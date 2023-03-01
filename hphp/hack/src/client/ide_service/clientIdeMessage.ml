@@ -42,10 +42,14 @@ being executed (e.g. hover). *)
 
 module Ide_file_opened = struct
   type request = document_and_path
+
+  type result = Errors.t
 end
 
 module Ide_file_changed = struct
-  type request = { file_path: Path.t }
+  type request = document_and_path
+
+  type result = Errors.t
 end
 
 module Hover = struct
@@ -158,8 +162,8 @@ type _ t =
       it has responded. *)
   | Shutdown : unit -> unit t
   | Disk_files_changed : changed_file list -> unit t
-  | Ide_file_opened : Ide_file_opened.request -> unit t
-  | Ide_file_changed : Ide_file_changed.request -> unit t
+  | Ide_file_opened : Ide_file_opened.request -> Ide_file_opened.result t
+  | Ide_file_changed : Ide_file_changed.request -> Ide_file_changed.result t
   | Ide_file_closed : Path.t -> unit t
   | Verbose_to_file : bool -> unit t
   | Hover : Hover.request -> Hover.result t
@@ -196,7 +200,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Disk_file_changed(%s%s)" (String.concat files) remainder
   | Ide_file_opened { file_path; _ } ->
     Printf.sprintf "Ide_file_opened(%s)" (Path.to_string file_path)
-  | Ide_file_changed { Ide_file_changed.file_path; _ } ->
+  | Ide_file_changed { file_path; _ } ->
     Printf.sprintf "Ide_file_changed(%s)" (Path.to_string file_path)
   | Ide_file_closed file_path ->
     Printf.sprintf "Ide_file_closed(%s)" (Path.to_string file_path)

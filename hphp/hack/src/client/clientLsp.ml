@@ -3828,7 +3828,7 @@ let handle_editor_buffer_message
       let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
       (* The ClientIdeDaemon only delivers answers for open files, which is why it's vital
          never to let is miss a DidOpen. *)
-      let%lwt () =
+      let%lwt _errors =
         ide_rpc
           ide_service
           ~env
@@ -3838,17 +3838,28 @@ let handle_editor_buffer_message
       in
       Lwt.return_unit
     | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
-      let file_path =
-        uri_to_path
-          params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+      let uri =
+        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+      in
+      let file_path = uri_to_path uri in
+      let editor_open_files =
+        match get_editor_open_files state with
+        | Some files -> files
+        | None -> UriMap.empty
       in
       let%lwt () =
-        ide_rpc
-          ide_service
-          ~env
-          ~tracking_id:metadata.tracking_id
-          ~ref_unblocked_time:ref_ide_unblocked_time
-          ClientIdeMessage.(Ide_file_changed { Ide_file_changed.file_path })
+        match get_document_contents editor_open_files uri with
+        | None -> Lwt.return_unit
+        | Some file_contents ->
+          let%lwt _errors =
+            ide_rpc
+              ide_service
+              ~env
+              ~tracking_id:metadata.tracking_id
+              ~ref_unblocked_time:ref_ide_unblocked_time
+              ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
+          in
+          Lwt.return_unit
       in
       Lwt.return_unit
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->

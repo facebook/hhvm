@@ -599,35 +599,22 @@ let log_missing_open_file_BUG (reason : string) (path : Relative_path.t) : unit
   in
   ClientIdeUtils.log_bug message ~telemetry:true
 
-(** Opens a file, in response to DidOpen event, by putting in a new
+(** Registers the file in response to DidOpen or DidChange,
+during the During_init state, by putting in a new
 entry in open_files, with empty AST and TAST. If the LSP client
-happened to send us two DidOpens for a file, well, we won't complain. *)
-let open_file
-    (files : open_files_state) (path : Relative_path.t) (contents : string) :
-    open_files_state =
+happened to send us two DidOpens for a file, or DidChange before DidOpen,
+well, we won't complain. *)
+let open_or_change_file_during_init
+    (dstate : dstate) (path : Relative_path.t) (contents : string) : state =
   let entry =
     Provider_context.make_entry
       ~path
       ~contents:(Provider_context.Provided_contents contents)
   in
   let open_files =
-    Relative_path.Map.add files.open_files ~key:path ~data:entry
+    Relative_path.Map.add dstate.dfiles.open_files ~key:path ~data:entry
   in
-  { files with open_files }
-
-(** Changes a file, in response to DidChange event. For future we
-might switch ClientIdeDaemon to incremental change events. But for
-now, this is basically a no-op just with some error checking. *)
-let change_file (files : open_files_state) (path : Relative_path.t) :
-    open_files_state =
-  if Relative_path.Map.mem files.open_files path then
-    files
-  else
-    (* We'll now mark the file as opened. We'll provide empty contents for now;
-       this doesn't matter since every actual future request for the file will provide
-       actual contents. *)
-    let () = log_missing_open_file_BUG "change-without-open" path in
-    open_file files path ""
+  During_init { dstate with dfiles = { dstate.dfiles with open_files } }
 
 (** Closes a file, in response to DidClose event, by removing the
 entry in open_files. If the LSP client sents us multile DidCloses,
@@ -809,6 +796,7 @@ let handle_request :
       }
     in
     Lwt.return (update_state_files state files, Ok ())
+    (* IDE File Closed *)
   | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
       Ide_file_closed file_path ) ->
     let path =
@@ -816,20 +804,38 @@ let handle_request :
     in
     let files = close_file files path in
     Lwt.return (update_state_files state files, Ok ())
-  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
-      Ide_file_opened { file_path; file_contents } ) ->
+  (* IDE File Opened *)
+  | (During_init dstate, Ide_file_opened { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let files = open_file files path file_contents in
-    Lwt.return (update_state_files state files, Ok ())
-  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
-      Ide_file_changed { Ide_file_changed.file_path; _ } ) ->
+    let state = open_or_change_file_during_init dstate path file_contents in
+    Lwt.return (state, Ok Errors.empty)
+  | (Initialized istate, Ide_file_opened { file_path; file_contents }) ->
+    let document_location =
+      { file_path; file_contents = Some file_contents; line = 0; column = 0 }
+    in
+    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
+    Lwt.return (state, Ok errors)
+  (* IDE File Changed *)
+  | (During_init dstate, Ide_file_changed { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let files = change_file files path in
-    Lwt.return (update_state_files state files, Ok ())
+    let state = open_or_change_file_during_init dstate path file_contents in
+    Lwt.return (state, Ok Errors.empty)
+  | (Initialized istate, Ide_file_changed { file_path; file_contents }) ->
+    let document_location =
+      { file_path; file_contents = Some file_contents; line = 0; column = 0 }
+    in
+    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
+    Lwt.return (state, Ok errors)
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),

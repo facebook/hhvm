@@ -204,6 +204,9 @@ fn elaborate<T: Transform>(
         // and class constants
         passes::validate_illegal_name::ValidateIllegalNamePass::default(),
 
+
+        passes::validate_control_context::ValidateControlContextPass::default(),
+
     ];
     let mut errs = Vec::default();
     let cfg = config::Config::new(tco, is_hhi);

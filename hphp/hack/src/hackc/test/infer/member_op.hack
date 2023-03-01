@@ -104,7 +104,7 @@ function mop_basel_querym_ei(vec<int> $a): int {
 // CHECK:   n5 = $builtins.hack_dim_array_get(n3, n4)
 // CHECK:   n6: *HackMixed = load n5
 // CHECK:   n7 = $builtins.hhbc_is_type_null(n6)
-// CHECK:   n8 = $root.todo(null, $builtins.hack_string("BaseType::Bool"))
+// CHECK:   n8 = $builtins.hhbc_is_type_bool(n7)
 // CHECK:   n9 = $builtins.hhbc_verify_type_pred(n7, n8)
 // CHECK:   ret n7
 // CHECK: }
@@ -200,14 +200,22 @@ function mop_basel_querym_pt(C $a): int {
 // TEST-CHECK-BAL: define $root.mop_basel_querym_qt
 // CHECK: define $root.mop_basel_querym_qt($this: *void, $a: *C) : *HackInt {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.hack_string("Unhandled modifiers: TypeConstraintFlags(261)")
-// CHECK:   n1 = &$a
-// CHECK:   n2 = $builtins.hack_string("foo")
-// CHECK:   n3 = $builtins.hack_dim_field_get_or_null(n1, n2)
-// CHECK:   n4: *HackMixed = load n3
-// CHECK:   n5 = $root.todo(null, n0)
-// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
-// CHECK:   ret n4
+// CHECK:   n0 = &$a
+// CHECK:   n1 = $builtins.hack_string("foo")
+// CHECK:   n2 = $builtins.hack_dim_field_get_or_null(n0, n1)
+// CHECK:   n3: *HackMixed = load n2
+// CHECK:   n4 = $builtins.hhbc_is_type_null(n3)
+// CHECK:   jmp b1, b2
+// CHECK: #b1:
+// CHECK:   prune $builtins.hack_is_true(n4)
+// CHECK:   jmp b3($builtins.hack_bool(true))
+// CHECK: #b2:
+// CHECK:   prune ! $builtins.hack_is_true(n4)
+// CHECK:   n5 = $builtins.hhbc_is_type_int(n3)
+// CHECK:   jmp b3(n5)
+// CHECK: #b3(n6: *HackMixed):
+// CHECK:   n7 = $builtins.hhbc_verify_type_pred(n3, n6)
+// CHECK:   ret n3
 // CHECK: }
 function mop_basel_querym_qt(?C $a): ?int {
   return $a?->foo;

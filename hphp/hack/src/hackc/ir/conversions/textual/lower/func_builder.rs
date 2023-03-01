@@ -11,7 +11,6 @@ use ir::FuncBuilder;
 use ir::Instr;
 use ir::LocId;
 use ir::ValueId;
-use log::trace;
 
 use crate::hack;
 
@@ -33,10 +32,6 @@ pub(crate) trait FuncBuilderEx {
     fn emit_hhbc_builtin(&mut self, builtin: hack::Hhbc, args: &[ValueId], loc: LocId) -> ValueId {
         self.emit_hack_builtin(hack::Builtin::Hhbc(builtin), args, loc)
     }
-
-    fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr;
-
-    fn emit_todo_instr(&mut self, reason: &str, loc: LocId) -> ValueId;
 }
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
@@ -59,19 +54,6 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         loc: LocId,
     ) -> ValueId {
         let instr = self.hack_builtin(builtin, args, loc);
-        self.emit(instr)
-    }
-
-    fn todo_instr(&mut self, reason: &str, loc: LocId) -> Instr {
-        trace!("TODO: {reason}");
-        textual_todo! {
-            use ir::FuncBuilderEx;
-            self.todo_fake_instr(reason, loc)
-        }
-    }
-
-    fn emit_todo_instr(&mut self, reason: &str, loc: LocId) -> ValueId {
-        let instr = self.todo_instr(reason, loc);
         self.emit(instr)
     }
 }

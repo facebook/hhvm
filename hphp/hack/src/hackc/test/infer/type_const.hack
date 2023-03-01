@@ -14,7 +14,7 @@ abstract class C {
   // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("self"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
   // CHECK:   n1: *HackMixed = load &$a
   // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1))
-  // CHECK:   n3 = $root.todo(null, $builtins.hack_string("BaseType::Bool"))
+  // CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
   // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
   // CHECK:   ret n2
   // CHECK: }
@@ -49,7 +49,7 @@ class D extends C {
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("D"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
 // CHECK:   n1: *HackMixed = load &$a
 // CHECK:   n2 = $builtins.hhbc_is_type_struct_c(n1, n0, $builtins.hack_int(1))
-// CHECK:   n3 = $root.todo(null, $builtins.hack_string("BaseType::Bool"))
+// CHECK:   n3 = $builtins.hhbc_is_type_bool(n2)
 // CHECK:   n4 = $builtins.hhbc_verify_type_pred(n2, n3)
 // CHECK:   ret n2
 // CHECK: }

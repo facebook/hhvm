@@ -86,6 +86,7 @@ function check_closure(int $x): void {
 
 // TEST-CHECK-BAL: define $root.add_elem
 // CHECK: define $root.add_elem($this: *void, $s1: *HackString, $s2: *HackString) : *void {
+// CHECK: local $c: *void
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_dict()
 // CHECK:   n1: *HackMixed = load &$s1
@@ -93,6 +94,7 @@ function check_closure(int $x): void {
 // CHECK:   n3: *HackMixed = load &$s2
 // CHECK:   n4 = $builtins.hhbc_add_elem_c(n2, n3, $builtins.hack_int(1))
 // CHECK:   store &$c <- n4: *HackMixed
+// CHECK:   ret null
 // CHECK: }
 function add_elem(string $s1, string $s2) : void {
   $c = dict [ $s1 => 0, $s2 => 1 ];
@@ -100,6 +102,8 @@ function add_elem(string $s1, string $s2) : void {
 
 // TEST-CHECK-BAL: define $root.col_from_array
 // CHECK: define $root.col_from_array($this: *void, $s1: *HackString, $s2: *HackString) : *void {
+// CHECK: local $c1: *void, $c2: *void, $c3: *void
+// CHECK: #b0:
 // CHECK:   n0 = $builtins.hhbc_new_dict()
 // CHECK:   n1: *HackMixed = load &$s1
 // CHECK:   n2 = $builtins.hhbc_add_elem_c(n0, n1, n1)
@@ -119,11 +123,10 @@ function add_elem(string $s1, string $s2) : void {
 // CHECK:   n14 = $builtins.hhbc_new_vec(n12, n13)
 // CHECK:   n15 = $builtins.hhbc_col_from_array_imm_vector(n14)
 // CHECK:   store &$c3 <- n15: *HackMixed
+// CHECK:   ret null
 // CHECK: }
 function col_from_array(string $s1, string $s2) : void {
   $c1 = ImmSet { $s1, $s2 };
   $c2 = ImmMap { $s1 => 1, $s2 => 2 };
   $c3 = ImmVector { $s1, $s2 };
 }
-
-// CHECK: declare $builtins.hhbc_add_elem_c(*HackMixed, *HackMixed, *HackMixed): *HackMixed

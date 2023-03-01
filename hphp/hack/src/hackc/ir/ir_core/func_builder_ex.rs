@@ -12,7 +12,6 @@ use crate::BaseType;
 use crate::Constant;
 use crate::EnforceableType;
 use crate::FuncBuilder;
-use crate::FunctionId;
 use crate::Instr;
 use crate::IsTypeOp;
 use crate::LocId;
@@ -55,10 +54,6 @@ pub trait FuncBuilderEx {
     /// Emit an `is` check.  This behaves like `is()` but instead of returning
     /// the final Instr it emits it.
     fn emit_is(&mut self, vid: ValueId, ty: &EnforceableType, loc: LocId) -> ValueId;
-
-    fn todo_fake_instr(&mut self, reason: &str, loc: LocId) -> Instr;
-
-    fn emit_todo_fake_instr(&mut self, reason: &str, loc: LocId) -> ValueId;
 }
 
 impl<'a> FuncBuilderEx for FuncBuilder<'a> {
@@ -142,13 +137,74 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
     }
 
     fn is(&mut self, vid: ValueId, ety: &EnforceableType, loc: LocId) -> Instr {
-        if ety.modifiers == TypeConstraintFlags::NoFlags
-            || ety.modifiers == TypeConstraintFlags::ExtendedHint
-        {
+        let mut modifiers = ety.modifiers;
+
+        if modifiers.contains(TypeConstraintFlags::Nullable) {
+            let is1 = self.is(vid, &EnforceableType::null(), loc);
+            let is1 = self.emit(is1);
+            let ety = EnforceableType {
+                ty: ety.ty,
+                modifiers: modifiers
+                    - TypeConstraintFlags::Nullable
+                    - TypeConstraintFlags::DisplayNullable,
+            };
+            return Instr::copy(self.emit_if_then_else(
+                is1,
+                loc,
+                |builder| Instr::copy(builder.emit_constant(Constant::Bool(true))),
+                |builder| builder.is(vid, &ety, loc),
+            ));
+        }
+
+        // (I think) ExtendedHint is used to enable non-PHP type flags - which
+        // is now standard so we can just ignore it.
+        modifiers -= TypeConstraintFlags::ExtendedHint;
+
+        if modifiers == TypeConstraintFlags::NoFlags {
+            fn is_type_op(op: IsTypeOp, vid: ValueId, loc: LocId) -> Instr {
+                Instr::Hhbc(Hhbc::IsTypeC(vid, op, loc))
+            }
+
+            fn is_type_op2(
+                op1: IsTypeOp,
+                op2: IsTypeOp,
+                builder: &mut FuncBuilder<'_>,
+                vid: ValueId,
+                loc: LocId,
+            ) -> Instr {
+                let is1 = builder.emit(is_type_op(op1, vid, loc));
+                Instr::copy(builder.emit_if_then_else(
+                    is1,
+                    loc,
+                    |builder| Instr::copy(builder.emit_constant(Constant::Bool(true))),
+                    |_| is_type_op(op2, vid, loc),
+                ))
+            }
+
             match ety.ty {
-                BaseType::AnyArray => self.todo_fake_instr("BaseType::AnyArray", loc),
-                BaseType::Arraykey => self.todo_fake_instr("BaseType::Arraykey", loc),
-                BaseType::Bool => self.todo_fake_instr("BaseType::Bool", loc),
+                BaseType::AnyArray => is_type_op(IsTypeOp::ArrLike, vid, loc),
+                BaseType::Arraykey => is_type_op2(IsTypeOp::Str, IsTypeOp::Int, self, vid, loc),
+                BaseType::Bool => is_type_op(IsTypeOp::Bool, vid, loc),
+                BaseType::Classname => is_type_op(IsTypeOp::Class, vid, loc),
+                BaseType::Darray => is_type_op(IsTypeOp::Dict, vid, loc),
+                BaseType::Dict => is_type_op(IsTypeOp::Dict, vid, loc),
+                BaseType::Float => is_type_op(IsTypeOp::Dbl, vid, loc),
+                BaseType::Int => is_type_op(IsTypeOp::Int, vid, loc),
+                BaseType::Keyset => is_type_op(IsTypeOp::Keyset, vid, loc),
+                BaseType::Mixed => Instr::copy(self.emit_constant(Constant::Bool(true))),
+                BaseType::Nothing => Instr::copy(self.emit_constant(Constant::Bool(false))),
+                BaseType::Null => is_type_op(IsTypeOp::Null, vid, loc),
+                BaseType::Num => is_type_op2(IsTypeOp::Int, IsTypeOp::Dbl, self, vid, loc),
+                BaseType::Resource => is_type_op(IsTypeOp::Res, vid, loc),
+                BaseType::String => is_type_op(IsTypeOp::Str, vid, loc),
+                BaseType::This => Instr::Hhbc(Hhbc::IsLateBoundCls(vid, loc)),
+                BaseType::Varray => is_type_op(IsTypeOp::Vec, vid, loc),
+                BaseType::VarrayOrDarray => {
+                    is_type_op2(IsTypeOp::Dict, IsTypeOp::Vec, self, vid, loc)
+                }
+                BaseType::Vec => is_type_op(IsTypeOp::Vec, vid, loc),
+                BaseType::VecOrDict => is_type_op(IsTypeOp::Dict, vid, loc),
+
                 BaseType::Class(cid) => {
                     let constant = Constant::Array(Arc::new(
                         TypeStruct::Unresolved(cid).into_typed_value(&self.strings),
@@ -160,47 +216,23 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                         loc,
                     ))
                 }
-                BaseType::Classname => self.todo_fake_instr("BaseType::Classname", loc),
-                BaseType::Darray => self.todo_fake_instr("BaseType::Darray", loc),
-                BaseType::Dict => self.todo_fake_instr("BaseType::Dict", loc),
-                BaseType::Float => self.todo_fake_instr("BaseType::Float", loc),
-                BaseType::Int => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Int, loc)),
-                BaseType::Keyset => self.todo_fake_instr("BaseType::Keyset", loc),
-                BaseType::Mixed => self.todo_fake_instr("BaseType::Mixed", loc),
-                BaseType::None => self.todo_fake_instr("BaseType::None", loc),
-                BaseType::Nonnull => self.todo_fake_instr("BaseType::Nonnull", loc),
-                BaseType::Noreturn => self.todo_fake_instr("BaseType::Noreturn", loc),
-                BaseType::Nothing => self.todo_fake_instr("BaseType::Nothing", loc),
-                BaseType::Null => self.todo_fake_instr("BaseType::Null", loc),
-                BaseType::Num => self.todo_fake_instr("BaseType::Num", loc),
-                BaseType::Resource => self.todo_fake_instr("BaseType::Resource", loc),
-                BaseType::String => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Str, loc)),
-                BaseType::This => Instr::Hhbc(Hhbc::IsLateBoundCls(vid, loc)),
-                BaseType::Typename => self.todo_fake_instr("BaseType::Typename", loc),
-                BaseType::Varray => self.todo_fake_instr("BaseType::Varray", loc),
-                BaseType::VarrayOrDarray => self.todo_fake_instr("BaseType::VarrayOrDarray", loc),
-                BaseType::Vec => self.todo_fake_instr("BaseType::Vec", loc),
-                BaseType::VecOrDict => self.todo_fake_instr("BaseType::VecOrDict", loc),
-                BaseType::Void => self.todo_fake_instr("BaseType::Void", loc),
+                BaseType::Nonnull => {
+                    let iid = self.emit(Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Null, loc)));
+                    Instr::Hhbc(Hhbc::Not(iid, loc))
+                }
+
+                BaseType::Noreturn => panic!("Unable to perform 'is' on 'noreturn'"),
+                BaseType::None => panic!("Unable to perform 'is' on 'none'"),
+                BaseType::Typename => panic!("Unable to perform 'is' on 'typename'"),
+                BaseType::Void => panic!("Unable to perform 'is' on 'void'"),
             }
         } else {
-            self.todo_fake_instr(&format!("Unhandled modifiers: {:?}", ety.modifiers), loc)
+            todo!("Unhandled modifiers: {:?}", modifiers);
         }
     }
 
     fn emit_is(&mut self, vid: ValueId, ty: &EnforceableType, loc: LocId) -> ValueId {
         let instr = self.is(vid, ty, loc);
-        self.emit(instr)
-    }
-
-    fn todo_fake_instr(&mut self, reason: &str, loc: LocId) -> Instr {
-        let op = self.emit_string(reason);
-        let fid = FunctionId::from_str("todo", &self.strings);
-        Instr::simple_call(fid, &[op], loc)
-    }
-
-    fn emit_todo_fake_instr(&mut self, reason: &str, loc: LocId) -> ValueId {
-        let instr = self.todo_fake_instr(reason, loc);
         self.emit(instr)
     }
 }

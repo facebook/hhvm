@@ -63,7 +63,7 @@ pub static BUILTIN_NAME_VEC_OR_DICT: Str<'static> =
 pub static BUILTIN_NAME_VOID: Str<'static> = strip_slash(naming_special_names::typehints::HH_VOID);
 pub static BUILTIN_NAME_SOFT_VOID: Str<'static> = Str::new(br"@HH\void");
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BaseType {
     AnyArray,
     Arraykey,
@@ -148,6 +148,13 @@ pub struct EnforceableType {
 }
 
 impl EnforceableType {
+    pub fn null() -> Self {
+        EnforceableType {
+            ty: BaseType::Null,
+            modifiers: TypeConstraintFlags::NoFlags,
+        }
+    }
+
     pub fn write(&self, f: &mut fmt::Formatter<'_>, strings: &StringInterner) -> fmt::Result {
         f.write_str("Constraint { ty: ")?;
         self.ty.write(f, strings)?;

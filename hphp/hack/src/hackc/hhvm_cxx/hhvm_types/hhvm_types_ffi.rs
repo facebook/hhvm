@@ -6,6 +6,7 @@
 use std::ops::BitAnd;
 use std::ops::BitAndAssign;
 use std::ops::BitOr;
+use std::ops::Sub;
 use std::ops::SubAssign;
 
 #[allow(unreachable_patterns)]
@@ -201,6 +202,16 @@ impl BitAnd for TypeConstraintFlags {
 impl BitAndAssign for TypeConstraintFlags {
     fn bitand_assign(&mut self, rhs: Self) {
         self.repr &= rhs.repr;
+    }
+}
+
+impl Sub for TypeConstraintFlags {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            repr: self.repr & !other.repr,
+        }
     }
 }
 

@@ -152,9 +152,17 @@ void testCreateStructured() {
   testCreateWithTag<struct_t<testset::struct_with<Tag>>>();
   testCreateWithTag<
       struct_t<testset::struct_with<Tag, testset::FieldModifier::Optional>>>();
+  testCreateWithTag<
+      struct_t<testset::struct_with<Tag, testset::FieldModifier::Terse>>>();
+  testCreateWithTag<
+      struct_t<testset::struct_with<Tag, testset::FieldModifier::Required>>>();
   testCreateWithTag<exception_t<testset::exception_with<Tag>>>();
   testCreateWithTag<exception_t<
       testset::exception_with<Tag, testset::FieldModifier::Optional>>>();
+  testCreateWithTag<exception_t<
+      testset::exception_with<Tag, testset::FieldModifier::Terse>>>();
+  testCreateWithTag<exception_t<
+      testset::exception_with<Tag, testset::FieldModifier::Required>>>();
   testCreateWithTag<union_t<testset::union_with<Tag>>>();
 }
 

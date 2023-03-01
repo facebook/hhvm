@@ -709,19 +709,21 @@ class CommonTests(BarebonesTests):
 
     def test_ide_find_refs(self) -> None:
         self.test_driver.start_hh_server()
-
+        path = os.path.join(self.test_driver.repo_dir, "foo_2.php")
         self.test_driver.check_cmd_and_json_cmd(
             [
-                "Foo",
-                'File "{root}foo_3.php", line 10, characters 17-19:',
-                "1 total results",
+                "g",
+                'File "{root}foo_2.php", line 3, characters 18-18:',
+                'File "{root}foo_1.php", line 4, characters 20-20:',
+                "2 total results",
             ],
             [
-                '[{{"name":"Foo","filename":"{root}foo_3.php",'
-                '"line":10,"char_start":17,"char_end":19}}]'
+                '[{{"name":"g","filename":"{root}foo_2.php",'
+                '"line":3,"char_start":18,"char_end":18}},'
+                '{{"name":"g","filename":"{root}foo_1.php",'
+                '"line":4,"char_start":20,"char_end":20}}]'
             ],
-            options=["--ide-find-refs", "1:20"],
-            stdin="<?hh function test(Foo $foo) { new Foo(); }",
+            options=["--ide-find-refs", "{}:3,18".format(path)],
         )
 
     def test_ide_highlight_refs(self) -> None:

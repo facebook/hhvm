@@ -84,8 +84,19 @@ let expand_path file =
       exit 2
     )
 
-let parse_position_string arg =
-  let tpos = Str.split (Str.regexp ":") arg in
+let parse_ide_find_refs_arg arg =
+  let pair = Str.split (Str.regexp ":") arg in
+  try
+    match pair with
+    | [filename; pos] -> (filename, pos)
+    | _ -> raise Exit
+  with
+  | _ ->
+    Printf.eprintf "Invalid input\n";
+    raise Exit_status.(Exit_with Input_error)
+
+let parse_position_string ~(split_on : string) arg =
+  let tpos = Str.split (Str.regexp split_on) arg in
   try
     match tpos with
     | [line; char] -> (int_of_string line, int_of_string char)
@@ -329,12 +340,10 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
         Printf.eprintf "Invalid input\n";
         Lwt.return (Exit_status.Input_error, Telemetry.create ()))
     | MODE_IDE_FIND_REFS arg ->
-      let (line, char) = parse_position_string arg in
-      let include_defs = false in
-      let content = Sys_utils.read_stdin_to_string () in
-      let labelled_file =
-        ServerCommandTypes.LabelledFileContent { filename = ""; content }
-      in
+      let (filename, pos) = parse_ide_find_refs_arg arg in
+      let (line, char) = parse_position_string ~split_on:"," pos in
+      let include_defs = true in
+      let labelled_file = ServerCommandTypes.LabelledFileName filename in
       let%lwt results =
         rpc_with_retry args
         @@ Rpc.IDE_FIND_REFS (labelled_file, line, char, include_defs)
@@ -342,7 +351,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       ClientFindRefs.go_ide results args.output_json;
       Lwt.return (Exit_status.No_error, Telemetry.create ())
     | MODE_IDE_HIGHLIGHT_REFS arg ->
-      let (line, char) = parse_position_string arg in
+      let (line, char) = parse_position_string ~split_on:":" arg in
       let content =
         ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
       in
@@ -438,7 +447,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
     | MODE_IDENTIFY_SYMBOL1 arg
     | MODE_IDENTIFY_SYMBOL2 arg
     | MODE_IDENTIFY_SYMBOL3 arg ->
-      let (line, char) = parse_position_string arg in
+      let (line, char) = parse_position_string ~split_on:":" arg in
       let file =
         match args.stdin_name with
         | None -> ""

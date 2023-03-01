@@ -1340,13 +1340,7 @@ module Primary = struct
           hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
-      | Invalid_refined_const_kind of {
-          pos: Pos.t;
-          class_id: string;
-          const_id: string;
-          correct_kind: string;
-          wrong_kind: string;
-        }
+      | Invalid_class_refinement of { pos: Pos.t }
 
     let missing_return pos hint_pos is_async =
       let return_type =
@@ -1441,21 +1435,9 @@ module Primary = struct
         lazy [],
         [] )
 
-    let invalid_refined_const_kind ~correct_kind ~wrong_kind p class_id const_id
-        =
-      ( Error_code.InvalidRefinedConstKind,
-        lazy
-          ( p,
-            "`"
-            ^ const_id
-            ^ "`"
-            ^ " in `"
-            ^ class_id
-            ^ "` is not a `"
-            ^ wrong_kind
-            ^ "`, did you mean `"
-            ^ correct_kind
-            ^ "`?" ),
+    let invalid_class_refinement pos =
+      ( Error_code.InvalidClassRefinement,
+        lazy (pos, "Invalid class refinement"),
         lazy [],
         [] )
 
@@ -1471,14 +1453,7 @@ module Primary = struct
       | Non_void_annotation_on_return_void_function { is_async; hint_pos } ->
         non_void_annotation_on_return_void_function is_async hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
-      | Invalid_refined_const_kind
-          { pos; class_id; const_id; correct_kind; wrong_kind } ->
-        invalid_refined_const_kind
-          ~correct_kind
-          ~wrong_kind
-          pos
-          class_id
-          const_id
+      | Invalid_class_refinement { pos } -> invalid_class_refinement pos
   end
 
   module Modules = struct
@@ -1804,7 +1779,6 @@ module Primary = struct
         name: string;
         parent_name: string;
       }
-    | Invalid_class_refinement of { pos: Pos.t }
     | Explain_where_constraint of {
         pos: Pos.t;
         in_class: bool;
@@ -2818,12 +2792,6 @@ module Primary = struct
             "Some members in class %s are incompatible with those declared in type %s"
             (Render.strip_ns name |> Markdown_lite.md_codify)
             (Render.strip_ns parent_name |> Markdown_lite.md_codify) ),
-      lazy [],
-      [] )
-
-  let invalid_class_refinement pos =
-    ( Error_code.InvalidClassRefinement,
-      lazy (pos, "Invalid class refinement"),
       lazy [],
       [] )
 
@@ -5672,7 +5640,6 @@ module Primary = struct
       bad_conditional_support_dynamic pos child parent ty_name self_ty_name
     | Bad_decl_override { pos; name; parent_name } ->
       bad_decl_override name pos parent_name
-    | Invalid_class_refinement { pos } -> invalid_class_refinement pos
     | Explain_where_constraint { pos; decl_pos; in_class } ->
       explain_where_constraint pos decl_pos in_class
     | Explain_constraint pos -> explain_constraint pos
@@ -6705,10 +6672,17 @@ and Secondary : sig
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_refinement of Pos_or_decl.t
-    | Missing_type_constant of {
+    | Missing_class_constant of {
         pos: Pos_or_decl.t;
-        class_id: string;
-        type_id: string;
+        class_name: string;
+        const_name: string;
+      }
+    | Invalid_refined_const_kind of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+        correct_kind: string;
+        wrong_kind: string;
       }
     | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
     | Violated_refinement_constraint of {
@@ -6983,10 +6957,17 @@ end = struct
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_refinement of Pos_or_decl.t
-    | Missing_type_constant of {
+    | Missing_class_constant of {
         pos: Pos_or_decl.t;
-        class_id: string;
-        type_id: string;
+        class_name: string;
+        const_name: string;
+      }
+    | Invalid_refined_const_kind of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+        correct_kind: string;
+        wrong_kind: string;
       }
     | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
     | Violated_refinement_constraint of {
@@ -7688,15 +7669,30 @@ end = struct
       lazy [(pos, "Unsupported refinement, only class types can be refined")],
       [] )
 
-  let missing_type_constant pos class_id type_id =
+  let missing_class_constant pos class_name const_name =
     ( Error_code.SmemberNotFound,
       lazy
         [
           ( pos,
             Printf.sprintf
-              "Class %s has no type constant %s"
-              (Render.strip_ns class_id |> Markdown_lite.md_codify)
-              (Markdown_lite.md_codify type_id) );
+              "Class %s has no constant %s"
+              (Render.strip_ns class_name |> Markdown_lite.md_codify)
+              (Markdown_lite.md_codify const_name) );
+        ],
+      [] )
+
+  let invalid_refined_const_kind
+      pos class_name const_name correct_kind wrong_kind =
+    ( Error_code.InvalidRefinedConstKind,
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Constant %s in %s is not a %s, did you mean %s?"
+              (Markdown_lite.md_codify const_name)
+              (Render.strip_ns class_name |> Markdown_lite.md_codify)
+              wrong_kind
+              correct_kind );
         ],
       [] )
 
@@ -7896,8 +7892,17 @@ end = struct
       Eval_result.single (override_no_default_typeconst pos parent_pos)
     | Unsupported_refinement pos ->
       Eval_result.single (unsupported_refinement pos)
-    | Missing_type_constant { pos; class_id; type_id } ->
-      Eval_result.single (missing_type_constant pos class_id type_id)
+    | Missing_class_constant { pos; class_name; const_name } ->
+      Eval_result.single (missing_class_constant pos class_name const_name)
+    | Invalid_refined_const_kind
+        { pos; class_name; const_name; correct_kind; wrong_kind } ->
+      Eval_result.single
+        (invalid_refined_const_kind
+           pos
+           class_name
+           const_name
+           correct_kind
+           wrong_kind)
     | Inexact_tconst_access (pos, id) ->
       Eval_result.single (inexact_tconst_access pos id)
     | Violated_refinement_constraint { cstr } ->
@@ -8503,7 +8508,8 @@ end = struct
     @@ retain_code
     @@ retain_quickfixes
     @@ of_primary_error
-    @@ Primary.Invalid_class_refinement { pos }
+    @@ Primary.Wellformedness
+         (Primary.Wellformedness.Invalid_class_refinement { pos })
 
   let explain_where_constraint pos ~in_class ~decl_pos =
     append_incoming_reasons

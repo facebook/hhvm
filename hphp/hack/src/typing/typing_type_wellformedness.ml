@@ -58,110 +58,66 @@ let loclty_of_hint unchecked_tparams env h =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, hint_pos, locl_ty)
 
-let check_refinement env cls_id rs =
-  let cls_decl = Env.get_class env cls_id in
-  rs
-  |> List.iter ~f:(fun r ->
-         let (sid, is_ctx) =
-           match r with
-           | Rctx (sid, _) -> (sid, true)
-           | Rtype (sid, _) -> (sid, false)
-         in
-         let const_id = snd sid in
-         Option.iter
-           ~f:Errors.add_typing_error
-           Option.Monad_infix.(
-             cls_decl >>= fun cls_decl ->
-             Env.get_typeconst env cls_decl const_id >>= fun ttc ->
-             if Bool.(ttc.ttc_is_ctx <> is_ctx) then
-               let kind_str is_ctx =
-                 if is_ctx then
-                   "ctx"
-                 else
-                   "type"
-               in
-               let correct_kind = kind_str ttc.ttc_is_ctx in
-               let wrong_kind = kind_str is_ctx in
-               Some
-                 Typing_error.(
-                   wellformedness
-                   @@ Primary.Wellformedness.Invalid_refined_const_kind
-                        {
-                          pos = fst sid;
-                          class_id = cls_id;
-                          const_id;
-                          correct_kind;
-                          wrong_kind;
-                        })
-             else
-               None))
-
-let check_hrefinement unchecked_tparams env h =
-  let r =
-    match snd h with
-    | Hrefinement (_, r) -> Some r
-    | _ -> None
-  in
-  let (env, hint_pos, locl_ty) = loclty_of_hint unchecked_tparams env h in
-  let (_, ty_err_opt) =
-    match get_node locl_ty with
-    | Tclass (cls, Nonexact cr, _) ->
-      Option.iter ~f:(check_refinement env (snd cls)) r;
-      let both_err e1 e2 = Option.merge e1 e2 ~f:Typing_error.both in
-      let on_error =
-        Some (Typing_error.Reasons_callback.invalid_class_refinement hint_pos)
+let check_hrefinement unchecked_tparams env h rl =
+  let (env, _, locl_ty) = loclty_of_hint unchecked_tparams env h in
+  match get_node locl_ty with
+  | Tclass (cls_id, _, _) ->
+    let get_class_const =
+      match Env.get_class env (snd cls_id) with
+      | Some cls -> begin
+        fun const_sid ->
+          match Env.get_typeconst env cls (snd const_sid) with
+          | Some ttc -> `Found ttc
+          | None -> `Missing
+      end
+      | _ -> (fun _ -> `Skip)
+    in
+    let check_ref r =
+      let (const_sid, is_ctx) =
+        match r with
+        | Rctx (sid, _) -> (sid, true)
+        | Rtype (sid, _) -> (sid, false)
       in
-      Class_refinement.fold_refined_consts
-        cr
-        ~init:(env, None)
-        ~f:(fun const_id { rc_bound; _ } (env, ty_err_opt) ->
-          let (lo_ty, up_ty) =
-            match rc_bound with
-            | TRexact ty -> (ty, ty)
-            | TRloose { tr_lower = lo_tys; tr_upper = up_tys } ->
-              let r = get_reason locl_ty in
-              let lo_ty = Typing_make_type.union r lo_tys in
-              let up_ty = Typing_make_type.intersection r up_tys in
-              (lo_ty, up_ty)
-          in
-          let (env, type_member) =
-            (* FIXME(refinements): the this type below is plain sketchy *)
-            Typing_type_member.lookup_class_type_member
-              env
-              ~on_error
-              ~this_ty:locl_ty
-              (cls, nonexact)
-              (Pos_or_decl.none, const_id)
-          in
-          match type_member with
-          | Typing_type_member.Error ty_err_opt' ->
-            (env, both_err ty_err_opt ty_err_opt')
-          | Typing_type_member.Exact ty' ->
-            let (env, ty_err_opt') =
-              Typing_utils.sub_type env ty' lo_ty on_error
-            in
-            let (env, ty_err_opt') =
-              match ty_err_opt with
-              | None -> Typing_utils.sub_type env up_ty ty' on_error
-              | Some _ -> (env, ty_err_opt')
-            in
-            (env, both_err ty_err_opt ty_err_opt')
-          | Typing_type_member.Abstract { name = _; lower; upper } ->
-            let (env, ty_err_opt') =
-              Option.value_map upper ~default:(env, None) ~f:(fun up ->
-                  Typing_utils.sub_type env up_ty up on_error)
-            in
-            let (env, ty_err_opt') =
-              match ty_err_opt' with
-              | None ->
-                Option.value_map lower ~default:(env, None) ~f:(fun lo ->
-                    Typing_utils.sub_type env lo lo_ty on_error)
-              | Some _ -> (env, ty_err_opt')
-            in
-            (env, both_err ty_err_opt ty_err_opt'))
-    | _ -> (env, None)
-  in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt
+      let on_error =
+        Typing_error.Reasons_callback.invalid_class_refinement (fst const_sid)
+      in
+      match get_class_const const_sid with
+      | `Skip -> None
+      | `Found ttc when Bool.(ttc.ttc_is_ctx = is_ctx) -> None
+      | `Missing ->
+        Some
+          Typing_error.(
+            apply_reasons ~on_error
+            @@ Secondary.Missing_class_constant
+                 {
+                   pos = fst cls_id;
+                   class_name = snd cls_id;
+                   const_name = snd const_sid;
+                 })
+      | `Found ttc ->
+        let kind_str is_ctx =
+          if is_ctx then
+            "ctx"
+          else
+            "type"
+        in
+        let correct_kind = kind_str ttc.ttc_is_ctx in
+        let wrong_kind = kind_str is_ctx in
+        Some
+          Typing_error.(
+            apply_reasons ~on_error
+            @@ Secondary.Invalid_refined_const_kind
+                 {
+                   pos = fst cls_id;
+                   class_name = snd cls_id;
+                   const_name = snd const_sid;
+                   correct_kind;
+                   wrong_kind;
+                 })
+    in
+    List.iter rl ~f:(fun r ->
+        Option.iter ~f:Errors.add_typing_error (check_ref r))
+  | _ -> ()
 
 (** Mostly check constraints on type parameters. *)
 let check_happly unchecked_tparams env h =
@@ -263,8 +219,8 @@ and hint_ ~in_signature env p h_ =
       in
       hints env hl
   end
-  | Hrefinement (hr, _) as h ->
-    check_hrefinement env.typedef_tparams env.tenv (p, h);
+  | Hrefinement (hr, rl) as h ->
+    check_hrefinement env.typedef_tparams env.tenv (p, h) rl;
     hint env hr
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in

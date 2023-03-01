@@ -1,24 +1,8 @@
-File "validity_checks.php", line 16, characters 31-53:
+File "validity_checks.php", line 16, characters 45-45:
 Invalid class refinement (Typing[4470])
   File "validity_checks.php", line 16, characters 31-31:
-  Class `C` has no type constant `T`
-File "validity_checks.php", line 17, characters 31-51:
+  Class `C` has no constant `T`
+File "validity_checks.php", line 17, characters 44-44:
 Invalid class refinement (Typing[4470])
-  File "validity_checks.php", line 8, characters 28-35:
-  Expected `arraykey`
-  File "validity_checks.php", line 17, characters 49-49:
-  But got `C`
-File "validity_checks.php", line 18, characters 31-53:
-Invalid class refinement (Typing[4470])
-  File "validity_checks.php", line 12, characters 18-23:
-  Expected `string`
-  File "validity_checks.php", line 18, characters 49-51:
-  But got `int`
-File "validity_checks.php", line 19, characters 31-51:
-Invalid class refinement (Typing[4470])
-  File "validity_checks.php", line 8, characters 28-35:
-  Expected `arraykey`
-  File "validity_checks.php", line 19, characters 48-49:
-  But got `mixed`
-File "validity_checks.php", line 19, characters 44-44:
-`T` in `\D` is not a `ctx`, did you mean `type`? (Typing[4471])
+  File "validity_checks.php", line 17, characters 31-31:
+  Constant `T` in `D` is not a ctx, did you mean type?

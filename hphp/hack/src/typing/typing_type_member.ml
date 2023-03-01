@@ -29,14 +29,14 @@ type unknown_concrete_class_kind =
   | EDT of Ident.t
   | This
 
-let make_missing_err ~on_error cls_id type_id =
+let make_missing_err ~on_error cls_id const_name =
   match on_error with
   | Some on_error ->
     Some
       Typing_error.(
         apply_reasons ~on_error
-        @@ Secondary.Missing_type_constant
-             { pos = fst cls_id; class_id = snd cls_id; type_id = snd type_id })
+        @@ Secondary.Missing_class_constant
+             { pos = fst cls_id; class_name = snd cls_id; const_name })
   | None -> None
 
 (* Lookups a type member from the class decl of `cls_id`. *)
@@ -46,10 +46,10 @@ let lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id =
    * Typing_taccess, leading to legacy behavior. *)
   let localize env decl_ty = Typing_utils.localize ~ety_env env decl_ty in
   match Env.get_class env (snd cls_id) with
-  | None -> (env, Error (make_missing_err ~on_error cls_id type_id))
+  | None -> (env, Error (make_missing_err ~on_error cls_id (snd type_id)))
   | Some cls -> begin
     match Env.get_typeconst env cls (snd type_id) with
-    | None -> (env, Error (make_missing_err ~on_error cls_id type_id))
+    | None -> (env, Error (make_missing_err ~on_error cls_id (snd type_id)))
     | Some { ttc_kind = TCConcrete tcc; _ } ->
       let ((env, err_opt), lty) = localize env tcc.tc_type in
       ( env,

@@ -46,9 +46,10 @@ val lookup_class_type_member :
   pos_id ->
   env * type_member
 
-(** Given an unknown concrete class (Tdependent(_) or Tgeneric("this"))
-    and its bounds, creates a rigid type variable that stands for the
-    type constant found in the concrete class. *)
+(** Given an unknown concrete class ([Tdependent(_)] or
+    [Tgeneric("this")]) and its bounds, creates a rigid type
+    variable that stands for the type constant found in the
+    concrete class. *)
 val make_type_member :
   env ->
   on_error:Typing_error.Reasons_callback.t option ->

@@ -335,13 +335,7 @@ module Primary : sig
           hint_pos: Pos.t;
         }
       | Tuple_syntax of Pos.t
-      | Invalid_refined_const_kind of {
-          pos: Pos.t;
-          class_id: string;
-          const_id: string;
-          correct_kind: string;
-          wrong_kind: string;
-        }
+      | Invalid_class_refinement of { pos: Pos.t }
   end
 
   module Modules : sig
@@ -468,7 +462,6 @@ module Primary : sig
         name: string;
         parent_name: string;
       }
-    | Invalid_class_refinement of { pos: Pos.t }
     | Explain_where_constraint of {
         pos: Pos.t;
         in_class: bool;
@@ -1665,10 +1658,17 @@ module Secondary : sig
         parent_pos: Pos_or_decl.t;
       }
     | Unsupported_refinement of Pos_or_decl.t
-    | Missing_type_constant of {
+    | Missing_class_constant of {
         pos: Pos_or_decl.t;
-        class_id: string;
-        type_id: string;
+        class_name: string;
+        const_name: string;
+      }
+    | Invalid_refined_const_kind of {
+        pos: Pos_or_decl.t;
+        class_name: string;
+        const_name: string;
+        correct_kind: string;
+        wrong_kind: string;
       }
     | Inexact_tconst_access of Pos_or_decl.t * (Pos_or_decl.t * string)
     | Violated_refinement_constraint of {

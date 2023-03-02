@@ -8,27 +8,6 @@ class X {
 
 <<__EntryPoint>>
 function main() {
-  if (!isset($g)) {
-    include 'class_constants-1.inc';
-  }
-
-  require_once(__DIR__.'/class_constants-classes1.inc');
-
-  if (!isset($g)) {
-    include 'class_constants-2.inc';
-  }
-
-  require_once(__DIR__.'/class_constants-classes2.inc');
-
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[
-        'autoloadedclass' => 'class_constants-3.inc',
-      ],
-    ],
-    __DIR__.'/',
-  );
-
   print "Test begin\n";
 
   var_dump(X::BAZ);

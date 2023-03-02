@@ -19,4 +19,4 @@ int(123)
 int(711)
 Test end
 
-Fatal error: Couldn't find constant D::FakeConstant in %s on line 60
+Fatal error: Couldn't find constant D::FakeConstant in %s on line %d

@@ -15,3 +15,7 @@ let from_config_file _ = failwith "not implemented"
 let make_env_term _ = failwith "not implemented"
 
 let close _ = failwith "not implemented"
+
+let log_file_path _ = failwith "not implemented"
+
+let scuba_dataset_name _ = failwith "not implemented"

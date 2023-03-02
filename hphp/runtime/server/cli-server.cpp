@@ -1089,6 +1089,10 @@ void CLIWorker::doJob(int client) {
     }
   } catch (const Exception& ex) {
     Logger::Warning("CLI Job failed: %s", ex.what());
+  } catch (const std::exception& ex) {
+    Logger::FError("CLI Job failed with C++ exception: {}", ex.what());
+  } catch (...) {
+    Logger::Error("CLI Job failed with unknown exception");
   }
 
   if (close(client) == -1) {

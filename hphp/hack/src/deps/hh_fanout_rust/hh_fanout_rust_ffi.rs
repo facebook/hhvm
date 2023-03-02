@@ -19,24 +19,14 @@ impl ocamlrep_custom::CamlSerialize for HhFanoutRustFfi {
 
 #[cfg(fbcode_build)]
 ocamlrep_ocamlpool::ocaml_ffi! {
-    fn hh_fanout_ffi_make(fanout_state_dir: PathBuf, decl_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
-        // TODO(toyang): we should replace this log with a real scuba logger and
-        // a file log in the state dir or in a configured location. See
-        // hh_decl_ffi.rs for another location we need to pass a better log
-        // object.
-        let log = file_scuba_logger::dummy();
-        let hh_decl = Box::new(hh_decl_shmem::DeclShmem::new(log.clone(), decl_state_dir));
-        let hh_fanout = hh_fanout_lib::HhFanoutImpl::new(log, fanout_state_dir, hh_decl);
+    fn hh_fanout_ffi_make(logger: Custom<file_scuba_logger_ffi::FileScubaLoggerFfi>, fanout_state_dir: PathBuf, decl_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+        let hh_decl = Box::new(hh_decl_shmem::DeclShmem::new(logger.0.clone(), decl_state_dir));
+        let hh_fanout = hh_fanout_lib::HhFanoutImpl::new(logger.0.clone(), fanout_state_dir, hh_decl);
         Custom::from(HhFanoutRustFfi(std::cell::RefCell::new(Box::new(hh_fanout))))
     }
 
-    fn hh_fanout_ffi_make_hhdg_builder(builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
-        // TODO(toyang): we should replace this log with a real scuba logger and
-        // a file log in the state dir or in a configured location. See
-        // hh_decl_ffi.rs for another location we need to pass a better log
-        // object.
-        let log = file_scuba_logger::dummy();
-        let hhdg_builder = hhdg_builder::HhdgBuilder::new(log, builder_state_dir);
+    fn hh_fanout_ffi_make_hhdg_builder(logger: Custom<file_scuba_logger_ffi::FileScubaLoggerFfi>, builder_state_dir: PathBuf) -> Custom<HhFanoutRustFfi> {
+        let hhdg_builder = hhdg_builder::HhdgBuilder::new(logger.0.clone(), builder_state_dir);
         Custom::from(HhFanoutRustFfi(std::cell::RefCell::new(Box::new(hhdg_builder))))
     }
 

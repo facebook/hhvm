@@ -71,7 +71,8 @@
  (wrapped false)
  (modules hh_fanout_rust_ffi_externs)
  (libraries
-  hh_fanout_rust_ffi))
+  hh_fanout_rust_ffi
+  file_scuba_logger_ffi_externs))
 
 (library
  (name hh_fanout_rust_ffi)

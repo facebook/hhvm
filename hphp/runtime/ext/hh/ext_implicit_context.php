@@ -139,6 +139,24 @@ function embed_implicit_context_state_in_async_closure(
   };
 }
 
+enum State: string as string {
+  NULL = 'NULL';
+  VALUE = 'VALUE';
+  SOFT_SET = 'SOFT_SET';
+  INACCESSIBLE = 'INACCESSIBLE';
+  SOFT_INACCESSIBLE = 'SOFT_INACCESSIBLE';
+}
+
+/**
+ * This function returns a value of the `HH\ImplicitContext\State` enum
+ * corresponding to the current IC state.
+ *
+ * This function is unsafe in that it doesn't trigger exceptions/logs for
+ * observing IC state when you normally should not. Use with caution.
+ */
+<<__Native>>
+function get_state_unsafe()[zoned]: string /* State */;
+
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {

@@ -43,7 +43,13 @@ const StaticString
   s_ImplicitContextDataClassName("HH\\ImplicitContext\\_Private\\ImplicitContextData"),
   s_ICInaccessibleMemoKey("%Inaccessible%"),
   s_ICSoftInaccessibleMemoKey("%SoftInaccessible%"),
-  s_ICSoftSetMemoKey("%SoftSet%");
+  s_ICSoftSetMemoKey("%SoftSet%"),
+  // matches HH\ImplicitContext\State
+  s_ICStateNull("NULL"),
+  s_ICStateValue("VALUE"),
+  s_ICStateSoftSet("SOFT_SET"),
+  s_ICStateInaccessible("INACCESSIBLE"),
+  s_ICStateSoftInaccessible("SOFT_INACCESSIBLE");
 
 Object create_new_IC() {
   assertx(s_ImplicitContextDataClass);
@@ -103,6 +109,24 @@ void set_implicit_context_blame(ImplicitContext* context,
 }
 
 } // namespace
+
+String HHVM_FUNCTION(get_state_unsafe) {
+  auto const obj = *ImplicitContext::activeCtx;
+  if (!obj) return String{s_ICStateNull.get()};
+  auto const context = Native::data<ImplicitContext>(obj);
+
+  switch (context->m_state) {
+    case ImplicitContext::State::Value:
+      return String{s_ICStateValue.get()};
+    case ImplicitContext::State::Inaccessible:
+      return String{s_ICStateInaccessible.get()};
+    case ImplicitContext::State::SoftInaccessible:
+      return String{s_ICStateSoftInaccessible.get()};
+    case ImplicitContext::State::SoftSet:
+      return String{s_ICStateSoftSet.get()};
+  }
+  not_reached();
+}
 
 TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   auto const obj = *ImplicitContext::activeCtx;
@@ -296,6 +320,8 @@ static struct HHImplicitContext final : Extension {
   void moduleInit() override {
     Native::registerNativeDataInfo<ImplicitContext>(s_ImplicitContext.get());
 
+    HHVM_NAMED_FE(HH\\ImplicitContext\\get_state_unsafe,
+                  HHVM_FN(get_state_unsafe));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context,
                   HHVM_FN(get_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_whole_implicit_context,

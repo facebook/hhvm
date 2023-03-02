@@ -1201,13 +1201,13 @@ let localize_targs_with_kinds
   in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
-  let open Int in
   let arity_ty_err_opt =
     if
       not
-        (targ_count = 0
-        || targ_count = explicit_tparam_count
-        || checking_rewritten_call ())
+        Int.(
+          targ_count = 0
+          || targ_count = explicit_tparam_count
+          || checking_rewritten_call ())
     then
       if is_method then
         Some

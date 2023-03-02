@@ -1052,7 +1052,9 @@ module Full = struct
       (fuel, doc)
 
   let to_string_rec ~fuel penv n x =
-    let (fuel, doc) = locl_ty ~fuel Doc.text (ISet.add n ISet.empty) penv x in
+    let (fuel, doc) =
+      locl_ty ~fuel text_strip_ns (ISet.add n ISet.empty) penv x
+    in
     let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
     (fuel, str)
 

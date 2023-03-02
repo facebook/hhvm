@@ -1,4 +1,2 @@
-File "occurs_check.php", line 17, characters 1-41:
-Incomplete position information! We couldn't find the exact line of your type error in this definition. Please run `hh rage` and post in https://fb.workplace.com/groups/hackforhiphop/. (Typing[4155])
-  File "occurs_check.php", line 14, characters 13-37:
-  Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type `\Box<?\C with { type T = [rec] }>`
+File "occurs_check.php", line 18, characters 3-4:
+Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type `Box<?C with { type T = [rec] }>` (Typing[4155])

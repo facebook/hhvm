@@ -201,7 +201,7 @@ let err_if_var_in_ty_pure env var ty =
         primary
         @@ Primary.Unification_cycle
              {
-               pos = get_pos ty |> Pos_or_decl.unsafe_to_raw_pos;
+               pos = Typing_env.get_tyvar_pos env var;
                ty_name =
                  lazy
                    Typing_print.(

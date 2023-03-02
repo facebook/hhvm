@@ -6,15 +6,6 @@ interface iiii {}
 
 <<__EntryPoint>>
 function main() {
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[
-        'fooo' => 'class_interface_trait_exists1.inc',
-      ],
-    ],
-    __DIR__.'/',
-  );
-
   var_dump(class_exists('fooo'));
   var_dump(class_exists('tttt'));
   var_dump(class_exists('cccc'));

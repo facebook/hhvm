@@ -38,6 +38,7 @@
   state_loader
   sys_utils
   utils_config_file_lwt
+  yojson
   version)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_variants_conv)))

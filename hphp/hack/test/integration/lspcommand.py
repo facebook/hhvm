@@ -61,7 +61,9 @@ class LspCommandProcessor:
 
     @classmethod
     @contextlib.contextmanager
-    def create(cls: Type[U], env: Mapping[str, str]) -> Iterator[U]:
+    def create(
+        cls: Type[U], env: Mapping[str, str], repo_dir: Optional[str] = None
+    ) -> Iterator[U]:
         args = ["--enhanced-hover", "--verbose"]
         proc = subprocess.Popen(
             [hh_client, "lsp"] + args,
@@ -69,6 +71,7 @@ class LspCommandProcessor:
             stdout=subprocess.PIPE,
             stderr=None,  # so hh_client inherits (=> writes to) our own stderr
             env=env,
+            cwd=repo_dir,
         )
 
         # Use the unbuffered versions of these streams, as the buffered versions

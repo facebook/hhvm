@@ -201,6 +201,14 @@ type result_telemetry = {
   result_extra_telemetry: Telemetry.t option;
 }
 
+(* --ide-find-refs returns a list of positions, this is a mapping of the response *)
+type ide_find_refs_pos = {
+  filename: string;
+  line: int;
+  char_start: int;
+  char_end: int;
+}
+
 let initialize_params_ref : Lsp.Initialize.params option ref = ref None
 
 let initialize_params_exc () : Lsp.Initialize.params =
@@ -1024,6 +1032,18 @@ let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
     {
       start = { line = line1 - 1; character = col1 - 1 };
       end_ = { line = line2 - 1; character = col2 - 1 };
+    }
+
+let ide_find_refs_pos_to_lsp_location (pos : ide_find_refs_pos) : Lsp.Location.t
+    =
+  Lsp.Location.
+    {
+      uri = path_to_lsp_uri pos.filename ~default_path:pos.filename;
+      range =
+        {
+          start = { line = pos.line - 1; character = pos.char_start - 1 };
+          end_ = { line = pos.line - 1; character = pos.char_end - 1 };
+        };
     }
 
 let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
@@ -2967,6 +2987,44 @@ let do_findReferences
     Lwt.return
       (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
+let do_findReferences_local (params : FindReferences.params) =
+  let { Ide_api_types.line; column } =
+    lsp_position_to_ide
+      params.FindReferences.loc.TextDocumentPositionParams.position
+  in
+  let filename =
+    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+      params.FindReferences.loc.TextDocumentPositionParams.textDocument
+  in
+  let formatted_cmd = Printf.sprintf "%s:%d,%d" filename line column in
+  let bin_path = Path.executable_name |> Path.to_string in
+  let exec_cmd =
+    Printf.sprintf "%s --ide-find-refs %s --json" bin_path formatted_cmd
+  in
+  match Sys_utils.exec_try_read exec_cmd with
+  | Some resp ->
+    let json = Yojson.Safe.from_string resp in
+    begin
+      match json with
+      | `List positions ->
+        let lsp_locations =
+          List.map positions ~f:(fun pos ->
+              let open Yojson.Basic.Util in
+              let pos_json = Yojson.Safe.to_basic pos in
+              let filename = pos_json |> member "filename" |> to_string in
+              let line = pos_json |> member "line" |> to_int in
+              let char_start = pos_json |> member "char_start" |> to_int in
+              let char_end = pos_json |> member "char_end" |> to_int in
+              let pos = { filename; line; char_start; char_end } in
+              ide_find_refs_pos_to_lsp_location pos)
+        in
+        Lwt.return lsp_locations
+      | _ -> failwith "Expected a list of positions from --ide-find-refs"
+    end
+  | None ->
+    log "Failed to invoke --ide-find-references";
+    Lwt.return []
+
 let do_goToImplementation
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -4349,6 +4407,17 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (TypeDefinitionResult result);
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
+    (* textDocument/references request *)
+    | (_, Some _ide_service, RequestMessage (id, FindReferencesRequest params))
+      ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
+      let%lwt result = do_findReferences_local params in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (FindReferencesResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)

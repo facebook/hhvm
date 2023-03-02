@@ -202,7 +202,9 @@ class TestLsp(TestCase[LspTestDriver]):
         elif use_serverless_ide:
             self.test_driver.stop_hh_server()
 
-        with LspCommandProcessor.create(self.test_driver.test_env) as lsp:
+        with LspCommandProcessor.create(
+            self.test_driver.test_env, self.test_driver.repo_dir
+        ) as lsp:
             observed_transcript = lsp.communicate(test)
 
         self.write_observed(test_name, observed_transcript)

@@ -265,7 +265,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   info.m_pendingException = nullptr;
 
   if (auto cbFlags =
-      flags & (XenonSignalFlag | MemThresholdFlag | IntervalTimerFlag)) {
+      flags & (MemThresholdFlag | IntervalTimerFlag)) {
     if (!callbacksOk()) {
       setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
       flags -= cbFlags;

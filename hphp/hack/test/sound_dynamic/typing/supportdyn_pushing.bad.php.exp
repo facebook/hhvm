@@ -1,0 +1,12 @@
+File "supportdyn_pushing.bad.php", line 9, characters 14-15:
+Invalid argument (Typing[4110])
+  File "supportdyn_pushing.bad.php", line 3, characters 30-46:
+  Expected `dynamic`
+  File "supportdyn_pushing.bad.php", line 8, characters 32-36:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "supportdyn_pushing.bad.php", line 13, characters 15-17:
+Invalid argument (Typing[4110])
+  File "supportdyn_pushing.bad.php", line 5, characters 46-62:
+  Expected `dynamic`
+  File "supportdyn_pushing.bad.php", line 12, characters 47-51:
+  Type `mixed` is not a subtype of `dynamic` under dynamic-aware subtyping

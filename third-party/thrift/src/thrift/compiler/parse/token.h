@@ -168,11 +168,23 @@ struct token_kind {
 
  private:
   // These are private friends to reduce overload sets.
-  friend bool operator==(tok lhs, token_kind rhs) {
+  friend bool operator==(const tok lhs, const token_kind rhs) {
     return lhs == rhs.value;
   }
-  friend bool operator!=(tok lhs, token_kind rhs) {
+  friend bool operator==(const token_kind lhs, const tok rhs) {
+    return lhs.value == rhs;
+  }
+  friend bool operator==(const token_kind lhs, const token_kind rhs) {
+    return lhs.value == rhs.value;
+  }
+  friend bool operator!=(const tok lhs, const token_kind rhs) {
     return lhs != rhs.value;
+  }
+  friend bool operator!=(const token_kind lhs, const tok rhs) {
+    return lhs.value != rhs;
+  }
+  friend bool operator!=(const token_kind lhs, const token_kind rhs) {
+    return lhs.value != rhs.value;
   }
 };
 

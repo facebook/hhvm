@@ -381,7 +381,6 @@ type t = {
       which files to ignore. This flag is not expected to be
       rolled out broadly, rather it is meant to be used by
       power users only. *)
-  re_worker: bool;
   ide_serverless: bool;
       (** whether clientLsp should use serverless-ide, but with RPC hh_server for squiggles *)
   ide_standalone: bool;
@@ -554,7 +553,6 @@ let default =
     trace_parsing = false;
     prechecked_files = false;
     enable_type_check_filter_files = false;
-    re_worker = false;
     ide_serverless = false;
     ide_standalone = false;
     ide_max_num_decls = 5000;
@@ -938,13 +936,6 @@ let load_
     bool_if_min_version
       "enable_type_check_filter_files"
       ~default:default.enable_type_check_filter_files
-      ~current_version
-      config
-  in
-  let re_worker =
-    bool_if_min_version
-      "re_worker"
-      ~default:default.re_worker
       ~current_version
       config
   in
@@ -1446,7 +1437,6 @@ let load_
     trace_parsing;
     prechecked_files;
     enable_type_check_filter_files;
-    re_worker;
     ide_serverless;
     ide_standalone;
     ide_max_num_decls;

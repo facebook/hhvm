@@ -90,6 +90,7 @@ val simplify_subtype_i :
 
 val subtype_funs :
   check_return:bool ->
+  for_override:bool ->
   on_error:Typing_error.Reasons_callback.t option ->
   Reason.t ->
   locl_fun_type ->

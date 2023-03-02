@@ -2416,6 +2416,7 @@ and simplify_subtype_i
           simplify_subtype_funs
             ~subtype_env
             ~check_return:true
+            ~for_override:false
             ~super_like
             r_sub
             ft_sub
@@ -3869,16 +3870,16 @@ and simplify_subtype_variance_for_non_injective
 
 and simplify_subtype_params
     ~(subtype_env : subtype_env)
+    ~for_override
     ?(check_params_ifc = false)
     (subl : locl_fun_param list)
     (superl : locl_fun_param list)
     (variadic_sub_ty : bool)
     (variadic_super_ty : bool)
     env =
-  let simplify_subtype_possibly_enforced =
-    simplify_subtype_possibly_enforced ~subtype_env ~sub_supportdyn:None
+  let simplify_subtype_params =
+    simplify_subtype_params ~subtype_env ~for_override
   in
-  let simplify_subtype_params = simplify_subtype_params ~subtype_env in
   let simplify_subtype_params_with_variadic =
     simplify_subtype_params_with_variadic ~subtype_env
   in
@@ -3920,6 +3921,22 @@ and simplify_subtype_params
   | (sub :: subl, super :: superl) ->
     let { fp_type = ty_sub; _ } = sub in
     let { fp_type = ty_super; _ } = super in
+    let subtype_env_for_param =
+      (* When overriding in Sound Dynamic, we treat any dynamic-aware subtype of dynamic as a
+       * subtype of the dynamic type itself
+       *)
+      match get_node ty_super.et_type with
+      | Tdynamic
+        when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+             && for_override ->
+        { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+      | _ -> subtype_env
+    in
+    let simplify_subtype_possibly_enforced =
+      simplify_subtype_possibly_enforced
+        ~subtype_env:subtype_env_for_param
+        ~sub_supportdyn:None
+    in
     (* Check that the calling conventions of the params are compatible. *)
     env
     |> simplify_param_modes ~subtype_env sub super
@@ -4321,6 +4338,7 @@ and simplify_subtype_possibly_enforced
 and simplify_subtype_funs
     ~(subtype_env : subtype_env)
     ~(check_return : bool)
+    ~(for_override : bool)
     ?(super_like = false)
     (r_sub : Reason.t)
     (ft_sub : locl_fun_type)
@@ -4345,6 +4363,7 @@ and simplify_subtype_funs
     in
     simplify_subtype_params
       ~subtype_env
+      ~for_override
       ~check_params_ifc
       ft_super.ft_params
       ft_sub.ft_params
@@ -4358,6 +4377,26 @@ and simplify_subtype_funs
   (* Finally do covariant subtyping on return type *)
   if check_return then
     let super_ty = liken ~super_like env ft_super.ft_ret.et_type in
+    let subtype_env =
+      if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt && for_override
+      then
+        (* When overriding in Sound Dynamic, we allow t to override dynamic if
+         * t is a dynamic-aware subtype of dynamic. We also allow Awaitable<t>
+         * to override Awaitable<dynamic> and and Awaitable<t> to
+         * override ~Awaitable<dynamic>.
+         *)
+        let super_ty = Typing_utils.strip_dynamic env super_ty in
+        match get_node super_ty with
+        | Tdynamic ->
+          { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+        | Tclass ((_, class_name), _, [ty])
+          when String.equal class_name Naming_special_names.Classes.cAwaitable
+               && is_dynamic ty ->
+          { subtype_env with coerce = Some Typing_logic.CoerceToDynamic }
+        | _ -> subtype_env
+      else
+        subtype_env
+    in
     simplify_subtype
       ~subtype_env
       ~sub_supportdyn:None
@@ -5417,6 +5456,7 @@ let sub_type_i env ?(is_coeffect = false) ty1 ty2 on_error =
 
 let subtype_funs
     ~(check_return : bool)
+    ~for_override
     ~on_error
     (r_sub : Reason.t)
     (ft_sub : locl_fun_type)
@@ -5430,8 +5470,9 @@ let subtype_funs
   let old_env = env in
   let (env, prop) =
     simplify_subtype_funs
-      ~subtype_env:(make_subtype_env ~coerce:(Some TL.CoerceToDynamic) on_error)
+      ~subtype_env:(make_subtype_env ~coerce:None on_error)
       ~check_return
+      ~for_override
       r_sub
       ft_sub
       r_super

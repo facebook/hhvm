@@ -21,6 +21,7 @@
 namespace apache {
 namespace thrift {
 namespace test {
+using type::AnyRef;
 using type::AnyValue;
 using type::BaseType;
 using type::Protocol;
@@ -88,6 +89,21 @@ void MultiSerializer::decode(
 }
 
 void MultiSerializer::decode(folly::io::Cursor& cursor, Ref value) const {
+  switch (value.type().baseType()) {
+    case BaseType::I32:
+      ++intDecCount;
+      FollyToStringSerializer<type::i32_t>().decode(cursor, value);
+      break;
+    case BaseType::Double:
+      ++dblDecCount;
+      FollyToStringSerializer<type::double_t>().decode(cursor, value);
+      break;
+    default:
+      folly::throw_exception<std::bad_any_cast>();
+  }
+}
+
+void MultiSerializer::decode(folly::io::Cursor& cursor, AnyRef value) const {
   switch (value.type().baseType()) {
     case BaseType::I32:
       ++intDecCount;

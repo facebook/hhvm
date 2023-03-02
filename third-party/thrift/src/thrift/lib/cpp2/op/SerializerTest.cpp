@@ -46,6 +46,16 @@ native_type<Tag> decode(const Serializer& serializer, std::string_view data) {
   return serializer.decode<Tag>(cursor);
 }
 
+template <typename Tag>
+native_type<Tag> decodeViaAnyRef(
+    const Serializer& serializer, std::string_view data) {
+  folly::IOBuf buf(folly::IOBuf::WRAP_BUFFER, data.data(), data.size());
+  folly::io::Cursor cursor{&buf};
+  native_type<Tag> value;
+  serializer.decode(cursor, AnyRef(value));
+  return value;
+}
+
 AnyValue decode(
     const Serializer& serializer, const Type& type, std::string_view data) {
   folly::IOBuf buf(folly::IOBuf::WRAP_BUFFER, data.data(), data.size());
@@ -73,10 +83,13 @@ TEST(SerializerTest, TagSerializer) {
       folly::BadPolyCast);
 
   EXPECT_EQ(decode<type::i32_t>(anyCodec, "1"), 1);
+  EXPECT_EQ(decodeViaAnyRef<type::i32_t>(anyCodec, "1"), 1);
   EXPECT_EQ(decode(anyCodec, type::i32_t{}, "1").as<type::i32_t>(), 1);
 
   EXPECT_THROW(decode<type::double_t>(anyCodec, "1.0"), std::bad_any_cast);
   EXPECT_THROW(decode(anyCodec, type::double_t{}, "1.0"), std::bad_any_cast);
+  EXPECT_THROW(
+      decodeViaAnyRef<type::double_t>(anyCodec, "1.0"), std::bad_any_cast);
 }
 
 TEST(SerializerTest, MultiSerializer) {

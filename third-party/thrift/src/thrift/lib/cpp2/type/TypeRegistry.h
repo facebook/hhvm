@@ -88,6 +88,7 @@ class TypeRegistry {
   // Throws std::out_of_range if no matching serializer has been registered.
   // Throws std::bad_any_cast if value cannot be stored in out.
   void load(const AnyData& data, Ref out) const;
+  void load(const AnyData& data, AnyRef out) const;
   AnyValue load(const AnyData& data) const;
 
   // Registers the given serializer for the given type

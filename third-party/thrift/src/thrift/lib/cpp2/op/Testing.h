@@ -247,6 +247,7 @@ class MultiSerializer : public op::Serializer {
   void encode(type::AnyConstRef value, folly::io::QueueAppender&& appender)
       const override;
   void decode(folly::io::Cursor& cursor, type::Ref value) const override;
+  void decode(folly::io::Cursor& cursor, type::AnyRef value) const override;
   void decode(
       const type::Type& type,
       folly::io::Cursor& cursor,

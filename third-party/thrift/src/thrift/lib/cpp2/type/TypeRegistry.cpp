@@ -47,6 +47,17 @@ void TypeRegistry::load(const AnyData& data, Ref out) const {
   getEntry(data.type()).getSerializer(data.protocol()).decode(cursor, out);
 }
 
+void TypeRegistry::load(const AnyData& data, AnyRef out) const {
+  if (data.type() == Type::get<type::void_t>()) {
+    if (out.type() != Type::get<type::void_t>()) {
+      folly::throw_exception<std::bad_any_cast>();
+    }
+    return;
+  }
+  folly::io::Cursor cursor{&data.data()};
+  getEntry(data.type()).getSerializer(data.protocol()).decode(cursor, out);
+}
+
 AnyValue TypeRegistry::load(const AnyData& data) const {
   if (data.type() == Type::get<type::void_t>()) {
     return {};

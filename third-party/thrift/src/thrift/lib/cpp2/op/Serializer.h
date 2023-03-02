@@ -71,6 +71,7 @@ class Serializer {
       const type::Type& type,
       folly::io::Cursor& cursor,
       type::AnyValue& value) const = 0;
+  virtual void decode(folly::io::Cursor& cursor, type::AnyRef value) const = 0;
   type::AnyValue decode(
       const type::Type& type, folly::io::Cursor& cursor) const;
   void decode(folly::io::Cursor& cursor, type::AnyValue& value) const {
@@ -126,6 +127,11 @@ class TagSerializer : public Serializer {
       value = type::AnyValue::create<Tag>();
       derived().decode(cursor, value.as<Tag>());
     }
+  }
+
+  void decode(folly::io::Cursor& cursor, type::AnyRef value) const final {
+    checkType(value.type(), type::Type::get<Tag>());
+    derived().decode(cursor, value.as<Tag>());
   }
 
  private:

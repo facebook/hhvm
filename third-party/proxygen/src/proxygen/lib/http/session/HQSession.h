@@ -29,6 +29,7 @@
 #include <proxygen/lib/http/session/HTTPSessionBase.h>
 #include <proxygen/lib/http/session/HTTPSessionController.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <proxygen/lib/http/session/QuicProtocolInfo.h>
 #include <proxygen/lib/http/session/ServerPushLifecycle.h>
 #include <proxygen/lib/utils/ConditionalGate.h>
 #include <quic/api/QuicSocket.h>
@@ -70,62 +71,6 @@ constexpr uint8_t kDefaultMaxBufferedDatagrams = 5;
 constexpr uint8_t kMaxStreamsWithBufferedDatagrams = 10;
 // Maximum number of priority updates received when stream is not available
 constexpr uint8_t kMaxBufferedPriorityUpdates = 10;
-
-/**
- * Session-level protocol info.
- */
-struct QuicProtocolInfo : public wangle::ProtocolInfo {
-  virtual ~QuicProtocolInfo() override = default;
-
-  folly::Optional<quic::ConnectionId> clientChosenDestConnectionId;
-  folly::Optional<quic::ConnectionId> clientConnectionId;
-  folly::Optional<quic::ConnectionId> serverConnectionId;
-  folly::Optional<quic::TransportSettings> transportSettings;
-
-  uint32_t ptoCount{0};
-  uint32_t totalPTOCount{0};
-  uint64_t totalTransportBytesSent{0};
-  uint64_t totalTransportBytesRecvd{0};
-  bool usedZeroRtt{false};
-};
-
-/**
- *  Stream level protocol info. Contains all data from
- *  the sessinon info, plus stream-specific information.
- *  This structure is owned by each individual stream,
- *  and is updated when requested.
- *  If instance of HQ Transport Stream outlives the corresponding QUIC socket,
- *  has been destroyed, this structure will contain the last snapshot
- *  of the data received from the QUIC socket.
- *
- * Usage:
- *   TransportInfo tinfo;
- *   txn.getCurrentTransportInfo(&tinfo); // txn is the HTTP transaction object
- *   auto streamInfo = dynamic_cast<QuicStreamProtocolInfo>(tinfo.protocolInfo);
- *   if (streamInfo) {
- *      // stream level AND connection level info is available
- *   };
- *   auto connectionInfo = dynamic_cast<QuicProtocolInfo>(tinfo.protocolInfo);
- *   if (connectionInfo) {
- *     // ONLY connection level info is available. No stream level info.
- *   }
- *
- */
-struct QuicStreamProtocolInfo : public QuicProtocolInfo {
-
-  // Slicing assignment operator to initialize the per-stream protocol info
-  // with the values of the per-session protocol info.
-  QuicStreamProtocolInfo& operator=(const QuicProtocolInfo& other) {
-    if (this != &other) {
-      *(static_cast<QuicProtocolInfo*>(this)) = other;
-    }
-    return *this;
-  }
-
-  quic::QuicSocket::StreamTransportInfo streamTransportInfo;
-  // NOTE: when the control stream latency stats will be reintroduced,
-  // collect it here.
-};
 
 class HQSession
     : public quic::QuicSocket::ConnectionSetupCallback

@@ -220,10 +220,7 @@ bool HQSession::checkNewStream(quic::StreamId id) {
 bool HQSession::onTransportReadyCommon() noexcept {
   localAddr_ = sock_->getLocalAddress();
   peerAddr_ = sock_->getPeerAddress();
-  quicInfo_->clientChosenDestConnectionId =
-      sock_->getClientChosenDestConnectionId();
-  quicInfo_->clientConnectionId = sock_->getClientConnectionId();
-  quicInfo_->serverConnectionId = sock_->getServerConnectionId();
+  initQuicProtocolInfo(*quicInfo_, *sock_);
   // NOTE: this can drop the connection if the next protocol is not supported
   if (!getAndCheckApplicationProtocol()) {
     return false;
@@ -455,13 +452,7 @@ bool HQSession::getCurrentTransportInfo(wangle::TransportInfo* tinfo) {
   transportInfo_.rtt = tinfo->rtt;
   transportInfo_.rtt_var = tinfo->rtt_var;
   if (sock_) {
-    auto quicInfo = sock_->getTransportInfo();
-    quicInfo_->ptoCount = quicInfo.ptoCount;
-    quicInfo_->totalPTOCount = quicInfo.totalPTOCount;
-    quicInfo_->totalTransportBytesSent = quicInfo.bytesSent;
-    quicInfo_->totalTransportBytesRecvd = quicInfo.bytesRecvd;
-    quicInfo_->transportSettings = sock_->getTransportSettings();
-    quicInfo_->usedZeroRtt = quicInfo.usedZeroRtt;
+    updateQuicProtocolInfo(*quicInfo_, *sock_);
     tinfo->protocolInfo = quicInfo_;
     auto flowControl = sock_->getConnectionFlowControl();
     if (!flowControl.hasError() && flowControl->sendWindowAvailable) {

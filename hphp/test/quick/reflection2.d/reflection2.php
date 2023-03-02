@@ -47,16 +47,6 @@ function entrypoint_reflection2(): void {
     }
   }
 
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[
-        'myclass' => 'reflection2-1.inc',
-      ],
-      'failure' => (...$args) ==> var_dump($args),
-    ],
-    __DIR__.'/',
-  );
-
   try {
     $r = new ReflectionClass('I');
     foreach ($r->getMethods() as $m) {

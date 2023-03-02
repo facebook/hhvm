@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[cfg(fbcode_build)]
-use std::path::Path;
 use std::path::PathBuf;
 
 use dep::Dep;
@@ -26,10 +24,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         // a file log in the state dir or in a configured location. See
         // hh_decl_ffi.rs for another location we need to pass a better log
         // object.
-        let log = file_scuba_logger::FileScubaLogger {
-            file: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log")),
-            scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
-        };
+        let log = file_scuba_logger::dummy();
         let hh_decl = Box::new(hh_decl_shmem::DeclShmem::new(log.clone(), decl_state_dir));
         let hh_fanout = hh_fanout_lib::HhFanoutImpl::new(log, fanout_state_dir, hh_decl);
         Custom::from(HhFanoutRustFfi(std::cell::RefCell::new(Box::new(hh_fanout))))
@@ -40,10 +35,7 @@ ocamlrep_ocamlpool::ocaml_ffi! {
         // a file log in the state dir or in a configured location. See
         // hh_decl_ffi.rs for another location we need to pass a better log
         // object.
-        let log = file_scuba_logger::FileScubaLogger {
-            file: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log")),
-            scuba: hh_slog::init_file_sync(Path::new("/tmp/hh_fanout_log_scuba")),
-        };
+        let log = file_scuba_logger::dummy();
         let hhdg_builder = hhdg_builder::HhdgBuilder::new(log, builder_state_dir);
         Custom::from(HhFanoutRustFfi(std::cell::RefCell::new(Box::new(hhdg_builder))))
     }

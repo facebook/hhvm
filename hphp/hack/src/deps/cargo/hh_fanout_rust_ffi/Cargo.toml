@@ -14,6 +14,5 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 dep = { version = "0.0.0", path = "../../../depgraph/cargo/dep" }
 hh24_types = { version = "0.0.0", path = "../../../utils/hh24_types" }
-hh_slog = { version = "0.0.0", path = "../../../utils/hh_slog/cargo/hh_slog" }
 ocamlrep_custom = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }

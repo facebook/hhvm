@@ -29,15 +29,6 @@ class H extends G {
 }
 
 function main2() {
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[
-        'f' => 'propeties4.inc',
-      ],
-    ],
-    __DIR__.'/',
-  );
-
   $d = new H();
   echo "Done\n";
 }

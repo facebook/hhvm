@@ -1,0 +1,6 @@
+File "consistent_construct_override_final.php", line 9, characters 25-27:
+Some members in class `Bar` are incompatible with those declared in type `Foo` (Typing[4070])
+  File "consistent_construct_override_final.php", line 10, characters 22-32:
+  You cannot override this method
+  File "consistent_construct_override_final.php", line 5, characters 28-38:
+  It was declared as final

@@ -817,10 +817,10 @@ let check_override
   in
 
   if MemberKind.is_method member_kind then begin
-    (* We first verify that we aren't overriding a final method *)
-    (* We only check for final overrides on methods, not properties *)
-    (* we don't check constructors, as they are already checked
-     * in the decl phase *)
+    (* We first verify that we aren't overriding a final method.  We only check
+     * for final overrides on methods, not properties. Constructors have their
+     * own code-path with this check, see `check_constructors`
+     *)
     check_override_final_method parent_class_elt class_elt on_error;
     check_dynamically_callable member_name parent_class_elt class_elt on_error
   end;
@@ -1513,51 +1513,52 @@ let check_constructors env parent_class class_ psubst on_error =
   let parent_is_consistent =
     constructor_is_consistent (snd (Cls.construct parent_class))
   in
-  if parent_is_interface || parent_is_consistent then
-    match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
-    | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
-    | (Some parent_cstr, None) ->
-      let (lazy pos) = parent_cstr.ce_pos in
-      Errors.add_typing_error
-        Typing_error.(
-          apply_reasons ~on_error @@ Secondary.Missing_constructor pos);
-      env
-    | (_, Some cstr) when get_ce_superfluous_override cstr ->
-      (* <<__UNSAFE_Construct>> *)
-      env
-    | (opt_parent_cstr, Some cstr)
-      when Option.is_some opt_parent_cstr || parent_is_consistent ->
-      let parent_cstr =
-        match opt_parent_cstr with
-        | Some parent_cstr -> parent_cstr
-        | None -> default_constructor_ce parent_class
-      in
-      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
-        let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
-        check_override
-          env
-          ~check_member_unique:false
-          Naming_special_names.Members.__construct
-          (MemberKind.Constructor { is_consistent = true })
-          class_
-          parent_class
-          parent_cstr
-          cstr
-          on_error
-      else
-        env
-    | (_, _) -> env
-  else (
-    begin
+  let env =
+    if parent_is_interface || parent_is_consistent then
       match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
-      | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
-      | (Some parent_cstr, Some child_cstr) ->
-        check_override_final_method parent_cstr child_cstr on_error;
-        check_class_elt_visibility env parent_cstr child_cstr on_error
-      | (_, _) -> ()
-    end;
-    env
-  )
+      | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
+      | (Some parent_cstr, None) ->
+        let (lazy pos) = parent_cstr.ce_pos in
+        Errors.add_typing_error
+          Typing_error.(
+            apply_reasons ~on_error @@ Secondary.Missing_constructor pos);
+        env
+      | (_, Some cstr) when get_ce_superfluous_override cstr ->
+        (* <<__UNSAFE_Construct>> *)
+        env
+      | (opt_parent_cstr, Some cstr)
+        when Option.is_some opt_parent_cstr || parent_is_consistent ->
+        let parent_cstr =
+          match opt_parent_cstr with
+          | Some parent_cstr -> parent_cstr
+          | None -> default_constructor_ce parent_class
+        in
+        if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
+          let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
+          check_override
+            env
+            ~check_member_unique:false
+            Naming_special_names.Members.__construct
+            (MemberKind.Constructor { is_consistent = true })
+            class_
+            parent_class
+            parent_cstr
+            cstr
+            on_error
+        else
+          env
+      | (_, _) -> env
+    else
+      env
+  in
+  begin
+    match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
+    | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
+    | (Some parent_cstr, Some child_cstr) ->
+      check_override_final_method parent_cstr child_cstr on_error
+    | (_, _) -> ()
+  end;
+  env
 
 (** Checks if a child is compatible with the type constant of its parent.
     This requires the child's constraint and assigned type to be a subtype of

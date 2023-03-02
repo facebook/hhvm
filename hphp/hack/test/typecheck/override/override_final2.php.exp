@@ -1,10 +1,4 @@
 File "override_final2.php", line 16, characters 19-21:
-Some members in class `Bar` are incompatible with those declared in type `Foo` (Typing[4113])
-  File "override_final2.php", line 17, characters 22-32:
-  This member visibility is: `protected`
-  File "override_final2.php", line 13, characters 25-35:
-  `public` was expected
-File "override_final2.php", line 16, characters 19-21:
 Some members in class `Bar` are incompatible with those declared in type `Foo` (Typing[4070])
   File "override_final2.php", line 17, characters 22-32:
   You cannot override this method

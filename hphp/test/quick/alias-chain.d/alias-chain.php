@@ -10,14 +10,6 @@ function fiz(Bar $r): Bar {
 }
 <<__EntryPoint>>
 function main_entry(): void {
-
-  HH\autoload_set_paths(
-    darray[
-      'type' => darray['bar' => 'alias-chain-1.inc', 'baz' => 'alias-chain-2.inc'],
-    ],
-    __DIR__.'/'
-  );
-
   $f = new Foo();
   $f->x = 10;
   $z = fiz($f);

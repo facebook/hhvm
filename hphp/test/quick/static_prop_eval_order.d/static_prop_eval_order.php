@@ -9,15 +9,6 @@ function g() {
 }
 <<__EntryPoint>>
 function entrypoint_static_prop_eval_order(): void {
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[
-        'c' => 'static_prop_eval_order.inc',
-      ],
-    ],
-    __DIR__.'/',
-  );
-
   $x = 1;
 
   $cls = 'C';

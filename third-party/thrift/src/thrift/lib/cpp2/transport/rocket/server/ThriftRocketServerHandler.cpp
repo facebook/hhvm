@@ -223,11 +223,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverConfigs_ = worker_->getServer();
     requestsRegistry_ = worker_->getRequestsRegistry();
 
-    // add sampleRate
-    if (serverConfigs_) {
-      if (auto* observer = serverConfigs_->getObserver()) {
-        sampleRate_ = observer->getSampleRate();
-      }
+    if (auto* observer = serverConfigs_->getObserver()) {
+      sampleRate_ = observer->getSampleRate();
     }
 
     if (meta.dscpToReflect_ref() || meta.markToReflect_ref()) {
@@ -563,19 +560,16 @@ void ThriftRocketServerHandler::handleRequestCommon(
     timestamps.processBegin = std::chrono::steady_clock::now();
   }
 
-  if (serverConfigs_) {
-    if (auto* observer = serverConfigs_->getObserver()) {
-      observer->admittedRequest(&request->getMethodName());
-      // Expensive operations; happens only when sampling is enabled
-      if (samplingStatus.isEnabledByServer()) {
-        if (threadManager_) {
-          observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
-        } else if (!serverConfigs_->resourcePoolSet().empty()) {
-          observer->queuedRequests(
-              serverConfigs_->resourcePoolSet().numQueued());
-        }
-        observer->activeRequests(serverConfigs_->getActiveRequests());
+  if (auto* observer = serverConfigs_->getObserver()) {
+    observer->admittedRequest(&request->getMethodName());
+    // Expensive operations; happens only when sampling is enabled
+    if (samplingStatus.isEnabledByServer()) {
+      if (threadManager_) {
+        observer->queuedRequests(threadManager_->pendingUpstreamTaskCount());
+      } else if (!serverConfigs_->resourcePoolSet().empty()) {
+        observer->queuedRequests(serverConfigs_->resourcePoolSet().numQueued());
       }
+      observer->activeRequests(serverConfigs_->getActiveRequests());
     }
   }
   const auto protocolId = request->getProtoId();

@@ -36,8 +36,8 @@ Experimental features:
 
 | Thrift feature | C++ | Hack | Java | Python |
 | :------------- | :-: | :--: | :--: | :----: |
-| [Deterministic hashing](/features/hash.md) | <Supported/> | <Unsupported/> | <Unsupported/> | <Unsupported/> |
-| [Patch](/features/hash.md) | <InProgress/> | <Unsupported/> | <Unsupported/> | <Unsupported/> |
+| [Patch](/features/patch.md) | <InProgress/> | <Unsupported/> | <Unsupported/> | <Unsupported/> |
+| [Deterministic Hashing](/fb/languages/cpp/hash.md) | <Supported/> | <Unsupported/> | <Unsupported/> | <Unsupported/> |
 
 The level of support of a feature in a given language is defined as follows:
 

@@ -166,7 +166,6 @@ module.exports = {
         // Experimental features:
         {
           Experimental: [
-            'features/hash',
             'features/patch',
             'features/schema',
             'features/yaml',

@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::io;
+
 use slog::o;
 use slog::Drain;
 
@@ -58,10 +60,10 @@ pub fn init_term_envlogger(binary_name: &'static str) -> (slog::Logger, slog_asy
     (logger, guard)
 }
 
-pub fn init_term_testing() -> slog::Logger {
-    // Due to how cargo and buck capture stdout, we have to use a special sink
-    // to display stdout in tests.
-    let decorator = slog_term::PlainSyncDecorator::new(slog_term::TestStdoutWriter);
+/// Logs produced by this logger will be visible on stderr in Buck tests (on
+/// test failure).
+pub fn stderr_sync_testing() -> slog::Logger {
+    let decorator = slog_term::PlainSyncDecorator::new(TestStderrWriter);
     let drain = slog_term::FullFormat::new(decorator)
         .use_custom_timestamp(timestamp_format)
         .build()
@@ -139,6 +141,26 @@ impl<'a, T: std::fmt::Debug> std::fmt::Debug for FmtN<'a, T> {
             f.write_fmt(std::format_args!(", ... [{} total]", self.len))?;
         }
         Ok(())
+    }
+}
+
+// Inspired by `slog_term::TestStdoutWriter`, but to stderr instead.
+struct TestStderrWriter;
+
+impl io::Write for TestStderrWriter {
+    fn write(&mut self, data: &[u8]) -> io::Result<usize> {
+        // Cargo's test harness only captures output to macros like `print!`,
+        // `eprint!`, etc.  If we logged normally to stderr, then Cargo won't
+        // capture this output, and instead Buck would. But, when a Rust test
+        // fails, Buck only prints out what Cargo has captured.
+        eprint!(
+            "{}",
+            std::str::from_utf8(data).map_err(|x| io::Error::new(io::ErrorKind::InvalidData, x))?
+        );
+        Ok(data.len())
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        io::stderr().flush()
     }
 }
 

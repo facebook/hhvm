@@ -240,14 +240,14 @@ class Document implements \IThriftSyncStruct {
 ...
 }
 ```
-### Field Wrapper
+### Wrapper
 
-This annotation will let you change the field’s type to a wrapper class. It should extend  [`IThriftFieldWrapper`](https://www.internalfb.com/code/www/flib/thrift/core/IThriftFieldWrapper.php?lines=22)  class. FieldWrapper wraps your field within the wrapper class and allows you to execute custom code before reading/writing the field. As a result, the field becomes private, and you can get the wrapper object via the getter method in the struct. The wrapper APIs are async so using wrapped fields will change your struct to an async struct. All the factory methods like `fromShape`, `toShape` will become async to access field value via the wrapper.
+This annotation will let you change a type to a wrapper class. It should extend `IThriftTypeWrapper` for primitive or container types, `IThriftFieldWrapper` for fields, or `IThriftStructWrapper` for structured types. A wrapper wraps your type and allows you to execute custom code before reading/writing. When applied to a field, the field becomes private, and you can get the wrapper object via the getter method in the struct. The wrapper APIs are async so using wrapped fields will change your struct to an async struct. All the factory methods like `fromShape`, `toShape` will become async to access field value via the wrapper.
 
 See example below.
 
 ```
-// In Hack file
+// An example of Field Wrapper in Hack file
 final class FooOnlyAllowOwnerToAccess<TThriftType, TStructType>
     extends IThriftFieldWrapper<TThriftType, TStructType> {
 
@@ -300,7 +300,7 @@ final class FooOnlyAllowOwnerToAccess<TThriftType, TStructType>
 ```
 // In thrift file
 struct Document {
-  @hack.FieldWrapper{name = '\FooOnlyAllowOwnerToAccess'}
+  @hack.Wrapper{name = '\FooOnlyAllowOwnerToAccess'}
   1: i32 created_time;
 }
 ```
@@ -327,17 +327,21 @@ function timeSinceCreated(Document $doc): Duration {
 }
 ```
 ### Compose
-
-* You can only apply one adapter to a field either via field adapter or via type adapter.
-* You can only apply one field wrapper to the field.
+* Field Wrapper on a field can be used to compose with Type Wrapper or Type Adapter on a typedef.
 
 ```
 @hack.Adapter{name = "CustomTypeAdapter"}
-typedef i32 CustomInt
+typedef i32 AdaptedInt
+
+@hack.Wrappper{name = "CustomTypeWrapper"}
+typedef i32 WrappedInt
 
 struct Foo {
-  @hack.FieldWrapper{name = "CustomFieldWrapper"}
-  1: CustomInt field1;
+  @hack.Wrapper{name = "CustomFieldWrapper"}
+  1: AdaptedInt field1;
+
+  @hack.Wrapper{name = "CustomFieldWrapper"}
+  2: WrappedInt field2;
 }
 ```
 ## Python

@@ -75,8 +75,10 @@ class Client : public ClientBase {
     };
     auto reply = client_.sendSync(request, connectionOptions.writeTimeout);
     if (logger_ && logger_->shouldLog()) {
-      auto stats = statsFrom(request, reply);
-      logger_->log(stats);
+      folly::fibers::runInMainContext([&]() {
+        auto stats = statsFrom(request, reply);
+        logger_->log(stats);
+      });
     }
     return reply;
   }

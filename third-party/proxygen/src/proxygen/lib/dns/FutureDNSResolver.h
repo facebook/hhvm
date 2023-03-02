@@ -47,6 +47,10 @@ class FutureDNSResolver {
       sa_family_t family = AF_INET,
       proxygen::TraceEventContext teCtx = proxygen::TraceEventContext());
 
+  virtual folly::Future<std::vector<DNSResolver::Answer>> resolveMailExchange(
+      const std::string& domain,
+      std::chrono::milliseconds timeout = kDefaultTimeout());
+
   virtual DNSResolver::StatsCollector* getStatsCollector() const;
   virtual void setStatsCollector(DNSResolver::StatsCollector* collector);
 

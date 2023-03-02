@@ -130,6 +130,7 @@ class DNSResolver : public folly::DelayedDestruction {
       AT_CNAME = 2,
       AT_TXT = 3,
       AT_SRV = 4,
+      AT_MX = 5,
     };
 
     AnswerType type;
@@ -139,6 +140,7 @@ class DNSResolver : public folly::DelayedDestruction {
     std::string name;
     std::string canonicalName;
     uint16_t port{0};
+    uint16_t priority{0};
     std::shared_ptr<folly::IOBuf> rawData;
 
     ResolverType resolverType{ResolverType::UNKNOWN};
@@ -159,6 +161,9 @@ class DNSResolver : public folly::DelayedDestruction {
     Answer(std::chrono::seconds cs, const std::string& n,
            uint16_t p, enum AnswerType t = AT_NAME) :
       ttl(cs), creationTime(secondsSinceEpoch()), type(t), address(), name(n), port(p) {
+    }
+    Answer(std::chrono::seconds cs, uint16_t pri, std::string  n) :
+      ttl(cs), creationTime(secondsSinceEpoch()), type(AT_MX), address(), name(std::move(n)), priority(pri) {
     }
     Answer(std::chrono::seconds cs,
            std::shared_ptr<folly::IOBuf> rData,
@@ -196,6 +201,12 @@ class DNSResolver : public folly::DelayedDestruction {
       if (type == AT_ADDRESS) {
         if (address != rhs.address) {
           return address < rhs.address;
+        }
+      } else if (type == AT_MX) {
+        if (priority != rhs.priority) {
+          return priority < rhs.priority;
+        } else if (name != rhs.name) {
+          return name < rhs.name;
         }
       } else {  // AT_NAME or AT_CNAME
         if (name != rhs.name) {
@@ -403,6 +414,21 @@ class DNSResolver : public folly::DelayedDestruction {
    std::chrono::milliseconds timeout = std::chrono::milliseconds(100),
    sa_family_t family = AF_INET,
    TraceEventContext teContext = TraceEventContext()) = 0;
+
+  /**
+   * Resolve mail exchange servers and priorities for the given domain name.
+   *
+   * This performs a MX query.
+   *
+   * @param cb                callback to invoke when resolution is complete
+   * @param domain            the domain name to retrieve mail exchange info for
+   * @param timeout           timeout after which to give up; a value of 0
+   *                          indicates no timeout and values greater than
+   *                          kMaxTimeout will be clamped
+   */
+  virtual void resolveMailExchange(ResolutionCallback* cb,
+      const std::string& domain,
+      std::chrono::milliseconds timeout = std::chrono::milliseconds(100));
 
   /**
    * Operate on the StatsCollector instance that we wish to be used to track

@@ -38,6 +38,12 @@ class MockDNSResolver : public proxygen::DNSResolver {
                sa_family_t,
                TraceEventContext));
 
+  MOCK_METHOD(void,
+              resolveMailExchange,
+              (DNSResolver::ResolutionCallback*,
+               const std::string&,
+               std::chrono::milliseconds));
+
   MOCK_METHOD(void, setStatsCollector, (DNSResolver::StatsCollector*));
   MOCK_METHOD(DNSResolver::StatsCollector*, getStatsCollector, (), (const));
 };

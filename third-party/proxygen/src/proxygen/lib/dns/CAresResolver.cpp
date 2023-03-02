@@ -401,6 +401,17 @@ void CAresResolver::Query::queryCallback(
       break;
     }
 
+    case RecordType::kMX: {
+      auto result = detail::parseMxRecords(abuf, alen);
+      if (result.hasError()) {
+        self->fail(result.error().status, result.error().msg);
+        return;
+      } else {
+        answers = std::move(result).value();
+      }
+      break;
+    }
+
     default:
       LOG(ERROR) << "Couldn't handle answer for query type "
                  << static_cast<int>(self->type_) << ", during resolving "
@@ -785,13 +796,13 @@ void CAresResolver::resolveAddress(DNSResolver::ResolutionCallback* cb,
   dnsEvent.addMeta(TraceFieldType::NumberResolvers, servers_.size());
   dnsEvent.addMeta(TraceFieldType::RequestFamily, address.getFamily());
 
-  Query* q = new Query(this,
-                       RecordType::kPtr,
-                       DNSResolver::getPtrName(address),
-                       true,
-                       std::move(dnsEvent),
-                       &timeUtil_,
-                       std::move(teContext));
+  auto q = new Query(this,
+                     RecordType::kPtr,
+                     DNSResolver::getPtrName(address),
+                     true,
+                     std::move(dnsEvent),
+                     &timeUtil_,
+                     std::move(teContext));
   q->setDnsCryptUsed(false, 0);
   q->resolve(cb, timeout);
 }
@@ -872,42 +883,42 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
   dnsEvent.addMeta(TraceFieldType::RequestFamily, family);
 
   if (resolveSRVRecord_) {
-    Query* q = new Query(this,
-                         RecordType::kSRV,
-                         host,
-                         true,
-                         std::move(dnsEvent),
-                         &timeUtil_,
-                         std::move(teContext));
+    auto q = new Query(this,
+                       RecordType::kSRV,
+                       host,
+                       true,
+                       std::move(dnsEvent),
+                       &timeUtil_,
+                       std::move(teContext));
     cb->insertQuery(q);
     q->setDnsCryptUsed(false, 0);
     q->resolve(cb, std::chrono::milliseconds(timeout));
   }
 
   if (family == AF_INET) {
-    Query* q = new Query(this,
-                         RecordType::kA,
-                         host,
-                         true,
-                         std::move(dnsEvent),
-                         &timeUtil_,
-                         std::move(teContext));
+    auto q = new Query(this,
+                       RecordType::kA,
+                       host,
+                       true,
+                       std::move(dnsEvent),
+                       &timeUtil_,
+                       std::move(teContext));
     cb->insertQuery(q);
     q->setDnsCryptUsed(false, 0);
     q->resolve(cb, std::chrono::milliseconds(timeout));
   } else if (family == AF_INET6) {
-    Query* q = new Query(this,
-                         RecordType::kAAAA,
-                         host,
-                         true,
-                         std::move(dnsEvent),
-                         &timeUtil_,
-                         std::move(teContext));
+    auto q = new Query(this,
+                       RecordType::kAAAA,
+                       host,
+                       true,
+                       std::move(dnsEvent),
+                       &timeUtil_,
+                       std::move(teContext));
     cb->insertQuery(q);
     q->setDnsCryptUsed(false, 0);
     q->resolve(cb, std::chrono::milliseconds(timeout));
   } else if (family == AF_UNSPEC) {
-    MultiQuery* mq = new MultiQuery(this, host);
+    auto mq = new MultiQuery(this, host);
     mq->setDnsCryptUsed(false, 0);
     cb->insertQuery(mq);
     mq->resolve(cb,
@@ -933,6 +944,34 @@ void CAresResolver::resolveHostname(DNSResolver::ResolutionCallback* cb,
         folly::to<std::string>("Unsupported address family: ", family));
     cb->resolutionError(ew);
   }
+}
+
+void CAresResolver::resolveMailExchange(DNSResolver::ResolutionCallback* cb,
+                                        const std::string& domain,
+                                        std::chrono::milliseconds timeout) {
+  if (timeout > kMaxTimeout) {
+    LOG(WARNING) << "Attempt to resolve mail exchange info for " << domain
+                 << " specified with "
+                 << "timeout of " << timeout.count() << "ms; "
+                 << "clamping to " << kMaxTimeout.count() << "ms";
+    timeout = kMaxTimeout;
+  }
+
+  /* TraceEvent Initialization */
+  TraceEventContext teContext = TraceEventContext();
+  TraceEvent dnsEvent =
+      TraceEvent(TraceEventType::DnsResolution, teContext.parentID);
+  dnsEvent.addMeta(TraceFieldType::NumberResolvers, servers_.size());
+
+  auto q = new Query(this,
+                     RecordType::kMX,
+                     domain,
+                     true,
+                     std::move(dnsEvent),
+                     &timeUtil_,
+                     std::move(teContext));
+  q->setDnsCryptUsed(false, 0);
+  q->resolve(cb, timeout);
 }
 
 bool CAresResolver::resolveLiterals(DNSResolver::ResolutionCallback* cb,
@@ -1083,6 +1122,34 @@ folly::Expected<std::vector<DNSResolver::Answer>, ParseError> parseSrvRecords(
     ParseError err;
     err.status = DNSResolver::ResolutionStatus::PARSE_ERROR;
     err.msg = folly::to<std::string>("Failed to parse SRV answer ", status);
+    return folly::makeUnexpected(std::move(err));
+  }
+
+  return folly::makeExpected<ParseError>(std::move(answers));
+}
+
+folly::Expected<std::vector<DNSResolver::Answer>, ParseError> parseMxRecords(
+    unsigned char* aresBuffer, int bufferLen) noexcept {
+  std::vector<DNSResolver::Answer> answers;
+  struct ares_mx_reply* mxs = nullptr;
+  auto status = ares_parse_mx_reply(aresBuffer, bufferLen, &mxs);
+  AresDataUniquePtr<ares_mx_reply> mxsReply(mxs);
+  if (status == ARES_SUCCESS) {
+    while (mxs != nullptr) {
+      // C-ares doesn't support yet parsing the ttl for MX records
+      // (https://github.com/c-ares/c-ares/issues/387).
+      // For the time being, I'm using an arbitrary ttl of 0 seconds,
+      // thus disabling any caching for the records (no caching is
+      // bad, but only from a performance perspective. Stale records, on
+      // the other hand, would violate the ttl set on the DNS server)
+      const std::chrono::seconds ttl = std::chrono::seconds(0);
+      answers.emplace_back(ttl, mxs->priority, mxs->host);
+      mxs = mxs->next;
+    }
+  } else {
+    ParseError err;
+    err.status = DNSResolver::ResolutionStatus::PARSE_ERROR;
+    err.msg = folly::to<std::string>("Failed to parse MX answer ", status);
     return folly::makeUnexpected(std::move(err));
   }
 

@@ -72,6 +72,19 @@ FutureDNSResolver::resolveHostname(const std::string& name,
   return future;
 }
 
+folly::Future<std::vector<DNSResolver::Answer>>
+FutureDNSResolver::resolveMailExchange(const std::string& domain,
+                                       std::chrono::milliseconds timeout) {
+  folly::Promise<std::vector<DNSResolver::Answer>> promise;
+  auto future = promise.getFuture();
+  auto callback = new FutureDNSResolutionCallback(std::move(promise));
+  evb_->runInEventBaseThread(
+      [callback, domain, resolver = resolver_, timeout]() {
+        resolver->resolveMailExchange(callback, domain, timeout);
+      });
+  return future;
+}
+
 DNSResolver::StatsCollector* FutureDNSResolver::getStatsCollector() const {
   return resolver_->getStatsCollector();
 }

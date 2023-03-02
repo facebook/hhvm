@@ -9,6 +9,8 @@
 #include "proxygen/lib/dns/FutureDNSResolver.h"
 
 #include <map>
+#include <utility>
+#include <vector>
 
 #include <folly/Memory.h>
 #include <folly/io/async/EventBase.h>
@@ -40,10 +42,13 @@ class FakeDNSResolver : public DNSResolver {
  public:
   explicit FakeDNSResolver(
       folly::EventBase* evb,
-      const std::map<folly::SocketAddress, string>& addrToHostMap)
+      const std::map<folly::SocketAddress, string>& addrToHostMap,
+      std::map<string, std::vector<std::pair<int, string>>>
+          domainToMailExchangeMap)
       : evb_{evb},
         addrToHostMap_{addrToHostMap},
-        hostToAddrMap_{invert(addrToHostMap)} {
+        hostToAddrMap_{invert(addrToHostMap)},
+        mailExchangeMap_{std::move(domainToMailExchangeMap)} {
     CHECK_EQ(addrToHostMap_.size(), hostToAddrMap_.size());
   }
 
@@ -88,6 +93,30 @@ class FakeDNSResolver : public DNSResolver {
     });
   }
 
+  void resolveMailExchange(ResolutionCallback* cb,
+                           const std::string& domain,
+                           std::chrono::milliseconds /* timeout */ =
+                               FutureDNSResolver::kDefaultTimeout()) override {
+    evb_->runInEventBaseThread([cb, domain, this]() {
+      auto iter = mailExchangeMap_.find(domain);
+      if (iter != mailExchangeMap_.end()) {
+        std::vector<std::pair<int, string>> entries = iter->second;
+        std::vector<DNSResolver::Answer> answers = {};
+        for (const std::pair<int, string>& entry : entries) {
+          DNSResolver::Answer answer;
+          answer.type = DNSResolver::Answer::AnswerType::AT_MX;
+          answer.priority = entry.first;
+          answer.name = entry.second;
+          answers.push_back(std::move(answer));
+        }
+        cb->resolutionSuccess(answers);
+      } else {
+        FakeResolverError error{"Cannot resolve mail exchange info"};
+        cb->resolutionError(folly::exception_wrapper{std::move(error)});
+      }
+    });
+  }
+
   DNSResolver::StatsCollector* getStatsCollector() const override {
     return statsCollector_;
   }
@@ -100,6 +129,7 @@ class FakeDNSResolver : public DNSResolver {
   folly::EventBase* evb_;
   std::map<folly::SocketAddress, string> addrToHostMap_;
   std::map<string, folly::SocketAddress> hostToAddrMap_;
+  std::map<string, std::vector<std::pair<int, string>>> mailExchangeMap_;
   DNSResolver::StatsCollector* statsCollector_;
 };
 } // namespace
@@ -115,7 +145,22 @@ class FutureDNSResolverTest : public ::testing::Test {
         {folly::SocketAddress(folly::IPAddress("1.2.3.4"), 0), "1234.com"},
         {folly::SocketAddress(folly::IPAddress("2.3.4.5"), 0), "2345.com"},
     };
-    proxygenResolver.reset(new FakeDNSResolver(evb_, addrToHostMap));
+    std::map<string, std::vector<std::pair<int, string>>>
+        domainToMailExchangeMap{
+            {"1234.com",
+             {
+                 {10, "mail1.1234.com"},
+                 {20, "mail2.1234.com"},
+                 {30, "mail3.1234.com"},
+             }},
+            {"2345.com",
+             {
+                 {100, "mailone.2345.com"},
+                 {100, "mailtwo.2345.com"},
+             }},
+        };
+    proxygenResolver.reset(
+        new FakeDNSResolver(evb_, addrToHostMap, domainToMailExchangeMap));
     resolver_ =
         std::make_unique<FutureDNSResolver>(evb_, std::move(proxygenResolver));
   }
@@ -164,5 +209,44 @@ TEST_F(FutureDNSResolverTest, TestResolveHostnameSuccess) {
 TEST_F(FutureDNSResolverTest, TestResolveHostnameFail) {
   EXPECT_THROW({ resolver_->resolveHostname("unknown-host.com").getVia(evb_); },
                FakeResolverError);
+}
+
+TEST_F(FutureDNSResolverTest, TestResolveMailExchangeSuccess) {
+  auto host11 = "mail1.1234.com";
+  auto priority11 = 10;
+  auto host12 = "mail2.1234.com";
+  auto priority12 = 20;
+  auto host13 = "mail3.1234.com";
+  auto priority13 = 30;
+  auto answers1 = resolver_->resolveMailExchange("1234.com").getVia(evb_);
+  EXPECT_EQ(3, answers1.size());
+  EXPECT_EQ(AnswerType::AT_MX, answers1[0].type);
+  EXPECT_EQ(host11, answers1[0].name);
+  EXPECT_EQ(priority11, answers1[0].priority);
+  EXPECT_EQ(AnswerType::AT_MX, answers1[1].type);
+  EXPECT_EQ(host12, answers1[1].name);
+  EXPECT_EQ(priority12, answers1[1].priority);
+  EXPECT_EQ(AnswerType::AT_MX, answers1[2].type);
+  EXPECT_EQ(host13, answers1[2].name);
+  EXPECT_EQ(priority13, answers1[2].priority);
+
+  auto host21 = "mailone.2345.com";
+  auto priority21 = 100;
+  auto host22 = "mailtwo.2345.com";
+  auto priority22 = 100;
+  auto answers2 = resolver_->resolveMailExchange("2345.com").getVia(evb_);
+  EXPECT_EQ(2, answers2.size());
+  EXPECT_EQ(AnswerType::AT_MX, answers2[0].type);
+  EXPECT_EQ(host21, answers2[0].name);
+  EXPECT_EQ(priority21, answers2[0].priority);
+  EXPECT_EQ(AnswerType::AT_MX, answers2[1].type);
+  EXPECT_EQ(host22, answers2[1].name);
+  EXPECT_EQ(priority22, answers2[1].priority);
+}
+
+TEST_F(FutureDNSResolverTest, TestResolveMailExchangeFail) {
+  EXPECT_THROW(
+      { resolver_->resolveMailExchange("unknown-host.com").getVia(evb_); },
+      FakeResolverError);
 }
 } // namespace proxygen

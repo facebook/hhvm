@@ -62,6 +62,9 @@ folly::Expected<std::vector<DNSResolver::Answer>, ParseError> parseTxtRecords(
 
 folly::Expected<std::vector<DNSResolver::Answer>, ParseError> parseSrvRecords(
     unsigned char* aresBuffer, int alen) noexcept;
+
+folly::Expected<std::vector<DNSResolver::Answer>, ParseError> parseMxRecords(
+    unsigned char* aresBuffer, int alen) noexcept;
 } // namespace detail
 
 class CAresResolver : public DNSResolver {
@@ -75,6 +78,7 @@ class CAresResolver : public DNSResolver {
     kPtr = 12,
     kTXT = 16,
     kSRV = 33,
+    kMX = 15,
   };
 
   // Helper class for handling a single query / answer + timeout.
@@ -205,6 +209,10 @@ class CAresResolver : public DNSResolver {
       std::chrono::milliseconds timeout = std::chrono::milliseconds(100),
       sa_family_t family = AF_INET,
       TraceEventContext teContext = TraceEventContext()) override;
+  void resolveMailExchange(ResolutionCallback* cb,
+                           const std::string& domain,
+                           std::chrono::milliseconds timeout =
+                               std::chrono::milliseconds(100)) override;
   void setStatsCollector(DNSResolver::StatsCollector* statsCollector) override;
   DNSResolver::StatsCollector* getStatsCollector() const override;
   std::chrono::steady_clock::time_point& getLastNonceTimeRef();

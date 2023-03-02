@@ -67,6 +67,12 @@ class CachingDNSResolver : public DNSResolver {
     resolver_->resolveAddress(cb, address, timeout);
   }
 
+  void resolveMailExchange(ResolutionCallback* cb,
+                           const std::string& domain,
+                           std::chrono::milliseconds timeout) override {
+    resolver_->resolveMailExchange(cb, domain, timeout);
+  }
+
   void setStatsCollector(DNSResolver::StatsCollector* statsCollector) override {
     statsCollector_ = statsCollector;
     resolver_->setStatsCollector(statsCollector);

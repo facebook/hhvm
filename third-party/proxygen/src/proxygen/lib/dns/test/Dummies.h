@@ -63,6 +63,12 @@ class DummyDNSResolver : public DNSResolver {
                           std::chrono::milliseconds(100)) override {
   }
 
+  void resolveMailExchange(DNSResolver::ResolutionCallback* /*cb*/,
+                           const std::string& /*domain*/,
+                           std::chrono::milliseconds /*timeout*/ =
+                               std::chrono::milliseconds(100)) override {
+  }
+
   void setStatsCollector(
       DNSResolver::StatsCollector* /*statsCollector*/) override {
   }

@@ -7,8 +7,10 @@
  */
 
 type StructWithWrapper = \MyStructWrapper<\thrift_adapted_types\StructWithWrapper>;
-type i64WithAdapter = \MyAdapter1::THackType;
+type i64WithAdapter = \MyAdapterInt::THackType;
 type i64WithWrapper = \MyTypeIntWrapper<\detail\i64WithWrapper>;
+type AdaptedMap = \MyAdapter1::THackType;
+type AdaptedStruct = \MyAdapter1::THackType;
 /**
  * Original thrift struct:-
  * AnnotationStruct
@@ -285,7 +287,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     5 => shape(
       'var' => 'optional_adapted_and_wrapped_type',
       'is_wrapped' => true,
-      'adapter' => \MyAdapter1::class,
+      'adapter' => \MyAdapterInt::class,
       'type' => \TType::I64,
     ),
     7 => shape(
@@ -301,6 +303,29 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       'type' => \TType::STRUCT,
       'class' => \thrift_adapted_types\StructWithWrapper::class,
     ),
+    9 => shape(
+      'var' => 'optional_adapted_and_wrapped_type_map',
+      'is_wrapped' => true,
+      'adapter' => \MyAdapter1::class,
+      'type' => \TType::MAP,
+      'ktype' => \TType::STRING,
+      'vtype' => \TType::STRUCT,
+      'key' => shape(
+        'type' => \TType::STRING,
+      ),
+      'val' => shape(
+        'type' => \TType::STRUCT,
+        'class' => MyStruct::class,
+      ),
+      'format' => 'harray',
+    ),
+    10 => shape(
+      'var' => 'optional_adapted_and_wrapped_type_struct',
+      'is_wrapped' => true,
+      'adapter' => \MyAdapter1::class,
+      'type' => \TType::STRUCT,
+      'class' => MyStruct::class,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'wrapped_field' => 1,
@@ -310,6 +335,8 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     'optional_adapted_and_wrapped_type' => 5,
     'wrapped_type_int' => 7,
     'double_wrapped_struct' => 8,
+    'optional_adapted_and_wrapped_type_map' => 9,
+    'optional_adapted_and_wrapped_type_struct' => 10,
   ];
 
   const type TConstructorShape = shape(
@@ -320,6 +347,8 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     ?'optional_adapted_and_wrapped_type' => ?i64WithAdapter,
     ?'wrapped_type_int' => ?\detail\i64WithWrapper,
     ?'double_wrapped_struct' => ?\thrift_adapted_types\StructWithWrapper,
+    ?'optional_adapted_and_wrapped_type_map' => ?AdaptedMap,
+    ?'optional_adapted_and_wrapped_type_struct' => ?AdaptedStruct,
   );
 
   const type TShape = shape(
@@ -330,8 +359,10 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     ?'optional_adapted_and_wrapped_type' => ?i64WithAdapter,
     'wrapped_type_int' => \detail\i64WithWrapper,
     ?'double_wrapped_struct' => ?\thrift_adapted_types\StructWithWrapper::TShape,
+    ?'optional_adapted_and_wrapped_type_map' => ?AdaptedMap,
+    ?'optional_adapted_and_wrapped_type_struct' => ?AdaptedStruct,
   );
-  const int STRUCTURAL_ID = 1369530209384758369;
+  const int STRUCTURAL_ID = 4891388107170377575;
   /**
    * Original thrift field:-
    * 1: i64 wrapped_field
@@ -409,15 +440,37 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     $this->get_double_wrapped_struct()->setValue_DO_NOT_USE_THRIFT_INTERNAL($double_wrapped_struct);
   }
 
+  /**
+   * Original thrift field:-
+   * 9: map<string, struct include.MyStruct> optional_adapted_and_wrapped_type_map
+   */
+  private ?\MyFieldWrapper<?AdaptedMap, MyNestedStruct> $optional_adapted_and_wrapped_type_map;
+
+  public function get_optional_adapted_and_wrapped_type_map()[]: \MyFieldWrapper<?AdaptedMap, MyNestedStruct> {
+    return $this->optional_adapted_and_wrapped_type_map as nonnull;
+  }
+
+  /**
+   * Original thrift field:-
+   * 10: struct include.MyStruct optional_adapted_and_wrapped_type_struct
+   */
+  private ?\MyFieldWrapper<?AdaptedStruct, MyNestedStruct> $optional_adapted_and_wrapped_type_struct;
+
+  public function get_optional_adapted_and_wrapped_type_struct()[]: \MyFieldWrapper<?AdaptedStruct, MyNestedStruct> {
+    return $this->optional_adapted_and_wrapped_type_struct as nonnull;
+  }
+
 
   public function __construct()[] {
     $this->adapted_type = \MyAdapter1::fromThrift(0);
     $this->wrapped_field = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<int, MyNestedStruct>(0, 1, $this);
     $this->annotated_field = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<int, MyNestedStruct>(0, 2, $this);
     $this->adapted__and_wrapped_type = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\MyAdapter1::THackType, MyNestedStruct>(\MyAdapter1::fromThrift(0), 4, $this);
-    $this->optional_adapted_and_wrapped_type = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\MyAdapter1::THackType, MyNestedStruct>(null, 5, $this);
+    $this->optional_adapted_and_wrapped_type = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\MyAdapterInt::THackType, MyNestedStruct>(null, 5, $this);
     $this->wrapped_type_int = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<i64WithWrapper, MyNestedStruct>(\MyTypeIntWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<\detail\i64WithWrapper>(0), 7, $this);
     $this->double_wrapped_struct = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?StructWithWrapper, MyNestedStruct>(null, 8, $this);
+    $this->optional_adapted_and_wrapped_type_map = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\MyAdapter1::THackType, MyNestedStruct>(null, 9, $this);
+    $this->optional_adapted_and_wrapped_type_struct = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<?\MyAdapter1::THackType, MyNestedStruct>(null, 10, $this);
   }
 
   public static function withDefaultValues()[]: this {
@@ -456,6 +509,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       $double_wrapped_struct = await \MyStructWrapper::genFromThrift<\thrift_adapted_types\StructWithWrapper>($double_wrapped_struct);
       await $obj->get_double_wrapped_struct()->genWrap($double_wrapped_struct);
     }
+    $optional_adapted_and_wrapped_type_map = Shapes::idx($shape, 'optional_adapted_and_wrapped_type_map');
+    if ($optional_adapted_and_wrapped_type_map !== null) {
+      await $obj->get_optional_adapted_and_wrapped_type_map()->genWrap($optional_adapted_and_wrapped_type_map);
+    }
+    $optional_adapted_and_wrapped_type_struct = Shapes::idx($shape, 'optional_adapted_and_wrapped_type_struct');
+    if ($optional_adapted_and_wrapped_type_struct !== null) {
+      await $obj->get_optional_adapted_and_wrapped_type_struct()->genWrap($optional_adapted_and_wrapped_type_struct);
+    }
     return $obj;
   }
 
@@ -490,6 +551,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     if ($double_wrapped_struct !== null) {
       $double_wrapped_struct = await \MyStructWrapper::genFromThrift<\thrift_adapted_types\StructWithWrapper>(HH\FIXME\UNSAFE_CAST<mixed, \thrift_adapted_types\StructWithWrapper>($double_wrapped_struct, 'Map value is mixed'));
       await $obj->get_double_wrapped_struct()->genWrap($double_wrapped_struct);
+    }
+    $optional_adapted_and_wrapped_type_map = idx($map, 'optional_adapted_and_wrapped_type_map');
+    if ($optional_adapted_and_wrapped_type_map !== null) {
+      await $obj->get_optional_adapted_and_wrapped_type_map()->genWrap(HH\FIXME\UNSAFE_CAST<mixed, AdaptedMap>($optional_adapted_and_wrapped_type_map, 'Map value is mixed'));
+    }
+    $optional_adapted_and_wrapped_type_struct = idx($map, 'optional_adapted_and_wrapped_type_struct');
+    if ($optional_adapted_and_wrapped_type_struct !== null) {
+      await $obj->get_optional_adapted_and_wrapped_type_struct()->genWrap(HH\FIXME\UNSAFE_CAST<mixed, AdaptedStruct>($optional_adapted_and_wrapped_type_struct, 'Map value is mixed'));
     }
     return $obj;
   }
@@ -615,6 +684,69 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
               "name" => "double_wrapped_struct",
             )
           ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "include.AdaptedMap",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_map" => tmeta_ThriftMapType::fromShape(
+                            shape(
+                              "keyType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                                )
+                              ),
+                              "valueType" => tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "include.MyStruct",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "optional_adapted_and_wrapped_type_map",
+              "is_optional" => true,
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 10,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "include.AdaptedStruct",
+                      "underlyingType" => tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "include.MyStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "optional_adapted_and_wrapped_type_struct",
+              "is_optional" => true,
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -680,7 +812,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'type' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\MyAdapter1",
+                "name" => "\MyAdapterInt",
               )
             ),
           ],
@@ -718,6 +850,38 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
             ),
           ],
         ),
+        'optional_adapted_and_wrapped_type_map' => shape(
+          'field' => dict[
+            '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
+              shape(
+                "name" => "\MyFieldWrapper",
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+              shape(
+                "name" => "\MyAdapter1",
+              )
+            ),
+          ],
+        ),
+        'optional_adapted_and_wrapped_type_struct' => shape(
+          'field' => dict[
+            '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
+              shape(
+                "name" => "\MyFieldWrapper",
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+              shape(
+                "name" => "\MyAdapter1",
+              )
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -743,6 +907,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       $double_wrapped_struct = await \MyStructWrapper::genFromThrift<\thrift_adapted_types\StructWithWrapper>(\thrift_adapted_types\StructWithWrapper::__fromShape($double_wrapped_struct));
       await $obj->get_double_wrapped_struct()->genWrap($double_wrapped_struct);
     }
+    $optional_adapted_and_wrapped_type_map = Shapes::idx($shape, 'optional_adapted_and_wrapped_type_map');
+    if ($optional_adapted_and_wrapped_type_map !== null) {
+      await $obj->get_optional_adapted_and_wrapped_type_map()->genWrap($optional_adapted_and_wrapped_type_map);
+    }
+    $optional_adapted_and_wrapped_type_struct = Shapes::idx($shape, 'optional_adapted_and_wrapped_type_struct');
+    if ($optional_adapted_and_wrapped_type_struct !== null) {
+      await $obj->get_optional_adapted_and_wrapped_type_struct()->genWrap($optional_adapted_and_wrapped_type_struct);
+    }
     return $obj;
   }
 
@@ -755,6 +927,8 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
     $wrapped_type_int = await $wrapped_type_int->genUnwrap();
     $double_wrapped_struct = await ($this->double_wrapped_struct as nonnull)->genUnwrap();
     $double_wrapped_struct = await $double_wrapped_struct?->genUnwrap();
+    $optional_adapted_and_wrapped_type_map = await ($this->optional_adapted_and_wrapped_type_map as nonnull)->genUnwrap();
+    $optional_adapted_and_wrapped_type_struct = await ($this->optional_adapted_and_wrapped_type_struct as nonnull)->genUnwrap();
     return shape(
       'wrapped_field' => $wrapped_field,
       'annotated_field' => $annotated_field,
@@ -766,6 +940,22 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
         ? null 
         : (
         $double_wrapped_struct->__toShape()
+        )
+      ),
+      'optional_adapted_and_wrapped_type_map' => await ($optional_adapted_and_wrapped_type_map === null 
+        ? null 
+        : (
+        Dict\map_async(
+        $optional_adapted_and_wrapped_type_map,
+        async $val0 ==> 
+          await $val0->__genToShape()
+      )
+        )
+      ),
+      'optional_adapted_and_wrapped_type_struct' => await ($optional_adapted_and_wrapped_type_struct === null 
+        ? null 
+        : (
+        $optional_adapted_and_wrapped_type_struct->__genToShape()
         )
       ),
     );
@@ -805,11 +995,32 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
       $_tmp1->readFromJson($_tmp0);
       $this->double_wrapped_struct = $_tmp1;
     }
+    if (idx($parsed, 'optional_adapted_and_wrapped_type_map') !== null) {
+      $_json5 = HH\FIXME\UNSAFE_CAST<mixed, AdaptedMap>($parsed['optional_adapted_and_wrapped_type_map']);
+      $_container6 = dict[];
+      foreach($_json5 as $_key3 => $_value4) {
+        $_value7 = MyStruct::withDefaultValues();
+        $_tmp8 = \json_encode($_value4);
+        $_tmp9 = MyStruct::withDefaultValues();
+        $_tmp9->readFromJson($_tmp8);
+        $_value7 = $_tmp9;
+        $_container6[$_key3] = $_value7;
+      }
+      $this->optional_adapted_and_wrapped_type_map = $_container6;
+    }
+    if (idx($parsed, 'optional_adapted_and_wrapped_type_struct') !== null) {
+      $_tmp10 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, AdaptedStruct>($parsed['optional_adapted_and_wrapped_type_struct']));
+      $_tmp11 = MyStruct::withDefaultValues();
+      $_tmp11->readFromJson($_tmp10);
+      $this->optional_adapted_and_wrapped_type_struct = $_tmp11;
+    }
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, i64WithAdapter>();
+    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, AdaptedMap>();
+    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, AdaptedStruct>();
     \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, int>();
+    \ThriftUtil::requireSameType<\MyAdapterInt::TThriftType, i64WithAdapter>();
   }
 
 }

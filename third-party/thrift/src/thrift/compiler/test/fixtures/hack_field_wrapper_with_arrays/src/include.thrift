@@ -24,11 +24,17 @@ struct AnnotationStruct {}
 struct MyStruct {
   1: MyNestedStruct nested_struct;
 }
-@hack.Adapter{name = "\MyAdapter1"}
+@hack.Adapter{name = "\MyAdapterInt"}
 typedef i64 i64WithAdapter
 
 @hack.Wrapper{name = "\MyTypeIntWrapper", extraNamespace = "detail"}
 typedef i64 i64WithWrapper
+
+@hack.Adapter{name = "\MyAdapter1"}
+typedef map<string, MyStruct> AdaptedMap
+
+@hack.Adapter{name = "\MyAdapter1"}
+typedef MyStruct AdaptedStruct
 
 struct MyNestedStruct {
   @hack.FieldWrapper{name = "\MyFieldWrapper"}
@@ -49,6 +55,10 @@ struct MyNestedStruct {
   7: i64WithWrapper wrapped_type_int;
   @hack.FieldWrapper{name = "\MyFieldWrapper"}
   8: StructWithWrapper double_wrapped_struct;
+  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  9: optional AdaptedMap optional_adapted_and_wrapped_type_map;
+  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  10: optional AdaptedStruct optional_adapted_and_wrapped_type_struct;
 }
 
 struct MyComplexStruct {

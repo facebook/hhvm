@@ -627,6 +627,7 @@ class ServiceStaticMetadata implements \IThriftServiceStaticMetadata {
               'include.MyStruct' => MyStruct::getStructMetadata(),
               'include.MyNestedStruct' => MyNestedStruct::getStructMetadata(),
               'include.StructWithWrapper' => \thrift_adapted_types\StructWithWrapper::getStructMetadata(),
+              'include.MyStruct' => MyStruct::getStructMetadata(),
             ],
             'exceptions' => dict[
             ],

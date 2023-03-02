@@ -204,12 +204,12 @@ class parser_actions {
   virtual std::unique_ptr<t_const_value> on_const_ref(
       const identifier& name) = 0;
 
-  virtual std::unique_ptr<t_const_value> on_bool_literal(bool value) = 0;
-  virtual std::unique_ptr<t_const_value> on_int_literal(
+  virtual std::unique_ptr<t_const_value> on_integer(
       source_location loc, int64_t value) = 0;
-  virtual std::unique_ptr<t_const_value> on_float_literal(double value) = 0;
+  virtual std::unique_ptr<t_const_value> on_float(double value) = 0;
   virtual std::unique_ptr<t_const_value> on_string_literal(
       fmt::string_view value) = 0;
+  virtual std::unique_ptr<t_const_value> on_bool_literal(bool value) = 0;
   virtual std::unique_ptr<t_const_value> on_list_literal() = 0;
   virtual std::unique_ptr<t_const_value> on_map_literal() = 0;
   virtual std::unique_ptr<t_const_value> on_struct_literal(

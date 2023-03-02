@@ -1011,13 +1011,7 @@ std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
   return std::make_unique<t_const_value>(std::move(name_str));
 }
 
-std::unique_ptr<t_const_value> parsing_driver::on_bool_literal(bool value) {
-  auto const_value = std::make_unique<t_const_value>();
-  const_value->set_bool(value);
-  return const_value;
-}
-
-std::unique_ptr<t_const_value> parsing_driver::on_int_literal(
+std::unique_ptr<t_const_value> parsing_driver::on_integer(
     source_location loc, int64_t value) {
   if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
       (value < INT32_MIN || value > INT32_MAX)) {
@@ -1029,7 +1023,7 @@ std::unique_ptr<t_const_value> parsing_driver::on_int_literal(
   return node;
 }
 
-std::unique_ptr<t_const_value> parsing_driver::on_float_literal(double value) {
+std::unique_ptr<t_const_value> parsing_driver::on_float(double value) {
   auto const_value = std::make_unique<t_const_value>();
   const_value->set_double(value);
   return const_value;
@@ -1038,6 +1032,12 @@ std::unique_ptr<t_const_value> parsing_driver::on_float_literal(double value) {
 std::unique_ptr<t_const_value> parsing_driver::on_string_literal(
     fmt::string_view value) {
   return std::make_unique<t_const_value>(fmt::to_string(value));
+}
+
+std::unique_ptr<t_const_value> parsing_driver::on_bool_literal(bool value) {
+  auto const_value = std::make_unique<t_const_value>();
+  const_value->set_bool(value);
+  return const_value;
 }
 
 std::unique_ptr<t_const_value> parsing_driver::on_list_literal() {

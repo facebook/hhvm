@@ -286,7 +286,7 @@ class parser {
   // annotation_list:
   //   (annotation comma_or_semicolon)* annotation comma_or_semicolon?
   //
-  // annotation: identifier ("=" annotation_value)?
+  // annotation: identifier ["=" annotation_value]
   // annotation_value: bool_literal | integer | string_literal
   std::unique_ptr<t_annotations> parse_annotations() {
     auto loc = token_.range.begin;
@@ -717,7 +717,7 @@ class parser {
   }
 
   // enum_value:
-  //   statement_attrs identifier ("=" integer)? annotations
+  //   statement_attrs identifier ["=" integer] annotations
   //     comma_or_semicolon? inline_doc?
   std::unique_ptr<t_enum_value> parse_enum_value() {
     auto range = track_range();
@@ -765,16 +765,16 @@ class parser {
       case to_tok('+'):
         consume_token();
         if (token_.kind == tok::int_literal) {
-          return actions_.on_int_literal(range, parse_integer(s));
+          return actions_.on_integer(range, parse_integer(s));
         } else if (token_.kind == tok::float_literal) {
-          return actions_.on_float_literal(parse_float(s));
+          return actions_.on_float(parse_float(s));
         }
         report_expected("number");
         break;
       case tok::int_literal:
-        return actions_.on_int_literal(range, parse_integer());
+        return actions_.on_integer(range, parse_integer());
       case tok::float_literal:
-        return actions_.on_float_literal(parse_float());
+        return actions_.on_float(parse_float());
       case tok::string_literal:
         return actions_.on_string_literal(consume_token().string_value());
       case to_tok('['):
@@ -851,7 +851,7 @@ class parser {
     return map;
   }
 
-  // integer: ("+" | "-")? int_literal
+  // integer: ["+" | "-"] int_literal
   boost::optional<int64_t> try_parse_integer(sign s = sign::plus) {
     auto range = track_range();
     switch (token_.kind) {
@@ -880,7 +880,7 @@ class parser {
     report_expected("integer");
   }
 
-  // float: ("+" | "-")? float_literal
+  // float: ["+" | "-"] float_literal
   double parse_float(sign s = sign::plus) {
     switch (token_.kind) {
       case to_tok('-'):

@@ -16,15 +16,18 @@
 
 package com.facebook.thrift.adapter.test;
 
-public class Wrapper<T> {
+import com.facebook.thrift.adapter.FieldContext;
+import com.facebook.thrift.adapter.Wrapper;
 
-  private T value;
+public class GenericWrapper<T, R> implements Wrapper<T, Wrapped, R> {
 
-  public Wrapper(T value) {
-    this.value = value;
+  @Override
+  public Wrapped<T> fromThrift(T o, FieldContext<R> ctx) {
+    return new Wrapped<T>(o);
   }
 
-  public T getValue() {
-    return this.value;
+  @Override
+  public T toThrift(Wrapped wrapped) {
+    return wrapped == null ? null : (T) wrapped.getValue();
   }
 }

@@ -69,6 +69,7 @@ enum class FieldModifier {{
   CustomDefault,
   AlternativeCustomDefault,
   Adapter,
+  FieldAdapter,
   OpEncode,
 }};
 
@@ -261,8 +262,14 @@ BOX_TRANSFORM: Dict[Target, str] = {
 
 ADAPTER_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "adapted_{}",
-    Target.THRIFT: "{0}|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestAdapter'}}|@java.Adapter{{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapper'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}|@hack.Adapter{{name = 'ConformanceTestAdapter_{1}'}}",
+    Target.THRIFT: "{0}|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestAdapter'}}|@java.Adapter{{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}|@hack.Adapter{{name = 'ConformanceTestAdapter_{1}'}}",
     Target.CPP2: "{}|FieldModifier::Adapter",
+}
+
+FIELD_ADAPTER_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "field_adapted_{}",
+    Target.THRIFT: "{}|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}}|@java.Wrapper{{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}",
+    Target.CPP2: "{}|FieldModifier::FieldAdapter",
 }
 
 
@@ -403,6 +410,10 @@ def gen_adapted(target: Target, values: Dict[str, str]) -> Dict[str, str]:
     return _gen_unary_tramsform(ADAPTER_TRANSFORM, target, values)
 
 
+def gen_field_adapted(target: Target, values: Dict[str, str]) -> Dict[str, str]:
+    return _gen_unary_tramsform(FIELD_ADAPTER_TRANSFORM, target, values)
+
+
 def gen_container_fields(target: Target) -> Dict[str, str]:
     """Generates field name -> type that are appropriate for use in unions."""
     prims = gen_primatives(target, PRIMITIVE_TYPES)
@@ -446,6 +457,8 @@ def gen_struct_fields(target: Target) -> Dict[str, str]:
         **gen_optional_box_fields(target),
         **gen_adapted(target, gen_primatives(target)),
         **gen_adapted(target, gen_container_fields(target)),
+        **gen_field_adapted(target, gen_primatives(target)),
+        **gen_field_adapted(target, gen_container_fields(target)),
     )
     ret.update(**gen_lazy_fields(target))
     return ret

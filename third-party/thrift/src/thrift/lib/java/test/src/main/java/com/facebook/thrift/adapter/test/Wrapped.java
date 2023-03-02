@@ -16,17 +16,15 @@
 
 package com.facebook.thrift.adapter.test;
 
-import com.facebook.thrift.adapter.TypeAdapter;
+public class Wrapped<T> {
 
-public class GenericTypeAdapter<T> implements TypeAdapter<T, Wrapped> {
+  private T value;
 
-  @Override
-  public Wrapped<T> fromThrift(T o) {
-    return new Wrapped<T>(o);
+  public Wrapped(T value) {
+    this.value = value;
   }
 
-  @Override
-  public T toThrift(Wrapped wrapped) {
-    return wrapped == null ? null : (T) wrapped.getValue();
+  public T getValue() {
+    return this.value;
   }
 }

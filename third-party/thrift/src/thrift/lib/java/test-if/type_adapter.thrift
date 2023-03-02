@@ -291,7 +291,7 @@ struct AdaptedTestStruct {
 
   @java.Adapter{
     adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
-    typeClassName = 'com.facebook.thrift.adapter.test.Wrapper',
+    typeClassName = 'com.facebook.thrift.adapter.test.Wrapped',
   }
   300: double generic_adapter_field;
 }
@@ -485,7 +485,7 @@ safe permanent client exception AdaptedTestException {
 
   @java.Adapter{
     adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
-    typeClassName = 'com.facebook.thrift.adapter.test.Wrapper',
+    typeClassName = 'com.facebook.thrift.adapter.test.Wrapped',
   }
   300: double generic_adapter_field;
 }

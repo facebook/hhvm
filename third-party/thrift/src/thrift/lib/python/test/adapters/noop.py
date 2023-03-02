@@ -18,7 +18,7 @@ from __future__ import annotations
 import typing
 
 from thrift.python.adapter import Adapter
-from thrift.python.types import Struct
+from thrift.python.types import Struct, StructOrUnion
 
 
 T = typing.TypeVar("T")
@@ -45,6 +45,30 @@ class Wrapper(Adapter[T, Wrapped[T]]):
     def to_thrift(
         cls,
         adapted: Wrapped[T],
+        *,
+        transitive_annotation: typing.Optional[Struct] = None,
+    ) -> T:
+        return adapted.value
+
+
+class FieldWrapper(Adapter[T, Wrapped[T]]):
+    @classmethod
+    def from_thrift_field(
+        cls,
+        original: T,
+        field_id: int,
+        strct: StructOrUnion,
+        *,
+        transitive_annotation: typing.Optional[Struct] = None,
+    ) -> Wrapped[T]:
+        return Wrapped(value=original)
+
+    @classmethod
+    def to_thrift_field(
+        cls,
+        adapted: Wrapped[T],
+        field_id: int,
+        strct: StructOrUnion,
         *,
         transitive_annotation: typing.Optional[Struct] = None,
     ) -> T:

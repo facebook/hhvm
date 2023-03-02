@@ -18,7 +18,7 @@ package com.facebook.thrift.adapter;
 
 import static org.junit.Assert.*;
 
-import com.facebook.thrift.adapter.test.Wrapper;
+import com.facebook.thrift.adapter.test.Wrapped;
 import com.facebook.thrift.test.adapter.AdaptedTestException;
 import com.facebook.thrift.test.adapter.AdaptedTestStruct;
 import com.facebook.thrift.test.adapter.AdaptedTestStructWithoutDefaults;
@@ -578,7 +578,7 @@ public class TypeAdapterStructTest {
   @Test
   public void testGenericTypeAdapter() {
     byte[] bytes =
-        serializeAdapted(defaultInstance().setGenericAdapterField(new Wrapper(23.45d)).build());
+        serializeAdapted(defaultInstance().setGenericAdapterField(new Wrapped(23.45d)).build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
 

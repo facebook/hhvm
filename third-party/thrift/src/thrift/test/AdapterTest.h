@@ -154,6 +154,30 @@ inline bool operator<(
   return lhs.value < rhs.value;
 }
 
+struct TemplatedTestFieldAdapter {
+  template <typename T, typename Struct, int16_t FieldId>
+  static void construct(
+      AdaptedWithContext<T, Struct, FieldId>& field,
+      apache::thrift::FieldContext<Struct, FieldId>&&) {
+    field.fieldId = apache::thrift::FieldContext<Struct, FieldId>::kFieldId;
+  }
+
+  template <typename T, typename Struct, int16_t FieldId>
+  static AdaptedWithContext<T, Struct, FieldId> fromThriftField(
+      T value, apache::thrift::FieldContext<Struct, FieldId>&&) {
+    return {
+        value,
+        apache::thrift::FieldContext<Struct, FieldId>::kFieldId,
+        nullptr,
+    };
+  }
+
+  template <typename T, typename Struct, int16_t FieldId>
+  static T toThrift(const AdaptedWithContext<T, Struct, FieldId>& adapted) {
+    return adapted.value;
+  }
+};
+
 struct AdapterWithContext {
   template <typename T, typename Struct, int16_t FieldId>
   static void construct(

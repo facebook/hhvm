@@ -119,8 +119,11 @@ using to_gtest_types_t = typename to_gtest_types<Ts>::type;
   _THRIFT_INST_TESTSET_BATCH(Test, structs, 46); \
   _THRIFT_INST_TESTSET_BATCH(Test, structs, 47); \
   _THRIFT_INST_TESTSET_BATCH(Test, structs, 48); \
-  _THRIFT_INST_TESTSET_LAST(Test, structs, 49)
-_THRIFT_CHECK_TESTSET_BATCHES(structs, 50);
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 49); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 50); \
+  _THRIFT_INST_TESTSET_BATCH(Test, structs, 51); \
+  _THRIFT_INST_TESTSET_LAST(Test, structs, 52)
+_THRIFT_CHECK_TESTSET_BATCHES(structs, 53);
 
 #define THRIFT_INST_TESTSET_UNIONS(Test)       \
   _THRIFT_INST_TESTSET_BATCH(Test, unions, 0); \

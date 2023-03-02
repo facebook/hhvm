@@ -55,11 +55,12 @@ The literal `42` is treated as a 32-bit integer in the definition of `BIG` and a
 
 ### Identifiers
 
-Identifiers in Thrift are identical to identifiers in C++.
+Identifiers begin with an uppercase or lowercase letter `A` through `Z` or an underscore (`_`). Subsequent characters can also be digits `0` through `9`. Identifiers in Thrift are case-sensitive.
 
 ```
-Identifier ::=
-  <C++ identifier>
+identifier  ::=  id_start id_continue*
+id_start    ::=  "a"..."z" | "A"..."Z" | "_"
+id_continue ::=  id_start | digit
 ```
 
 ### Reserved Words

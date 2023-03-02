@@ -371,27 +371,35 @@ let try_bind_to_equal_bound ~freshen env r var =
     let old_env = env in
     let env = Utils.remove_tyvar_from_bounds env var in
     let expand_all ~strip_supportdyn env tyset =
-      ITySet.fold_map
-        ~init:env
-        ~f:(fun env ty ->
+      ITySet.fold
+        (fun ty (env, res, sd_res) ->
           let (env, ty) = Env.expand_internal_type env ty in
           match ty with
           | LoclType ty when strip_supportdyn ->
-            let (_, env, ty) = Typing_utils.strip_supportdyn env ty in
-            (env, LoclType ty)
-          | _ -> (env, ty))
+            let (_, env, stripped_ty) = Typing_utils.strip_supportdyn env ty in
+            ( env,
+              ITySet.add (LoclType stripped_ty) res,
+              ITySet.add (LoclType ty) sd_res )
+          | _ -> (env, ITySet.add ty res, sd_res))
         tyset
+        (env, ITySet.empty, ITySet.empty)
     in
-    let (env, lower_bounds) =
+    let (env, lower_bounds, sd_lower_bounds) =
       expand_all ~strip_supportdyn:true env (Env.get_tyvar_lower_bounds env var)
     in
-    let (env, upper_bounds) =
+    let (env, upper_bounds, _) =
       expand_all
         ~strip_supportdyn:false
         env
         (Env.get_tyvar_upper_bounds env var)
     in
     let equal_bounds = ITySet.inter lower_bounds upper_bounds in
+    let equal_bounds =
+      if ITySet.is_empty equal_bounds then
+        ITySet.inter sd_lower_bounds upper_bounds
+      else
+        equal_bounds
+    in
     let (env, ty_err_opt) =
       match ITySet.choose_opt equal_bounds with
       | Some (LoclType ty) -> bind env var ty

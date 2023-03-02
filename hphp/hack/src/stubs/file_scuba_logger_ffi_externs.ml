@@ -13,3 +13,5 @@ type logger_guard
 let from_config_file _ = failwith "not implemented"
 
 let make_env_term _ = failwith "not implemented"
+
+let close _ = failwith "not implemented"

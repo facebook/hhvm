@@ -3,7 +3,6 @@
 namespace HH {
 
 type XenonSample = shape(
-  'time' => int,
   'timeNano' => int,
   'lastTriggerTimeNano' => int,
   'stack' => varray,
@@ -16,7 +15,7 @@ type XenonSample = shape(
  * Does not clear the stored stacks.
  *
  * @return array - an array of shapes with the following keys:
- *  'time' - unixtime when the snapshot was taken
+ *  'timeNano' - unixtime in nanoseconds when the snapshot was taken
  *  'stack' - stack trace formatted as debug_backtrace()
  *  'phpStack' - array with the following keys: 'function', 'file', 'line'
  *  'ioWaitSample' - the snapshot occurred while request was in asio scheduler

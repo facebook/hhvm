@@ -31,6 +31,7 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
+#include "hphp/util/timer.h"
 
 #include <signal.h>
 #include <time.h>
@@ -91,7 +92,6 @@ const StaticString
   s_phpStack("phpStack"),
   s_sourceType("sourceType"),
   s_stack("stack"),
-  s_time("time"),
   s_time_ns("timeNano"),
   s_lastTriggerTime("lastTriggerTimeNano"),
   s_unwinder("Unwinder");
@@ -270,7 +270,6 @@ Array XenonRequestLocalData::createResponse() {
   for (ArrayIter it(m_stackSnapshots); it; ++it) {
     const auto& frame = it.second().toArray();
     stacks.append(make_dict_array(
-      s_time, frame[s_time],
       s_time_ns, frame[s_time_ns],
       s_lastTriggerTime, frame[s_lastTriggerTime],
       s_stack, frame[s_stack].toArray(),
@@ -301,7 +300,6 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   if (!m_isProfiledRequest) return;
 
   TRACE(1, "XenonRequestLocalData::log\n");
-  time_t now = time(nullptr);
   auto now_ns = gettime_ns(CLOCK_REALTIME);
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
@@ -310,7 +308,6 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
                              .withMetadata()
                              .ignoreArgs());
   m_stackSnapshots.append(make_dict_array(
-    s_time, now,
     s_time_ns, now_ns,
     s_lastTriggerTime, triggerTime,
     s_stack, bt,

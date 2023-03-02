@@ -180,3 +180,18 @@ pub enum FullInstrId {
 
 pub type ValueIdMap<V> = std::collections::HashMap<ValueId, V, newtype::BuildIdHasher<u32>>;
 pub type ValueIdSet = std::collections::HashSet<ValueId, newtype::BuildIdHasher<u32>>;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GlobalId {
+    pub id: UnitBytesId,
+}
+
+impl GlobalId {
+    pub fn new(id: UnitBytesId) -> Self {
+        Self { id }
+    }
+
+    pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> MappedRwLockReadGuard<'a, [u8]> {
+        strings.lookup_bytes(self.id)
+    }
+}

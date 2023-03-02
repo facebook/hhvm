@@ -349,6 +349,12 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             ref values,
             loc: _,
         })) => write_builtin(state, iid, target, values)?,
+        Instr::Special(Special::Textual(Textual::LoadGlobal(id))) => {
+            let name = id.mangle(&state.strings);
+            let var = textual::Var::global(name);
+            let expr = state.load_mixed(textual::Expr::deref(var))?;
+            state.set_iid(iid, expr);
+        }
         Instr::Special(Special::Textual(Textual::String(s))) => {
             let expr = {
                 let s = state.strings.lookup_bstr(s);
@@ -486,6 +492,10 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // have already inserted assert in place on the target bids.
             state.fb.jmp(&[true_bid, false_bid], ())?;
         }
+        Terminator::MemoGet(..) | Terminator::MemoGetEager(..) => {
+            // This should have been lowered.
+            unreachable!();
+        }
         Terminator::Ret(vid, _) => {
             let sid = state.lookup_vid(vid);
             state.fb.ret(sid)?;
@@ -497,8 +507,6 @@ fn write_terminator(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         Terminator::CallAsync(..)
         | Terminator::IterInit(..)
         | Terminator::IterNext(..)
-        | Terminator::MemoGet(..)
-        | Terminator::MemoGetEager(..)
         | Terminator::NativeImpl(..)
         | Terminator::RetCSuspended(..)
         | Terminator::RetM(..)

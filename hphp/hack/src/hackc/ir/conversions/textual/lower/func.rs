@@ -51,6 +51,11 @@ pub(crate) fn lower_func<'a>(
     // Simplify various Instrs.
     super::instrs::lower_instrs(&mut builder, func_info);
 
+    trace!(
+        "After lower_instrs: {}",
+        ir::print::DisplayFunc::new(&builder.func, true, &strings)
+    );
+
     // Write the complex constants out as a prelude to the function.
     super::constants::write_constants(&mut builder);
 

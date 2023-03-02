@@ -18,6 +18,7 @@ use crate::ContCheckOp;
 use crate::FCallArgsFlags;
 use crate::FatalOp;
 use crate::FunctionId;
+use crate::GlobalId;
 use crate::IncDecOp;
 use crate::InitPropOp;
 use crate::IsLogAsDynamicCallOp;
@@ -1123,6 +1124,9 @@ pub enum Textual {
         values: Box<[ValueId]>,
         loc: LocId,
     },
+    #[has_operands(none)]
+    #[has_loc(none)]
+    LoadGlobal(GlobalId),
     /// Literal String
     #[has_operands(none)]
     #[has_loc(none)]

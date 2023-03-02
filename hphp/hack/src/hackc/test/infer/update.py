@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import subprocess
 import sys
@@ -204,28 +205,55 @@ def update_file(filename):
         f.write("\n".join(file))
 
 
+def run(*args):
+    return subprocess.check_output(*args).decode("utf-8", "ignore").strip()
+
+
 # Query buck for the location of hackc.
-def compute_hackc():
-    stdout = subprocess.check_output(
-        (
-            "buck2",
-            "build",
-            "--reuse-current-config",
-            "//hphp/hack/src/hackc:hackc",
-            "--show-full-output",
+def compute_hackc(use_cargo):
+    if use_cargo:
+        root = run("hg root".split())
+        stdout = run(
+            (
+                root + "/fbcode/hphp/hack/scripts/facebook/cargo.sh",
+                "build",
+                "-p",
+                "hackc",
+                "--message-format=json",
+            )
         )
-    ).decode("utf-8", "ignore")
-    _, hackc = stdout.split(" ", 1)
-    return hackc.strip()
+        for msg in stdout.split("\n"):
+            # print(repr(msg))
+            output = json.loads(msg)
+            if output["reason"] == "compiler-artifact" and output[
+                "package_id"
+            ].startswith("hackc "):
+                return output["executable"]
+
+        raise Exception("hackc not found")
+
+    else:
+        stdout = run(
+            (
+                "buck2",
+                "build",
+                "--reuse-current-config",
+                "//hphp/hack/src/hackc:hackc",
+                "--show-full-output",
+            )
+        )
+        _, hackc = stdout.split(" ", 1)
+        return hackc.strip()
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("files", metavar="FILE", type=str, nargs="*")
+    parser.add_argument("--cargo", action="store_true")
     args = parser.parse_args()
 
     global HACKC, ROOT
-    HACKC = compute_hackc()
+    HACKC = compute_hackc(args.cargo)
     ROOT = os.path.dirname(__file__)
 
     if not args.files:

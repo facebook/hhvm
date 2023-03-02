@@ -10,9 +10,11 @@ use ir::func_builder::TransformState;
 use ir::instr::CallDetail;
 use ir::instr::CmpOp;
 use ir::instr::HasLoc;
+use ir::instr::HasLocals;
 use ir::instr::HasOperands;
 use ir::instr::Hhbc;
 use ir::instr::IteratorArgs;
+use ir::instr::MemoGet;
 use ir::instr::Predicate;
 use ir::instr::Special;
 use ir::instr::Terminator;
@@ -24,6 +26,7 @@ use ir::FCallArgsFlags;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
+use ir::GlobalId;
 use ir::Instr;
 use ir::InstrId;
 use ir::IsTypeOp;
@@ -41,6 +44,8 @@ use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
 use crate::func::FuncInfo;
 use crate::hack;
+use crate::mangle::Mangle as _;
+use crate::mangle::MangleWithClass as _;
 
 /// Lower individual Instrs in the Func to simpler forms.
 pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: Arc<FuncInfo<'_>>) {
@@ -91,6 +96,7 @@ impl LowerInstrs<'_> {
             Hhbc::ConcatN(..) => hack::Hhbc::ConcatN,
             Hhbc::Div(..) => hack::Hhbc::Div,
             Hhbc::GetClsRGProp(..) => hack::Hhbc::GetClsRGProp,
+            Hhbc::GetMemoKeyL(..) => hack::Hhbc::GetMemoKeyL,
             Hhbc::HasReifiedParent(..) => hack::Hhbc::HasReifiedParent,
             Hhbc::IsLateBoundCls(..) => hack::Hhbc::IsLateBoundCls,
             Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _) => hack::Hhbc::IsTypeArrLike,
@@ -134,14 +140,27 @@ impl LowerInstrs<'_> {
     }
 
     fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Option<Instr> {
+        let loc = instr.loc_id();
         match instr {
             Instr::Hhbc(hhbc) => {
                 let hhbc = self.handle_hhbc_with_builtin(hhbc)?;
-                Some(builder.hhbc_builtin(hhbc, instr.operands(), instr.loc_id()))
+                Some(
+                    match (instr.locals().is_empty(), instr.operands().is_empty()) {
+                        (true, true) => builder.hhbc_builtin(hhbc, &[], loc),
+                        (true, false) => builder.hhbc_builtin(hhbc, instr.operands(), loc),
+                        (false, true) => {
+                            let ops = Self::get_locals(builder, instr.locals(), loc);
+                            builder.hhbc_builtin(hhbc, &ops, loc)
+                        }
+                        (false, false) => panic!(
+                            "Unable to handle mixed instruction (locals and operands) as a built-in: {hhbc:?}"
+                        ),
+                    },
+                )
             }
             Instr::Terminator(term) => {
                 let hhbc = self.handle_terminator_with_builtin(term)?;
-                builder.emit_hhbc_builtin(hhbc, instr.operands(), instr.loc_id());
+                builder.emit_hhbc_builtin(hhbc, instr.operands(), loc);
                 Some(Instr::unreachable())
             }
             _ => None,
@@ -215,6 +234,96 @@ impl LowerInstrs<'_> {
             args.done_bid(),
             loc,
         )
+    }
+
+    fn get_locals<'s>(
+        builder: &mut FuncBuilder<'s>,
+        locals: &[LocalId],
+        loc: LocId,
+    ) -> Vec<ValueId> {
+        locals
+            .iter()
+            .map(|lid| builder.emit(Instr::Hhbc(Hhbc::CGetL(*lid, loc))))
+            .collect()
+    }
+
+    fn compute_memo_ops(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        locals: &[LocalId],
+        loc: LocId,
+    ) -> Vec<ValueId> {
+        let name = match *self.func_info {
+            FuncInfo::Method(ref mi) => {
+                mi.name
+                    .mangle_with_class(mi.class.name, mi.is_static, &builder.strings)
+            }
+            FuncInfo::Function(ref fi) => fi.name.mangle(&builder.strings),
+        };
+
+        let mut ops = Vec::new();
+
+        let name = GlobalId::new(builder.strings.intern_str(format!(
+            "memocache::{}",
+            crate::util::escaped_ident(name.into())
+        )));
+        // NOTE: This is called 'LocalId' but actually represents a GlobalId
+        // (because we don't have a DerefGlobal instr - but it would work the
+        // same with just a different type).
+        let global = builder.emit(Textual::deref(LocalId::Named(name.id)));
+        ops.push(global);
+
+        match *self.func_info {
+            FuncInfo::Method(_) => {
+                let this = builder.strings.intern_str("$this");
+                let lid = LocalId::Named(this);
+                ops.push(builder.emit(Instr::Hhbc(Hhbc::CGetL(lid, loc))));
+            }
+            FuncInfo::Function(_) => {}
+        };
+
+        ops.extend(Self::get_locals(builder, locals, loc).into_iter());
+        ops
+    }
+
+    fn memo_get(&self, builder: &mut FuncBuilder<'_>, memo_get: MemoGet) -> Instr {
+        // memo_get([$a, $b], b1, b2)
+        // ->
+        // global NAME
+        // if memo_isset($this, $a, $b) {
+        //   tmp = memo_get($this, $a, $b)
+        //   goto b1(tmp);
+        // } else {
+        //   goto b2;
+        // }
+        let loc = memo_get.loc;
+
+        let ops = self.compute_memo_ops(builder, &memo_get.locals, loc);
+
+        let pred = builder.emit_hack_builtin(hack::Builtin::MemoIsset, &ops, loc);
+        builder.emit_if_then_else(
+            pred,
+            loc,
+            |builder| {
+                let value = builder.emit_hack_builtin(hack::Builtin::MemoGet, &ops, loc);
+                Instr::jmp_args(memo_get.edges[0], &[value], loc)
+            },
+            |_| Instr::jmp(memo_get.edges[1], loc),
+        );
+
+        Instr::tombstone()
+    }
+
+    fn memo_set(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        vid: ValueId,
+        locals: &[LocalId],
+        loc: LocId,
+    ) -> Instr {
+        let mut ops = self.compute_memo_ops(builder, locals, loc);
+        ops.push(vid);
+        builder.hhbc_builtin(hack::Hhbc::MemoSet, &ops, loc)
     }
 
     fn verify_out_type(
@@ -392,6 +501,9 @@ impl TransformInstr for LowerInstrs<'_> {
                 builder.emit_hhbc_builtin(hack::Hhbc::LockObj, &[obj], loc);
                 Instr::copy(obj)
             }
+            Instr::Hhbc(Hhbc::MemoSet(vid, locals, loc)) => {
+                self.memo_set(builder, vid, &locals, loc)
+            }
             Instr::Hhbc(Hhbc::NewStructDict(names, values, loc)) => {
                 let args = names
                     .iter()
@@ -468,6 +580,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 self.iter_init(builder, args, value)
             }
             Instr::Terminator(Terminator::IterNext(args)) => self.iter_next(builder, args),
+            Instr::Terminator(Terminator::MemoGet(memo)) => self.memo_get(builder, memo),
             Instr::Terminator(Terminator::RetM(ops, loc)) => {
                 // ret a, b;
                 // =>

@@ -1446,6 +1446,13 @@ pub(crate) fn print_textual(
             }
             write!(w, ")")?;
         }
+        Textual::LoadGlobal(id) => {
+            write!(
+                w,
+                "textual::load_global({})",
+                FmtIdentifierId(id.id, strings)
+            )?;
+        }
         Textual::String(s) => {
             write!(w, "textual::string({:?})", s)?;
         }

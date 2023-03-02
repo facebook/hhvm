@@ -34,7 +34,7 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// the names should match the HHBC name except when they are compound bytecodes
 /// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found
 /// in hphp/doc/bytecode.specification.
-#[derive(Copy, Clone, TextualDecl, Eq, PartialEq, Hash, EnumIter)]
+#[derive(Copy, Clone, Debug, TextualDecl, Eq, PartialEq, Hash, EnumIter)]
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
@@ -100,6 +100,8 @@ pub(crate) enum Hhbc {
     Fatal,
     #[decl(fn hhbc_get_cls_rg_prop(*HackMixed) -> *HackMixed)]
     GetClsRGProp,
+    #[decl(fn hhbc_get_memo_key_l(*HackMixed) -> *HackMixed)]
+    GetMemoKeyL,
     #[decl(fn hhbc_has_reified_parent(*HackMixed) -> *HackMixed)]
     HasReifiedParent,
     #[decl(fn hhbc_is_late_bound_cls(*HackMixed) -> *HackMixed)]
@@ -146,6 +148,8 @@ pub(crate) enum Hhbc {
     IterNext,
     #[decl(fn hhbc_lock_obj(*HackMixed) -> void)]
     LockObj,
+    #[decl(fn hhbc_memo_set(...) -> *HackMixed)]
+    MemoSet,
     #[decl(fn hhbc_modulo(*HackMixed, *HackMixed) -> *HackMixed)]
     Modulo,
     #[decl(fn hhbc_mul(*HackMixed, *HackMixed) -> *HackMixed)]
@@ -241,6 +245,16 @@ pub(crate) enum Builtin {
     /// Returns true if the given object is of the named type.
     #[decl(fn hack_is_type(obj: *HackMixed, ty: *HackString) -> *HackMixed)]
     IsType,
+    /// Merge the given values into a single hash key and return the memoized
+    /// value.
+    /// (&global, ops)
+    #[decl(fn hack_memo_get(...) -> *HackMixed)]
+    MemoGet,
+    /// Merge the given values into a single hash key and return true if the
+    /// memo key is already set.
+    /// (&global, ops)
+    #[decl(fn hack_memo_isset(...) -> *HackMixed)]
+    MemoIsset,
     /// Build a dict based on key/value pairs.
     #[decl(fn hack_new_dict(...) -> *HackMixed)]
     NewDict,

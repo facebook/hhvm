@@ -171,3 +171,9 @@ impl MangleWithClass for ir::ConstId {
         )
     }
 }
+
+impl Mangle for ir::GlobalId {
+    fn mangle(&self, strings: &StringInterner) -> String {
+        self.as_bytes(strings).mangle(strings)
+    }
+}

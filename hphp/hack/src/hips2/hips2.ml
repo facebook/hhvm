@@ -19,17 +19,19 @@ module Make (Intra : Intra) = struct
   type custom_inter_constraint_ = Intra.custom_inter_constraint_
   [@@deriving hash, eq, ord, show { with_path = false }]
 
-  type id =
-    | ClassLike of string
-    | Function of string
-  [@@deriving hash, eq, ord, sexp, show { with_path = false }]
+  module Id = struct
+    type t =
+      | ClassLike of string
+      | Function of string
+    [@@deriving hash, eq, ord, sexp, show { with_path = false }]
+
+    let hash : t -> int = Obj.magic hash (* workaround for T92019055 *)
+  end
 
   type inter_constraint_ =
-    | Inherits of id
+    | Inherits of Id.t
     | CustomInterConstraint of custom_inter_constraint_
   [@@deriving eq, hash, ord, show { with_path = false }]
-
-  let hash_id : id -> int = Obj.magic hash_id (* workaround for T92019055 *)
 
   let hash_inter_constraint_ : inter_constraint_ -> int =
     Obj.magic hash_inter_constraint_ (* workaround for T92019055 *)
@@ -42,15 +44,7 @@ module Make (Intra : Intra) = struct
     Uses `Caml`'s.HashTbl instead of `Base`'s for marshallability, see T146711502.
   *)
   module DefaultTbl (SetOf : Caml.Hashtbl.HashedType) = struct
-    module IdHash = struct
-      type t = id
-
-      let equal = equal_id
-
-      let hash = hash_id
-    end
-
-    module TblImpl = Caml.Hashtbl.Make (IdHash)
+    module TblImpl = Caml.Hashtbl.Make (Id)
 
     module Set = struct
       module SetImpl = Caml.Hashtbl.Make (SetOf)
@@ -79,7 +73,7 @@ module Make (Intra : Intra) = struct
 
     let create () : t = TblImpl.create hashtbl_size
 
-    let to_sequence_keys t : id Sequence.t =
+    let to_sequence_keys t : Id.t Sequence.t =
       TblImpl.to_seq_keys t |> Sequence.of_seq
 
     let find t key : Set.t =
@@ -124,7 +118,7 @@ module Make (Intra : Intra) = struct
 
   let get_intras t id = get_intras_set t id |> IntraTbl.Set.to_sequence
 
-  let get_keys { inters; _ } : id Sequence.t =
+  let get_keys { inters; _ } : Id.t Sequence.t =
     (* OK to just check inters because add_keys adds keys to inters *)
     inters |> InterTbl.to_sequence_keys
 

@@ -33,7 +33,7 @@ module Constraint : sig
 end
 
 module CustomInterConstraint : sig
-  type t = SyntacticallyNadable [@@deriving ord, show]
+  type t = SyntacticallyNadable [@@deriving eq, ord, show, hash]
 end
 
 type 'a decorated = {
@@ -48,7 +48,7 @@ module H :
     with type intra_constraint_ = Constraint.t
      and type custom_inter_constraint_ = CustomInterConstraint.t
 
-module IdMap : Caml.Map.S with type key := H.id
+module IdMap : Caml.Map.S with type key := H.Id.t
 
 module WalkResult : sig
   type 'a t = 'a list IdMap.t
@@ -57,11 +57,11 @@ module WalkResult : sig
 
   val empty : 'a t
 
-  val add_constraint : 'a t -> H.id -> 'a -> 'a t
+  val add_constraint : 'a t -> H.Id.t -> 'a -> 'a t
 
-  val add_id : 'a t -> H.id -> 'a t
+  val add_id : 'a t -> H.Id.t -> 'a t
 
-  val singleton : H.id -> 'a -> 'a t
+  val singleton : H.Id.t -> 'a -> 'a t
 end
 
 type summary = {
@@ -71,6 +71,6 @@ type summary = {
   (* count of things where the <<__NoAutoDynamic>> attribute is syntactically allowed *)
   nadable_cnt: int;
   (* count of things the analysis thinks can have <<__NoAutoDynamic>> added *)
-  nadables: H.id Sequence.t;
+  nadables: H.Id.t Sequence.t;
       (* sequence of ids for things the analysis thinks can have <<__NoAutoDynamic>> added *)
 }

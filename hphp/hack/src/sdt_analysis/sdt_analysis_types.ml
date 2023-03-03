@@ -26,7 +26,7 @@ end
 
 module CustomInterConstraint = struct
   type t = SyntacticallyNadable
-  [@@deriving eq, hash, ord, show { with_path = false }]
+  [@@deriving eq, ord, show { with_path = false }, hash]
 end
 
 type 'a decorated = {
@@ -44,11 +44,7 @@ module H = Hips2.Make (struct
   [@@deriving eq, hash, ord, show { with_path = false }]
 end)
 
-module IdMap = Caml.Map.Make (struct
-  type t = H.id
-
-  let compare = H.compare_id
-end)
+module IdMap = Caml.Map.Make (H.Id)
 
 module WalkResult = struct
   type 'a t = 'a list IdMap.t
@@ -78,5 +74,5 @@ type summary = {
   id_cnt: int;
   syntactically_nadable_cnt: int;
   nadable_cnt: int;
-  nadables: H.id Sequence.t;
+  nadables: H.Id.t Sequence.t;
 }

@@ -61,9 +61,11 @@ let parse_command ~command ~verbosity ~on_bad_command =
   in
   Sdt_analysis_options.mk ~verbosity ~command
 
-let sid_of_id = function
-  | H.ClassLike sid -> sid
-  | H.Function sid -> sid
+let sid_of_id =
+  H.Id.(
+    function
+    | ClassLike sid -> sid
+    | Function sid -> sid)
 
 let print_solution reader =
   let { id_cnt; syntactically_nadable_cnt; nadable_cnt; nadables } =
@@ -82,7 +84,7 @@ Stats:
   if nadable_cnt > 0 then (
     Format.printf "\nCandidates for adding <<__NoAutoDynamic>>:\n";
     nadables
-    |> Sequence.iter ~f:(fun id -> Format.printf "  %s\n" @@ H.show_id id)
+    |> Sequence.iter ~f:(fun id -> Format.printf "  %s\n" @@ H.Id.show id)
   )
 
 let do_tast
@@ -157,10 +159,10 @@ let do_tast
     let reader = H.debug_dump ~db_dir:default_db_dir in
     H.Read.get_keys reader
     |> Sequence.iter ~f:(fun id ->
-           Format.printf "Intraprocedural constraints for %s\n" @@ H.show_id id;
+           Format.printf "Intraprocedural constraints for %s\n" @@ H.Id.show id;
            H.Read.get_intras reader id
            |> Sequence.iter ~f:print_intra_constraint;
-           Format.printf "Interprocedural constraints for %s\n" @@ H.show_id id;
+           Format.printf "Interprocedural constraints for %s\n" @@ H.Id.show id;
            H.Read.get_inters reader id
            |> Sequence.iter ~f:print_inter_constraint;
            Format.print_newline ())

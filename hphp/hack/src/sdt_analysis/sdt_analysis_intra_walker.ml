@@ -56,7 +56,7 @@ let collect_sdts =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
           let constraints_of_sid sid =
-            let id = H.ClassLike sid in
+            let id = H.Id.ClassLike sid in
             let ty = remove_supportdyn_from_ty base_ty in
             match T.get_node ty with
             | T.Tfun ft ->
@@ -89,7 +89,7 @@ let collect_sdts =
       WalkResult.(walk_result @ super#on_expr env e)
 
     method! on_fun_def env (A.{ fd_name = (_, sid); fd_fun; _ } as fd) =
-      let id = H.Function sid in
+      let id = H.Id.Function sid in
       let env = remove_supportdyn_of_mixed_upper_bound_from_tparams env in
       let decorated_constraint ~origin =
         let hack_pos = fd_fun.A.f_span in

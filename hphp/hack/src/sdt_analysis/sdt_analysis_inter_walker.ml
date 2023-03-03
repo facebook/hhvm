@@ -45,12 +45,12 @@ let reduce_walk_result =
              c_kind;
              _;
            } as class_) =
-      let id = H.ClassLike sid in
+      let id = H.Id.ClassLike sid in
 
       let at_inherits acc (_, hint_) =
         match hint_ with
         | A.Happly ((hack_pos, parent_sid), _hints) ->
-          let parent_id = H.ClassLike parent_sid in
+          let parent_id = H.Id.ClassLike parent_sid in
           let constraint_ = H.Inherits parent_id in
           let decorated =
             { origin = __LINE__; hack_pos; decorated_data = constraint_ }
@@ -79,7 +79,7 @@ let reduce_walk_result =
       WalkResult.(wr @ super#on_class_ env class_)
 
     method! on_fun_def env (A.{ fd_name = (f_pos, sid); _ } as fd) =
-      let id = H.Function sid in
+      let id = H.Id.Function sid in
       let wr =
         WalkResult.singleton
           id

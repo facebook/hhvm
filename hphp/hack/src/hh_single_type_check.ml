@@ -324,26 +324,10 @@ let parse_options () =
     ref (TypecheckerOptions.profile_top_level_definitions GlobalOptions.default)
   in
   let memtrace = ref None in
-  let enable_global_access_check_files = ref [] in
-  let enable_global_access_check_functions = ref SSet.empty in
-  let global_access_check_on_write = ref true in
-  let global_access_check_on_read = ref true in
+  let enable_global_access_check = ref false in
   let refactor_mode = ref "" in
   let refactor_analysis_mode = ref "" in
   let packages_config_path = ref None in
-  let set_enable_global_access_check_functions s =
-    let json_obj = Hh_json.json_of_file s in
-    let add_function f =
-      match f with
-      | Hh_json.JSON_String str ->
-        enable_global_access_check_functions :=
-          SSet.add str !enable_global_access_check_functions
-      | _ -> ()
-    in
-    match json_obj with
-    | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
-    | _ -> enable_global_access_check_functions := SSet.empty
-  in
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
   let substitution_mutation = ref false in
@@ -829,22 +813,9 @@ let parse_options () =
         " Sets the amount of fuel that the type printer can use to display an individual type. Default: "
         ^ string_of_int
             (TypecheckerOptions.type_printer_fuel GlobalOptions.default) );
-      ( "--enable-global-access-check-files",
-        Arg.String
-          (fun s ->
-            enable_global_access_check_files := String_utils.split ',' s),
-        " Run global access checker on any file whose path is prefixed by the argument (use \"\\\" for hh_single_type_check)"
-      );
-      ( "--enable-global-access-check-functions",
-        Arg.String set_enable_global_access_check_functions,
-        " Run global access checker on functions listed in the given JSON file"
-      );
-      ( "--disable-global-access-check-on-write",
-        Arg.Clear global_access_check_on_write,
-        " Disable global access checker to check global writes" );
-      ( "--disable-global-access-check-on-read",
-        Arg.Clear global_access_check_on_read,
-        " Disable global access checker to check global reads" );
+      ( "--enable-global-access-check",
+        Arg.Set enable_global_access_check,
+        " Run global access checker to check global writes and reads" );
       ( "--overwrite-loop-iteration-upper-bound",
         Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
         " Sets the maximum number of iterations that will be used to typecheck loops"
@@ -1013,11 +984,7 @@ let parse_options () =
           ["/"]
         else
           [])
-      ~tco_global_access_check_files_enabled:!enable_global_access_check_files
-      ~tco_global_access_check_functions_enabled:
-        !enable_global_access_check_functions
-      ~tco_global_access_check_on_write:!global_access_check_on_write
-      ~tco_global_access_check_on_read:!global_access_check_on_read
+      ~tco_global_access_check_enabled:!enable_global_access_check
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types
       ~tco_enable_strict_string_concat_interp:

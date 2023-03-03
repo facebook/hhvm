@@ -15,18 +15,9 @@
  * is treated as a global variable as well.
  *
  * By default, this checker is turned off.
- * To turn on this checker on certain files/functions:
- * - use the argument --enable-global-access-check-files
- *   to specify the prefixes of files to be checked (e.g. "/" for all files).
- * - use the argument --enable-global-access-check-functions
- *   to specify a JSON file of functions names to be checked.
+ * To turn on this checker, use the argument --enable-global-access-check.
  *
- * When the checker is turned on, both global writes and reads are checked by default.
- * To check only global writes or global reads:
- * - use the flag --disable-global-access-check-on-write;
- * - use the flag --disable-global-access-check-on-read.
- *
- * A trick to run this checker on a specific list of files (not simply by prefix) is to
+ * A trick to run this checker on a specific list of files is to
  *   use "--config enable_type_check_filter_files=true" togehter with above arguments,
  *   which runs typechecker only on files listed in ~/.hack_type_check_files_filter.
  *)
@@ -63,52 +54,45 @@ end)
 
 (* Raise a global access error if the corresponding write/read mode is enabled. *)
 let raise_global_access_error
-    env pos fun_name data_type global_set patterns error_code =
-  let tcopt = Tast_env.get_tcopt env in
-  let (error_message, error_enabled) =
+    pos fun_name data_type global_set patterns error_code =
+  let error_message =
     match error_code with
-    | GlobalAccessCheck.DefiniteGlobalWrite ->
-      ( "definitely written.",
-        TypecheckerOptions.global_access_check_on_write tcopt )
+    | GlobalAccessCheck.DefiniteGlobalWrite -> "definitely written."
     | GlobalAccessCheck.PossibleGlobalWriteViaReference ->
-      ( "possibly written via reference.",
-        TypecheckerOptions.global_access_check_on_write tcopt )
+      "possibly written via reference."
     | GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall ->
-      ( "possibly written via function call.",
-        TypecheckerOptions.global_access_check_on_write tcopt )
-    | GlobalAccessCheck.DefiniteGlobalRead ->
-      ("definitely read.", TypecheckerOptions.global_access_check_on_read tcopt)
+      "possibly written via function call."
+    | GlobalAccessCheck.DefiniteGlobalRead -> "definitely read."
   in
-  if error_enabled then
-    let global_vars_str = String.concat ~sep:"," (SSet.elements global_set) in
-    let print_pattern p =
-      match p with
-      | NoPattern -> None
-      | _ as p -> Some (show_global_access_pattern p)
-    in
-    let patterns_str =
-      String.concat
-        ~sep:","
-        (Caml.List.filter_map
-           print_pattern
-           (GlobalAccessPatternSet.elements patterns))
-    in
-    let message =
-      "["
-      ^ fun_name
-      ^ "]{"
-      ^ global_vars_str
-      ^ "}("
-      ^ data_type
-      ^ ")"
-      ^ (if String.length patterns_str > 0 then
-          "<" ^ patterns_str ^ ">"
-        else
-          "")
-      ^ " A global variable is "
-      ^ error_message
-    in
-    Errors.global_access_error error_code pos message
+  let global_vars_str = String.concat ~sep:"," (SSet.elements global_set) in
+  let print_pattern p =
+    match p with
+    | NoPattern -> None
+    | _ as p -> Some (show_global_access_pattern p)
+  in
+  let patterns_str =
+    String.concat
+      ~sep:","
+      (Caml.List.filter_map
+         print_pattern
+         (GlobalAccessPatternSet.elements patterns))
+  in
+  let message =
+    "["
+    ^ fun_name
+    ^ "]{"
+    ^ global_vars_str
+    ^ "}("
+    ^ data_type
+    ^ ")"
+    ^ (if String.length patterns_str > 0 then
+        "<" ^ patterns_str ^ ">"
+      else
+        "")
+    ^ " A global variable is "
+    ^ error_message
+  in
+  Errors.global_access_error error_code pos message
 
 (* Various types of data sources for a local variable. *)
 type data_source =
@@ -351,7 +335,6 @@ let check_super_global_method expr env external_fun_name =
             | [] -> default_global_var_name)
         in
         raise_global_access_error
-          env
           pos
           external_fun_name
           ("superglobal " ^ func_ty_str)
@@ -967,7 +950,6 @@ let visitor =
            with
           | Some global_set ->
             raise_global_access_error
-              env
               p
               fun_name
               (Tast_env.print_ty env ty)
@@ -996,7 +978,6 @@ let visitor =
           let expr_str = print_global_expr env e in
           let ty_str = Tast_env.print_ty env ty in
           raise_global_access_error
-            env
             p
             fun_name
             ty_str
@@ -1012,7 +993,6 @@ let visitor =
           match check_func_is_memoized func_expr env with
           | Some memoized_func_name ->
             raise_global_access_error
-              env
               p
               fun_name
               func_ty_str
@@ -1030,7 +1010,6 @@ let visitor =
             in
             if Option.is_some e_global_opt then
               raise_global_access_error
-                env
                 pos
                 fun_name
                 (Tast_env.print_ty env ty)
@@ -1070,7 +1049,6 @@ let visitor =
            that has references to static variables. *)
         (if is_expr_static env le && Option.is_some le_global_opt then
           raise_global_access_error
-            env
             p
             fun_name
             re_ty
@@ -1083,7 +1061,6 @@ let visitor =
           if has_global_write_access le then (
             if Option.is_some le_global_opt then
               raise_global_access_error
-                env
                 p
                 fun_name
                 re_ty
@@ -1117,7 +1094,6 @@ let visitor =
             (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
             if is_expr_static env e then
               raise_global_access_error
-                env
                 p
                 fun_name
                 e_ty
@@ -1126,7 +1102,6 @@ let visitor =
                 GlobalAccessCheck.DefiniteGlobalWrite
             else if has_global_write_access e then
               raise_global_access_error
-                env
                 p
                 fun_name
                 e_ty
@@ -1141,7 +1116,6 @@ let visitor =
             in
             if Option.is_some e_global_opt then
               raise_global_access_error
-                env
                 pos
                 fun_name
                 (Tast_env.print_ty env ty)
@@ -1151,30 +1125,6 @@ let visitor =
         super#on_expr (env, (ctx, fun_name)) te
       | _ -> super#on_expr (env, (ctx, fun_name)) te
   end
-
-(* Determine if a file is enabled for global access check *)
-let global_access_check_enabled_on_file tcopt file =
-  let enabled_paths =
-    TypecheckerOptions.global_access_check_files_enabled tcopt
-  in
-  let path = "/" ^ Relative_path.suffix file in
-  List.exists enabled_paths ~f:(fun prefix -> String.is_prefix path ~prefix)
-
-(* Determine if a function is enabled for global access check *)
-let global_access_check_enabled_on_function tcopt function_name =
-  let enabled_functions =
-    TypecheckerOptions.global_access_check_functions_enabled tcopt
-  in
-  SSet.mem function_name enabled_functions
-
-(* The global access check is turned on if:
- * the given file or function is enabled for global access check,
- * and at least one of (global_write_check, global_read_check) is turned on. *)
-let global_access_check_enabled tcopt file function_name =
-  (TypecheckerOptions.global_access_check_on_write tcopt
-  || TypecheckerOptions.global_access_check_on_read tcopt)
-  && (global_access_check_enabled_on_file tcopt file
-     || global_access_check_enabled_on_function tcopt function_name)
 
 let handler =
   object
@@ -1192,10 +1142,7 @@ let handler =
       let full_name =
         String.sub full_name ~pos:1 ~len:(String.length full_name - 1)
       in
-      let tcopt = Tast_env.get_tcopt env in
-      let file = Tast_env.get_file env in
-      if global_access_check_enabled tcopt file full_name then
-        visitor#on_method_ (env, (current_ctx, full_name)) m
+      visitor#on_method_ (env, (current_ctx, full_name)) m
 
     method! at_fun_def env f =
       let (_, function_name) = f.fd_name in
@@ -1203,8 +1150,5 @@ let handler =
       let function_name =
         String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
       in
-      let tcopt = Tast_env.get_tcopt env in
-      let file = Tast_env.get_file env in
-      if global_access_check_enabled tcopt file function_name then
-        visitor#on_fun_def (env, (current_ctx, function_name)) f
+      visitor#on_fun_def (env, (current_ctx, function_name)) f
   end

@@ -48,13 +48,7 @@ module type S = sig
 
   val enable_ifc : options -> string list
 
-  val enable_global_access_check_files : options -> string list
-
-  val enable_global_access_check_functions : options -> SSet.t
-
-  val global_access_check_on_write : options -> bool
-
-  val global_access_check_on_read : options -> bool
+  val enable_global_access_check : options -> bool
 
   val from : options -> string
 

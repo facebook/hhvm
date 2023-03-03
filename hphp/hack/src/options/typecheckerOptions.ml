@@ -148,20 +148,11 @@ let enable_ifc t = GlobalOptions.{ t with tco_ifc_enabled = ["/"] }
 
 let ifc_enabled t = t.GlobalOptions.tco_ifc_enabled
 
-let enable_global_access_check_files t =
-  GlobalOptions.{ t with tco_global_access_check_files_enabled = ["/"] }
+let enable_global_access_check t =
+  GlobalOptions.{ t with tco_global_access_check_enabled = true }
 
-let global_access_check_files_enabled t =
-  t.GlobalOptions.tco_global_access_check_files_enabled
-
-let global_access_check_functions_enabled t =
-  t.GlobalOptions.tco_global_access_check_functions_enabled
-
-let global_access_check_on_write t =
-  t.GlobalOptions.tco_global_access_check_on_write
-
-let global_access_check_on_read t =
-  t.GlobalOptions.tco_global_access_check_on_read
+let global_access_check_enabled t =
+  t.GlobalOptions.tco_global_access_check_enabled
 
 let like_type_hints t = t.GlobalOptions.tco_like_type_hints
 

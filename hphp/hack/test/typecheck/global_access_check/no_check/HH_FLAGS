@@ -1,4 +1,1 @@
---enable-global-access-check-files "/"
 --allowed-fixme-codes-strict 11001,11002,11003,11004
---disable-global-access-check-on-write
---disable-global-access-check-on-read

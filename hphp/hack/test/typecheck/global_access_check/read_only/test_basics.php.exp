@@ -1,8 +1,0 @@
-File "test_basics.php", line 15, characters 8-16:
-[test_fun_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_basics.php", line 34, characters 10-26:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])
-File "test_basics.php", line 38, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_basics.php", line 48, characters 16-32:
-[Test::test_method_call]{Foo::$static_prop}(int) A global variable is definitely read. (Other[11004])

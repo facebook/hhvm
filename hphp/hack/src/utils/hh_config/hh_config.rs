@@ -150,11 +150,8 @@ impl HhConfig {
                 "expression_tree_virtualize_functions" => {
                     go.tco_expression_tree_virtualize_functions = parse_json(&value);
                 }
-                "tco_global_access_check_on_write" => {
-                    go.tco_global_access_check_on_write = parse_json(&value);
-                }
-                "tco_global_access_check_on_read" => {
-                    go.tco_global_access_check_on_read = parse_json(&value);
+                "tco_global_access_check_enabled" => {
+                    go.tco_global_access_check_enabled = parse_json(&value);
                 }
                 "log_levels" => {
                     go.log_levels = parse_json(&value);

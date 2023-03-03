@@ -32,20 +32,6 @@ let logger_handlers ctx =
   in
   List.fold ~init:[] ~f:add_handler key_handler_pairs
 
-(* Global access check is turned on only if certain files or functions are
-   enabled for checking global writes or global reads. *)
-let is_global_access_check_enabled tcopt =
-  let open TypecheckerOptions in
-  let check_write = global_access_check_on_write tcopt in
-  let check_read = global_access_check_on_read tcopt in
-  let files_enabled =
-    not @@ List.is_empty (global_access_check_files_enabled tcopt)
-  in
-  let function_enabled =
-    not @@ SSet.is_empty (global_access_check_functions_enabled tcopt)
-  in
-  (check_write || check_read) && (files_enabled || function_enabled)
-
 let visitor ctx =
   (* Handlers that are not TAST checks to produce errors, but are used for
      telemetry that processes TASTs. *)
@@ -95,7 +81,7 @@ let visitor ctx =
           Some Expression_tree_check.handler;
           hierarchy_check Class_const_origin_check.handler;
           Some Enum_classes_check.handler;
-          (if is_global_access_check_enabled tcopt then
+          (if TypecheckerOptions.global_access_check_enabled tcopt then
             Some Global_access_check.handler
           else
             None);

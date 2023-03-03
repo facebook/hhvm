@@ -48,7 +48,7 @@ id_continue ::=  id_start | digit | "."
 Thrift has two types of keywords: reserved words and context-sensitive keywords.
 The following are reserved words in Thrift - and cannot be used as identifiers:
 
-```
+```thrift
 binary              extends             list                stream
 bool                float               map                 string
 byte                hs_include          namespace           struct
@@ -61,7 +61,7 @@ exception           interaction         set
 
 Context-sensitive keywords listed below can be used as identifiers:
 
-```
+```thrift
 client              package              safe               stateful
 idempotent          permanent            server             transient
 oneway              readonly             sink
@@ -99,7 +99,7 @@ bool_literal ::=  "true" | "false"
 
 Literals in Thrift do not have exact types. Instead they are represented using maximum precision and the actual type is inferred from context. For example:
 
-```
+```thrift
 const i32 BIG = 42;
 const i16 LITTLE = 42;
 ```
@@ -137,7 +137,7 @@ ThriftFile ::=
 
 The following example illustrates concepts introduced so far:
 
-```
+```thrift
 // Allows the definitions in search_types.thrift to be used here qualified with
 // the prefix `search_types.`.
 include "common/if/search_types.thrift"
@@ -221,7 +221,7 @@ PackageDeclaration:
 
 For example:
 
-```
+```thrift
 package "test.dev/testing"
 
 // Has the universal name "test.dev/testing/MyInt".
@@ -230,7 +230,7 @@ typedef int MyInt
 
 Annotations on a package declaration apply to the whole file. For example:
 
-```
+```thrift
 @cpp.TerseWrite
 package "foo.bar/baz"
 ```
@@ -249,7 +249,7 @@ Name ::=
 
 Namespace directives instruct the compiler on top level structure of the generated code. The details are language-specific (*we need link to compiler doc*). Namespace directives do not affect the Thrift file semantics.
 
-```
+```thrift
 // Directs the compiler to generate C++ code inside the namespace
 // `facebook::peoplesearch::cpp2`.
 namespace cpp2 facebook.peoplesearch
@@ -274,13 +274,13 @@ User can override default namespace explicitly by using `namespace` keyword for 
 
 Here is an example
 
-```
+```thrift
 package "domain.com/path/to/file"
 ```
 
 This package generates following namespace
 
-```
+```thrift
 namespace cpp2 domain.path.to.file
 namespace py3 domain.path.to
 namespace hack path.to.file
@@ -291,13 +291,13 @@ namespace java.swift com.domain.path.to.file
 
 If package name doesn't contain filename, it generates different namespace for `py3`
 
-```
+```thrift
 package "domain.com/path/to"
 ```
 
 This package generates following namespace
 
-```
+```thrift
 namespace cpp2 domain.path.to
 namespace py3 domain.path.to
 namespace hack path.to
@@ -396,7 +396,7 @@ Enumerator ::=
 
 Thrift supports C++ style enumeration types. The enumerators (the named constants) must be explicitly bound to an integer value. The identifier after the reserved word `enum` may be used to denote the enumeration type.
 
-```
+```thrift
 enum SearchKind {
   UNKNOWN = 0,  // default value
   PEOPLE = 1,
@@ -426,7 +426,7 @@ TypeDef ::=
 
 Typedefs introduce a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
 
-```
+```thrift
 typedef map<string, string> StringMap
 ```
 
@@ -451,7 +451,7 @@ FieldId ::=
 
 Structs in Thrift look very similar to structs in C++ - though fields in Thrift structs have a field id, and optionally a qualifier and a default value. They are significantly different in that the order of appearance of fields is not important and there is no expectations on the memory layout of the objects in the corresponding programming language code.
 
-```
+```thrift
 enum Gender { MALE = 1, FEMALE = 2 }
 
 struct PersonMetadata {
@@ -472,7 +472,7 @@ Thrift does not support structure inheritance (though it is possible to use comp
 
 As a consequence of the above rules, `PersonMetadata1` below defines the same type as `PersonMetadata` above:
 
-```
+```thrift
 // Just a different ordering of fields.
 struct PersonMetadata1 {
   3: i32 age;
@@ -484,7 +484,7 @@ struct PersonMetadata1 {
 
 But the following two types are both legal, but different from `PersonMetadata`:
 
-```
+```thrift
 // Some ids are different.
 struct PersonMetadata2 {
   590: string name;
@@ -598,7 +598,7 @@ The constant on the right hand side of `"="` can be:
 
 ### Literal Constants
 
-```
+```thrift
 const bool flag = true
 const byte offset = -10 // byte is a 8-bit *signed* integer
 const i32 count = 200

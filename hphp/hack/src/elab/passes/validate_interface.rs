@@ -18,7 +18,7 @@ use crate::Pass;
 pub struct ValidateInterfacePass;
 
 impl Pass for ValidateInterfacePass {
-    fn on_ty_class__top_down<Ex, En>(
+    fn on_ty_class__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
         _cfg: &Config,

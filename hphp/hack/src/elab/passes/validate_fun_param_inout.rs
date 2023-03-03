@@ -21,7 +21,7 @@ use crate::Pass;
 pub struct ValidateFunParamInoutPass;
 
 impl Pass for ValidateFunParamInoutPass {
-    fn on_ty_fun_def_top_down<Ex, En>(
+    fn on_ty_fun_def_bottom_up<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
         _cfg: &Config,
@@ -38,7 +38,7 @@ impl Pass for ValidateFunParamInoutPass {
         );
         ControlFlow::Continue(())
     }
-    fn on_ty_method__top_down<Ex, En>(
+    fn on_ty_method__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
         _cfg: &Config,

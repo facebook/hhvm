@@ -56,7 +56,7 @@ impl ValidateCoroutinePass {
 }
 
 impl Pass for ValidateCoroutinePass {
-    fn on_ty_stmt_top_down<Ex, En>(
+    fn on_ty_stmt_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Stmt<Ex, En>,
         _cfg: &Config,

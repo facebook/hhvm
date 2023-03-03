@@ -18,7 +18,7 @@ use crate::Pass;
 pub struct ValidateClassUserAttributeConstPass;
 
 impl Pass for ValidateClassUserAttributeConstPass {
-    fn on_ty_class__top_down<Ex, En>(
+    fn on_ty_class__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
         cfg: &Config,

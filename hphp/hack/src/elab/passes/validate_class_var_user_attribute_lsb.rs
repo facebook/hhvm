@@ -19,7 +19,7 @@ pub struct ValidateClassVarUserAttributeLsbPass {
 }
 
 impl Pass for ValidateClassVarUserAttributeLsbPass {
-    fn on_ty_class__top_down<Ex, En>(
+    fn on_ty_class__bottom_up<Ex, En>(
         &mut self,
         elem: &mut oxidized::aast::Class_<Ex, En>,
         _cfg: &Config,
@@ -36,7 +36,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_var_top_down<Ex, En>(
+    fn on_ty_class_var_bottom_up<Ex, En>(
         &mut self,
         elem: &mut ClassVar<Ex, En>,
         _cfg: &Config,

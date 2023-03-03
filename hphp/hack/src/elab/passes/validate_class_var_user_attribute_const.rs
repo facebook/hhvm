@@ -18,7 +18,7 @@ use crate::Pass;
 pub struct ValidateClassVarUserAttributeConstPass;
 
 impl Pass for ValidateClassVarUserAttributeConstPass {
-    fn on_ty_class_var_top_down<Ex, En>(
+    fn on_ty_class_var_bottom_up<Ex, En>(
         &mut self,
         elem: &mut ClassVar<Ex, En>,
         cfg: &Config,

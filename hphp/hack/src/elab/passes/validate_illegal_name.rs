@@ -46,12 +46,24 @@ impl Pass for ValidateIllegalNamePass {
         &mut self,
         elem: &mut Class_<Ex, En>,
         _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         self.classish_kind = Some(elem.kind);
+        ControlFlow::Continue(())
+    }
+
+    fn on_ty_class__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Class_<Ex, En>,
+        _cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
         elem.typeconsts
             .iter()
             .for_each(|tc| check_illegal_member_variable_class(&tc.name, errs));
@@ -65,12 +77,24 @@ impl Pass for ValidateIllegalNamePass {
         &mut self,
         elem: &mut FunDef<Ex, En>,
         _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         self.func_name = Some(elem.name.name().to_string());
+        ControlFlow::Continue(())
+    }
+
+    fn on_ty_fun_def_bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut FunDef<Ex, En>,
+        _cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
         let lower_name = elem.name.name().to_ascii_lowercase();
         let lower_norm = lower_name
             .strip_prefix('/')
@@ -91,12 +115,24 @@ impl Pass for ValidateIllegalNamePass {
         &mut self,
         elem: &mut Method_<Ex, En>,
         _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         self.func_name = Some(elem.name.name().to_string());
+        ControlFlow::Continue(())
+    }
+
+    fn on_ty_method__bottom_up<Ex, En>(
+        &mut self,
+        elem: &mut Method_<Ex, En>,
+        _cfg: &Config,
+        errs: &mut Vec<NamingPhaseError>,
+    ) -> ControlFlow<(), ()>
+    where
+        Ex: Default,
+    {
         if elem.name.name() == sn::members::__DESTRUCT {
             errs.push(NamingPhaseError::NastCheck(
                 NastCheckError::IllegalDestructor(elem.name.pos().clone()),

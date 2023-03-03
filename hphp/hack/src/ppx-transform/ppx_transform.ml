@@ -172,130 +172,54 @@ module Core_ty = struct
       substitution. This will fail if the substitution does not contain the
       names of all tyvars encountered *)
   let rename_tyvars t ~subst =
-    let rec aux ty =
-      let ptyp_desc =
-        match ty.ptyp_desc with
-        | Ptyp_any -> Ptyp_any
-        | Ptyp_var nm ->
-          Ptyp_var (Option.value ~default:nm @@ SMap.find_opt nm subst)
-        | Ptyp_alias (inner_ty, lbl) -> Ptyp_alias (aux inner_ty, lbl)
-        | Ptyp_arrow (arg_lbl, ty1, ty2) ->
-          Ptyp_arrow (arg_lbl, aux ty1, aux ty2)
-        | Ptyp_tuple tys -> Ptyp_tuple (List.map aux tys)
-        | Ptyp_constr (nm, tys) -> Ptyp_constr (nm, List.map aux tys)
-        | Ptyp_class (nm, tys) -> Ptyp_class (nm, List.map aux tys)
-        | Ptyp_object (flds, closed_flag) ->
-          Ptyp_object (List.map aux_obj_fld flds, closed_flag)
-        | Ptyp_variant (row_flds, closed_flag, labels_opt) ->
-          Ptyp_variant (List.map aux_row_fld row_flds, closed_flag, labels_opt)
-        | Ptyp_poly (vars, ty) -> Ptyp_poly (vars, aux ty)
-        | Ptyp_package _
-        | Ptyp_extension _ ->
-          Err.raise_unsupported_ty ty.ptyp_loc
-      in
-      { ty with ptyp_desc }
-    and aux_obj_fld fld =
-      let pof_desc =
-        match fld.pof_desc with
-        | Otag (lbl, ty) -> Otag (lbl, aux ty)
-        | Oinherit ty -> Oinherit (aux ty)
-      in
-      { fld with pof_desc }
-    and aux_row_fld fld =
-      let prf_desc =
-        match fld.prf_desc with
-        | Rtag (lbl, flag, tys) -> Rtag (lbl, flag, List.map aux tys)
-        | Rinherit ty -> Rinherit (aux ty)
-      in
-      { fld with prf_desc }
+    let visitor =
+      object
+        inherit Ast_traverse.map as super
+
+        method! core_type core_type =
+          let core_type = super#core_type core_type in
+          match core_type.ptyp_desc with
+          | Ptyp_var nm ->
+            ptyp_var ~loc:core_type.ptyp_loc
+            @@ Option.value ~default:nm
+            @@ SMap.find_opt nm subst
+          | _ -> core_type
+      end
     in
-    aux t
+    visitor#core_type t
 
   (** Replace tyvars with type constructors corresponding to newtypes
       declaration for locally abstract types *)
-  let newtypes ty =
-    let rec aux ty =
-      let ptyp_desc =
-        match ty.ptyp_desc with
-        | Ptyp_any -> ty.ptyp_desc
-        | Ptyp_var nm -> Ptyp_constr ({ loc = ty.ptyp_loc; txt = Lident nm }, [])
-        | Ptyp_alias (inner_ty, lbl) -> Ptyp_alias (aux inner_ty, lbl)
-        | Ptyp_arrow (arg_lbl, ty1, ty2) ->
-          Ptyp_arrow (arg_lbl, aux ty1, aux ty2)
-        | Ptyp_tuple tys -> Ptyp_tuple (List.map aux tys)
-        | Ptyp_constr (nm, tys) -> Ptyp_constr (nm, List.map aux tys)
-        | Ptyp_class (nm, tys) -> Ptyp_class (nm, List.map aux tys)
-        | Ptyp_object (flds, closed_flag) ->
-          Ptyp_object (List.map aux_obj_fld flds, closed_flag)
-        | Ptyp_variant (row_flds, closed_flag, labels_opt) ->
-          Ptyp_variant (List.map aux_row_fld row_flds, closed_flag, labels_opt)
-        | Ptyp_poly (vars, ty) -> Ptyp_poly (vars, aux ty)
-        | Ptyp_package _
-        | Ptyp_extension _ ->
-          Err.raise_unsupported_ty ty.ptyp_loc
-      in
-      { ty with ptyp_desc }
-    and aux_obj_fld fld =
-      let pof_desc =
-        match fld.pof_desc with
-        | Otag (lbl, ty) -> Otag (lbl, aux ty)
-        | Oinherit ty -> Oinherit (aux ty)
-      in
-      { fld with pof_desc }
-    and aux_row_fld fld =
-      let prf_desc =
-        match fld.prf_desc with
-        | Rtag (lbl, flag, tys) -> Rtag (lbl, flag, List.map aux tys)
-        | Rinherit ty -> Rinherit (aux ty)
-      in
-      { fld with prf_desc }
+  let newtypes =
+    let visitor =
+      object
+        inherit Ast_traverse.map as super
+
+        method! core_type core_type =
+          let core_type = super#core_type core_type in
+          match core_type.ptyp_desc with
+          | Ptyp_var nm ->
+            let loc = core_type.ptyp_loc in
+            ptyp_constr ~loc { loc; txt = lident nm } []
+          | _ -> core_type
+      end
     in
-    aux ty
+    (fun ty -> visitor#core_type ty)
 
   (** Collect the unique tyvar names with a [core_type] *)
-  let tyvars ?(acc = []) ty =
-    let rec aux ty ~acc ~k =
-      match ty.ptyp_desc with
-      | Ptyp_any -> k acc
-      | Ptyp_var v when not @@ List.exists (String.equal v) acc -> k (v :: acc)
-      | Ptyp_var _ -> k acc
-      | Ptyp_alias (ty, _) -> aux ty ~acc ~k
-      | Ptyp_arrow (_, t1, t2) -> aux t1 ~acc ~k:(fun acc -> aux t2 ~acc ~k)
-      | Ptyp_tuple tys
-      | Ptyp_constr (_, tys)
-      | Ptyp_class (_, tys) ->
-        auxs tys ~acc ~k
-      | Ptyp_object (flds, _) -> aux_obj_flds flds ~acc ~k
-      | Ptyp_variant (row_flds, _, _) -> aux_row_flds row_flds ~acc ~k
-      | Ptyp_poly (_, ty) -> aux ty ~acc ~k
-      | Ptyp_package _
-      | Ptyp_extension _ ->
-        Err.raise_unsupported_ty ty.ptyp_loc
-    and aux_obj_fld fld ~acc ~k =
-      match fld.pof_desc with
-      | Otag (_, ty)
-      | Oinherit ty ->
-        aux ty ~acc ~k
-    and aux_row_fld fld ~acc ~k =
-      match fld.prf_desc with
-      | Rtag (_, _, tys) -> auxs tys ~acc ~k
-      | Rinherit ty -> aux ty ~acc ~k
-    and auxs tys ~acc ~k =
-      match tys with
-      | [] -> k acc
-      | next :: rest -> aux next ~acc ~k:(fun acc -> auxs rest ~acc ~k)
-    and aux_obj_flds flds ~acc ~k =
-      match flds with
-      | [] -> k acc
-      | next :: rest ->
-        aux_obj_fld next ~acc ~k:(fun acc -> aux_obj_flds rest ~acc ~k)
-    and aux_row_flds flds ~acc ~k =
-      match flds with
-      | [] -> k acc
-      | next :: rest ->
-        aux_row_fld next ~acc ~k:(fun acc -> aux_row_flds rest ~acc ~k)
+  let tyvars =
+    let visitor =
+      object
+        inherit [label list] Ast_traverse.fold as super
+
+        method! core_type core_type acc =
+          let acc = super#core_type core_type acc in
+          match core_type.ptyp_desc with
+          | Ptyp_var v when not @@ List.exists (( = ) v) acc -> v :: acc
+          | _ -> acc
+      end
     in
-    aux ty ~acc ~k:(fun x -> x)
+    (fun ?(acc = []) ty -> visitor#core_type ty acc)
 
   let builtin_prims =
     SSet.of_list
@@ -345,67 +269,37 @@ module Core_ty = struct
   (** Collect all type constructors referenced in a [core_type] _excluding_
       those in the provided set - note that the excluded ctors are always
       a set of type declarations local to the module we are deriving for  *)
-  let tycons acc ty ~excluded =
-    let excluded = SSet.union builtin excluded in
-    let rec aux ty ~acc ~k =
-      if Annot.has_opaque_attr ty.ptyp_attributes then
-        acc
-      else
-        match ty.ptyp_desc with
-        | Ptyp_constr ({ txt; _ }, tys) ->
-          aux_constr txt ~acc ~k:(fun acc -> auxs tys ~acc ~k)
-        | Ptyp_any
-        | Ptyp_var _ ->
-          k acc
-        | Ptyp_alias (ty, _) -> aux ty ~acc ~k
-        | Ptyp_arrow (_, t1, t2) -> aux t1 ~acc ~k:(fun acc -> aux t2 ~acc ~k)
-        | Ptyp_tuple tys
-        | Ptyp_class (_, tys) ->
-          auxs tys ~acc ~k
-        | Ptyp_object (flds, _) -> aux_obj_flds flds ~acc ~k
-        | Ptyp_variant (row_flds, _, _) -> aux_row_flds row_flds ~acc ~k
-        | Ptyp_poly (_, ty) -> aux ty ~acc ~k
-        | Ptyp_package _
-        | Ptyp_extension _ ->
-          Err.raise_unsupported_ty ty.ptyp_loc
-    and aux_constr lident ~acc ~k =
-      let (tyname, key, path) =
-        match List.rev @@ Longident.flatten_exn lident with
-        | ty :: path ->
-          ( String.concat "." @@ List.rev (ty :: path),
-            String.concat "" path,
-            path )
-        | _ -> failwith "Bad `Longident`"
-      in
-      if SSet.mem tyname excluded then
-        k acc
-      else
-        k @@ SMap.add key path acc
-    and aux_obj_fld fld ~acc ~k =
-      match fld.pof_desc with
-      | Otag (_, ty)
-      | Oinherit ty ->
-        aux ty ~acc ~k
-    and aux_row_fld fld ~acc ~k =
-      match fld.prf_desc with
-      | Rtag (_, _, tys) -> auxs tys ~acc ~k
-      | Rinherit ty -> aux ty ~acc ~k
-    and auxs tys ~acc ~k =
-      match tys with
-      | [] -> k acc
-      | next :: rest -> aux next ~acc ~k:(fun acc -> auxs rest ~acc ~k)
-    and aux_obj_flds flds ~acc ~k =
-      match flds with
-      | [] -> k acc
-      | next :: rest ->
-        aux_obj_fld next ~acc ~k:(fun acc -> aux_obj_flds rest ~acc ~k)
-    and aux_row_flds flds ~acc ~k =
-      match flds with
-      | [] -> k acc
-      | next :: rest ->
-        aux_row_fld next ~acc ~k:(fun acc -> aux_row_flds rest ~acc ~k)
+  let tycons =
+    let visitor excluded =
+      object
+        inherit [label list SMap.t] Ast_traverse.fold as super
+
+        method! core_type core_type acc =
+          if Annot.has_opaque_attr core_type.ptyp_attributes then
+            acc
+          else
+            super#core_type core_type
+            @@
+            match core_type.ptyp_desc with
+            | Ptyp_constr ({ txt; _ }, _) ->
+              let (tyname, key, path) =
+                match List.rev @@ Longident.flatten_exn txt with
+                | ty :: path ->
+                  ( String.concat "." @@ List.rev (ty :: path),
+                    String.concat "" path,
+                    path )
+                | _ -> failwith "Bad `Longident`"
+              in
+              if SSet.mem tyname excluded then
+                acc
+              else
+                SMap.add key path acc
+            | _ -> acc
+      end
     in
-    aux ty ~acc ~k:(fun x -> x)
+    fun acc ty ~excluded ->
+      let visitor = visitor @@ SSet.union builtin excluded in
+      visitor#core_type ty acc
 end
 
 module Ident = struct

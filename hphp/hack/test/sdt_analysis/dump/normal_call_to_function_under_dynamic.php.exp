@@ -3,13 +3,19 @@ Intraprocedural Constraints for (Function "\\f"):
    8: NeedsSDT
 
 Interprocedural Constraints for (ClassLike "\\C"):
-     3: (CustomInterConstraint SyntacticallyNadable)
+     3: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None })
 
 Interprocedural Constraints for (Function "\\f"):
-     5: (CustomInterConstraint SyntacticallyNadable)
-     5: (CustomInterConstraint SyntacticallyNadable)
+     5: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+     5: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 
 Interprocedural Constraints for (Function "\\main"):
-     7: (CustomInterConstraint SyntacticallyNadable)
-     7: (CustomInterConstraint SyntacticallyNadable)
+     7: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+     7: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 

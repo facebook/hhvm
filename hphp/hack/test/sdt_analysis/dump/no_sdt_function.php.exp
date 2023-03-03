@@ -1,4 +1,5 @@
 === SDT analysis results for no_sdt_function.php
 Interprocedural Constraints for (Function "\\f"):
-     4: (CustomInterConstraint SyntacticallyNadable)
+     4: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 

@@ -8,7 +8,7 @@ class SdMe1 {
   public static function foo(vec<int> $_): void {}
 }
 class SdMe2 extends SdMe1 {}
-class SdMe3 extends SdMe2 {}
+final class SdMe3 extends SdMe2 {}
 
 function main(dynamic $d): void {
   SdMe1::foo($d);

@@ -6,10 +6,14 @@ Intraprocedural Constraints for (Function "\\g"):
    3: NeedsSDT
 
 Interprocedural Constraints for (Function "\\f"):
-     5: (CustomInterConstraint SyntacticallyNadable)
-     5: (CustomInterConstraint SyntacticallyNadable)
+     5: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+     5: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 
 Interprocedural Constraints for (Function "\\g"):
-     3: (CustomInterConstraint SyntacticallyNadable)
-     3: (CustomInterConstraint SyntacticallyNadable)
+     3: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+     3: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 

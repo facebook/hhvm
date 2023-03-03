@@ -10,19 +10,16 @@ open Hh_prelude
 open Sdt_analysis_types
 module A = Aast
 
-let syntactically_nadable =
-  H.CustomInterConstraint CustomInterConstraint.SyntacticallyNadable
+let create_custom_inter ~classish_kind_opt ~hierarchy_for_final_item =
+  H.CustomInterConstraint
+    CustomInterConstraint.{ classish_kind_opt; hierarchy_for_final_item }
 
-let is_syntactically_nadable =
-  Ast_defs.(
-    function
-    | Cclass _
-    | Cinterface
-    | Ctrait ->
-      true
-    | Cenum
-    | Cenum_class _ ->
-      false)
+let get_hierarchy_for_final_class ctx A.{ c_name = (_, sid); c_final; _ } =
+  if not c_final then
+    None
+  else
+    let open Option.Monad_infix in
+    Decl_provider.get_class ctx sid >>| Decl_provider.Class.all_ancestor_names
 
 let reduce_walk_result =
   object
@@ -45,6 +42,7 @@ let reduce_walk_result =
              c_kind;
              _;
            } as class_) =
+      let ctx = Tast_env.get_ctx env in
       let id = H.Id.ClassLike sid in
 
       let at_inherits acc (_, hint_) =
@@ -64,29 +62,42 @@ let reduce_walk_result =
       let wr = List.fold ~init:WalkResult.empty ~f:at_inherits inherited in
       let wr = WalkResult.add_id wr id in
       let wr =
-        if is_syntactically_nadable c_kind then
-          WalkResult.add_constraint
-            wr
-            id
-            {
-              origin = __LINE__;
-              hack_pos = c_pos;
-              decorated_data = syntactically_nadable;
-            }
-        else
+        let hierarchy_for_final_item =
+          get_hierarchy_for_final_class ctx class_
+        in
+        WalkResult.add_constraint
           wr
+          id
+          {
+            origin = __LINE__;
+            hack_pos = c_pos;
+            decorated_data =
+              create_custom_inter
+                ~classish_kind_opt:(Some c_kind)
+                ~hierarchy_for_final_item;
+          }
       in
       WalkResult.(wr @ super#on_class_ env class_)
 
     method! on_fun_def env (A.{ fd_name = (f_pos, sid); _ } as fd) =
       let id = H.Id.Function sid in
+
+      let hierarchy_for_final_item =
+        Some
+          (* `Some` because a top-level function is morally "final" (they cannot be extended) *)
+          []
+        (* [] because a top-level function doesn't inherit from anything *)
+      in
       let wr =
         WalkResult.singleton
           id
           {
             origin = __LINE__;
             hack_pos = f_pos;
-            decorated_data = syntactically_nadable;
+            decorated_data =
+              create_custom_inter
+                ~classish_kind_opt:None
+                ~hierarchy_for_final_item;
           }
       in
       let wr = WalkResult.add_id wr id in

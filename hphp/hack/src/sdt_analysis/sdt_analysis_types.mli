@@ -33,7 +33,34 @@ module Constraint : sig
 end
 
 module CustomInterConstraint : sig
-  type t = SyntacticallyNadable [@@deriving eq, ord, show, hash]
+  type abstraction = Ast_defs.abstraction =
+    | Concrete
+    | Abstract
+  [@@deriving eq, hash, ord, show { with_path = false }]
+
+  val hash_abstraction : abstraction -> int
+
+  type classish_kind = Ast_defs.classish_kind =
+    | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
+    | Cinterface  (** Kind for `interface` *)
+    | Ctrait  (** Kind for `trait` *)
+    | Cenum  (** Kind for `enum` *)
+    | Cenum_class of abstraction
+  [@@deriving eq, hash, ord, show { with_path = false }]
+
+  val hash_classish_kind : classish_kind -> int
+
+  (** Facts that help us summarize results. *)
+  type t = {
+    classish_kind_opt: classish_kind option;
+        (** classish_kind is `None` for functions *)
+    hierarchy_for_final_item: string list option;
+        (**
+        `Some []` indicates something with no parents or descendents, such as a top-level function or final class with no `extends` or `implements`.
+        `Some [c1, c2]` indicates a final class that inherits transitively from c1 and c2.
+        Anything else is `None`
+        *)
+  }
 end
 
 type 'a decorated = {

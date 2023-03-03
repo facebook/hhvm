@@ -1,7 +1,9 @@
 === SDT analysis results for normal_call_to_function.php
 Interprocedural Constraints for (Function "\\f"):
-     3: (CustomInterConstraint SyntacticallyNadable)
+     3: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 
 Interprocedural Constraints for (Function "\\main"):
-     5: (CustomInterConstraint SyntacticallyNadable)
+     5: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 

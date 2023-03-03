@@ -3,27 +3,40 @@ Intraprocedural Constraints for (ClassLike "\\SdMe1"):
   14: NeedsSDT
 
 Interprocedural Constraints for (ClassLike "\\NadMe1"):
-     3: (CustomInterConstraint SyntacticallyNadable)
+     3: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None })
 
 Interprocedural Constraints for (ClassLike "\\NadMe2"):
-     4: (CustomInterConstraint SyntacticallyNadable)
+     4: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None })
      4: (Inherits (ClassLike "\\NadMe1"))
 
 Interprocedural Constraints for (ClassLike "\\NadMe3"):
-     5: (CustomInterConstraint SyntacticallyNadable)
+     5: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None })
      5: (Inherits (ClassLike "\\NadMe2"))
 
 Interprocedural Constraints for (ClassLike "\\SdMe1"):
-     7: (CustomInterConstraint SyntacticallyNadable)
+     7: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None })
 
 Interprocedural Constraints for (ClassLike "\\SdMe2"):
-    10: (CustomInterConstraint SyntacticallyNadable)
+    10: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = None })
     10: (Inherits (ClassLike "\\SdMe1"))
 
 Interprocedural Constraints for (ClassLike "\\SdMe3"):
-    11: (CustomInterConstraint SyntacticallyNadable)
+    11: (CustomInterConstraint
+   { classish_kind_opt = (Some (Cclass Concrete));
+     hierarchy_for_final_item = (Some ["\\SdMe1"; "\\SdMe2"]) })
     11: (Inherits (ClassLike "\\SdMe2"))
 
 Interprocedural Constraints for (Function "\\main"):
-    13: (CustomInterConstraint SyntacticallyNadable)
+    13: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
 

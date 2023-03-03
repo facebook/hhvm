@@ -8,14 +8,27 @@
 open Hh_prelude
 open Sdt_analysis_types
 
+let is_syntactically_nadable = function
+  | None -> (* is function *) true
+  | Some c_kind ->
+    Ast_defs.(
+      (match c_kind with
+      | Cclass _
+      | Cinterface
+      | Ctrait ->
+        true
+      | Cenum
+      | Cenum_class _ ->
+        false))
+
 let calc reader : summary =
   let filter_to_syntactically_nadable =
     Sequence.filter ~f:(fun id ->
         H.Read.get_inters reader id
         |> Sequence.exists ~f:(function
                | H.CustomInterConstraint
-                   CustomInterConstraint.SyntacticallyNadable ->
-                 true
+                   CustomInterConstraint.{ classish_kind_opt; _ } ->
+                 is_syntactically_nadable classish_kind_opt
                | _ -> false))
   in
 

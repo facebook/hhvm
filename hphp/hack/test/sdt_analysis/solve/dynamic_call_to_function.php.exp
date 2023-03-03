@@ -1,4 +1,10 @@
 === SDT analysis results for dynamic_call_to_function.php
-Intraprocedural Constraints for \f:
-NeedsSDT
 
+Stats:
+  id_cnt: 3
+  syntactically_nadable_cnt: 2
+  nadable_cnt: 2
+
+Candidates for adding <<__NoAutoDynamic>>:
+  (Function "\\f")
+  (Function "\\main")

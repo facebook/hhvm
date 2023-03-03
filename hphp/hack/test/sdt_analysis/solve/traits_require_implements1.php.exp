@@ -1,10 +1,9 @@
 === SDT analysis results for traits_require_implements1.php
-Intraprocedural Constraints for \I:
-NeedsSDT
 
-Intraprocedural Constraints for \C:
-NeedsSDT
+Stats:
+  id_cnt: 4
+  syntactically_nadable_cnt: 4
+  nadable_cnt: 1
 
-Intraprocedural Constraints for \Tr:
-NeedsSDT
-
+Candidates for adding <<__NoAutoDynamic>>:
+  (Function "\\foo")

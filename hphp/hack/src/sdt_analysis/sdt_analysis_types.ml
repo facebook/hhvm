@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 
 module Options = struct
   type command =
@@ -43,7 +44,7 @@ module H = Hips2.Make (struct
   [@@deriving eq, hash, ord, show { with_path = false }]
 end)
 
-module IdMap = Map.Make (struct
+module IdMap = Caml.Map.Make (struct
   type t = H.id
 
   let compare = H.compare_id
@@ -72,3 +73,10 @@ module WalkResult = struct
 
   let singleton id constraint_ = add_constraint empty id constraint_
 end
+
+type summary = {
+  id_cnt: int;
+  syntactically_nadable_cnt: int;
+  nadable_cnt: int;
+  nadables: H.id Sequence.t;
+}

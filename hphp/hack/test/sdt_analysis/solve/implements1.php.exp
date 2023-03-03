@@ -1,7 +1,9 @@
 === SDT analysis results for implements1.php
-Intraprocedural Constraints for \I:
-NeedsSDT
 
-Intraprocedural Constraints for \C:
-NeedsSDT
+Stats:
+  id_cnt: 3
+  syntactically_nadable_cnt: 3
+  nadable_cnt: 1
 
+Candidates for adding <<__NoAutoDynamic>>:
+  (Function "\\main")

@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 
 module Options : sig
   type command =
@@ -47,7 +48,7 @@ module H :
     with type intra_constraint_ = Constraint.t
      and type custom_inter_constraint_ = CustomInterConstraint.t
 
-module IdMap : Map.S with type key := H.id
+module IdMap : Caml.Map.S with type key := H.id
 
 module WalkResult : sig
   type 'a t = 'a list IdMap.t
@@ -62,3 +63,14 @@ module WalkResult : sig
 
   val singleton : H.id -> 'a -> 'a t
 end
+
+type summary = {
+  id_cnt: int;
+  (* count of functions and class-like things *)
+  syntactically_nadable_cnt: int;
+  (* count of things where the <<__NoAutoDynamic>> attribute is syntactically allowed *)
+  nadable_cnt: int;
+  (* count of things the analysis thinks can have <<__NoAutoDynamic>> added *)
+  nadables: H.id Sequence.t;
+      (* sequence of ids for things the analysis thinks can have <<__NoAutoDynamic>> added *)
+}

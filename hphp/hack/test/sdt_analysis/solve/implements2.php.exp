@@ -1,1 +1,10 @@
 === SDT analysis results for implements2.php
+
+Stats:
+  id_cnt: 2
+  syntactically_nadable_cnt: 2
+  nadable_cnt: 2
+
+Candidates for adding <<__NoAutoDynamic>>:
+  (ClassLike "\\I")
+  (ClassLike "\\C")

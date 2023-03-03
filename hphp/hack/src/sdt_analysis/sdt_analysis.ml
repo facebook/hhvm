@@ -65,6 +65,26 @@ let sid_of_id = function
   | H.ClassLike sid -> sid
   | H.Function sid -> sid
 
+let print_solution reader =
+  let { id_cnt; syntactically_nadable_cnt; nadable_cnt; nadables } =
+    Sdt_analysis_summary.calc reader
+  in
+  Format.printf
+    {|
+Stats:
+  id_cnt: %d
+  syntactically_nadable_cnt: %d
+  nadable_cnt: %d
+|}
+    id_cnt
+    syntactically_nadable_cnt
+    nadable_cnt;
+  if nadable_cnt > 0 then (
+    Format.printf "\nCandidates for adding <<__NoAutoDynamic>>:\n";
+    nadables
+    |> Sequence.iter ~f:(fun id -> Format.printf "  %s\n" @@ H.show_id id)
+  )
+
 let do_tast
     (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
   let Options.{ command; verbosity } = options in
@@ -124,11 +144,15 @@ let do_tast
       flush ()
     in
     generate_constraints ();
+    let log_intras reader =
+      H.Read.get_keys reader
+      |> Sequence.iter ~f:(fun id ->
+             let intras = H.Read.get_intras reader id |> Sequence.to_list in
+             print_intra_constraints id intras)
+    in
     let reader = H.solve ~db_dir in
-    H.Read.get_keys reader
-    |> Sequence.iter ~f:(fun id ->
-           let intras = H.Read.get_intras reader id |> Sequence.to_list in
-           print_intra_constraints id intras)
+    if verbosity > 0 then log_intras reader;
+    print_solution reader
   | Options.DumpPersistedConstraints ->
     let reader = H.debug_dump ~db_dir:default_db_dir in
     H.Read.get_keys reader
@@ -142,11 +166,7 @@ let do_tast
            Format.print_newline ())
   | Options.SolvePersistedConstraints ->
     let reader = H.solve ~db_dir:default_db_dir in
-    H.Read.get_keys reader
-    |> Sequence.iter ~f:(fun id ->
-           Format.printf "Intraprocedural constraints for %s\n" @@ H.show_id id;
-           H.Read.get_intras reader id
-           |> Sequence.iter ~f:print_intra_constraint)
+    print_solution reader
 
 let do_ ~command ~verbosity ~on_bad_command =
   let opts = parse_command ~command ~on_bad_command ~verbosity in

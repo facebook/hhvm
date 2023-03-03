@@ -7,5 +7,5 @@ function main1(string $d): void {
 }
 
 function main2(dynamic $d): void {
-  f($d);
+  f($d); // f NeedsSDT
 }

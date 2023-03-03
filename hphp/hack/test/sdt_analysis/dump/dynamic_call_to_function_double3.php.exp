@@ -1,5 +1,5 @@
 === SDT analysis results for dynamic_call_to_function_double3.php
-Intraprocedural Constraints for (ClassLike "\\f"):
+Intraprocedural Constraints for (Function "\\f"):
   10: NeedsSDT
 
 Interprocedural Constraints for (Function "\\f"):

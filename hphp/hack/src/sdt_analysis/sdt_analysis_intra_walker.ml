@@ -55,8 +55,7 @@ let collect_sdts =
           let doesnt_subtype (fp, (_, (arg_ty, _, _))) =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type
           in
-          let constraints_of_sid sid =
-            let id = H.Id.ClassLike sid in
+          let constraints_of_id id =
             let ty = remove_supportdyn_from_ty base_ty in
             match T.get_node ty with
             | T.Tfun ft ->
@@ -75,13 +74,15 @@ let collect_sdts =
           in
           begin
             match base_exp with
-            | A.Id (_, sid) -> constraints_of_sid sid
+            | A.Id (_, sid) -> constraints_of_id (H.Id.Function sid)
             | A.Obj_get ((receiver_ty, _, _), _, _, _) -> begin
               match T.get_node receiver_ty with
-              | T.Tclass ((_, sid), _, _) -> constraints_of_sid sid
+              | T.Tclass ((_, sid), _, _) ->
+                constraints_of_id (H.Id.ClassLike sid)
               | _ -> WalkResult.empty
             end
-            | A.Class_const ((_, _, A.CI (_, sid)), _) -> constraints_of_sid sid
+            | A.Class_const ((_, _, A.CI (_, sid)), _) ->
+              constraints_of_id (H.Id.ClassLike sid)
             | _ -> WalkResult.empty
           end
         | _ -> WalkResult.empty

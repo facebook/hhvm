@@ -1,10 +1,9 @@
 === SDT analysis results for dynamic_call_to_function.php
 
 Stats:
-  id_cnt: 3
+  id_cnt: 2
   syntactically_nadable_cnt: 2
-  nadable_cnt: 2
+  nadable_cnt: 1
 
 Candidates for adding <<__NoAutoDynamic>>:
-  (Function "\\f")
   (Function "\\main")

@@ -10,6 +10,8 @@ module Options = struct
   type command =
     | DumpConstraints
     | SolveConstraints
+    | DumpPersistedConstraints
+    | SolvePersistedConstraints
 
   type t = {
     command: command;

@@ -9,7 +9,17 @@
 module Options : sig
   type command =
     | DumpConstraints
-    | SolveConstraints
+        (** print constraints for a single file without solving *)
+    | SolveConstraints  (** generate and solve constraints for a single file *)
+    | DumpPersistedConstraints
+        (** For debugging: print all constraints from directory `Sdt_analysis.default_db_dir`, without solving.
+    NOTE: hh_single_type_check requires an arg that is a path to a Hack file, but the analysis intentionally ignores that argument (T146711502)
+     *)
+    | SolvePersistedConstraints
+        (** Solve all constraints from directory `Sdt_analysis.default_db_dir`.
+        The directory must already contain constraints generated with `hh  --config log_levels='{"sdt_analysis":1}'
+    NOTE: hh_single_type_check requires an arg that is a path to a Hack file, but the analysis intentionally ignores that argument (T146711502)
+     *)
 
   type t = {
     command: command;

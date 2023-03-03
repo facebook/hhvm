@@ -80,14 +80,19 @@ let do_tast
              (PP.decorated ~show:Constraint.show ~verbosity constr));
     Format.printf "\n%!"
   in
+  let print_intra_constraint =
+    Fn.compose (Format.printf "%s\n") Constraint.show
+  in
+  let print_inter_constraint =
+    Fn.compose (Format.printf "%s\n") H.show_inter_constraint_
+  in
   let print_intra_constraints id (intra_constraints : Constraint.t list) =
     let sid = sid_of_id id in
     if not @@ List.is_empty intra_constraints then (
       Format.printf "Intraprocedural Constraints for %s:\n" sid;
       intra_constraints
       |> List.sort ~compare:Constraint.compare
-      |> List.iter ~f:(fun constr ->
-             Format.printf "%s\n" (Constraint.show constr));
+      |> List.iter ~f:print_intra_constraint;
       Format.printf "\n%!"
     )
   in
@@ -124,6 +129,24 @@ let do_tast
     |> Sequence.iter ~f:(fun id ->
            let intras = H.Read.get_intras reader id |> Sequence.to_list in
            print_intra_constraints id intras)
+  | Options.DumpPersistedConstraints ->
+    let reader = H.debug_dump ~db_dir:default_db_dir in
+    H.Read.get_keys reader
+    |> Sequence.iter ~f:(fun id ->
+           Format.printf "Intraprocedural constraints for %s\n" @@ H.show_id id;
+           H.Read.get_intras reader id
+           |> Sequence.iter ~f:print_intra_constraint;
+           Format.printf "Interprocedural constraints for %s\n" @@ H.show_id id;
+           H.Read.get_inters reader id
+           |> Sequence.iter ~f:print_inter_constraint;
+           Format.print_newline ())
+  | Options.SolvePersistedConstraints ->
+    let reader = H.solve ~db_dir:default_db_dir in
+    H.Read.get_keys reader
+    |> Sequence.iter ~f:(fun id ->
+           Format.printf "Intraprocedural constraints for %s\n" @@ H.show_id id;
+           H.Read.get_intras reader id
+           |> Sequence.iter ~f:print_intra_constraint)
 
 let do_ ~command ~verbosity ~on_bad_command =
   let opts = parse_command ~command ~on_bad_command ~verbosity in

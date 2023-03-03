@@ -3,14 +3,14 @@ Intraprocedural Constraints for \SdMe1:
   14: NeedsSDT
 
 Interprocedural Constraints for \NadMe2:
-     4: (ClassExtends (Class "\\NadMe1"))
+     4: (Inherits (ClassLike "\\NadMe1"))
 
 Interprocedural Constraints for \NadMe3:
-     5: (ClassExtends (Class "\\NadMe2"))
+     5: (Inherits (ClassLike "\\NadMe2"))
 
 Interprocedural Constraints for \SdMe2:
-    10: (ClassExtends (Class "\\SdMe1"))
+    10: (Inherits (ClassLike "\\SdMe1"))
 
 Interprocedural Constraints for \SdMe3:
-    11: (ClassExtends (Class "\\SdMe2"))
+    11: (Inherits (ClassLike "\\SdMe2"))
 

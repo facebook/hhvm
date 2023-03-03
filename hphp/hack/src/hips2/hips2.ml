@@ -18,11 +18,11 @@ module Make (Intra : Intra) :
   type intra_constraint_ = Intra.constraint_ [@@deriving hash, eq]
 
   type id =
-    | Class of string
+    | ClassLike of string
     | Function of string
   [@@deriving hash, eq, ord, sexp, show { with_path = false }]
 
-  type inter_constraint_ = ClassExtends of id
+  type inter_constraint_ = Inherits of id
   [@@deriving eq, hash, ord, show { with_path = false }]
 
   let hash_id : id -> int = Obj.magic hash_id (* workaround for T92019055 *)
@@ -182,7 +182,7 @@ module Make (Intra : Intra) :
   let solve_t t : Read.t =
     let rec loop () =
       let at_inter_constraint_mut id = function
-        | ClassExtends parent_id ->
+        | Inherits parent_id ->
           let from_set = get_intras_set t parent_id in
           let to_set = get_intras_set t id in
           let changed = IntraTbl.Set.union ~from_set ~to_set in

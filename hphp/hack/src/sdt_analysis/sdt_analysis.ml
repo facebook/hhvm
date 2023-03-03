@@ -62,7 +62,7 @@ let parse_command ~command ~verbosity ~on_bad_command =
   Sdt_analysis_options.mk ~verbosity ~command
 
 let sid_of_id = function
-  | H.Class sid -> sid
+  | H.ClassLike sid -> sid
   | H.Function sid -> sid
 
 let do_tast

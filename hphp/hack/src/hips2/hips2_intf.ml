@@ -18,11 +18,11 @@ module type T = sig
   type intra_constraint_
 
   type id =
-    | Class of string
+    | ClassLike of string
     | Function of string
   [@@deriving ord, show { with_path = false }]
 
-  type inter_constraint_ = ClassExtends of id
+  type inter_constraint_ = Inherits of id
   [@@deriving ord, show { with_path = false }]
 
   module Read : sig

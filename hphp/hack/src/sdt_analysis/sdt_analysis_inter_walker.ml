@@ -20,13 +20,13 @@ let reduce_walk_result =
     method plus = WalkResult.( @ )
 
     method! on_class_ env (A.{ c_name = (_, sid); c_extends; _ } as class_) =
-      let id = H.Class sid in
+      let id = H.ClassLike sid in
 
       let at_extends acc (_, hint_) =
         match hint_ with
         | A.Happly ((hack_pos, parent_sid), _hints) ->
-          let parent_id = H.Class parent_sid in
-          let constraint_ = H.ClassExtends parent_id in
+          let parent_id = H.ClassLike parent_sid in
+          let constraint_ = H.Inherits parent_id in
           let decorated =
             { origin = __LINE__; hack_pos; decorated_data = constraint_ }
           in

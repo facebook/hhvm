@@ -554,7 +554,7 @@ Hdf Hdf::parent() {
 
 const Hdf Hdf::operator[](int name) const {
   char buf[12];
-  sprintf(buf, "%d", name);
+  snprintf(buf, sizeof(buf), "%d", name);
   return operator[](buf);
 }
 
@@ -568,7 +568,7 @@ const Hdf Hdf::operator[](const std::string &name) const {
 
 Hdf Hdf::operator[](int name) {
   char buf[12];
-  sprintf(buf, "%d", name);
+  snprintf(buf, sizeof(buf), "%d", name);
   return operator[](buf);
 }
 
@@ -598,7 +598,7 @@ bool Hdf::exists() const {
 
 bool Hdf::exists(int name) const {
   char buf[12];
-  sprintf(buf, "%d", name);
+  snprintf(buf, sizeof(buf), "%d", name);
   return exists(buf);
 }
 
@@ -626,7 +626,7 @@ bool Hdf::exists(const std::string &name) const {
 
 void Hdf::remove(int name) const {
   char buf[12];
-  sprintf(buf, "%d", name);
+  snprintf(buf, sizeof(buf), "%d", name);
   remove(buf);
 }
 

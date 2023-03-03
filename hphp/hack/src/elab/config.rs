@@ -6,8 +6,15 @@
 use bitflags::bitflags;
 use oxidized::typechecker_options::TypecheckerOptions;
 
+#[derive(Debug, Clone, Default)]
+pub struct ProgramSpecificOptions {
+    pub is_hhi: bool,
+    pub allow_type_constant_in_enum_class: bool,
+    pub allow_module_declarations: bool,
+}
+
 bitflags! {
-    struct Flags: u8 {
+    struct Flags: u16 {
         const SOFT_AS_LIKE = 1 << 0;
         const HKT_ENABLED = 1 << 1;
         const IS_HHI = 1 << 2;
@@ -16,18 +23,14 @@ bitflags! {
         const CONST_ATTRIBUTE = 1 << 5;
         const CONST_STATIC_PROPS = 1 << 6;
         const ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS = 1 << 7;
+        const ALLOW_MODULE_DECLARATIONS = 1 << 8;
     }
 }
 
 impl Flags {
-    pub fn new(
-        tco: &TypecheckerOptions,
-        is_hhi: bool,
-        allow_type_constant_in_enum_class: bool,
-    ) -> Self {
+    pub fn new(tco: &TypecheckerOptions, pso: &ProgramSpecificOptions) -> Self {
         let mut flags: Self = Flags::empty();
 
-        flags.set(Self::IS_HHI, is_hhi);
         flags.set(
             Self::SOFT_AS_LIKE,
             tco.po_interpret_soft_types_as_like_types,
@@ -37,9 +40,15 @@ impl Flags {
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
         flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
         flags.set(Self::CONST_STATIC_PROPS, tco.tco_const_static_props);
+
+        flags.set(Self::IS_HHI, pso.is_hhi);
         flags.set(
             Self::ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS,
-            allow_type_constant_in_enum_class,
+            pso.allow_type_constant_in_enum_class,
+        );
+        flags.set(
+            Self::ALLOW_MODULE_DECLARATIONS,
+            pso.allow_module_declarations,
         );
 
         flags
@@ -54,18 +63,17 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self::new(&TypecheckerOptions::default(), false, false)
+        Self::new(
+            &TypecheckerOptions::default(),
+            &ProgramSpecificOptions::default(),
+        )
     }
 }
 
 impl Config {
-    pub fn new(
-        tco: &TypecheckerOptions,
-        is_hhi: bool,
-        allow_type_constant_in_enum_class: bool,
-    ) -> Self {
+    pub fn new(tco: &TypecheckerOptions, pso: &ProgramSpecificOptions) -> Self {
         Self {
-            flags: Flags::new(tco, is_hhi, allow_type_constant_in_enum_class),
+            flags: Flags::new(tco, pso),
             consistent_ctor_level: tco.tco_explicit_consistent_constructors,
         }
     }
@@ -77,6 +85,10 @@ impl Config {
     pub fn allow_type_constant_in_enum_class(&self) -> bool {
         self.flags
             .contains(Flags::ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS)
+    }
+
+    pub fn allow_module_declarations(&self) -> bool {
+        self.flags.contains(Flags::ALLOW_MODULE_DECLARATIONS)
     }
 
     pub fn hkt_enabled(&self) -> bool {

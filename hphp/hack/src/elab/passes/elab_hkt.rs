@@ -71,6 +71,7 @@ mod tests {
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
+    use crate::config::ProgramSpecificOptions;
     use crate::Transform;
 
     #[test]
@@ -79,16 +80,18 @@ mod tests {
             &TypecheckerOptions {
                 ..Default::default()
             },
-            false,
-            false,
+            &ProgramSpecificOptions {
+                ..Default::default()
+            },
         );
         let cfg_hkt_enabled = Config::new(
             &TypecheckerOptions {
                 tco_higher_kinded_types: true,
                 ..Default::default()
             },
-            false,
-            false,
+            &ProgramSpecificOptions {
+                ..Default::default()
+            },
         );
 
         let mut errs = Vec::default();
@@ -124,16 +127,18 @@ mod tests {
             &TypecheckerOptions {
                 ..Default::default()
             },
-            false,
-            false,
+            &ProgramSpecificOptions {
+                ..Default::default()
+            },
         );
         let cfg_hkt_enabled = Config::new(
             &TypecheckerOptions {
                 tco_higher_kinded_types: true,
                 ..Default::default()
             },
-            false,
-            false,
+            &ProgramSpecificOptions {
+                ..Default::default()
+            },
         );
 
         let mut errs = Vec::default();

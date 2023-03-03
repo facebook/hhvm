@@ -51,6 +51,7 @@ mod tests {
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
+    use crate::config::ProgramSpecificOptions;
     use crate::Transform;
 
     fn mk_class_typeconst_def(name: &str) -> ClassTypeconstDef<(), ()> {
@@ -107,12 +108,13 @@ mod tests {
 
     #[test]
     fn test_type_constant_allowed() {
-        let allow_type_constant_in_enum_class = true;
         let mut errs = Vec::default();
         let config = Config::new(
             &TypecheckerOptions::default(),
-            false,
-            allow_type_constant_in_enum_class,
+            &ProgramSpecificOptions {
+                allow_type_constant_in_enum_class: true,
+                ..Default::default()
+            },
         );
         let mut class = mk_enum_class("Foo", vec![mk_class_typeconst_def("foo")]);
         class.transform(&config, &mut errs, &mut ValidateEnumClassTypeconstPass);
@@ -121,12 +123,13 @@ mod tests {
 
     #[test]
     fn test_type_constant_not_allowed() {
-        let allow_type_constant_in_enum_class = false;
         let mut errs = Vec::default();
         let config = Config::new(
             &TypecheckerOptions::default(),
-            false,
-            allow_type_constant_in_enum_class,
+            &ProgramSpecificOptions {
+                allow_type_constant_in_enum_class: false,
+                ..Default::default()
+            },
         );
         let mut class = mk_enum_class("Foo", vec![mk_class_typeconst_def("foo")]);
         class.transform(&config, &mut errs, &mut ValidateEnumClassTypeconstPass);

@@ -25,6 +25,7 @@ mod pass;
 mod passes;
 mod transform;
 
+use config::ProgramSpecificOptions;
 use oxidized::ast;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::typechecker_options::TypecheckerOptions;
@@ -36,7 +37,8 @@ pub fn elaborate_program(
     tco: &TypecheckerOptions,
 ) -> Vec<NamingPhaseError> {
     let pos = program.first_pos();
-    let dir = pos.and_then(|pos| pos.filename().path().parent());
+    let filename = pos.map(|pos| pos.filename().path());
+    let dir = filename.and_then(|file| file.parent());
 
     let is_hhi = pos.map_or(false, |pos| {
         pos.filename().prefix() == relative_path::Prefix::Hhi
@@ -50,15 +52,36 @@ pub fn elaborate_program(
                 .any(|prefix| dir.starts_with(prefix))
         });
 
-    elaborate(program, tco, is_hhi, allow_type_constant_in_enum_class)
+    let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
+        || tco
+            .tco_allowed_files_for_module_declarations
+            .iter()
+            .any(|spec| {
+                !spec.is_empty()
+                    && filename.map_or(false, |filename| {
+                        spec.ends_with('*') && filename.starts_with(&spec[..spec.len() - 1])
+                            || filename.to_str().unwrap() == spec
+                    })
+            });
+
+    elaborate(
+        program,
+        tco,
+        &ProgramSpecificOptions {
+            is_hhi,
+            allow_type_constant_in_enum_class,
+            allow_module_declarations,
+        },
+    )
 }
 
 fn elaborate<T: Transform>(
     node: &mut T,
     tco: &TypecheckerOptions,
-    is_hhi: bool,
-    allow_type_constant_in_enum_class: bool,
+    pso: &ProgramSpecificOptions,
 ) -> Vec<NamingPhaseError> {
+    let cfg = config::Config::new(tco, pso);
+
     #[rustfmt::skip]
     let mut passes = passes![
         // Stop on `Invalid` expressions
@@ -188,7 +211,7 @@ fn elaborate<T: Transform>(
         // - `allow_all_files_for_module_declarations`
         // - `allowed_files_for_module_declarations`
         // typechecker options
-        // passes::validate_module::ValidateModulePass::default(),
+        passes::validate_module::ValidateModulePass::default(),
 
         // -- Old 'NAST checks' ------------------------------------------------
 
@@ -223,8 +246,8 @@ fn elaborate<T: Transform>(
         passes::validate_class_tparams::ValidateClassTparamsPass::default(),
 
     ];
+
     let mut errs = Vec::default();
-    let cfg = config::Config::new(tco, is_hhi, allow_type_constant_in_enum_class);
     node.transform(&cfg, &mut errs, &mut passes);
     errs
 }

@@ -62,15 +62,6 @@ if(NOT SKIP_CCACHE)
   endif(CCACHE_FOUND)
 endif(NOT SKIP_CCACHE)
 
-# 3rd party library
-IF(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third-party/CMakeLists.txt")
-  MESSAGE(FATAL_ERROR "third-party/CMakeLists.txt missing. "
-                      "Try updating your submodule with:
-rm -r third-party
-git submodule update --init --recursive
-")
-ENDIF()
-
 INCLUDE(HPHPFunctions)
 INCLUDE(CheckFunctionExists)
 

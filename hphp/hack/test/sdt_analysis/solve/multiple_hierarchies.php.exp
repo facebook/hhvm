@@ -1,11 +1,5 @@
 === SDT analysis results for multiple_hierarchies.php
-
-Stats:
-  id_cnt: 4
-  syntactically_nadable_cnt: 4
-  nadable_cnt: 4
-
-Candidates for adding <<__NoAutoDynamic>>:
-[class-like items]: \E
-[class-like items]: \C, \I
-[class-like items]: \D, \I
+{"entry_kind":"stats","id_cnt":4,"nadable_cnt":4,"syntactically_nadable_cnt":4}
+{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"(Cclass Concrete)","sid":"\\E"}]}
+{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"(Cclass Concrete)","sid":"\\C"},{"kind":"Cinterface","sid":"\\I"}]}
+{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"(Cclass Concrete)","sid":"\\D"},{"kind":"Cinterface","sid":"\\I"}]}

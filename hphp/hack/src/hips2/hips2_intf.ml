@@ -23,6 +23,9 @@ module type T = sig
       | ClassLike of string
       | Function of string
     [@@deriving ord, show { with_path = false }]
+
+    (** drop the tag: [ClassLike "Foo"] to `"Foo"] *)
+    val sid_of_t : t -> string
   end
 
   type inter_constraint_ =

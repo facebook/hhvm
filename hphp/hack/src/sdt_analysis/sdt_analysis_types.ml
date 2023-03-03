@@ -24,26 +24,26 @@ module Constraint = struct
   type t = NeedsSDT [@@deriving eq, hash, ord, show { with_path = false }]
 end
 
+type abstraction = Ast_defs.abstraction =
+  | Concrete
+  | Abstract
+[@@deriving eq, hash, ord, show { with_path = false }]
+
+let hash_abstraction : abstraction -> int =
+  Obj.magic hash_abstraction (* workaround for T92019055 *)
+
+type classish_kind = Ast_defs.classish_kind =
+  | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
+  | Cinterface  (** Kind for `interface` *)
+  | Ctrait  (** Kind for `trait` *)
+  | Cenum  (** Kind for `enum` *)
+  | Cenum_class of abstraction
+[@@deriving eq, hash, ord, show { with_path = false }]
+
+let hash_classish_kind : classish_kind -> int =
+  Obj.magic hash_classish_kind (* workaround for T92019055 *)
+
 module CustomInterConstraint = struct
-  type abstraction = Ast_defs.abstraction =
-    | Concrete
-    | Abstract
-  [@@deriving eq, hash, ord, show { with_path = false }]
-
-  let hash_abstraction : abstraction -> int =
-    Obj.magic hash_abstraction (* workaround for T92019055 *)
-
-  type classish_kind = Ast_defs.classish_kind =
-    | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
-    | Cinterface  (** Kind for `interface` *)
-    | Ctrait  (** Kind for `trait` *)
-    | Cenum  (** Kind for `enum` *)
-    | Cenum_class of abstraction
-  [@@deriving eq, hash, ord, show { with_path = false }]
-
-  let hash_classish_kind : classish_kind -> int =
-    Obj.magic hash_classish_kind (* workaround for T92019055 *)
-
   type t = {
     classish_kind_opt: classish_kind option;
         (** classish_kind is `None` for functions *)
@@ -93,9 +93,20 @@ module WalkResult = struct
   let singleton id constraint_ = add_constraint empty id constraint_
 end
 
-type summary = {
-  id_cnt: int;
-  syntactically_nadable_cnt: int;
-  nadable_cnt: int;
-  nadable_groups: H.Id.t list Sequence.t;
-}
+module Summary = struct
+  type nadable_kind =
+    | ClassLike of classish_kind
+    | Function
+
+  type nadable = {
+    id: H.Id.t;
+    kind: nadable_kind;
+  }
+
+  type t = {
+    id_cnt: int;
+    syntactically_nadable_cnt: int;
+    nadable_cnt: int;
+    nadable_groups: nadable list Sequence.t;
+  }
+end

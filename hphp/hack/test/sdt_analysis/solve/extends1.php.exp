@@ -1,9 +1,3 @@
 === SDT analysis results for extends1.php
-
-Stats:
-  id_cnt: 7
-  syntactically_nadable_cnt: 7
-  nadable_cnt: 4
-
-Candidates for adding <<__NoAutoDynamic>>:
-[functions]: \main
+{"entry_kind":"stats","id_cnt":7,"nadable_cnt":4,"syntactically_nadable_cnt":7}
+{"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"function","sid":"\\main"}]}

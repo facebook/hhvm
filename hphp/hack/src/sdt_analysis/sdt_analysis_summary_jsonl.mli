@@ -5,6 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 open Sdt_analysis_types
 
-val calc : H.Read.t -> Summary.t
+val of_summary : Summary.t -> string Sequence.t

@@ -26,6 +26,10 @@ module Make (Intra : Intra) = struct
     [@@deriving hash, eq, ord, sexp, show { with_path = false }]
 
     let hash : t -> int = Obj.magic hash (* workaround for T92019055 *)
+
+    let sid_of_t = function
+      | ClassLike sid -> sid
+      | Function sid -> sid
   end
 
   type inter_constraint_ =

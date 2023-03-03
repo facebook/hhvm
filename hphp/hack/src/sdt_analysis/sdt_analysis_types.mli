@@ -32,24 +32,24 @@ module Constraint : sig
   type t = NeedsSDT [@@deriving ord, show]
 end
 
+type abstraction = Ast_defs.abstraction =
+  | Concrete
+  | Abstract
+[@@deriving eq, hash, ord, show { with_path = false }]
+
+val hash_abstraction : abstraction -> int
+
+type classish_kind = Ast_defs.classish_kind =
+  | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
+  | Cinterface  (** Kind for `interface` *)
+  | Ctrait  (** Kind for `trait` *)
+  | Cenum  (** Kind for `enum` *)
+  | Cenum_class of abstraction
+[@@deriving eq, hash, ord, show { with_path = false }]
+
+val hash_classish_kind : classish_kind -> int
+
 module CustomInterConstraint : sig
-  type abstraction = Ast_defs.abstraction =
-    | Concrete
-    | Abstract
-  [@@deriving eq, hash, ord, show { with_path = false }]
-
-  val hash_abstraction : abstraction -> int
-
-  type classish_kind = Ast_defs.classish_kind =
-    | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
-    | Cinterface  (** Kind for `interface` *)
-    | Ctrait  (** Kind for `trait` *)
-    | Cenum  (** Kind for `enum` *)
-    | Cenum_class of abstraction
-  [@@deriving eq, hash, ord, show { with_path = false }]
-
-  val hash_classish_kind : classish_kind -> int
-
   (** Facts that help us summarize results. *)
   type t = {
     classish_kind_opt: classish_kind option;
@@ -91,13 +91,24 @@ module WalkResult : sig
   val singleton : H.Id.t -> 'a -> 'a t
 end
 
-type summary = {
-  id_cnt: int;
-  (* count of functions and class-like things *)
-  syntactically_nadable_cnt: int;
-  (* count of things where the <<__NoAutoDynamic>> attribute is syntactically allowed *)
-  nadable_cnt: int;
-  (* count of things the analysis thinks can have <<__NoAutoDynamic>> added *)
-  nadable_groups: H.Id.t list Sequence.t;
-      (* Sequence of lists of ids for things the analysis thinks can have <<__NoAutoDynamic>> added. Items in the same list should be modified together. *)
-}
+module Summary : sig
+  type nadable_kind =
+    | ClassLike of classish_kind
+    | Function
+
+  type nadable = {
+    id: H.Id.t;
+    kind: nadable_kind;
+  }
+
+  type t = {
+    id_cnt: int;
+    (* count of functions and class-like things *)
+    syntactically_nadable_cnt: int;
+    (* count of things where the <<__NoAutoDynamic>> attribute is syntactically allowed *)
+    nadable_cnt: int;
+    (* count of things the analysis thinks can have <<__NoAutoDynamic>> added *)
+    nadable_groups: nadable list Sequence.t;
+        (* Sequence of things the analysis thinks can have <<__NoAutoDynamic>> added. Items in the same list should be modified together. *)
+  }
+end

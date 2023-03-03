@@ -1,0 +1,7 @@
+=== SDT analysis results for implements1.php
+Intraprocedural Constraints for \I:
+NeedsSDT
+
+Intraprocedural Constraints for \C:
+NeedsSDT
+

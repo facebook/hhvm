@@ -22,7 +22,9 @@ module type T = sig
     | Function of string
   [@@deriving ord, show { with_path = false }]
 
-  type inter_constraint_ = Inherits of id
+  type inter_constraint_ =
+    | Inherits of id
+        (** Interpreted broadly: extends+implements+trait require *)
   [@@deriving ord, show { with_path = false }]
 
   module Read : sig

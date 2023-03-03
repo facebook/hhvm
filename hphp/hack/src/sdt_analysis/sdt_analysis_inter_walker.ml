@@ -19,10 +19,13 @@ let reduce_walk_result =
 
     method plus = WalkResult.( @ )
 
-    method! on_class_ env (A.{ c_name = (_, sid); c_extends; _ } as class_) =
+    method! on_class_
+        env
+        (A.{ c_name = (_, sid); c_extends; c_uses; c_implements; c_reqs; _ } as
+        class_) =
       let id = H.ClassLike sid in
 
-      let at_extends acc (_, hint_) =
+      let at_inherits acc (_, hint_) =
         match hint_ with
         | A.Happly ((hack_pos, parent_sid), _hints) ->
           let parent_id = H.ClassLike parent_sid in
@@ -33,10 +36,12 @@ let reduce_walk_result =
           WalkResult.add_constraint acc id decorated
         | _ -> acc
       in
-      WalkResult.(
-        let wr = List.fold ~init:WalkResult.empty ~f:at_extends c_extends in
-        let wr = WalkResult.add_id wr id in
-        wr @ super#on_class_ env class_)
+      let inherited =
+        c_uses @ c_extends @ c_implements @ List.map ~f:fst c_reqs
+      in
+      let wr = List.fold ~init:WalkResult.empty ~f:at_inherits inherited in
+      let wr = WalkResult.add_id wr id in
+      WalkResult.(wr @ super#on_class_ env class_)
 
     method! on_fun_def env (A.{ fd_name = (_, sid); _ } as fd) =
       let id = H.Function sid in

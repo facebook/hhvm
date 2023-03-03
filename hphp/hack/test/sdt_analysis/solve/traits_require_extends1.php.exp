@@ -1,0 +1,10 @@
+=== SDT analysis results for traits_require_extends1.php
+Intraprocedural Constraints for \C:
+NeedsSDT
+
+Intraprocedural Constraints for \Tr1:
+NeedsSDT
+
+Intraprocedural Constraints for \Abs:
+NeedsSDT
+

@@ -371,7 +371,7 @@ class parser {
   }
 
   // function:
-  //   statement_attrs function_qualifier
+  //   statement_attrs function_qualifier?
   //     return_type identifier? "(" field* ")" throws? annotations
   //
   // function_qualifier: "oneway" | "idempotent" | "readonly"

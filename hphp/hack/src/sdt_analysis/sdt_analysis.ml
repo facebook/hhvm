@@ -13,11 +13,31 @@ module InterWalker = Sdt_analysis_inter_walker
 module TastHandler = Sdt_analysis_tast_handler
 module PP = Sdt_analysis_pretty_printer
 
-let sid_of_id = function
-  | H.Class sid -> sid
-  | H.Function sid -> sid
+let exit_if_incorrect_tcopt ctx : unit =
+  let tcopt = Provider_context.get_tcopt ctx in
+  let has_correct_options =
+    TypecheckerOptions.(
+      enable_sound_dynamic tcopt
+      && tast_under_dynamic tcopt
+      && pessimise_builtins tcopt
+      && everything_sdt tcopt)
+  in
+  if not has_correct_options then (
+    Out_channel.output_string
+      stderr
+      {|sdt analysis can only be used with certain options.
+    If running with hh_single_type_check, pass flags `--implicit-pess --tast_under_dynamic.
+    If running with hh, pass these flags or set the corresponding .hhconfig options:
+        --config enable_sound_dynamic_type=true \
+        --config tast_under_dynamic=true \
+        --config pessimise_builtins=true \
+        --config everything_sdt=true \
+|};
+    exit 2
+  )
 
 let create_handler ctx : Tast_visitor.handler =
+  exit_if_incorrect_tcopt ctx;
   let writer = H.Write.create () in
   TastHandler.create_handler ctx writer
 
@@ -31,9 +51,14 @@ let parse_command ~command ~verbosity ~on_bad_command =
   in
   Sdt_analysis_options.mk ~verbosity ~command
 
+let sid_of_id = function
+  | H.Class sid -> sid
+  | H.Function sid -> sid
+
 let do_tast
     (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
   let Options.{ command; verbosity } = options in
+  exit_if_incorrect_tcopt ctx;
   let print_decorated_intra_constraints id decorated_constraints =
     let sid = sid_of_id id in
     Format.printf "Intraprocedural Constraints for %s:\n" sid;

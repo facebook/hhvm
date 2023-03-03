@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/package.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 
@@ -187,6 +188,21 @@ private:
   friend struct RepoOptions;
 };
 
+namespace Stream {
+struct Wrapper;
+}
+
+struct RepoOptionStats {
+  RepoOptionStats() = default;
+  RepoOptionStats(const std::string&, Stream::Wrapper*);
+  bool missing() const {
+    return !m_configStat.has_value() && !m_packageStat.has_value();
+  }
+
+  Optional<struct stat> m_configStat;
+  Optional<struct stat> m_packageStat;
+};
+
 /*
  * RepoOptionsFlags plus extra state
  */
@@ -195,8 +211,9 @@ struct RepoOptions {
   RepoOptions(RepoOptions&&) = default;
 
   const RepoOptionsFlags& flags() const { return m_flags; }
+  const PackageInfo& packageInfo() const { return m_packageInfo; }
   const std::string& path() const { return m_path; }
-  const struct stat& stat() const { return m_stat; }
+  const RepoOptionStats& stat() const { return m_stat; }
 
   const std::filesystem::path& dir() const { return m_repo; }
 
@@ -223,9 +240,11 @@ private:
   RepoOptionsFlags m_flags;
 
   std::string m_path;
-  struct stat m_stat;
+  RepoOptionStats m_stat;
 
   std::filesystem::path m_repo;
+
+  PackageInfo m_packageInfo;
 
   static bool s_init;
   static RepoOptions s_defaults;

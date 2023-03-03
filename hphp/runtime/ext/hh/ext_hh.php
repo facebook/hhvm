@@ -380,6 +380,12 @@ function enable_function_coverage(): void;
 <<__Native>>
 function collect_function_coverage(): dict<string, string>;
 
+/**
+ * Return all package information from PACKAGES.toml
+ */
+<<__Native>>
+function get_all_packages(): dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
+
 } // HH
 
 namespace HH\Rx {

@@ -1466,6 +1466,36 @@ Array HHVM_FUNCTION(collect_function_coverage) {
   return Func::GetCoverage();
 }
 
+const StaticString
+  s_uses("uses"),
+  s_includes("includes");
+
+Array HHVM_FUNCTION(get_all_packages) {
+  VMRegAnchor _;
+  auto const func =
+    fromCaller([] (const BTFrame& frm) { return frm.func(); });
+  assertx(func);
+  auto const packageInfo =
+    RepoOptions::forFile(func->filename()->data()).packageInfo();
+
+  DictInit result(packageInfo.packages().size());
+  for (auto const& [name, p] : packageInfo.packages()) {
+    DictInit package(2);
+
+    VecInit uses(p.m_uses.size());
+    for (auto& s : p.m_uses) uses.append(String{makeStaticString(s)});
+    package.set(s_uses.get(), uses.toVariant());
+
+    VecInit includes(p.m_includes.size());
+    for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
+    package.set(s_includes.get(), includes.toVariant());
+
+    result.set(makeStaticString(name), package.toVariant());
+  }
+
+  return result.toArray();
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1507,6 +1537,7 @@ static struct HHExtension final : Extension {
     X(hphp_get_logger_request_id);
     X(enable_function_coverage);
     X(collect_function_coverage);
+    X(get_all_packages);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

@@ -219,15 +219,21 @@ struct CachedRepoOptions {
     return *this;
   }
 
-  static bool isChanged(const RepoOptions* opts, struct stat s) {
-    auto const o = opts->stat();
-    return
-      s.st_mtim.tv_sec  != o.st_mtim.tv_sec ||
-      s.st_mtim.tv_nsec != o.st_mtim.tv_nsec ||
-      s.st_ctim.tv_sec  != o.st_ctim.tv_sec ||
-      s.st_ctim.tv_nsec != o.st_ctim.tv_nsec ||
-      s.st_dev != o.st_dev ||
-      s.st_ino != o.st_ino;
+  static bool isChanged(const RepoOptions* opts, const RepoOptionStats& st) {
+    auto const compare = [&] (Optional<struct stat> o,
+                              Optional<struct stat> s) {
+      if (!o.has_value() && !s.has_value()) return false;
+      if (o.has_value() != s.has_value()) return true;
+      return
+        s->st_mtim.tv_sec  != o->st_mtim.tv_sec ||
+        s->st_mtim.tv_nsec != o->st_mtim.tv_nsec ||
+        s->st_ctim.tv_sec  != o->st_ctim.tv_sec ||
+        s->st_ctim.tv_nsec != o->st_ctim.tv_nsec ||
+        s->st_dev != o->st_dev ||
+        s->st_ino != o->st_ino;
+    };
+    return compare(opts->stat().m_configStat, st.m_configStat)
+           || compare(opts->stat().m_packageStat, st.m_packageStat);
   }
 
   const RepoOptions* update(RepoOptions&& opts) const {
@@ -237,7 +243,7 @@ struct CachedRepoOptions {
     return val;
   }
 
-  const RepoOptions* fetch(struct stat st) const {
+  const RepoOptions* fetch(const RepoOptionStats& st) const {
     auto const opts = options.load(std::memory_order_relaxed);
     return opts && !isChanged(opts, st) ? opts : nullptr;
   }
@@ -265,15 +271,17 @@ using RepoOptionCache = tbb::concurrent_hash_map<
 >;
 RepoOptionCache s_repoOptionCache;
 
+constexpr char* kHhvmConfigHdf = ".hhvmconfig.hdf";
+constexpr char* kPackagesToml = "PACKAGES.toml";
+
 template<class F>
 bool walkDirTree(std::string fpath, F func) {
-  const char* filename = ".hhvmconfig.hdf";
   do {
     auto const off = fpath.rfind('/');
     if (off == std::string::npos) return false;
     fpath.resize(off);
     fpath += '/';
-    fpath += filename;
+    fpath += kHhvmConfigHdf;
 
     if (func(fpath)) return true;
 
@@ -284,6 +292,27 @@ bool walkDirTree(std::string fpath, F func) {
 
 RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
+}
+
+RepoOptionStats::RepoOptionStats(const std::string& configPath,
+                                 Stream::Wrapper* wrapper)
+  : m_configStat(std::nullopt)
+  , m_packageStat(std::nullopt)
+{
+  auto const wrapped_stat = [&](const char* path, struct stat* st) {
+    if (wrapper) return wrapper->stat(path, st);
+    return ::stat(path, st);
+  };
+  struct stat config;
+  if (wrapped_stat(configPath.data(), &config) == 0) m_configStat = config;
+  // Same directory
+  auto const repo =
+    configPath.empty() ? "" : std::filesystem::path(configPath).parent_path();
+  auto const packagePath = repo / kPackagesToml;
+  if (std::filesystem::exists(packagePath)) {
+    struct stat package;
+    if (wrapped_stat(packagePath.string().data(), &package) == 0) m_packageStat = config;
+  }
 }
 
 ParserEnv RepoOptionsFlags::getParserEnvironment() const {
@@ -376,11 +405,6 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
     wrapper = Stream::getWrapperFromURI(path);
     if (wrapper && !wrapper->isNormalFileStream()) wrapper = nullptr;
   }
-  auto const wrapped_stat = [&](const char* path, struct stat* st) {
-    if (wrapper) return wrapper->stat(path, st);
-    return ::stat(path, st);
-  };
-
   auto const wrapped_open = [&](const char* path) -> Optional<String> {
     if (wrapper) {
       if (auto const file = wrapper->open(path, "r", 0, nullptr)) {
@@ -399,7 +423,7 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   auto const set = [&] (
     RepoOptionCache::const_accessor& rpathAcc,
     const std::string& path,
-    const struct stat& st
+    const RepoOptionStats& st
   ) -> const RepoOptions* {
     *s_lastSeenRepoConfig = path;
     if (auto const opts = rpathAcc->second.fetch(st)) {
@@ -413,11 +437,11 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   };
 
   auto const test = [&] (const std::string& path) -> const RepoOptions* {
-    struct stat st;
     RepoOptionCache::const_accessor rpathAcc;
     const RepoOptionCacheKey key {(bool)wrapper, path};
     if (!s_repoOptionCache.find(rpathAcc, key)) return nullptr;
-    if (wrapped_stat(path.data(), &st) != 0) {
+    RepoOptionStats st(path, wrapper);
+    if (st.missing()) {
       s_repoOptionCache.erase(rpathAcc);
       return nullptr;
     }
@@ -450,8 +474,8 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   if (ret) return *ret;
 
   walkDirTree(fpath, [&] (const std::string& path) {
-    struct stat st;
-    if (wrapped_stat(path.data(), &st) != 0) return false;
+    RepoOptionStats st(path, wrapper);
+    if (st.missing()) return false;
     RepoOptionCache::const_accessor rpathAcc;
     const RepoOptionCacheKey key {(bool)wrapper, path};
     s_repoOptionCache.insert(rpathAcc, key);
@@ -474,6 +498,7 @@ AUTOLOADFLAGS()
 #undef P
 #undef H
 #undef E
+  mangleForKey(packageInfo().mangleForCacheKey(), raw);
   m_flags.m_sha1 = SHA1{string_sha1(raw)};
 }
 
@@ -531,6 +556,7 @@ AUTOLOADFLAGS();
   filterNamespaces();
   calcCacheKey();
   if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
+  m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -548,6 +574,7 @@ AUTOLOADFLAGS()
   filterNamespaces();
   m_path.clear();
   calcCacheKey();
+  m_packageInfo = PackageInfo::defaults();
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {

@@ -12,6 +12,7 @@ import uuid
 from typing import (
     Callable,
     Iterator,
+    List,
     Mapping,
     NamedTuple,
     Optional,
@@ -62,9 +63,12 @@ class LspCommandProcessor:
     @classmethod
     @contextlib.contextmanager
     def create(
-        cls: Type[U], env: Mapping[str, str], repo_dir: Optional[str] = None
+        cls: Type[U],
+        env: Mapping[str, str],
+        lsp_args: List[str],
+        repo_dir: Optional[str] = None,
     ) -> Iterator[U]:
-        args = ["--enhanced-hover", "--verbose"]
+        args = lsp_args + ["--enhanced-hover", "--verbose"]
         proc = subprocess.Popen(
             [hh_client, "lsp"] + args,
             stdin=subprocess.PIPE,

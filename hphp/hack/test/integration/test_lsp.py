@@ -10,7 +10,7 @@ import os
 import re
 import unittest
 import urllib.parse
-from typing import Iterable, List, Mapping, Tuple
+from typing import Iterable, List, Mapping, Optional, Tuple
 
 import common_tests
 from hh_paths import hh_server
@@ -182,6 +182,7 @@ class TestLsp(TestCase[LspTestDriver]):
         expected: Json,
         wait_for_server: bool,
         use_serverless_ide: bool,
+        lsp_args: List[str],
     ) -> None:
         if wait_for_server:
             assert not use_serverless_ide, (
@@ -203,7 +204,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.test_driver.stop_hh_server()
 
         with LspCommandProcessor.create(
-            self.test_driver.test_env, self.test_driver.repo_dir
+            self.test_driver.test_env, lsp_args, self.test_driver.repo_dir
         ) as lsp:
             observed_transcript = lsp.communicate(test)
 
@@ -270,13 +271,31 @@ class TestLsp(TestCase[LspTestDriver]):
         wait_for_server: bool = True,
         use_serverless_ide: bool = False,
     ) -> None:
+        self.load_and_run_lsp_with_config(
+            test_name=test_name,
+            variables=variables,
+            wait_for_server=wait_for_server,
+            use_serverless_ide=use_serverless_ide,
+        )
+
+    def load_and_run_lsp_with_config(
+        self,
+        test_name: str,
+        variables: Mapping[str, str],
+        wait_for_server: bool = True,
+        use_serverless_ide: bool = False,
+        lsp_args: Optional[List[str]] = None,
+    ) -> None:
         test, expected = self.load_test_data(test_name, variables)
+        if lsp_args is None:
+            lsp_args = []
         self.run_lsp_test(
             test_name=test_name,
             test=test,
             expected=expected,
             wait_for_server=wait_for_server,
             use_serverless_ide=use_serverless_ide,
+            lsp_args=lsp_args,
         )
 
     def run_spec(
@@ -293,7 +312,7 @@ class TestLsp(TestCase[LspTestDriver]):
             self.test_driver.stop_hh_server()
 
         with LspCommandProcessor.create(
-            self.test_driver.test_env
+            self.test_driver.test_env, []
         ) as lsp_command_processor:
             (observed_transcript, error_details) = spec.run(
                 lsp_command_processor=lsp_command_processor, variables=variables

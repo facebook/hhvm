@@ -8,10 +8,7 @@
 open Hh_prelude
 
 module type Intra = sig
-  type constraint_ [@@deriving eq, hash]
-
-  (** for observability only: no behavior should depend on what this function does *)
-  val debug_show_constraint_ : constraint_ -> string
+  type constraint_ [@@deriving eq, hash, show]
 end
 
 module type T = sig

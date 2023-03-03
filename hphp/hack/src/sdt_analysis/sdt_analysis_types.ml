@@ -31,9 +31,7 @@ type 'a decorated = {
 [@@deriving ord]
 
 module H = Hips2.Make (struct
-  type constraint_ = Constraint.t [@@deriving eq, hash]
-
-  let debug_show_constraint_ = Constraint.show
+  type constraint_ = Constraint.t [@@deriving eq, hash, show]
 end)
 
 module IdMap = Map.Make (struct

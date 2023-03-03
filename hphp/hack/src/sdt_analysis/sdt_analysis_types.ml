@@ -23,6 +23,11 @@ module Constraint = struct
   type t = NeedsSDT [@@deriving eq, hash, ord, show { with_path = false }]
 end
 
+module CustomInterConstraint = struct
+  type t = SyntacticallyNadable
+  [@@deriving eq, hash, ord, show { with_path = false }]
+end
+
 type 'a decorated = {
   hack_pos: Pos.t;
   origin: int;
@@ -31,7 +36,11 @@ type 'a decorated = {
 [@@deriving ord]
 
 module H = Hips2.Make (struct
-  type constraint_ = Constraint.t [@@deriving eq, hash, show]
+  type constraint_ = Constraint.t
+  [@@deriving eq, hash, show { with_path = false }]
+
+  type custom_inter_constraint_ = CustomInterConstraint.t
+  [@@deriving eq, hash, ord, show { with_path = false }]
 end)
 
 module IdMap = Map.Make (struct

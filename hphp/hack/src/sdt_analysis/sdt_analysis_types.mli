@@ -31,6 +31,10 @@ module Constraint : sig
   type t = NeedsSDT [@@deriving ord, show]
 end
 
+module CustomInterConstraint : sig
+  type t = SyntacticallyNadable [@@deriving ord, show]
+end
+
 type 'a decorated = {
   hack_pos: Pos.t;
   origin: int;
@@ -38,7 +42,10 @@ type 'a decorated = {
 }
 [@@deriving ord]
 
-module H : Hips2.T with type intra_constraint_ = Constraint.t
+module H :
+  Hips2.T
+    with type intra_constraint_ = Constraint.t
+     and type custom_inter_constraint_ = CustomInterConstraint.t
 
 module IdMap : Map.S with type key := H.id
 

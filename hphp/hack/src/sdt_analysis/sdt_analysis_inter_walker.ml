@@ -10,6 +10,20 @@ open Hh_prelude
 open Sdt_analysis_types
 module A = Aast
 
+let syntactically_nadable =
+  H.CustomInterConstraint CustomInterConstraint.SyntacticallyNadable
+
+let is_syntactically_nadable =
+  Ast_defs.(
+    function
+    | Cclass _
+    | Cinterface
+    | Ctrait ->
+      true
+    | Cenum
+    | Cenum_class _ ->
+      false)
+
 let reduce_walk_result =
   object
     inherit
@@ -21,8 +35,16 @@ let reduce_walk_result =
 
     method! on_class_
         env
-        (A.{ c_name = (_, sid); c_extends; c_uses; c_implements; c_reqs; _ } as
-        class_) =
+        (A.
+           {
+             c_name = (c_pos, sid);
+             c_extends;
+             c_uses;
+             c_implements;
+             c_reqs;
+             c_kind;
+             _;
+           } as class_) =
       let id = H.ClassLike sid in
 
       let at_inherits acc (_, hint_) =
@@ -41,11 +63,34 @@ let reduce_walk_result =
       in
       let wr = List.fold ~init:WalkResult.empty ~f:at_inherits inherited in
       let wr = WalkResult.add_id wr id in
+      let wr =
+        if is_syntactically_nadable c_kind then
+          WalkResult.add_constraint
+            wr
+            id
+            {
+              origin = __LINE__;
+              hack_pos = c_pos;
+              decorated_data = syntactically_nadable;
+            }
+        else
+          wr
+      in
       WalkResult.(wr @ super#on_class_ env class_)
 
-    method! on_fun_def env (A.{ fd_name = (_, sid); _ } as fd) =
+    method! on_fun_def env (A.{ fd_name = (f_pos, sid); _ } as fd) =
       let id = H.Function sid in
-      WalkResult.add_id (super#on_fun_def env fd) id
+      let wr =
+        WalkResult.singleton
+          id
+          {
+            origin = __LINE__;
+            hack_pos = f_pos;
+            decorated_data = syntactically_nadable;
+          }
+      in
+      let wr = WalkResult.add_id wr id in
+      WalkResult.(wr @ super#on_fun_def env fd)
   end
 
 let program (ctx : Provider_context.t) (tast : Tast.program) :

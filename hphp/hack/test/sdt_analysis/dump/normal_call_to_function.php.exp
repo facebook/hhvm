@@ -1,1 +1,7 @@
 === SDT analysis results for normal_call_to_function.php
+Interprocedural Constraints for \f:
+     3: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \main:
+     5: (CustomInterConstraint SyntacticallyNadable)
+

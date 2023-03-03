@@ -9,10 +9,14 @@ open Hh_prelude
 
 module type Intra = sig
   type constraint_ [@@deriving eq, hash, show]
+
+  type custom_inter_constraint_ [@@deriving eq, hash, ord, show]
 end
 
 module type T = sig
   type intra_constraint_
+
+  type custom_inter_constraint_ [@@deriving eq, hash, ord, show]
 
   type id =
     | ClassLike of string
@@ -22,6 +26,7 @@ module type T = sig
   type inter_constraint_ =
     | Inherits of id
         (** Interpreted broadly: extends+implements+trait require *)
+    | CustomInterConstraint of custom_inter_constraint_
   [@@deriving ord, show { with_path = false }]
 
   module Read : sig

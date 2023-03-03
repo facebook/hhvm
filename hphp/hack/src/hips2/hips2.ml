@@ -13,16 +13,20 @@ let hashset_size = 0
 
 let hashtbl_size = 0
 
-module Make (Intra : Intra) :
-  T with type intra_constraint_ = Intra.constraint_ = struct
+module Make (Intra : Intra) = struct
   type intra_constraint_ = Intra.constraint_ [@@deriving hash, eq]
+
+  type custom_inter_constraint_ = Intra.custom_inter_constraint_
+  [@@deriving hash, eq, ord, show { with_path = false }]
 
   type id =
     | ClassLike of string
     | Function of string
   [@@deriving hash, eq, ord, sexp, show { with_path = false }]
 
-  type inter_constraint_ = Inherits of id
+  type inter_constraint_ =
+    | Inherits of id
+    | CustomInterConstraint of custom_inter_constraint_
   [@@deriving eq, hash, ord, show { with_path = false }]
 
   let hash_id : id -> int = Obj.magic hash_id (* workaround for T92019055 *)
@@ -187,6 +191,8 @@ module Make (Intra : Intra) :
           let to_set = get_intras_set t id in
           let changed = IntraTbl.Set.union ~from_set ~to_set in
           changed
+        | CustomInterConstraint _ ->
+          false (* the solver ignores custom inter constraints *)
       in
       let has_changes =
         all_inter_constraints t

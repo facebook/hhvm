@@ -5,3 +5,11 @@ Intraprocedural Constraints for \f:
 Intraprocedural Constraints for \g:
    3: NeedsSDT
 
+Interprocedural Constraints for \f:
+     5: (CustomInterConstraint SyntacticallyNadable)
+     5: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \g:
+     3: (CustomInterConstraint SyntacticallyNadable)
+     3: (CustomInterConstraint SyntacticallyNadable)
+

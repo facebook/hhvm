@@ -1,0 +1,22 @@
+=== SDT analysis results for is_syntactically_nadable.php
+Interprocedural Constraints for \No1:
+     8: (Inherits (ClassLike "\\HH\\BuiltinEnum"))
+
+Interprocedural Constraints for \No2:
+     9: (Inherits (ClassLike "\\HH\\BuiltinEnumClass"))
+
+Interprocedural Constraints for \Yes1:
+     3: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \Yes2:
+     4: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \Yes3:
+     5: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \Yes4:
+     6: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \yes_fn:
+    11: (CustomInterConstraint SyntacticallyNadable)
+

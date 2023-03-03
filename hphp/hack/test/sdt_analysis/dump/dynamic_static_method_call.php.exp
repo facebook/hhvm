@@ -2,3 +2,9 @@
 Intraprocedural Constraints for \C:
    8: NeedsSDT
 
+Interprocedural Constraints for \C:
+     3: (CustomInterConstraint SyntacticallyNadable)
+
+Interprocedural Constraints for \main:
+     7: (CustomInterConstraint SyntacticallyNadable)
+

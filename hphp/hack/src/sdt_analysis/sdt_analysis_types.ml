@@ -97,5 +97,5 @@ type summary = {
   id_cnt: int;
   syntactically_nadable_cnt: int;
   nadable_cnt: int;
-  nadables: H.Id.t Sequence.t;
+  nadable_groups: H.Id.t list Sequence.t;
 }

@@ -6,5 +6,4 @@ Stats:
   nadable_cnt: 2
 
 Candidates for adding <<__NoAutoDynamic>>:
-  (ClassLike "\\I")
-  (ClassLike "\\C")
+[class-like items]: \C, \I

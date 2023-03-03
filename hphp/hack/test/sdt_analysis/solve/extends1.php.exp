@@ -6,7 +6,4 @@ Stats:
   nadable_cnt: 4
 
 Candidates for adding <<__NoAutoDynamic>>:
-  (ClassLike "\\NadMe3")
-  (ClassLike "\\NadMe2")
-  (Function "\\main")
-  (ClassLike "\\NadMe1")
+[functions]: \main

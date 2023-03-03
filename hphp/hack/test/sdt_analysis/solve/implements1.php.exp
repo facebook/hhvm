@@ -6,4 +6,4 @@ Stats:
   nadable_cnt: 1
 
 Candidates for adding <<__NoAutoDynamic>>:
-  (Function "\\main")
+[functions]: \main

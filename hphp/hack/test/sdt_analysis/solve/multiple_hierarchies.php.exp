@@ -1,0 +1,11 @@
+=== SDT analysis results for multiple_hierarchies.php
+
+Stats:
+  id_cnt: 4
+  syntactically_nadable_cnt: 4
+  nadable_cnt: 4
+
+Candidates for adding <<__NoAutoDynamic>>:
+[class-like items]: \E
+[class-like items]: \C, \I
+[class-like items]: \D, \I

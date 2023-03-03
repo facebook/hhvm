@@ -98,6 +98,6 @@ type summary = {
   (* count of things where the <<__NoAutoDynamic>> attribute is syntactically allowed *)
   nadable_cnt: int;
   (* count of things the analysis thinks can have <<__NoAutoDynamic>> added *)
-  nadables: H.Id.t Sequence.t;
-      (* sequence of ids for things the analysis thinks can have <<__NoAutoDynamic>> added *)
+  nadable_groups: H.Id.t list Sequence.t;
+      (* Sequence of lists of ids for things the analysis thinks can have <<__NoAutoDynamic>> added. Items in the same list should be modified together. *)
 }

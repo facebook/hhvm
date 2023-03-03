@@ -61,8 +61,24 @@ let parse_command ~command ~verbosity ~on_bad_command =
   in
   Sdt_analysis_options.mk ~verbosity ~command
 
+let sid_of_id =
+  H.Id.(
+    function
+    | Function sid -> sid
+    | ClassLike sid -> sid)
+
 let print_solution reader =
-  let { id_cnt; syntactically_nadable_cnt; nadable_cnt; nadables } =
+  let print_ids ids =
+    let label =
+      H.Id.(
+        match List.hd_exn ids with
+        | ClassLike _ -> "[class-like items]"
+        | Function _ -> "[functions]")
+    in
+    let sids = ids |> List.map ~f:sid_of_id |> String.concat ~sep:", " in
+    Format.printf "%s: %s\n" label sids
+  in
+  let { id_cnt; syntactically_nadable_cnt; nadable_cnt; nadable_groups } =
     Sdt_analysis_summary.calc reader
   in
   Format.printf
@@ -77,8 +93,7 @@ Stats:
     nadable_cnt;
   if nadable_cnt > 0 then (
     Format.printf "\nCandidates for adding <<__NoAutoDynamic>>:\n";
-    nadables
-    |> Sequence.iter ~f:(fun id -> Format.printf "  %s\n" @@ H.Id.show id)
+    nadable_groups |> Sequence.iter ~f:print_ids
   )
 
 let do_tast

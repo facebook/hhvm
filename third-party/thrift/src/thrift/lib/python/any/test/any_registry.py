@@ -29,7 +29,7 @@ from thrift.python.any.any_registry import AnyRegistry
 from thrift.test.testset import thrift_types
 
 if typing.TYPE_CHECKING:
-    from thrift.python.any.serializer import PrimitiveType
+    from thrift.python.any.serializer import PrimitiveType, SerializableType
 
 
 TEST_STRUCT = thrift_types.struct_map_string_i32(
@@ -46,6 +46,20 @@ TEST_PRIMITIVES: typing.List[PrimitiveType] = [
     "thrift-python",
     b"raw bytes",
     testing.thrift_types.Color.blue,
+]
+TEST_CONTAINERS: typing.List[
+    typing.Union[
+        typing.Sequence[SerializableType],
+        typing.AbstractSet[SerializableType],
+        typing.Mapping[str, SerializableType],
+    ]
+] = [
+    [1, 1, 2, 3, 5],
+    list(testing.thrift_types.Color),
+    [TEST_STRUCT, TEST_STRUCT],
+    {b"hello", b"world"},
+    {TEST_UNION},
+    {"foo": TEST_EXCEPTION, "bar": TEST_EXCEPTION},
 ]
 
 
@@ -137,6 +151,25 @@ class AnyRegistryTest(unittest.TestCase):
                             self.assertAlmostEqual(primitive, loaded, places=3)
                         else:
                             self.assertEqual(primitive, loaded)
+
+    def test_containers_round_trip(self) -> None:
+        registry = AnyRegistry()
+        registry.register_module(thrift_types)
+        registry.register_module(testing.thrift_types)
+
+        for standard_protocol in [
+            StandardProtocol.Binary,
+            StandardProtocol.Compact,
+            StandardProtocol.SimpleJson,
+        ]:
+            with self.subTest(standard_protocol=standard_protocol):
+                for container in TEST_CONTAINERS:
+                    with self.subTest(container=container):
+                        any_obj = registry.store(
+                            container, protocol=Protocol(standard=standard_protocol)
+                        )
+                        loaded = registry.load(any_obj)
+                        self.assertEqual(container, loaded)
 
     def test_iobuf_comes_back_as_bytes(self) -> None:
         registry = AnyRegistry()

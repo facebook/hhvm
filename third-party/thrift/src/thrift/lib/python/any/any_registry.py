@@ -28,7 +28,16 @@ from apache.thrift.type.standard.thrift_types import (
 from apache.thrift.type.type.thrift_types import Protocol, Type
 from folly.iobuf import IOBuf
 from thrift.python import serializer
-from thrift.python.any.serializer import deserialize_primitive, serialize_primitive
+from thrift.python.any.serializer import (
+    deserialize_list,
+    deserialize_map,
+    deserialize_primitive,
+    deserialize_set,
+    serialize_list,
+    serialize_map,
+    serialize_primitive,
+    serialize_set,
+)
 from thrift.python.conformance.universal_name import (
     find_by_universal_hash,
     get_universal_hash,
@@ -38,14 +47,26 @@ from thrift.python.conformance.universal_name import (
 from thrift.python.exceptions import GeneratedError
 from thrift.python.types import Enum, StructOrUnion, Union
 
+# When storing an empty container, the elem type doesn't matter so we just use bool as placeholder
+_ELEM_TYPE_FOR_EMPTY_CONTAINERS = Type(name=TypeName(boolType=Void.Unused))
+
 
 if typing.TYPE_CHECKING:
     from thrift.python.any.serializer import (
         PrimitiveType,
         SerializableType,
         StructOrUnionOrException,
+        TKey,
+        TSerializable,
+        TValue,
     )
 
+    SerializableTypeOrContainers = typing.Union[
+        SerializableType,
+        typing.Sequence[TSerializable],
+        typing.AbstractSet[TSerializable],
+        typing.Mapping[TKey, TValue],
+    ]
     ObjWithUri = typing.Union[StructOrUnionOrException, Enum]
     ClassWithUri = typing.Type[ObjWithUri]
 
@@ -72,24 +93,29 @@ def _get_type_hash_prefix(obj: ObjWithUri) -> bytes:
     )
 
 
-def _infer_type_name_from_value(value: PrimitiveType) -> TypeName:
-    if isinstance(value, Enum):
-        return TypeName(
-            enumType=TypeUri(typeHashPrefixSha2_256=_get_type_hash_prefix(value))
-        )
-    if isinstance(value, bool):
-        return TypeName(boolType=Void.Unused)
-    if isinstance(value, int):
-        return TypeName(i64Type=Void.Unused)
-    if isinstance(value, float):
-        return TypeName(doubleType=Void.Unused)
-    if isinstance(value, str):
-        return TypeName(stringType=Void.Unused)
-    if isinstance(value, bytes):
-        return TypeName(binaryType=Void.Unused)
-    if isinstance(value, IOBuf):
-        return TypeName(binaryType=Void.Unused)
-    raise ValueError(f"Can not infer thrift type from: {value}")
+def _infer_type_from_obj(obj: SerializableType) -> Type:
+    if isinstance(obj, (Enum, GeneratedError, StructOrUnion)):
+        type_uri = TypeUri(typeHashPrefixSha2_256=_get_type_hash_prefix(obj))
+        if isinstance(obj, Enum):
+            return Type(name=TypeName(enumType=type_uri))
+        if isinstance(obj, Union):
+            return Type(name=TypeName(unionType=type_uri))
+        if isinstance(obj, GeneratedError):
+            return Type(name=TypeName(exceptionType=type_uri))
+        return Type(name=TypeName(structType=type_uri))
+    if isinstance(obj, bool):
+        return Type(name=TypeName(boolType=Void.Unused))
+    if isinstance(obj, int):
+        return Type(name=TypeName(i64Type=Void.Unused))
+    if isinstance(obj, float):
+        return Type(name=TypeName(doubleType=Void.Unused))
+    if isinstance(obj, str):
+        return Type(name=TypeName(stringType=Void.Unused))
+    if isinstance(obj, bytes):
+        return Type(name=TypeName(binaryType=Void.Unused))
+    if isinstance(obj, IOBuf):
+        return Type(name=TypeName(binaryType=Void.Unused))
+    raise ValueError(f"Can not infer thrift type from: {obj}")
 
 
 class AnyRegistry:
@@ -120,7 +146,9 @@ class AnyRegistry:
         return any_change
 
     def store(
-        self, obj: SerializableType, protocol: typing.Optional[Protocol] = None
+        self,
+        obj: SerializableTypeOrContainers,
+        protocol: typing.Optional[Protocol] = None,
     ) -> Any:
         if protocol is None:
             protocol = Protocol(standard=StandardProtocol.Compact)
@@ -132,18 +160,17 @@ class AnyRegistry:
             return self._store_struct(obj, protocol=protocol)
         if isinstance(obj, (bool, int, float, str, bytes, IOBuf, Enum)):
             return self._store_primitive(obj, protocol=protocol)
-        raise ValueError(f"Unsupported type: f{type(obj)}")
+        if isinstance(obj, typing.Sequence):
+            return self._store_list(obj, protocol=protocol)
+        if isinstance(obj, typing.AbstractSet):
+            return self._store_set(obj, protocol=protocol)
+        if isinstance(obj, typing.Mapping):
+            return self._store_map(obj, protocol=protocol)
+        raise ValueError(f"Unsupported type: {type(obj)}")
 
     def _store_struct(self, obj: StructOrUnionOrException, protocol: Protocol) -> Any:
-        type_uri = TypeUri(typeHashPrefixSha2_256=_get_type_hash_prefix(obj))
-        if isinstance(obj, Union):
-            type_name = TypeName(unionType=type_uri)
-        elif isinstance(obj, GeneratedError):
-            type_name = TypeName(exceptionType=type_uri)
-        else:
-            type_name = TypeName(structType=type_uri)
         return Any(
-            type=Type(name=type_name),
+            type=_infer_type_from_obj(obj),
             protocol=protocol,
             data=serializer.serialize_iobuf(
                 obj,
@@ -152,7 +179,7 @@ class AnyRegistry:
         )
 
     def _store_primitive(self, obj: PrimitiveType, protocol: Protocol) -> Any:
-        thrift_type = Type(name=_infer_type_name_from_value(obj))
+        thrift_type = _infer_type_from_obj(obj)
         return Any(
             type=thrift_type,
             protocol=protocol,
@@ -160,6 +187,63 @@ class AnyRegistry:
                 obj,
                 protocol=_standard_protocol_to_serializer_protocol(protocol.standard),
                 thrift_type=thrift_type,
+            ),
+        )
+
+    def _store_list(
+        self, obj: typing.Sequence[TSerializable], protocol: Protocol
+    ) -> Any:
+        if obj:
+            elem_type = _infer_type_from_obj(obj[0])
+        else:
+            elem_type = _ELEM_TYPE_FOR_EMPTY_CONTAINERS
+        return Any(
+            type=Type(
+                name=TypeName(listType=Void.Unused),
+                params=[elem_type],
+            ),
+            protocol=protocol,
+            data=serialize_list(
+                obj,
+                protocol=_standard_protocol_to_serializer_protocol(protocol.standard),
+            ),
+        )
+
+    def _store_set(
+        self, obj: typing.AbstractSet[TSerializable], protocol: Protocol
+    ) -> Any:
+        if obj:
+            elem_type = _infer_type_from_obj(next(iter(obj)))
+        else:
+            elem_type = _ELEM_TYPE_FOR_EMPTY_CONTAINERS
+        return Any(
+            type=Type(
+                name=TypeName(setType=Void.Unused),
+                params=[elem_type],
+            ),
+            protocol=protocol,
+            data=serialize_set(
+                obj,
+                protocol=_standard_protocol_to_serializer_protocol(protocol.standard),
+            ),
+        )
+
+    def _store_map(self, obj: typing.Mapping[TKey, TValue], protocol: Protocol) -> Any:
+        if obj:
+            key, value = next(iter(obj.items()))
+            key_type = _infer_type_from_obj(key)
+            value_type = _infer_type_from_obj(value)
+        else:
+            key_type = value_type = _ELEM_TYPE_FOR_EMPTY_CONTAINERS
+        return Any(
+            type=Type(
+                name=TypeName(mapType=Void.Unused),
+                params=[key_type, value_type],
+            ),
+            protocol=protocol,
+            data=serialize_map(
+                obj,
+                protocol=_standard_protocol_to_serializer_protocol(protocol.standard),
             ),
         )
 
@@ -173,7 +257,7 @@ class AnyRegistry:
             )
         raise ValueError("No type information found")
 
-    def load(self, any_obj: Any) -> SerializableType:
+    def load(self, any_obj: Any) -> SerializableTypeOrContainers:
         if any_obj.protocol.type != Protocol.Type.standard:
             raise NotImplementedError(
                 f"Unsupported non-standard protocol: {any_obj.protocol.value}"
@@ -196,29 +280,17 @@ class AnyRegistry:
             TypeName.Type.enumType,
         ):
             return self._load_primitive(any_obj)
-        raise NotImplementedError(f"Unsupported type: {any_obj.type.name}")
+        if any_obj.type.name.type is TypeName.Type.listType:
+            return self._load_list(any_obj)
+        if any_obj.type.name.type is TypeName.Type.setType:
+            return self._load_set(any_obj)
+        if any_obj.type.name.type is TypeName.Type.mapType:
+            return self._load_map(any_obj)
+        raise NotImplementedError(f"Unsupported type: {any_obj.type}")
 
-    def _load_struct(self, any_obj: Any) -> StructOrUnionOrException:
-        type_uri = any_obj.type.name.value
-        if not isinstance(type_uri, TypeUri):
-            raise ValueError("Any object does not contain a struct or union")
-        cls = self._type_uri_to_cls(type_uri)
-        if not issubclass(cls, (GeneratedError, StructOrUnion)):
-            raise ValueError(f"{type_uri} is not a struct")
-        return serializer.deserialize(
-            # pyre-fixme[6]: For 1st argument expected `Type[Variable[sT (bound to
-            #  Union[GeneratedError, StructOrUnion])]]` but got
-            #  `Union[Type[Union[GeneratedError, StructOrUnion]], Type[Enum]]`.
-            cls,
-            any_obj.data,
-            protocol=_standard_protocol_to_serializer_protocol(
-                any_obj.protocol.standard
-            ),
-        )
-
-    def _type_name_to_primitive_type(
+    def _type_name_to_serializable_type(
         self, type_name: TypeName
-    ) -> typing.Type[PrimitiveType]:
+    ) -> typing.Type[SerializableType]:
         if type_name.type is TypeName.Type.boolType:
             return bool
         if type_name.type in (
@@ -236,19 +308,82 @@ class AnyRegistry:
             return str
         if type_name.type is TypeName.Type.binaryType:
             return bytes
-        if type_name.type is TypeName.Type.enumType:
-            cls = self._type_uri_to_cls(type_name.enumType)
-            if not issubclass(cls, Enum):
+        if type_name.type in (
+            TypeName.Type.enumType,
+            TypeName.Type.structType,
+            TypeName.Type.unionType,
+            TypeName.Type.exceptionType,
+        ):
+            # pyre-fixme[6]: For 1st argument expected `TypeUri` but got
+            #  `Union[None, TypeUri, Void]`.
+            cls = self._type_uri_to_cls(type_name.value)
+            if type_name.type is TypeName.Type.enumType and (not issubclass(cls, Enum)):
                 raise ValueError(f"{type_name.enumType} is not an enum")
-            # pyre-fixme[7]: Expected `Type[Union[Enum, IOBuf, bool, bytes, float,
-            #  int, str]]` but got `Union[Type[Union[GeneratedError, StructOrUnion]],
-            #  Type[Enum]]`.
+            if type_name.type in (
+                TypeName.Type.structType,
+                TypeName.Type.unionType,
+            ) and (not issubclass(cls, StructOrUnion)):
+                raise ValueError(f"{type_name.enumType} is not a struct/union")
+            if type_name.type is TypeName.Type.exceptionType and (
+                not issubclass(cls, GeneratedError)
+            ):
+                raise ValueError(f"{type_name.enumType} is not an exception")
             return cls
-        raise ValueError(f"Unsupported primitive type: {type_name}")
+        raise ValueError(f"Unsupported type: {type_name}")
+
+    def _load_struct(self, any_obj: Any) -> StructOrUnionOrException:
+        return serializer.deserialize(
+            # pyre-fixme[6]: For 1st argument expected `Type[Variable[sT (bound to
+            #  Union[GeneratedError, StructOrUnion])]]` but got `Type[Union[Enum,
+            #  GeneratedError, IOBuf, StructOrUnion, bool, bytes, float, int, str]]`.
+            self._type_name_to_serializable_type(any_obj.type.name),
+            any_obj.data,
+            protocol=_standard_protocol_to_serializer_protocol(
+                any_obj.protocol.standard
+            ),
+        )
 
     def _load_primitive(self, any_obj: Any) -> PrimitiveType:
         return deserialize_primitive(
-            self._type_name_to_primitive_type(any_obj.type.name),
+            # pyre-fixme[6]: For 1st argument expected `Type[Variable[TPrimitive
+            #  (bound to Union[Enum, IOBuf, bool, bytes, float, int, str])]]` but got
+            #  `Type[Union[Enum, GeneratedError, IOBuf, StructOrUnion, bool, bytes,
+            #  float, int, str]]`.
+            self._type_name_to_serializable_type(any_obj.type.name),
+            any_obj.data,
+            protocol=_standard_protocol_to_serializer_protocol(
+                any_obj.protocol.standard
+            ),
+        )
+
+    def _load_list(self, any_obj: Any) -> typing.Sequence[SerializableType]:
+        elem_cls = self._type_name_to_serializable_type(any_obj.type.params[0].name)
+        return deserialize_list(
+            elem_cls,
+            any_obj.data,
+            protocol=_standard_protocol_to_serializer_protocol(
+                any_obj.protocol.standard
+            ),
+        )
+
+    def _load_set(self, any_obj: Any) -> typing.AbstractSet[SerializableType]:
+        elem_cls = self._type_name_to_serializable_type(any_obj.type.params[0].name)
+        return deserialize_set(
+            elem_cls,
+            any_obj.data,
+            protocol=_standard_protocol_to_serializer_protocol(
+                any_obj.protocol.standard
+            ),
+        )
+
+    def _load_map(
+        self, any_obj: Any
+    ) -> typing.Mapping[SerializableType, SerializableType]:
+        key_cls = self._type_name_to_serializable_type(any_obj.type.params[0].name)
+        value_cls = self._type_name_to_serializable_type(any_obj.type.params[1].name)
+        return deserialize_map(
+            key_cls,
+            value_cls,
             any_obj.data,
             protocol=_standard_protocol_to_serializer_protocol(
                 any_obj.protocol.standard

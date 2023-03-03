@@ -89,53 +89,12 @@ const StaticString
   s_line("line"),
   s_metadata("metadata"),
   s_native("Native"),
-  s_phpStack("phpStack"),
   s_sourceType("sourceType"),
   s_stack("stack"),
   s_time_ns("timeNano"),
   s_lastTriggerTime("lastTriggerTimeNano"),
   s_unwinder("Unwinder");
 
-
-namespace {
-
-Array parsePhpStack(const Array& bt) {
-  VecInit stack(bt->size());
-  for (ArrayIter it(bt); it; ++it) {
-    const auto& frame = it.second().toArray();
-    if (frame.exists(s_function)) {
-      bool fileline = frame.exists(s_file) && frame.exists(s_line);
-      bool metadata = frame.exists(s_metadata);
-
-      DictInit element(1 + (fileline ? 2 : 0) + (metadata ? 1 : 0));
-
-      if (frame.exists(s_class)) {
-        auto func = folly::to<std::string>(
-          frame[s_class].toString().c_str(),
-          "::",
-          frame[s_function].toString().c_str()
-        );
-        element.set(s_function, func);
-      } else {
-        element.set(s_function, frame[s_function].toString());
-      }
-
-      if (fileline) {
-        element.set(s_file, frame[s_file]);
-        element.set(s_line, frame[s_line]);
-      }
-
-      if (metadata) {
-        element.set(s_metadata, frame[s_metadata]);
-      }
-
-      stack.append(element.toArray());
-    }
-  }
-  return stack.toArray();
-}
-
-} // namespace
 
 ///////////////////////////////////////////////////////////////////////////
 // A singleton object that handles the two Xenon modes (always or timer).
@@ -273,7 +232,6 @@ Array XenonRequestLocalData::createResponse() {
       s_time_ns, frame[s_time_ns],
       s_lastTriggerTime, frame[s_lastTriggerTime],
       s_stack, frame[s_stack].toArray(),
-      s_phpStack, parsePhpStack(frame[s_stack].toArray()),
       s_isWait, frame[s_isWait],
       s_sourceType, frame[s_sourceType]
     ));

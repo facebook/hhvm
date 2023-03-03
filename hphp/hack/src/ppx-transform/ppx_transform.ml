@@ -26,13 +26,6 @@ module Help = struct
         string_of_int n
     in
     a ^ v
-
-  let fresh =
-    let n = ref 0 in
-    fun () ->
-      let nm = "_" ^ tyvar_name !n in
-      incr n;
-      nm
 end
 
 module Names = struct
@@ -160,7 +153,7 @@ module Core_ty = struct
   let tyvar_exn { ptyp_desc; _ } =
     match ptyp_desc with
     | Ptyp_var nm -> nm
-    | Ptyp_any -> Help.fresh ()
+    | Ptyp_any -> gen_symbol ()
     | _ -> failwith "Expected a type variable"
 
   let ctor_longident_exn { ptyp_desc; _ } =

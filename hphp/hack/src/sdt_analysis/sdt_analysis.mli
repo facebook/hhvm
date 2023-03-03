@@ -14,4 +14,7 @@ val do_ :
   Tast.program ->
   unit
 
-val create_handler : Provider_context.t -> Tast_visitor.handler
+val default_db_dir : string
+
+val create_handler :
+  db_dir:string -> worker_id:int -> Provider_context.t -> Tast_visitor.handler

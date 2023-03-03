@@ -18,7 +18,7 @@ module Options = struct
 end
 
 module Constraint = struct
-  type t = NeedsSDT [@@deriving ord, show { with_path = false }]
+  type t = NeedsSDT [@@deriving eq, hash, ord, show { with_path = false }]
 end
 
 type 'a decorated = {
@@ -29,7 +29,7 @@ type 'a decorated = {
 [@@deriving ord]
 
 module H = Hips2.Make (struct
-  type constraint_ = Constraint.t
+  type constraint_ = Constraint.t [@@deriving eq, hash]
 
   let debug_show_constraint_ = Constraint.show
 end)

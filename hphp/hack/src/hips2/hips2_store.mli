@@ -5,8 +5,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Hh_prelude
 
-let create_handler ctx =
-  let worker_id = !Typing_deps.worker_id |> Option.value ~default:0 in
-  let db_dir = Sdt_analysis.default_db_dir in
-  Sdt_analysis.create_handler ~db_dir ~worker_id ctx
+val persist : db_dir:string -> worker_id:int -> 'a -> unit
+
+val un_persist : db_dir:string -> 'a Sequence.t

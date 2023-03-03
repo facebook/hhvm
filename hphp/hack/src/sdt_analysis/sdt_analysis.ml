@@ -13,6 +13,8 @@ module InterWalker = Sdt_analysis_inter_walker
 module TastHandler = Sdt_analysis_tast_handler
 module PP = Sdt_analysis_pretty_printer
 
+let default_db_dir = "/tmp/sdt_analysis_constraints"
+
 let exit_if_incorrect_tcopt ctx : unit =
   let tcopt = Provider_context.get_tcopt ctx in
   let has_correct_options =
@@ -36,10 +38,18 @@ let exit_if_incorrect_tcopt ctx : unit =
     exit 2
   )
 
-let create_handler ctx : Tast_visitor.handler =
+let create_handler ~db_dir ~worker_id ctx : Tast_visitor.handler =
   exit_if_incorrect_tcopt ctx;
-  let writer = H.Write.create () in
+  let (_flush, writer) = H.Write.create ~db_dir ~worker_id in
   TastHandler.create_handler ctx writer
+
+let fresh_db_dir () =
+  (* enables test parallelization *)
+  Format.sprintf
+    "/tmp/sdt_analysis-%f-%d-%d"
+    (Unix.gettimeofday ())
+    (Unix.getpid ())
+    (Random.int 999)
 
 let parse_command ~command ~verbosity ~on_bad_command =
   let command =
@@ -70,12 +80,11 @@ let do_tast
              (PP.decorated ~show:Constraint.show ~verbosity constr));
     Format.printf "\n%!"
   in
-  let print_intra_constraints id (intra_constraints : Constraint.t HashSet.t) =
+  let print_intra_constraints id (intra_constraints : Constraint.t list) =
     let sid = sid_of_id id in
-    if not @@ HashSet.is_empty intra_constraints then (
+    if not @@ List.is_empty intra_constraints then (
       Format.printf "Intraprocedural Constraints for %s:\n" sid;
       intra_constraints
-      |> HashSet.to_list
       |> List.sort ~compare:Constraint.compare
       |> List.iter ~f:(fun constr ->
              Format.printf "%s\n" (Constraint.show constr));
@@ -101,13 +110,20 @@ let do_tast
     IntraWalker.program ctx tast |> IdMap.iter print_decorated_intra_constraints;
     InterWalker.program ctx tast |> IdMap.iter print_decorated_inter_constraints
   | Options.SolveConstraints ->
-    let writer = H.Write.create () in
-    let tast_handler = TastHandler.create_handler ctx writer in
-    (Tast_visitor.iter_with [tast_handler])#go ctx tast;
-    let reader = H.Write.solve writer in
+    let db_dir = fresh_db_dir () in
+    let worker_id = 0 in
+    let generate_constraints () =
+      let (flush, writer) = H.Write.create ~db_dir ~worker_id in
+      let tast_handler = TastHandler.create_handler ctx writer in
+      (Tast_visitor.iter_with [tast_handler])#go ctx tast;
+      flush ()
+    in
+    generate_constraints ();
+    let reader = H.solve ~db_dir in
     H.Read.get_keys reader
     |> Sequence.iter ~f:(fun id ->
-           print_intra_constraints id @@ H.Read.get_intras reader id)
+           let intras = H.Read.get_intras reader id |> Sequence.to_list in
+           print_intra_constraints id intras)
 
 let do_ ~command ~verbosity ~on_bad_command =
   let opts = parse_command ~command ~on_bad_command ~verbosity in

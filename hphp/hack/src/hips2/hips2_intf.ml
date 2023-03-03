@@ -8,7 +8,7 @@
 open Hh_prelude
 
 module type Intra = sig
-  type constraint_
+  type constraint_ [@@deriving eq, hash]
 
   (** for observability only: no behavior should depend on what this function does *)
   val debug_show_constraint_ : constraint_ -> string
@@ -28,9 +28,9 @@ module type T = sig
   module Read : sig
     type t
 
-    val get_inters : t -> id -> inter_constraint_ HashSet.t
+    val get_inters : t -> id -> inter_constraint_ Sequence.t
 
-    val get_intras : t -> id -> intra_constraint_ HashSet.t
+    val get_intras : t -> id -> intra_constraint_ Sequence.t
 
     val get_keys : t -> id Sequence.t
   end
@@ -38,17 +38,20 @@ module type T = sig
   module Write : sig
     type t
 
-    val create : unit -> t
+    (** enables flushing to disk. You may not need this, since flushing happens automatically `at_exit` *)
+    type flush = unit -> unit
+
+    val create : db_dir:string -> worker_id:int -> flush * t
 
     val add_id : t -> id -> unit
 
     val add_inter : t -> id -> inter_constraint_ -> unit
 
     val add_intra : t -> id -> intra_constraint_ -> unit
-
-    val solve : t -> Read.t
-
-    (** dump the constraints provided with `add_inter` and `add_intra`, without modification *)
-    val debug_dump : t -> Read.t
   end
+
+  (** read the constraints provided with `add_inter` and `add_intra`, without modification *)
+  val debug_dump : db_dir:string -> Read.t
+
+  val solve : db_dir:string -> Read.t
 end

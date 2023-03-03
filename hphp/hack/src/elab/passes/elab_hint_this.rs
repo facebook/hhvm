@@ -264,13 +264,13 @@ impl Pass for ElabHintThisPass {
     where
         Ex: Default,
     {
-        if elem.is_static {
-            let lsb = !elem
-                .user_attributes
-                .iter()
-                .any(|ua| ua.name.name() == sn::user_attributes::LSB);
-            self.set_static_class_var(lsb)
-        }
+        self.set_static_class_var(
+            elem.is_static
+                && !elem
+                    .user_attributes
+                    .iter()
+                    .any(|ua| ua.name.name() == sn::user_attributes::LSB),
+        );
         ControlFlow::Continue(())
     }
 

@@ -1,10 +1,10 @@
 === SDT analysis results for dynamic_static_method_call.php
-Intraprocedural Constraints for \C:
+Intraprocedural Constraints for (ClassLike "\\C"):
    8: NeedsSDT
 
-Interprocedural Constraints for \C:
+Interprocedural Constraints for (ClassLike "\\C"):
      3: (CustomInterConstraint SyntacticallyNadable)
 
-Interprocedural Constraints for \main:
+Interprocedural Constraints for (Function "\\main"):
      7: (CustomInterConstraint SyntacticallyNadable)
 

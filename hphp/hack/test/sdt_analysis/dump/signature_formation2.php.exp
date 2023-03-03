@@ -1,15 +1,15 @@
 === SDT analysis results for signature_formation2.php
-Intraprocedural Constraints for \f:
+Intraprocedural Constraints for (Function "\\f"):
    5: NeedsSDT
 
-Intraprocedural Constraints for \g:
+Intraprocedural Constraints for (Function "\\g"):
    3: NeedsSDT
 
-Interprocedural Constraints for \f:
+Interprocedural Constraints for (Function "\\f"):
      5: (CustomInterConstraint SyntacticallyNadable)
      5: (CustomInterConstraint SyntacticallyNadable)
 
-Interprocedural Constraints for \g:
+Interprocedural Constraints for (Function "\\g"):
      3: (CustomInterConstraint SyntacticallyNadable)
      3: (CustomInterConstraint SyntacticallyNadable)
 

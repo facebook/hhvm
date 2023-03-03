@@ -1,7 +1,7 @@
 === SDT analysis results for dynamically_callable_function.php
-Intraprocedural Constraints for \f:
+Intraprocedural Constraints for (Function "\\f"):
    3: NeedsSDT
 
-Interprocedural Constraints for \f:
+Interprocedural Constraints for (Function "\\f"):
      4: (CustomInterConstraint SyntacticallyNadable)
 

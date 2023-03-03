@@ -61,12 +61,6 @@ let parse_command ~command ~verbosity ~on_bad_command =
   in
   Sdt_analysis_options.mk ~verbosity ~command
 
-let sid_of_id =
-  H.Id.(
-    function
-    | ClassLike sid -> sid
-    | Function sid -> sid)
-
 let print_solution reader =
   let { id_cnt; syntactically_nadable_cnt; nadable_cnt; nadables } =
     Sdt_analysis_summary.calc reader
@@ -92,8 +86,7 @@ let do_tast
   let Options.{ command; verbosity } = options in
   exit_if_incorrect_tcopt ctx;
   let print_decorated_intra_constraints id decorated_constraints =
-    let sid = sid_of_id id in
-    Format.printf "Intraprocedural Constraints for %s:\n" sid;
+    Format.printf "Intraprocedural Constraints for %s:\n" (H.Id.show id);
     decorated_constraints
     |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
     |> List.iter ~f:(fun constr ->
@@ -109,9 +102,8 @@ let do_tast
     Fn.compose (Format.printf "%s\n") H.show_inter_constraint_
   in
   let print_intra_constraints id (intra_constraints : Constraint.t list) =
-    let sid = sid_of_id id in
     if not @@ List.is_empty intra_constraints then (
-      Format.printf "Intraprocedural Constraints for %s:\n" sid;
+      Format.printf "Intraprocedural Constraints for %s:\n" (H.Id.show id);
       intra_constraints
       |> List.sort ~compare:Constraint.compare
       |> List.iter ~f:print_intra_constraint;
@@ -120,9 +112,8 @@ let do_tast
   in
   let print_decorated_inter_constraints
       id (decorated_inter_constraints : H.inter_constraint_ decorated list) =
-    let sid = sid_of_id id in
     if not @@ List.is_empty decorated_inter_constraints then begin
-      Format.printf "Interprocedural Constraints for %s:\n" sid;
+      Format.printf "Interprocedural Constraints for %s:\n" (H.Id.show id);
       decorated_inter_constraints
       |> List.sort ~compare:(compare_decorated H.compare_inter_constraint_)
       |> List.iter ~f:(fun constr ->

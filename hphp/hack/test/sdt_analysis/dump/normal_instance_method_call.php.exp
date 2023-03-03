@@ -1,7 +1,7 @@
 === SDT analysis results for normal_instance_method_call.php
-Interprocedural Constraints for \C:
+Interprocedural Constraints for (ClassLike "\\C"):
      3: (CustomInterConstraint SyntacticallyNadable)
 
-Interprocedural Constraints for \main:
+Interprocedural Constraints for (Function "\\main"):
      7: (CustomInterConstraint SyntacticallyNadable)
 

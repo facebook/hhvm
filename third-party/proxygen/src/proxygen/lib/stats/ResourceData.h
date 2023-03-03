@@ -30,8 +30,8 @@ struct ResourceData : public PeriodicStatsDataBase {
    * utilized should it not be idle (i.e. excludes both idle and iowait
    * proc stats).
    */
-  double getCpuRatioUtil() const {
-    return cpuRatioUtil_;
+  double getCpuRatioUtil(bool normalized = true) const {
+    return normalized ? std::min(1.0, cpuRatioUtil_) : cpuRatioUtil_;
   }
 
   /**
@@ -39,9 +39,14 @@ struct ResourceData : public PeriodicStatsDataBase {
    * Note for the purposes of this implementation, a core is considered
    * utilized should it not be idle (i.e. excludes both idle and iowait
    * proc stats)
+   *
+   * Cgroup CPU utilization might be significantly off during peak utilization
+   * i.e. way above 100% due to CPU throttling, pass `normalized` as false if
+   * you want to see values above 100, for example if you aggregate values over
+   * some window.
    */
-  double getCpuPctUtil() const {
-    return getPctFromRatio(cpuRatioUtil_);
+  double getCpuPctUtil(bool normalized = true) const {
+    return getPctFromRatio(getCpuRatioUtil(normalized));
   }
 
   /**

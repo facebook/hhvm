@@ -7,4 +7,4 @@
  *)
 
 (** Tast visitor to count like types across different entities. *)
-val handler : Tast_visitor.handler
+val create_handler : Provider_context.t -> Tast_visitor.handler

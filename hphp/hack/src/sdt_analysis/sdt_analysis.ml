@@ -17,9 +17,9 @@ let sid_of_id = function
   | H.Class sid -> sid
   | H.Function sid -> sid
 
-let tast_handler ctx : Tast_visitor.handler =
+let create_handler ctx : Tast_visitor.handler =
   let writer = H.Write.create () in
-  TastHandler.handler ctx writer
+  TastHandler.create_handler ctx writer
 
 let parse_command ~command ~verbosity ~on_bad_command =
   let command =
@@ -77,7 +77,7 @@ let do_tast
     InterWalker.program ctx tast |> IdMap.iter print_decorated_inter_constraints
   | Options.SolveConstraints ->
     let writer = H.Write.create () in
-    let tast_handler = TastHandler.handler ctx writer in
+    let tast_handler = TastHandler.create_handler ctx writer in
     (Tast_visitor.iter_with [tast_handler])#go ctx tast;
     let reader = H.Write.solve writer in
     H.Read.get_keys reader

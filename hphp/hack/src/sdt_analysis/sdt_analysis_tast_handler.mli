@@ -7,4 +7,4 @@
  *)
 open Sdt_analysis_types
 
-val handler : Provider_context.t -> H.Write.t -> Tast_visitor.handler
+val create_handler : Provider_context.t -> H.Write.t -> Tast_visitor.handler

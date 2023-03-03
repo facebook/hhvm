@@ -6,4 +6,5 @@
  *
  *)
 
-let create_handler = Sdt_analysis.create_handler
+(** collects __SupportDynamicType information *)
+val create_handler : Provider_context.t -> Tast_visitor.handler

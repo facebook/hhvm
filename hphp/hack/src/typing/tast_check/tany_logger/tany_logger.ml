@@ -180,7 +180,7 @@ let collect_infos =
       (collect_infos_methods_functions context_id)#on_method_ env m
   end
 
-let handler =
+let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 

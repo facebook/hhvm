@@ -14,7 +14,7 @@ let should_visit = Fn.non Tast_env.is_hhi
 
 let strip_constraints { decorated_data; _ } = decorated_data
 
-let handler ctx writer =
+let create_handler ctx writer =
   let write_ids_and_inters id (cs : H.inter_constraint_ decorated list) =
     H.Write.add_id writer id;
     cs

@@ -19,15 +19,15 @@ let logger_handlers ctx =
   let log_levels = TypecheckerOptions.log_levels tco in
   let add_handler handlers (key, handler) =
     match SMap.find_opt key log_levels with
-    | Some level when level > 0 -> handler :: handlers
+    | Some level when level > 0 -> handler ctx :: handlers
     | _ -> handlers
   in
   let key_handler_pairs =
     [
-      ("tany", Tany_logger.handler);
-      ("like_type", Like_type_logger.handler);
-      ("shape_analysis", Shape_analysis_logger.handler);
-      ("sdt_analysis", Sdt_analysis_logger.handler ctx);
+      ("tany", Tany_logger.create_handler);
+      ("like_type", Like_type_logger.create_handler);
+      ("shape_analysis", Shape_analysis_logger.create_handler);
+      ("sdt_analysis", Sdt_analysis_logger.create_handler);
     ]
   in
   List.fold ~init:[] ~f:add_handler key_handler_pairs

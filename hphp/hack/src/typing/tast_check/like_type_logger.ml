@@ -271,7 +271,7 @@ let log_type_partition env log =
     Out_channel.flush !Typing_log.out_channel
   end
 
-let handler =
+let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 

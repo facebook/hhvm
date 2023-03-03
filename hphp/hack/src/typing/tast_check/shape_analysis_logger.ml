@@ -191,7 +191,7 @@ let should_not_skip tast_env =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   not @@ Typing_env.is_hhi typing_env
 
-let handler =
+let create_handler _ctx =
   object
     inherit Tast_visitor.handler_base
 

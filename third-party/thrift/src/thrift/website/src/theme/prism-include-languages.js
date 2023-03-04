@@ -16,6 +16,7 @@ export default function prismIncludeLanguages(PrismObject) {
     require(`prismjs/components/prism-${lang}`);
   });
 
+  // Syntax highlighting rules for Thrift code:
   Prism.languages.thrift = {
     'keyword': [
       /\b(?:binary|bool|byte|const|cpp_include|double|enum|exception)\b/,
@@ -41,6 +42,18 @@ export default function prismIncludeLanguages(PrismObject) {
         'greedy': true
       }
     ]
+  };
+
+  // Syntax highlighting rules for grammar (modified BNF):
+  Prism.languages.grammar = {
+    'defined-symbol': {
+      'pattern': /(^|\n)[a-z][a-z_]*/,
+      'lookbehind': true,
+      'alias': 'keyword'
+    },
+    'string': /(?:"[^"]*"|'[^']*')/,
+    'operator': /(?:[|*]|\.\.\.|::=)/,
+    'punctuation': /[\[\]()]/
   };
 
   delete globalThis.Prism;

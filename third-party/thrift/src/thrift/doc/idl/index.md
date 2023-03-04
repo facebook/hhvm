@@ -49,14 +49,15 @@ Thrift has two types of keywords: reserved words and context-sensitive keywords.
 The following are reserved words in Thrift - and cannot be used as identifiers:
 
 ```thrift
-binary              extends             list                stream
-bool                float               map                 string
-byte                hs_include          namespace           struct
-const               i16                 optional            throws
-cpp_include         i32                 performs            typedef
-double              i64                 required            union
-enum                include             service             void
-exception           interaction         set
+binary              false               map                 struct
+bool                float               namespace           throws
+byte                hs_include          optional            true
+const               i16                 performs            typedef
+cpp_include         i32                 required            union
+double              i64                 service             void
+enum                include             set
+exception           interaction         stream
+extends             list                string
 ```
 
 Context-sensitive keywords listed below can be used as identifiers:

@@ -233,6 +233,7 @@ struct RepoFile {
   // loaded with the UnitEmitter and will instead be loaded on demand.
   static std::unique_ptr<UnitEmitter>
   loadUnitEmitter(const StringData* path,
+                  const RepoUnitInfo* info,
                   const Native::FuncTable& nativeFuncs,
                   bool lazy);
 

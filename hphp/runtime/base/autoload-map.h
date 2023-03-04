@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/type-string.h"
+
 #include "hphp/util/assertions.h"
 
 namespace folly {
@@ -31,6 +32,7 @@ namespace folly {
 namespace HPHP {
 
 struct Variant;
+struct RepoUnitInfo;
 
 struct AutoloadMap {
 
@@ -51,6 +53,21 @@ struct AutoloadMap {
     Module = 4,
     TypeAlias = 5,
     TypeOrTypeAlias = 6,
+  };
+
+  struct FileResult {
+    String path;
+    const RepoUnitInfo* info;
+
+    FileResult(String path, const RepoUnitInfo* info)
+      : path(path), info(info) {}
+    explicit FileResult(String path): path(path), info(nullptr) {}
+
+    FileResult& operator=(String path) {
+      this->path = path;
+      this->info = nullptr;
+      return *this;
+    }
   };
 
   struct Holder {
@@ -109,7 +126,7 @@ struct AutoloadMap {
    * In general this is only safe to call on request threads because the
    * resulting string (absolute path) may be allocated on the request heap.
    */
-  Optional<String> getFile(KindOf kind, const String& symbol) {
+  Optional<FileResult> getFile(KindOf kind, const String& symbol) {
     switch (kind) {
       case AutoloadMap::KindOf::TypeOrTypeAlias: return getTypeOrTypeAliasFile(symbol);
       case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
@@ -160,12 +177,12 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
-  virtual Optional<String> getTypeOrTypeAliasFile(const String& typeName) = 0;
-  virtual Optional<String> getTypeFile(const String& typeName) = 0;
-  virtual Optional<String> getFunctionFile(const String& functionName) = 0;
-  virtual Optional<String> getConstantFile(const String& constantName) = 0;
-  virtual Optional<String> getTypeAliasFile(const String& aliasName) = 0;
-  virtual Optional<String> getModuleFile(const String& moduleName) = 0;
+  virtual Optional<FileResult> getTypeOrTypeAliasFile(const String& typeName) = 0;
+  virtual Optional<FileResult> getTypeFile(const String& typeName) = 0;
+  virtual Optional<FileResult> getFunctionFile(const String& functionName) = 0;
+  virtual Optional<FileResult> getConstantFile(const String& constantName) = 0;
+  virtual Optional<FileResult> getTypeAliasFile(const String& aliasName) = 0;
+  virtual Optional<FileResult> getModuleFile(const String& moduleName) = 0;
 
   virtual Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) = 0;
   virtual Optional<std::filesystem::path> getTypeFile(std::string_view name) = 0;

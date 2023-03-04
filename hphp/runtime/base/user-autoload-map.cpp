@@ -124,7 +124,7 @@ Array UserAutoloadMap::getAllFiles() const {
   return ret.toVec();
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 UserAutoloadMap::getTypeOrTypeAliasFile(const String& typeName) {
   auto typeFile = getTypeFile(typeName);
   if (typeFile) {
@@ -133,24 +133,29 @@ UserAutoloadMap::getTypeOrTypeAliasFile(const String& typeName) {
   return getTypeAliasFile(typeName);
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 UserAutoloadMap::getTypeFile(const String& typeName) {
   return getFileFromMap(m_typeFile, HHVM_FN(strtolower)(typeName));
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 UserAutoloadMap::getFunctionFile(const String& funcName) {
   return getFileFromMap(m_functionFile, HHVM_FN(strtolower)(funcName));
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 UserAutoloadMap::getConstantFile(const String& constName) {
   return getFileFromMap(m_constantFile, constName);
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 UserAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
   return getFileFromMap(m_typeAliasFile, HHVM_FN(strtolower)(typeAliasName));
+}
+
+Optional<AutoloadMap::FileResult>
+UserAutoloadMap::getModuleFile(const String& moduleName) {
+  return getFileFromMap(m_moduleFile, moduleName);
 }
 
 Optional<fs::path>
@@ -160,11 +165,6 @@ UserAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
     return typeFile;
   }
   return getTypeAliasFile(typeName);
-}
-
-Optional<String>
-UserAutoloadMap::getModuleFile(const String& moduleName) {
-  return getFileFromMap(m_moduleFile, moduleName);
 }
 
 Optional<fs::path>
@@ -241,7 +241,7 @@ AutoloadMap::Result UserAutoloadMap::handleFailure(
   return AutoloadMap::Result::StopAutoloading;
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 UserAutoloadMap::getFileFromMap(const Array& map, const String& key) const {
   auto const& filePath = map[key];
   if (!filePath.isString()) {
@@ -251,14 +251,14 @@ UserAutoloadMap::getFileFromMap(const Array& map, const String& key) const {
   if (!path.empty() && !m_root.empty() && path.get()->data()[0] != '/') {
     path = m_root + std::move(path);
   }
-  return std::move(path);
+  return AutoloadMap::FileResult(path);
 }
 
 Optional<fs::path>
 UserAutoloadMap::getPathFromMap(const Array& map, const String& key) const {
-  auto file = getFileFromMap(map, key);
-  if (!file) return {};
-  return file->toCppString();
+  auto fileRes = getFileFromMap(map, key);
+  if (!fileRes) return {};
+  return fileRes->path.toCppString();
 }
 
 //////////////////////////////////////////////////////////////////////

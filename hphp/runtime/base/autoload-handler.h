@@ -98,8 +98,8 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_facts;
   }
 
-  Optional<String> getFile(const String& name,
-                                  AutoloadMap::KindOf kind);
+  Optional<AutoloadMap::FileResult> getFile(const String& name,
+                                            AutoloadMap::KindOf kind);
 
   Array getSymbols(const String& path, AutoloadMap::KindOf kind);
 

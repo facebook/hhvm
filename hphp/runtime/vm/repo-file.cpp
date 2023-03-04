@@ -864,7 +864,7 @@ RepoFile::ListIndex readListIndexHeader(const RepoFileData& data,
   auto indexSize = data.sizes.indexSizes[i * 2];
   auto dataOffset = data.indexOffsets[i * 2 + 1];
   auto dataSize = data.sizes.indexSizes[i * 2 + 1];
-  FTRACE(1, "readListIndexHeader {} {} {} {} {}", uint32_t(index), indexOffset,
+  FTRACE(1, "readListIndexHeader {} {} {} {} {}\n", uint32_t(index), indexOffset,
          indexSize, dataOffset, dataSize);
   size_t size = (indexSize / sizeof(uint32_t)) - 1;
   return RepoFile::ListIndex(size, RepoBounds { indexOffset, indexSize },
@@ -1024,16 +1024,19 @@ void RepoFile::loadGlobalTables(bool loadAutoloadMap) {
 
 std::unique_ptr<UnitEmitter>
 RepoFile::loadUnitEmitter(const StringData* path,
+                          const RepoUnitInfo* info,
                           const Native::FuncTable& nativeFuncs,
                           bool lazy) {
   assertx(s_repoFileData);
   assertx(s_repoFileData->loadedGlobalTables.load());
   auto& data = *s_repoFileData;
 
-  assertx(path->isStatic());
-  auto info = findUnitInfoFromPath(data, path);
-  if (!info) return nullptr;
-  assertx(info->path == path);
+  if (info == nullptr) {
+    assertx(path->isStatic());
+    info = findUnitInfoFromPath(data, path);
+    if (!info) return nullptr;
+    assertx(info->path == path);
+  }
 
   auto blob = data.fd.readBlob(
     data.unitEmittersOffset + info->emitterLocation.offset,
@@ -1042,7 +1045,7 @@ RepoFile::loadUnitEmitter(const StringData* path,
 
   auto ue = std::make_unique<UnitEmitter>(SHA1{ (uint64_t)info->unitSn },
                                           SHA1{}, nativeFuncs);
-  ue->m_filepath = path;
+  ue->m_filepath = info->path;
   ue->m_sn = info->unitSn;
   ue->serde(blob.decoder, lazy);
   ue->finish();

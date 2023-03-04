@@ -391,7 +391,7 @@ std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
     for (auto const unit : units) {
       assertx((bucketIdx == 0) == FileUtil::isSystemName(unit->slice()));
       ues.emplace_back(
-        RepoFile::loadUnitEmitter(unit, Native::s_noNativeFuncs, false)
+        RepoFile::loadUnitEmitter(unit, nullptr, Native::s_noNativeFuncs, false)
       );
     }
 

@@ -44,12 +44,12 @@ struct RepoAutoloadMap final : AutoloadMap {
     RepoFile::CaseInsensitiveHashMapIndex typeAliases,
     RepoFile::CaseSensitiveHashMapIndex modules);
 
-  Optional<String> getTypeOrTypeAliasFile(const String& typeName) override;
-  Optional<String> getTypeFile(const String& typeName) override;
-  Optional<String> getFunctionFile(const String& functionName) override;
-  Optional<String> getConstantFile(const String& constantName) override;
-  Optional<String> getTypeAliasFile(const String& typeAliasName) override;
-  Optional<String> getModuleFile(const String& moduleName) override;
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
+  Optional<AutoloadMap::FileResult> getFunctionFile(const String& functionName) override;
+  Optional<AutoloadMap::FileResult> getConstantFile(const String& constantName) override;
+  Optional<AutoloadMap::FileResult> getTypeAliasFile(const String& typeAliasName) override;
+  Optional<AutoloadMap::FileResult> getModuleFile(const String& moduleName) override;
 
   Optional<std::filesystem::path> getTypeOrTypeAliasFile(std::string_view name) override;
   Optional<std::filesystem::path> getTypeFile(std::string_view name) override;

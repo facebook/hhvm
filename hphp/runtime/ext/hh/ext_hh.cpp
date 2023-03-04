@@ -124,11 +124,11 @@ Variant autoload_symbol_to_path(const String& symbol, AutoloadMap::KindOf kind) 
     SystemLib::throwInvalidOperationExceptionObject(
       "Only available when autoloader is active");
   }
-  auto path = AutoloadHandler::s_instance->getFile(symbol, kind);
-  if (!path) {
+  auto pathRes = AutoloadHandler::s_instance->getFile(symbol, kind);
+  if (!pathRes) {
     return null_string;
   }
-  return *path;
+  return pathRes->path;
 }
 
 } // end anonymous namespace

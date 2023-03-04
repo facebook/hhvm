@@ -213,8 +213,8 @@ const StaticString
   s_file("file"),
   s_line("line");
 
-Optional<String> AutoloadHandler::getFile(const String& clsName,
-                                               AutoloadMap::KindOf kind) {
+Optional<AutoloadMap::FileResult> AutoloadHandler::getFile(
+  const String& clsName, AutoloadMap::KindOf kind) {
   assertx(m_map);
   // Always normalize name before autoloading
   return m_map->getFile(kind, normalizeNS(clsName));
@@ -232,12 +232,11 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  AutoloadMap::KindOf kind,
                                  const T &checkExists,
                                  Variant& err) {
-  auto file = getFile(clsName, kind);
-  if (!file) {
+  auto fileRes = getFile(clsName, kind);
+  if (!fileRes) {
     return AutoloadMap::Result::Failure;
   }
   bool ok = false;
-  String fName = *file;
   // Utility for logging errors in server mode.
   auto log_err = [](char const* const msg) {
     if (RuntimeOption::ServerMode) {
@@ -247,8 +246,8 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   try {
     VMRegAnchor _;
     bool initial;
-    auto const unit = lookupUnit(fName.get(), "", &initial,
-                                 Native::s_noNativeFuncs,
+    auto const unit = lookupUnit(fileRes->path.get(), fileRes->info, "",
+                                 &initial, Native::s_noNativeFuncs,
                                  RuntimeOption::TrustAutoloaderPath);
     if (unit) {
       if (initial) unit->merge();

@@ -68,27 +68,27 @@ RepoAutoloadMap::RepoAutoloadMap(
 }
 
 template <typename Compare>
-static Optional<String> getPathFromSymbol(
+static Optional<AutoloadMap::FileResult> getPathFromSymbol(
     const RepoFile::HashMapIndex<Compare>& map,
     const String& name) {
-  auto unitInfo = RepoFile::findUnitInfo(map, name.get());
-  if (!unitInfo) {
+  auto info = RepoFile::findUnitInfo(map, name.get());
+  if (!info) {
     FTRACE(1, "Fail autoload {}\n", name.data());
     return {};
   }
 
-  auto path = unitInfo->path;
+  auto path = info->path;
   FTRACE(1, "Success autoload {} {}\n", name.data(), path->data());
-  return {StrNR(path).asString()};
+  return {AutoloadMap::FileResult(StrNR(path), info)};
 }
 
 template <typename Compare>
 static Optional<fs::path> getPathFromSymbol(
     const RepoFile::HashMapIndex<Compare>& map,
     std::string_view name) {
-  auto file = getPathFromSymbol(map, StrNR(makeStaticString(name)));
-  if (!file) return {};
-  return file->toCppString();
+  auto fileRes = getPathFromSymbol(map, StrNR(makeStaticString(name)));
+  if (!fileRes) return {};
+  return fileRes->path.toCppString();
 }
 
 static Array getSymbolFromPath(const String& path, RepoSymbolType type) {
@@ -104,7 +104,7 @@ static Array getSymbolFromPath(const String& path, RepoSymbolType type) {
   return ret;
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 RepoAutoloadMap::getTypeOrTypeAliasFile(const String& typeName) {
   auto typeFile = getTypeFile(typeName);
   if (typeFile) {
@@ -113,24 +113,29 @@ RepoAutoloadMap::getTypeOrTypeAliasFile(const String& typeName) {
   return getTypeAliasFile(typeName);
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 RepoAutoloadMap::getTypeFile(const String& typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 RepoAutoloadMap::getFunctionFile(const String& funcName) {
   return getPathFromSymbol(m_functions, funcName);
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 RepoAutoloadMap::getConstantFile(const String& constName) {
   return getPathFromSymbol(m_constants, constName);
 }
 
-Optional<String>
+Optional<AutoloadMap::FileResult>
 RepoAutoloadMap::getTypeAliasFile(const String& typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
+}
+
+Optional<AutoloadMap::FileResult>
+RepoAutoloadMap::getModuleFile(const String& moduleName) {
+  return getPathFromSymbol(m_modules, moduleName);
 }
 
 Optional<fs::path>
@@ -140,11 +145,6 @@ RepoAutoloadMap::getTypeOrTypeAliasFile(std::string_view typeName) {
     return typeFile;
   }
   return getTypeAliasFile(typeName);
-}
-
-Optional<String>
-RepoAutoloadMap::getModuleFile(const String& moduleName) {
-  return getPathFromSymbol(m_modules, moduleName);
 }
 
 Optional<fs::path>

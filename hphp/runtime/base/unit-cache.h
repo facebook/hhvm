@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 
 #include "hphp/util/sha1.h"
@@ -35,6 +36,7 @@ struct Unit;
 struct String;
 struct StringData;
 struct RepoOptions;
+struct RepoUnitInfo;
 
 namespace Native {
 struct FuncTable;
@@ -67,7 +69,12 @@ struct FuncTable;
  * May return nullptr if the Unit can't be loaded, and may throw exceptions or
  * fatal errors.
  */
-Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
+Unit* lookupUnit(const StringData* path, const char* currentDir,
+                 bool* initial_opt, const Native::FuncTable&,
+                 bool alreadyRealpath, bool forPrefetch = false);
+
+Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
+                 const char* currentDir, bool* initial_opt,
                  const Native::FuncTable&, bool alreadyRealpath,
                  bool forPrefetch = false);
 

@@ -143,7 +143,9 @@ using RepoUnitCache = RankedCHM<
 RepoUnitCache s_repoUnitCache;
 
 CachedUnit lookupUnitRepoAuth(const StringData* path,
+                              const RepoUnitInfo* info,
                               const Native::FuncTable& nativeFuncs) {
+  assertx(!info || info->path == path);
   tracing::BlockNoTrace _{"lookup-unit-repo-auth"};
 
   path = makeStaticString(path);
@@ -193,7 +195,7 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     /*
      * We got the lock, so we're responsible for updating the entry.
      */
-    auto ue = RepoFile::loadUnitEmitter(path, nativeFuncs, true);
+    auto ue = RepoFile::loadUnitEmitter(path, info, nativeFuncs, true);
     if (ue) {
       auto unit = create(std::move(ue));
       cu.rdsBitId = rds::allocBit();
@@ -1084,9 +1086,9 @@ void prefetchSymbolRefs(SymbolRefs symbols, const Unit* loadingUnit) {
       // Lookup the path in the maps that the autoloader
       // provides. Note that this won't succeed if the autoloader
       // defines the symbol via its "failure" function.
-      if (auto const path =
+      if (auto const pathRes =
           AutoloadHandler::s_instance->getFile(StrNR{name}, k)) {
-        paths.insert(makeStaticString(*path));
+        paths.insert(makeStaticString(pathRes->path));
       }
     }
   };
@@ -1236,7 +1238,7 @@ CachedUnit loadUnitNonRepoAuth(const StringData* rpath,
   return cu;
 }
 
-CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
+CachedUnit lookupUnitNonRepoAuth(const StringData* requestedPath,
                                  const struct stat& statInfo,
                                  OptLog& ent,
                                  const Native::FuncTable& nativeFuncs,
@@ -1356,7 +1358,7 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir,
   s->st_mode = 0;
 
   if (RuntimeOption::RepoAuthoritative) {
-    return lookupUnitRepoAuth(path, nativeFuncs).unit != nullptr;
+    return lookupUnitRepoAuth(path, nullptr, nativeFuncs).unit != nullptr;
   }
 
   if (statSyscall(path->data(), s) == 0) {
@@ -1418,7 +1420,7 @@ bool findFileWrapper(const String& file, void* ctx) {
 
 void logLoad(
   StructuredLogEntry& ent,
-  StringData* path,
+  const StringData* path,
   const char* cwd,
   String rpath,
   const CachedUnit& cu
@@ -1463,22 +1465,6 @@ void logLoad(
 }
 
 //////////////////////////////////////////////////////////////////////
-
-CachedUnit checkoutFile(
-  StringData* path,
-  const struct stat& statInfo,
-  OptLog& ent,
-  const Native::FuncTable& nativeFuncs,
-  FileLoadFlags& flags,
-  bool alreadyRealpath,
-  bool forPrefetch
-) {
-  return RuntimeOption::RepoAuthoritative
-    ? lookupUnitRepoAuth(path, nativeFuncs)
-    : lookupUnitNonRepoAuth(path, statInfo, ent,
-                            nativeFuncs, flags,
-                            alreadyRealpath, forPrefetch);
-}
 
 char mangleExtension(const folly::StringPiece fileName) {
   if (fileName.endsWith(".hack")) return '0';
@@ -1584,7 +1570,15 @@ String resolveVmInclude(const StringData* path,
   return ctx.path;
 }
 
-Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
+Unit* lookupUnit(const StringData* path, const char* currentDir,
+                 bool* initial_opt, const Native::FuncTable& nativeFuncs,
+                 bool alreadyRealpath, bool forPrefetch) {
+  return lookupUnit(path, nullptr, currentDir, initial_opt, nativeFuncs,
+                    alreadyRealpath, forPrefetch);
+}
+
+Unit* lookupUnit(const StringData* path, const RepoUnitInfo* info,
+                 const char* currentDir, bool* initial_opt,
                  const Native::FuncTable& nativeFuncs, bool alreadyRealpath,
                  bool forPrefetch) {
   bool init;
@@ -1611,8 +1605,16 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
    */
 
   struct stat s;
-  auto const spath = resolveVmInclude(path, currentDir, &s, nativeFuncs);
-  if (spath.isNull()) return nullptr;
+  String spath;
+  if (info) {
+    assertx(!path->empty());
+    assertx(path->data()[0] == '/');
+    assertx(path->isStatic());
+    spath = StrNR(path);
+  } else {
+    spath = resolveVmInclude(path, currentDir, &s, nativeFuncs);
+    if (spath.isNull()) return nullptr;
+  }
 
   auto const eContext = g_context.getNoCheck();
 
@@ -1634,10 +1636,12 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
   FileLoadFlags flags = FileLoadFlags::kHitMem;
 
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = checkoutFile(
-    spath.get(), s, ent, nativeFuncs,
-    flags, alreadyRealpath, forPrefetch
-  );
+  auto const cunit = RuntimeOption::RepoAuthoritative
+    ? lookupUnitRepoAuth(spath.get(), info, nativeFuncs)
+    : lookupUnitNonRepoAuth(spath.get(), s, ent,
+                            nativeFuncs, flags,
+                            alreadyRealpath, forPrefetch);
+
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
@@ -1671,7 +1675,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
 
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
   assertx(RuntimeOption::RepoAuthoritative);
-  return lookupUnitRepoAuth(path, nativeFuncs).unit;
+  return lookupUnitRepoAuth(path, nullptr, nativeFuncs).unit;
 }
 
 //////////////////////////////////////////////////////////////////////

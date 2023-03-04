@@ -612,14 +612,15 @@ struct FactsStoreImpl final
         __func__, [&]() { return m_map.isTypeFinal(*type.get()); });
   }
 
-  Optional<String> getTypeOrTypeAliasFile(const String& type) override {
+  Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(
+      const String& type) override {
     return getSymbolFile<SymKind::Type>(
         type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeOrTypeAliasFile(s);
         });
   }
 
-  Optional<String> getTypeFile(const String& type) override {
+  Optional<AutoloadMap::FileResult> getTypeFile(const String& type) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Type>(
           type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
@@ -628,7 +629,8 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<String> getFunctionFile(const String& function) override {
+  Optional<AutoloadMap::FileResult> getFunctionFile(
+      const String& function) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Function>(
           function, [](SymbolMap& m, Symbol<SymKind::Function> s) {
@@ -637,7 +639,8 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<String> getConstantFile(const String& constant) override {
+  Optional<AutoloadMap::FileResult> getConstantFile(
+      const String& constant) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Constant>(
           constant, [](SymbolMap& m, Symbol<SymKind::Constant> s) {
@@ -646,7 +649,8 @@ struct FactsStoreImpl final
     });
   }
 
-  Optional<String> getTypeAliasFile(const String& typeAlias) override {
+  Optional<AutoloadMap::FileResult> getTypeAliasFile(
+      const String& typeAlias) override {
     return logPerformance(__func__, [&]() {
       return getSymbolFile<SymKind::Type>(
           typeAlias, [](SymbolMap& m, Symbol<SymKind::Type> s) {
@@ -655,17 +659,18 @@ struct FactsStoreImpl final
     });
   }
 
+  Optional<AutoloadMap::FileResult> getModuleFile(
+      const String& module) override {
+    return getSymbolFile<SymKind::Module>(
+        module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
+          return m.getModuleFile(s);
+        });
+  }
+
   Optional<fs::path> getTypeOrTypeAliasFile(std::string_view type) override {
     return getSymbolFile<SymKind::Type>(
         type, [](SymbolMap& m, Symbol<SymKind::Type> s) {
           return m.getTypeOrTypeAliasFile(s);
-        });
-  }
-
-  Optional<String> getModuleFile(const String& module) override {
-    return getSymbolFile<SymKind::Module>(
-        module, [](SymbolMap& m, Symbol<SymKind::Module> s) {
-          return m.getModuleFile(s);
         });
   }
 
@@ -1347,12 +1352,14 @@ struct FactsStoreImpl final
   }
 
   template <SymKind K, class T>
-  Optional<String> getSymbolFile(const String& symbol, T lambda) {
+  Optional<AutoloadMap::FileResult> getSymbolFile(
+      const String& symbol,
+      T lambda) {
     auto path = getSymbolFile<K>(std::string_view{symbol.slice()}, lambda);
     if (UNLIKELY(!path)) {
       return {};
     }
-    return String{path->native()};
+    return AutoloadMap::FileResult(String{path->native()});
   }
 
   template <SymKind K, class T>

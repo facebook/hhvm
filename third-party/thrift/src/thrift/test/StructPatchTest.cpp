@@ -537,6 +537,17 @@ TEST(StructPatchTest, MapPatch) {
       {{"a", "01"}, {"b", "21"}},
       {{"a", "011"}, {"b", "211"}});
 
+  MapPatch ensuredElementPatch;
+  ensuredElementPatch.ensureAndPatchByKey("k") += "1";
+  ensuredElementPatch.add({{"w", "2"}});
+  ensuredElementPatch.ensureAndPatchByKey("w") += "1";
+
+  test::expectPatch(
+      ensuredElementPatch,
+      {{"a", "0"}},
+      {{"a", "0"}, {"k", "1"}, {"w", "21"}},
+      {{"a", "0"}, {"k", "11"}, {"w", "211"}});
+
   MapPatch patchMerging1, patchMerging2;
   patchMerging2.patchByKey("d") += "2";
   patchMerging2.patchByKey("f") += "2";

@@ -409,6 +409,12 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
                                        : data_.patchPrior()->operator[](key);
   }
 
+  // Ensures that key exists and patches the entry
+  template <typename K = typename T::key_type>
+  FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key) {
+    return (data_.add().value()[key], data_.patch()->operator[](key));
+  }
+
   void apply(T& val) const {
     if (applyAssignOrClear(val)) {
       return;

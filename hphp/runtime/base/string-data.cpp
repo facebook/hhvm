@@ -62,14 +62,13 @@ ALWAYS_INLINE StringData* allocFlat(size_t len) {
 //////////////////////////////////////////////////////////////////////
 
 std::aligned_storage<
-  kStringOverhead,
+  kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
 >::type s_theEmptyString;
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
-std::atomic<bool> s_symbols_loaded;
 
 SymbolPrefix* getSymbolPrefix(StringData* sd) {
   assertx(sd->isSymbol());
@@ -83,10 +82,6 @@ const SymbolPrefix* getSymbolPrefix(const StringData* sd) {
 
 bool StringData::isSymbol() const {
   return (m_aux16 >> 8) & kIsSymbolMask;
-}
-
-void StringData::markSymbolsLoaded() {
-  s_symbols_loaded.store(true, std::memory_order_release);
 }
 
 Class* StringData::getCachedClass() const {
@@ -144,10 +139,7 @@ MemBlock StringData::AllocateShared(folly::StringPiece sl) {
     raiseStringLengthExceededError(sl.size());
   }
 
-  auto const symbol =
-    trueStatic && !s_symbols_loaded.load(std::memory_order_acquire);
-
-  auto const extra = symbol ? sizeof(SymbolPrefix) : 0;
+  auto const extra = trueStatic ? sizeof(SymbolPrefix) : 0;
   auto const bytes = sl.size() + kStringOverhead + extra;
   auto const ptr = trueStatic ? static_alloc(bytes) : AllocUncounted(bytes);
   return MemBlock{ptr, bytes};
@@ -155,18 +147,16 @@ MemBlock StringData::AllocateShared(folly::StringPiece sl) {
 
 template <bool trueStatic> ALWAYS_INLINE
 StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
-  assertx(range.size >= sl.size() + kStringOverhead);
-  auto const symbol = trueStatic &&
-    !s_symbols_loaded.load(std::memory_order_acquire) &&
-    (range.size >= sl.size() + kStringOverhead + sizeof(SymbolPrefix));
-  auto const extra = symbol ? sizeof(SymbolPrefix) : 0;
+  auto const extra = trueStatic ? sizeof(SymbolPrefix) : 0;
+  assertx(range.size >= sl.size() + kStringOverhead + extra);
+
   StringData* sd = reinterpret_cast<StringData*>(
     reinterpret_cast<uintptr_t>(range.ptr) + extra
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
   auto const count = trueStatic ? StaticValue : UncountedValue;
-  if (symbol) {
+  if (trueStatic) {
     auto constexpr aux = kIsSymbolMask << 8 | kInvalidColor;
     sd->initHeader_16(HeaderKind::String, count, aux);
     getSymbolPrefix(sd)->nty = nullptr;
@@ -184,7 +174,7 @@ StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
 
   assertx(ret == sd);
   assertx(trueStatic ? ret->isStatic() : ret->isUncounted());
-  assertx(ret->isSymbol() == symbol);
+  assertx(ret->isSymbol() == trueStatic);
   assertx(ret->checkSane());
   return ret;
 }

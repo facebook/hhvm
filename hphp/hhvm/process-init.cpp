@@ -76,7 +76,6 @@ const StaticString s_DynMethCallerHelper("\\__SystemLib\\DynMethCallerHelper");
 
 void ProcessInitNoSystemLib() {
   assertx(!RuntimeOption::RepoAuthoritative);
-  StringData::markSymbolsLoaded();
   Stack::ValidateStackSize();
 }
 
@@ -109,7 +108,6 @@ void ProcessInit() {
     RepoFile::loadGlobalTables();
     RepoFile::globalData().load();
   }
-  StringData::markSymbolsLoaded();
 
   rds::requestInit();
   auto const slib = get_and_check_systemlib();

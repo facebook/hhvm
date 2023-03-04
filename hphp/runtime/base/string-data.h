@@ -127,13 +127,6 @@ struct StringData final : MaybeCountable,
   static StringData* Make(size_t reserve);
 
   /*
-   * Initialize a static string on a pre-allocated range of memory. This is
-   * useful when we need to create static strings at designated addresses when
-   * optimizing locality.
-   */
-  static StringData* MakeStaticAt(folly::StringPiece, MemBlock);
-
-  /*
    * Allocate a string with malloc, using the low-memory allocator if
    * jemalloc is available, and setting it as a static string.
    *
@@ -389,7 +382,6 @@ struct StringData final : MaybeCountable,
    * to avoid allocating these extra caches on any more static strings.
    */
   bool isSymbol() const;
-  static void markSymbolsLoaded();
 
   /*
    * A static string may be assigned a "color" which to be used as the hash key
@@ -504,6 +496,13 @@ private:
   template<bool trueStatic>
   static StringData* MakeSharedAt(folly::StringPiece sl, MemBlock range);
 
+  /*
+   * Initialize a static string on a pre-allocated range of memory. This is
+   * useful when we need to create static strings at designated addresses when
+   * optimizing locality.
+   */
+  static StringData* MakeStaticAt(folly::StringPiece, MemBlock);
+
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
   ~StringData() = delete;
@@ -597,7 +596,7 @@ struct string_data_lti;
 //////////////////////////////////////////////////////////////////////
 
 extern std::aligned_storage<
-  kStringOverhead,
+  kStringOverhead + sizeof(SymbolPrefix),
   alignof(StringData)
 >::type s_theEmptyString;
 
@@ -608,7 +607,9 @@ extern std::aligned_storage<
  */
 ALWAYS_INLINE StringData* staticEmptyString() {
   void* vp = &s_theEmptyString;
-  return static_cast<StringData*>(vp);
+  return reinterpret_cast<StringData*>(
+    reinterpret_cast<uintptr_t>(vp) + sizeof(SymbolPrefix)
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

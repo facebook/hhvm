@@ -12,10 +12,12 @@ use toml::Spanned;
 // Preserve the order for ease of testing
 // Alternatively, we could use HashMap for performance
 type PackageMap = IndexMap<String, Package>;
+type DeploymentMap = IndexMap<String, Deployment>;
 
 #[derive(Debug, Deserialize)]
 struct Config {
     packages: PackageMap,
+    deployments: Option<DeploymentMap>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -24,9 +26,16 @@ pub struct Package {
     pub includes: Option<Vec<Spanned<String>>>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct Deployment {
+    pub packages: Option<Vec<Spanned<String>>>,
+    pub domain: Option<Spanned<String>>,
+}
+
 #[derive(Debug)]
 pub struct PackageInfo {
     packages: PackageMap,
+    deployments: Option<DeploymentMap>,
     line_offsets: Vec<usize>,
 }
 
@@ -41,12 +50,17 @@ impl PackageInfo {
             .collect::<Vec<_>>();
         Ok(Self {
             packages: config.packages,
+            deployments: config.deployments,
             line_offsets,
         })
     }
 
     pub fn packages(&self) -> &PackageMap {
         &self.packages
+    }
+
+    pub fn deployments(&self) -> Option<&DeploymentMap> {
+        self.deployments.as_ref()
     }
 
     pub fn line_number(&self, byte_offset: usize) -> usize {
@@ -81,6 +95,14 @@ mod test {
         assert_eq!(baz.includes.as_ref().unwrap()[1].get_ref(), "bar");
         assert_eq!(info.line_number(baz.uses.as_ref().unwrap()[0].span().0), 11);
         assert_eq!(info.line_number(baz.uses.as_ref().unwrap()[1].span().0), 11);
+
+        let my_prod = &info.deployments().unwrap()["my-prod"];
+        assert_eq!(my_prod.packages.as_ref().unwrap()[0].get_ref(), "foo");
+        assert_eq!(my_prod.packages.as_ref().unwrap()[1].get_ref(), "bar");
+        assert_eq!(
+            my_prod.domain.as_ref().unwrap().get_ref(),
+            "www.my-prod.com"
+        );
     }
 
     #[test]

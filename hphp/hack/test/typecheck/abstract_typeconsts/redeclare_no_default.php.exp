@@ -1,7 +1,3 @@
-File "redeclare_no_default.php", line 8, characters 23-23:
-This abstract type constant does not have a default type (Typing[4320])
-  File "redeclare_no_default.php", line 4, characters 23-23:
-  It cannot override an abstract type constant that has a default type
 File "redeclare_no_default.php", line 11, characters 13-13:
 This class was declared as `final`. It must provide an implementation for the abstract type constant `T` (Typing[4047])
   File "redeclare_no_default.php", line 11, characters 23-23:
@@ -12,3 +8,7 @@ File "redeclare_no_default.php", line 14, characters 33-35:
 Cannot reference abstract constant `C::T` directly (Typing[4129])
   File "redeclare_no_default.php", line 8, characters 23-23:
   Declaration is here
+File "redeclare_no_default.php", line 8, characters 23-23:
+This abstract type constant does not have a default type (Typing[4320])
+  File "redeclare_no_default.php", line 4, characters 23-23:
+  It cannot override an abstract type constant that has a default type

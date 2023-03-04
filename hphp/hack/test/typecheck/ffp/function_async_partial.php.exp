@@ -1,6 +1,6 @@
 File "function_async_partial.php", line 4, characters 23-31:
-Async functions that do not return a value must have a type of Awaitable<void> (Typing[4422])
-File "function_async_partial.php", line 4, characters 23-31:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "classes.hhi", line 165, characters 18-26:
   Definition is here
+File "function_async_partial.php", line 4, characters 23-31:
+Async functions that do not return a value must have a type of Awaitable<void> (Typing[4422])

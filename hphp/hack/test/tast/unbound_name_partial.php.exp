@@ -1,7 +1,7 @@
 Errors:
   [4:15-28] Unbound name: `NoSuchClass` (an object type)
-  [3:18-23] Functions that do not return a value must have a type of void
   [4:15-28] Unbound name (typing): `NoSuchClass`
+  [3:18-23] Functions that do not return a value must have a type of void
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

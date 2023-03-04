@@ -1,16 +1,16 @@
-File "test_superglobals.php", line 27, characters 10-23:
-[Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
 File "test_superglobals.php", line 28, characters 5-18:
 [Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
+File "test_superglobals.php", line 32, characters 5-24:
+[Test::test_method_call]{$Test}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
+File "test_superglobals.php", line 37, characters 5-24:
+[Test::test_method_call]{$_}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
+File "test_superglobals.php", line 27, characters 10-23:
+[Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
 File "test_superglobals.php", line 29, characters 16-29:
 [Test::test_method_call]{$_ENV}(superglobal (function(arraykey $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
 File "test_superglobals.php", line 31, characters 10-29:
 [Test::test_method_call]{$TEST}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-File "test_superglobals.php", line 32, characters 5-24:
-[Test::test_method_call]{$Test}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])
 File "test_superglobals.php", line 33, characters 10-29:
 [Test::test_method_call]{$TEST}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
 File "test_superglobals.php", line 36, characters 10-29:
 [Test::test_method_call]{$_}(superglobal (function(string $key): mixed))<SuperGlobalRead> A global variable is definitely read. (Other[11004])
-File "test_superglobals.php", line 37, characters 5-24:
-[Test::test_method_call]{$_}(superglobal (function(string $key, mixed $value): void))<SuperGlobalWrite> A global variable is definitely written. (Other[11001])

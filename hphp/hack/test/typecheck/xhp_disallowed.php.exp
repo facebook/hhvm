@@ -1,10 +1,10 @@
 File "xhp_disallowed.php", line 15, characters 29-31:
-Unbound name: `Xhp` (Naming[2049])
-File "xhp_disallowed.php", line 15, characters 29-31:
 `Xhp` is not a valid type. Use `:xhp` or `XHPChild`. (Naming[2008])
+File "xhp_disallowed.php", line 15, characters 29-31:
+Unbound name: `Xhp` (Naming[2049])
 File "xhp_disallowed.php", line 16, characters 12-22:
 Invalid return type (Typing[4110])
-File "xhp_disallowed.php", line 15, characters 29-31:
-Expected `Xhp`
-File "xhp_disallowed.php", line 16, characters 13-15:
-But got `:div`
+  File "xhp_disallowed.php", line 15, characters 29-31:
+  Expected `Xhp`
+  File "xhp_disallowed.php", line 16, characters 13-15:
+  But got `:div`

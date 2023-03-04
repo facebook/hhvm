@@ -1,40 +1,40 @@
-File "test_singleton_write_collection.php", line 25, characters 18-34:
-[Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-File "test_singleton_write_collection.php", line 25, characters 18-34:
-[Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
 File "test_singleton_write_collection.php", line 28, characters 7-38:
 [Foo::get_dict_value]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. (Other[11001])
+File "test_singleton_write_collection.php", line 35, characters 7-41:
+[Foo::get_dict_value2]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. (Other[11001])
+File "test_singleton_write_collection.php", line 44, characters 7-44:
+[Foo::get_shape_value]{Foo::$static_shape}(Bar)<Caching> A global variable is definitely written. (Other[11001])
+File "test_singleton_write_collection.php", line 53, characters 7-38:
+[Foo::get_dict_value_3]{Foo::$static_dic}(Bar) A global variable is definitely written. (Other[11001])
+File "test_singleton_write_collection.php", line 62, characters 7-41:
+[Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is definitely written. (Other[11001])
+File "test_singleton_write_collection.php", line 25, characters 18-34:
+[Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
 File "test_singleton_write_collection.php", line 30, characters 12-17:
 [Foo::get_dict_value]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. (Other[11003])
 File "test_singleton_write_collection.php", line 34, characters 32-48:
-[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-File "test_singleton_write_collection.php", line 34, characters 32-48:
 [Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-File "test_singleton_write_collection.php", line 35, characters 7-41:
-[Foo::get_dict_value2]{Foo::$static_dic}(Bar)<Caching> A global variable is definitely written. (Other[11001])
-File "test_singleton_write_collection.php", line 37, characters 12-28:
-[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_collection.php", line 37, characters 12-34:
 [Foo::get_dict_value2]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. (Other[11003])
-File "test_singleton_write_collection.php", line 41, characters 14-32:
-[Foo::get_shape_value]{Foo::$static_shape}(shape('field1' => ?Bar, 'field2' => ?Bar)) A global variable is definitely read. (Other[11004])
-File "test_singleton_write_collection.php", line 44, characters 7-44:
-[Foo::get_shape_value]{Foo::$static_shape}(Bar)<Caching> A global variable is definitely written. (Other[11001])
 File "test_singleton_write_collection.php", line 46, characters 12-17:
 [Foo::get_shape_value]{Foo::$static_shape}(Bar) A global variable is possibly written via function call. (Other[11003])
 File "test_singleton_write_collection.php", line 50, characters 29-45:
-[Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
-File "test_singleton_write_collection.php", line 50, characters 29-45:
 [Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-File "test_singleton_write_collection.php", line 53, characters 7-38:
-[Foo::get_dict_value_3]{Foo::$static_dic}(Bar) A global variable is definitely written. (Other[11001])
-File "test_singleton_write_collection.php", line 59, characters 40-56:
-[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_collection.php", line 59, characters 40-56:
 [Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is possibly written via function call. (Other[11003])
-File "test_singleton_write_collection.php", line 62, characters 7-41:
-[Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is definitely written. (Other[11001])
-File "test_singleton_write_collection.php", line 64, characters 12-28:
-[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_collection.php", line 64, characters 12-34:
 [Foo::get_dict_value_4]{Foo::$static_dic}(Bar) A global variable is possibly written via function call. (Other[11003])
+File "test_singleton_write_collection.php", line 25, characters 18-34:
+[Foo::get_dict_value]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_collection.php", line 34, characters 32-48:
+[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_collection.php", line 37, characters 12-28:
+[Foo::get_dict_value2]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_collection.php", line 41, characters 14-32:
+[Foo::get_shape_value]{Foo::$static_shape}(shape('field1' => ?Bar, 'field2' => ?Bar)) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_collection.php", line 50, characters 29-45:
+[Foo::get_dict_value_3]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_collection.php", line 59, characters 40-56:
+[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_collection.php", line 64, characters 12-28:
+[Foo::get_dict_value_4]{Foo::$static_dic}(dict<string, Bar>) A global variable is definitely read. (Other[11004])

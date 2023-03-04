@@ -1,4 +1,4 @@
 File "interface_constructor_nonempty.php", line 3, characters 19-29:
-This method is declared as abstract, but has a body (NastCheck[3002])
-File "interface_constructor_nonempty.php", line 3, characters 19-29:
 This method shouldn't have a body (NastCheck[3001])
+File "interface_constructor_nonempty.php", line 3, characters 19-29:
+This method is declared as abstract, but has a body (NastCheck[3002])

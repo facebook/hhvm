@@ -1,10 +1,10 @@
-File "type_arguments.php", line 20, characters 3-37:
-Too many arguments (expected 1 but got 2) (Typing[4105])
-  File "printf.hhi", line 122, characters 12-30:
-  Definition is here
 File "type_arguments.php", line 20, characters 31-34:
 No instance method `haha` in `X` (Typing[4053])
   File "type_arguments.php", line 19, characters 12-12:
   This is why I think it is an object of type X
   File "type_arguments.php", line 12, characters 7-7:
   Declaration of `X` is here
+File "type_arguments.php", line 20, characters 3-37:
+Too many arguments (expected 1 but got 2) (Typing[4105])
+  File "printf.hhi", line 122, characters 12-30:
+  Definition is here

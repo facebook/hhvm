@@ -1,15 +1,15 @@
-File "arities02.php", line 23, characters 11-15:
-Typing error (Typing[4110])
-  File "arities02.php", line 23, characters 11-23:
-  Expected `num` because this is used in an arithmetic operation
-  File "arities02.php", line 3, characters 35-40:
-  But got `string`
-File "arities02.php", line 23, characters 19-23:
-Typing error (Typing[4110])
-  File "arities02.php", line 23, characters 11-23:
-  Expected `num` because this is used in an arithmetic operation
-  File "arities02.php", line 3, characters 35-40:
-  But got `string`
+File "arities02.php", line 50, characters 13-52:
+Invalid argument (Typing[4041])
+  File "arities02.php", line 50, characters 13-52:
+  Too many mandatory arguments (expected 3 but got 4)
+  File "arities02.php", line 3, characters 20-63:
+  Because of this definition
+File "arities02.php", line 45, characters 13-48:
+Invalid argument (Typing[4042])
+  File "arities02.php", line 45, characters 13-48:
+  Should have a variadic argument
+  File "arities02.php", line 3, characters 20-63:
+  Because of this definition
 File "arities02.php", line 34, characters 17-19:
 You are trying to access the method `bar` but this is a string (Typing[4062])
   File "arities02.php", line 3, characters 35-40:
@@ -22,15 +22,15 @@ File "arities02.php", line 40, characters 17-19:
 You are trying to access the method `bar` but this is a string (Typing[4062])
   File "arities02.php", line 39, characters 29-30:
   Definition is here
-File "arities02.php", line 45, characters 13-48:
-Invalid argument (Typing[4042])
-  File "arities02.php", line 45, characters 13-48:
-  Should have a variadic argument
-  File "arities02.php", line 3, characters 20-63:
-  Because of this definition
-File "arities02.php", line 50, characters 13-52:
-Invalid argument (Typing[4041])
-  File "arities02.php", line 50, characters 13-52:
-  Too many mandatory arguments (expected 3 but got 4)
-  File "arities02.php", line 3, characters 20-63:
-  Because of this definition
+File "arities02.php", line 23, characters 11-15:
+Typing error (Typing[4110])
+  File "arities02.php", line 23, characters 11-23:
+  Expected `num` because this is used in an arithmetic operation
+  File "arities02.php", line 3, characters 35-40:
+  But got `string`
+File "arities02.php", line 23, characters 19-23:
+Typing error (Typing[4110])
+  File "arities02.php", line 23, characters 11-23:
+  Expected `num` because this is used in an arithmetic operation
+  File "arities02.php", line 3, characters 35-40:
+  But got `string`

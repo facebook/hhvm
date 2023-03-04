@@ -1,10 +1,10 @@
+File "printf2.php", line 19, characters 12-15:
+This argument must be a literal format string (Typing[4027])
 File "printf2.php", line 18, characters 10-10:
 Was expecting a return type hint (Typing[4030])
 File "printf2.php", line 19, characters 5-22:
 Invalid argument (Typing[4110])
-File "printf2.php", line 15, characters 12-30:
-Expected `HH\FormatString<X>`
-File "printf2.php", line 19, characters 5-22:
-But got `string`
-File "printf2.php", line 19, characters 12-15:
-This argument must be a literal format string (Typing[4027])
+  File "printf2.php", line 15, characters 12-30:
+  Expected `HH\FormatString<X>`
+  File "printf2.php", line 19, characters 5-22:
+  But got `string`

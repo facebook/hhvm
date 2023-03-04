@@ -1,11 +1,9 @@
-File "supportdyn.bad.php", line 7, characters 3-8:
-This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4324])
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  Definition is here
 File "supportdyn.bad.php", line 8, characters 3-11:
 a nonnull value does not allow array append (Typing[4006])
   File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
+File "supportdyn.bad.php", line 28, characters 6-6:
+Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
 File "supportdyn.bad.php", line 9, characters 3-5:
 Was expecting a class, but got a nonnull value (Typing[4026])
 File "supportdyn.bad.php", line 10, characters 8-8:
@@ -22,14 +20,18 @@ Typing error (Typing[4062])
   You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
   File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
+File "supportdyn.bad.php", line 26, characters 27-30:
+Invalid type hint (Typing[4062])
+  File "supportdyn.bad.php", line 26, characters 30-30:
+  You are trying to access the type constant `C` but this is a nonnull value
+  File "supportdynamic.hhi", line 6, characters 29-29:
+  Definition is here
 File "supportdyn.bad.php", line 13, characters 3-5:
 Typing error (Typing[4110])
   File "supportdyn.bad.php", line 13, characters 3-9:
   Expected `null` (use of `?->` operator)
   File "supportdyn.bad.php", line 6, characters 26-32:
   But got `nonnull`
-File "supportdyn.bad.php", line 14, characters 9-11:
-Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
 File "supportdyn.bad.php", line 15, characters 3-5:
 Typing error (Typing[4110])
   File "supportdyn.bad.php", line 15, characters 3-9:
@@ -60,14 +62,6 @@ File "supportdyn.bad.php", line 21, characters 3-11:
   But got `nonnull`
   File "supportdynamic.hhi", line 6, characters 29-29:
     via this generic `T`
-File "supportdyn.bad.php", line 26, characters 27-30:
-Invalid type hint (Typing[4062])
-  File "supportdyn.bad.php", line 26, characters 30-30:
-  You are trying to access the type constant `C` but this is a nonnull value
-  File "supportdynamic.hhi", line 6, characters 29-29:
-  Definition is here
-File "supportdyn.bad.php", line 28, characters 6-6:
-Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
 File "supportdyn.bad.php", line 38, characters 10-18:
 Invalid return type (Typing[4110])
   File "supportdyn.bad.php", line 37, characters 42-48:
@@ -86,3 +80,9 @@ Invalid argument (Typing[4110])
   Expected `dynamic`
   File "supportdyn.bad.php", line 4, characters 29-35:
   Type `nonnull` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "supportdyn.bad.php", line 14, characters 9-11:
+Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
+File "supportdyn.bad.php", line 7, characters 3-8:
+This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4324])
+  File "supportdyn.bad.php", line 6, characters 26-32:
+  Definition is here

@@ -20,13 +20,13 @@ Invalid return type (Typing[4336])
   Expected `null`
   File "native_bad1.php", line 10, characters 19-25:
   But got `void` because this function does not always return a value
-File "native_bad1.php", line 12, characters 28-37:
-Method `getNothing` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
-  File "native_bad1.php", line 8, characters 7-12:
-  Or make the class abstract.
 File "native_bad1.php", line 19, characters 19-25:
 Invalid return type (Typing[4336])
   File "native_bad1.php", line 19, characters 30-33:
   Expected `null`
   File "native_bad1.php", line 19, characters 19-25:
   But got `void` because this function does not always return a value
+File "native_bad1.php", line 12, characters 28-37:
+Method `getNothing` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "native_bad1.php", line 8, characters 7-12:
+  Or make the class abstract.

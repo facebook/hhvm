@@ -1,14 +1,14 @@
 File "test_function_call.php", line 21, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
 File "test_function_call.php", line 24, characters 14-22:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
+File "test_function_call.php", line 30, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
+File "test_function_call.php", line 33, characters 21-29:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
 File "test_function_call.php", line 24, characters 14-22:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
-File "test_function_call.php", line 30, characters 10-18:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_function_call.php", line 30, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
-File "test_function_call.php", line 33, characters 21-29:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_function_call.php", line 33, characters 21-29:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])

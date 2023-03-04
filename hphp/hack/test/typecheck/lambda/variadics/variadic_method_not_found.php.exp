@@ -30,10 +30,6 @@ No instance method `foo` in `D` (Typing[4053])
   This is why I think it is an object of type D (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
-File "variadic_method_not_found.php", line 33, characters 25-29:
-Was expecting an object but type is unknown (Typing[4297])
-  File "variadic_method_not_found.php", line 33, characters 17-18:
-  It is unknown because a type could not be determined here
 File "variadic_method_not_found.php", line 36, characters 35-37:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
@@ -42,10 +38,6 @@ No instance method `foo` in `D` (Typing[4053])
   This is why I think it is an object of type D (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
-File "variadic_method_not_found.php", line 39, characters 12-16:
-Was expecting an object but type is unknown (Typing[4297])
-  File "variadic_method_not_found.php", line 38, characters 27-28:
-  It is unknown because a type could not be determined here
 File "variadic_method_not_found.php", line 44, characters 19-21:
 No instance method `foo` in `D` (Typing[4053])
   File "variadic_method_not_found.php", line 5, characters 19-21:
@@ -54,3 +46,11 @@ No instance method `foo` in `D` (Typing[4053])
   This is why I think it is an object of type D (variadic argument)
   File "variadic_method_not_found.php", line 3, characters 7-7:
   Declaration of `D` is here
+File "variadic_method_not_found.php", line 33, characters 25-29:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadic_method_not_found.php", line 33, characters 17-18:
+  It is unknown because a type could not be determined here
+File "variadic_method_not_found.php", line 39, characters 12-16:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadic_method_not_found.php", line 38, characters 27-28:
+  It is unknown because a type could not be determined here

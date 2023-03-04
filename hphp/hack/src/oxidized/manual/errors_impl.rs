@@ -44,19 +44,9 @@ impl<PP, P> UserError<PP, P> {
     }
 }
 
-pub trait FileOrd {
-    fn cmp_file(&self, other: &Self) -> Ordering;
-}
-
-impl FileOrd for Pos {
-    fn cmp_file(&self, other: &Self) -> Ordering {
-        self.filename().cmp(other.filename())
-    }
-}
-
-impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
+impl<PP: Ord + FileOrd, P: Ord + FileOrd> UserError<PP, P> {
     // Intended to match the implementation of `compare` in `Errors.sort` in OCaml.
-    fn cmp(&self, other: &Self) -> Ordering {
+    pub fn cmp_impl(&self, other: &Self, by_phase: bool) -> Ordering {
         let Self {
             code: self_code,
             claim: Message(self_pos, self_msg),
@@ -71,11 +61,18 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
             quickfixes: _,
             is_fixmed: _,
         } = other;
+        let compare_code = |self_code: ErrorCode, other_code: ErrorCode| {
+            if by_phase {
+                (self_code / 1000).cmp(&{ other_code / 1000 })
+            } else {
+                self_code.cmp(&other_code)
+            }
+        };
         // The primary sort order is by file of the claim (main message).
         self_pos
             .cmp_file(other_pos)
-            // If the files are the same, sort by phase.
-            .then((*self_code / 1000).cmp(&{ *other_code / 1000 }))
+            // If the files are the same, sort by error code or phase, depending on parameter.
+            .then(compare_code(*self_code, *other_code))
             // If the phases are the same, sort by position.
             .then(self_pos.cmp(other_pos))
             // If the positions are the same, sort by claim message text.
@@ -87,9 +84,25 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
     }
 }
 
+pub trait FileOrd {
+    fn cmp_file(&self, other: &Self) -> Ordering;
+}
+
+impl FileOrd for Pos {
+    fn cmp_file(&self, other: &Self) -> Ordering {
+        self.filename().cmp(other.filename())
+    }
+}
+
+impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.cmp_impl(other, false)
+    }
+}
+
 impl<PP: Ord + FileOrd, P: Ord + FileOrd> PartialOrd for UserError<PP, P> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        Some(self.cmp_impl(other, false))
     }
 }
 

@@ -1,6 +1,6 @@
 Errors:
-  [7:3-13] `Tcat` cannot be used with `new` because it does not have the `<<__Newable>>` attribute
   [7:7-11] Erased generics can only be used in type hints because they do not exist at runtime.
+  [7:3-13] `Tcat` cannot be used with `new` because it does not have the `<<__Newable>>` attribute
 [(Class
     { c_span = [4:1-14]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

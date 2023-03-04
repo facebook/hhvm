@@ -1,14 +1,14 @@
 File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 9, characters 16-18:
 Lacking `__construct`, class `Inf` does not initialize its private member(s): `t` (NastCheck[3030])
-File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
-Invalid return type (Typing[4336])
-  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 42-45:
-  Expected `G<T>`
-  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
-  But got `void` because this function does not always return a value
 File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 16, characters 15-21:
 No instance method `noexist` in `Tupper` (Typing[4053])
   File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 9, characters 46-51:
   This is why I think it is an object of type Tupper
   File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 4, characters 16-21:
   Declaration of `Tupper` is here
+File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
+Invalid return type (Typing[4336])
+  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 42-45:
+  Expected `G<T>`
+  File "infinite_loop_awaitable_generic_upper_bound.bad.php", line 11, characters 26-26:
+  But got `void` because this function does not always return a value

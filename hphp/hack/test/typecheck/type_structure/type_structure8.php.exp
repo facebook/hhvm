@@ -1,7 +1,7 @@
+File "type_structure8.php", line 8, characters 18-20:
+Was expecting a class, but got a string (Typing[4026])
 File "type_structure8.php", line 8, characters 3-16:
 The two arguments to `type_structure()` must be:
  - first: `ValidClassname::class` or an object of that class
  - second: a single-quoted string literal containing the name of a type constant of that class
 Could not resolve the type constant (Typing[4150])
-File "type_structure8.php", line 8, characters 18-20:
-Was expecting a class, but got a string (Typing[4026])

@@ -1,4 +1,4 @@
-File "reified_generic_static_const.php", line 9, characters 3-7:
-Cannot access static properties on reified generics (Typing[4346])
 File "reified_generic_static_const.php", line 9, characters 6-7:
 Cannot mutate a `__Const` property (Typing[4196])
+File "reified_generic_static_const.php", line 9, characters 3-7:
+Cannot access static properties on reified generics (Typing[4346])

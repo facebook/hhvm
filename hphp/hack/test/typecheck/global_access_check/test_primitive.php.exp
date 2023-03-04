@@ -1,20 +1,20 @@
-File "test_primitive.php", line 8, characters 12-28:
-[Foo::get_int]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
 File "test_primitive.php", line 12, characters 5-26:
 [Foo::set_int]{Foo::$static_int}(int) A global variable is definitely written. (Other[11001])
-File "test_primitive.php", line 16, characters 12-31:
-[Foo::get_string]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])
 File "test_primitive.php", line 20, characters 5-29:
 [Foo::set_string]{Foo::$static_string}(string) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 30, characters 5-24:
 [Test::test_method_call]{Foo::$static_int}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 31, characters 5-31:
 [Test::test_method_call]{Foo::$static_string}(string)<WriteLiteral> A global variable is definitely written. (Other[11001])
-File "test_primitive.php", line 33, characters 10-25:
-[Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
-File "test_primitive.php", line 36, characters 10-28:
-[Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])
 File "test_primitive.php", line 42, characters 5-38:
 [Test::test_method_call]{Test::$static_int}(int) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 43, characters 5-44:
 [Test::test_method_call]{Test::$static_string}(string) A global variable is definitely written. (Other[11001])
+File "test_primitive.php", line 8, characters 12-28:
+[Foo::get_int]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
+File "test_primitive.php", line 16, characters 12-31:
+[Foo::get_string]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])
+File "test_primitive.php", line 33, characters 10-25:
+[Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
+File "test_primitive.php", line 36, characters 10-28:
+[Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])

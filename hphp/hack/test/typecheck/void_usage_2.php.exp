@@ -1,10 +1,10 @@
+File "void_usage_2.php", line 15, characters 8-12:
+You are using the return value of a `void` function (Typing[4119])
+  File "void_usage_2.php", line 10, characters 7-13:
+  A `void` function doesn't return a value.
 File "void_usage_2.php", line 8, characters 8-94:
 This function can exit with and without returning a value (Typing[4421])
   File "void_usage_2.php", line 12, characters 7-21:
   Returning a value here.
   File "void_usage_2.php", line 10, characters 7-13:
   Returning without a value here
-File "void_usage_2.php", line 15, characters 8-12:
-You are using the return value of a `void` function (Typing[4119])
-  File "void_usage_2.php", line 10, characters 7-13:
-  A `void` function doesn't return a value.

@@ -1,3 +1,13 @@
+File "unknown_class.php--file2.php", line 8, characters 3-4:
+Was expecting a class, but got a mixed value (Typing[4026])
+File "unknown_class.php--file2.php", line 7, characters 7-9:
+You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "unknown_class.php--file1.php", line 5, characters 16-19:
+  This type is mixed because this is an internal symbol from module foo, which is opaque outside of the module.
+  File "unknown_class.php--file1.php", line 13, characters 12-15:
+  The type originated from here
+  File "unknown_class.php--file1.php", line 10, characters 11-11:
+    via this generic `T`
 File "unknown_class.php--file2.php", line 6, characters 14-15:
 Invalid argument (Typing[4110])
   File "unknown_class.php--file1.php", line 29, characters 21-24:
@@ -8,13 +18,3 @@ Invalid argument (Typing[4110])
   The type originated from here
   File "unknown_class.php--file1.php", line 10, characters 11-11:
     via this generic `T`
-File "unknown_class.php--file2.php", line 7, characters 7-9:
-You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
-  File "unknown_class.php--file1.php", line 5, characters 16-19:
-  This type is mixed because this is an internal symbol from module foo, which is opaque outside of the module.
-  File "unknown_class.php--file1.php", line 13, characters 12-15:
-  The type originated from here
-  File "unknown_class.php--file1.php", line 10, characters 11-11:
-    via this generic `T`
-File "unknown_class.php--file2.php", line 8, characters 3-4:
-Was expecting a class, but got a mixed value (Typing[4026])

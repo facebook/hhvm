@@ -1,5 +1,9 @@
 File "anyarray_bad.php", line 34, characters 5-17:
   AnyArray<arraykey, mixed>
+File "anyarray_bad.php", line 17, characters 3-13:
+You cannot mutate this (Typing[4011])
+  File "anyarray_bad.php", line 4, characters 25-42:
+  This is an object of type AnyArray<int, int>
 File "anyarray_bad.php", line 10, characters 15-20:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 3, characters 22-39:
@@ -26,16 +30,6 @@ Invalid argument (Typing[4110])
     via this generic `Tv`
   File "anyarray_bad.php", line 4, characters 39-41:
   But got `int`
-File "anyarray_bad.php", line 17, characters 3-13:
-You cannot mutate this (Typing[4011])
-  File "anyarray_bad.php", line 4, characters 25-42:
-  This is an object of type AnyArray<int, int>
-File "anyarray_bad.php", line 25, characters 19-21:
-The method `foo` is not compatible with the overridden method (Typing[4341])
-  File "anyarray_bad.php", line 25, characters 32-34:
-  Expected `int`
-  File "anyarray_bad.php", line 21, characters 32-39:
-  But got `arraykey`
 File "anyarray_bad.php", line 35, characters 18-21:
 Invalid argument (Typing[4110])
   File "anyarray_bad.php", line 29, characters 10-15:
@@ -48,3 +42,9 @@ Invalid argument (Typing[4110])
     via this generic `Tv`
   File "interfaces.hhi", line 92, characters 48-49:
     via this generic `Tv`
+File "anyarray_bad.php", line 25, characters 19-21:
+The method `foo` is not compatible with the overridden method (Typing[4341])
+  File "anyarray_bad.php", line 25, characters 32-34:
+  Expected `int`
+  File "anyarray_bad.php", line 21, characters 32-39:
+  But got `arraykey`

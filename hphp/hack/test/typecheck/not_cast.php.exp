@@ -3,10 +3,10 @@ An expression is expected here. (Parsing[1002])
 File "not_cast.php", line 15, characters 9-14:
 No such type `double`, did you mean `float`? (Naming[2123])
 File "not_cast.php", line 15, characters 9-14:
-Casts are only supported for `bool`, `int`, `float` and `string`. (Naming[2055])
-File "not_cast.php", line 15, characters 9-14:
 Unbound name: `double` (Naming[2049])
 File "not_cast.php", line 15, characters 17-18:
 Unbound name: `>>` (a global constant) (Naming[2049])
+File "not_cast.php", line 15, characters 9-14:
+Casts are only supported for `bool`, `int`, `float` and `string`. (Naming[2055])
 File "not_cast.php", line 15, characters 17-18:
 Unbound global constant (Typing) (Typing[4106])

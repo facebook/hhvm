@@ -1,12 +1,12 @@
-File "xhpchild_implicit_return.php", line 14, characters 1-67:
-This function can exit with and without returning a value (Typing[4421])
-  File "xhpchild_implicit_return.php", line 16, characters 5-23:
-  Returning a value here.
-  File "xhpchild_implicit_return.php", line 14, characters 1-67:
-  This function does not always return a value
 File "xhpchild_implicit_return.php", line 14, characters 10-12:
 Invalid return type (Typing[4336])
   File "xhpchild_implicit_return.php", line 14, characters 17-24:
   Expected `XHPChild`
   File "xhpchild_implicit_return.php", line 14, characters 10-12:
   But got `void` because this function does not always return a value
+File "xhpchild_implicit_return.php", line 14, characters 1-67:
+This function can exit with and without returning a value (Typing[4421])
+  File "xhpchild_implicit_return.php", line 16, characters 5-23:
+  Returning a value here.
+  File "xhpchild_implicit_return.php", line 14, characters 1-67:
+  This function does not always return a value

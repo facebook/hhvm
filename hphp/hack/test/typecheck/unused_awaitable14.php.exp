@@ -1,6 +1,6 @@
-File "unused_awaitable14.php", line 9, characters 17-31:
-Cannot cast a value of type `Awaitable<string>` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])
 File "unused_awaitable14.php", line 9, characters 25-31:
 This expression is of type `Awaitable`, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-File "unused_awaitable14.php", line 3, characters 21-37:
-This is why I think it is `Awaitable`
+  File "unused_awaitable14.php", line 3, characters 21-37:
+  This is why I think it is `Awaitable`
+File "unused_awaitable14.php", line 9, characters 17-31:
+Cannot cast a value of type `Awaitable<string>` to string. Only primitives may be used in a `(string)` cast. (Typing[4281])

@@ -1,16 +1,16 @@
-File "pseudofunction_with_signature.php", line 8, characters 15-22:
-Unexpected `inout` annotation for argument (Typing[4183])
-  File "Shapes.hhi", line 40, characters 19-24:
-  This is a normal parameter (does not have `inout`)
+File "pseudofunction_with_signature.php", line 9, characters 28-30:
+No class constant `T` in `dict` (Typing[4090])
+  File "hackarray.hhi", line 32, characters 24-27:
+  Declaration of `dict` is here
 File "pseudofunction_with_signature.php", line 9, characters 3-16:
 The two arguments to `type_structure()` must be:
  - first: `ValidClassname::class` or an object of that class
  - second: a single-quoted string literal containing the name of a type constant of that class
 Could not resolve the type constant (Typing[4150])
-File "pseudofunction_with_signature.php", line 9, characters 28-30:
-No class constant `T` in `dict` (Typing[4090])
-  File "hackarray.hhi", line 32, characters 24-27:
-  Declaration of `dict` is here
+File "pseudofunction_with_signature.php", line 8, characters 15-22:
+Unexpected `inout` annotation for argument (Typing[4183])
+  File "Shapes.hhi", line 40, characters 19-24:
+  This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 10, characters 16-23:
 Unexpected `inout` annotation for argument (Typing[4183])
   File "printf.hhi", line 48, characters 40-41:

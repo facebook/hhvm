@@ -1,3 +1,9 @@
+File "array_get_tconst.php", line 8, characters 12-13:
+Invalid return type (Typing[4110])
+  File "array_get_tconst.php", line 6, characters 43-55:
+  Expected `this::MyArray`
+  File "array_get_tconst.php", line 4, characters 34-53:
+  But got `dict<mixed, mixed>`
 File "array_get_tconst.php", line 4, characters 34-53:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 6-7:
@@ -8,9 +14,3 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "array_get_tconst.php", line 4, characters 41-45:
   But got `mixed`
-File "array_get_tconst.php", line 8, characters 12-13:
-Invalid return type (Typing[4110])
-  File "array_get_tconst.php", line 6, characters 43-55:
-  Expected `this::MyArray`
-  File "array_get_tconst.php", line 4, characters 34-53:
-  But got `dict<mixed, mixed>`

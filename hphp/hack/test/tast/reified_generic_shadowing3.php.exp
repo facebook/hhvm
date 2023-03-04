@@ -1,7 +1,7 @@
 Errors:
   [6:7-8] Unbound name: `U` (an object type)
-  [5:3-10] `T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute
   [5:7-8] Erased generics can only be used in type hints because they do not exist at runtime.
+  [5:3-10] `T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

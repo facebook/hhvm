@@ -4,9 +4,9 @@ Invalid return type (Typing[4336])
   Expected `string`
   File "printf_crash.php--printf.php", line 5, characters 10-19:
   But got `void` because this function does not always return a value
+File "printf_crash.php--use.php", line 5, characters 16-17:
+This argument must be a literal format string (Typing[4027])
 File "printf_crash.php--use.php", line 4, characters 21-36:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "typenames.hhi", line 4, characters 11-22:
   Definition is here
-File "printf_crash.php--use.php", line 5, characters 16-17:
-This argument must be a literal format string (Typing[4027])

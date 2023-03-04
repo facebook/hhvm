@@ -1,17 +1,17 @@
 File "requireclass_conflict_01.bad.php", line 9, characters 28-28:
 `C` is a `final` class, so it cannot be extended. (NastCheck[3072])
-File "requireclass_conflict_01.bad.php", line 8, characters 7-8:
-Trait T1 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
-  File "requireclass_conflict_01.bad.php", line 6, characters 13-13:
-  Class C is defined here.
-  File "requireclass_conflict_01.bad.php", line 8, characters 26-26:
-  The require class requirement is here.
 File "requireclass_conflict_01.bad.php", line 11, characters 7-7:
 This trait defines incompatible requirements. (Typing[4111])
   File "requireclass_conflict_01.bad.php", line 8, characters 26-26:
   This requires exactly class C
   File "requireclass_conflict_01.bad.php", line 9, characters 28-28:
   This requires a subtype of class C
+File "requireclass_conflict_01.bad.php", line 8, characters 7-8:
+Trait T1 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  File "requireclass_conflict_01.bad.php", line 6, characters 13-13:
+  Class C is defined here.
+  File "requireclass_conflict_01.bad.php", line 8, characters 26-26:
+  The require class requirement is here.
 File "requireclass_conflict_01.bad.php", line 11, characters 7-7:
 Trait T requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
   File "requireclass_conflict_01.bad.php", line 6, characters 13-13:

@@ -1,10 +1,10 @@
-File "this_access_union_intersect.php", line 41, characters 60-61:
-No type constant `TP` in `IEmpty` (Typing[4090])
-  File "this_access_union_intersect.php", line 33, characters 11-16:
-  Declaration of `IEmpty` is here
 File "this_access_union_intersect.php", line 42, characters 12-14:
 No instance method `get` in `IEmpty` (Typing[4053])
   File "this_access_union_intersect.php", line 41, characters 27-32:
   This is why I think it is an object of type IEmpty
+  File "this_access_union_intersect.php", line 33, characters 11-16:
+  Declaration of `IEmpty` is here
+File "this_access_union_intersect.php", line 41, characters 60-61:
+No type constant `TP` in `IEmpty` (Typing[4090])
   File "this_access_union_intersect.php", line 33, characters 11-16:
   Declaration of `IEmpty` is here

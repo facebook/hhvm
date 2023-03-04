@@ -8,18 +8,6 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "index_array_bad.php", line 8, characters 8-12:
   But got `mixed`
-File "index_array_bad.php", line 15, characters 8-14:
-Invalid index type for this dict (Typing[4449])
-  File "index_array_bad.php", line 6, characters 8-10:
-  This is an int
-  File "index_array_bad.php", line 15, characters 11-13:
-  It is incompatible with a string
-File "index_array_bad.php", line 16, characters 8-15:
-Invalid index type for this dict (Typing[4449])
-  File "index_array_bad.php", line 7, characters 10-12:
-  This is an int
-  File "index_array_bad.php", line 16, characters 12-14:
-  It is incompatible with a string
 File "index_array_bad.php", line 18, characters 9-18:
 This value is not a valid key type for this container (Typing[4324])
   File "index_array_bad.php", line 8, characters 3-18:
@@ -61,4 +49,16 @@ Invalid index type for this KeyedContainer (Typing[4324])
   File "index_array_bad.php", line 9, characters 18-20:
   This is an int
   File "index_array_bad.php", line 32, characters 28-30:
+  It is incompatible with a string
+File "index_array_bad.php", line 15, characters 8-14:
+Invalid index type for this dict (Typing[4449])
+  File "index_array_bad.php", line 6, characters 8-10:
+  This is an int
+  File "index_array_bad.php", line 15, characters 11-13:
+  It is incompatible with a string
+File "index_array_bad.php", line 16, characters 8-15:
+Invalid index type for this dict (Typing[4449])
+  File "index_array_bad.php", line 7, characters 10-12:
+  This is an int
+  File "index_array_bad.php", line 16, characters 12-14:
   It is incompatible with a string

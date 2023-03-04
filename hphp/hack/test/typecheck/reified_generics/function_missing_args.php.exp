@@ -1,8 +1,8 @@
-File "function_missing_args.php", line 8, characters 3-6:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
-  File "function_missing_args.php", line 4, characters 10-10:
-  Definition is here
 File "function_missing_args.php", line 9, characters 3-3:
 Expected no type parameters (Typing[4029])
   File "function_missing_args.php", line 5, characters 10-10:
+  Definition is here
+File "function_missing_args.php", line 8, characters 3-6:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+  File "function_missing_args.php", line 4, characters 10-10:
   Definition is here

@@ -1,8 +1,8 @@
 File "bad_inout_use_arg19.php", line 15, characters 11-15:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-  File "bad_inout_use_arg19.php", line 11, characters 10-23:
-  This is an object of type Pair<int, int> or an object of type vec<int>
-File "bad_inout_use_arg19.php", line 15, characters 11-15:
 You cannot mutate this (Typing[4011])
   File "bad_inout_use_arg19.php", line 11, characters 10-23:
   This is an object of type Pair<int, int>
+File "bad_inout_use_arg19.php", line 15, characters 11-15:
+Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
+  File "bad_inout_use_arg19.php", line 11, characters 10-23:
+  This is an object of type Pair<int, int> or an object of type vec<int>

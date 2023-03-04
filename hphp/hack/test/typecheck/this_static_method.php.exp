@@ -1,14 +1,14 @@
 File "this_static_method.php", line 10, characters 5-18:
   this = Foo
-File "this_static_method.php", line 6, characters 26-26:
-Invalid return type (Typing[4336])
-  File "this_static_method.php", line 6, characters 31-33:
-  Expected `int`
-  File "this_static_method.php", line 6, characters 26-26:
-  But got `void` because this function does not always return a value
 File "this_static_method.php", line 11, characters 12-21:
 Invalid return type (Typing[4110])
   File "this_static_method.php", line 7, characters 24-29:
   Expected `string`
   File "this_static_method.php", line 6, characters 31-33:
   But got `int`
+File "this_static_method.php", line 6, characters 26-26:
+Invalid return type (Typing[4336])
+  File "this_static_method.php", line 6, characters 31-33:
+  Expected `int`
+  File "this_static_method.php", line 6, characters 26-26:
+  But got `void` because this function does not always return a value

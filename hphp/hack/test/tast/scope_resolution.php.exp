@@ -1,4 +1,6 @@
 Errors:
+  [154:1-6] Variable `$much` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
   [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
   [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
@@ -17,8 +19,7 @@ Errors:
   [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [154:1-6] Variable `$much` is undefined, or not always defined.
-  [107:28-30] Did you mean `$x` instead?
+  [151:9-13] This call is invalid, this is not a function, it is void
   [31:8-15] No class constant `bar\baz` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
@@ -139,15 +140,14 @@ Errors:
   [126:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
-  [143:10-12] Expected an object convertible to string but got void
   [143:10-12] You are using the return value of a `void` function
   [143:10-12] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
-  [147:12-14] Expected an object convertible to string but got void
   [147:12-14] You are using the return value of a `void` function
   [147:12-14] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
   [151:9-11] You are using the return value of a `void` function
   [151:9-11] A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)
-  [151:9-13] This call is invalid, this is not a function, it is void
+  [143:10-12] Expected an object convertible to string but got void
+  [147:12-14] Expected an object convertible to string but got void
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

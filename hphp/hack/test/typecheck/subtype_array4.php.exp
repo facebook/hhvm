@@ -1,3 +1,9 @@
+File "subtype_array4.php", line 24, characters 11-12:
+Invalid argument (Typing[4110])
+  File "subtype_array4.php", line 19, characters 32-34:
+  Expected `int`
+  File "subtype_array4.php", line 12, characters 36-39:
+  But got `bool`
 File "subtype_array4.php", line 19, characters 18-35:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 6-7:
@@ -8,9 +14,3 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "subtype_array4.php", line 19, characters 25-29:
   But got `mixed`
-File "subtype_array4.php", line 24, characters 11-12:
-Invalid argument (Typing[4110])
-  File "subtype_array4.php", line 19, characters 32-34:
-  Expected `int`
-  File "subtype_array4.php", line 12, characters 36-39:
-  But got `bool`

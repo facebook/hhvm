@@ -1,12 +1,12 @@
 File "lambda.php", line 16, characters 5-13:
 Unrecognized user attribute: `__Invalid` starts with __ but is not a standard attribute (Naming[2049])
-File "lambda.php", line 15, characters 5-7:
-The `Bad` attribute cannot be used on a lambda expression. (Typing[4231])
-  File "lambda.php", line 7, characters 7-9:
-  The attribute's class is defined here. To be available for use on a lambda expression, the `Bad` class must implement `HH\LambdaAttribute`.
 File "lambda.php", line 15, characters 21-36:
 Invalid argument (Typing[4110])
   File "lambda.php", line 4, characters 38-40:
   Expected `int`
   File "lambda.php", line 15, characters 21-36:
   But got `string`
+File "lambda.php", line 15, characters 5-7:
+The `Bad` attribute cannot be used on a lambda expression. (Typing[4231])
+  File "lambda.php", line 7, characters 7-9:
+  The attribute's class is defined here. To be available for use on a lambda expression, the `Bad` class must implement `HH\LambdaAttribute`.

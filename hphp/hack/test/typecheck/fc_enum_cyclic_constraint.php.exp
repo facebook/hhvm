@@ -2,13 +2,13 @@ File "fc_enum_cyclic_constraint.php", line 3, characters 6-6:
 Invalid type hint (Typing[4146])
   File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
   Cyclic enum constraint
+File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
+Invalid type hint (Typing[4146])
+  File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
+  Cyclic enum constraint
 File "fc_enum_cyclic_constraint.php", line 3, characters 6-6:
 Underlying type for enum is incompatible with constraint (Typing[4330])
   File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
   Expected `E`
   File "fc_enum_cyclic_constraint.php", line 3, characters 9-11:
   But got `int`
-File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
-Invalid type hint (Typing[4146])
-  File "fc_enum_cyclic_constraint.php", line 3, characters 16-16:
-  Cyclic enum constraint

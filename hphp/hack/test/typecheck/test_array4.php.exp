@@ -1,3 +1,9 @@
+File "test_array4.php", line 13, characters 10-17:
+Invalid return type (Typing[4110])
+  File "test_array4.php", line 12, characters 38-41:
+  Expected `bool`
+  File "test_array4.php", line 12, characters 28-30:
+  But got `int`
 File "test_array4.php", line 12, characters 15-31:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 6-7:
@@ -8,12 +14,6 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "test_array4.php", line 12, characters 22-25:
   But got `bool`
-File "test_array4.php", line 13, characters 10-17:
-Invalid return type (Typing[4110])
-  File "test_array4.php", line 12, characters 38-41:
-  Expected `bool`
-  File "test_array4.php", line 12, characters 28-30:
-  But got `int`
 File "test_array4.php", line 13, characters 10-17:
 This value is not a valid key type for this container (Typing[4324])
   File "test_array4.php", line 12, characters 15-31:

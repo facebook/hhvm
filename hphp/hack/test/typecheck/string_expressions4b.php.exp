@@ -1,5 +1,5 @@
-File "string_expressions4b.php", line 32, characters 12-19:
-Expected an object convertible to string but got an object of exactly the class Other (Typing[4318])
 File "string_expressions4b.php", line 32, characters 20-24:
 You cannot use this object as a string
 Implicit conversions of Stringish objects to string are deprecated. (Typing[4067])
+File "string_expressions4b.php", line 32, characters 12-19:
+Expected an object convertible to string but got an object of exactly the class Other (Typing[4318])

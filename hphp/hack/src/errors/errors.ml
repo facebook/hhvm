@@ -348,6 +348,10 @@ let phase_of_string (value : string) : phase option =
 let sort : error list -> error list =
  fun err ->
   let compare_reasons = List.compare (Message.compare Pos_or_decl.compare) in
+  let compare_exact_code = Int.compare in
+  let compare_phase x_code y_code =
+    Int.compare (x_code / 1000) (y_code / 1000)
+  in
   let compare
       User_error.
         {
@@ -364,7 +368,8 @@ let sort : error list -> error list =
           reasons = y_messages;
           quickfixes = _;
           is_fixmed = _;
-        } =
+        }
+      ~compare_code =
     (* The primary sort order is by file *)
     let comparison =
       Relative_path.compare
@@ -374,7 +379,7 @@ let sort : error list -> error list =
     (* Then within each file, sort by phase *)
     let comparison =
       if comparison = 0 then
-        Int.compare (x_code / 1000) (y_code / 1000)
+        compare_code x_code y_code
       else
         comparison
     in
@@ -400,9 +405,14 @@ let sort : error list -> error list =
     else
       comparison
   in
-  let equal x y = compare x y = 0 in
-  List.sort ~compare:(fun x y -> compare x y) err
-  |> List.remove_consecutive_duplicates ~equal:(fun x y -> equal x y)
+  (* Sort using the exact code to ensure sort stability, but use the phase to deduplicate *)
+  let equal x y = compare ~compare_code:compare_phase x y = 0 in
+  List.sort
+    ~compare:(fun x y -> compare ~compare_code:compare_exact_code x y)
+    err
+  |> List.remove_consecutive_duplicates
+       ~equal:(fun x y -> equal x y)
+       ~which_to_keep:`First (* Match Rust dedup_by *)
 
 let get_sorted_error_list ?(drop_fixmed = true) err =
   sort (files_t_to_list (drop_fixmes_if err drop_fixmed))

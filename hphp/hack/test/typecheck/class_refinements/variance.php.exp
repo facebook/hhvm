@@ -4,6 +4,19 @@ Illegal usage of a covariant type parameter (Typing[4120])
   This is where the parameter was declared as covariant `+`
   File "variance.php", line 20, characters 54-55:
   exact refinements are invariant
+File "variance.php", line 32, characters 58-59:
+Illegal usage of a covariant type parameter (Typing[4120])
+  File "variance.php", line 31, characters 22-23:
+  This is where the parameter was declared as covariant `+`
+  File "variance.php", line 32, characters 58-59:
+  This position is contravariant (-) because it is the composition of (-)(+)
+The rest of the error messages decomposes the inference of the variance.
+Check out this link if you don't understand what this is about:
+http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
+  File "variance.php", line 32, characters 58-59:
+  (-) `super` refinement bounds are contravariant
+  File "variance.php", line 32, characters 35-60:
+  (+) Function return types are covariant
 File "variance.php", line 24, characters 54-55:
 Illegal usage of a contravariant type parameter (Typing[4121])
   File "variance.php", line 23, characters 27-28:
@@ -22,17 +35,4 @@ http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
   File "variance.php", line 28, characters 55-56:
   (+) `as` refinement bounds are covariant
   File "variance.php", line 28, characters 35-57:
-  (+) Function return types are covariant
-File "variance.php", line 32, characters 58-59:
-Illegal usage of a covariant type parameter (Typing[4120])
-  File "variance.php", line 31, characters 22-23:
-  This is where the parameter was declared as covariant `+`
-  File "variance.php", line 32, characters 58-59:
-  This position is contravariant (-) because it is the composition of (-)(+)
-The rest of the error messages decomposes the inference of the variance.
-Check out this link if you don't understand what this is about:
-http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
-  File "variance.php", line 32, characters 58-59:
-  (-) `super` refinement bounds are contravariant
-  File "variance.php", line 32, characters 35-60:
   (+) Function return types are covariant

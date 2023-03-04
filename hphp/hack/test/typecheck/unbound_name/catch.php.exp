@@ -1,9 +1,9 @@
+File "catch.php", line 21, characters 10-26:
+Unbound name: `NotFoundException` (an object type) (Naming[2049])
 File "catch.php", line 15, characters 10-14:
 Expected a `class` but got a type alias. (Naming[2052])
   File "catch.php", line 5, characters 6-10:
   Alias definition is here.
-File "catch.php", line 21, characters 10-26:
-Unbound name: `NotFoundException` (an object type) (Naming[2049])
 File "catch.php", line 27, characters 10-10:
 Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
 File "catch.php", line 27, characters 10-10:

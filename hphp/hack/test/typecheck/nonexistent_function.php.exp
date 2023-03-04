@@ -1,6 +1,6 @@
 File "nonexistent_function.php", line 4, characters 3-14:
 Unbound name: `no_such_func` (a global function) (Naming[2049])
-File "nonexistent_function.php", line 3, characters 17-21:
-Functions that do not return a value must have a type of void (Typing[4422])
 File "nonexistent_function.php", line 4, characters 3-14:
 Unbound name (typing): `no_such_func` (Typing[4107])
+File "nonexistent_function.php", line 3, characters 17-21:
+Functions that do not return a value must have a type of void (Typing[4422])

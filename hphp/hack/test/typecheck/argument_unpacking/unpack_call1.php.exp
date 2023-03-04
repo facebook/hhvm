@@ -1,3 +1,15 @@
+File "unpack_call1.php", line 85, characters 8-19:
+Invalid argument (Typing[4110])
+  File "unpack_call1.php", line 85, characters 8-19:
+  Expected `Traversable<_>` (it is unpacked with `...`)
+  File "unpack_call1.php", line 90, characters 24-28:
+  But got `mixed`
+File "unpack_call1.php", line 87, characters 8-14:
+Invalid argument (Typing[4110])
+  File "unpack_call1.php", line 87, characters 8-14:
+  Expected `Traversable<_>` (it is unpacked with `...`)
+  File "unpack_call1.php", line 90, characters 24-28:
+  But got `mixed`
 File "unpack_call1.php", line 38, characters 8-12:
 Invalid argument (Typing[4359])
   File "unpack_call1.php", line 38, characters 8-12:
@@ -52,15 +64,3 @@ Invalid argument (Typing[4359])
   An array cannot be unpacked into the required arguments of a function
   File "unpack_call1.php", line 3, characters 10-10:
   Definition is here
-File "unpack_call1.php", line 85, characters 8-19:
-Invalid argument (Typing[4110])
-  File "unpack_call1.php", line 85, characters 8-19:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call1.php", line 90, characters 24-28:
-  But got `mixed`
-File "unpack_call1.php", line 87, characters 8-14:
-Invalid argument (Typing[4110])
-  File "unpack_call1.php", line 87, characters 8-14:
-  Expected `Traversable<_>` (it is unpacked with `...`)
-  File "unpack_call1.php", line 90, characters 24-28:
-  But got `mixed`

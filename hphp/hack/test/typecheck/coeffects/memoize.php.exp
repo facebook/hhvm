@@ -1,10 +1,10 @@
 File "memoize.php", line 8, characters 15-15:
-Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize.php", line 8, characters 20-21:
-  The local (enclosing) context provides the capability set {}
-File "memoize.php", line 8, characters 15-15:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "memoize.php", line 8, characters 20-21:
   From this declaration, the context of this function body provides the capability set {}
   File "memoize.php", line 4, characters 36-43:
   But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+File "memoize.php", line 8, characters 15-15:
+Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
+  File "memoize.php", line 8, characters 20-21:
+  The local (enclosing) context provides the capability set {}

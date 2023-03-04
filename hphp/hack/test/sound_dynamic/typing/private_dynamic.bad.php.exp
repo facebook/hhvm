@@ -1,3 +1,15 @@
+File "private_dynamic.bad.php", line 36, characters 12-13:
+Typing error (Typing[4425])
+  File "private_dynamic.bad.php", line 36, characters 16-19:
+  Cannot read from property `item` through dynamic type because private property in `Wrap` cannot be assigned to dynamic
+  File "private_dynamic.bad.php", line 32, characters 11-11:
+  Property `item` has type `D`
+File "private_dynamic.bad.php", line 48, characters 12-13:
+Typing error (Typing[4425])
+  File "private_dynamic.bad.php", line 48, characters 16-20:
+  Cannot read from property `item1` through dynamic type because private property in `NonDyn` cannot be assigned to dynamic
+  File "private_dynamic.bad.php", line 41, characters 11-11:
+  Property `item1` has type `D`
 File "private_dynamic.bad.php", line 13, characters 12-16:
 Method  `setItems` in class `C` is not dynamically callable. (Typing[4426])
   File "private_dynamic.bad.php", line 13, characters 12-16:
@@ -8,19 +20,7 @@ File "private_dynamic.bad.php", line 25, characters 9-13:
 Cannot write to property `items` through dynamic type because private property in `C` does not have an enforceable type (Typing[4426])
   File "private_dynamic.bad.php", line 10, characters 11-18:
   Property `items` has type `vec<int>`
-File "private_dynamic.bad.php", line 36, characters 12-13:
-Typing error (Typing[4425])
-  File "private_dynamic.bad.php", line 36, characters 16-19:
-  Cannot read from property `item` through dynamic type because private property in `Wrap` cannot be assigned to dynamic
-  File "private_dynamic.bad.php", line 32, characters 11-11:
-  Property `item` has type `D`
 File "private_dynamic.bad.php", line 45, characters 9-13:
 Cannot write to property `item2` through dynamic type because private property in `NonDyn` does not have an enforceable type (Typing[4426])
   File "private_dynamic.bad.php", line 42, characters 11-18:
   Property `item2` has type `vec<int>`
-File "private_dynamic.bad.php", line 48, characters 12-13:
-Typing error (Typing[4425])
-  File "private_dynamic.bad.php", line 48, characters 16-20:
-  Cannot read from property `item1` through dynamic type because private property in `NonDyn` cannot be assigned to dynamic
-  File "private_dynamic.bad.php", line 41, characters 11-11:
-  Property `item1` has type `D`

@@ -1,15 +1,3 @@
-File "generic_constraint_dynamic.bad.php", line 19, characters 12-12:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_constraint_dynamic.bad.php", line 5, characters 34-50:
-  Expected `dynamic`
-  File "generic_constraint_dynamic.bad.php", line 19, characters 14-14:
-  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
-File "generic_constraint_dynamic.bad.php", line 20, characters 8-11:
-Some type arguments violate their constraints (Typing[4323])
-  File "generic_constraint_dynamic.bad.php", line 12, characters 40-56:
-  Expected `dynamic`
-  File "generic_constraint_dynamic.bad.php", line 20, characters 13-13:
-  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "generic_constraint_dynamic.bad.php", line 21, characters 14-20:
 Invalid argument (Typing[4110])
   File "generic_constraint_dynamic.bad.php", line 21, characters 12-12:
@@ -29,4 +17,16 @@ Invalid argument (Typing[4110])
   File "generic_constraint_dynamic.bad.php", line 12, characters 40-56:
   Expected `dynamic`
   File "generic_constraint_dynamic.bad.php", line 22, characters 17-17:
+  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "generic_constraint_dynamic.bad.php", line 19, characters 12-12:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_constraint_dynamic.bad.php", line 5, characters 34-50:
+  Expected `dynamic`
+  File "generic_constraint_dynamic.bad.php", line 19, characters 14-14:
+  Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping
+File "generic_constraint_dynamic.bad.php", line 20, characters 8-11:
+Some type arguments violate their constraints (Typing[4323])
+  File "generic_constraint_dynamic.bad.php", line 12, characters 40-56:
+  Expected `dynamic`
+  File "generic_constraint_dynamic.bad.php", line 20, characters 13-13:
   Type `D` is not a subtype of `dynamic` under dynamic-aware subtyping

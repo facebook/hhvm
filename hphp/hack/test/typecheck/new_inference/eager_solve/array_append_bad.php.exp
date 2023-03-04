@@ -1,3 +1,11 @@
+File "array_append_bad.php", line 41, characters 3-21:
+an object of type Map<_, _> does not allow array append (Typing[4006])
+  File "array_append_bad.php", line 27, characters 3-14:
+  Definition is here
+File "array_append_bad.php", line 42, characters 3-21:
+an object of type Map<int, num> does not allow array append (Typing[4006])
+  File "array_append_bad.php", line 27, characters 3-14:
+  Definition is here
 File "array_append_bad.php", line 32, characters 16-20:
 Invalid argument (Typing[4110])
   File "array_append_bad.php", line 11, characters 23-28:
@@ -22,11 +30,3 @@ Set values must be arraykeys (Typing[4324])
   This container is an object of type Set<int>
   File "array_append_bad.php", line 39, characters 12-15:
   A bool is not an arraykey
-File "array_append_bad.php", line 41, characters 3-21:
-an object of type Map<_, _> does not allow array append (Typing[4006])
-  File "array_append_bad.php", line 27, characters 3-14:
-  Definition is here
-File "array_append_bad.php", line 42, characters 3-21:
-an object of type Map<int, num> does not allow array append (Typing[4006])
-  File "array_append_bad.php", line 27, characters 3-14:
-  Definition is here

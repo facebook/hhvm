@@ -4,20 +4,14 @@ Invalid argument (Typing[4110])
   Expected `HH\Lib\Regex\Pattern<_>`
   File "re_prefixed_string.php", line 20, characters 8-20:
   But got `string` because this is the result of a concatenation
-File "re_prefixed_string.php", line 26, characters 10-16:
-Invalid return type (Typing[4336])
-  File "re_prefixed_string.php", line 26, characters 78-78:
-  Expected `T`
-  File "re_prefixed_string.php", line 26, characters 10-16:
-  But got `void` because this function does not always return a value
+File "re_prefixed_string.php", line 41, characters 16-35:
+Strings with embedded expressions are not allowed to be to be `re`-prefixed (Typing[4274])
 File "re_prefixed_string.php", line 32, characters 13-35:
 Bad regex pattern; two named subpatterns have the same name [14]. (Typing[4275])
 File "re_prefixed_string.php", line 33, characters 13-29:
 Bad regex pattern; group name must start with a non-digit [5]. (Typing[4275])
 File "re_prefixed_string.php", line 34, characters 13-18:
 Bad regex pattern; \c at end of pattern [2]. (Typing[4275])
-File "re_prefixed_string.php", line 41, characters 16-35:
-Strings with embedded expressions are not allowed to be to be `re`-prefixed (Typing[4274])
 File "re_prefixed_string.php", line 47, characters 13-19:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
 File "re_prefixed_string.php", line 49, characters 13-20:
@@ -38,3 +32,9 @@ File "re_prefixed_string.php", line 77, characters 13-68:
 Bad regex pattern; Missing delimiter(s). (Typing[4275])
 File "re_prefixed_string.php", line 81, characters 14-15:
 Bad regex pattern; This pattern is empty. (Typing[4275])
+File "re_prefixed_string.php", line 26, characters 10-16:
+Invalid return type (Typing[4336])
+  File "re_prefixed_string.php", line 26, characters 78-78:
+  Expected `T`
+  File "re_prefixed_string.php", line 26, characters 10-16:
+  But got `void` because this function does not always return a value

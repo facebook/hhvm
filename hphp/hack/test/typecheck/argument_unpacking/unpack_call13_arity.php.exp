@@ -1,48 +1,48 @@
-File "unpack_call13_arity.php", line 14, characters 20-26:
-Invalid argument (Typing[4105])
-File "unpack_call13_arity.php", line 14, characters 20-26:
-Too many arguments (expected 1 but got 2)
-File "unpack_call13_arity.php", line 36, characters 10-22:
-Definition is here
-File "unpack_call13_arity.php", line 15, characters 23-29:
-Invalid argument (Typing[4105])
-File "unpack_call13_arity.php", line 15, characters 23-29:
-Too many arguments (expected 2 but got 3)
-File "unpack_call13_arity.php", line 37, characters 10-22:
-Definition is here
 File "unpack_call13_arity.php", line 16, characters 23-29:
 Invalid argument (Typing[4104])
-File "unpack_call13_arity.php", line 16, characters 23-29:
-Too few arguments (required 3 but got 2)
-File "unpack_call13_arity.php", line 42, characters 10-25:
-Definition is here
+  File "unpack_call13_arity.php", line 16, characters 23-29:
+  Too few arguments (required 3 but got 2)
+  File "unpack_call13_arity.php", line 42, characters 10-25:
+  Definition is here
+File "unpack_call13_arity.php", line 14, characters 20-26:
+Invalid argument (Typing[4105])
+  File "unpack_call13_arity.php", line 14, characters 20-26:
+  Too many arguments (expected 1 but got 2)
+  File "unpack_call13_arity.php", line 36, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 15, characters 23-29:
+Invalid argument (Typing[4105])
+  File "unpack_call13_arity.php", line 15, characters 23-29:
+  Too many arguments (expected 2 but got 3)
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here
 File "unpack_call13_arity.php", line 27, characters 20-24:
 Invalid argument (Typing[4359])
-File "unpack_call13_arity.php", line 27, characters 20-24:
-An array cannot be unpacked into the required arguments of a function
-File "unpack_call13_arity.php", line 36, characters 10-22:
-Definition is here
+  File "unpack_call13_arity.php", line 27, characters 20-24:
+  An array cannot be unpacked into the required arguments of a function
+  File "unpack_call13_arity.php", line 36, characters 10-22:
+  Definition is here
 File "unpack_call13_arity.php", line 28, characters 23-27:
 Invalid argument (Typing[4359])
-File "unpack_call13_arity.php", line 28, characters 23-27:
-A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-File "unpack_call13_arity.php", line 36, characters 10-22:
-Definition is here
+  File "unpack_call13_arity.php", line 28, characters 23-27:
+  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
+  File "unpack_call13_arity.php", line 36, characters 10-22:
+  Definition is here
 File "unpack_call13_arity.php", line 29, characters 20-24:
 Invalid argument (Typing[4359])
-File "unpack_call13_arity.php", line 29, characters 20-24:
-An array cannot be unpacked into the required arguments of a function
-File "unpack_call13_arity.php", line 37, characters 10-22:
-Definition is here
+  File "unpack_call13_arity.php", line 29, characters 20-24:
+  An array cannot be unpacked into the required arguments of a function
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here
 File "unpack_call13_arity.php", line 30, characters 23-27:
 Invalid argument (Typing[4359])
-File "unpack_call13_arity.php", line 30, characters 23-27:
-An array cannot be unpacked into the required arguments of a function
-File "unpack_call13_arity.php", line 37, characters 10-22:
-Definition is here
+  File "unpack_call13_arity.php", line 30, characters 23-27:
+  An array cannot be unpacked into the required arguments of a function
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here
 File "unpack_call13_arity.php", line 31, characters 26-30:
 Invalid argument (Typing[4359])
-File "unpack_call13_arity.php", line 31, characters 26-30:
-A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
-File "unpack_call13_arity.php", line 37, characters 10-22:
-Definition is here
+  File "unpack_call13_arity.php", line 31, characters 26-30:
+  A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here

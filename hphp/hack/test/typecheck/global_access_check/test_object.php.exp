@@ -2,12 +2,8 @@ File "test_object.php", line 26, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
 File "test_object.php", line 27, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-File "test_object.php", line 29, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_object.php", line 30, characters 5-16:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
-File "test_object.php", line 43, characters 16-24:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_object.php", line 44, characters 5-22:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_object.php", line 45, characters 5-22:
@@ -18,3 +14,7 @@ File "test_object.php", line 48, characters 5-22:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_object.php", line 49, characters 5-22:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_object.php", line 29, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_object.php", line 43, characters 16-24:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])

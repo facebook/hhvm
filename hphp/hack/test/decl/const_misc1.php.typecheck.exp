@@ -2,18 +2,12 @@ File "const_misc1.php", line 15, characters 7-7:
 Please add a type hint `const SomeType J` (Naming[2001])
 File "const_misc1.php", line 15, characters 12-12:
 Please add a type hint `const SomeType T` (Naming[2001])
-File "const_misc1.php", line 4, characters 7-7:
-Wrong type hint (Typing[4338])
-  File "const_misc1.php", line 4, characters 3-5:
+File "const_misc1.php", line 14, characters 7-9:
+Wrong type hint (Typing[4110])
+  File "const_misc1.php", line 14, characters 7-9:
   Expected `int`
-  File "const_misc1.php", line 4, characters 11-13:
+  File "const_misc1.php", line 14, characters 18-20:
   But got `string`
-File "const_misc1.php", line 5, characters 10-10:
-Wrong type hint (Typing[4338])
-  File "const_misc1.php", line 5, characters 3-8:
-  Expected `string`
-  File "const_misc1.php", line 5, characters 14-14:
-  But got `int`
 File "const_misc1.php", line 10, characters 3-3:
 Constant does not match the type of the enum it is in (Typing[4328])
   File "const_misc1.php", line 8, characters 8-10:
@@ -26,12 +20,18 @@ Constant does not match the type of the enum it is in (Typing[4328])
   Expected `int`
   File "const_misc1.php", line 8, characters 15-22:
   But got `arraykey`
-File "const_misc1.php", line 14, characters 7-9:
-Wrong type hint (Typing[4110])
-  File "const_misc1.php", line 14, characters 7-9:
+File "const_misc1.php", line 4, characters 7-7:
+Wrong type hint (Typing[4338])
+  File "const_misc1.php", line 4, characters 3-5:
   Expected `int`
-  File "const_misc1.php", line 14, characters 18-20:
+  File "const_misc1.php", line 4, characters 11-13:
   But got `string`
+File "const_misc1.php", line 5, characters 10-10:
+Wrong type hint (Typing[4338])
+  File "const_misc1.php", line 5, characters 3-8:
+  Expected `string`
+  File "const_misc1.php", line 5, characters 14-14:
+  But got `int`
 File "const_misc1.php", line 18, characters 21-22:
 Wrong type hint (Typing[4338])
   File "const_misc1.php", line 18, characters 9-11:

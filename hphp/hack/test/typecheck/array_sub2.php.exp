@@ -1,3 +1,9 @@
+File "array_sub2.php", line 21, characters 12-13:
+Invalid argument (Typing[4110])
+  File "array_sub2.php", line 12, characters 23-38:
+  Expected `dict<bool, _>`
+  File "array_sub2.php", line 20, characters 15-25:
+  But got `vec<int>`
 File "array_sub2.php", line 12, characters 23-38:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 6-7:
@@ -8,9 +14,3 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "array_sub2.php", line 12, characters 30-33:
   But got `bool`
-File "array_sub2.php", line 21, characters 12-13:
-Invalid argument (Typing[4110])
-  File "array_sub2.php", line 12, characters 23-38:
-  Expected `dict<bool, _>`
-  File "array_sub2.php", line 20, characters 15-25:
-  But got `vec<int>`

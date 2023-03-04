@@ -1,10 +1,10 @@
-File "class_const_targ_bad.php", line 8, characters 11-13:
-Cannot create a function pointer to `Foo::bar`; it is abstract (Typing[4391])
-  File "class_const_targ_bad.php", line 4, characters 26-28:
-  Declaration is here
 File "class_const_targ_bad.php", line 9, characters 6-12:
 Invalid argument (Typing[4110])
   File "class_const_targ_bad.php", line 4, characters 30-32:
   Expected `int`
   File "class_const_targ_bad.php", line 9, characters 6-12:
   But got `string`
+File "class_const_targ_bad.php", line 8, characters 11-13:
+Cannot create a function pointer to `Foo::bar`; it is abstract (Typing[4391])
+  File "class_const_targ_bad.php", line 4, characters 26-28:
+  Declaration is here

@@ -14,11 +14,11 @@ File "switch_exhaustive.bad.php", line 44, characters 11-12:
 `switch` statement nonexhaustive; the following cases are missing: `B` (Typing[4019])
   File "switch_exhaustive.bad.php", line 11, characters 12-12:
   Enum class declared here
-File "switch_exhaustive.bad.php", line 46, characters 8-10:
-Switching on enum class `E` but using constant from `F` (Typing[4023])
 File "switch_exhaustive.bad.php", line 54, characters 11-12:
 `switch` statement nonexhaustive; the following cases are missing: `B` (Typing[4019])
   File "switch_exhaustive.bad.php", line 16, characters 12-12:
   Enum class declared here
+File "switch_exhaustive.bad.php", line 46, characters 8-10:
+Switching on enum class `E` but using constant from `F` (Typing[4023])
 File "switch_exhaustive.bad.php", line 56, characters 8-10:
 Switching on enum class `F` but using constant from `E` (Typing[4023])

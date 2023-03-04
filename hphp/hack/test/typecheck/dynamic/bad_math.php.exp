@@ -28,16 +28,28 @@ Typing error (Typing[4110])
   Expected `num` because this is used in an arithmetic operation
   File "bad_math.php", line 5, characters 19-25:
   But got `dynamic`
-File "bad_math.php", line 14, characters 3-5:
-Typing error (Typing[4423])
-  File "bad_math.php", line 14, characters 3-5:
-  Expected `int` because this is used in a bitwise operation
-  File "bad_math.php", line 5, characters 33-33:
-  But got `C`
 File "bad_math.php", line 15, characters 3-4:
 Typing error (Typing[4110])
   File "bad_math.php", line 15, characters 3-8:
   Expected `int` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 33-33:
+  But got `C`
+File "bad_math.php", line 21, characters 3-5:
+Typing error (Typing[4110])
+  File "bad_math.php", line 21, characters 3-5:
+  Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
+File "bad_math.php", line 22, characters 3-5:
+Typing error (Typing[4110])
+  File "bad_math.php", line 22, characters 3-5:
+  Expected `num` because this is used in an arithmetic operation
+  File "bad_math.php", line 5, characters 19-25:
+  But got `dynamic`
+File "bad_math.php", line 14, characters 3-5:
+Typing error (Typing[4423])
+  File "bad_math.php", line 14, characters 3-5:
+  Expected `int` because this is used in a bitwise operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
 File "bad_math.php", line 16, characters 3-4:
@@ -70,15 +82,3 @@ Typing error (Typing[4423])
   Expected `int` because this is used in a bitwise operation
   File "bad_math.php", line 5, characters 33-33:
   But got `C`
-File "bad_math.php", line 21, characters 3-5:
-Typing error (Typing[4110])
-  File "bad_math.php", line 21, characters 3-5:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`
-File "bad_math.php", line 22, characters 3-5:
-Typing error (Typing[4110])
-  File "bad_math.php", line 22, characters 3-5:
-  Expected `num` because this is used in an arithmetic operation
-  File "bad_math.php", line 5, characters 19-25:
-  But got `dynamic`

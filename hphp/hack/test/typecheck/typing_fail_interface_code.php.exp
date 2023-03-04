@@ -1,4 +1,4 @@
 File "typing_fail_interface_code.php", line 14, characters 19-21:
-This method is declared as abstract, but has a body (NastCheck[3002])
-File "typing_fail_interface_code.php", line 14, characters 19-21:
 This method shouldn't have a body (NastCheck[3001])
+File "typing_fail_interface_code.php", line 14, characters 19-21:
+This method is declared as abstract, but has a body (NastCheck[3002])

@@ -1,46 +1,46 @@
-File "test_collection.php", line 14, characters 12-28:
-[Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_collection.php", line 14, characters 12-28:
-[Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is possibly written via function call. (Other[11003])
 File "test_collection.php", line 18, characters 5-26:
 [Foo::set_bar]{Foo::$static_bar}(Bar) A global variable is definitely written. (Other[11001])
-File "test_collection.php", line 22, characters 12-32:
-[Foo::get_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 26, characters 5-31:
 [Foo::set_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely written. (Other[11001])
-File "test_collection.php", line 30, characters 12-32:
-[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
-File "test_collection.php", line 30, characters 12-32:
-[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is possibly written via function call. (Other[11003])
 File "test_collection.php", line 34, characters 5-31:
 [Foo::set_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely written. (Other[11001])
 File "test_collection.php", line 40, characters 5-32:
 [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely written. (Other[11001])
-File "test_collection.php", line 42, characters 10-25:
-[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_collection.php", line 43, characters 5-16:
-[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_collection.php", line 45, characters 5-39:
 [Test::test_method_call]{Foo::$static_vec_int}(vec<int>)<WriteLiteral> A global variable is definitely written. (Other[11001])
-File "test_collection.php", line 47, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 50, characters 5-31:
 [Test::test_method_call]{Foo::$static_vec_int}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
 File "test_collection.php", line 52, characters 5-41:
 [Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely written. (Other[11001])
-File "test_collection.php", line 54, characters 10-29:
-[Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
-File "test_collection.php", line 55, characters 5-19:
-[Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_collection.php", line 58, characters 5-37:
 [Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
+File "test_collection.php", line 43, characters 5-16:
+[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_collection.php", line 55, characters 5-19:
+[Test::test_method_call]{Foo::$static_vec_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_collection.php", line 62, characters 5-26:
+[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_collection.php", line 68, characters 5-19:
+[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_collection.php", line 14, characters 12-28:
+[Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is possibly written via function call. (Other[11003])
+File "test_collection.php", line 30, characters 12-32:
+[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is possibly written via function call. (Other[11003])
+File "test_collection.php", line 14, characters 12-28:
+[Foo::get_bar]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_collection.php", line 22, characters 12-32:
+[Foo::get_vec_int]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
+File "test_collection.php", line 30, characters 12-32:
+[Foo::get_vec_bar]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
+File "test_collection.php", line 42, characters 10-25:
+[Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_collection.php", line 47, characters 10-29:
+[Test::test_method_call]{Foo::$static_vec_int}(vec<int>) A global variable is definitely read. (Other[11004])
+File "test_collection.php", line 54, characters 10-29:
+[Test::test_method_call]{Foo::$static_vec_bar}(vec<Bar>) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 60, characters 39-54:
 [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_collection.php", line 61, characters 20-35:
 [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_collection.php", line 62, characters 5-26:
-[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_collection.php", line 67, characters 12-27:
 [Test::test_method_call]{Foo::$static_bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_collection.php", line 68, characters 5-19:
-[Test::test_method_call]{Foo::$static_bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])

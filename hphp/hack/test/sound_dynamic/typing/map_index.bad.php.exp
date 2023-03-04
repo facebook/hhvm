@@ -1,21 +1,9 @@
-File "map_index.bad.php", line 9, characters 3-13:
-Invalid index type for this Map (Typing[4324])
-  File "map_index.bad.php", line 6, characters 7-9:
-  Expected `int`
-  File "map_index.bad.php", line 5, characters 3-9:
-  But got `dynamic`
 File "map_index.bad.php", line 11, characters 3-15:
 Invalid assignment (Typing[4110])
   File "map_index.bad.php", line 6, characters 12-14:
   Expected `int`
   File "map_index.bad.php", line 11, characters 13-15:
   But got `string`
-File "map_index.bad.php", line 11, characters 3-15:
-Invalid index type for this Map (Typing[4324])
-  File "map_index.bad.php", line 6, characters 7-9:
-  Expected `int`
-  File "map_index.bad.php", line 5, characters 3-9:
-  But got `dynamic`
 File "map_index.bad.php", line 12, characters 3-15:
 Invalid assignment (Typing[4110])
   File "map_index.bad.php", line 7, characters 17-19:
@@ -28,15 +16,63 @@ Invalid assignment (Typing[4110])
   Expected `int`
   File "map_index.bad.php", line 5, characters 3-9:
   But got `dynamic`
-File "map_index.bad.php", line 13, characters 3-14:
+File "map_index.bad.php", line 14, characters 3-14:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 7, characters 17-19:
+  Expected `int`
+  File "map_index.bad.php", line 5, characters 3-9:
+  But got `dynamic`
+File "map_index.bad.php", line 28, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 19, characters 21-23:
+  Expected `int`
+  File "map_index.bad.php", line 28, characters 21-23:
+  But got `string`
+File "map_index.bad.php", line 29, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 20, characters 27-29:
+  Expected `int`
+  File "map_index.bad.php", line 29, characters 21-23:
+  But got `string`
+File "map_index.bad.php", line 30, characters 5-23:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 21, characters 22-24:
+  Expected `int`
+  File "map_index.bad.php", line 30, characters 21-23:
+  But got `string`
+File "map_index.bad.php", line 31, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 19, characters 21-23:
+  Expected `int`
+  File "map_index.bad.php", line 24, characters 21-27:
+  But got `dynamic`
+File "map_index.bad.php", line 32, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 20, characters 27-29:
+  Expected `int`
+  File "map_index.bad.php", line 24, characters 21-27:
+  But got `dynamic`
+File "map_index.bad.php", line 33, characters 5-22:
+Invalid assignment (Typing[4110])
+  File "map_index.bad.php", line 21, characters 22-24:
+  Expected `int`
+  File "map_index.bad.php", line 24, characters 21-27:
+  But got `dynamic`
+File "map_index.bad.php", line 9, characters 3-13:
 Invalid index type for this Map (Typing[4324])
   File "map_index.bad.php", line 6, characters 7-9:
   Expected `int`
   File "map_index.bad.php", line 5, characters 3-9:
   But got `dynamic`
-File "map_index.bad.php", line 14, characters 3-14:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 7, characters 17-19:
+File "map_index.bad.php", line 11, characters 3-15:
+Invalid index type for this Map (Typing[4324])
+  File "map_index.bad.php", line 6, characters 7-9:
+  Expected `int`
+  File "map_index.bad.php", line 5, characters 3-9:
+  But got `dynamic`
+File "map_index.bad.php", line 13, characters 3-14:
+Invalid index type for this Map (Typing[4324])
+  File "map_index.bad.php", line 6, characters 7-9:
   Expected `int`
   File "map_index.bad.php", line 5, characters 3-9:
   But got `dynamic`
@@ -55,12 +91,6 @@ Invalid index type for this Map (Typing[4324])
   File "map_index.bad.php", line 24, characters 21-27:
   But got `dynamic`
 File "map_index.bad.php", line 28, characters 5-23:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 19, characters 21-23:
-  Expected `int`
-  File "map_index.bad.php", line 28, characters 21-23:
-  But got `string`
-File "map_index.bad.php", line 28, characters 5-23:
 Invalid index type for this Map (Typing[4324])
   File "map_index.bad.php", line 17, characters 9-10:
   Expected `Tk`
@@ -68,18 +98,6 @@ Invalid index type for this Map (Typing[4324])
     via this generic `Tk`
   File "map_index.bad.php", line 24, characters 21-27:
   But got `dynamic`
-File "map_index.bad.php", line 29, characters 5-23:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 20, characters 27-29:
-  Expected `int`
-  File "map_index.bad.php", line 29, characters 21-23:
-  But got `string`
-File "map_index.bad.php", line 30, characters 5-23:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 21, characters 22-24:
-  Expected `int`
-  File "map_index.bad.php", line 30, characters 21-23:
-  But got `string`
 File "map_index.bad.php", line 30, characters 5-23:
 Invalid index type for this Map (Typing[4324])
   File "map_index.bad.php", line 21, characters 17-19:
@@ -87,29 +105,11 @@ Invalid index type for this Map (Typing[4324])
   File "map_index.bad.php", line 24, characters 21-27:
   But got `dynamic`
 File "map_index.bad.php", line 31, characters 5-22:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 19, characters 21-23:
-  Expected `int`
-  File "map_index.bad.php", line 24, characters 21-27:
-  But got `dynamic`
-File "map_index.bad.php", line 31, characters 5-22:
 Invalid index type for this Map (Typing[4324])
   File "map_index.bad.php", line 17, characters 9-10:
   Expected `Tk`
   File "map_index.bad.php", line 19, characters 17-18:
     via this generic `Tk`
-  File "map_index.bad.php", line 24, characters 21-27:
-  But got `dynamic`
-File "map_index.bad.php", line 32, characters 5-22:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 20, characters 27-29:
-  Expected `int`
-  File "map_index.bad.php", line 24, characters 21-27:
-  But got `dynamic`
-File "map_index.bad.php", line 33, characters 5-22:
-Invalid assignment (Typing[4110])
-  File "map_index.bad.php", line 21, characters 22-24:
-  Expected `int`
   File "map_index.bad.php", line 24, characters 21-27:
   But got `dynamic`
 File "map_index.bad.php", line 33, characters 5-22:

@@ -1,5 +1,11 @@
 File "enum_class.php", line 3, characters 20-49:
 Direct references to coeffects namespaces are not allowed (Parsing[1002])
+File "enum_class.php", line 12, characters 12-12:
+Constant does not match the type of the enum it is in (Typing[4328])
+  File "enum_class.php", line 11, characters 14-19:
+  Expected `string`
+  File "enum_class.php", line 12, characters 16-16:
+  But got `int`
 File "enum_class.php", line 7, characters 7-7:
 Wrong type hint (Typing[4338])
   File "enum_class.php", line 7, characters 3-5:
@@ -16,9 +22,3 @@ Wrong type hint (Typing[4338])
   But got `arraykey`
   File "BuiltinEnum.hhi", line 78, characters 44-48:
     via this generic `TType`
-File "enum_class.php", line 12, characters 12-12:
-Constant does not match the type of the enum it is in (Typing[4328])
-  File "enum_class.php", line 11, characters 14-19:
-  Expected `string`
-  File "enum_class.php", line 12, characters 16-16:
-  But got `int`

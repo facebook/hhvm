@@ -26,6 +26,12 @@ File "mixed.php", line 91, characters 3-13:
   (B | exact A)
 File "mixed.php", line 11, characters 24-31:
 Was expecting a type hint (Typing[4032])
+File "mixed.php", line 65, characters 28-29:
+Invalid argument (Typing[4041])
+  File "mixed.php", line 59, characters 10-31:
+  Too many mandatory arguments (expected 1 but got 2)
+  File "mixed.php", line 94, characters 35-60:
+  Because of this definition
 File "mixed.php", line 27, characters 12-13:
 Invalid argument (Typing[4110])
   File "mixed.php", line 102, characters 19-19:
@@ -56,9 +62,3 @@ Invalid argument (Typing[4110])
   Expected `int`
   File "mixed.php", line 52, characters 36-41:
   But got `string`
-File "mixed.php", line 65, characters 28-29:
-Invalid argument (Typing[4041])
-  File "mixed.php", line 59, characters 10-31:
-  Too many mandatory arguments (expected 1 but got 2)
-  File "mixed.php", line 94, characters 35-60:
-  Because of this definition

@@ -2,17 +2,17 @@ File "recursive_typeconst_bad_2.php", line 25, characters 25-47:
 Type aliases to type constants are not supported (Parsing[1002])
 File "recursive_typeconst_bad_2.php", line 26, characters 24-44:
 Type aliases to type constants are not supported (Parsing[1002])
+File "recursive_typeconst_bad_2.php", line 25, characters 6-21:
+Cyclic type definition (Typing[4014])
+  File "recursive_typeconst_bad_2.php", line 8, characters 14-29:
+  Cyclic use is here
+File "recursive_typeconst_bad_2.php", line 26, characters 6-20:
+Cyclic type definition (Typing[4014])
+  File "recursive_typeconst_bad_2.php", line 18, characters 14-28:
+  Cyclic use is here
 File "recursive_typeconst_bad_2.php", line 6, characters 14-26:
 Cyclic type constant:
   `MyParent::MyParentShape` -> `MyParentShapeFix` -> `MyParent::MyParentShape` (Typing[4131])
 File "recursive_typeconst_bad_2.php", line 15, characters 14-25:
 Cyclic type constant:
   `MyChild::MyChildShape` -> `MyChildShapeFix` -> `MyChild::MyChildShape` (Typing[4131])
-File "recursive_typeconst_bad_2.php", line 25, characters 6-21:
-Cyclic type definition (Typing[4014])
-File "recursive_typeconst_bad_2.php", line 8, characters 14-29:
-Cyclic use is here
-File "recursive_typeconst_bad_2.php", line 26, characters 6-20:
-Cyclic type definition (Typing[4014])
-File "recursive_typeconst_bad_2.php", line 18, characters 14-28:
-Cyclic use is here

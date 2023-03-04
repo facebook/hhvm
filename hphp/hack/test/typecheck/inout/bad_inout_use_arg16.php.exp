@@ -1,8 +1,8 @@
 File "bad_inout_use_arg16.php", line 6, characters 11-27:
-Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
-File "bad_inout_use_arg16.php", line 5, characters 15-52:
-This is an object of type ConstMap<string, shape('eggs' => int)>
-File "bad_inout_use_arg16.php", line 6, characters 11-27:
 You cannot mutate this (Typing[4011])
-File "bad_inout_use_arg16.php", line 5, characters 15-52:
-This is an object of type ConstMap<string, shape('eggs' => int)>
+  File "bad_inout_use_arg16.php", line 5, characters 15-52:
+  This is an object of type ConstMap<string, shape('eggs' => int)>
+File "bad_inout_use_arg16.php", line 6, characters 11-27:
+Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
+  File "bad_inout_use_arg16.php", line 5, characters 15-52:
+  This is an object of type ConstMap<string, shape('eggs' => int)>

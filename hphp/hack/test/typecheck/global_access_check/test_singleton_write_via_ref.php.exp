@@ -1,9 +1,5 @@
-File "test_singleton_write_via_ref.php", line 28, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_via_ref.php", line 29, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-File "test_singleton_write_via_ref.php", line 32, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_via_ref.php", line 34, characters 7-25:
 [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 36, characters 7-25:
@@ -12,8 +8,6 @@ File "test_singleton_write_via_ref.php", line 40, characters 7-25:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 42, characters 7-25:
 [Test::test_method_call]{Foo::$bar}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
-File "test_singleton_write_via_ref.php", line 45, characters 10-23:
-[Test::test_method_call]{\fun_memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])
 File "test_singleton_write_via_ref.php", line 47, characters 7-25:
 [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 49, characters 7-25:
@@ -22,3 +16,9 @@ File "test_singleton_write_via_ref.php", line 53, characters 7-25:
 [Test::test_method_call]{\fun_memoized}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_write_via_ref.php", line 55, characters 7-25:
 [Test::test_method_call]{\fun_memoized}(Baz)<Singleton> A global variable is possibly written via reference. (Other[11002])
+File "test_singleton_write_via_ref.php", line 28, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_via_ref.php", line 32, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_singleton_write_via_ref.php", line 45, characters 10-23:
+[Test::test_method_call]{\fun_memoized}((function(): Bar)) A global variable is definitely read. (Other[11004])

@@ -1,8 +1,8 @@
-File "test_anonymous.php", line 14, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_anonymous.php", line 16, characters 7-27:
 [Test::test_method_call]{Foo::$static_prop}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
 File "test_anonymous.php", line 17, characters 7-21:
 [Test::test_method_call]{Foo::$bar}(int) A global variable is possibly written via reference. (Other[11002])
 File "test_anonymous.php", line 24, characters 5-16:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_anonymous.php", line 14, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])

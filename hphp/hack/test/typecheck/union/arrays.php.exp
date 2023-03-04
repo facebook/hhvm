@@ -74,12 +74,6 @@ File "arrays.php", line 150, characters 3-13:
   dict<int, bool>
 File "arrays.php", line 151, characters 3-16:
   bool
-File "arrays.php", line 4, characters 16-16:
-Wrong type hint (Typing[4338])
-  File "arrays.php", line 4, characters 9-14:
-  Expected `string`
-  File "arrays.php", line 4, characters 20-20:
-  But got `int`
 File "arrays.php", line 65, characters 20-21:
 Invalid argument (Typing[4110])
   File "arrays.php", line 155, characters 34-36:
@@ -103,4 +97,10 @@ Invalid argument (Typing[4110])
   File "arrays.php", line 156, characters 37-42:
   Expected `string`
   File "arrays.php", line 82, characters 17-17:
+  But got `int`
+File "arrays.php", line 4, characters 16-16:
+Wrong type hint (Typing[4338])
+  File "arrays.php", line 4, characters 9-14:
+  Expected `string`
+  File "arrays.php", line 4, characters 20-20:
   But got `int`

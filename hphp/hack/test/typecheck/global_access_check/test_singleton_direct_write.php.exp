@@ -1,38 +1,38 @@
-File "test_singleton_direct_write.php", line 21, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
 File "test_singleton_direct_write.php", line 22, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 File "test_singleton_direct_write.php", line 25, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
-File "test_singleton_direct_write.php", line 27, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_singleton_direct_write.php", line 28, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 File "test_singleton_direct_write.php", line 30, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-File "test_singleton_direct_write.php", line 33, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
-File "test_singleton_direct_write.php", line 35, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_direct_write.php", line 37, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-File "test_singleton_direct_write.php", line 40, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_singleton_direct_write.php", line 41, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 File "test_singleton_direct_write.php", line 43, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-File "test_singleton_direct_write.php", line 47, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_direct_write.php", line 49, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
-File "test_singleton_direct_write.php", line 52, characters 9-17:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_singleton_direct_write.php", line 53, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
 File "test_singleton_direct_write.php", line 55, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
-File "test_singleton_direct_write.php", line 59, characters 7-18:
-[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_singleton_direct_write.php", line 61, characters 7-27:
 [Test::test_method_call]{Foo::$bar}(Bar)<Singleton> A global variable is definitely written. (Other[11001])
+File "test_singleton_direct_write.php", line 35, characters 7-18:
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_singleton_direct_write.php", line 47, characters 7-18:
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_singleton_direct_write.php", line 59, characters 7-18:
+[Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
+File "test_singleton_direct_write.php", line 21, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(?Bar) A global variable is definitely read. (Other[11004])
+File "test_singleton_direct_write.php", line 27, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_singleton_direct_write.php", line 33, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_singleton_direct_write.php", line 40, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
+File "test_singleton_direct_write.php", line 52, characters 9-17:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])

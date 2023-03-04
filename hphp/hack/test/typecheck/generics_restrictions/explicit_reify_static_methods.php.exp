@@ -12,23 +12,23 @@ File "explicit_reify_static_methods.php", line 35, characters 4-6:
 Type arguments are not allowed in this position (Parsing[1002])
 File "explicit_reify_static_methods.php", line 38, characters 4-6:
 Type arguments are not allowed in this position (Parsing[1002])
-File "explicit_reify_static_methods.php", line 16, characters 3-74:
-Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
-File "explicit_reify_static_methods.php", line 16, characters 44-44:
-Class-level reified generic used here.
-File "explicit_reify_static_methods.php", line 24, characters 6-12:
-Generic type parameter `TF` must be specified explicitly (Typing[4347])
-File "explicit_reify_static_methods.php", line 4, characters 49-50:
-Definition is here
-File "explicit_reify_static_methods.php", line 26, characters 9-15:
-Generic type parameter `TF` must be specified explicitly (Typing[4347])
-File "explicit_reify_static_methods.php", line 4, characters 49-50:
-Definition is here
 File "explicit_reify_static_methods.php", line 32, characters 3-14:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-File "explicit_reify_static_methods.php", line 13, characters 26-32:
-Definition is here
+  File "explicit_reify_static_methods.php", line 13, characters 26-32:
+  Definition is here
 File "explicit_reify_static_methods.php", line 34, characters 3-17:
 All type arguments must be specified because a type parameter is reified (Typing[4303])
-File "explicit_reify_static_methods.php", line 13, characters 26-32:
-Definition is here
+  File "explicit_reify_static_methods.php", line 13, characters 26-32:
+  Definition is here
+File "explicit_reify_static_methods.php", line 24, characters 6-12:
+Generic type parameter `TF` must be specified explicitly (Typing[4347])
+  File "explicit_reify_static_methods.php", line 4, characters 49-50:
+  Definition is here
+File "explicit_reify_static_methods.php", line 26, characters 9-15:
+Generic type parameter `TF` must be specified explicitly (Typing[4347])
+  File "explicit_reify_static_methods.php", line 4, characters 49-50:
+  Definition is here
+File "explicit_reify_static_methods.php", line 16, characters 3-74:
+Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
+  File "explicit_reify_static_methods.php", line 16, characters 44-44:
+  Class-level reified generic used here.

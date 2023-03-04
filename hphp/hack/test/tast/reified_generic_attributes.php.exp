@@ -1,14 +1,14 @@
 Errors:
   [7:17-28] Unbound name: `Enforceable` (an object type)
   [7:17-28] Unrecognized user attribute: `Enforceable` does not have a class. Please declare a class for the attribute.
+  [11:15-16] This constructor expects no argument
   [6:10-11] Was expecting a return type hint
-  [6:48-49] The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
   [7:10-11] Was expecting a return type hint
-  [7:47-49] The type parameter `Tu` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
   [8:10-11] Was expecting a return type hint
   [9:10-11] Was expecting a return type hint
   [11:10-12] Was expecting a return type hint
-  [11:15-16] This constructor expects no argument
+  [6:48-49] The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
+  [7:47-49] The type parameter `Tu` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes
 [(Class
     { c_span = [3:1-48]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

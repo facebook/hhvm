@@ -6,9 +6,9 @@ File "test_ignore.php", line 31, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is definitely written. (Other[11001])
 File "test_ignore.php", line 33, characters 5-25:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely written. (Other[11001])
-File "test_ignore.php", line 36, characters 10-18:
-[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])
 File "test_ignore.php", line 37, characters 5-16:
 [Test::test_method_call]{Foo::$bar}(int)<WriteLiteral> A global variable is possibly written via reference. (Other[11002])
 File "test_ignore.php", line 45, characters 16-17:
 [Test::test_method_call]{Foo::$bar}(Bar) A global variable is possibly written via function call. (Other[11003])
+File "test_ignore.php", line 36, characters 10-18:
+[Test::test_method_call]{Foo::$bar}(Bar) A global variable is definitely read. (Other[11004])

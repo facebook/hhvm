@@ -4,10 +4,10 @@ Errors:
   [7:28-30] Was expecting a type hint
   [11:19-21] Was expecting a type hint
   [11:23-25] Was expecting a type hint
-  [12:7-10] You are trying to access the property `foo` on a value whose class is unknown.
-  [11:19-21] It is unknown
   [15:32-34] Was expecting a type hint
   [15:36-38] Was expecting a type hint
+  [12:7-10] You are trying to access the property `foo` on a value whose class is unknown.
+  [11:19-21] It is unknown
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

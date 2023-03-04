@@ -1,3 +1,17 @@
+File "abstract.bad.php", line 35, characters 12-12:
+This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
+  File "abstract.bad.php", line 35, characters 26-26:
+  `H` uses `E`
+  File "abstract.bad.php", line 11, characters 14-14:
+  The constant is defined here
+File "abstract.bad.php", line 30, characters 10-10:
+Cannot reference abstract constant `E::X` directly (Typing[4129])
+  File "abstract.bad.php", line 11, characters 14-14:
+  Declaration is here
+File "abstract.bad.php", line 31, characters 10-10:
+Cannot reference abstract constant `G::Y` directly (Typing[4129])
+  File "abstract.bad.php", line 23, characters 19-19:
+  Declaration is here
 File "abstract.bad.php", line 16, characters 26-26:
 Some members in class `F` are incompatible with those declared in type `E` (Typing[4348])
   File "abstract.bad.php", line 11, characters 12-12:
@@ -8,17 +22,3 @@ File "abstract.bad.php", line 23, characters 19-19:
 Constant `Y` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
   File "abstract.bad.php", line 21, characters 12-12:
   Or make the class abstract.
-File "abstract.bad.php", line 30, characters 10-10:
-Cannot reference abstract constant `E::X` directly (Typing[4129])
-  File "abstract.bad.php", line 11, characters 14-14:
-  Declaration is here
-File "abstract.bad.php", line 31, characters 10-10:
-Cannot reference abstract constant `G::Y` directly (Typing[4129])
-  File "abstract.bad.php", line 23, characters 19-19:
-  Declaration is here
-File "abstract.bad.php", line 35, characters 12-12:
-This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
-  File "abstract.bad.php", line 35, characters 26-26:
-  `H` uses `E`
-  File "abstract.bad.php", line 11, characters 14-14:
-  The constant is defined here

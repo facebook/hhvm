@@ -1,13 +1,13 @@
-File "lambda_application_incorrect_types.php", line 17, characters 26-30:
-Was expecting an object but type is unknown (Typing[4297])
-  File "lambda_application_incorrect_types.php", line 17, characters 18-19:
-  It is unknown because a type could not be determined here
 File "lambda_application_incorrect_types.php", line 29, characters 12-18:
 Invalid argument (Typing[4110])
   File "lambda_application_incorrect_types.php", line 27, characters 20-21:
   Expected `D` (variadic argument)
   File "lambda_application_incorrect_types.php", line 29, characters 16-16:
   But got `C`
+File "lambda_application_incorrect_types.php", line 17, characters 26-30:
+Was expecting an object but type is unknown (Typing[4297])
+  File "lambda_application_incorrect_types.php", line 17, characters 18-19:
+  It is unknown because a type could not be determined here
 File "lambda_application_incorrect_types.php", line 34, characters 39-43:
 Was expecting an object but type is unknown (Typing[4297])
   File "lambda_application_incorrect_types.php", line 34, characters 31-32:

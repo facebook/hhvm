@@ -1,4 +1,4 @@
-File "new_generic_bad.php", line 5, characters 12-18:
-`T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute (Typing[4309])
 File "new_generic_bad.php", line 5, characters 16-16:
 Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])
+File "new_generic_bad.php", line 5, characters 12-18:
+`T` cannot be used with `new` because it does not have the `<<__Newable>>` attribute (Typing[4309])

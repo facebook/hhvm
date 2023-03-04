@@ -8,7 +8,7 @@ File "elseif2.php", line 14, characters 5-18:
 Cannot use `[]` for reading (NastCheck[3047])
 File "elseif2.php", line 15, characters 5-8:
 Cannot use `[]` for reading (NastCheck[3047])
-File "elseif2.php", line 14, characters 5-10:
-Unbound name (typing): `elseif` (Typing[4107])
 File "elseif2.php", line 15, characters 5-8:
 Unbound global constant (Typing) (Typing[4106])
+File "elseif2.php", line 14, characters 5-10:
+Unbound name (typing): `elseif` (Typing[4107])

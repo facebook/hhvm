@@ -4,14 +4,14 @@ Invalid type hint (Typing[4090])
   No type constant `T` in `A`
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Declaration of `A` is here
-File "primary_error_pos_bug.php", line 11, characters 17-22:
-Wrong number of type arguments (expected 0, got 1) (Typing[4101])
-  File "primary_error_pos_bug.php", line 3, characters 7-7:
-  Definition is here
 File "primary_error_pos_bug.php", line 16, characters 29-29:
 No type constant `T` in `A` (Typing[4090])
   File "primary_error_pos_bug.php", line 3, characters 7-7:
   Declaration of `A` is here
+File "primary_error_pos_bug.php", line 11, characters 17-22:
+Wrong number of type arguments (expected 0, got 1) (Typing[4101])
+  File "primary_error_pos_bug.php", line 3, characters 7-7:
+  Definition is here
 File "primary_error_pos_bug.php", line 18, characters 26-31:
 Wrong number of type arguments (expected 0, got 1) (Typing[4101])
   File "primary_error_pos_bug.php", line 3, characters 7-7:

@@ -1,7 +1,7 @@
 Errors:
   [4:10-12] Please add a type hint `public SomeType $x`
-  [6:31-33] Was expecting a type hint
   [12:19-23] Was expecting a return type hint
+  [6:31-33] Was expecting a type hint
 [(Class
     { c_span = [3:1-15:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

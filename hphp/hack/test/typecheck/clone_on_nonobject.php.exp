@@ -1,10 +1,10 @@
 File "clone_on_nonobject.php", line 24, characters 12-27:
+You are trying to access the method `__clone` but this is an int (Typing[4062])
+  File "clone_on_nonobject.php", line 4, characters 11-13:
+  Definition is here
+File "clone_on_nonobject.php", line 24, characters 12-27:
 Invalid return type (Typing[4110])
   File "clone_on_nonobject.php", line 23, characters 33-33:
   Expected `A`
   File "clone_on_nonobject.php", line 4, characters 11-13:
   But got `int`
-File "clone_on_nonobject.php", line 24, characters 12-27:
-You are trying to access the method `__clone` but this is an int (Typing[4062])
-  File "clone_on_nonobject.php", line 4, characters 11-13:
-  Definition is here

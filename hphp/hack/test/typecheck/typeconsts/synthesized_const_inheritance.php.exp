@@ -1,12 +1,12 @@
-File "synthesized_const_inheritance.php", line 16, characters 24-31:
-Some members in class `ChildTwo` are incompatible with those declared in type `ChildOne` (Typing[4348])
-  File "synthesized_const_inheritance.php", line 5, characters 9-11:
-  Expected `int`
-  File "synthesized_const_inheritance.php", line 18, characters 9-14:
-  But got `string`
 File "synthesized_const_inheritance.php", line 17, characters 14-14:
 The assigned type of this type constant is inconsistent with its parent (Typing[4110])
   File "synthesized_const_inheritance.php", line 4, characters 18-20:
   Expected `int`
   File "synthesized_const_inheritance.php", line 17, characters 18-23:
+  But got `string`
+File "synthesized_const_inheritance.php", line 16, characters 24-31:
+Some members in class `ChildTwo` are incompatible with those declared in type `ChildOne` (Typing[4348])
+  File "synthesized_const_inheritance.php", line 5, characters 9-11:
+  Expected `int`
+  File "synthesized_const_inheritance.php", line 18, characters 9-14:
   But got `string`

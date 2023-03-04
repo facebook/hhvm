@@ -1,18 +1,18 @@
-File "shape_modified5.php", line 17, characters 1-163:
-This function can exit with and without returning a value (Typing[4421])
-  File "shape_modified5.php", line 23, characters 5-14:
-  Returning a value here.
-  File "shape_modified5.php", line 17, characters 1-163:
-  This function does not always return a value
-File "shape_modified5.php", line 17, characters 10-12:
-Invalid return type (Typing[4336])
-  File "shape_modified5.php", line 17, characters 27-34:
-  Expected `shape('x' => int, 'y' => bool)`
-  File "shape_modified5.php", line 17, characters 10-12:
-  But got `void` because this function does not always return a value
 File "shape_modified5.php", line 23, characters 12-13:
 Invalid return type (Typing[4057])
   File "shape_modified5.php", line 18, characters 8-22:
   The field `y` is missing
   File "shape_modified5.php", line 14, characters 3-5:
   The field `y` is defined
+File "shape_modified5.php", line 17, characters 10-12:
+Invalid return type (Typing[4336])
+  File "shape_modified5.php", line 17, characters 27-34:
+  Expected `shape('x' => int, 'y' => bool)`
+  File "shape_modified5.php", line 17, characters 10-12:
+  But got `void` because this function does not always return a value
+File "shape_modified5.php", line 17, characters 1-163:
+This function can exit with and without returning a value (Typing[4421])
+  File "shape_modified5.php", line 23, characters 5-14:
+  Returning a value here.
+  File "shape_modified5.php", line 17, characters 1-163:
+  This function does not always return a value

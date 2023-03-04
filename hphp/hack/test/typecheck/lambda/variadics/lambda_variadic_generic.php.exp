@@ -1,7 +1,3 @@
-File "lambda_variadic_generic.php", line 38, characters 19-19:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "lambda_variadic_generic.php", line 9, characters 7-7:
-  Definition is here
 File "lambda_variadic_generic.php", line 40, characters 47-49:
 No instance method `bar` in `C` (Typing[4053])
   File "lambda_variadic_generic.php", line 4, characters 19-21:
@@ -12,3 +8,7 @@ No instance method `bar` in `C` (Typing[4053])
     via this generic `T`
   File "lambda_variadic_generic.php", line 3, characters 7-7:
   Declaration of `C` is here
+File "lambda_variadic_generic.php", line 38, characters 19-19:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+  File "lambda_variadic_generic.php", line 9, characters 7-7:
+  Definition is here

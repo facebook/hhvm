@@ -1,14 +1,14 @@
-File "using_bad_return_disposable.php", line 14, characters 12-16:
-Return expression must be new disposable in function marked `<<__ReturnDisposable>>` (Typing[4205])
-File "using_bad_return_disposable.php", line 14, characters 12-16:
-`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4192])
-File "using_bad_return_disposable.php", line 18, characters 12-13:
-Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
-File "using_bad_return_disposable.php", line 18, characters 12-13:
-Return expression must be new disposable in function marked `<<__ReturnDisposable>>` (Typing[4205])
 File "using_bad_return_disposable.php", line 35, characters 10-25:
 Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
 File "using_bad_return_disposable.php", line 38, characters 8-24:
 Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
 File "using_bad_return_disposable.php", line 41, characters 8-16:
 Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>` (Typing[4187])
+File "using_bad_return_disposable.php", line 18, characters 12-13:
+Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4188])
+File "using_bad_return_disposable.php", line 14, characters 12-16:
+`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation or passed to another function with `<<__AcceptDisposable>>` parameter attribute (Typing[4192])
+File "using_bad_return_disposable.php", line 14, characters 12-16:
+Return expression must be new disposable in function marked `<<__ReturnDisposable>>` (Typing[4205])
+File "using_bad_return_disposable.php", line 18, characters 12-13:
+Return expression must be new disposable in function marked `<<__ReturnDisposable>>` (Typing[4205])

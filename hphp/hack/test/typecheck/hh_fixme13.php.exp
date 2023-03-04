@@ -1,14 +1,14 @@
-File "hh_fixme13.php", line 10, characters 8-11:
-XHP children must be compatible with XHPChild (Typing[4193])
-  File "hh_fixme13.php", line 3, characters 24-27:
-  This is void
-File "hh_fixme13.php", line 10, characters 8-11:
-You are using the return value of a `void` function (Typing[4119])
-  File "hh_fixme13.php", line 3, characters 24-27:
-  A `void` function doesn't return a value.
 File "hh_fixme13.php", line 10, characters 10-10:
 Invalid argument (Typing[4110])
   File "hh_fixme13.php", line 3, characters 12-17:
   Expected `string`
   File "hh_fixme13.php", line 10, characters 10-10:
   But got `int`
+File "hh_fixme13.php", line 10, characters 8-11:
+You are using the return value of a `void` function (Typing[4119])
+  File "hh_fixme13.php", line 3, characters 24-27:
+  A `void` function doesn't return a value.
+File "hh_fixme13.php", line 10, characters 8-11:
+XHP children must be compatible with XHPChild (Typing[4193])
+  File "hh_fixme13.php", line 3, characters 24-27:
+  This is void

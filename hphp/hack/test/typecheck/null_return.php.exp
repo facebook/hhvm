@@ -1,12 +1,12 @@
-File "null_return.php", line 12, characters 1-64:
-This function can exit with and without returning a value (Typing[4421])
-  File "null_return.php", line 14, characters 5-14:
-  Returning a value here.
-  File "null_return.php", line 12, characters 1-64:
-  This function does not always return a value
 File "null_return.php", line 12, characters 10-12:
 Invalid return type (Typing[4336])
   File "null_return.php", line 12, characters 18-20:
   Expected `int`
   File "null_return.php", line 12, characters 10-12:
   But got `void` because this function does not always return a value
+File "null_return.php", line 12, characters 1-64:
+This function can exit with and without returning a value (Typing[4421])
+  File "null_return.php", line 14, characters 5-14:
+  Returning a value here.
+  File "null_return.php", line 12, characters 1-64:
+  This function does not always return a value

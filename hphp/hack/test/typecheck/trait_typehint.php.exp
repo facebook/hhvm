@@ -1,10 +1,10 @@
+File "trait_typehint.php", line 34, characters 26-33:
+`KidTrait` is uninstantiable (Typing[4002])
+  File "trait_typehint.php", line 17, characters 7-14:
+  Declaration is here
 File "trait_typehint.php", line 25, characters 14-18:
 Invalid argument (Typing[4110])
   File "trait_typehint.php", line 34, characters 19-34:
   Expected `Vector<KidTrait>`
   File "trait_typehint.php", line 25, characters 14-18:
   But got `this as KidTrait`
-File "trait_typehint.php", line 34, characters 26-33:
-`KidTrait` is uninstantiable (Typing[4002])
-  File "trait_typehint.php", line 17, characters 7-14:
-  Declaration is here

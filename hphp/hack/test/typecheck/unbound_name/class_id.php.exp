@@ -2,23 +2,23 @@ File "class_id.php", line 20, characters 3-10:
 Unbound name: `NotFound` (an object type) (Naming[2049])
 File "class_id.php", line 21, characters 3-10:
 Unbound name: `NotFound` (an object type) (Naming[2049])
-File "class_id.php", line 28, characters 3-7:
-Expected a `class` but got a type alias. (Naming[2052])
-File "class_id.php", line 13, characters 6-10:
-Alias definition is here.
-File "class_id.php", line 29, characters 3-7:
-Expected a `class` but got a type alias. (Naming[2052])
-File "class_id.php", line 13, characters 6-10:
-Alias definition is here.
 File "class_id.php", line 36, characters 3-10:
 Unbound name: `NotFound` (an object type) (Naming[2049])
-File "class_id.php", line 39, characters 3-7:
-Expected a `class` but got a type alias. (Naming[2052])
-File "class_id.php", line 13, characters 6-10:
-Alias definition is here.
 File "class_id.php", line 46, characters 7-14:
 Unbound name: `NotFound` (an object type) (Naming[2049])
+File "class_id.php", line 28, characters 3-7:
+Expected a `class` but got a type alias. (Naming[2052])
+  File "class_id.php", line 13, characters 6-10:
+  Alias definition is here.
+File "class_id.php", line 29, characters 3-7:
+Expected a `class` but got a type alias. (Naming[2052])
+  File "class_id.php", line 13, characters 6-10:
+  Alias definition is here.
+File "class_id.php", line 39, characters 3-7:
+Expected a `class` but got a type alias. (Naming[2052])
+  File "class_id.php", line 13, characters 6-10:
+  Alias definition is here.
 File "class_id.php", line 52, characters 7-11:
 Expected a `class` but got a type alias. (Naming[2052])
-File "class_id.php", line 13, characters 6-10:
-Alias definition is here.
+  File "class_id.php", line 13, characters 6-10:
+  Alias definition is here.

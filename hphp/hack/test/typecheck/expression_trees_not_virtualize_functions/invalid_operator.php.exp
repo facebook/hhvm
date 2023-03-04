@@ -22,13 +22,13 @@ File "invalid_operator.php", line 16, characters 19-30:
 You are trying to access the method `__plus` but this is an int (Typing[4062])
   File "invalid_operator.php", line 9, characters 7-9:
   Definition is here
+File "invalid_operator.php", line 32, characters 34-40:
+You are trying to access the method `__unsupported` but this is an int (Typing[4062])
+  File "invalid_operator.php", line 32, characters 20-22:
+  Definition is here
 File "invalid_operator.php", line 26, characters 31-32:
 Wrong type hint (Typing[4331])
   File "invalid_operator.php", line 26, characters 20-29:
   Expected `ExampleInt`
   File "invalid_operator.php", line 26, characters 36-36:
   But got `int`
-File "invalid_operator.php", line 32, characters 34-40:
-You are trying to access the method `__unsupported` but this is an int (Typing[4062])
-  File "invalid_operator.php", line 32, characters 20-22:
-  Definition is here

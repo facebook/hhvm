@@ -1,21 +1,4 @@
 Errors:
-  [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [125:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [130:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
-  [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [165:9-14] Cannot use dynamic class or method name in strict mode
   [166:10-21] Cannot use dynamic class or method name in strict mode
   [167:10-31] Cannot use dynamic class or method name in strict mode
@@ -40,6 +23,23 @@ Errors:
   [193:9-13] Cannot use dynamic class or method name in strict mode
   [194:10-14] Cannot use dynamic class or method name in strict mode
   [195:10-14] Cannot use dynamic class or method name in strict mode
+  [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [125:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [130:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

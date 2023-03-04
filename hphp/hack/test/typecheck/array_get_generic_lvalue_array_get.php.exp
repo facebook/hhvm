@@ -1,3 +1,9 @@
+File "array_get_generic_lvalue_array_get.php", line 8, characters 10-11:
+Invalid return type (Typing[4110])
+  File "array_get_generic_lvalue_array_get.php", line 6, characters 48-49:
+  Expected `Tv`
+  File "array_get_generic_lvalue_array_get.php", line 6, characters 18-37:
+  But got `dict<mixed, mixed>`
 File "array_get_generic_lvalue_array_get.php", line 6, characters 18-37:
 Some type arguments violate their constraints (Typing[4323])
   File "hackarray.hhi", line 33, characters 6-7:
@@ -8,9 +14,3 @@ Some type arguments violate their constraints (Typing[4323])
   Expected `arraykey`
   File "array_get_generic_lvalue_array_get.php", line 6, characters 25-29:
   But got `mixed`
-File "array_get_generic_lvalue_array_get.php", line 8, characters 10-11:
-Invalid return type (Typing[4110])
-  File "array_get_generic_lvalue_array_get.php", line 6, characters 48-49:
-  Expected `Tv`
-  File "array_get_generic_lvalue_array_get.php", line 6, characters 18-37:
-  But got `dict<mixed, mixed>`

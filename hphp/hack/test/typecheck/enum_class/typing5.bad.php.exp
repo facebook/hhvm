@@ -2,6 +2,8 @@ File "typing5.bad.php", line 11, characters 22-22:
 Unbound name: `T` (Naming[2049])
 File "typing5.bad.php", line 11, characters 22-22:
 Unbound name: `T` (an object type) (Naming[2049])
+File "typing5.bad.php", line 16, characters 12-12:
+Invalid base type for an enum class: `dynamic` (Typing[4024])
 File "typing5.bad.php", line 12, characters 16-16:
 Constant does not match the type of the enum it is in (Typing[4328])
   File "typing5.bad.php", line 11, characters 22-22:
@@ -14,5 +16,3 @@ Constant does not match the type of the enum it is in (Typing[4328])
   This type argument to `Box` must match exactly (it is invariant)
   File "typing5.bad.php", line 6, characters 31-31:
     via this generic `T`
-File "typing5.bad.php", line 16, characters 12-12:
-Invalid base type for an enum class: `dynamic` (Typing[4024])

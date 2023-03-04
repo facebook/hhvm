@@ -4,15 +4,15 @@ File "namespace_infinite_loop1.php", line 2, characters 28-28:
 An expression is expected here. (Parsing[1002])
 File "namespace_infinite_loop1.php", line 3, characters 1-1:
 Encountered unexpected text ``, was expecting a expression. (Parsing[1002])
-File "namespace_infinite_loop1.php", line 7, characters 28-38:
-Invalid return type (Typing[4336])
-  File "namespace_infinite_loop1.php", line 7, characters 42-52:
-  Expected `libphonenumber\PhoneNumber`
-  File "namespace_infinite_loop1.php", line 7, characters 28-38:
-  But got `void` because this function does not always return a value
 File "namespace_infinite_loop1.php", line 9, characters 3-3:
 Invalid return type (Typing[4110])
   File "namespace_infinite_loop1.php", line 8, characters 55-58:
   Expected `bool`
   File "namespace_infinite_loop1.php", line 9, characters 3-3:
   But got `null`
+File "namespace_infinite_loop1.php", line 7, characters 28-38:
+Invalid return type (Typing[4336])
+  File "namespace_infinite_loop1.php", line 7, characters 42-52:
+  Expected `libphonenumber\PhoneNumber`
+  File "namespace_infinite_loop1.php", line 7, characters 28-38:
+  But got `void` because this function does not always return a value

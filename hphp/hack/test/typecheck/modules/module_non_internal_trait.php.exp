@@ -1,11 +1,11 @@
-File "module_non_internal_trait.php--A.php", line 17, characters 5-10:
-Cannot access `internal` members inside a non-internal trait (Typing[4444])
-  File "module_non_internal_trait.php--A.php", line 12, characters 7-23:
-  This trait must be made `internal` to access other internal members
 File "module_non_internal_trait.php--A.php", line 18, characters 9-14:
 You cannot access internal members inside a public trait (Typing[4112])
   File "module_non_internal_trait.php--A.php", line 8, characters 32-37:
   This member is internal
+File "module_non_internal_trait.php--A.php", line 17, characters 5-10:
+Cannot access `internal` members inside a non-internal trait (Typing[4444])
+  File "module_non_internal_trait.php--A.php", line 12, characters 7-23:
+  This trait must be made `internal` to access other internal members
 File "module_non_internal_trait.php--A.php", line 19, characters 14-17:
 Cannot access `internal` members inside a non-internal trait (Typing[4444])
   File "module_non_internal_trait.php--A.php", line 12, characters 7-23:

@@ -1,8 +1,8 @@
 File "instantiability.php", line 16, characters 13-36:
 Not a valid class name (Typing[4148])
+File "instantiability.php", line 17, characters 13-19:
+Not a valid class name (Typing[4148])
 File "instantiability.php", line 17, characters 3-42:
 Invalid type hint (Typing[4469])
   File "instantiability.php", line 17, characters 13-41:
   Unsupported refinement, only class types can be refined
-File "instantiability.php", line 17, characters 13-19:
-Not a valid class name (Typing[4148])

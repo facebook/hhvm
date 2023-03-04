@@ -404,6 +404,14 @@ struct BlobEncoder {
     return *this;
   }
 
+  template <typename T>
+  BlobEncoder& fixedWidth(T offset) {
+    uint64_t start = m_blob.size();
+    m_blob.resize(start + sizeof(T));
+    std::copy((char*)&offset, (char*)&offset + sizeof(T), &m_blob[start]);
+    return *this;
+  }
+
   /*
    * Run f() to encode N items. The number of encoded items is
    * returned from f() and encoded before the items. This can be used
@@ -874,6 +882,13 @@ struct BlobDecoder {
     uint32_t size;
     std::copy(m_p, m_p + sizeof(uint32_t), (unsigned char*)&size);
     return size + sizeof(uint32_t);
+  }
+
+  template <typename T>
+  void fixedWidth(T& offset) {
+    assertx(remaining() >= sizeof(T));
+    std::memcpy(&offset, data(), sizeof(T));
+    advance(sizeof(T));
   }
 
   /*

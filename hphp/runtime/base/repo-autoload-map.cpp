@@ -26,7 +26,7 @@ namespace fs = std::filesystem;
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 using UnitToPathMap = tbb::concurrent_hash_map<int64_t, const StringData*>;
 
@@ -36,101 +36,68 @@ namespace {
 }
 
 RepoAutoloadMap::RepoAutoloadMap(
-      CaseInsensitiveMap types,
-      CaseInsensitiveMap functions,
-      CaseSensitiveMap constants,
-      CaseInsensitiveMap typeAliases,
-      CaseSensitiveMap modules)
+    RepoFile::CaseInsensitiveHashMapIndex types,
+    RepoFile::CaseInsensitiveHashMapIndex functions,
+    RepoFile::CaseSensitiveHashMapIndex constants,
+    RepoFile::CaseInsensitiveHashMapIndex typeAliases,
+    RepoFile::CaseSensitiveHashMapIndex modules)
   : m_types{std::move(types)},
     m_functions{std::move(functions)},
     m_constants{std::move(constants)},
     m_typeAliases{std::move(typeAliases)},
     m_modules{std::move(modules)} {
-  if (Trace::moduleEnabled(Trace::repo_autoload, 2)) {
-    FTRACE(2, "Type:\n");
-    for (auto const DEBUG_ONLY& s : types) {
-      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
-    }
-    FTRACE(2, "Functions:\n");
-    for (auto const DEBUG_ONLY& s : functions) {
-      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
-    }
-    FTRACE(2, "Constants:\n");
-    for (auto const DEBUG_ONLY& s : constants) {
-      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
-    }
-    FTRACE(2, "TypeAliases:\n");
-    for (auto const DEBUG_ONLY& s : typeAliases) {
-      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
-    }
-    FTRACE(2, "Modules:\n");
-    for (auto const DEBUG_ONLY& s : modules) {
-      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
-    }
-  }
+  FTRACE(2, "Types: {} ({}, {}) ({}, {})\n",
+          m_types.size, m_types.indexBounds.offset, m_types.indexBounds.size,
+          m_types.dataBounds.offset, m_types.dataBounds.size);
+  FTRACE(2, "Functions: {} ({}, {}) ({}, {})\n",
+          m_functions.size, m_functions.indexBounds.offset,
+          m_functions.indexBounds.size, m_functions.dataBounds.offset,
+          m_functions.dataBounds.size);
+  FTRACE(2, "Constants: {} ({}, {}) ({}, {})\n",
+          m_constants.size, m_constants.indexBounds.offset,
+          m_constants.indexBounds.size, m_constants.dataBounds.offset,
+          m_constants.dataBounds.size);
+  FTRACE(2, "TypeAliases: {} ({}, {}) ({}, {})\n",
+          m_typeAliases.size, m_typeAliases.indexBounds.offset,
+          m_typeAliases.indexBounds.size, m_typeAliases.dataBounds.offset,
+          m_typeAliases.dataBounds.size);
+  FTRACE(2, "Modules: {} ({}, {}) ({}, {})\n",
+          m_modules.size, m_modules.indexBounds.offset,
+          m_modules.indexBounds.size, m_modules.dataBounds.offset,
+          m_modules.dataBounds.size);
 }
 
 template <typename Compare>
 static Optional<String> getPathFromSymbol(
-    const RepoAutoloadMap::Map<Compare>& map,
+    const RepoFile::HashMapIndex<Compare>& map,
     const String& name) {
-  auto search = map.find(name.get());
-  if (search == map.end()) {
+  auto unitInfo = RepoFile::findUnitInfo(map, name.get());
+  if (!unitInfo) {
     FTRACE(1, "Fail autoload {}\n", name.data());
     return {};
   }
-  auto unitSn = search->second;
 
-  UnitToPathMap::const_accessor acc;
-  if (unitToPathMap.find(acc, unitSn)) {
-    FTRACE(1, "Success autoload (cache) {} {}\n", name.data(), acc->second->data());
-    return {StrNR(acc->second).asString()};
-  }
-
-  auto const path = [&] () -> const StringData* {
-    auto const relative = RepoFile::findUnitPath(unitSn);
-    always_assert(relative);
-    assertx(relative->isStatic());
-    if (RO::SourceRoot.empty() || relative->data()[0] == '/') return relative;
-    return makeStaticString(RO::SourceRoot + relative->data());
-  }();
-  unitToPathMap.insert(std::make_pair(unitSn, path));
-
+  auto path = unitInfo->path;
   FTRACE(1, "Success autoload {} {}\n", name.data(), path->data());
   return {StrNR(path).asString()};
 }
 
 template <typename Compare>
 static Optional<fs::path> getPathFromSymbol(
-    const RepoAutoloadMap::Map<Compare>& map,
+    const RepoFile::HashMapIndex<Compare>& map,
     std::string_view name) {
   auto file = getPathFromSymbol(map, StrNR(makeStaticString(name)));
   if (!file) return {};
   return file->toCppString();
 }
 
-template <typename Compare>
-Array getSymbolFromPath(
-    const RepoAutoloadMap::Map<Compare>& map,
-    const String& path) {
-
-  auto const unitSn = [&] {
-    auto const pathData = path.c_str();
-    if (pathData[0] == '/' && !RO::SourceRoot.empty() &&
-        !strncmp(RO::SourceRoot.c_str(), pathData, RO::SourceRoot.size())) {
-      auto const strippedPath =
-        makeStaticString(pathData + RO::SourceRoot.size());
-      auto const sn = RepoFile::findUnitSN(strippedPath);
-      if (sn >= 0) return sn;
-    }
-    return RepoFile::findUnitSN(makeStaticString(path));
-  }();
-
+static Array getSymbolFromPath(const String& path, RepoSymbolType type) {
+  auto symbols = RepoFile::findUnitSymbols(path.get());
   auto ret = Array::CreateVec();
-  if (unitSn >= 0) {
-    for (auto it = map.begin(); it != map.end(); ++it) {
-      if (it->second == unitSn) {
-        ret.append(StrNR(it->first).asString());
+  if (symbols) {
+    for (auto& symbol : *symbols) {
+      if (symbol.second == type) {
+        ret.append(StrNR(symbol.first).asString());
       }
     }
   }
@@ -206,23 +173,23 @@ RepoAutoloadMap::getModuleFile(std::string_view moduleName) {
 }
 
 Array RepoAutoloadMap::getFileTypes(const String& path) {
-  return getSymbolFromPath(m_types, path);
+  return getSymbolFromPath(path, RepoSymbolType::TYPE);
 }
 
 Array RepoAutoloadMap::getFileFunctions(const String& path) {
-  return getSymbolFromPath(m_functions, path);
+  return getSymbolFromPath(path, RepoSymbolType::FUNC);
 }
 
 Array RepoAutoloadMap::getFileConstants(const String& path) {
-  return getSymbolFromPath(m_constants, path);
+  return getSymbolFromPath(path, RepoSymbolType::CONSTANT);
 }
 
 Array RepoAutoloadMap::getFileTypeAliases(const String& path) {
-  return getSymbolFromPath(m_typeAliases, path);
+  return getSymbolFromPath(path, RepoSymbolType::TYPE_ALIAS);
 }
 
 Array RepoAutoloadMap::getFileModules(const String& path) {
-  return getSymbolFromPath(m_modules, path);
+  return getSymbolFromPath(path, RepoSymbolType::MODULE);
 }
 
 AutoloadMap::Result RepoAutoloadMap::handleFailure(
@@ -236,6 +203,6 @@ Array RepoAutoloadMap::getAllFiles() const {
   );
 }
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 } // HPHP

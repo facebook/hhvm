@@ -25,6 +25,8 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
 
+#include "hphp/runtime/vm/repo-file.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -35,23 +37,12 @@ namespace HPHP {
 
 struct RepoAutoloadMap final : AutoloadMap {
 
-  template <typename Compare>
-  using Map = hphp_fast_map<
-    const StringData*,
-    int64_t,
-    string_data_hash,
-    Compare
-  >;
-
-  using CaseInsensitiveMap = Map<string_data_isame>;
-  using CaseSensitiveMap = Map<string_data_same>;
-
   explicit RepoAutoloadMap(
-      CaseInsensitiveMap types,
-      CaseInsensitiveMap functions,
-      CaseSensitiveMap constants,
-      CaseInsensitiveMap typeAliases,
-      CaseSensitiveMap modules);
+    RepoFile::CaseInsensitiveHashMapIndex types,
+    RepoFile::CaseInsensitiveHashMapIndex functions,
+    RepoFile::CaseSensitiveHashMapIndex constants,
+    RepoFile::CaseInsensitiveHashMapIndex typeAliases,
+    RepoFile::CaseSensitiveHashMapIndex modules);
 
   Optional<String> getTypeOrTypeAliasFile(const String& typeName) override;
   Optional<String> getTypeFile(const String& typeName) override;
@@ -93,11 +84,11 @@ struct RepoAutoloadMap final : AutoloadMap {
   Array getAllFiles() const override;
 
 private:
-  CaseInsensitiveMap m_types;
-  CaseInsensitiveMap m_functions;
-  CaseSensitiveMap m_constants;
-  CaseInsensitiveMap m_typeAliases;
-  CaseSensitiveMap m_modules;
+  RepoFile::CaseInsensitiveHashMapIndex m_types;
+  RepoFile::CaseInsensitiveHashMapIndex m_functions;
+  RepoFile::CaseSensitiveHashMapIndex m_constants;
+  RepoFile::CaseInsensitiveHashMapIndex m_typeAliases;
+  RepoFile::CaseSensitiveHashMapIndex m_modules;
 };
 
 } // HPHP

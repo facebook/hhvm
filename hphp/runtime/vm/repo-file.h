@@ -30,15 +30,52 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayData;
+struct BlobDecoder;
+struct BlobEncoder;
 struct RepoAutoloadMapBuilder;
+struct RepoFileIndex;
 struct RepoGlobalData;
 struct SHA1;
 struct StringData;
+struct string_data_isame;
+struct string_data_same;
 struct UnitEmitter;
 
 namespace Native {
 struct FuncTable;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+struct RepoBounds {
+  size_t offset = 0;
+  size_t size = 0;
+
+  template<class SerDe> void serde(SerDe& sd) {
+    sd(offset)(size);
+  }
+};
+
+struct RepoUnitInfo {
+  int64_t unitSn;
+  const StringData* path = nullptr;
+  RepoBounds emitterLocation;
+  RepoBounds symbolsLocation;
+
+  void serde(BlobEncoder& sd) const;
+  void serde(BlobDecoder& sd);
+};
+
+enum class RepoSymbolType {
+  TYPE,
+  FUNC,
+  CONSTANT,
+  TYPE_ALIAS,
+  MODULE
+};
+
+using RepoUnitSymbols =
+  std::vector<std::pair<const StringData*, RepoSymbolType>>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -113,6 +150,33 @@ private:
  * don't have a good way to recover from such errors.
  */
 struct RepoFile {
+
+  template <typename Compare>
+  struct HashMapIndex {
+    HashMapIndex(size_t size, RepoBounds indexBounds, RepoBounds dataBounds)
+      : size(size), indexBounds(indexBounds), dataBounds(dataBounds) {}
+    HashMapIndex()
+      : HashMapIndex<Compare>(0, RepoBounds { 0, 0 }, RepoBounds { 0, 0 }) {}
+
+    size_t size;
+    RepoBounds indexBounds;
+    RepoBounds dataBounds;
+  };
+
+  struct ListIndex {
+
+    ListIndex(): ListIndex(0, RepoBounds { 0, 0 }, RepoBounds { 0, 0 }) {}
+    ListIndex(size_t size, RepoBounds indexBounds, RepoBounds dataBounds)
+      : size(size), indexBounds(indexBounds), dataBounds(dataBounds) {}
+
+    size_t size;
+    RepoBounds indexBounds;
+    RepoBounds dataBounds;
+  };
+
+  using CaseSensitiveHashMapIndex = HashMapIndex<string_data_same>;
+  using CaseInsensitiveHashMapIndex = HashMapIndex<string_data_isame>;
+
   // To support lazy-loading, RepoFile needs to know where to load
   // certain pieces of data. It is the responsibility of the caller to
   // provide such offsets. The offset is abstracted away as a "token"
@@ -168,8 +232,7 @@ struct RepoFile {
   // issues). If `lazy` is true, the bytecode and line tables are not
   // loaded with the UnitEmitter and will instead be loaded on demand.
   static std::unique_ptr<UnitEmitter>
-  loadUnitEmitter(const StringData* searchPath,
-                  const StringData* path,
+  loadUnitEmitter(const StringData* path,
                   const Native::FuncTable& nativeFuncs,
                   bool lazy);
 
@@ -188,9 +251,6 @@ struct RepoFile {
                               unsigned char* data,
                               size_t len);
 
-  // Map an UnitEmitter's path to its associated SN (returning -1 if
-  // no such UnitEmitter exists).
-  static int64_t findUnitSN(const StringData* path);
   // Map an UnitEmitter's SN to its associated path (returning nullptr
   // if no such UnitEmitter exists).
   static const StringData* findUnitPath(int64_t unitSn);
@@ -199,6 +259,15 @@ struct RepoFile {
   // thing" for RepoFile. We assume the SHA1 matches the SN. This is
   // only provided for compatibility for tc-print.
   static const StringData* findUnitPath(const SHA1&);
+
+  // Get the RepoUnitInfo for a specific key in a specific map.
+  // The map must point to RepoBounds containing the bounds for RepoUnitInfo
+  template <typename Compare>
+  static const RepoUnitInfo* findUnitInfo(const HashMapIndex<Compare>& map,
+                                          const StringData* key);
+
+  // Get all the symbols for a specific path
+  static const RepoUnitSymbols* findUnitSymbols(const StringData* path);
 
   RepoFile() = delete;
   RepoFile(const RepoFile&) = delete;

@@ -184,6 +184,7 @@ namespace Trace {
       TM(regalloc)      \
       TM(region)        \
       TM(repo_autoload) \
+      TM(repo_file)     \
       TM(reusetc)       \
       TM(ringbuffer)    \
       TM(runtime)       \

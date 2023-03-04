@@ -189,27 +189,12 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     return ue->create();
   };
 
-  auto const load = [&] {
-    auto const pathData = path->data();
-    if (pathData[0] == '/' && !RO::SourceRoot.empty() &&
-        !strncmp(RO::SourceRoot.c_str(), pathData, RO::SourceRoot.size())) {
-      auto const strippedPath =
-        makeStaticString(pathData + RO::SourceRoot.size());
-      if (auto ue = RepoFile::loadUnitEmitter(strippedPath,
-                                              path,
-                                              nativeFuncs,
-                                              true)) {
-        return ue;
-      }
-    }
-    return RepoFile::loadUnitEmitter(path, path, nativeFuncs, true);
-  };
-
   try {
     /*
      * We got the lock, so we're responsible for updating the entry.
      */
-    if (auto ue = load()) {
+    auto ue = RepoFile::loadUnitEmitter(path, nativeFuncs, true);
+    if (ue) {
       auto unit = create(std::move(ue));
       cu.rdsBitId = rds::allocBit();
       lock.update(unit.release());

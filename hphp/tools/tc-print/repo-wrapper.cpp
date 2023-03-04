@@ -98,7 +98,7 @@ Unit* RepoWrapper::getUnit(SHA1 sha1) {
     auto const path = RepoFile::findUnitPath(sha1);
     if (!path) return nullptr;
     auto const ue =
-      RepoFile::loadUnitEmitter(path, path, Native::s_noNativeFuncs, false);
+      RepoFile::loadUnitEmitter(path, Native::s_noNativeFuncs, false);
     if (!ue) return nullptr;
     return ue->create().release();
   }();

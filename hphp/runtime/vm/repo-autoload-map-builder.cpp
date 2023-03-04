@@ -55,21 +55,29 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   }
 }
 
-void RepoAutoloadMapBuilder::serde(BlobEncoder& sd) const {
-  serdeMap(sd, m_types);
-  serdeMap(sd, m_funcs);
-  serdeMap(sd, m_typeAliases);
-  serdeMap(sd, m_constants);
-  serdeMap(sd, m_modules);
+const RepoAutoloadMapBuilder::CaseInsensitiveMap&
+RepoAutoloadMapBuilder::getTypes() const {
+  return m_types;
 }
 
-std::unique_ptr<RepoAutoloadMap> RepoAutoloadMapBuilder::serde(BlobDecoder& sd) {
-  RepoAutoloadMap::CaseInsensitiveMap types = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
-  RepoAutoloadMap::CaseInsensitiveMap funcs = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
-  RepoAutoloadMap::CaseInsensitiveMap typeAliases = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
-  RepoAutoloadMap::CaseSensitiveMap constants = serdeMap<RepoAutoloadMap::CaseSensitiveMap>(sd);
-  RepoAutoloadMap::CaseSensitiveMap modules = serdeMap<RepoAutoloadMap::CaseSensitiveMap>(sd);
-  return std::make_unique<RepoAutoloadMap>(types, funcs, constants, typeAliases, modules);
+const RepoAutoloadMapBuilder::CaseInsensitiveMap&
+RepoAutoloadMapBuilder::getFuncs() const {
+  return m_funcs;
+}
+
+const RepoAutoloadMapBuilder::CaseSensitiveMap&
+RepoAutoloadMapBuilder::getConstants() const {
+  return m_constants;
+}
+
+const RepoAutoloadMapBuilder::CaseInsensitiveMap&
+RepoAutoloadMapBuilder::getTypeAliases() const {
+  return m_typeAliases;
+}
+
+const RepoAutoloadMapBuilder::CaseSensitiveMap&
+RepoAutoloadMapBuilder::getModules() const {
+  return m_modules;
 }
 
 //////////////////////////////////////////////////////////////////////

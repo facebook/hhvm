@@ -650,12 +650,14 @@ class t_hack_generator : public t_concat_generator {
   }
 
   const std::string* find_hack_adapter(const t_type* type) {
-    if (const auto annotation =
-            t_typedef::get_first_structured_annotation_or_null(
-                type, kHackAdapterUri)) {
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == "name") {
-          return &item.second->get_string();
+    if (!is_transitive_annotation(*type)) {
+      if (const auto annotation =
+              t_typedef::get_first_structured_annotation_or_null(
+                  type, kHackAdapterUri)) {
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == "name") {
+            return &item.second->get_string();
+          }
         }
       }
     }
@@ -663,15 +665,17 @@ class t_hack_generator : public t_concat_generator {
   }
 
   const std::string* find_hack_wrapper(const t_field& node) {
-    auto annotation =
-        node.find_structured_annotation_or_null(kHackFieldWrapperUri);
-    if (!annotation) {
-      annotation = node.find_structured_annotation_or_null(kHackWrapperUri);
-    }
-    if (annotation) {
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == "name") {
-          return new std::string(item.second->get_string());
+    if (!is_transitive_annotation(node)) {
+      auto annotation =
+          node.find_structured_annotation_or_null(kHackFieldWrapperUri);
+      if (!annotation) {
+        annotation = node.find_structured_annotation_or_null(kHackWrapperUri);
+      }
+      if (annotation) {
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == "name") {
+            return new std::string(item.second->get_string());
+          }
         }
       }
     }
@@ -681,42 +685,44 @@ class t_hack_generator : public t_concat_generator {
   std::tuple<const std::string*, const std::string*, const std::string*>
   find_hack_wrapper(
       const t_type* ttype, bool look_up_through_hierarchy = true) {
-    const t_const* annotation = look_up_through_hierarchy
-        ? t_typedef::get_first_structured_annotation_or_null(
-              ttype, kHackWrapperUri)
-        : ttype->find_structured_annotation_or_null(kHackWrapperUri);
-    if (annotation) {
-      const std::string* name;
-      const std::string* underlying_name = new std::string("");
-      const std::string* extra_namespace =
-          new std::string("thrift_adapted_types");
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == "name") {
-          name = new std::string(item.second->get_string());
-        } else if (item.first->get_string() == "underlyingName") {
-          underlying_name = new std::string(
-              hack_name(item.second->get_string(), ttype->program(), true));
-        } else if (item.first->get_string() == "extraNamespace") {
-          extra_namespace = &item.second->get_string();
+    if (!is_transitive_annotation(*ttype)) {
+      const t_const* annotation = look_up_through_hierarchy
+          ? t_typedef::get_first_structured_annotation_or_null(
+                ttype, kHackWrapperUri)
+          : ttype->find_structured_annotation_or_null(kHackWrapperUri);
+      if (annotation) {
+        const std::string* name;
+        const std::string* underlying_name = new std::string("");
+        const std::string* extra_namespace =
+            new std::string("thrift_adapted_types");
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == "name") {
+            name = new std::string(item.second->get_string());
+          } else if (item.first->get_string() == "underlyingName") {
+            underlying_name = new std::string(
+                hack_name(item.second->get_string(), ttype->program(), true));
+          } else if (item.first->get_string() == "extraNamespace") {
+            extra_namespace = &item.second->get_string();
+          }
         }
-      }
-      if (name) {
-        // If both name and ns are not provided,
-        // then we need to nest the namespace
-        if (underlying_name->empty()) {
-          underlying_name = new std::string(hack_name(ttype, true));
-        }
+        if (name) {
+          // If both name and ns are not provided,
+          // then we need to nest the namespace
+          if (underlying_name->empty()) {
+            underlying_name = new std::string(hack_name(ttype, true));
+          }
 
-        auto [ns, ns_type] = get_namespace(ttype->program());
-        if (ns_type == HackThriftNamespaceType::HACK ||
-            ns_type == HackThriftNamespaceType::PACKAGE) {
-          return {
-              name,
-              underlying_name,
-              new std::string(ns + "\\" + *extra_namespace)};
-        }
+          auto [ns, ns_type] = get_namespace(ttype->program());
+          if (ns_type == HackThriftNamespaceType::HACK ||
+              ns_type == HackThriftNamespaceType::PACKAGE) {
+            return {
+                name,
+                underlying_name,
+                new std::string(ns + "\\" + *extra_namespace)};
+          }
 
-        return {name, underlying_name, extra_namespace};
+          return {name, underlying_name, extra_namespace};
+        }
       }
     }
     return {nullptr, nullptr, nullptr};

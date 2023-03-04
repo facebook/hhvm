@@ -37,7 +37,7 @@ class Company_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
       'enum' => dict[],
       'constants' => dict[
         'FACEBOOK' => dict[
-          'AnnotationStruct' => \thrift_adapted_types\AnnotationStruct::fromShape(
+          'AnnotationStruct' => AnnotationStruct::fromShape(
             shape(
             )
           ),
@@ -327,7 +327,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
       'fields' => dict[
         'compensation' => shape(
           'field' => dict[
-            'AnnotationStruct' => \thrift_adapted_types\AnnotationStruct::fromShape(
+            'AnnotationStruct' => AnnotationStruct::fromShape(
               shape(
               )
             ),

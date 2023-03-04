@@ -135,7 +135,7 @@ class constants_CONSTANTS implements \IThriftConstants {
   public static function getAllStructuredAnnotations()[write_props]: dict<string, dict<string, \IThriftStruct>> {
     return dict[
       'engineers' => dict[
-        'AnnotationStruct' => \thrift_adapted_types\AnnotationStruct::fromShape(
+        'AnnotationStruct' => AnnotationStruct::fromShape(
           shape(
           )
         ),

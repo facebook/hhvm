@@ -322,7 +322,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
       'fields' => dict[
         'union_annotated_field' => shape(
           'field' => dict[
-            'AnnotationStruct' => AnnotationStruct::fromShape(
+            'AnnotationStruct' => \thrift_adapted_types\AnnotationStruct::fromShape(
               shape(
               )
             ),
@@ -554,7 +554,7 @@ class MyException extends \TException implements \IThriftAsyncStruct, \IThriftEx
       'fields' => dict[
         'annotated_message' => shape(
           'field' => dict[
-            'AnnotationStruct' => AnnotationStruct::fromShape(
+            'AnnotationStruct' => \thrift_adapted_types\AnnotationStruct::fromShape(
               shape(
               )
             ),

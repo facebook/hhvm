@@ -18,7 +18,7 @@ include "thrift/annotation/hack.thrift"
 include "thrift/annotation/scope.thrift"
 
 @scope.Transitive
-@hack.FieldWrapper{name = "\MyFieldWrapper"}
+@hack.Wrapper{name = "\MyFieldWrapper"}
 struct AnnotationStruct {}
 
 struct MyStruct {

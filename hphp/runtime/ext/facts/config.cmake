@@ -7,6 +7,7 @@ HHVM_DEFINE_EXTENSION(
     logging.cpp
     sqlite-autoload-db.cpp
     sqlite-key.cpp
+    static-watcher.cpp
     string-data-ptr.cpp
     symbol-map.cpp
     thread-factory.cpp
@@ -26,6 +27,7 @@ HHVM_DEFINE_EXTENSION(
     path-symbols-map.h
     sqlite-autoload-db.h
     sqlite-key.h
+    static-watcher.h
     string-ptr.h
     symbol-map.h
     symbol-types.h

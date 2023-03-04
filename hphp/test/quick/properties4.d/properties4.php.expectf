@@ -1,7 +1,0 @@
-dict(1) {
-  ["w"]=>
-  int(3)
-}
-Done
-
-Fatal error: Class undefined: NonExistentClass in %s/properties4.php on line %d

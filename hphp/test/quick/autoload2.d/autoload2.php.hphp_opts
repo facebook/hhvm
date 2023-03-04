@@ -1,3 +1,0 @@
--vAllVolatile=true
--d hhvm.php7.all=0
---inputs=hphp/test/quick/autoload2.d/autoload1.inc

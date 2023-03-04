@@ -1186,6 +1186,7 @@ static InitFiniNode s_covLinksReinit([]{
 
 InitFiniNode s_clear_called_functions([]{
   tl_called_functions.nullOut();
+  if (s_coverage_index.bound()) *s_coverage_index = 0;
 }, InitFiniNode::When::RequestFini, "tl_called_functions clear");
 }
 

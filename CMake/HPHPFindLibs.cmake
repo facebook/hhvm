@@ -173,17 +173,6 @@ if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
   add_definitions(-DENABLE_HHPROF=1)
 endif()
 
-# tbb libs
-find_package(TBB REQUIRED)
-if (${TBB_INTERFACE_VERSION} LESS 5005)
-  unset(TBB_FOUND CACHE)
-  unset(TBB_INCLUDE_DIRS CACHE)
-  unset(TBB_LIBRARIES CACHE)
-  message(FATAL_ERROR "TBB is too old, please install at least 3.0(5005), preferably 4.0(6000) or higher")
-endif()
-include_directories(${TBB_INCLUDE_DIRS})
-link_directories(${TBB_LIBRARY_DIRS})
-
 # OpenSSL libs
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -432,6 +421,8 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} parser_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
   target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
+
+  target_link_libraries(${target} ${VISIBILITY} tbb)
 
   if (NOT MSVC)
     target_link_libraries(${target} ${VISIBILITY} afdt)

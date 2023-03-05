@@ -57,6 +57,7 @@ class MockResources : public Resources {
     uint64_t totalMemBytes = 100;
     data.setMemStats(
         folly::to<uint64_t>(round(params.memUtilRatio * totalMemBytes)),
+        folly::to<uint64_t>(round(params.memUtilRatio * totalMemBytes)),
         totalMemBytes);
     uint64_t totalNetMemBytes = 100;
     data.setTcpMemStats(

@@ -93,6 +93,14 @@ struct ResourceData : public PeriodicStatsDataBase {
     return usedMemBytes_;
   }
 
+  // Similar to getUsedMemBytes but difference is that
+  // `getUsedMemBytes` only contains anon memory while
+  // `getUsedMemBytesAll` contains file cache and all the other
+  // types of memory
+  uint64_t getUsedMemBytesAll() const {
+    return usedMemBytesAll_;
+  }
+
   // Gets the total memory of the system in bytes
   uint64_t getTotalMemBytes() const {
     return totalMemBytes_;
@@ -109,6 +117,10 @@ struct ResourceData : public PeriodicStatsDataBase {
   // Gets the used memory (0-100) of the system as a percent
   double getUsedMemPct() const {
     return ((double)usedMemBytes_) / totalMemBytes_ * 100;
+  }
+
+  double getUsedMemAllPct() const {
+    return ((double)usedMemBytesAll_) / totalMemBytes_ * 100;
   }
 
   // Gets the used memory (0-1.0) of the system as a ratio
@@ -244,8 +256,11 @@ struct ResourceData : public PeriodicStatsDataBase {
     softIrqCpuCoreRatioUtils_ = softIrqCpuCoreRatioUtils;
   }
 
-  void setMemStats(uint64_t usedMemBytes, uint64_t totalMemBytes) {
+  void setMemStats(uint64_t usedMemBytes,
+                   uint64_t usedMemBytesAll,
+                   uint64_t totalMemBytes) {
     usedMemBytes_ = usedMemBytes;
+    usedMemBytesAll_ = usedMemBytesAll;
     totalMemBytes_ = totalMemBytes;
   }
 
@@ -289,6 +304,9 @@ struct ResourceData : public PeriodicStatsDataBase {
   double cpuSoftIrqRatioUtil_{0};
   std::vector<double> softIrqCpuCoreRatioUtils_;
   uint64_t usedMemBytes_{0};
+  // usedMemBytes_ contains only anon memory while usedMemBytesAll_ contains
+  // all the memory including file cache.
+  uint64_t usedMemBytesAll_{0};
   uint64_t totalMemBytes_{0};
   uint64_t tcpMemoryPages_{0};
   uint64_t maxTcpMemLimit_{0};

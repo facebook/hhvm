@@ -104,7 +104,9 @@ module Main_env = struct
   type t = {
     conn: server_conn;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
-    uris_with_diagnostics: UriSet.t;
+    uris_with_server_diagnostics: UriSet.t;
+        (** these are all uris where hh_server has pushed diagnostics, so we
+        know to publish "reset" for them should we lose connection to hh_server *)
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
     hh_server_status: ShowStatusFB.params;
@@ -982,8 +984,10 @@ let dismiss_diagnostics (state : state) : state =
     In_init { ienv with hh_server_status_diagnostic = None }
   | Main_loop menv ->
     let open Main_env in
-    UriSet.iter (dismiss_one ~isStatusFB:false) menv.uris_with_diagnostics;
-    Main_loop { menv with uris_with_diagnostics = UriSet.empty }
+    UriSet.iter
+      (dismiss_one ~isStatusFB:false)
+      menv.uris_with_server_diagnostics;
+    Main_loop { menv with uris_with_server_diagnostics = UriSet.empty }
   | Lost_server lenv ->
     let open Lost_env in
     Option.iter lenv.hh_server_status_diagnostic ~f:dismiss_status;
@@ -1498,7 +1502,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
       {
         Main_env.conn = ienv.In_init_env.conn;
         editor_open_files = ienv.editor_open_files;
-        uris_with_diagnostics = UriSet.empty;
+        uris_with_server_diagnostics = UriSet.empty;
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
         hh_server_status =
           {
@@ -2092,7 +2096,7 @@ let state_to_rage (state : state) : string =
         ^^ "hh_server_status.shortMessage: %s\n")
         !hh_server_needs_idle
         (menv.editor_open_files |> UriMap.keys |> uris_to_string)
-        (menv.uris_with_diagnostics |> UriSet.elements |> uris_to_string)
+        (menv.uris_with_server_diagnostics |> UriSet.elements |> uris_to_string)
         (menv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
         menv.hh_server_status.ShowStatusFB.request.ShowStatusFB.message
         (Option.value
@@ -3474,7 +3478,8 @@ let fix_empty_paths_in_error_map errors_per_file =
     SMap.remove "" errors_per_file
     |> SMap.add ~combine:( @ ) default_path errors
 
-let update_uris_with_diagnostics uris_with_diagnostics errors_per_file =
+let update_uris_with_server_diagnostics
+    uris_with_server_diagnostics errors_per_file =
   let default_path = get_root_exn () |> Path.to_string in
   let is_error_free _uri errors = List.is_empty errors in
   (* reports_without/reports_with are maps of filename->ErrorList. *)
@@ -3491,14 +3496,14 @@ let update_uris_with_diagnostics uris_with_diagnostics errors_per_file =
   let uris_with =
     List.map files_with ~f:(path_to_lsp_uri ~default_path) |> UriSet.of_list
   in
-  (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
-  UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
+  (* this is "(uris_with_server_diagnostics \ uris_without) U uris_with" *)
+  UriSet.union (UriSet.diff uris_with_server_diagnostics uris_without) uris_with
 
-(** Send notifications for all reported diagnostics.
-    Returns an updated "uris_with_diagnostics" set of all files for which
+(** Send notifications for all server reported diagnostics.
+    Returns an updated "uris_with_server_diagnostics" set of all files for which
     our client currently has non-empty diagnostic reports. *)
-let do_diagnostics
-    (uris_with_diagnostics : UriSet.t)
+let do_server_diagnostics
+    (uris_with_server_diagnostics : UriSet.t)
     (errors_per_file : Errors.finalized_error list SMap.t)
     ~(is_truncated : int option) : UriSet.t =
   let errors_per_file = fix_empty_paths_in_error_map errors_per_file in
@@ -3509,7 +3514,9 @@ let do_diagnostics
   in
   SMap.iter send_diagnostic_notification errors_per_file;
   warn_truncated_diagnostic_list is_truncated;
-  update_uris_with_diagnostics uris_with_diagnostics errors_per_file
+  update_uris_with_server_diagnostics
+    uris_with_server_diagnostics
+    errors_per_file
 
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
@@ -4784,10 +4791,13 @@ let handle_server_message
     | ( Main_loop menv,
         { push = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated }; _ } )
       ->
-      let uris_with_diagnostics =
-        do_diagnostics menv.Main_env.uris_with_diagnostics errors ~is_truncated
+      let uris_with_server_diagnostics =
+        do_server_diagnostics
+          menv.Main_env.uris_with_server_diagnostics
+          errors
+          ~is_truncated
       in
-      state := Main_loop { menv with Main_env.uris_with_diagnostics };
+      state := Main_loop { menv with Main_env.uris_with_server_diagnostics };
       Lwt.return_unit
     (* any server diagnostics that come after we've shut down *)
     | (_, { push = ServerCommandTypes.DIAGNOSTIC _; _ }) -> Lwt.return_unit

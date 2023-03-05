@@ -3372,8 +3372,9 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     std::stringstream inner;
     bool is_simple_shape_index = true;
-
-    if (t->is_set()) {
+    if (find_hack_field_adapter(field) || find_hack_adapter(field.get_type())) {
+      inner << source.str();
+    } else if (t->is_set()) {
       if (arraysets_ || arrays_ || no_use_hack_collections_) {
         inner << source.str();
       } else {
@@ -3533,8 +3534,9 @@ void t_hack_generator::generate_php_struct_shape_methods(
         field_is_nullable(tstruct, &field, render_default_value(t)) ||
         nullable_everything_;
     auto fieldRef = "$this->" + field.name();
-
-    if (t->is_container()) {
+    if (find_hack_field_adapter(field) || find_hack_adapter(field.get_type())) {
+      val << fieldRef << ",\n";
+    } else if (t->is_container()) {
       if (t->is_map() || t->is_list()) {
         if (arrays_ || no_use_hack_collections_) {
           val << fieldRef;
@@ -3629,6 +3631,10 @@ bool t_hack_generator::
   if (const auto* ttypedef =
           dynamic_cast<const t_placeholder_typedef*>(ttype)) {
     ttype = ttypedef->get_type();
+  }
+  if (const auto* adapter = find_hack_adapter(ttype)) {
+    out << val;
+    return false;
   }
   if (is_shape_method) {
     if (const auto* tstruct = dynamic_cast<const t_struct*>(ttype)) {
@@ -3777,6 +3783,10 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     const t_type* ttype,
     t_name_generator& namer,
     std::string val) {
+  if (const auto* annotation = find_hack_adapter(ttype)) {
+    out << val;
+    return false;
+  }
   if (const auto* tstruct = dynamic_cast<const t_struct*>(ttype)) {
     if (is_async_shapish_struct(tstruct)) {
       out << val << "->__genToShape()";
@@ -3975,7 +3985,9 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
         fieldRef = "$" + field.name();
       }
     }
-    if (!t->is_container() && !t->is_struct()) {
+    if (const auto* adapter = find_hack_field_adapter(field)) {
+      out << fieldRef << ",\n";
+    } else if (!t->is_container() && !t->is_struct()) {
       out << fieldRef << ",\n";
     } else {
       bool is_async = generate_php_struct_async_toShape_method_helper(
@@ -5418,38 +5430,46 @@ void t_hack_generator::
   }
   auto name = field.name();
 
-  std::stringstream source;
-  bool is_async =
-      generate_php_struct_async_struct_creation_method_field_assignment_helper(
-          source,
-          field.get_type(),
-          namer,
-          field_ref,
-          is_shape,
-          uses_thrift_only_methods);
-  auto source_str = source.str();
-  auto [type_wrapper, struct_name, ns] = find_hack_wrapper(field.get_type());
-  const auto* field_wrapper = find_hack_wrapper(field);
-  if (type_wrapper) {
-    if (is_async) {
-      out << indent() << "$" << name << " = " << source_str << ";\n";
-      source_str = "$" + name;
+  bool is_async;
+  std::string source_str;
+  if (const auto* adapter = find_hack_field_adapter(field)) {
+    is_async = false;
+    source_str = field_ref;
+  } else {
+    std::stringstream source;
+    is_async =
+        generate_php_struct_async_struct_creation_method_field_assignment_helper(
+            source,
+            field.get_type(),
+            namer,
+            field_ref,
+            is_shape,
+            uses_thrift_only_methods);
+    source_str = source.str();
+    auto [type_wrapper, struct_name, ns] = find_hack_wrapper(field.get_type());
+    if (type_wrapper) {
+      if (is_async) {
+        out << indent() << "$" << name << " = " << source_str << ";\n";
+        source_str = "$" + name;
+      }
+      std::string val = "";
+      if (uses_thrift_only_methods) {
+        is_async = false;
+        val = *type_wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
+      } else {
+        is_async = true;
+        val = "await " + *type_wrapper + "::genFromThrift<";
+      }
+      val = val +
+          type_to_typehint(
+                field.get_type(),
+                {{TypeToTypehintVariations::IGNORE_WRAPPER, true}}) +
+          ">(" + source_str + ")";
+      source_str = val;
     }
-    std::string val = "";
-    if (uses_thrift_only_methods) {
-      is_async = false;
-      val = *type_wrapper + "::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<";
-    } else {
-      is_async = true;
-      val = "await " + *type_wrapper + "::genFromThrift<";
-    }
-    val = val +
-        type_to_typehint(
-              field.get_type(),
-              {{TypeToTypehintVariations::IGNORE_WRAPPER, true}}) +
-        ">(" + source_str + ")";
-    source_str = val;
   }
+
+  const auto* field_wrapper = find_hack_wrapper(field);
   if (field_wrapper) {
     // await statements need to be in separate line,
     // so we need to assign the value to a temp variable
@@ -6577,7 +6597,7 @@ std::string t_hack_generator::type_to_typehint(
   variations[TypeToTypehintVariations::IGNORE_WRAPPER] =
       variations[TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER];
   variations[TypeToTypehintVariations::IGNORE_TYPEDEF] = false;
-
+  auto* adapter = find_hack_adapter(ttype);
   // Resolve wrapper on typedef
   auto [wrapper, name, ns] = find_hack_wrapper(ttype, false);
   if (wrapper) {
@@ -6606,15 +6626,17 @@ std::string t_hack_generator::type_to_typehint(
       return (nullable ? "?" : "") + *wrapper + "<" + typehint + ">";
     }
   } else if (use_defined_type_const) {
-    // This is a typedef without wrapper, we can use the type constant directly
+    // This is a typedef without wrapper, we can use the type constant
+    // directly
+    if (adapter && variations[TypeToTypehintVariations::IGNORE_ADAPTER]) {
+      return type_to_typehint(ttype->get_true_type());
+    }
     return hack_name(ttype);
   }
 
-  if (!variations[TypeToTypehintVariations::IGNORE_ADAPTER]) {
+  if (adapter && !variations[TypeToTypehintVariations::IGNORE_ADAPTER]) {
     // Check the adapter before resolving typedefs.
-    if (const auto* adapter = find_hack_adapter(ttype)) {
-      return *adapter + "::THackType";
-    }
+    return *adapter + "::THackType";
   }
 
   if (const auto* ttypedef = dynamic_cast<const t_typedef*>(ttype)) {

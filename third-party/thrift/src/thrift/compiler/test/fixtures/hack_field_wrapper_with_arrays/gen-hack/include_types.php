@@ -1017,10 +1017,10 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, AdaptedMap>();
-    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, AdaptedStruct>();
+    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, MyStruct>();
+    \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, dict<string, MyStruct>>();
     \ThriftUtil::requireSameType<\MyAdapter1::TThriftType, int>();
-    \ThriftUtil::requireSameType<\MyAdapterInt::TThriftType, i64WithAdapter>();
+    \ThriftUtil::requireSameType<\MyAdapterInt::TThriftType, int>();
   }
 
 }

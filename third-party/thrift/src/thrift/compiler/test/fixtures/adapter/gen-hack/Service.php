@@ -334,7 +334,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftStructMetadata, \
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\StringWithAdapter>();
+    \ThriftUtil::requireSameType<\Adapter1::TThriftType, string>();
   }
 
 }
@@ -453,7 +453,7 @@ class Service_func_result extends \ThriftSyncStructWithResult implements \IThrif
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\MyI32>();
+    \ThriftUtil::requireSameType<\Adapter1::TThriftType, int>();
   }
 
 }

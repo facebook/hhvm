@@ -1001,14 +1001,10 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $shape['intField'],
       Shapes::idx($shape, 'optionalIntField'),
       $shape['intFieldWithDefault'],
-      new Set(Keyset\keys($shape['setField'])),
-      Shapes::idx($shape, 'optionalSetField') === null ? null : (new Set(Keyset\keys($shape['optionalSetField']))),
-      (new Map($shape['mapField']))->map(
-        $val0 ==> (new Vector($val0)),
-      ),
-      Shapes::idx($shape, 'optionalMapField') === null ? null : ((new Map($shape['optionalMapField']))->map(
-        $val1 ==> (new Vector($val1)),
-      )),
+      $shape['setField'],
+      Shapes::idx($shape, 'optionalSetField'),
+      $shape['mapField'],
+      Shapes::idx($shape, 'optionalMapField'),
       $shape['binaryField'],
       $shape['longField'],
       $shape['adaptedLongField'],
@@ -1021,17 +1017,10 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'intField' => $this->intField,
       'optionalIntField' => $this->optionalIntField,
       'intFieldWithDefault' => $this->intFieldWithDefault,
-      'setField' => ThriftUtil::toDArray(Dict\fill_keys($this->setField->toValuesArray(), true), static::class),
-      'optionalSetField' => $this->optionalSetField
-        |> $$ === null ? null : ThriftUtil::toDArray(Dict\fill_keys($$->toValuesArray(), true), static::class),
-      'mapField' => $this->mapField->map(
-        ($_val0) ==> vec($_val0),
-      )
-        |> dict($$),
-      'optionalMapField' => $this->optionalMapField?->map(
-        ($_val0) ==> vec($_val0),
-      )
-        |> $$ === null ? null : dict($$),
+      'setField' => $this->setField,
+      'optionalSetField' => $this->optionalSetField,
+      'mapField' => $this->mapField,
+      'optionalMapField' => $this->optionalMapField,
       'binaryField' => $this->binaryField,
       'longField' => $this->longField,
       'adaptedLongField' => $this->adaptedLongField,
@@ -1142,11 +1131,10 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\StringWithAdapter>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, int>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, string>();
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, \thrift\test\ListWithElemAdapter_withAdapter>();
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, \thrift\test\SetWithAdapter>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Set<string>>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Vector<\thrift\test\StringWithAdapter>>();
     \ThriftUtil::requireSameType<\Adapter3::TThriftType, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>();
   }
 
@@ -1681,10 +1669,8 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       Shapes::idx($shape, 'intField'),
-      Shapes::idx($shape, 'setField') === null ? null : (new Set(Keyset\keys($shape['setField']))),
-      Shapes::idx($shape, 'mapField') === null ? null : ((new Map($shape['mapField']))->map(
-        $val0 ==> (new Vector($val0)),
-      )),
+      Shapes::idx($shape, 'setField'),
+      Shapes::idx($shape, 'mapField'),
       Shapes::idx($shape, 'binaryField'),
       Shapes::idx($shape, 'longField'),
     );
@@ -1693,12 +1679,8 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   public function __toShape()[]: self::TShape {
     return shape(
       'intField' => $this->intField,
-      'setField' => $this->setField
-        |> $$ === null ? null : ThriftUtil::toDArray(Dict\fill_keys($$->toValuesArray(), true), static::class),
-      'mapField' => $this->mapField?->map(
-        ($_val0) ==> vec($_val0),
-      )
-        |> $$ === null ? null : dict($$),
+      'setField' => $this->setField,
+      'mapField' => $this->mapField,
       'binaryField' => $this->binaryField,
       'longField' => $this->longField,
     );
@@ -1764,11 +1746,10 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\StringWithAdapter>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, int>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, string>();
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, \thrift\test\ListWithElemAdapter_withAdapter>();
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, \thrift\test\SetWithAdapter>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Set<string>>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Vector<\thrift\test\StringWithAdapter>>();
     \ThriftUtil::requireSameType<\Adapter3::TThriftType, Map<string, \thrift\test\ListWithElemAdapter_withAdapter>>();
   }
 
@@ -2237,24 +2218,24 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
 
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
-      Shapes::idx($shape, 'structField') === null ? null : (\thrift\test\Foo::__fromShape($shape['structField'])),
-      Shapes::idx($shape, 'optionalStructField') === null ? null : (\thrift\test\Foo::__fromShape($shape['optionalStructField'])),
+      Shapes::idx($shape, 'structField'),
+      Shapes::idx($shape, 'optionalStructField'),
       (new Vector($shape['structListField']))->map(
         $val0 ==> \thrift\test\Foo::__fromShape($val0),
       ),
       Shapes::idx($shape, 'optionalStructListField') === null ? null : ((new Vector($shape['optionalStructListField']))->map(
         $val1 ==> \thrift\test\Foo::__fromShape($val1),
       )),
-      Shapes::idx($shape, 'unionField') === null ? null : (\thrift\test\Baz::__fromShape($shape['unionField'])),
-      Shapes::idx($shape, 'optionalUnionField') === null ? null : (\thrift\test\Baz::__fromShape($shape['optionalUnionField'])),
+      Shapes::idx($shape, 'unionField'),
+      Shapes::idx($shape, 'optionalUnionField'),
       Shapes::idx($shape, 'adaptedStructField') === null ? null : (\thrift\test\DirectlyAdapted::__fromShape($shape['adaptedStructField'])),
     );
   }
 
   public function __toShape()[]: self::TShape {
     return shape(
-      'structField' => $this->structField?->__toShape(),
-      'optionalStructField' => $this->optionalStructField?->__toShape(),
+      'structField' => $this->structField,
+      'optionalStructField' => $this->optionalStructField,
       'structListField' => $this->structListField->map(
         ($_val0) ==> $_val0->__toShape(),
       )
@@ -2263,8 +2244,8 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
         ($_val0) ==> $_val0->__toShape(),
       )
         |> $$ === null ? null : vec($$),
-      'unionField' => $this->unionField?->__toShape(),
-      'optionalUnionField' => $this->optionalUnionField?->__toShape(),
+      'unionField' => $this->unionField,
+      'optionalUnionField' => $this->optionalUnionField,
       'adaptedStructField' => $this->adaptedStructField?->__toShape(),
     );
   }
@@ -2340,7 +2321,6 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   private static function __hackAdapterTypeChecks()[]: void {
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\Baz>();
     \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\Foo>();
-    \ThriftUtil::requireSameType<\Adapter1::TThriftType, \thrift\test\FooWithAdapter>();
   }
 
 }
@@ -3650,14 +3630,14 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public static function __fromShape(self::TShape $shape)[]: this {
     return new static(
       $shape['field'],
-      new Set(Keyset\keys($shape['set_string'])),
+      $shape['set_string'],
     );
   }
 
   public function __toShape()[]: self::TShape {
     return shape(
       'field' => $this->field,
-      'set_string' => ThriftUtil::toDArray(Dict\fill_keys($this->set_string->toValuesArray(), true), static::class),
+      'set_string' => $this->set_string,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -3692,7 +3672,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   }
 
   private static function __hackAdapterTypeChecks()[]: void {
-    \ThriftUtil::requireSameType<\Adapter2::TThriftType, \thrift\test\SetWithAdapter>();
+    \ThriftUtil::requireSameType<\Adapter2::TThriftType, Set<string>>();
   }
 
 }

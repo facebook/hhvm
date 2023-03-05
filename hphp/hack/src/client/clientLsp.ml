@@ -3849,7 +3849,7 @@ let cancel_if_has_pending_cancel_request
 
 (** send DidOpen/Close/Change/Save to hh_server and ide_service as needed *)
 let handle_editor_buffer_message
-    ~(state : state)
+    ~(state : state ref)
     ~(ide_service : ClientIdeService.t ref option)
     ~(env : env)
     ~(metadata : incoming_metadata)
@@ -3862,7 +3862,7 @@ let handle_editor_buffer_message
   (* send to hh_server as necessary *)
   let (hh_server_promise : unit Lwt.t) =
     let open Main_env in
-    match (state, message) with
+    match (!state, message) with
     (* textDocument/didOpen notification *)
     | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
       let%lwt () = do_didOpen menv.conn ref_hh_unblocked_time params in
@@ -3884,7 +3884,7 @@ let handle_editor_buffer_message
   (* send to ide_service as necessary *)
   (* For now 'ide_service_promise' is immediately fulfilled, but in future it will
      be fulfilled only when the ide_service has finished processing the message. *)
-  let (ide_service_promise : unit Lwt.t) =
+  let (ide_service_promise : state Lwt.t) =
     match (ide_service, message) with
     | (Some ide_service, NotificationMessage (DidOpenNotification params)) ->
       let file_path =
@@ -3901,20 +3901,20 @@ let handle_editor_buffer_message
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
       in
-      Lwt.return_unit
+      Lwt.return !state
     | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
       let uri =
         params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
       in
       let file_path = uri_to_path uri in
       let editor_open_files =
-        match get_editor_open_files state with
+        match get_editor_open_files !state with
         | Some files -> files
         | None -> UriMap.empty
       in
-      let%lwt () =
+      begin
         match get_document_contents editor_open_files uri with
-        | None -> Lwt.return_unit
+        | None -> Lwt.return !state
         | Some file_contents ->
           let%lwt _errors =
             ide_rpc
@@ -3924,9 +3924,8 @@ let handle_editor_buffer_message
               ~ref_unblocked_time:ref_ide_unblocked_time
               ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
           in
-          Lwt.return_unit
-      in
-      Lwt.return_unit
+          Lwt.return !state
+      end
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
       let file_path =
         uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
@@ -3939,11 +3938,11 @@ let handle_editor_buffer_message
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_closed file_path)
       in
-      Lwt.return_unit
+      Lwt.return !state
     | _ ->
       (* Don't handle other events for now. When we show typechecking errors for
          the open file, we'll start handling them. *)
-      Lwt.return_unit
+      Lwt.return !state
   in
 
   (* Our asynchrony deal is (1) we want to kick off notifications to
@@ -3951,25 +3950,27 @@ let handle_editor_buffer_message
      both are done, (3) an exception in one shouldn't jeapordize the other,
      (4) our failure model only allows us to record at most one exception
      so we'll pick one arbitrarily. *)
-  let%lwt (hh_server_e : Exception.t option) =
+  let%lwt (hh_server_result : (unit, Exception.t) result) =
     try%lwt
       let%lwt () = hh_server_promise in
-      Lwt.return_none
+      Lwt.return_ok ()
     with
-    | e -> Lwt.return_some (Exception.wrap e)
-  and (ide_service_e : Exception.t option) =
+    | e -> Lwt.return_error (Exception.wrap e)
+  and (ide_service_result : (state, Exception.t) result) =
     try%lwt
-      let%lwt () = ide_service_promise in
-      Lwt.return_none
+      let%lwt new_state = ide_service_promise in
+      Lwt.return_ok new_state
     with
-    | e -> Lwt.return_some (Exception.wrap e)
+    | e -> Lwt.return_error (Exception.wrap e)
   in
   ref_unblocked_time := Float.max !ref_hh_unblocked_time !ref_ide_unblocked_time;
-  match (hh_server_e, ide_service_e) with
-  | (_, Some e)
-  | (Some e, _) ->
+  match (hh_server_result, ide_service_result) with
+  | (Ok (), Ok new_state) ->
+    state := new_state;
+    Lwt.return_unit
+  | (Error e, _)
+  | (_, Error e) ->
     Exception.reraise e
-  | _ -> Lwt.return_unit
 
 let set_verbose_to_file
     ~(ide_service : ClientIdeService.t ref option)
@@ -4513,7 +4514,7 @@ let handle_client_message
           | DidCloseNotification _ | DidSaveNotification _ ) ) ->
       let%lwt () =
         handle_editor_buffer_message
-          ~state:!state
+          ~state
           ~ide_service
           ~env
           ~metadata

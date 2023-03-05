@@ -3,7 +3,7 @@
 class C {
   // TEST-CHECK-BAL: define C.memometh_inst
   // CHECK: define C.memometh_inst($this: *C, $a: *HackInt, $b: *HackInt) : *HackInt {
-  // CHECK: local $0: *void, $1: *void
+  // CHECK: local memocache::_C_2ememometh__inst: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$this
   // CHECK:   n1 = $builtins.hhbc_check_this(n0)
@@ -41,7 +41,7 @@ class C {
 
   // TEST-CHECK-BAL: define C$static.memometh_static
   // CHECK: define C$static.memometh_static($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
-  // CHECK: local $0: *void, $1: *void
+  // CHECK: local memocache::_C$static_2ememometh__static: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$a
   // CHECK:   n1 = $builtins.hhbc_get_memo_key_l(n0)
@@ -78,7 +78,7 @@ class C {
 
   // TEST-CHECK-BAL: define C$static.memometh_lsb
   // CHECK: define C$static.memometh_lsb($this: *C$static, $a: *HackInt, $b: *HackInt) : *HackInt {
-  // CHECK: local $0: *void, $1: *void
+  // CHECK: local memocache::_C$static_2ememometh__lsb: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$a
   // CHECK:   n1 = $builtins.hhbc_get_memo_key_l(n0)
@@ -115,7 +115,7 @@ class C {
 
   // TEST-CHECK-BAL: define $root.memofunc
   // CHECK: define $root.memofunc($this: *void, $a: *HackInt, $b: *HackInt) : *HackInt {
-  // CHECK: local $0: *void, $1: *void
+  // CHECK: local memocache::_$root_2ememofunc: *void, $0: *void, $1: *void
   // CHECK: #b0:
   // CHECK:   n0: *HackMixed = load &$a
   // CHECK:   n1 = $builtins.hhbc_get_memo_key_l(n0)

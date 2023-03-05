@@ -130,3 +130,6 @@ function col_from_array(string $s1, string $s2) : void {
   $c2 = ImmMap { $s1 => 1, $s2 => 2 };
   $c3 = ImmVector { $s1, $s2 };
 }
+
+// TEST-CHECK-1: declare $builtins.hhbc_add_elem_c
+// CHECK: declare $builtins.hhbc_add_elem_c(*HackMixed, *HackMixed, *HackMixed): *HackMixed

@@ -1105,13 +1105,14 @@ pub enum IrToBc {
 
 /// Instructions used during conversions/textual.
 #[derive(Clone, Debug, HasLoc, HasLocals, HasOperands, PartialEq, Eq)]
-#[has_locals(none)]
 pub enum Textual {
     /// If the expression is not true then halt execution along this path.
     /// (this is what Textual calls 'prune')
+    #[has_locals(none)]
     AssertTrue(ValueId, LocId),
     /// If the expression is true then halt execution along this path.
     /// (this is what Textual calls 'prune not')
+    #[has_locals(none)]
     AssertFalse(ValueId, LocId),
     /// Special Deref marker for a variable.
     #[has_operands(none)]
@@ -1119,6 +1120,7 @@ pub enum Textual {
     Deref(LocalId),
     /// Special call to a Hack builtin function (like `hack_string`) skipping
     /// the normal Hack function ABI.
+    #[has_locals(none)]
     HackBuiltin {
         target: Cow<'static, str>,
         values: Box<[ValueId]>,
@@ -1126,10 +1128,12 @@ pub enum Textual {
     },
     #[has_operands(none)]
     #[has_loc(none)]
+    #[has_locals(none)]
     LoadGlobal(GlobalId),
     /// Literal String
     #[has_operands(none)]
     #[has_loc(none)]
+    #[has_locals(none)]
     String(UnitBytesId),
 }
 

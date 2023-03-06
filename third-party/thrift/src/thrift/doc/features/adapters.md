@@ -14,7 +14,7 @@ struct Adapter {
   static DefaultType toThrift(const AdaptedType&);
 };
 ```
-This completely replaces the underlying type of a thrift from [default type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types) and uses the specified adapter to convert to and from the underlying Thrift type during (de)serialization.
+This changes the type used by Thrift from the [default type](../glossary/#kinds-of-types) to [adapted type](../glossary/#kinds-of-types).
 
 ## Terminologies
 * **Type adapter** — Allows the user to change any default type to custom type.

@@ -16,7 +16,7 @@ use crate::Pass;
 pub struct ValidateModulePass;
 
 impl Pass for ValidateModulePass {
-    fn on_ty_module_def_top_down<Ex: Default, En>(
+    fn on_ty_module_def_bottom_up<Ex: Default, En>(
         &mut self,
         module: &mut ModuleDef<Ex, En>,
         config: &Config,

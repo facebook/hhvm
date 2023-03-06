@@ -137,9 +137,14 @@ module Lost_env = struct
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
-    lock_file: string;
+    uris_with_standalone_diagnostics: float UriMap.t;
+        (** these are diagnostics which arrived from serverless-ide or shelling out to hh check,
+        each with a timestamp of when they were discovered. The timestamp lets us calculate
+        for instance whether a diagnostic discovered by clientIdeDaemon is more recent
+        than one discovered by hh check. *)
     hh_server_status_diagnostic: PublishDiagnostics.params option;
-        (** Diagnostic messages warning about server not fully running. *)
+        (** Diagnostic messages warning about server not fully running (not used for standalone). *)
+    lock_file: string;
   }
 
   and params = {
@@ -1473,6 +1478,7 @@ and do_lost_server
           Lost_env.p;
           editor_open_files;
           uris_with_unsaved_changes;
+          uris_with_standalone_diagnostics = UriMap.empty;
           lock_file;
           hh_server_status_diagnostic = None;
         }
@@ -1489,6 +1495,7 @@ and do_lost_server
            Lost_env.p;
            editor_open_files;
            uris_with_unsaved_changes;
+           uris_with_standalone_diagnostics = UriMap.empty;
            lock_file;
            hh_server_status_diagnostic = None;
          })
@@ -2081,6 +2088,11 @@ let state_to_rage (state : state) : string =
   let uris_to_string uris =
     List.map uris ~f:(fun (DocumentUri uri) -> uri) |> String.concat ~sep:","
   in
+  let timestamped_uris_to_string uris =
+    List.map uris ~f:(fun (DocumentUri uri, timestamp) ->
+        Printf.sprintf "%s @ %0.2f" uri timestamp)
+    |> String.concat ~sep:","
+  in
   let details =
     match state with
     | Pre_init -> ""
@@ -2118,6 +2130,7 @@ let state_to_rage (state : state) : string =
       Printf.sprintf
         ("editor_open_files: %s\n"
         ^^ "uris_with_unsaved_changes: %s\n"
+        ^^ "urs_with_standalone_diagnostics: %s\n"
         ^^ "lock_file: %s\n"
         ^^ "explanation: %s\n"
         ^^ "new_hh_server_state: %s\n"
@@ -2126,6 +2139,9 @@ let state_to_rage (state : state) : string =
         ^^ "trigger_on_lock_file: %b\n")
         (lenv.editor_open_files |> UriMap.keys |> uris_to_string)
         (lenv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
+        (lenv.uris_with_standalone_diagnostics
+        |> UriMap.elements
+        |> timestamped_uris_to_string)
         lenv.lock_file
         lenv.p.explanation
         (lenv.p.new_hh_server_state
@@ -3518,6 +3534,47 @@ let do_server_diagnostics
     uris_with_server_diagnostics
     errors_per_file
 
+let publish_errors_if_standalone
+    (env : env)
+    (state : state)
+    (file_path : Path.t)
+    (errors : Errors.t)
+    ~(powered_by : powered_by) : state =
+  match (env.serverless_ide, state) with
+  | ((Serverless_not | Serverless_with_rpc), _) -> state
+  | (Serverless_with_shell, Pre_init) ->
+    failwith "how we got errors before initialize?"
+  | (Serverless_with_shell, (In_init _ | Main_loop _)) ->
+    failwith "how serverless_with_shell is in an hh_server state?"
+  | (Serverless_with_shell, Post_shutdown) -> state (* no-op *)
+  | (Serverless_with_shell, Lost_server lenv) ->
+    let file_path = Path.to_string file_path in
+    let uri = path_to_lsp_uri file_path ~default_path:file_path in
+    let errors_by_file =
+      errors
+      |> Errors.drop_fixmed_errors_in_files
+      |> Errors.as_map
+      |> Relative_path.Map.elements
+    in
+    let uris = lenv.Lost_env.uris_with_standalone_diagnostics in
+    let (uris_with_standalone_diagnostics, errors_in_file) =
+      match errors_by_file with
+      | [] -> (UriMap.remove uri uris, [])
+      | [(file, e)] when String.equal (Relative_path.to_absolute file) file_path
+        ->
+        ( UriMap.add uri (Unix.gettimeofday ()) uris,
+          List.map ~f:User_error.to_absolute e )
+      | _ ->
+        failwith "why we got errors for anything other than the expected file?"
+    in
+    let params = hack_errors_to_lsp_diagnostic file_path errors_in_file in
+    let notification = PublishDiagnosticsNotification params in
+    notify_jsonrpc ~powered_by notification;
+    let new_state =
+      Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics }
+    in
+    new_state
+
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
     {
@@ -3893,7 +3950,7 @@ let handle_editor_buffer_message
       let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
       (* The ClientIdeDaemon only delivers answers for open files, which is why it's vital
          never to let is miss a DidOpen. *)
-      let%lwt _errors =
+      let%lwt errors =
         ide_rpc
           ide_service
           ~env
@@ -3901,7 +3958,15 @@ let handle_editor_buffer_message
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
       in
-      Lwt.return !state
+      let new_state =
+        publish_errors_if_standalone
+          env
+          !state
+          file_path
+          errors
+          ~powered_by:Serverless_ide
+      in
+      Lwt.return new_state
     | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
       let uri =
         params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
@@ -3916,7 +3981,7 @@ let handle_editor_buffer_message
         match get_document_contents editor_open_files uri with
         | None -> Lwt.return !state
         | Some file_contents ->
-          let%lwt _errors =
+          let%lwt errors =
             ide_rpc
               ide_service
               ~env
@@ -3924,7 +3989,15 @@ let handle_editor_buffer_message
               ~ref_unblocked_time:ref_ide_unblocked_time
               ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
           in
-          Lwt.return !state
+          let new_state =
+            publish_errors_if_standalone
+              env
+              !state
+              file_path
+              errors
+              ~powered_by:Serverless_ide
+          in
+          Lwt.return new_state
       end
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
       let file_path =
@@ -4156,6 +4229,7 @@ let handle_client_message
                 Lost_env.p;
                 editor_open_files = UriMap.empty;
                 uris_with_unsaved_changes = UriSet.empty;
+                uris_with_standalone_diagnostics = UriMap.empty;
                 lock_file = ServerFiles.lock_file (get_root_exn ());
                 hh_server_status_diagnostic = None;
               }

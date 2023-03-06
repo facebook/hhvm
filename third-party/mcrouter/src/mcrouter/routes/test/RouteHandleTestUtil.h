@@ -53,6 +53,28 @@ inline void mockFiberContext() {
       [&ctx]() { ctx = getTestContext<RouterInfo>(); });
   fiber_local<RouterInfo>::setSharedCtx(std::move(ctx));
 }
+
+/**
+ * Set valid McrouterFiberContext in fiber locals with record bucket data
+ * context
+ */
+template <class RouterInfo = McrouterRouterInfo>
+void setRecordBucketDataContext(
+    std::vector<std::pair<std::string, std::string>>& pairs) {
+  using KeyBucketPair = std::pair<std::string, std::string>;
+  auto cb = [&pairs](
+                std::string key,
+                const uint64_t bucket,
+                const std::string_view /*poolRecorded*/) {
+    pairs.push_back({key, folly::to<std::string>(bucket)});
+  };
+  auto ctx = ProxyRequestContextWithInfo<RouterInfo>::createRecording(
+      *getTestRouter<RouterInfo>()->getProxy(0),
+      nullptr,
+      nullptr,
+      std::move(cb));
+  fiber_local<RouterInfo>::setSharedCtx(std::move(ctx));
+}
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

@@ -93,13 +93,6 @@ class McBucketRoute {
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
       return ch3_(getRoutingKey<Request>(req, this->salt_));
     });
-    return routeImpl(req, bucketId);
-  }
-
-  memcache::McDeleteReply route(const McDeleteRequest& req) const {
-    auto bucketId = folly::fibers::runInMainContext([this, &req]() {
-      return ch3_(getRoutingKey<McDeleteRequest>(req, this->salt_));
-    });
     auto& ctx = fiber_local<MemcacheRouterInfo>::getSharedCtx();
 
     if (UNLIKELY(ctx->recordingBucketData())) {
@@ -107,7 +100,7 @@ class McBucketRoute {
           req.key_ref()->keyWithoutRoute().str(),
           bucketId,
           bucketizationKeyspace_);
-      return createReply<McDeleteRequest>(DefaultReply, req);
+      return createReply<Request>(DefaultReply, req);
     }
     return routeImpl(req, bucketId);
   }

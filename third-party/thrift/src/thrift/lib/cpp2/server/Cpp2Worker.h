@@ -413,6 +413,9 @@ class Cpp2Worker : public IOWorkerContext,
 
   void cancelQueuedRequests();
 
+  static void handleServerRequestRejection(
+      const ServerRequest& serverRequest, ServerRequestRejection& reject);
+
   uint32_t activeRequests_;
   RequestsRegistry* requestsRegistry_;
   std::atomic<bool> stopping_{false};

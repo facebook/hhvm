@@ -357,6 +357,19 @@ void Cpp2Worker::cancelQueuedRequests() {
   }
 }
 
+void Cpp2Worker::handleServerRequestRejection(
+    const ServerRequest& serverRequest, ServerRequestRejection& reject) {
+  auto errorCode = kAppOverloadedErrorCode;
+  if (reject.applicationException().getType() ==
+      TApplicationException::UNKNOWN_METHOD) {
+    errorCode = kMethodUnknownErrorCode;
+  }
+  serverRequest.request()->sendErrorWrapped(
+      folly::exception_wrapper(
+          folly::in_place, std::move(reject).applicationException()),
+      errorCode);
+}
+
 Cpp2Worker::ActiveRequestsGuard Cpp2Worker::getActiveRequestsGuard() {
   DCHECK(!isStopping() || activeRequests_);
   ++activeRequests_;
@@ -451,44 +464,56 @@ void Cpp2Worker::dispatchRequest(
                   &found->metadata)
             : nullptr;
 
-        SelectPoolResult poolResult;
-        // if this is a wildcard method enalbled for using Sync path of
-        // ResourcePool
-        if (maybeWildcardMetadata &&
-            maybeWildcardMetadata->executorType ==
-                AsyncProcessorFactory::MethodMetadata::ExecutorType::EVB) {
-          poolResult = ResourcePoolHandle::defaultSync();
-        } else {
-          poolResult = AsyncProcessorHelper::selectResourcePool(
-              serverRequest, found->metadata);
-        }
+        SelectPoolResult poolResult =
+            serverConfigs->resourcePoolSet().selectResourcePool(serverRequest);
 
-        if (auto* reject = std::get_if<ServerRequestRejection>(&poolResult)) {
-          auto errorCode = kAppOverloadedErrorCode;
-          if (reject->applicationException().getType() ==
-              TApplicationException::UNKNOWN_METHOD) {
-            errorCode = kMethodUnknownErrorCode;
-          }
-          serverRequest.request()->sendErrorWrapped(
-              folly::exception_wrapper(
-                  folly::in_place, std::move(*reject).applicationException()),
-              errorCode);
+        ResourcePool* resourcePool;
+
+        if (auto resourcePoolHandle =
+                std::get_if<std::reference_wrapper<const ResourcePoolHandle>>(
+                    &poolResult)) {
+          DCHECK(serverConfigs->resourcePoolSet().hasResourcePool(
+              *resourcePoolHandle));
+          resourcePool = &serverConfigs->resourcePoolSet().resourcePool(
+              *resourcePoolHandle);
+        } else if (
+            auto* reject = std::get_if<ServerRequestRejection>(&poolResult)) {
+          handleServerRequestRejection(serverRequest, *reject);
           return;
-        }
+        } else {
+          // std::monostate So a ResourcePool is picked based on default logic
+          if (maybeWildcardMetadata &&
+              maybeWildcardMetadata->executorType ==
+                  AsyncProcessorFactory::MethodMetadata::ExecutorType::EVB) {
+            // if this is a wildcard method enabled for using Sync path of
+            // ResourcePool
+            poolResult = ResourcePoolHandle::defaultSync();
+          } else {
+            poolResult = AsyncProcessorHelper::selectResourcePool(
+                serverRequest, found->metadata);
+            // poolResult can't be std::monostate
+            DCHECK(!std::holds_alternative<std::monostate>(poolResult));
+          }
 
-        auto resourcePoolHandle =
-            std::get_if<std::reference_wrapper<const ResourcePoolHandle>>(
-                &poolResult);
-        DCHECK(serverConfigs->resourcePoolSet().hasResourcePool(
-            *resourcePoolHandle));
-        auto* resourcePool =
-            &serverConfigs->resourcePoolSet().resourcePool(*resourcePoolHandle);
-        // Allow the priority to override the default resource pool
-        if (priority != concurrency::NORMAL &&
-            resourcePoolHandle->get().index() ==
-                ResourcePoolHandle::kDefaultAsync) {
-          resourcePool = &serverConfigs->resourcePoolSet()
-                              .resourcePoolByPriority_deprecated(priority);
+          if (auto* reject = std::get_if<ServerRequestRejection>(&poolResult)) {
+            handleServerRequestRejection(serverRequest, *reject);
+            return;
+          }
+
+          auto resourcePoolHandle =
+              std::get_if<std::reference_wrapper<const ResourcePoolHandle>>(
+                  &poolResult);
+          DCHECK(serverConfigs->resourcePoolSet().hasResourcePool(
+              *resourcePoolHandle));
+          resourcePool = &serverConfigs->resourcePoolSet().resourcePool(
+              *resourcePoolHandle);
+          // Allow the priority to override the default resource pool
+          if (priority != concurrency::NORMAL &&
+              resourcePoolHandle->get().index() ==
+                  ResourcePoolHandle::kDefaultAsync) {
+            resourcePool = &serverConfigs->resourcePoolSet()
+                                .resourcePoolByPriority_deprecated(priority);
+          }
         }
 
         auto executor = resourcePool->executor();

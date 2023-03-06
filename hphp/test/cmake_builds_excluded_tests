@@ -183,3 +183,6 @@ zend/good/ext/standard/tests/general_functions/bug41518.php
 zend/good/ext/standard/tests/network/gethostbynamel_basic1.php
 zend/good/ext/xmlreader/tests/008.php
 zend/good/ext/xsl/tests/bug53965.php
+
+# TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
+slow/packages/basic-1.php

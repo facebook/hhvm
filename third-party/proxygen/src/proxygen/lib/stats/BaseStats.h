@@ -41,7 +41,9 @@ class BaseStats {
   // exports .60 counters
   using TLTimeseries = TLTimeseriesMinute;
   using TLTimeseriesMinuteAndAllTime = facebook::fb303::MinuteTimeseriesWrapper;
-  using TLHistogram = facebook::fb303::HistogramWrapper;
+
+  using TLHistogram = facebook::fb303::MinuteOnlyHistogram;
+  using TLHistogramMinuteAndAllTime = facebook::fb303::HistogramWrapper;
   // Please avoid adding DynamicHistogramWrapper if we can.
   // At a minimum they require formatters and map lookups for
   // operations and make it easier to violate the constraint that all counters

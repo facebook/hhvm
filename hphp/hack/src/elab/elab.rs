@@ -245,6 +245,8 @@ fn elaborate<T: Transform>(
 
         passes::validate_class_tparams::ValidateClassTparamsPass::default(),
 
+        passes::validate_user_attribute_dynamically_callable::ValidaetUserAttributeDynamicallyCallable::default(),
+
     ];
 
     let mut errs = Vec::default();

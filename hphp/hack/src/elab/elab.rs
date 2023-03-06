@@ -247,6 +247,8 @@ fn elaborate<T: Transform>(
 
         passes::validate_user_attribute_dynamically_callable::ValidaetUserAttributeDynamicallyCallable::default(),
 
+        passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
+
     ];
 
     let mut errs = Vec::default();

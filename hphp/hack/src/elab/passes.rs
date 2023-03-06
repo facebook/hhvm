@@ -42,6 +42,7 @@ pub mod validate_expr_call_echo;
 pub mod validate_expr_cast;
 pub mod validate_fun_param_inout;
 pub mod validate_fun_params;
+pub mod validate_hint_habstr;
 pub mod validate_illegal_name;
 pub mod validate_interface;
 pub mod validate_module;

@@ -878,10 +878,6 @@ module Primary : sig
         name: string;
         others: Pos_or_decl.t list;
       }
-    | Tparam_non_shadowing_reuse of {
-        pos: Pos.t;
-        tparam_name: string;
-      }
     | Reified_function_reference of Pos.t
     | Class_meth_abstract_call of {
         pos: Pos.t;

@@ -2195,10 +2195,6 @@ module Primary = struct
         name: string;
         others: Pos_or_decl.t list;
       }
-    | Tparam_non_shadowing_reuse of {
-        pos: Pos.t;
-        tparam_name: string;
-      }
     | Reified_function_reference of Pos.t
     | Class_meth_abstract_call of {
         pos: Pos.t;
@@ -4129,17 +4125,6 @@ module Primary = struct
       lazy (List.map others ~f:(fun pos -> (pos, "Here is another occurrence"))),
       [] )
 
-  let tparam_non_shadowing_reuse pos var_name =
-    ( Error_code.TypeParameterNameAlreadyUsedNonShadow,
-      lazy
-        ( pos,
-          "The name "
-          ^ Markdown_lite.md_codify var_name
-          ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
-        ),
-      lazy [],
-      [] )
-
   let reified_function_reference call_pos =
     ( Error_code.ReifiedFunctionReference,
       lazy
@@ -5893,8 +5878,6 @@ module Primary = struct
     | Meth_caller_trait { pos; trait_name } -> meth_caller_trait pos trait_name
     | Duplicate_interface { pos; name; others } ->
       duplicate_interface pos name others
-    | Tparam_non_shadowing_reuse { pos; tparam_name } ->
-      tparam_non_shadowing_reuse pos tparam_name
     | Reified_function_reference pos -> reified_function_reference pos
     | Class_meth_abstract_call { pos; class_name; meth_name; decl_pos } ->
       class_meth_abstract_call class_name meth_name pos decl_pos

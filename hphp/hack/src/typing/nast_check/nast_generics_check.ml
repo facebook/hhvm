@@ -106,10 +106,8 @@ and check_tparams ~nested (seen : tparam_info) tparams =
         Errors.add_naming_error
         @@ Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name = name }
       | Some (_, false, _) ->
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Tparam_non_shadowing_reuse { pos; tparam_name = name })
+        Errors.add_naming_error
+          (Naming_error.Tparam_non_shadowing_reuse { pos; tparam_name = name })
       | None -> ());
       SMap.add name (pos, true, is_hk) seen
     end

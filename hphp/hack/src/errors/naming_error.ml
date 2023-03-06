@@ -279,6 +279,10 @@ type t =
       class_name: string;
       suggestion: string option;
     }
+  | Tparam_non_shadowing_reuse of {
+      pos: Pos.t;
+      tparam_name: string;
+    }
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -1207,6 +1211,16 @@ let unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion =
     (pos, sprintf "The attribute `%s` is unnecessary" @@ Render.strip_ns attr)
     reason
 
+let tparam_non_shadowing_reuse pos var_name =
+  User_error.make
+    Error_codes.Typing.(to_enum TypeParameterNameAlreadyUsedNonShadow)
+    ( pos,
+      "The name "
+      ^ Markdown_lite.md_codify var_name
+      ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
+    )
+    []
+
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
@@ -1345,3 +1359,5 @@ let to_user_error = function
   | Deprecated_use { pos; fn_name } -> deprecated_use pos fn_name
   | Unnecessary_attribute { pos; attr; class_pos; class_name; suggestion } ->
     unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
+  | Tparam_non_shadowing_reuse { pos; tparam_name } ->
+    tparam_non_shadowing_reuse pos tparam_name

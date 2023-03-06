@@ -270,6 +270,10 @@ type t =
       class_name: string;
       suggestion: string option;
     }
+  | Tparam_non_shadowing_reuse of {
+      pos: Pos.t;
+      tparam_name: string;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.Naming

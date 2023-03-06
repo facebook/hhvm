@@ -3,6 +3,7 @@ Native Autoload: true
 Paths:
   %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-class.inc:
     Types:
+      A1 => PASS
       TestClass => PASS
     Functions:
     Constants:
@@ -38,15 +39,14 @@ Paths:
     Constants:
     Modules:
     TypeAliases:
-
-Notice: Attempted to call HH\autoload_set_paths() while the native autoloader is enabled. HH\autoload_set_paths() disables the native autoloader, putting us on a deprecated code path that will soon stop working.%s
-Overriding: 1
-Native Autoload: false
+Decorated methods:
+  TestClass::decorated
 Test passed successfully
 Native Autoload: true
 Paths:
   %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-class.inc:
     Types:
+      A1 => PASS
       TestClass => PASS
     Functions:
     Constants:
@@ -82,7 +82,5 @@ Paths:
     Constants:
     Modules:
     TypeAliases:
-
-Notice: Attempted to call HH\autoload_set_paths() while the native autoloader is enabled. HH\autoload_set_paths() disables the native autoloader, putting us on a deprecated code path that will soon stop working.%s
-Overriding: 1
-Native Autoload: false
+Decorated methods:
+  TestClass::decorated

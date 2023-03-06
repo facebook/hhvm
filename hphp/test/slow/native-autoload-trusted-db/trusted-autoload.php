@@ -57,10 +57,8 @@ function main_trusted_autoload(): void {
     }
   }
 
-  print "Overriding: ".(string)(HH\autoload_set_paths(
-    darray['class' => darray[]],
-    __DIR__,
-  ))."\n";
-
-  print_enabled_stats();
+  print "Decorated methods:\n";
+  foreach (HH\Facts\methods_with_attribute(A1::class) as list($class, $method)) {
+    print "  $class::$method\n";
+  }
 }

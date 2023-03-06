@@ -642,7 +642,11 @@ FactsStore* WatchmanAutoloadMapFactory::getForOptions(
         mapKey->m_dbKey.m_path.native());
     return m_maps
         .insert(
-            {*mapKey, make_trusted_facts(mapKey->m_root, std::move(dbHandle))})
+            {*mapKey,
+             make_trusted_facts(
+                 mapKey->m_root,
+                 std::move(dbHandle),
+                 mapKey->m_indexedMethodAttrs)})
         .first->second.get();
   }
 

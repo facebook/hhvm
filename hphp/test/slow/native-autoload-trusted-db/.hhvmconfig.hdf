@@ -1,4 +1,7 @@
 Autoload {
     Enabled = true
     TrustedDBPath = db/trusted-autoload.php.0.autoloadDB
+    IndexedMethodAttributes {
+        * = A1
+    }
 }

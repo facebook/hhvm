@@ -508,10 +508,14 @@ struct FactsStoreImpl final
         m_watcher{std::move(watcher)},
         m_suppressionFilePath{std::move(suppressionFilePath)} {}
 
-  FactsStoreImpl(fs::path root, AutoloadDB::Handle dbHandle)
+  FactsStoreImpl(
+      fs::path root,
+      AutoloadDB::Handle dbHandle,
+      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")},
         m_root{std::move(root)},
-        m_map{m_root, std::move(dbHandle)} {}
+        m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)} {
+  }
 
   ~FactsStoreImpl() override {
     m_closing = true;
@@ -1508,8 +1512,15 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 
 std::shared_ptr<FactsStore> make_trusted_facts(
     fs::path root,
-    AutoloadDB::Handle dbHandle) {
-  return std::make_shared<FactsStoreImpl>(std::move(root), std::move(dbHandle));
+    AutoloadDB::Handle dbHandle,
+    std::vector<std::string> indexedMethodAttrsVec) {
+  hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttrs;
+  indexedMethodAttrs.reserve(indexedMethodAttrsVec.size());
+  for (auto& v : indexedMethodAttrsVec) {
+    indexedMethodAttrs.insert(Symbol<SymKind::Type>{std::move(v)});
+  }
+  return std::make_shared<FactsStoreImpl>(
+      std::move(root), std::move(dbHandle), std::move(indexedMethodAttrs));
 }
 
 } // namespace Facts

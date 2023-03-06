@@ -47,7 +47,8 @@ std::shared_ptr<FactsStore> make_watcher_facts(
  */
 std::shared_ptr<FactsStore> make_trusted_facts(
     std::filesystem::path root,
-    AutoloadDB::Handle dbHandle);
+    AutoloadDB::Handle dbHandle,
+    std::vector<std::string> indexedMethodAttributes);
 
 } // namespace Facts
 } // namespace HPHP

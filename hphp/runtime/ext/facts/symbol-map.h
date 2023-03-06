@@ -96,7 +96,7 @@ struct SymbolMap {
   explicit SymbolMap(
       std::filesystem::path root,
       AutoloadDB::Handle dbHandle,
-      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes = {});
+      hphp_hash_set<Symbol<SymKind::Type>> indexedMethodAttributes);
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;

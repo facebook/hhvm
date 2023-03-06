@@ -197,6 +197,9 @@ namespace HH\Facts {
    * Get all methods matching the given filters.
    *
    * Throws InvalidOperationException if Facts is not enabled.
+   * Throws a RuntimeException if querying for an attribute that's not listed
+   *   in the `Autoload.IndexedMethodAttributes` setting in this repo's
+   *   `.hhvmconfig.hdf` file.
    */
   function methods_with_attribute(
     classname<\HH\MethodAttribute> $attribute,

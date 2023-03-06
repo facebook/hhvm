@@ -232,11 +232,14 @@ function type_aliases_with_attribute(
  * Get all methods matching the given filters.
  *
  * Throws InvalidOperationException if Facts is not enabled.
+ * Throws a RuntimeException if querying for an attribute that's not listed
+ *   in the `Autoload.IndexedMethodAttributes` setting in this repo's
+ *   `.hhvmconfig.hdf` file.
  */
 <<__Native>>
 function methods_with_attribute(
   /* classname<\HH\MethodAttribute> */ string $attribute,
-)[]: vec<string>; /* vec<(classname<nonnull>, string)> */
+)[]: vec<(classname<nonnull>, string)>;
 
 /**
  * Get all files matching the given filters.

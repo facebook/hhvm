@@ -195,6 +195,9 @@ impl HhConfig {
                 "profile_top_level_definitions" => {
                     go.tco_profile_top_level_definitions = parse_json(&value);
                 }
+                "skip_check_under_dynamic" => {
+                    go.tco_skip_check_under_dynamic = parse_json(&value);
+                }
                 "gc_minor_heap_size" => {
                     value.retain(|c| c != '_');
                     c.gc_minor_heap_size = parse_json(&value);

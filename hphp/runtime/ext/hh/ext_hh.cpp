@@ -1466,18 +1466,24 @@ Array HHVM_FUNCTION(collect_function_coverage) {
   return Func::GetCoverage();
 }
 
+namespace {
 const StaticString
   s_uses("uses"),
-  s_includes("includes");
+  s_includes("includes"),
+  s_packages("packages"),
+  s_domains("domains");
 
-Array HHVM_FUNCTION(get_all_packages) {
+const PackageInfo getPackageInfo() {
   VMRegAnchor _;
   auto const func =
     fromCaller([] (const BTFrame& frm) { return frm.func(); });
   assertx(func);
-  auto const packageInfo =
-    RepoOptions::forFile(func->filename()->data()).packageInfo();
+  return RepoOptions::forFile(func->filename()->data()).packageInfo();
+}
 
+} // namespace
+Array HHVM_FUNCTION(get_all_packages) {
+  auto const packageInfo = getPackageInfo();
   DictInit result(packageInfo.packages().size());
   for (auto const& [name, p] : packageInfo.packages()) {
     DictInit package(2);
@@ -1491,6 +1497,28 @@ Array HHVM_FUNCTION(get_all_packages) {
     package.set(s_includes.get(), includes.toVariant());
 
     result.set(makeStaticString(name), package.toVariant());
+  }
+
+  return result.toArray();
+}
+
+Array HHVM_FUNCTION(get_all_deployments) {
+  auto const packageInfo = getPackageInfo();
+  DictInit result(packageInfo.deployments().size());
+  for (auto const& [name, d] : packageInfo.deployments()) {
+    DictInit deployment(2);
+
+    VecInit packages(d.m_packages.size());
+    for (auto& s : d.m_packages) packages.append(String{makeStaticString(s)});
+    deployment.set(s_packages.get(), packages.toVariant());
+
+    VecInit domains(d.m_domainsOriginal.size());
+    for (auto& s : d.m_domainsOriginal) {
+      domains.append(String{makeStaticString(s)});
+    }
+    deployment.set(s_domains.get(), domains.toVariant());
+
+    result.set(makeStaticString(name), deployment.toVariant());
   }
 
   return result.toArray();
@@ -1538,6 +1566,7 @@ static struct HHExtension final : Extension {
     X(enable_function_coverage);
     X(collect_function_coverage);
     X(get_all_packages);
+    X(get_all_deployments);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

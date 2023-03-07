@@ -384,7 +384,15 @@ function collect_function_coverage(): dict<string, string>;
  * Return all package information from PACKAGES.toml
  */
 <<__Native>>
-function get_all_packages(): dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
+function get_all_packages(
+): dict<string, shape('uses' => vec<string>, 'includes' => vec<string>)>;
+
+/**
+ * Return all deploment information from PACKAGES.toml
+ */
+<<__Native>>
+function get_all_deployments(
+): dict<string, shape('packages' => vec<string>, 'domains' => vec<string>)>;
 
 } // HH
 

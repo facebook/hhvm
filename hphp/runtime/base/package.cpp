@@ -32,6 +32,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   if (!file.is_open()) return {};
 
   PackageMap packages;
+  DeploymentMap deployments;
 
 //TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
 #ifdef FACEBOOK
@@ -48,9 +49,21 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
     for (auto& s : p.package.includes) includes.push_back(std::string(s));
     packages.emplace(std::string(p.name), Package { uses, includes });
   }
+
+  for (auto& d : info.deployments) {
+    std::vector<std::string> packages, domainsOriginal;
+    std::vector<std::regex> domains;
+    for (auto& s : d.deployment.packages) packages.push_back(std::string(s));
+    for (auto& s : d.deployment.domains) {
+      domains.push_back(std::regex(std::string(s)));
+      domainsOriginal.push_back(std::string(s));
+    }
+    deployments.emplace(std::string(d.name),
+                        Deployment { packages, domains, domainsOriginal });
+  }
 #endif
 
-  return PackageInfo { packages };
+  return PackageInfo { packages, deployments };
 }
 
 PackageInfo PackageInfo::defaults() {
@@ -58,20 +71,28 @@ PackageInfo PackageInfo::defaults() {
   return {};
 }
 
+namespace {
+folly::dynamic mangleVecForCacheKey(const std::vector<std::string>& vec) {
+  folly::dynamic result = folly::dynamic::array();
+  for (auto& s : vec) result.push_back(s);
+  return result;
+}
+} // namespace
+
 std::string PackageInfo::mangleForCacheKey() const {
   folly::dynamic result = folly::dynamic::object();
 
   for (auto& [name, package] : packages()) {
     folly::dynamic entry = folly::dynamic::object();
+    entry["uses"] = mangleVecForCacheKey(package.m_uses);
+    entry["includes"] = mangleVecForCacheKey(package.m_includes);
+    result[name] = entry;
+  }
 
-    folly::dynamic uses = folly::dynamic::array();
-    for (auto& s : package.m_uses) uses.push_back(s);
-    entry["uses"] = uses;
-
-    folly::dynamic includes = folly::dynamic::array();
-    for (auto& s : package.m_includes) includes.push_back(s);
-    entry["includes"] = includes;
-
+  for (auto& [name, deployment] : deployments()) {
+    folly::dynamic entry = folly::dynamic::object();
+    entry["packages"] = mangleVecForCacheKey(deployment.m_packages);
+    entry["domains"] = mangleVecForCacheKey(deployment.m_domainsOriginal);
     result[name] = entry;
   }
 

@@ -10,3 +10,9 @@ includes = ["foo"]
 [packages.baz]
 uses = ["x.*", "y.*"]
 includes = ["foo", "bar"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["foo", "bar"]
+domains = ['www\.my-prod\.com', '.*\.website\.com$']

@@ -34,3 +34,18 @@ dict(3) {
     }
   }
 }
+dict(1) {
+  ["my-prod"]=>
+  dict(2) {
+    ["packages"]=>
+    vec(2) {
+      string(3) "foo"
+      string(3) "bar"
+    }
+    ["domains"]=>
+    vec(2) {
+      string(17) "www\.my-prod\.com"
+      string(17) ".*\.website\.com$"
+    }
+  }
+}

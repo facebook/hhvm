@@ -213,8 +213,7 @@ class ResourcePoolSet {
       std::optional<std::reference_wrapper<folly::Executor>> executor) const;
   void calculatePriorityMapping();
 
-  using ResourcePools = std::vector<std::unique_ptr<ResourcePool>>;
-  ResourcePools resourcePools_;
+  std::vector<std::unique_ptr<ResourcePool>> resourcePools_;
   mutable std::mutex mutex_;
   bool locked_{false};
   std::vector<std::optional<concurrency::PRIORITY>> priorities_;

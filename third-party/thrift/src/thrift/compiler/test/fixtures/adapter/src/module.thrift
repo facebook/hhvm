@@ -69,12 +69,15 @@ typedef i32 MyI32
 struct Foo {
   @hack.Adapter{name = '\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
+  @rust.Adapter{name = "::my::Adapter1"}
   1: i32 (py.adapter = 'my.Adapter1') intField;
   @hack.Adapter{name = '\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
+  @rust.Adapter{name = "::my::Adapter1"}
   2: optional i32 (py.adapter = 'my.Adapter1') optionalIntField;
   @hack.Adapter{name = '\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
+  @rust.Adapter{name = "::my::Adapter1"}
   3: i32 (py.adapter = 'my.Adapter1') intFieldWithDefault = 13;
   4: SetWithAdapter setField;
   5: optional SetWithAdapter optionalSetField;
@@ -104,6 +107,7 @@ struct Foo {
 union Baz {
   @hack.Adapter{name = '\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
+  @rust.Adapter{name = "::my::Adapter1"}
   1: i32 (py.adapter = 'my.Adapter1') intField;
   4: SetWithAdapter setField;
   @hack.Adapter{name = '\Adapter3'}
@@ -158,7 +162,7 @@ struct IndependentDirectlyAdapted {
 struct StructWithFieldAdapter {
   @cpp.Adapter{name = "::my::Adapter1"}
   @python.Adapter{name = "my.Adapter1", typeHint = "my.AdaptedType1"}
-  @rust.Adapter{name = "my::Adapter1"}
+  @rust.Adapter{name = "::my::Adapter1"}
   1: i32 field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @cpp.Ref{type = cpp.RefType.Shared}
@@ -328,10 +332,13 @@ struct AdaptTemplatedTestStruct {
   17: AdaptedString adaptedStringDefault = "6";
   18: AdaptedEnum adaptedEnum = ThriftAdaptedEnum.One;
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @rust.Adapter{name = "::fbthrift_adapters::test::TestAdapter"}
   19: list<i64> adaptedListDefault = [1];
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @rust.Adapter{name = "::fbthrift_adapters::test::TestAdapter"}
   20: set<i64> adaptedSetDefault = [1];
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  @rust.Adapter{name = "::fbthrift_adapters::test::TestAdapter"}
   21: map<i64, i64> adaptedMapDefault = {1: 1};
   22: DoubleTypedefBool doubleTypedefBool;
 }

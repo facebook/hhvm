@@ -840,6 +840,11 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter1",
               )
             ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter1",
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -855,6 +860,11 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
                 "name" => "::my::Adapter1",
               )
             ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter1",
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -866,6 +876,11 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               )
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter1",
+              )
+            ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -1594,6 +1609,11 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
               )
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter1",
+              )
+            ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter1",
               )
@@ -2749,7 +2769,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
             ),
             '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -5269,6 +5289,11 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
             ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "::fbthrift_adapters::test::TestAdapter",
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -5279,6 +5304,11 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
               )
             ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "::fbthrift_adapters::test::TestAdapter",
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -5287,6 +5317,11 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "::fbthrift_adapters::test::TestAdapter",
               )
             ),
           ],

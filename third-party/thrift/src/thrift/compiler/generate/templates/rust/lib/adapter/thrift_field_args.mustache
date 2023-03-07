@@ -14,11 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:optional?}}::std::option::Option<{{/field:optional?}}{{!
-}}{{#field:box?}}::std::boxed::Box<{{/field:box?}}{{!
-}}{{#field:arc?}}::std::sync::Arc<{{/field:arc?}}{{!
-    }}{{#field:has_adapter?}}<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType{{/field:has_adapter?}}{{!
-    }}{{^field:has_adapter?}}{{#field:type}}{{>lib/type}}{{/field:type}}{{/field:has_adapter?}}{{!
-}}{{#field:arc?}}>{{/field:arc?}}{{!
-}}{{#field:box?}}>{{/field:box?}}{{!
-}}{{#field:optional?}}>{{/field:optional?}}
+}}, {{field:key}}, ::std::any::TypeId::of::<self::{{struct:rust_name}}>()

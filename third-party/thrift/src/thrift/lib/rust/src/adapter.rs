@@ -15,7 +15,6 @@
  */
 
 use std::any::TypeId;
-use std::error::Error;
 use std::fmt::Debug;
 
 pub trait ThriftTypeAdapter {
@@ -23,13 +22,14 @@ pub trait ThriftTypeAdapter {
     type AdaptedType: Clone + Debug + PartialEq + Send + Sync;
 
     /// The error type thrown if `from_thrift` fails during deserialization.
-    type Error: Error;
+    type Error: Into<anyhow::Error> + Debug;
 
     /// Converts from a basic Thrift type to the specified `AdaptedType` during deserialization.
     ///
     /// The `Err` returned by this method will be propagated as a deserialization error.
     fn from_thrift(value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error>;
 
+    // TODO(emersonford): should we support a moved param here?
     /// Converts from the specified `AdaptedType` back to the native Thrift type during
     /// serialization.
     ///

@@ -24,14 +24,18 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
         }}{{#struct:fields}}
             {{field:rust_name}}: {{!
                 }}{{#field:default}}{{!
+                    }}{{#field:has_adapter?}}<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({{/field:has_adapter?}}{{!
                     }}{{>lib/fieldvalue}}{{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
                 }}{{/field:default}}{{!
                 }}{{^field:default}}{{!
                     }}{{#field:optional?}}{{!
                         }}::std::option::Option::None{{!
                     }}{{/field:optional?}}{{!
                     }}{{^field:optional?}}{{!
+                        }}{{#field:has_adapter?}}<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({{/field:has_adapter?}}{{!
                         }}::std::default::Default::default(){{!
+                        }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
                     }}{{/field:optional?}}{{!
                 }}{{/field:default}}{{!
             }},{{!
@@ -89,7 +93,11 @@ where
                 }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
                 }}{{field:key}}{{!
             }});
-            {{#field:type}}{{>lib/write}}{{/field:type}}(some, p);
+            {{#field:type}}{{>lib/write}}{{/field:type}}({{!
+            }}{{#field:has_adapter?}}&<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field({{/field:has_adapter?}}{{!
+            }}some{{!
+            }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
+            }}, p);
             p.write_field_end();
         }{{!
         }}{{/field:optional?}}{{!
@@ -99,7 +107,11 @@ where
             }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
             }}{{field:key}}{{!
         }});
-        {{#field:type}}{{>lib/write}}{{/field:type}}(&self.{{field:rust_name}}, p);
+        {{#field:type}}{{>lib/write}}{{/field:type}}({{!
+          }}{{#field:has_adapter?}}&<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field({{/field:has_adapter?}}{{!
+          }}&self.{{field:rust_name}}{{!
+          }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
+        }}, p);
         p.write_field_end();{{!
         }}{{/field:optional?}}{{!
         }}{{/struct:fields}}
@@ -128,7 +140,11 @@ where
                 (::fbthrift::TType::Stop, _) => break,{{!
                 }}{{#struct:fields}}
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
-                    }}field_{{field:name}} = ::std::option::Option::Some({{#field:type}}{{>lib/read}}{{/field:type}}(p)?),{{!
+                    }}field_{{field:name}} = ::std::option::Option::Some({{!
+                    }}{{#field:has_adapter?}}<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field({{/field:has_adapter?}}{{!
+                    }}{{#field:type}}{{>lib/read}}{{/field:type}}(p)?{{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}})?{{/field:has_adapter?}}{{!
+                    }}),{{!
                 }}{{/struct:fields}}
                 (fty, _) => p.skip(fty)?,
             }
@@ -139,17 +155,25 @@ where
             }}{{#struct:fields}}
             {{field:rust_name}}: field_{{field:name}}{{!
                 }}{{^field:optional?}}{{!
-                    }}{{#field:default}}{{!
-                        }}{{#value:simpleLiteral?}}{{!
-                            }}.unwrap_or({{>lib/value}}){{!
-                        }}{{/value:simpleLiteral?}}{{!
-                        }}{{^value:simpleLiteral?}}{{!
-                            }}.unwrap_or_else(|| {{>lib/value}}){{!
-                        }}{{/value:simpleLiteral?}}{{!
-                    }}{{/field:default}}{{!
-                    }}{{^field:default}}{{!
-                        }}.unwrap_or_default(){{!
-                    }}{{/field:default}}{{!
+                    }}{{#field:has_adapter?}}{{!
+                        }}.unwrap_or_else(|| <{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({{!
+                        }}{{#field:default}}{{>lib/value}}{{/field:default}}{{!
+                        }}{{^field:default}}::std::default::Default::default(){{/field:default}}{{!
+                        }}{{>lib/adapter/thrift_field_args}})){{!
+                    }}{{/field:has_adapter?}}{{!
+                    }}{{^field:has_adapter?}}{{!
+                        }}{{#field:default}}{{!
+                            }}{{#value:simpleLiteral?}}{{!
+                                }}.unwrap_or({{>lib/value}}){{!
+                            }}{{/value:simpleLiteral?}}{{!
+                            }}{{^value:simpleLiteral?}}{{!
+                                }}.unwrap_or_else(|| {{>lib/value}}){{!
+                            }}{{/value:simpleLiteral?}}{{!
+                        }}{{/field:default}}{{!
+                        }}{{^field:default}}{{!
+                            }}.unwrap_or_default(){{!
+                        }}{{/field:default}}{{!
+                    }}{{/field:has_adapter?}}{{!
                 }}{{/field:optional?}}{{!
             }},{{!
             }}{{/struct:fields}}{{!

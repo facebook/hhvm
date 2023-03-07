@@ -74,9 +74,9 @@ pub struct MyAnnotation {
 
 #[derive(Clone, PartialEq)]
 pub struct Foo {
-    pub intField: ::std::primitive::i32,
-    pub optionalIntField: ::std::option::Option<::std::primitive::i32>,
-    pub intFieldWithDefault: ::std::primitive::i32,
+    pub intField: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
+    pub optionalIntField: ::std::option::Option<<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType>,
+    pub intFieldWithDefault: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
     pub setField: crate::types::SetWithAdapter,
     pub optionalSetField: ::std::option::Option<crate::types::SetWithAdapter>,
     pub mapField: ::std::collections::BTreeMap<::std::string::String, crate::types::ListWithElemAdapter_withAdapter>,
@@ -95,7 +95,7 @@ pub struct Foo {
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Baz {
-    intField(::std::primitive::i32),
+    intField(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType),
     setField(crate::types::SetWithAdapter),
     mapField(::std::collections::BTreeMap<::std::string::String, crate::types::ListWithElemAdapter_withAdapter>),
     binaryField(::std::vec::Vec<::std::primitive::u8>),
@@ -142,9 +142,9 @@ pub struct IndependentDirectlyAdapted {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, PartialEq)]
 pub struct StructWithFieldAdapter {
-    pub field: ::std::primitive::i32,
+    pub field: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
     pub shared_field: ::std::primitive::i32,
     pub opt_shared_field: ::std::option::Option<::std::primitive::i32>,
     pub opt_boxed_field: ::std::option::Option<::std::boxed::Box<::std::primitive::i32>>,
@@ -253,9 +253,9 @@ pub struct AdaptTemplatedTestStruct {
     pub adaptedDoubleDefault: crate::types::AdaptedDouble,
     pub adaptedStringDefault: crate::types::AdaptedString,
     pub adaptedEnum: crate::types::AdaptedEnum,
-    pub adaptedListDefault: ::std::vec::Vec<::std::primitive::i64>,
-    pub adaptedSetDefault: ::std::collections::BTreeSet<::std::primitive::i64>,
-    pub adaptedMapDefault: ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>,
+    pub adaptedListDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
+    pub adaptedSetDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
+    pub adaptedMapDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
     pub doubleTypedefBool: crate::types::DoubleTypedefBool,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -830,9 +830,9 @@ where
 impl ::std::default::Default for self::Foo {
     fn default() -> Self {
         Self {
-            intField: ::std::default::Default::default(),
+            intField: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::Foo>()),
             optionalIntField: ::std::option::Option::None,
-            intFieldWithDefault: 13,
+            intFieldWithDefault: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(13, 3, ::std::any::TypeId::of::<self::Foo>()),
             setField: ::std::default::Default::default(),
             optionalSetField: ::std::option::Option::None,
             mapField: ::std::default::Default::default(),
@@ -886,15 +886,15 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("Foo");
         p.write_field_begin("intField", ::fbthrift::TType::I32, 1);
-        ::fbthrift::Serialize::write(&self.intField, p);
+        ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.intField, 1, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.optionalIntField {
             p.write_field_begin("optionalIntField", ::fbthrift::TType::I32, 2);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(some, 2, ::std::any::TypeId::of::<self::Foo>()), p);
             p.write_field_end();
         }
         p.write_field_begin("intFieldWithDefault", ::fbthrift::TType::I32, 3);
-        ::fbthrift::Serialize::write(&self.intFieldWithDefault, p);
+        ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.intFieldWithDefault, 3, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         p.write_field_begin("setField", ::fbthrift::TType::Set, 4);
         ::fbthrift::Serialize::write(&self.setField, p);
@@ -963,9 +963,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_intField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 2) => field_optionalIntField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 3) => field_intFieldWithDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_intField = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 1, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::I32, 2) => field_optionalIntField = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 2, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::I32, 3) => field_intFieldWithDefault = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 3, ::std::any::TypeId::of::<self::Foo>())?),
                 (::fbthrift::TType::Set, 4) => field_setField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Set, 5) => field_optionalSetField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 6) => field_mapField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -980,9 +980,9 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
-            intField: field_intField.unwrap_or_default(),
+            intField: field_intField.unwrap_or_else(|| <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::Foo>())),
             optionalIntField: field_optionalIntField,
-            intFieldWithDefault: field_intFieldWithDefault.unwrap_or(13),
+            intFieldWithDefault: field_intFieldWithDefault.unwrap_or_else(|| <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(13, 3, ::std::any::TypeId::of::<self::Foo>())),
             setField: field_setField.unwrap_or_default(),
             optionalSetField: field_optionalSetField,
             mapField: field_mapField.unwrap_or_default(),
@@ -1023,7 +1023,7 @@ where
         match self {
             Self::intField(inner) => {
                 p.write_field_begin("intField", ::fbthrift::TType::I32, 1);
-                ::fbthrift::Serialize::write(inner, p);
+                ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&inner, 1, ::std::any::TypeId::of::<self::Baz>()), p);
                 p.write_field_end();
             }
             Self::setField(inner) => {
@@ -1074,7 +1074,7 @@ where
                 (::fbthrift::TType::Stop, _, _) => break,
                 (::fbthrift::TType::I32, 1, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::intField(::fbthrift::Deserialize::read(p)?));
+                    alt = ::std::option::Option::Some(Self::intField(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 1, ::std::any::TypeId::of::<self::Baz>())?));
                 }
                 (::fbthrift::TType::Set, 4, false) => {
                     once = true;
@@ -1399,7 +1399,7 @@ where
 impl ::std::default::Default for self::StructWithFieldAdapter {
     fn default() -> Self {
         Self {
-            field: ::std::default::Default::default(),
+            field: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()),
             shared_field: ::std::default::Default::default(),
             opt_shared_field: ::std::option::Option::None,
             opt_boxed_field: ::std::option::Option::None,
@@ -1441,7 +1441,7 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithFieldAdapter");
         p.write_field_begin("field", ::fbthrift::TType::I32, 1);
-        ::fbthrift::Serialize::write(&self.field, p);
+        ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.field, 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()), p);
         p.write_field_end();
         p.write_field_begin("shared_field", ::fbthrift::TType::I32, 2);
         ::fbthrift::Serialize::write(&self.shared_field, p);
@@ -1481,7 +1481,7 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 1) => field_field = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())?),
                 (::fbthrift::TType::I32, 2) => field_shared_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I32, 3) => field_opt_shared_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I32, 4) => field_opt_boxed_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -1491,7 +1491,7 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
-            field: field_field.unwrap_or_default(),
+            field: field_field.unwrap_or_else(|| <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())),
             shared_field: field_shared_field.unwrap_or_default(),
             opt_shared_field: field_opt_shared_field,
             opt_boxed_field: field_opt_boxed_field,
@@ -2072,19 +2072,19 @@ impl ::std::default::Default for self::AdaptTemplatedTestStruct {
             adaptedDoubleDefault: 5.0,
             adaptedStringDefault: "6".to_owned(),
             adaptedEnum: crate::types::ThriftAdaptedEnum::One,
-            adaptedListDefault: vec![
+            adaptedListDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(vec![
                     1,
-                ],
-            adaptedSetDefault: {
+                ], 19, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>()),
+            adaptedSetDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({
                     let mut set = ::std::collections::BTreeSet::new();
                     set.insert(1);
                     set
-                },
-            adaptedMapDefault: {
+                }, 20, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>()),
+            adaptedMapDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({
                     let mut map = ::std::collections::BTreeMap::new();
                     map.insert(1, 1);
                     map
-                },
+                }, 21, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>()),
             doubleTypedefBool: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
@@ -2196,13 +2196,13 @@ where
         ::fbthrift::Serialize::write(&self.adaptedEnum, p);
         p.write_field_end();
         p.write_field_begin("adaptedListDefault", ::fbthrift::TType::List, 19);
-        ::fbthrift::Serialize::write(&self.adaptedListDefault, p);
+        ::fbthrift::Serialize::write(&<::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.adaptedListDefault, 19, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>()), p);
         p.write_field_end();
         p.write_field_begin("adaptedSetDefault", ::fbthrift::TType::Set, 20);
-        ::fbthrift::Serialize::write(&self.adaptedSetDefault, p);
+        ::fbthrift::Serialize::write(&<::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.adaptedSetDefault, 20, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>()), p);
         p.write_field_end();
         p.write_field_begin("adaptedMapDefault", ::fbthrift::TType::Map, 21);
-        ::fbthrift::Serialize::write(&self.adaptedMapDefault, p);
+        ::fbthrift::Serialize::write(&<::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.adaptedMapDefault, 21, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>()), p);
         p.write_field_end();
         p.write_field_begin("doubleTypedefBool", ::fbthrift::TType::Bool, 22);
         ::fbthrift::Serialize::write(&self.doubleTypedefBool, p);
@@ -2286,9 +2286,9 @@ where
                 (::fbthrift::TType::Double, 16) => field_adaptedDoubleDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::String, 17) => field_adaptedStringDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::I32, 18) => field_adaptedEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 19) => field_adaptedListDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 20) => field_adaptedSetDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Map, 21) => field_adaptedMapDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 19) => field_adaptedListDefault = ::std::option::Option::Some(<::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 19, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>())?),
+                (::fbthrift::TType::Set, 20) => field_adaptedSetDefault = ::std::option::Option::Some(<::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 20, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>())?),
+                (::fbthrift::TType::Map, 21) => field_adaptedMapDefault = ::std::option::Option::Some(<::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 21, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>())?),
                 (::fbthrift::TType::Bool, 22) => field_doubleTypedefBool = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
@@ -2314,19 +2314,19 @@ where
             adaptedDoubleDefault: field_adaptedDoubleDefault.unwrap_or(5.0),
             adaptedStringDefault: field_adaptedStringDefault.unwrap_or_else(|| "6".to_owned()),
             adaptedEnum: field_adaptedEnum.unwrap_or(crate::types::ThriftAdaptedEnum::One),
-            adaptedListDefault: field_adaptedListDefault.unwrap_or_else(|| vec![
+            adaptedListDefault: field_adaptedListDefault.unwrap_or_else(|| <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(vec![
                     1,
-                ]),
-            adaptedSetDefault: field_adaptedSetDefault.unwrap_or_else(|| {
+                ], 19, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>())),
+            adaptedSetDefault: field_adaptedSetDefault.unwrap_or_else(|| <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({
                     let mut set = ::std::collections::BTreeSet::new();
                     set.insert(1);
                     set
-                }),
-            adaptedMapDefault: field_adaptedMapDefault.unwrap_or_else(|| {
+                }, 20, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>())),
+            adaptedMapDefault: field_adaptedMapDefault.unwrap_or_else(|| <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default({
                     let mut map = ::std::collections::BTreeMap::new();
                     map.insert(1, 1);
                     map
-                }),
+                }, 21, ::std::any::TypeId::of::<self::AdaptTemplatedTestStruct>())),
             doubleTypedefBool: field_doubleTypedefBool.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })

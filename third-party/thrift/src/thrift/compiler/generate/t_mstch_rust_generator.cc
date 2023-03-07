@@ -734,6 +734,11 @@ class rust_mstch_struct : public mstch_struct {
       if (!can_derive_ord(field.get_type())) {
         return false;
       }
+
+      // Assume we cannot derive `Ord` on the adapted type.
+      if (find_structured_adapter_annotation(field) != nullptr) {
+        return false;
+      }
     }
     return true;
   }

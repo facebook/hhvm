@@ -21,6 +21,7 @@ use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
 use naming_special_names_rust::classes;
+use naming_special_names_rust::members;
 use naming_special_names_rust::user_attributes;
 use ocamlrep::rc::RcOc;
 use options::Options;
@@ -92,7 +93,8 @@ pub fn from_ast<'a, 'arena, 'decl>(
         .iter()
         .any(|ua| user_attributes::is_memoized(&ua.name.1));
     let class_name = string_utils::mangle(string_utils::strip_global_ns(&class.name.1).into());
-    let is_closure_body = &method.name.1 == "__invoke" && (class.name.1).starts_with("Closure$");
+    let is_closure_body =
+        &method.name.1 == members::__INVOKE && (class.name.1).starts_with("Closure$");
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
     if !is_closure_body {
         attributes.extend(emit_attribute::add_reified_attribute(
@@ -224,8 +226,8 @@ pub fn from_ast<'a, 'arena, 'decl>(
     }
     if emitter.systemlib() {
         match (class.name.1.as_str(), method.name.1.as_str()) {
-            ("\\__SystemLib\\MethCallerHelper", "__invoke")
-            | ("\\__SystemLib\\DynMethCallerHelper", "__invoke") => {
+            ("\\__SystemLib\\MethCallerHelper", members::__INVOKE)
+            | ("\\__SystemLib\\DynMethCallerHelper", members::__INVOKE) => {
                 coeffects = coeffects.with_caller(emitter.alloc)
             }
             _ => {}

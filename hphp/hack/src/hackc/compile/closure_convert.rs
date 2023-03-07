@@ -16,6 +16,7 @@ use hhbc::Coeffects;
 use hhbc_string_utils as string_utils;
 use itertools::Itertools;
 use naming_special_names_rust::fb;
+use naming_special_names_rust::members;
 use naming_special_names_rust::pseudo_consts;
 use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
@@ -571,7 +572,7 @@ fn make_closure(
         static_: is_static,
         readonly_this: fd.readonly_this.is_some(),
         visibility: Visibility::Public,
-        name: Id(p.clone(), "__invoke".into()),
+        name: Id(p.clone(), members::__INVOKE.into()),
         tparams: fun_tparams,
         where_constraints: fd.where_constraints.clone(),
         params: fd.params.clone(),

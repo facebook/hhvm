@@ -3,6 +3,7 @@
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
 use bstr::BStr;
+use naming_special_names_rust::members;
 use newtype::newtype_int;
 use parking_lot::MappedRwLockReadGuard;
 
@@ -56,18 +57,20 @@ pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHas
 interned_hhbc_id!(ConstId, ConstName);
 interned_hhbc_id!(FunctionId, FunctionName);
 
+const __FACTORY: &str = "__factory";
+
 interned_hhbc_id!(MethodId, MethodName);
 impl MethodId {
     pub fn factory(strings: &StringInterner) -> Self {
-        Self::from_str("__factory", strings)
+        Self::from_str(__FACTORY, strings)
     }
 
     pub fn constructor(strings: &StringInterner) -> Self {
-        Self::from_str("__construct", strings)
+        Self::from_str(members::__CONSTRUCT, strings)
     }
 
     pub fn is_constructor(&self, strings: &StringInterner) -> bool {
-        strings.eq_str(self.id, "__construct")
+        strings.eq_str(self.id, members::__CONSTRUCT)
     }
 }
 

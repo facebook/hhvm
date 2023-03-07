@@ -90,19 +90,19 @@ pub fn is_soft_make_ic_inaccessible_memoize<'arena>(
 }
 
 fn is_foldable<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__IsFoldable", attr)
+    is(ua::IS_FOLDABLE, attr)
 }
 
 fn is_dynamically_constructible<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__DynamicallyConstructible", attr)
+    is(ua::DYNAMICALLY_CONSTRUCTIBLE, attr)
 }
 
 fn is_sealed<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__Sealed", attr)
+    is(ua::SEALED, attr)
 }
 
 fn is_const<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__Const", attr)
+    is(ua::CONST, attr)
 }
 
 fn is_meth_caller<'arena>(attr: &Attribute<'arena>) -> bool {
@@ -110,19 +110,19 @@ fn is_meth_caller<'arena>(attr: &Attribute<'arena>) -> bool {
 }
 
 fn is_provenance_skip_frame<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__ProvenanceSkipFrame", attr)
+    is(ua::PROVENANCE_SKIP_FRAME, attr)
 }
 
 fn is_dynamically_callable<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__DynamicallyCallable", attr)
+    is(ua::DYNAMICALLY_CALLABLE, attr)
 }
 
 fn is_native<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__Native", attr)
+    is(ua::NATIVE, attr)
 }
 
 fn is_enum_class<'arena>(attr: &Attribute<'arena>) -> bool {
-    is("__EnumClass", attr)
+    is(ua::ENUM_CLASS, attr)
 }
 
 fn is_memoize<'arena>(attr: &Attribute<'arena>) -> bool {

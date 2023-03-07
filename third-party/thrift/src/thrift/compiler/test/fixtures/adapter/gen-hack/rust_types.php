@@ -90,6 +90,10 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
           shape(
           )
         ),
+        '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

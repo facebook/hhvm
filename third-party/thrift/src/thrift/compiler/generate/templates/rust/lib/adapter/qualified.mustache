@@ -14,9 +14,4 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#field:generic_adapter?}}{{!
-}}<{{field:adapter_name}}<{{#field:type}}{{>lib/type}}{{/field:type}}> as ::fbthrift::adapter::ThriftTypeAdapter>{{!
-}}{{/field:generic_adapter?}}{{!
-}}{{^field:generic_adapter?}}{{!
-}}<{{field:adapter_name}} as ::fbthrift::adapter::ThriftTypeAdapter>{{!
-}}{{/field:generic_adapter?}}
+}}<{{>lib/adapter/name}} as ::fbthrift::adapter::ThriftAdapter>

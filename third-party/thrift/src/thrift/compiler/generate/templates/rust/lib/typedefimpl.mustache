@@ -16,6 +16,9 @@
 
 }}
 
+{{#typedef:has_adapter?}}
+type {{typedef:transitive_adapter_name}} = {{>lib/adapter/name}};
+{{/typedef:has_adapter?}}
 {{#typedef:newtype?}}
 impl ::fbthrift::GetTType for {{typedef:rust_name}} {
     const TTYPE: ::fbthrift::TType = <{{#typedef:type}}{{>lib/type}}{{/typedef:type}} as ::fbthrift::GetTType>::TTYPE;

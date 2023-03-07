@@ -16,45 +16,45 @@
 
 // If you want an adapter to refer to a Thrift struct defined in the Thrift file using the adapter,
 // you have to use `rust_include_srcs` to avoid the target circular dependency.
-use fbthrift::adapter::ThriftTypeAdapter;
+use fbthrift::adapter::ThriftAdapter;
 
 use crate::types::Foo;
 
 pub struct FieldCheckerAdapter {}
 
-impl ThriftTypeAdapter for FieldCheckerAdapter {
-    type ThriftType = String;
+impl ThriftAdapter for FieldCheckerAdapter {
+    type OriginalType = String;
     type Error = anyhow::Error;
 
     type AdaptedType = String;
 
-    fn from_thrift(value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
         Ok(value)
     }
 
-    fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
         value.clone()
     }
 
     fn from_thrift_field(
-        value: Self::ThriftType,
+        value: Self::OriginalType,
         field_id: i16,
         strct: std::any::TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
         assert_eq!(field_id, 8);
         assert_eq!(std::any::TypeId::of::<Foo>(), strct);
 
-        Self::from_thrift(value)
+        Self::from_original(value)
     }
 
     fn to_thrift_field(
         value: &Self::AdaptedType,
         field_id: i16,
         strct: std::any::TypeId,
-    ) -> Self::ThriftType {
+    ) -> Self::OriginalType {
         assert_eq!(field_id, 8);
         assert_eq!(std::any::TypeId::of::<Foo>(), strct);
 
-        Self::to_thrift(value)
+        Self::to_original(value)
     }
 }

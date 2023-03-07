@@ -317,6 +317,15 @@ const t_const* find_structured_adapter_annotation(const t_named& node) {
       "facebook.com/thrift/annotation/rust/Adapter");
 }
 
+bool node_has_adapter(const t_named& node) {
+  return find_structured_adapter_annotation(node) != nullptr;
+}
+
+bool node_has_custom_rust_type(const t_named& node) {
+  return node.has_annotation("rust.type") ||
+      node.has_annotation("rust.newtype");
+}
+
 const std::string get_annotation_property(
     const t_const* annotation, const std::string& key) {
   if (annotation) {
@@ -327,6 +336,75 @@ const std::string get_annotation_property(
     }
   }
   return "";
+}
+
+const std::string typedef_rust_name(const t_typedef* t) {
+  if (!t->has_annotation("rust.name")) {
+    return mangle_type(t->name());
+  }
+  return t->get_annotation("rust.name");
+}
+
+const std::string transitive_typedef_adapter_name(const t_typedef* t) {
+  return fmt::format("{}_INTERNAL_TYPEDEF_ADAPTER", typedef_rust_name(t));
+}
+
+mstch::node adapter_node(
+    // The field or typedef's adapter (if there is one).
+    const t_const* adapter_annotation,
+    const t_type* type,
+    mstch_context& context,
+    mstch_element_position pos) {
+  // Step through typedefs until we find one with an adapter.
+  const t_typedef* typedef_with_transitive_adapter = nullptr;
+  const t_type* curr_type = type;
+  while (curr_type->is_typedef()) {
+    auto typedef_type = dynamic_cast<const t_typedef*>(curr_type);
+    if (!typedef_type) {
+      break;
+    }
+
+    if (node_has_adapter(*typedef_type)) {
+      typedef_with_transitive_adapter = typedef_type;
+      break;
+    }
+
+    curr_type = typedef_type->get_type();
+  }
+
+  if (!adapter_annotation && !typedef_with_transitive_adapter) {
+    return false;
+  }
+
+  auto name = adapter_annotation != nullptr
+      ? get_annotation_property(adapter_annotation, "name")
+      : transitive_typedef_adapter_name(typedef_with_transitive_adapter);
+
+  bool is_generic = boost::algorithm::ends_with(name, "<>");
+  if (is_generic) {
+    name = name.substr(0, name.length() - 2);
+  }
+
+  auto mtype = context.type_factory->make_mstch_object(type, context, pos);
+
+  mstch::node layered;
+  if (adapter_annotation != nullptr &&
+      typedef_with_transitive_adapter != nullptr) {
+    layered = transitive_typedef_adapter_name(typedef_with_transitive_adapter);
+  }
+
+  bool transitive_only = adapter_annotation == nullptr &&
+      typedef_with_transitive_adapter != nullptr;
+
+  mstch::map node{
+      {"adapter:name", name},
+      {"adapter:is_generic?", is_generic},
+      {"adapter:type", mtype},
+      {"adapter:layered?", layered},
+      {"adapter:transitive_only?", transitive_only},
+  };
+
+  return node;
 }
 
 class t_mstch_rust_generator : public t_mstch_generator {
@@ -736,7 +814,7 @@ class rust_mstch_struct : public mstch_struct {
       }
 
       // Assume we cannot derive `Ord` on the adapted type.
-      if (find_structured_adapter_annotation(field) != nullptr) {
+      if (node_has_adapter(field)) {
         return false;
       }
     }
@@ -868,6 +946,7 @@ class rust_mstch_type : public mstch_type {
             {"type:package", &rust_mstch_type::rust_package},
             {"type:rust", &rust_mstch_type::rust_type},
             {"type:nonstandard?", &rust_mstch_type::rust_nonstandard},
+            {"type:has_adapter?", &rust_mstch_type::adapter},
         });
   }
   mstch::node rust_name() {
@@ -893,6 +972,7 @@ class rust_mstch_type : public mstch_type {
     return has_nonstandard_type_annotation(type_) &&
         !(type_->is_typedef() && type_->has_annotation("rust.newtype"));
   }
+  mstch::node adapter() { return adapter_node(nullptr, type_, context_, pos_); }
 
  private:
   const rust_codegen_options& options_;
@@ -919,6 +999,7 @@ class mstch_rust_value : public mstch_base {
       if (!typedef_type) {
         break;
       }
+
       type_ = typedef_type->get_type();
     }
 
@@ -1377,8 +1458,6 @@ class rust_mstch_field : public mstch_field {
             {"field:docs?", &rust_mstch_field::rust_has_docs},
             {"field:docs", &rust_mstch_field::rust_docs},
             {"field:has_adapter?", &rust_mstch_field::has_adapter},
-            {"field:generic_adapter?", &rust_mstch_field::generic_adapter},
-            {"field:adapter_name", &rust_mstch_field::adapter_name},
         });
   }
   mstch::node rust_name() {
@@ -1408,20 +1487,9 @@ class rust_mstch_field : public mstch_field {
   mstch::node rust_is_arc() { return field_kind(*field_) == FieldKind::Arc; }
   mstch::node rust_has_docs() { return field_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(field_); }
-  mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
-  mstch::node generic_adapter() {
-    auto name = get_annotation_property(adapter_annotation_, "name");
-
-    return boost::algorithm::ends_with(name, "<>");
-  }
-  mstch::node adapter_name() {
-    auto name = get_annotation_property(adapter_annotation_, "name");
-
-    if (boost::algorithm::ends_with(name, "<>")) {
-      return name.substr(0, name.length() - 2);
-    }
-
-    return name;
+  mstch::node has_adapter() {
+    return adapter_node(
+        adapter_annotation_, field_->get_type(), context_, pos_);
   }
 
  private:
@@ -1436,7 +1504,9 @@ class rust_mstch_typedef : public mstch_typedef {
       mstch_context& ctx,
       mstch_element_position pos,
       const rust_codegen_options* options)
-      : mstch_typedef(t, ctx, pos), options_(*options) {
+      : mstch_typedef(t, ctx, pos),
+        options_(*options),
+        adapter_annotation_(find_structured_adapter_annotation(*t)) {
     register_methods(
         this,
         {
@@ -1449,14 +1519,12 @@ class rust_mstch_typedef : public mstch_typedef {
             {"typedef:docs?", &rust_mstch_typedef::rust_has_docs},
             {"typedef:docs", &rust_mstch_typedef::rust_docs},
             {"typedef:serde?", &rust_mstch_typedef::rust_serde},
+            {"typedef:has_adapter?", &rust_mstch_typedef::has_adapter},
+            {"typedef:transitive_adapter_name",
+             &rust_mstch_typedef::transitive_adapter_name},
         });
   }
-  mstch::node rust_name() {
-    if (!typedef_->has_annotation("rust.name")) {
-      return mangle_type(typedef_->name());
-    }
-    return typedef_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return typedef_rust_name(typedef_); }
   mstch::node rust_newtype() {
     return typedef_->has_annotation("rust.newtype");
   }
@@ -1489,9 +1557,17 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node rust_has_docs() { return typedef_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(typedef_); }
   mstch::node rust_serde() { return rust_serde_enabled(options_, *typedef_); }
+  mstch::node has_adapter() {
+    return adapter_node(
+        adapter_annotation_, typedef_->get_type(), context_, pos_);
+  }
+  mstch::node transitive_adapter_name() {
+    return transitive_typedef_adapter_name(typedef_);
+  }
 
  private:
   const rust_codegen_options& options_;
+  const t_const* adapter_annotation_;
 };
 
 class rust_mstch_deprecated_annotation : public mstch_deprecated_annotation {
@@ -1690,6 +1766,7 @@ class annotation_validator : public validator {
   using validator::visit;
   bool visit(t_struct*) override;
   bool visit(t_enum*) override;
+  bool visit(t_program*) override;
 };
 
 bool annotation_validator::visit(t_struct* s) {
@@ -1705,6 +1782,13 @@ bool annotation_validator::visit(t_struct* s) {
       report_error(
           field, "Field `{}` cannot be both Box'ed and Arc'ed", field.name());
     }
+
+    if (node_has_adapter(field) && node_has_custom_rust_type(field)) {
+      report_error(
+          field,
+          "Field `{}` cannot have both an adapter and `rust.type` or `rust.newtype`",
+          field.name());
+    }
   }
   return true;
 }
@@ -1713,6 +1797,19 @@ bool annotation_validator::visit(t_enum* e) {
   if (!validate_rust_serde(*e)) {
     report_error(*e, "`rust.serde` must be `true` or `false`");
   }
+  return true;
+}
+
+bool annotation_validator::visit(t_program* p) {
+  for (auto t : p->typedefs()) {
+    if (node_has_adapter(*t) && node_has_custom_rust_type(*t)) {
+      report_error(
+          *t,
+          "Typedef `{}` cannot have both an adapter and `rust.type` or `rust.newtype`",
+          (*t).name());
+    }
+  }
+
   return true;
 }
 

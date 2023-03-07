@@ -18,37 +18,37 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::num::NonZeroI64;
 
-use fbthrift::adapter::ThriftTypeAdapter;
+use fbthrift::adapter::ThriftAdapter;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CustomString(pub String);
 
 pub struct StringAdapter {}
 
-impl ThriftTypeAdapter for StringAdapter {
-    type ThriftType = String;
+impl ThriftAdapter for StringAdapter {
+    type OriginalType = String;
     type Error = std::convert::Infallible;
 
     type AdaptedType = CustomString;
 
-    fn from_thrift(value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
         Ok(CustomString(value))
     }
 
-    fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
         value.0.clone()
     }
 }
 
 pub struct NonZeroI64Adapter {}
 
-impl ThriftTypeAdapter for NonZeroI64Adapter {
-    type ThriftType = i64;
+impl ThriftAdapter for NonZeroI64Adapter {
+    type OriginalType = i64;
     type Error = anyhow::Error;
 
     type AdaptedType = NonZeroI64;
 
-    fn from_thrift(value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
         match NonZeroI64::new(value) {
             Some(v) => Ok(v),
             None => {
@@ -57,7 +57,7 @@ impl ThriftTypeAdapter for NonZeroI64Adapter {
         }
     }
 
-    fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
         value.get()
     }
 }
@@ -67,19 +67,19 @@ pub struct SortedVec(pub Vec<String>);
 
 pub struct ListAdapter {}
 
-impl ThriftTypeAdapter for ListAdapter {
-    type ThriftType = Vec<String>;
+impl ThriftAdapter for ListAdapter {
+    type OriginalType = Vec<String>;
     type Error = std::convert::Infallible;
 
     type AdaptedType = SortedVec;
 
-    fn from_thrift(mut value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_original(mut value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
         value.sort();
 
         Ok(SortedVec(value))
     }
 
-    fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
         value.0.clone()
     }
 }
@@ -91,20 +91,20 @@ where
     inner: PhantomData<T>,
 }
 
-impl<T> ThriftTypeAdapter for IdentityAdapter<T>
+impl<T> ThriftAdapter for IdentityAdapter<T>
 where
     T: Clone + Debug + Send + Sync + PartialEq,
 {
-    type ThriftType = T;
+    type OriginalType = T;
     type AdaptedType = T;
 
     type Error = std::convert::Infallible;
 
-    fn from_thrift(value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
         Ok(value)
     }
 
-    fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
         value.clone()
     }
 }

@@ -30,6 +30,7 @@ package "facebook.com/thrift/test"
 
 @hack.Adapter{name = '\Adapter2'}
 @cpp.Adapter{name = '::my::Adapter2'}
+@rust.Adapter{name = "::my::Adapter2"}
 typedef set<string> (py.adapter = 'my.Adapter2') SetWithAdapter
 @hack.Adapter{name = '\Adapter1'}
 @cpp.Adapter{name = '::my::Adapter1'}

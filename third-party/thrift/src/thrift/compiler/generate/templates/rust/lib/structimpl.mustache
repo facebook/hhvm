@@ -24,7 +24,7 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
         }}{{#struct:fields}}
             {{field:rust_name}}: {{!
                 }}{{#field:default}}{{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter}}::from_thrift_default({{/field:has_adapter?}}{{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default({{/field:has_adapter?}}{{!
                     }}{{>lib/fieldvalue}}{{!
                     }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
                 }}{{/field:default}}{{!
@@ -33,7 +33,7 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
                         }}::std::option::Option::None{{!
                     }}{{/field:optional?}}{{!
                     }}{{^field:optional?}}{{!
-                        }}{{#field:has_adapter?}}{{>lib/adapter}}::from_thrift_default({{/field:has_adapter?}}{{!
+                        }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default({{/field:has_adapter?}}{{!
                         }}::std::default::Default::default(){{!
                         }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
                     }}{{/field:optional?}}{{!
@@ -94,7 +94,7 @@ where
                 }}{{field:key}}{{!
             }});
             {{#field:type}}{{>lib/write}}{{/field:type}}({{!
-            }}{{#field:has_adapter?}}&{{>lib/adapter}}::to_thrift_field({{/field:has_adapter?}}{{!
+            }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field({{/field:has_adapter?}}{{!
             }}some{{!
             }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
             }}, p);
@@ -108,7 +108,7 @@ where
             }}{{field:key}}{{!
         }});
         {{#field:type}}{{>lib/write}}{{/field:type}}({{!
-          }}{{#field:has_adapter?}}&{{>lib/adapter}}::to_thrift_field({{/field:has_adapter?}}{{!
+          }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field({{/field:has_adapter?}}{{!
           }}&self.{{field:rust_name}}{{!
           }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
         }}, p);
@@ -141,7 +141,7 @@ where
                 }}{{#struct:fields}}
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
                     }}field_{{field:name}} = ::std::option::Option::Some({{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter}}::from_thrift_field({{/field:has_adapter?}}{{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field({{/field:has_adapter?}}{{!
                     }}{{#field:type}}{{>lib/read}}{{/field:type}}(p)?{{!
                     }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}})?{{/field:has_adapter?}}{{!
                     }}),{{!
@@ -156,7 +156,7 @@ where
             {{field:rust_name}}: field_{{field:name}}{{!
                 }}{{^field:optional?}}{{!
                     }}{{#field:has_adapter?}}{{!
-                        }}.unwrap_or_else(|| {{>lib/adapter}}::from_thrift_default({{!
+                        }}.unwrap_or_else(|| {{>lib/adapter/qualified}}::from_thrift_default({{!
                         }}{{#field:default}}{{>lib/value}}{{/field:default}}{{!
                         }}{{^field:default}}::std::default::Default::default(){{/field:default}}{{!
                         }}{{>lib/adapter/thrift_field_args}})){{!

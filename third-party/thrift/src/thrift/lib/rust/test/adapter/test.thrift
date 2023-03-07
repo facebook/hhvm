@@ -16,6 +16,20 @@
 
 include "thrift/annotation/rust.thrift"
 
+@rust.Adapter{name = "::adapters::StringAdapter"}
+typedef string AdaptedString
+
+@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+typedef i64 AdaptedI64
+
+typedef AdaptedI64 PassThroughAdaptedI64
+
+@rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
+typedef PassThroughAdaptedI64 DoubleAdaptedI64
+
+@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+typedef DoubleAdaptedI64 TripleAdaptedI64
+
 struct Foo {
   1: string str_val;
   2: i64 int_val;
@@ -33,6 +47,10 @@ struct Foo {
   8: string field_checked;
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
   9: string ident_field;
+  10: AdaptedString typedef_str_val;
+  11: DoubleAdaptedI64 double_adapted_i64 = 42;
+  @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+  12: DoubleAdaptedI64 double_adapted_and_field_i64 = 2;
 }
 
 union Bar {

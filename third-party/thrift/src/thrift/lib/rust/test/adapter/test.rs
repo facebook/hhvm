@@ -43,6 +43,13 @@ fn test_foo_default() {
             default_foo.list_val,
             SortedVec(vec!["ispum".to_string(), "lorem".to_string()])
         );
+        assert_eq!(default_foo.ident_field, "".to_string());
+        assert_eq!(default_foo.typedef_str_val, CustomString("".to_string()));
+        assert_eq!(default_foo.double_adapted_i64, NonZeroI64::new(42).unwrap());
+        assert_eq!(
+            default_foo.double_adapted_and_field_i64,
+            NonZeroI64::new(2).unwrap()
+        );
 
         assert_eq!(
             r#"{
@@ -53,7 +60,10 @@ fn test_foo_default() {
           "validated_int_val": 1,
           "list_val": ["ispum", "lorem"],
           "field_checked": "",
-          "ident_field": ""
+          "ident_field": "",
+          "typedef_str_val": "",
+          "double_adapted_i64": 42,
+          "double_adapted_and_field_i64": 2
         }"#
             .replace(['\n', ' '], ""),
             String::from_utf8(simplejson_protocol::serialize(default_foo).into()).unwrap()
@@ -71,7 +81,8 @@ fn test_foo_deser() {
           "str_val_adapted_default": "c++",
           "str_val_adapted_optional": "golang",
           "validated_int_val": 42,
-          "list_val": ["zzz", "hi", "there"]
+          "list_val": ["zzz", "hi", "there"],
+          "double_adapted_and_field_i64": 100
         }"#,
     )
     .unwrap();
@@ -92,6 +103,10 @@ fn test_foo_deser() {
             "there".to_string(),
             "zzz".to_string()
         ])
+    );
+    assert_eq!(
+        foo.double_adapted_and_field_i64,
+        NonZeroI64::new(100).unwrap()
     );
 }
 
@@ -131,6 +146,9 @@ fn test_foo_ser() {
             "zzz".to_string(),
         ]),
         ident_field: "foobar".to_string(),
+        typedef_str_val: CustomString("haskell".to_string()),
+        double_adapted_i64: NonZeroI64::new(13).unwrap(),
+        double_adapted_and_field_i64: NonZeroI64::new(14).unwrap(),
         ..Default::default()
     };
 
@@ -144,7 +162,10 @@ fn test_foo_ser() {
           "validated_int_val": 42,
           "list_val": ["hi", "there", "zzz"],
           "field_checked": "",
-          "ident_field": "foobar"
+          "ident_field": "foobar",
+          "typedef_str_val": "haskell",
+          "double_adapted_i64": 13,
+          "double_adapted_and_field_i64": 14
         }"#
         .replace(['\n', ' '], ""),
         std::string::String::from_utf8(simplejson_protocol::serialize(foo).into()).unwrap()

@@ -18,11 +18,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 65,
+              "line" : 66,
               "column" : 3
             },
             "end" : {
-              "line" : 65,
+              "line" : 66,
               "column" : 18
             }
           }
@@ -34,7 +34,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 66,
+          "line" : 67,
           "column" : 63
         }
       }

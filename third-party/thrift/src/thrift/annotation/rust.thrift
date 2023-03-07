@@ -24,6 +24,7 @@ namespace go thrift.annotation.rust
 namespace py thrift.annotation.rust
 
 @scope.Field
+@scope.Typedef
 struct Adapter {
   // A fully qualified path to a struct that implements `fbthrift::adapter::ThriftTypeAdapter`.
   //

@@ -51,7 +51,7 @@ where
                     }}{{field:key}}{{!
                 }});
                 {{#field:type}}{{>lib/write}}{{/field:type}}({{!
-                }}{{#field:has_adapter?}}&{{>lib/adapter}}::to_thrift_field(&{{/field:has_adapter?}}{{!
+                }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field(&{{/field:has_adapter?}}{{!
                 }}inner{{!
                 }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
                 }}, p);
@@ -86,7 +86,7 @@ where
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}, false) => {
                     once = true;
                     alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter}}::from_thrift_field({{/field:has_adapter?}}{{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field({{/field:has_adapter?}}{{!
                     }}{{#field:type}}{{>lib/read}}{{/field:type}}(p)?{{!
                     }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}})?{{/field:has_adapter?}}{{!
                     }}));

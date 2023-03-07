@@ -29,7 +29,7 @@ pub struct Package {
 #[derive(Debug, Deserialize)]
 pub struct Deployment {
     pub packages: Option<Vec<Spanned<String>>>,
-    pub domain: Option<Spanned<String>>,
+    pub domains: Option<Vec<Spanned<String>>>,
 }
 
 #[derive(Debug)]
@@ -100,8 +100,12 @@ mod test {
         assert_eq!(my_prod.packages.as_ref().unwrap()[0].get_ref(), "foo");
         assert_eq!(my_prod.packages.as_ref().unwrap()[1].get_ref(), "bar");
         assert_eq!(
-            my_prod.domain.as_ref().unwrap().get_ref(),
-            "www.my-prod.com"
+            my_prod.domains.as_ref().unwrap()[0].get_ref(),
+            r"www\.my-prod\.com"
+        );
+        assert_eq!(
+            my_prod.domains.as_ref().unwrap()[1].get_ref(),
+            r".*\.website\.com$"
         );
     }
 

@@ -29,7 +29,7 @@ mod ffi {
     }
     struct Deployment {
         packages: Vec<String>,
-        domain: String,
+        domains: Vec<String>,
     }
     extern "Rust" {
         pub fn package_info_cpp_ffi(source_text: &CxxString) -> PackageInfo;
@@ -64,11 +64,7 @@ pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
                 .map(|(name, deployment)| {
                     let deployment_ffi = ffi::Deployment {
                         packages: convert(deployment.packages.as_ref()),
-                        domain: deployment
-                            .domain
-                            .as_ref()
-                            .map_or("", |domain_unwrapped| domain_unwrapped.get_ref())
-                            .to_string(),
+                        domains: convert(deployment.domains.as_ref()),
                     };
                     ffi::DeploymentMapEntry {
                         name: name.to_string(),

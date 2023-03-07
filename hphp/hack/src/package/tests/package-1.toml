@@ -15,4 +15,4 @@ includes = ["foo", "bar"]
 
 [deployments.my-prod]
 packages = ["foo", "bar"]
-domain = "www.my-prod.com"
+domains = ['www\.my-prod\.com', '.*\.website\.com$']

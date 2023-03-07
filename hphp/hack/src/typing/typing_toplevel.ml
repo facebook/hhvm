@@ -219,7 +219,7 @@ let fun_def ctx fd :
       Aast.fd_module = fd.fd_module;
     }
   in
-  let fundefs =
+  let (env, fundefs) =
     let fundef_of_dynamic
         (dynamic_env, dynamic_params, dynamic_body, dynamic_return_ty) =
       let open Aast in
@@ -235,12 +235,15 @@ let fun_def ctx fd :
           };
       }
     in
-    fundef
-    ::
-    (if
-     sdt_dynamic_check_required
-     && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
+    if
+      sdt_dynamic_check_required
+      && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
     then
+      let env = { env with checked = Tast.CUnderNormalAssumptions } in
+      let fundef =
+        let f_annotation = Env.save local_tpenv env in
+        Aast.{ fundef with fd_fun = { fundef.fd_fun with f_annotation } }
+      in
       let dynamic_components =
         Typing.check_function_dynamically_callable
           ~this_class:None
@@ -250,12 +253,15 @@ let fun_def ctx fd :
           params_decl_ty
           return_ty.et_type
       in
-      if TypecheckerOptions.tast_under_dynamic tcopt then
-        [fundef_of_dynamic dynamic_components]
-      else
-        []
+      let fundefs =
+        if TypecheckerOptions.tast_under_dynamic tcopt then
+          [fundef_of_dynamic dynamic_components]
+        else
+          []
+      in
+      (env, fundef :: fundefs)
     else
-      [])
+      (env, [fundef])
   in
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in

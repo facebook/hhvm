@@ -87,9 +87,9 @@ function clock_gettime(
 <<__PHPStdLib>>
 function clock_gettime_ns(int $clk_id)[leak_safe]: int;
 <<__PHPStdLib>>
-function cpu_get_count(): HH\FIXME\MISSING_RETURN_TYPE;
+function cpu_get_count()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
-function cpu_get_model(): HH\FIXME\MISSING_RETURN_TYPE;
+function cpu_get_model()[read_globals]: HH\FIXME\MISSING_RETURN_TYPE;
 <<__PHPStdLib>>
 function hphp_memory_get_interval_peak_usage(bool $real_usage = false): int;
 <<__PHPStdLib>>

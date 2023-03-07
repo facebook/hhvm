@@ -532,25 +532,6 @@ impl TransformInstr for LowerInstrs<'_> {
                     loc,
                 }))
             }
-            Instr::Hhbc(Hhbc::NewObjD(clsid, loc)) => {
-                let cls = builder.emit(Instr::Hhbc(Hhbc::ResolveClass(clsid, loc)));
-                let method = MethodId::from_str("__factory", &builder.strings);
-                let operands = vec![cls].into_boxed_slice();
-                let context = UnitBytesId::NONE;
-                let flavor = ObjMethodOp::NullThrows;
-                let detail = CallDetail::FCallObjMethodD { flavor, method };
-                let flags = FCallArgsFlags::default();
-                Instr::Call(Box::new(Call {
-                    operands,
-                    context,
-                    detail,
-                    flags,
-                    num_rets: 1,
-                    inouts: None,
-                    readonly: None,
-                    loc,
-                }))
-            }
             Instr::Hhbc(Hhbc::NewObjS(clsref, loc)) => {
                 let cls = self.emit_special_cls_ref(builder, clsref, loc);
                 Instr::Hhbc(Hhbc::NewObj(cls, loc))

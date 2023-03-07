@@ -45,6 +45,7 @@ use crate::mangle::Mangle as _;
 use crate::mangle::MangleWithClass as _;
 use crate::state::UnitState;
 use crate::textual;
+use crate::textual::Expr;
 use crate::textual::Sid;
 use crate::textual::TextualFile;
 use crate::typed_value;
@@ -305,6 +306,14 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             | Hhbc::ConsumeL(lid, _),
         ) => write_load_var(state, iid, lid)?,
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
+        Instr::Hhbc(Hhbc::NewObjD(clsid, _)) => {
+            // NewObjD allocates a default initialized object; constructor invocation is a
+            // *separate* instruction. Thus we can translate it directly as textual Alloc
+            // instruction.
+            let ty = class::non_static_ty(clsid, &state.strings).deref();
+            let obj = state.fb.write_expr_stmt(Expr::Alloc(ty))?;
+            state.set_iid(iid, obj);
+        }
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
             let vid = state.load_static_class(cid)?;
             state.set_iid(iid, vid);
@@ -407,7 +416,6 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
 fn write_copy(state: &mut FuncState<'_, '_, '_>, iid: InstrId, vid: ValueId) -> Result {
     use hack::Builtin;
     use textual::Const;
-    use textual::Expr;
     use typed_value::typed_value_expr;
 
     match vid.full() {

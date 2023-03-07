@@ -546,6 +546,7 @@ impl fmt::Display for FmtConst<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Expr {
+    /// __sil_allocate(\<ty\>)
     Alloc(Ty),
     /// foo(1, 2, 3)
     Call(String, Box<[Expr]>),

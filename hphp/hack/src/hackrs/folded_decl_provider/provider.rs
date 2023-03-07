@@ -55,11 +55,10 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         match self.shallow_decl_provider.get_type_kind(name)? {
             None => Ok(None),
-            Some(KindOfType::TTypedef) => Ok(Some(TypeDecl::Typedef(
-                self.shallow_decl_provider.get_typedef(name)?.expect(
-                    "got None after get_type_kind indicated a typedef with this name exists",
-                ),
-            ))),
+            Some(KindOfType::TTypedef) => Ok(self
+                .shallow_decl_provider
+                .get_typedef(name)?
+                .map(TypeDecl::Typedef)),
             Some(KindOfType::TClass) => {
                 let mut stack = Default::default();
                 Ok(self

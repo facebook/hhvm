@@ -38,6 +38,7 @@ use anyhow::Result;
 #[macro_use]
 pub mod protocol;
 
+pub mod adapter;
 pub mod application_exception;
 pub mod binary_protocol;
 pub mod binary_type;

@@ -190,7 +190,6 @@ impl<Ex, En> Program<Ex, En> {
             Def::Constant(gc) => Some(gc.name.pos()),
             Def::Namespace(ns) => Some(ns.0.pos()),
             Def::Module(md) => Some(md.name.pos()),
-            Def::Package(pd) => Some(pd.name.pos()),
             Def::SetModule(sid) => Some(sid.pos()),
             Def::NamespaceUse(sids) => sids.first().map(|(_, sid, _)| sid.pos()),
             Def::SetNamespaceEnv(..) => None,
@@ -228,7 +227,6 @@ impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
                 Def::Stmt(_)
                 | Def::Module(_)
                 | Def::SetModule(_)
-                | Def::Package(_)
                 | Def::NamespaceUse(_)
                 | Def::SetNamespaceEnv(_)
                 | Def::FileAttributes(_) => {}

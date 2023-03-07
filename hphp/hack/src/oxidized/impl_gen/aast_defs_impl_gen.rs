@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<db6672a2a27da2c6c02f61a87edf7e8d>>
+// @generated SignedSource<<adf4a5e7b5797301e0d0f5e65ac3a151>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2951,9 +2951,6 @@ impl<Ex, En> Def<Ex, En> {
     pub fn mk_module(p0: ModuleDef<Ex, En>) -> Self {
         Def::Module(Box::new(p0))
     }
-    pub fn mk_package(p0: PackageDef<Ex, En>) -> Self {
-        Def::Package(Box::new(p0))
-    }
     pub fn mk_set_module(p0: Sid) -> Self {
         Def::SetModule(Box::new(p0))
     }
@@ -3014,12 +3011,6 @@ impl<Ex, En> Def<Ex, En> {
     pub fn is_module(&self) -> bool {
         match self {
             Def::Module(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_package(&self) -> bool {
-        match self {
-            Def::Package(..) => true,
             _ => false,
         }
     }
@@ -3089,12 +3080,6 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_package(&self) -> Option<&PackageDef<Ex, En>> {
-        match self {
-            Def::Package(p0) => Some(&p0),
-            _ => None,
-        }
-    }
     pub fn as_set_module(&self) -> Option<&Sid> {
         match self {
             Def::SetModule(p0) => Some(&p0),
@@ -3161,12 +3146,6 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_package_mut(&mut self) -> Option<&mut PackageDef<Ex, En>> {
-        match self {
-            Def::Package(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_set_module_mut(&mut self) -> Option<&mut Sid> {
         match self {
             Def::SetModule(p0) => Some(p0.as_mut()),
@@ -3230,12 +3209,6 @@ impl<Ex, En> Def<Ex, En> {
     pub fn as_module_into(self) -> Option<ModuleDef<Ex, En>> {
         match self {
             Def::Module(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_package_into(self) -> Option<PackageDef<Ex, En>> {
-        match self {
-            Def::Package(p0) => Some(*p0),
             _ => None,
         }
     }

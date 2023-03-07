@@ -883,7 +883,6 @@ impl<'decl> Infer<'decl> {
             FileAttributes(b) => FileAttributes(b.clone()),
             Module(b) => Module(b.clone()),
             SetModule(b) => SetModule(b.clone()),
-            Package(b) => Package(b.clone()),
         }
     }
 

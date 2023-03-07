@@ -43,8 +43,7 @@ impl Pass for ElabDefsPass {
                 | Def::Typedef(_)
                 | Def::Constant(_)
                 | Def::Module(_)
-                | Def::SetModule(_)
-                | Def::Package(_) => defs.push(e),
+                | Def::SetModule(_) => defs.push(e),
                 // Retain all non [Noop] and [Markup] top-level statements
                 // note that these statements may still appear in non-top-level
                 // positions

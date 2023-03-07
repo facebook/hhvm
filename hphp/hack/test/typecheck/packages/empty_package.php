@@ -1,3 +1,0 @@
-<?hh
-
-package foo {}

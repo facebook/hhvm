@@ -412,7 +412,6 @@ pub mod toplevel_elaborator {
             | Def::NamespaceUse(_)
             | Def::SetNamespaceEnv(_)
             | Def::FileAttributes(_)
-            | Def::Package(_)
             | Def::SetModule(_) => {}
         });
     }

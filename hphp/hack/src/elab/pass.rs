@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<54046ea0d4787190fcfce867ea316efc>>
+// @generated SignedSource<<c61ea017a41294cbfb02997d316c26fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1408,30 +1408,6 @@ pub trait Pass {
     fn on_ty_module_def_bottom_up<Ex, En>(
         &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_package_def_top_down<Ex, En>(
-        &mut self,
-        elem: &mut PackageDef<Ex, En>,
-        cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
-        Continue(())
-    }
-    #[inline(always)]
-    fn on_ty_package_def_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut PackageDef<Ex, En>,
         cfg: &Config,
         errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
@@ -3343,32 +3319,6 @@ where
     {
         self.fst.on_ty_module_def_bottom_up(elem, cfg, errs)?;
         self.snd.on_ty_module_def_bottom_up(elem, cfg, errs)
-    }
-    #[inline(always)]
-    fn on_ty_package_def_top_down<Ex, En>(
-        &mut self,
-        elem: &mut PackageDef<Ex, En>,
-        cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
-        self.fst.on_ty_package_def_top_down(elem, cfg, errs)?;
-        self.snd.on_ty_package_def_top_down(elem, cfg, errs)
-    }
-    #[inline(always)]
-    fn on_ty_package_def_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut PackageDef<Ex, En>,
-        cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
-        self.fst.on_ty_package_def_bottom_up(elem, cfg, errs)?;
-        self.snd.on_ty_package_def_bottom_up(elem, cfg, errs)
     }
     #[inline(always)]
     fn on_ty_def_top_down<Ex, En>(

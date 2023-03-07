@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2d45cb6cb50ca2f9321ab59953cb6ca7>>
+// @generated SignedSource<<6f8985ff3391ad006f55d9fd8a1f76a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2548,39 +2548,6 @@ arena_deserializer::impl_deserialize_in_arena!(ModuleDef<'arena, Ex, En>);
 
 #[derive(
     Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[serde(bound(
-    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
-))]
-#[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "pkg_")]
-#[repr(C)]
-pub struct PackageDef<'a, Ex, En> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: ast_defs::Id<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a UserAttributes<'a, Ex, En>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub uses: Option<&'a [MdNameKind<'a>]>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub includes: Option<&'a [ast_defs::Id<'a>]>,
-}
-impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for PackageDef<'a, Ex, En> {}
-arena_deserializer::impl_deserialize_in_arena!(PackageDef<'arena, Ex, En>);
-
-#[derive(
-    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -2650,8 +2617,6 @@ pub enum Def<'a, Ex, En> {
     FileAttributes(&'a FileAttribute<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Module(&'a ModuleDef<'a, Ex, En>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Package(&'a PackageDef<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SetModule(&'a Sid<'a>),
 }

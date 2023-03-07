@@ -649,7 +649,5 @@ let _toplevel_def tenv = function
   | FileAttributes _
   | SetModule _
   (* TODO(T108206307) *)
-  | Module _
-  (* TODO(milliechen) *)
-  | Package _ ->
+  | Module _ ->
     []

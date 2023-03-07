@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6ffded1d744160b1bddd2c0a403398d3>>
+// @generated SignedSource<<2bb2dbecbad3a30571d0d44dcf8b66bf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2704,54 +2704,6 @@ const _: () = {
     }
 };
 const _: () = {
-    impl<Ex, En> Transform for PackageDef<Ex, En>
-    where
-        Ex: Default,
-        Ex: Transform,
-        En: Transform,
-    {
-        fn transform(
-            &mut self,
-            cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
-            pass: &mut (impl Pass + Clone),
-        ) {
-            let mut in_pass = pass.clone();
-            if let Break(..) = pass.on_ty_package_def_top_down(self, cfg, errs) {
-                return;
-            }
-            self.traverse(cfg, errs, pass);
-            in_pass.on_ty_package_def_bottom_up(self, cfg, errs);
-        }
-        fn traverse(
-            &mut self,
-            cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
-            pass: &mut (impl Pass + Clone),
-        ) {
-            match self {
-                PackageDef {
-                    name: ref mut __binding_0,
-                    user_attributes: ref mut __binding_1,
-                    uses: ref mut __binding_2,
-                    includes: ref mut __binding_3,
-                } => {
-                    {
-                        __binding_0.transform(cfg, errs, pass)
-                    }
-                    {
-                        __binding_1.transform(cfg, errs, pass)
-                    }
-                    {
-                        __binding_2.transform(cfg, errs, pass)
-                    }
-                    { __binding_3.transform(cfg, errs, pass) }
-                }
-            }
-        }
-    }
-};
-const _: () = {
     impl Transform for MdNameKind {}
 };
 const _: () = {
@@ -2791,7 +2743,6 @@ const _: () = {
                 Def::SetNamespaceEnv(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Def::FileAttributes(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Def::Module(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
-                Def::Package(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
                 Def::SetModule(ref mut __binding_0) => __binding_0.transform(cfg, errs, pass),
             }
         }

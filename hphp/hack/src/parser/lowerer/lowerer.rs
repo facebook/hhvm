@@ -5448,36 +5448,6 @@ fn p_module_imports<'a>(
     }
 }
 
-fn p_pkg_uses<'a>(
-    name: &ast::Sid,
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<Option<Vec<ast::MdNameKind>>> {
-    match &node.children {
-        Missing => Ok(None),
-        PackageUses(e) => Ok(Some(
-            e.uses
-                .syntax_node_to_list_skip_separator()
-                .map(|n| pos_qualified_referenced_module_name(name, n, env))
-                .collect::<Result<Vec<_>, _>>()?,
-        )),
-        _ => missing_syntax("package module uses", node, env),
-    }
-}
-
-fn p_pkg_includes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<Vec<ast::Sid>>> {
-    match &node.children {
-        Missing => Ok(None),
-        PackageIncludes(e) => Ok(Some(
-            e.includes
-                .syntax_node_to_list_skip_separator()
-                .map(|n| pos_name(n, env))
-                .collect::<Result<Vec<_>, _>>()?,
-        )),
-        _ => missing_syntax("package includes", node, env),
-    }
-}
-
 fn check_effect_memoized<'a>(
     contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
@@ -6159,19 +6129,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 doc_comment: doc_comment_opt,
                 exports,
                 imports,
-            })])
-        }
-        PackageDeclaration(pkg) => {
-            let name = pos_name(&pkg.name, env)?;
-            let user_attributes = p_user_attributes(&pkg.attribute_spec, env);
-            let uses = p_pkg_uses(&name, &pkg.uses, env)?;
-            let includes = p_pkg_includes(&pkg.includes, env)?;
-
-            Ok(vec![ast::Def::mk_package(ast::PackageDef {
-                name,
-                user_attributes,
-                uses,
-                includes,
             })])
         }
         ModuleMembershipDeclaration(mm) => {

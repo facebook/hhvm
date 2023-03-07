@@ -82,7 +82,5 @@ let def_env ctx x =
   | SetNamespaceEnv _
   | FileAttributes _
   (* TODO(T108206307) *)
-  | Module _
-  (* TODO: milliechen *)
-  | Package _ ->
+  | Module _ ->
     empty_env

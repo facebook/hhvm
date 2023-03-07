@@ -28,7 +28,6 @@ let on_program program ~ctx =
     | Aast.Typedef _
     | Aast.Constant _
     | Aast.Module _
-    | Aast.Package _
     | Aast.SetModule _ ->
       def :: acc
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc

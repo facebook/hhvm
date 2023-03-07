@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<828a35b7371f0167262773ff1fe6d314>>
+// @generated SignedSource<<34194c3c8f124cfb66f1c462441b3477>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2066,30 +2066,6 @@ pub struct ModuleDef<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
-#[rust_to_ocaml(prefix = "pkg_")]
-#[repr(C)]
-pub struct PackageDef<Ex, En> {
-    pub name: ast_defs::Id,
-    pub user_attributes: UserAttributes<Ex, En>,
-    pub uses: Option<Vec<MdNameKind>>,
-    pub includes: Option<Vec<ast_defs::Id>>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum MdNameKind {
@@ -2126,7 +2102,6 @@ pub enum Def<Ex, En> {
     SetNamespaceEnv(Box<Nsenv>),
     FileAttributes(Box<FileAttribute<Ex, En>>),
     Module(Box<ModuleDef<Ex, En>>),
-    Package(Box<PackageDef<Ex, En>>),
     SetModule(Box<Sid>),
 }
 

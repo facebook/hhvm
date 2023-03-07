@@ -23,7 +23,7 @@ use oxidized::ast_defs;
 use oxidized::ast_defs::Bop;
 use oxidized::ast_defs::Pos;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
-use oxidized_by_ref::typing_kinding_defs::FunElt;
+use oxidized_by_ref::typing_defs::FunElt;
 
 use crate::subtype;
 use crate::tyx;

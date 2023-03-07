@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized_by_ref as obr;
-use oxidized_by_ref::ast::Id;
 use pos::Pos;
 use pos::ToOxidized;
 
@@ -366,7 +365,7 @@ impl<'a, R: Reason> ToOxidized<'a> for EnumType<R> {
 }
 
 impl<'a, P: Pos> ToOxidized<'a> for Enforceable<P> {
-    type Output = (&'a oxidized_by_ref::pos::Pos<'a>, bool);
+    type Output = (&'a obr::pos::Pos<'a>, bool);
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         self.0.as_ref().map_or_else(
@@ -495,7 +494,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             support_dynamic_type: *support_dynamic_type,
             module: module.as_ref().map(|m| {
                 let (pos, id) = m.to_oxidized(arena);
-                Id(pos, id)
+                obr::ast_defs::Id(pos, id)
             }),
             tparams: tparams.to_oxidized(arena),
             where_constraints: where_constraints.to_oxidized(arena),
@@ -565,10 +564,7 @@ impl<'a, P: ToOxidized<'a, Output = &'a obr::pos::Pos<'a>>> ToOxidized<'a>
             },
             Self::CyclicClassDef(pos, stack) => DeclError::CyclicClassDef {
                 pos: pos.to_oxidized(arena),
-                stack: oxidized_by_ref::s_set::SSet::from(
-                    arena,
-                    stack.iter().map(|s| s.to_oxidized(arena)),
-                ),
+                stack: obr::s_set::SSet::from(arena, stack.iter().map(|s| s.to_oxidized(arena))),
             },
         }
     }
@@ -708,7 +704,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::ClassDecl<R> {
             kind: *kind,
             module: module.as_ref().map(|m| {
                 let (pos, id) = m.to_oxidized(arena);
-                oxidized_by_ref::ast_defs::Id(pos, id)
+                obr::ast_defs::Id(pos, id)
             }),
             name: name.to_oxidized(arena),
             tparams: tparams.to_oxidized(arena),
@@ -765,7 +761,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::FunDecl<R> {
             no_auto_dynamic: *no_auto_dynamic,
             module: module.as_ref().map(|m| {
                 let (pos, id) = m.to_oxidized(arena);
-                oxidized_by_ref::ast_defs::Id(pos, id)
+                obr::ast_defs::Id(pos, id)
             }),
         })
     }
@@ -791,7 +787,7 @@ impl<'a, R: Reason> ToOxidized<'a> for shallow::TypedefDecl<R> {
         arena.alloc(obr::shallow_decl_defs::TypedefDecl {
             module: module.as_ref().map(|m| {
                 let (pos, id) = m.to_oxidized(arena);
-                oxidized_by_ref::ast_defs::Id(pos, id)
+                obr::ast_defs::Id(pos, id)
             }),
             pos: pos.to_oxidized(arena),
             vis: *vis,

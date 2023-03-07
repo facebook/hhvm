@@ -51,7 +51,6 @@
   tast_typecheck
   temp_file
   typing
-  typing_serialization
   utils_core
   utils_multifile
   write_symbol_info))

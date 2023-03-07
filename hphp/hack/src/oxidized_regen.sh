@@ -132,24 +132,11 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
-  hphp/hack/src/options/globalOptions.ml                                      \
   hphp/hack/src/options/saved_state_rollouts.ml                               \
-  hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/scoured_comments.ml                                    \
-  hphp/hack/src/typing/tast.ml                                                \
-  hphp/hack/src/typing/type_parameter_env.ml                                  \
-  hphp/hack/src/typing/typing_cont_key.ml                                     \
   hphp/hack/src/typing/typing_defs_core.ml                                    \
   hphp/hack/src/typing/typing_defs.ml                                         \
-  hphp/hack/src/typing/typing_env_return_info.ml                              \
-  hphp/hack/src/typing/typing_fake_members.ml                                 \
-  hphp/hack/src/typing/typing_inference_env.ml                                \
-  hphp/hack/src/typing/typing_kinding_defs.ml                                 \
-  hphp/hack/src/typing/typing_modules.ml                                      \
-  hphp/hack/src/typing/typing_local_types.ml                                  \
-  hphp/hack/src/typing/typing_per_cont_env.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \
-  hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/typing/xhp_attribute.ml                                       \
   hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \

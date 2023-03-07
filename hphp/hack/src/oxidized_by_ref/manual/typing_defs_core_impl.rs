@@ -5,9 +5,9 @@
 
 use std::cmp::Ordering;
 
-use crate::aast_defs::Tprim;
 use crate::ast_defs::Id;
 use crate::ast_defs::ParamKind;
+use crate::ast_defs::Tprim;
 use crate::ident::Ident;
 use crate::pos::Pos;
 use crate::typing_defs_core::*;
@@ -162,39 +162,6 @@ impl std::fmt::Debug for Ty_<'_> {
                 .field(exact)
                 .field(tys)
                 .finish(),
-        }
-    }
-}
-
-impl PartialEq for ConstraintType<'_> {
-    fn eq(&self, other: &Self) -> bool {
-        self.1 == other.1
-    }
-}
-impl Eq for ConstraintType<'_> {}
-impl PartialOrd for ConstraintType<'_> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl Ord for ConstraintType<'_> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.1.cmp(other.1)
-    }
-}
-
-impl<'a> InternalType<'a> {
-    pub fn get_locl_type_opt(self) -> Option<&'a Ty<'a>> {
-        match self {
-            InternalType::LoclType(ty) => Some(ty),
-            InternalType::ConstraintType(_) => None,
-        }
-    }
-
-    pub fn get_var(self) -> Option<Ident> {
-        match self {
-            InternalType::LoclType(ty) => ty.get_var(),
-            InternalType::ConstraintType(_) => None,
         }
     }
 }

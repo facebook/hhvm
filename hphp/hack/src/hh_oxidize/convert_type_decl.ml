@@ -184,21 +184,35 @@ let derived_traits ty =
          not (DeriveSkipLists.skip_derive ~ty ~trait))
   |> List.append (additional_derives ty)
 
-let denylisted_types =
-  [
-    ("aast_defs", "LocalIdMap");
-    ("aast_defs", "ByteString");
-    ("errors", "FinalizedError");
-    ("errors", "Marker");
-    ("errors", "MarkedMessage");
-    ("errors", "PositionGroup");
-    ("file_info", "FileInfo");
-    ("file_info", "Saved");
-    ("typing_defs", "ExpandEnv");
-    ("typing_defs", "PhaseTy");
-    ("typing_reason", "DeclPhase");
-    ("typing_reason", "LoclPhase");
-  ]
+let denylisted_types () =
+  (match Configuration.mode () with
+  | Configuration.ByRef ->
+    [
+      ("typing_defs_core", "CanIndex");
+      ("typing_defs_core", "CanTraverse");
+      ("typing_defs_core", "ConstraintType_");
+      ("typing_defs_core", "ConstraintType");
+      ("typing_defs_core", "Destructure");
+      ("typing_defs_core", "DestructureKind");
+      ("typing_defs_core", "HasMember");
+      ("typing_defs_core", "HasTypeMember");
+      ("typing_defs_core", "InternalType");
+    ]
+  | Configuration.ByBox -> [])
+  @ [
+      ("aast_defs", "LocalIdMap");
+      ("aast_defs", "ByteString");
+      ("errors", "FinalizedError");
+      ("errors", "Marker");
+      ("errors", "MarkedMessage");
+      ("errors", "PositionGroup");
+      ("file_info", "FileInfo");
+      ("file_info", "Saved");
+      ("typing_defs", "ExpandEnv");
+      ("typing_defs", "PhaseTy");
+      ("typing_reason", "DeclPhase");
+      ("typing_reason", "LoclPhase");
+    ]
 
 (* HACK: ignore anything beginning with the "decl" or "locl" prefix, since the
    oxidized version of Ty does not have a phase. *)
@@ -292,7 +306,7 @@ let should_add_rcoc ty =
 
 let denylisted ty_name =
   let ty = (curr_module_name (), ty_name) in
-  List.mem denylisted_types ty ~equal:equal_s2
+  List.mem (denylisted_types ()) ty ~equal:equal_s2
   || List.exists denylisted_type_prefixes ~f:(fun (mod_name, prefix) ->
          String.equal mod_name (curr_module_name ())
          && String.is_prefix ty_name ~prefix)

@@ -9,7 +9,6 @@ use std::ops::Deref;
 pub use constraint::Cstr;
 use hcons::Conser;
 use hcons::Hc;
-use pos::ToOxidized;
 
 use crate::local::Ty;
 use crate::local_error::TypingError;
@@ -89,27 +88,5 @@ impl<R: Reason> Prop<R> {
             PropF::Conj(ps) => ps.iter().any(|p| p.is_unsat()),
             PropF::Disj(_, ps) => ps.iter().all(|p| p.is_unsat()),
         }
-    }
-}
-
-impl<'a, R: Reason> ToOxidized<'a> for Prop<R> {
-    type Output = oxidized_by_ref::typing_logic::SubtypeProp<'a>;
-
-    fn to_oxidized(&self, bump: &'a bumpalo::Bump) -> Self::Output {
-        self.deref().to_oxidized(bump)
-    }
-}
-
-impl<'a, R: Reason> ToOxidized<'a> for PropF<R, Prop<R>> {
-    type Output = oxidized_by_ref::typing_logic::SubtypeProp<'a>;
-
-    fn to_oxidized(&self, bump: &'a bumpalo::Bump) -> Self::Output {
-        use oxidized_by_ref::typing_logic::SubtypeProp;
-        let prop = match self {
-            PropF::Conj(conjs) => SubtypeProp::Conj(conjs.to_oxidized(bump)),
-            PropF::Disj(..) => unimplemented!("{:?}", self),
-            PropF::Atom(_) => unimplemented!("{:?}", self),
-        };
-        prop
     }
 }

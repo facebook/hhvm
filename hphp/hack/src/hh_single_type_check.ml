@@ -57,7 +57,6 @@ type mode =
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
-  | Type
   | Check_tast
   | RewriteGlobalInference
   | Find_refs of int * int
@@ -457,9 +456,6 @@ let parse_options () =
       ("--outline", Arg.Unit (set_mode Outline), " Print file outline");
       ("--nast", Arg.Unit (set_mode Dump_nast), " Print out the named AST");
       ("--tast", Arg.Unit (set_mode Dump_tast), " Print out the typed AST");
-      ( "--type",
-        Arg.Unit (set_mode Type),
-        " Extract types from the typed AST and print one per line as JSON" );
       ("--tast-check", Arg.Unit (set_mode Check_tast), " Typecheck the tast");
       ( "--stripped-tast",
         Arg.Unit (set_mode Dump_stripped_tast),
@@ -871,7 +867,7 @@ let parse_options () =
   Arg.parse options (fun fn -> fn_ref := fn :: !fn_ref) usage;
   let fns =
     match (!fn_ref, !mode) with
-    | ([], (Get_member _ | Type)) -> []
+    | ([], Get_member _) -> []
     | ([], _) -> die usage
     | (x, _) -> x
   in
@@ -2448,32 +2444,6 @@ let handle_mode
     in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
-  | Type ->
-    let path_stream =
-      match filenames with
-      | [] ->
-        Stream.from (fun _ ->
-            try
-              Some
-                (let path = Caml.input_line Caml.stdin |> String.strip in
-                 Relative_path.(create Dummy path))
-            with
-            | End_of_file -> None)
-      | filenames -> Stream.of_list filenames
-    in
-    let process path =
-      let (errors, tasts, _gi_solved) =
-        compute_tasts_expand_types ctx ~verbosity files_info files_contents
-      in
-      let errors = Errors.get_error_list errors in
-      if (not (List.is_empty parse_errors)) || not (List.is_empty errors) then begin
-        List.iter ~f:(print_error error_format) (parse_errors @ errors);
-        exit 2
-      end else
-        let tast = Relative_path.Map.find tasts path in
-        Typing_preorder_ser.encode_tys_as_stdout_lines tast
-    in
-    Stream.iter process path_stream
   | Decl_compare ->
     let filename = expect_single_file () in
     (* Might raise because of Option.value_exn *)

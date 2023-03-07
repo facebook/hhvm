@@ -6186,7 +6186,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 if self.module.is_none() {
                     let name = self.module_name_string_from_parts(parts, pos);
                     let this = Rc::make_mut(&mut self.state);
-                    this.module = Some(oxidized_by_ref::ast::Id(pos, name));
+                    this.module = Some(Id(pos, name));
                 }
             }
             _ => {}

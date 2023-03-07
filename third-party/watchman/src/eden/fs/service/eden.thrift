@@ -690,6 +690,12 @@ const i64 DIS_COMPUTE_BLOB_SIZES = 8;
  */
 const i64 DIS_COMPUTE_ACCURATE_MODE = 16;
 
+/**
+ * Only return data for the passed in directory, do not attempt to recurse down
+ * to its childrens.
+ */
+const i64 DIS_NOT_RECURSIVE = 32;
+
 struct TreeInodeEntryDebugInfo {
   /**
    * The entry name.  This is just a PathComponent, not the full path

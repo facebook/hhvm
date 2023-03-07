@@ -1,0 +1,5 @@
+--inputs=hphp/test/quick/class_constants.d/class_constants-3.inc
+--inputs=hphp/test/quick/class_constants.d/class_constants-1.inc
+--inputs=hphp/test/quick/class_constants.d/class_constants-2.inc
+--inputs=hphp/test/quick/class_constants.d/class_constants-classes1.inc
+--inputs=hphp/test/quick/class_constants.d/class_constants-classes2.inc

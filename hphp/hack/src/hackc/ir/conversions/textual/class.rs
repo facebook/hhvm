@@ -317,14 +317,14 @@ impl ClassState<'_, '_, '_> {
         params: impl Iterator<Item = (&'s str, textual::Ty)>,
     ) -> Result {
         let strings = &self.unit_state.strings;
-        let name = ir::MethodId::from_str("__factory", strings).mangle_with_class(
+        let name = ir::MethodId::factory(strings).mangle_with_class(
             self.class.name,
             IsStatic::Static,
             strings,
         );
         let static_ty = static_ty(self.class.name, strings);
         let ty = non_static_ty(self.class.name, strings);
-        let cons_id = ir::MethodId::from_str("__construct", strings);
+        let cons_id = ir::MethodId::constructor(strings);
 
         let params = std::iter::once(("$this", static_ty))
             .chain(params)
@@ -378,12 +378,7 @@ impl ClassState<'_, '_, '_> {
             func
         };
 
-        if self.needs_factory
-            && self
-                .unit_state
-                .strings
-                .eq_str(method.name.id, "__construct")
-        {
+        if self.needs_factory && method.name.is_constructor(&self.unit_state.strings) {
             self.needs_factory = false;
 
             let (param_names, param_tys, _) =

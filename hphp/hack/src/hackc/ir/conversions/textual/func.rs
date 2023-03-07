@@ -286,7 +286,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             loc: _,
         }) => {
             let ty = class::non_static_ty(clsid, &state.strings).deref();
-            let cons = ir::MethodId::from_str("__construct", &state.strings).mangle_with_class(
+            let cons = ir::MethodId::constructor(&state.strings).mangle_with_class(
                 clsid,
                 IsStatic::NonStatic,
                 &state.strings,

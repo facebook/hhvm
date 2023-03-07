@@ -416,7 +416,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 },
             ) => {
                 let flavor = ObjMethodOp::NullThrows;
-                let method = MethodId::from_str("__construct", &builder.strings);
+                let method = MethodId::constructor(&builder.strings);
                 call.detail = CallDetail::FCallObjMethodD { flavor, method };
                 Instr::Call(Box::new(call))
             }
@@ -515,7 +515,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 builder.hack_builtin(Builtin::NewDict, &args, loc)
             }
             Instr::Hhbc(Hhbc::NewObj(cls, loc)) => {
-                let method = MethodId::from_str("__factory", &builder.strings);
+                let method = MethodId::factory(&builder.strings);
                 let operands = vec![cls].into_boxed_slice();
                 let context = UnitBytesId::NONE;
                 let flavor = ObjMethodOp::NullThrows;

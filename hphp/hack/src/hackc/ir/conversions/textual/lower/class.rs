@@ -38,7 +38,7 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
 }
 
 fn create_default_closure_constructor<'a>(class: &mut Class<'a>, strings: Arc<StringInterner>) {
-    let name = MethodId::from_str("__construct", &strings);
+    let name = MethodId::constructor(&strings);
 
     let func = FuncBuilder::build_func(Arc::clone(&strings), |fb| {
         let loc = fb.add_loc(class.src_loc.clone());

@@ -55,7 +55,22 @@ pub type ClassIdMap<T> = indexmap::map::IndexMap<ClassId, T, newtype::BuildIdHas
 
 interned_hhbc_id!(ConstId, ConstName);
 interned_hhbc_id!(FunctionId, FunctionName);
+
 interned_hhbc_id!(MethodId, MethodName);
+impl MethodId {
+    pub fn factory(strings: &StringInterner) -> Self {
+        Self::from_str("__factory", strings)
+    }
+
+    pub fn constructor(strings: &StringInterner) -> Self {
+        Self::from_str("__construct", strings)
+    }
+
+    pub fn is_constructor(&self, strings: &StringInterner) -> bool {
+        strings.eq_str(self.id, "__construct")
+    }
+}
+
 interned_hhbc_id!(PropId, PropName);
 
 // A BlockId represents a Block within a Func.

@@ -13,6 +13,8 @@ type package = {
 }
 [@@deriving eq, show]
 
+val get_package_name : package -> string
+
 val get_package_pos : package -> Pos.t
 
 val get_package_for_module : string -> package option

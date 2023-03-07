@@ -137,7 +137,7 @@
   glean_options
   server_local_config_knobs_stubs
   symbol_write_options
-  packages
+  package
   parser_options
   pos
   procs_bucket

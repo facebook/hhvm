@@ -37,7 +37,7 @@ type t = {
   backend: Provider_backend.t;
   deps_mode: Typing_deps_mode.t;
   entries: entries;
-  get_package_for_module: (string -> Packages.package_info option) option;
+  get_package_for_module: (string -> Package.package option) option;
 }
 
 let empty_for_tool ~popt ~tcopt ~backend ~deps_mode =
@@ -115,14 +115,12 @@ let get_popt (t : t) : ParserOptions.t = t.popt
 
 let get_tcopt (t : t) : TypecheckerOptions.t = t.tcopt
 
-let get_package_for_module (t : t) :
-    (string -> Packages.package_info option) option =
+let get_package_for_module (t : t) : (string -> Package.package option) option =
   t.get_package_for_module
 
 let ctx_with_get_package_for_module
-    (t : t)
-    (get_package_for_module : (string -> Packages.package_info option) option) :
-    t =
+    (t : t) (get_package_for_module : (string -> Package.package option) option)
+    : t =
   { t with get_package_for_module }
 
 let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =

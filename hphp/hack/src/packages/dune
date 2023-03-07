@@ -1,9 +1,0 @@
-(library
- (name packages)
- (modules packages)
- (libraries
-  annotated_ast
-  ast
-  collections)
- (preprocess
-  (pps ppx_deriving.std)))

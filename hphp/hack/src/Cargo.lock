@@ -3420,6 +3420,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "package_ocaml_ffi"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep",
+ "ocamlrep_ocamlpool",
+ "package",
+ "toml",
+]
+
+[[package]]
 name = "packedvec"
 version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -202,7 +202,7 @@
   logging
   naming_special_names
   nast_check
-  packages
+  package
   pcre
   procs_procs
   typing_common

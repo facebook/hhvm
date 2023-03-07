@@ -550,7 +550,7 @@ val is_consistent : env -> bool
 
 val mark_inconsistent : env -> env
 
-val get_package_for_module : env -> string -> Packages.package_info option
+val get_package_for_module : env -> string -> Package.package option
 
 (** Remove solved variable from environment by replacing it by its binding. *)
 val remove_var :

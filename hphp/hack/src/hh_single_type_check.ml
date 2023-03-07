@@ -2824,40 +2824,11 @@ let decl_and_run_mode
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
   in
   let get_package_for_module =
-    let module_to_package =
-      match packages_config_path with
-      | None -> SMap.empty
-      | Some path ->
-        let (_, pkg_ast) =
-          Relative_path.create_detect_prefix path
-          |> Ast_provider.get_ast_with_error ctx
-        in
-        List.fold pkg_ast ~init:SMap.empty ~f:(fun acc def ->
-            let open Aast in
-            match def with
-            | Package { pkg_uses = Some mds; pkg_name; pkg_includes; _ } ->
-              List.fold mds ~init:acc ~f:(fun acc md ->
-                  let pkg =
-                    Packages.{ pkg_name; pkg_includes; pkg_uses = mds }
-                  in
-                  SMap.add (module_name_kind_to_string md) pkg acc)
-            | _ -> acc)
-    in
-    fun md_name ->
-      let matching_pkgs =
-        SMap.filter
-          (fun md_prefix _ -> Str.string_match (Str.regexp md_prefix) md_name 0)
-          module_to_package
-      in
-      let sorted_pkgs =
-        List.sort
-          (SMap.elements matching_pkgs)
-          ~compare:(fun (md1, _) (md2, _) -> String.compare md1 md2)
-        |> List.rev
-      in
-      match sorted_pkgs with
-      | [] -> None
-      | (_, pkg) :: _ -> Some pkg
+    match packages_config_path with
+    | None -> (fun _ -> None)
+    | Some path ->
+      Package.initialize_packages_info path;
+      Package.get_package_for_module
   in
   let ctx =
     Provider_context.ctx_with_get_package_for_module

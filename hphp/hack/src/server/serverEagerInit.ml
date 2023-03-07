@@ -63,9 +63,8 @@ let init
       |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ()))
   in
 
-  (* Load and parse __PACKAGES__.php if it exists at the root.
-     TODO(milliechen): restart the server if __PACKAGES__.php changes. *)
-  let get_package_for_module = PackageConfig.load_and_parse env in
+  (* Load and parse packages.toml if it exists at the root. *)
+  let get_package_for_module = PackageConfig.load_and_parse () in
   let env = { env with get_package_for_module = Some get_package_for_module } in
 
   (* We don't support a saved state for eager init. *)

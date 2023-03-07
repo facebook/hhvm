@@ -1264,9 +1264,8 @@ let post_saved_state_initialization
       [Errors.Decl; Errors.Typing]
   in
 
-  (* Load and parse __PACKAGES__.php if it exists at the root.
-     TODO(milliechen): restart the server if __PACKAGES__.php changes. *)
-  let get_package_for_module = PackageConfig.load_and_parse env in
+  (* Load and parse packages.toml if it exists at the root. *)
+  let get_package_for_module = PackageConfig.load_and_parse () in
   let env = { env with get_package_for_module = Some get_package_for_module } in
 
   (* Parse and name all dirty files uniformly *)

@@ -6,7 +6,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "package_ocaml_ffi.rs"
+path = "../package_ocaml_ffi.rs"
 test = false
 doctest = false
 crate-type = ["lib", "staticlib"]
@@ -14,5 +14,5 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 ocamlrep_ocamlpool = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
-package = { version = "0.0.0", path = "../cargo" }
+package = { version = "0.0.0", path = "../../cargo" }
 toml = "=0.5.8"

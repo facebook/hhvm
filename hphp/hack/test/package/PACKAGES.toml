@@ -1,0 +1,12 @@
+[packages]
+
+[packages.pkg1]
+uses = ["a", "b.*"]
+
+[packages.pkg2]
+uses = ["b.b1"]
+includes = ["pkg1"]
+
+[packages.pkg3]
+uses = ["c"]
+includes = ["pkg2"]

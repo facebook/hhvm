@@ -106,15 +106,15 @@ let satisfies_package_deps env current target =
   | (None, None) -> None
   | (None, Some _) -> Some Pos.none
   | (Some current_pkg_info, None) ->
-    Some (Packages.get_package_pos current_pkg_info)
+    Some (Package.get_package_pos current_pkg_info)
   | (Some current_pkg_info, Some target_pkg_info) ->
     if
-      Packages.equal_package_info current_pkg_info target_pkg_info
-      || Packages.includes current_pkg_info target_pkg_info
+      Package.equal_package current_pkg_info target_pkg_info
+      || Package.includes current_pkg_info target_pkg_info
     then
       None
     else
-      Some (Packages.get_package_pos current_pkg_info)
+      Some (Package.get_package_pos current_pkg_info)
 
 let satisfies_pkg_rules env current target =
   match find_module_symbol env current with

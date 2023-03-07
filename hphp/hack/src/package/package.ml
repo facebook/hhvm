@@ -55,4 +55,6 @@ let get_package_for_module md =
 
 let get_package_pos _pkg = Pos.none
 
+let get_package_name pkg = pkg.name
+
 let includes pkg1 pkg2 = List.mem pkg2.name pkg1.includes

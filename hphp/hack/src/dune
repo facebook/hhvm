@@ -30,7 +30,7 @@
   hhi
   naming_ast_print
   memtrace
-  packages
+  package
   parent
   rust_provider_backend_stubs
   refactor_sd

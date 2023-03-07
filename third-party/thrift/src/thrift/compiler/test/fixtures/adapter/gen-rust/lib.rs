@@ -1274,7 +1274,7 @@ pub mod server {
     }
 
     struct Args_Service_func {
-        arg1: crate::types::StringWithAdapter,
+        arg1: <crate::types::StringWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
         arg2: ::std::string::String,
         arg3: crate::types::Foo,
     }

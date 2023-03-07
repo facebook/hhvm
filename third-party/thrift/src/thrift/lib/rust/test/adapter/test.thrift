@@ -30,6 +30,8 @@ typedef PassThroughAdaptedI64 DoubleAdaptedI64
 @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
 typedef DoubleAdaptedI64 TripleAdaptedI64
 
+typedef list<TripleAdaptedI64> NestedTripleAdaptedI64
+
 struct Foo {
   1: string str_val;
   2: i64 int_val;
@@ -51,6 +53,15 @@ struct Foo {
   11: DoubleAdaptedI64 double_adapted_i64 = 42;
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
   12: DoubleAdaptedI64 double_adapted_and_field_i64 = 2;
+  13: list<DoubleAdaptedI64> adapted_int_list = [1, 2, 3];
+  14: list<AdaptedString> adapted_string_list = ["hello", "world"];
+  15: list<list<list<AdaptedString>>> nested_adapted_string_list = [
+    [["hello", "world"]],
+  ];
+  16: map<string, list<list<NestedTripleAdaptedI64>>> nested_adapted_int_map = {
+    "hello": [[[1, 2, 3], [4, 5, 6]]],
+    "world": [[[7, 8, 9]]],
+  };
 }
 
 union Bar {

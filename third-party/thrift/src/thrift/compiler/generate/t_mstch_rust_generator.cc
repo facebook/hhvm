@@ -321,6 +321,38 @@ bool node_has_adapter(const t_named& node) {
   return find_structured_adapter_annotation(node) != nullptr;
 }
 
+bool type_has_transitive_adapter(const t_type* type) {
+  if (type->is_typedef()) {
+    auto typedef_type = dynamic_cast<const t_typedef*>(type);
+    if (typedef_type) {
+      // Currently the only "type" that can have an adapter is a typedef.
+      if (node_has_adapter(*typedef_type)) {
+        return true;
+      }
+
+      return type_has_transitive_adapter(typedef_type->get_type());
+    }
+  } else if (type->is_list()) {
+    auto list_type = dynamic_cast<const t_list*>(type);
+    if (list_type) {
+      return type_has_transitive_adapter(list_type->get_elem_type());
+    }
+  } else if (type->is_set()) {
+    auto set_type = dynamic_cast<const t_set*>(type);
+    if (set_type) {
+      return type_has_transitive_adapter(set_type->get_elem_type());
+    }
+  } else if (type->is_map()) {
+    auto map_type = dynamic_cast<const t_map*>(type);
+    if (map_type) {
+      return type_has_transitive_adapter(map_type->get_key_type()) ||
+          type_has_transitive_adapter(map_type->get_val_type());
+    }
+  }
+
+  return false;
+}
+
 bool node_has_custom_rust_type(const t_named& node) {
   return node.has_annotation("rust.type") ||
       node.has_annotation("rust.newtype");
@@ -346,7 +378,7 @@ const std::string typedef_rust_name(const t_typedef* t) {
 }
 
 const std::string transitive_typedef_adapter_name(const t_typedef* t) {
-  return fmt::format("{}_INTERNAL_TYPEDEF_ADAPTER", typedef_rust_name(t));
+  return fmt::format("{}TypedefThriftAdapter", typedef_rust_name(t));
 }
 
 mstch::node adapter_node(
@@ -355,8 +387,7 @@ mstch::node adapter_node(
     const t_type* type,
     mstch_context& context,
     mstch_element_position pos) {
-  // Step through typedefs until we find one with an adapter.
-  const t_typedef* typedef_with_transitive_adapter = nullptr;
+  // Step through typedefs.
   const t_type* curr_type = type;
   while (curr_type->is_typedef()) {
     auto typedef_type = dynamic_cast<const t_typedef*>(curr_type);
@@ -365,43 +396,57 @@ mstch::node adapter_node(
     }
 
     if (node_has_adapter(*typedef_type)) {
-      typedef_with_transitive_adapter = typedef_type;
       break;
     }
 
     curr_type = typedef_type->get_type();
   }
 
-  if (!adapter_annotation && !typedef_with_transitive_adapter) {
+  const t_type* transitive_type = nullptr;
+
+  if (type_has_transitive_adapter(curr_type)) {
+    transitive_type = curr_type;
+  }
+
+  if (!adapter_annotation && !transitive_type) {
     return false;
   }
 
-  auto name = adapter_annotation != nullptr
-      ? get_annotation_property(adapter_annotation, "name")
-      : transitive_typedef_adapter_name(typedef_with_transitive_adapter);
+  mstch::node name;
+  bool is_generic = false;
+  if (adapter_annotation != nullptr) {
+    auto adapter_name = get_annotation_property(adapter_annotation, "name");
 
-  bool is_generic = boost::algorithm::ends_with(name, "<>");
-  if (is_generic) {
-    name = name.substr(0, name.length() - 2);
+    is_generic = boost::algorithm::ends_with(adapter_name, "<>");
+    if (is_generic) {
+      adapter_name = adapter_name.substr(0, adapter_name.length() - 2);
+    }
+
+    name = adapter_name;
   }
 
-  auto mtype = context.type_factory->make_mstch_object(type, context, pos);
+  bool layered = adapter_annotation != nullptr && transitive_type != nullptr;
+  bool transitive_only =
+      adapter_annotation == nullptr && transitive_type != nullptr;
 
-  mstch::node layered;
-  if (adapter_annotation != nullptr &&
-      typedef_with_transitive_adapter != nullptr) {
-    layered = transitive_typedef_adapter_name(typedef_with_transitive_adapter);
+  auto underlying_type =
+      context.type_factory->make_mstch_object(type, context, pos);
+
+  mstch::node transitive_type_node;
+  if (transitive_type) {
+    transitive_type_node =
+        context.type_factory->make_mstch_object(transitive_type, context, pos);
   }
-
-  bool transitive_only = adapter_annotation == nullptr &&
-      typedef_with_transitive_adapter != nullptr;
 
   mstch::map node{
-      {"adapter:name", name},
+      // Only populated if this adapter node was generated from a typedef
+      // or a field with an adapter.
+      {"adapter:name?", name},
       {"adapter:is_generic?", is_generic},
-      {"adapter:type", mtype},
+      {"adapter:underlying_type", underlying_type},
       {"adapter:layered?", layered},
       {"adapter:transitive_only?", transitive_only},
+      {"adapter:transitive_type?", transitive_type_node},
   };
 
   return node;

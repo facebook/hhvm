@@ -50,6 +50,28 @@ fn test_foo_default() {
             default_foo.double_adapted_and_field_i64,
             NonZeroI64::new(2).unwrap()
         );
+        assert_eq!(
+            default_foo.adapted_int_list,
+            vec![
+                NonZeroI64::new(1).unwrap(),
+                NonZeroI64::new(2).unwrap(),
+                NonZeroI64::new(3).unwrap()
+            ]
+        );
+        assert_eq!(
+            default_foo.adapted_string_list,
+            vec![
+                CustomString("hello".to_string()),
+                CustomString("world".to_string()),
+            ]
+        );
+        assert_eq!(
+            default_foo.nested_adapted_string_list,
+            vec![vec![vec![
+                CustomString("hello".to_string()),
+                CustomString("world".to_string()),
+            ]]]
+        );
 
         assert_eq!(
             r#"{
@@ -63,7 +85,14 @@ fn test_foo_default() {
           "ident_field": "",
           "typedef_str_val": "",
           "double_adapted_i64": 42,
-          "double_adapted_and_field_i64": 2
+          "double_adapted_and_field_i64": 2,
+          "adapted_int_list": [1, 2, 3],
+          "adapted_string_list": ["hello", "world"],
+          "nested_adapted_string_list": [[["hello", "world"]]],
+          "nested_adapted_int_map": {
+            "hello": [[[1, 2, 3], [4, 5, 6]]],
+            "world": [[[7, 8, 9]]]
+          }
         }"#
             .replace(['\n', ' '], ""),
             String::from_utf8(simplejson_protocol::serialize(default_foo).into()).unwrap()
@@ -149,6 +178,9 @@ fn test_foo_ser() {
         typedef_str_val: CustomString("haskell".to_string()),
         double_adapted_i64: NonZeroI64::new(13).unwrap(),
         double_adapted_and_field_i64: NonZeroI64::new(14).unwrap(),
+        adapted_int_list: vec![NonZeroI64::new(15).unwrap()],
+        adapted_string_list: vec![CustomString("java".to_string())],
+        nested_adapted_string_list: vec![vec![vec![CustomString("ada".to_string())]]],
         ..Default::default()
     };
 
@@ -165,7 +197,14 @@ fn test_foo_ser() {
           "ident_field": "foobar",
           "typedef_str_val": "haskell",
           "double_adapted_i64": 13,
-          "double_adapted_and_field_i64": 14
+          "double_adapted_and_field_i64": 14,
+          "adapted_int_list": [15],
+          "adapted_string_list": ["java"],
+          "nested_adapted_string_list": [[["ada"]]],
+          "nested_adapted_int_map": {
+            "hello": [[[1, 2, 3], [4, 5, 6]]],
+            "world": [[[7, 8, 9]]]
+          }
         }"#
         .replace(['\n', ' '], ""),
         std::string::String::from_utf8(simplejson_protocol::serialize(foo).into()).unwrap()

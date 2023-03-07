@@ -22,11 +22,11 @@
 }}{{^typedef:newtype?}}
 pub type {{typedef:rust_name}} = {{!
   }}{{#typedef:has_adapter?}}{{!
+    }}{{#adapter:transitive_only?}}{{!
+    }}{{#adapter:underlying_type}}{{>lib/type}}{{/adapter:underlying_type}}{{!
+    }}{{/adapter:transitive_only?}}{{!
     }}{{^adapter:transitive_only?}}{{!
     }}{{>lib/adapter/qualified}}::AdaptedType{{!
-    }}{{/adapter:transitive_only?}}{{!
-    }}{{#adapter:transitive_only?}}{{!
-    }}{{#typedef:type}}{{>lib/type}}{{/typedef:type}}{{!
     }}{{/adapter:transitive_only?}}{{!
   }}{{/typedef:has_adapter?}}{{!
   }}{{^typedef:has_adapter?}}{{!

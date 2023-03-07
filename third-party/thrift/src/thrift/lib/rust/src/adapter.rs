@@ -15,6 +15,8 @@
  */
 
 use std::any::TypeId;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
@@ -94,6 +96,9 @@ pub trait ThriftAdapter {
         })
     }
 }
+
+// NOTE: we define where bounds on the structs themselves here to improve error messaging during
+// the Thrift compilation process.
 
 //// Layers multiple [ThriftTypeAdapter] together. Used when multiple Thrift typedefs with adapters
 //// are layered on each other.
@@ -175,6 +180,275 @@ where
             field_id,
             strct,
         )
+    }
+}
+
+/// Transforms the given adapter `A` into an adapter with the signature `Vec<OriginalType>`
+/// -> `Vec<AdaptedType>`. Because Rust doesn't have HKT, we cannot make this "generic" over
+/// multiple collection types.
+pub struct ListMapAdapter<A>
+where
+    A: ThriftAdapter,
+{
+    _inner_adapter: PhantomData<A>,
+}
+
+impl<A> ThriftAdapter for ListMapAdapter<A>
+where
+    A: ThriftAdapter,
+{
+    type OriginalType = Vec<A::OriginalType>;
+    type AdaptedType = Vec<A::AdaptedType>;
+
+    type Error = A::Error;
+
+    #[inline]
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|elem| A::from_original(elem))
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        value.iter().map(|elem| A::to_original(elem)).collect()
+    }
+
+    #[inline]
+    fn from_thrift_field(
+        value: Self::OriginalType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift_field(elem, field_id, strct))
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift_field(
+        value: &Self::AdaptedType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Self::OriginalType {
+        value
+            .iter()
+            .map(|elem| A::to_thrift_field(elem, field_id, strct))
+            .collect()
+    }
+
+    #[inline]
+    fn from_thrift_default(
+        value: Self::OriginalType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Self::AdaptedType {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift_default(elem, field_id, strct))
+            .collect()
+    }
+}
+
+/// Transforms the given adapter `A` into an adapter with the signature `BTreeSet<OriginalType>`
+/// -> `BTreeSet<AdaptedType>`. Because Rust doesn't have HKT, we cannot make this "generic" over
+/// multiple collection types.
+pub struct SetMapAdapter<A>
+where
+    A: ThriftAdapter,
+    A::OriginalType: Ord + PartialEq,
+    A::AdaptedType: Ord + PartialEq,
+{
+    _inner_adapter: PhantomData<A>,
+}
+
+impl<A> ThriftAdapter for SetMapAdapter<A>
+where
+    A: ThriftAdapter,
+    A::OriginalType: Ord + PartialEq,
+    A::AdaptedType: Ord + PartialEq,
+{
+    type OriginalType = BTreeSet<A::OriginalType>;
+    type AdaptedType = BTreeSet<A::AdaptedType>;
+
+    type Error = A::Error;
+
+    #[inline]
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|elem| A::from_original(elem))
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        value.iter().map(|elem| A::to_original(elem)).collect()
+    }
+
+    #[inline]
+    fn from_thrift_field(
+        value: Self::OriginalType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift_field(elem, field_id, strct))
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift_field(
+        value: &Self::AdaptedType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Self::OriginalType {
+        value
+            .iter()
+            .map(|elem| A::to_thrift_field(elem, field_id, strct))
+            .collect()
+    }
+
+    #[inline]
+    fn from_thrift_default(
+        value: Self::OriginalType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Self::AdaptedType {
+        value
+            .into_iter()
+            .map(|elem| A::from_thrift_default(elem, field_id, strct))
+            .collect()
+    }
+}
+
+/// Transforms the given adapter `KA` and `KV` into an adapter with the signature
+/// `BTreeMap<KA::OriginalType, KV::OriginalType>` -> `BTreeMap<KA::AdaptedType, KV::AdaptedType>`.
+/// Because Rust doesn't have HKT, we cannot make this "generic" over multiple collection types.
+pub struct MapMapAdapter<KA, KV>
+where
+    KA: ThriftAdapter,
+    KV: ThriftAdapter,
+    KA::OriginalType: Ord + PartialEq,
+    KA::AdaptedType: Ord + PartialEq,
+{
+    _inner_key_adapter: PhantomData<KA>,
+    _inner_val_adapter: PhantomData<KV>,
+}
+
+impl<KA, KV> ThriftAdapter for MapMapAdapter<KA, KV>
+where
+    KA: ThriftAdapter,
+    KV: ThriftAdapter,
+    KA::OriginalType: Ord + PartialEq,
+    KA::AdaptedType: Ord + PartialEq,
+{
+    type OriginalType = BTreeMap<KA::OriginalType, KV::OriginalType>;
+    type AdaptedType = BTreeMap<KA::AdaptedType, KV::AdaptedType>;
+
+    type Error = anyhow::Error;
+
+    #[inline]
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|(key, val)| {
+                Ok((
+                    KA::from_original(key).map_err(Into::<anyhow::Error>::into)?,
+                    KV::from_original(val).map_err(Into::<anyhow::Error>::into)?,
+                ))
+            })
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        value
+            .iter()
+            .map(|(key, val)| (KA::to_original(key), KV::to_original(val)))
+            .collect::<Self::OriginalType>()
+    }
+
+    #[inline]
+    fn from_thrift_field(
+        value: Self::OriginalType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Result<Self::AdaptedType, Self::Error> {
+        value
+            .into_iter()
+            .map(|(key, val)| {
+                Ok((
+                    KA::from_thrift_field(key, field_id, strct)
+                        .map_err(Into::<anyhow::Error>::into)?,
+                    KV::from_thrift_field(val, field_id, strct)
+                        .map_err(Into::<anyhow::Error>::into)?,
+                ))
+            })
+            .collect::<Result<Self::AdaptedType, Self::Error>>()
+    }
+
+    #[inline]
+    fn to_thrift_field(
+        value: &Self::AdaptedType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Self::OriginalType {
+        value
+            .iter()
+            .map(|(key, val)| {
+                (
+                    KA::to_thrift_field(key, field_id, strct),
+                    KV::to_thrift_field(val, field_id, strct),
+                )
+            })
+            .collect::<Self::OriginalType>()
+    }
+
+    #[inline]
+    fn from_thrift_default(
+        value: Self::OriginalType,
+        field_id: i16,
+        strct: TypeId,
+    ) -> Self::AdaptedType {
+        value
+            .into_iter()
+            .map(|(key, val)| {
+                (
+                    KA::from_thrift_default(key, field_id, strct),
+                    KV::from_thrift_default(val, field_id, strct),
+                )
+            })
+            .collect::<Self::AdaptedType>()
+    }
+}
+
+/// No-op adapter. Used if the key of a map is an adapted type, but the value isn't, or vice versa.
+pub struct IdentityAdapter<T>
+where
+    T: Clone + Debug + Send + Sync + PartialEq,
+{
+    _inner: PhantomData<T>,
+}
+
+impl<T> ThriftAdapter for IdentityAdapter<T>
+where
+    T: Clone + Debug + Send + Sync + PartialEq,
+{
+    type OriginalType = T;
+    type AdaptedType = T;
+
+    type Error = std::convert::Infallible;
+
+    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        Ok(value)
+    }
+
+    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        value.clone()
     }
 }
 

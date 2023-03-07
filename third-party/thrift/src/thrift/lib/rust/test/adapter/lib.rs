@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::num::NonZeroI64;
 
 use fbthrift::adapter::ThriftTypeAdapter;
@@ -79,5 +81,30 @@ impl ThriftTypeAdapter for ListAdapter {
 
     fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
         value.0.clone()
+    }
+}
+
+pub struct IdentityAdapter<T>
+where
+    T: Clone + Debug + Send + Sync + PartialEq,
+{
+    inner: PhantomData<T>,
+}
+
+impl<T> ThriftTypeAdapter for IdentityAdapter<T>
+where
+    T: Clone + Debug + Send + Sync + PartialEq,
+{
+    type ThriftType = T;
+    type AdaptedType = T;
+
+    type Error = std::convert::Infallible;
+
+    fn from_thrift(value: Self::ThriftType) -> Result<Self::AdaptedType, Self::Error> {
+        Ok(value)
+    }
+
+    fn to_thrift(value: &Self::AdaptedType) -> Self::ThriftType {
+        value.clone()
     }
 }

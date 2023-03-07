@@ -1377,6 +1377,7 @@ class rust_mstch_field : public mstch_field {
             {"field:docs?", &rust_mstch_field::rust_has_docs},
             {"field:docs", &rust_mstch_field::rust_docs},
             {"field:has_adapter?", &rust_mstch_field::has_adapter},
+            {"field:generic_adapter?", &rust_mstch_field::generic_adapter},
             {"field:adapter_name", &rust_mstch_field::adapter_name},
         });
   }
@@ -1408,8 +1409,19 @@ class rust_mstch_field : public mstch_field {
   mstch::node rust_has_docs() { return field_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(field_); }
   mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
+  mstch::node generic_adapter() {
+    auto name = get_annotation_property(adapter_annotation_, "name");
+
+    return boost::algorithm::ends_with(name, "<>");
+  }
   mstch::node adapter_name() {
-    return get_annotation_property(adapter_annotation_, "name");
+    auto name = get_annotation_property(adapter_annotation_, "name");
+
+    if (boost::algorithm::ends_with(name, "<>")) {
+      return name.substr(0, name.length() - 2);
+    }
+
+    return name;
   }
 
  private:

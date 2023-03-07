@@ -2769,7 +2769,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
             ),
             '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
               shape(
-                "name" => "::my::Adapter1",
+                "name" => "::my::Adapter1<>",
               )
             ),
           ],
@@ -2800,6 +2800,11 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
             '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
               shape(
                 "type" => \thrift\annotation\cpp\RefType::Shared,
+              )
+            ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter1<>",
               )
             ),
           ],

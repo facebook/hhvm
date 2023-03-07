@@ -50,12 +50,13 @@ struct Adapter {
   // to the Thrift library's `rust_deps`. Alternatively, you define the adapter in a file added to the
   // Thrift library's `rust_include_srcs`, and use the `crate::` prefix in your adapter name.
   //
-  // If `TType` is present as a generic parameter, we will replace that in with the original Thrift type.
+  // If `<>` is present at the end of the name, we will treat the name as a generic and fill it in with
+  // the original unadapted type.
   // For example:
   // ```
   // struct Foo {
   //   @rust.Adapter{
-  //    name = "fbthrift_adapters::DurationSecondsAdapter<TType>"
+  //    name = "fbthrift_adapters::DurationSecondsAdapter<>"
   //   }
   //   1: i64 duration_secs;
   // }

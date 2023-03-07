@@ -144,9 +144,9 @@ pub struct IndependentDirectlyAdapted {
 
 #[derive(Clone, PartialEq)]
 pub struct StructWithFieldAdapter {
-    pub field: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
+    pub field: <::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType,
     pub shared_field: ::std::primitive::i32,
-    pub opt_shared_field: ::std::option::Option<::std::primitive::i32>,
+    pub opt_shared_field: ::std::option::Option<<::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::AdaptedType>,
     pub opt_boxed_field: ::std::option::Option<::std::boxed::Box<::std::primitive::i32>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -1399,7 +1399,7 @@ where
 impl ::std::default::Default for self::StructWithFieldAdapter {
     fn default() -> Self {
         Self {
-            field: <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()),
+            field: <::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()),
             shared_field: ::std::default::Default::default(),
             opt_shared_field: ::std::option::Option::None,
             opt_boxed_field: ::std::option::Option::None,
@@ -1441,14 +1441,14 @@ where
     fn write(&self, p: &mut P) {
         p.write_struct_begin("StructWithFieldAdapter");
         p.write_field_begin("field", ::fbthrift::TType::I32, 1);
-        ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.field, 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()), p);
+        ::fbthrift::Serialize::write(&<::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(&self.field, 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()), p);
         p.write_field_end();
         p.write_field_begin("shared_field", ::fbthrift::TType::I32, 2);
         ::fbthrift::Serialize::write(&self.shared_field, p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.opt_shared_field {
             p.write_field_begin("opt_shared_field", ::fbthrift::TType::I32, 3);
-            ::fbthrift::Serialize::write(some, p);
+            ::fbthrift::Serialize::write(&<::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::to_thrift_field(some, 3, ::std::any::TypeId::of::<self::StructWithFieldAdapter>()), p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.opt_boxed_field {
@@ -1481,9 +1481,9 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::I32, 1) => field_field = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())?),
+                (::fbthrift::TType::I32, 1) => field_field = ::std::option::Option::Some(<::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())?),
                 (::fbthrift::TType::I32, 2) => field_shared_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 3) => field_opt_shared_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 3) => field_opt_shared_field = ::std::option::Option::Some(<::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 3, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())?),
                 (::fbthrift::TType::I32, 4) => field_opt_boxed_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
@@ -1491,7 +1491,7 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
-            field: field_field.unwrap_or_else(|| <::my::Adapter1 as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())),
+            field: field_field.unwrap_or_else(|| <::my::Adapter1<::std::primitive::i32> as ::fbthrift::adapter::ThriftTypeAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::StructWithFieldAdapter>())),
             shared_field: field_shared_field.unwrap_or_default(),
             opt_shared_field: field_opt_shared_field,
             opt_boxed_field: field_opt_boxed_field,

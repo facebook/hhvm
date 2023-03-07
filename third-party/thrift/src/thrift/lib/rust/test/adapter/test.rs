@@ -52,7 +52,8 @@ fn test_foo_default() {
           "str_val_adapted_default": "hello",
           "validated_int_val": 1,
           "list_val": ["ispum", "lorem"],
-          "field_checked": ""
+          "field_checked": "",
+          "ident_field": ""
         }"#
             .replace(['\n', ' '], ""),
             String::from_utf8(simplejson_protocol::serialize(default_foo).into()).unwrap()
@@ -129,6 +130,7 @@ fn test_foo_ser() {
             "there".to_string(),
             "zzz".to_string(),
         ]),
+        ident_field: "foobar".to_string(),
         ..Default::default()
     };
 
@@ -141,7 +143,8 @@ fn test_foo_ser() {
           "str_val_adapted_optional": "golang",
           "validated_int_val": 42,
           "list_val": ["hi", "there", "zzz"],
-          "field_checked": ""
+          "field_checked": "",
+          "ident_field": "foobar"
         }"#
         .replace(['\n', ' '], ""),
         std::string::String::from_utf8(simplejson_protocol::serialize(foo).into()).unwrap()

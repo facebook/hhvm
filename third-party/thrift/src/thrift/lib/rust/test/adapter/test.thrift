@@ -31,6 +31,8 @@ struct Foo {
   7: list<string> list_val = ["lorem", "ispum"];
   @rust.Adapter{name = "crate::FieldCheckerAdapter"}
   8: string field_checked;
+  @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+  9: string ident_field;
 }
 
 union Bar {

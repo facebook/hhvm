@@ -162,13 +162,14 @@ struct IndependentDirectlyAdapted {
 struct StructWithFieldAdapter {
   @cpp.Adapter{name = "::my::Adapter1"}
   @python.Adapter{name = "my.Adapter1", typeHint = "my.AdaptedType1"}
-  @rust.Adapter{name = "::my::Adapter1"}
+  @rust.Adapter{name = "::my::Adapter1<>"}
   1: i32 field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @cpp.Ref{type = cpp.RefType.Shared}
   2: i32 shared_field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @cpp.Ref{type = cpp.RefType.Shared}
+  @rust.Adapter{name = "::my::Adapter1<>"}
   3: optional i32 opt_shared_field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.Box

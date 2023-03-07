@@ -101,6 +101,18 @@ struct ResourceData : public PeriodicStatsDataBase {
     return usedMemBytesAll_;
   }
 
+  [[nodiscard]] double getMemPressureAvg10Pct() const {
+    return memPressureAvg10Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureAvg60Pct() const {
+    return memPressureAvg60Pct_;
+  }
+
+  [[nodiscard]] double getMemPressureAvg300Pct() const {
+    return memPressureAvg300Pct_;
+  }
+
   // Gets the total memory of the system in bytes
   uint64_t getTotalMemBytes() const {
     return totalMemBytes_;
@@ -264,6 +276,12 @@ struct ResourceData : public PeriodicStatsDataBase {
     totalMemBytes_ = totalMemBytes;
   }
 
+  void setMemPressureStats(double avg10, double avg60, double avg300) {
+    memPressureAvg10Pct_ = avg10;
+    memPressureAvg60Pct_ = avg60;
+    memPressureAvg300Pct_ = avg300;
+  }
+
   /**
    * Sets the structure fields describing TCP memory state.
    */
@@ -316,6 +334,11 @@ struct ResourceData : public PeriodicStatsDataBase {
   uint64_t maxUdpMemLimit_{0};
   uint64_t pressureUdpMemLimit_{0};
   uint64_t minUdpMemLimit_{0};
+
+  // Pressure metrics (experimental)
+  double memPressureAvg10Pct_{0};
+  double memPressureAvg60Pct_{0};
+  double memPressureAvg300Pct_{0};
 };
 
 /**

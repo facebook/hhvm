@@ -146,8 +146,8 @@ void BootStats::done() {
     for (auto const& strCol : s_instance->m_strs) {
       cols.setStr(strCol.first, strCol.second);
     }
-    for (auto const& intCol : s_instance->m_strs) {
-      cols.setStr(intCol.first, intCol.second);
+    for (auto const& intCol : s_instance->m_ints) {
+      cols.setInt(intCol.first, intCol.second);
     }
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();

@@ -595,10 +595,12 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_TAST_HOLES_BATCH (file : string) ->
       let files =
-        Sys_utils.read_file file
+        expand_path file
+        |> Sys_utils.read_file
         |> Bytes.to_string
         |> String.strip
         |> String.split ~on:'\n'
+        |> List.map ~f:expand_path
       in
       let%lwt (holes, telemetry) = rpc args @@ Rpc.TAST_HOLES_BATCH files in
       ClientTastHoles.go holes ~print_file:true args.output_json;

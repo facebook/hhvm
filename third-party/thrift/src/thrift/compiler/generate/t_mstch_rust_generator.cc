@@ -31,6 +31,8 @@
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/lib/uri.h>
 
+// TODO(emersonford): should be `pub use` the type of an adapted typed?
+
 using namespace std;
 
 namespace apache {
@@ -308,6 +310,23 @@ FieldKind field_kind(const t_named& node) {
 // into the generated crate.
 bool has_nonstandard_type_annotation(const t_type* type) {
   return type->get_annotation("rust.type").find("::") != string::npos;
+}
+
+const t_const* find_structured_adapter_annotation(const t_named& node) {
+  return node.find_structured_annotation_or_null(
+      "facebook.com/thrift/annotation/rust/Adapter");
+}
+
+const std::string get_annotation_property(
+    const t_const* annotation, const std::string& key) {
+  if (annotation) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == key) {
+        return item.second->get_string();
+      }
+    }
+  }
+  return "";
 }
 
 class t_mstch_rust_generator : public t_mstch_generator {
@@ -1338,7 +1357,9 @@ class rust_mstch_field : public mstch_field {
       mstch_element_position pos,
       const field_generator_context* field_context,
       const rust_codegen_options* options)
-      : mstch_field(field, ctx, pos, field_context), options_(*options) {
+      : mstch_field(field, ctx, pos, field_context),
+        options_(*options),
+        adapter_annotation_(find_structured_adapter_annotation(*field)) {
     register_methods(
         this,
         {
@@ -1350,6 +1371,8 @@ class rust_mstch_field : public mstch_field {
             {"field:arc?", &rust_mstch_field::rust_is_arc},
             {"field:docs?", &rust_mstch_field::rust_has_docs},
             {"field:docs", &rust_mstch_field::rust_docs},
+            {"field:has_adapter?", &rust_mstch_field::has_adapter},
+            {"field:adapter_name", &rust_mstch_field::adapter_name},
         });
   }
   mstch::node rust_name() {
@@ -1379,9 +1402,14 @@ class rust_mstch_field : public mstch_field {
   mstch::node rust_is_arc() { return field_kind(*field_) == FieldKind::Arc; }
   mstch::node rust_has_docs() { return field_->has_doc(); }
   mstch::node rust_docs() { return quoted_rust_doc(field_); }
+  mstch::node has_adapter() { return adapter_annotation_ != nullptr; }
+  mstch::node adapter_name() {
+    return get_annotation_property(adapter_annotation_, "name");
+  }
 
  private:
   const rust_codegen_options& options_;
+  const t_const* adapter_annotation_;
 };
 
 class rust_mstch_typedef : public mstch_typedef {

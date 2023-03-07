@@ -14,6 +14,7 @@
 #include "thrift/annotation/gen-cpp2/thrift_types.h"
 #include "thrift/annotation/gen-cpp2/scope_types.h"
 #include "thrift/annotation/gen-cpp2/hack_types.h"
+#include "thrift/annotation/gen-cpp2/rust_types.h"
 #include "adapter_dependency.h"
 
 namespace apache {

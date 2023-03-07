@@ -23,6 +23,7 @@ include "thrift/annotation/python.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/scope.thrift"
 include "thrift/annotation/hack.thrift"
+include "thrift/annotation/rust.thrift"
 
 @thrift.Experimental
 package "facebook.com/thrift/test"
@@ -157,6 +158,7 @@ struct IndependentDirectlyAdapted {
 struct StructWithFieldAdapter {
   @cpp.Adapter{name = "::my::Adapter1"}
   @python.Adapter{name = "my.Adapter1", typeHint = "my.AdaptedType1"}
+  @rust.Adapter{name = "my::Adapter1"}
   1: i32 field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @cpp.Ref{type = cpp.RefType.Shared}

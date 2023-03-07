@@ -83,6 +83,7 @@ pub mod dependencies {
     pub use thrift as thrift;
     pub use scope as scope;
     pub use hack as hack;
+    pub use rust as rust;
 }
 
 pub mod services {

@@ -15,6 +15,7 @@ import (
 	thrift2 "thrift/annotation/thrift"
 	scope3 "thrift/annotation/scope"
 	hack4 "thrift/annotation/hack"
+	rust5 "thrift/annotation/rust"
 
 )
 
@@ -30,6 +31,7 @@ var _ = python1.GoUnusedProtection__
 var _ = thrift2.GoUnusedProtection__
 var _ = scope3.GoUnusedProtection__
 var _ = hack4.GoUnusedProtection__
+var _ = rust5.GoUnusedProtection__
 type AdapterService interface {
   Count() (_r *CountingStruct, err error)
   // Parameters:
@@ -262,12 +264,12 @@ func (p *AdapterServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewAdapterServiceProcessor(handler AdapterService) *AdapterServiceProcessor {
-  self31 := &AdapterServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self31.processorMap["count"] = &adapterServiceProcessorCount{handler:handler}
-  self31.processorMap["adaptedTypes"] = &adapterServiceProcessorAdaptedTypes{handler:handler}
-  self31.functionServiceMap["count"] = "AdapterService"
-  self31.functionServiceMap["adaptedTypes"] = "AdapterService"
-  return self31
+  self32 := &AdapterServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self32.processorMap["count"] = &adapterServiceProcessorCount{handler:handler}
+  self32.processorMap["adaptedTypes"] = &adapterServiceProcessorAdaptedTypes{handler:handler}
+  self32.functionServiceMap["count"] = "AdapterService"
+  self32.functionServiceMap["adaptedTypes"] = "AdapterService"
+  return self32
 }
 
 type adapterServiceProcessorCount struct {

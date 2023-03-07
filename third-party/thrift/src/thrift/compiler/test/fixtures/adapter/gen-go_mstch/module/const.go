@@ -9,6 +9,7 @@ import (
   thrift0 "thrift/annotation/thrift"
   scope "thrift/annotation/scope"
   hack "thrift/annotation/hack"
+  rust "thrift/annotation/rust"
   "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
@@ -17,6 +18,7 @@ var _ = python.GoUnusedProtection__
 var _ = thrift0.GoUnusedProtection__
 var _ = scope.GoUnusedProtection__
 var _ = hack.GoUnusedProtection__
+var _ = rust.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
 

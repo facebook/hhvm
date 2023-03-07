@@ -19,6 +19,7 @@ import thrift.annotation.python.ttypes
 import thrift.annotation.thrift.ttypes
 import thrift.annotation.scope.ttypes
 import thrift.annotation.hack.ttypes
+import thrift.annotation.rust.ttypes
 import ::my
 import my
 

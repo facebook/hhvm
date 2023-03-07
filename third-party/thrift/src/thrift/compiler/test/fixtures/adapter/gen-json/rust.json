@@ -1,0 +1,43 @@
+{
+  "__fbthrift": {"@generated": 0},
+  "thrift_module" : "rust",
+  "includes": {
+    "scope" : {
+      "path" : "thrift/annotation/scope.thrift"
+    }
+  },
+  "structs" : {
+    "Adapter" : {
+      "lineno" : 26,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 64,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 64,
+              "column" : 18
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 26,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 65,
+          "column" : 63
+        }
+      }
+    }
+  }
+}

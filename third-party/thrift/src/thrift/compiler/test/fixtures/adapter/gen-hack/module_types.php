@@ -2747,6 +2747,11 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
                 "typeHint" => "my.AdaptedType1",
               )
             ),
+            '\thrift\annotation\rust\Adapter' => \thrift\annotation\rust\Adapter::fromShape(
+              shape(
+                "name" => "my::Adapter1",
+              )
+            ),
           ],
           'type' => dict[],
         ),

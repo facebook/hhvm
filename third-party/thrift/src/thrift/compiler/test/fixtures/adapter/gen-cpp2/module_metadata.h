@@ -15,6 +15,7 @@
 #include "thrift/annotation/gen-cpp2/thrift_metadata.h"
 #include "thrift/annotation/gen-cpp2/scope_metadata.h"
 #include "thrift/annotation/gen-cpp2/hack_metadata.h"
+#include "thrift/annotation/gen-cpp2/rust_metadata.h"
 
 namespace facebook {
 namespace thrift {

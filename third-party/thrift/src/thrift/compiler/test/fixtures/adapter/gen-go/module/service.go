@@ -15,6 +15,7 @@ import (
 	thrift2 "thrift/annotation/thrift"
 	scope3 "thrift/annotation/scope"
 	hack4 "thrift/annotation/hack"
+	rust5 "thrift/annotation/rust"
 
 )
 
@@ -30,6 +31,7 @@ var _ = python1.GoUnusedProtection__
 var _ = thrift2.GoUnusedProtection__
 var _ = scope3.GoUnusedProtection__
 var _ = hack4.GoUnusedProtection__
+var _ = rust5.GoUnusedProtection__
 type Service interface {
   // Parameters:
   //  - Arg1
@@ -232,10 +234,10 @@ func (p *ServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewServiceProcessor(handler Service) *ServiceProcessor {
-  self29 := &ServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
-  self29.processorMap["func"] = &serviceProcessorFunc{handler:handler}
-  self29.functionServiceMap["func"] = "Service"
-  return self29
+  self30 := &ServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunction), functionServiceMap:make(map[string]string)}
+  self30.processorMap["func"] = &serviceProcessorFunc{handler:handler}
+  self30.functionServiceMap["func"] = "Service"
+  return self30
 }
 
 type serviceProcessorFunc struct {

@@ -15,6 +15,7 @@ import (
 	thrift2 "thrift/annotation/thrift"
 	scope3 "thrift/annotation/scope"
 	hack4 "thrift/annotation/hack"
+	rust5 "thrift/annotation/rust"
 
 )
 
@@ -30,6 +31,7 @@ var _ = python1.GoUnusedProtection__
 var _ = thrift2.GoUnusedProtection__
 var _ = scope3.GoUnusedProtection__
 var _ = hack4.GoUnusedProtection__
+var _ = rust5.GoUnusedProtection__
 const Var1 = 10
 const Var2 = "20"
 var Var3 *MyStruct

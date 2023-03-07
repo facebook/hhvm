@@ -17,6 +17,7 @@ hash = { version = "0.0.0", path = "../../../../../../utils/hash" }
 ir = { version = "0.0.0", path = "../../../.." }
 itertools = "0.10.3"
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
+naming_special_names_rust = { version = "0.0.0", path = "../../../../../../naming" }
 newtype = { version = "0.0.0", path = "../../../../../../utils/newtype" }
 strum = "0.21"
 strum_macros = "0.21"

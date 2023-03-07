@@ -18,6 +18,7 @@ use hash::IndexMap;
 use ir::StringInterner;
 use itertools::Itertools;
 use log::trace;
+use naming_special_names_rust::special_idents;
 
 use super::func;
 use super::hack;
@@ -111,14 +112,13 @@ impl ClassState<'_, '_, '_> {
 
         self.write_init_static()?;
 
+        if self.needs_factory {
+            self.write_factory()?;
+        }
+
         let methods = std::mem::take(&mut self.class.methods);
         for method in methods {
             self.write_method(method)?;
-        }
-
-        if self.needs_factory {
-            // TODO: This should be the parameters from the constructor.
-            self.write_factory(std::iter::empty())?;
         }
 
         Ok(())
@@ -312,11 +312,13 @@ impl ClassState<'_, '_, '_> {
     }
 
     /// Build the factory for a class.
-    fn write_factory<'s>(
-        &mut self,
-        params: impl Iterator<Item = (&'s str, textual::Ty)>,
-    ) -> Result {
+    ///
+    /// The factory only allocates an object of the required type. The initialization is done via a separate constructor invocation on the allocated object.
+    ///
+    /// The factory method is used only when the class of an object to allocate is not known statically. Otherwise, we directly use Textual's typed allocation builtin.
+    fn write_factory<'s>(&mut self) -> Result {
         let strings = &self.unit_state.strings;
+
         let name = ir::MethodId::factory(strings).mangle_with_class(
             self.class.name,
             IsStatic::Static,
@@ -324,25 +326,11 @@ impl ClassState<'_, '_, '_> {
         );
         let static_ty = static_ty(self.class.name, strings);
         let ty = non_static_ty(self.class.name, strings);
-        let cons_id = ir::MethodId::constructor(strings);
-
-        let params = std::iter::once(("$this", static_ty))
-            .chain(params)
-            .collect_vec();
-        let params = params.iter().map(|(s, ty)| (*s, ty)).collect_vec();
+        let params = vec![(special_idents::THIS, &static_ty)];
 
         self.txf
             .define_function(&name, &self.class.src_loc, &params, &ty, &[], |fb| {
-                let mut operands = Vec::new();
-                for (name, ty) in &params[1..] {
-                    let id = strings.intern_str(*name);
-                    let lid = textual::Var::Local(ir::LocalId::Named(id));
-                    operands.push(fb.load(ty, textual::Expr::deref(lid))?);
-                }
-
-                let cons = cons_id.mangle_with_class(self.class.name, IsStatic::NonStatic, strings);
                 let obj = fb.write_expr_stmt(textual::Expr::Alloc(ty.deref()))?;
-                fb.call_static(&cons, obj.into(), operands)?;
                 fb.ret(obj)?;
                 Ok(())
             })
@@ -378,20 +366,6 @@ impl ClassState<'_, '_, '_> {
             func
         };
 
-        if self.needs_factory && method.name.is_constructor(&self.unit_state.strings) {
-            self.needs_factory = false;
-
-            let (param_names, param_tys, _) =
-                func::compute_func_params(&func.params, self.unit_state, this_ty.clone())?;
-            self.write_factory(
-                param_names
-                    .iter()
-                    .map(|s| s.as_str())
-                    .zip(param_tys.iter().cloned())
-                    .skip(1),
-            )?;
-        }
-
         let method_info = MethodInfo {
             name: method.name,
             class: &self.class,
@@ -399,6 +373,7 @@ impl ClassState<'_, '_, '_> {
             strings: Arc::clone(&self.unit_state.strings),
             flags: method.flags,
         };
+
         func::write_func(
             self.txf,
             self.unit_state,

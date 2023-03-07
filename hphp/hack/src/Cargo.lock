@@ -4808,6 +4808,7 @@ dependencies = [
  "ir",
  "itertools 0.10.5",
  "log",
+ "naming_special_names_rust",
  "newtype",
  "strum",
  "strum_macros",

@@ -36,14 +36,10 @@ class C {
   public int $type = 2;
 
   // TEST-CHECK-BAL: define C$static.__factory
-  // CHECK: define C$static.__factory($this: *C$static, $a: *HackInt, $b: *HackString, $c: *HackInt) : *C {
+  // CHECK: define C$static.__factory($this: *C$static) : *C {
   // CHECK: #b0:
-  // CHECK:   n0: *HackInt = load &$a
-  // CHECK:   n1: *HackString = load &$b
-  // CHECK:   n2: *HackInt = load &$c
-  // CHECK:   n3 = __sil_allocate(<C>)
-  // CHECK:   n4 = C.__construct(n3, n0, n1, n2)
-  // CHECK:   ret n3
+  // CHECK:   n0 = __sil_allocate(<C>)
+  // CHECK:   ret n0
   // CHECK: }
 
   // TEST-CHECK-BAL: define C.__construct

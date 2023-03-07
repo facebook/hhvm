@@ -1077,6 +1077,7 @@ and ('ex, 'en) module_def = {
   md_annotation: 'en;
   md_name: Ast_defs.id; [@transform.opaque]
   md_user_attributes: ('ex, 'en) user_attributes;
+  md_file_attributes: ('ex, 'en) file_attribute list;
   md_span: pos; [@transform.opaque]
   md_mode: FileInfo.mode; [@visitors.opaque] [@transform.opaque]
   md_doc_comment: doc_comment option;

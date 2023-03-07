@@ -331,6 +331,9 @@ let module_def ctx md =
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span md.md_span @@ fun () ->
   let env = EnvFromDef.module_env ~origin:Decl_counters.TopLevel ctx md in
+  let (env, file_attributes) =
+    Typing.file_attributes env md.md_file_attributes
+  in
   let (env, user_attributes) =
     Typing.attributes_check_def
       env
@@ -341,6 +344,7 @@ let module_def ctx md =
     md with
     Aast.md_annotation = Env.save (Env.get_tpenv env) env;
     Aast.md_user_attributes = user_attributes;
+    Aast.md_file_attributes = file_attributes;
   }
 
 let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :

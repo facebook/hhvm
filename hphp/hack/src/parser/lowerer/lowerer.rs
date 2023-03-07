@@ -6153,6 +6153,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 name,
                 user_attributes: p_user_attributes(&md.attribute_spec, env),
+                file_attributes: vec![],
                 span: p_pos(node, env),
                 mode: env.file_mode(),
                 doc_comment: doc_comment_opt,

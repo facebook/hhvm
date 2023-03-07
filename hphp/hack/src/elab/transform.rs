@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a112d7501697b3b7bf0cf4f18fcff13d>>
+// @generated SignedSource<<6ffded1d744160b1bddd2c0a403398d3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2676,9 +2676,10 @@ const _: () = {
                 ModuleDef {
                     annotation: ref mut __binding_0,
                     user_attributes: ref mut __binding_2,
-                    doc_comment: ref mut __binding_5,
-                    exports: ref mut __binding_6,
-                    imports: ref mut __binding_7,
+                    file_attributes: ref mut __binding_3,
+                    doc_comment: ref mut __binding_6,
+                    exports: ref mut __binding_7,
+                    imports: ref mut __binding_8,
                     ..
                 } => {
                     {
@@ -2688,12 +2689,15 @@ const _: () = {
                         __binding_2.transform(cfg, errs, pass)
                     }
                     {
-                        __binding_5.transform(cfg, errs, pass)
+                        __binding_3.transform(cfg, errs, pass)
                     }
                     {
                         __binding_6.transform(cfg, errs, pass)
                     }
-                    { __binding_7.transform(cfg, errs, pass) }
+                    {
+                        __binding_7.transform(cfg, errs, pass)
+                    }
+                    { __binding_8.transform(cfg, errs, pass) }
                 }
             }
         }

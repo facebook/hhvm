@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1f982b103dc17473276252e91b1530e3>>
+// @generated SignedSource<<606747c2e09bad9b577b6e5a185aefe6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1577,6 +1577,7 @@ impl<P: Params> NodeMut<P> for ModuleDef<P::Ex, P::En> {
         v.visit_en(c, &mut self.annotation)?;
         self.name.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
+        self.file_attributes.accept(c, v)?;
         self.span.accept(c, v)?;
         self.mode.accept(c, v)?;
         self.doc_comment.accept(c, v)?;

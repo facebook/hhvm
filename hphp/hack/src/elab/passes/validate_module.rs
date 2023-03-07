@@ -49,6 +49,7 @@ mod tests {
             annotation: (),
             name: Id(Pos::NONE, name.to_string()),
             user_attributes: UserAttributes::default(),
+            file_attributes: vec![],
             span: Pos::NONE,
             mode: oxidized::file_info::Mode::Mstrict,
             doc_comment: None,

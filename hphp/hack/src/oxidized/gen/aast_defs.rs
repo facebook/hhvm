@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6cb9192f1e2287036e52d665e2bd7325>>
+// @generated SignedSource<<828a35b7371f0167262773ff1fe6d314>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2040,6 +2040,7 @@ pub struct ModuleDef<Ex, En> {
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub name: ast_defs::Id,
     pub user_attributes: UserAttributes<Ex, En>,
+    pub file_attributes: Vec<FileAttribute<Ex, En>>,
     #[rust_to_ocaml(attr = "transform.opaque")]
     pub span: Pos,
     #[rust_to_ocaml(attr = "visitors.opaque")]

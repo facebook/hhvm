@@ -43,5 +43,17 @@
           }
          ];
        c_docs_url = None; c_enum = None; c_doc_comment = None; c_emit_id = None; 
-       c_internal = false; c_module = None })
+       c_internal = false; c_module = None });
+  (Module
+     { md_annotation = (); md_name = ([11:12-15], "my."); md_user_attributes = [];
+       md_file_attributes =
+       [{ fa_user_attributes = [{ ua_name = ([5:9-24], "\\MyNamespace\\MyFileAttribute"); ua_params = [] }];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "MyNamespace"); 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       md_span = [11:1-24]; md_mode = Mstrict; md_doc_comment = None; 
+       md_exports = None; md_imports = None })
   ]

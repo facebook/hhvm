@@ -403,7 +403,17 @@ pub mod toplevel_elaborator {
                 t.file_attributes = file_attrs.clone();
                 t.module = module_name.clone()
             }
-            _ => {}
+            Def::Module(m) => {
+                m.file_attributes = file_attrs.clone();
+            }
+            Def::Stmt(_)
+            | Def::Constant(_)
+            | Def::Namespace(_)
+            | Def::NamespaceUse(_)
+            | Def::SetNamespaceEnv(_)
+            | Def::FileAttributes(_)
+            | Def::Package(_)
+            | Def::SetModule(_) => {}
         });
     }
 

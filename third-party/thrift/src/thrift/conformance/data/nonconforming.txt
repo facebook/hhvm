@@ -21,6 +21,10 @@ cpp2/RoundTripTest/testset.Adapted.float/NaN.Binary
 cpp2/RoundTripTest/testset.Adapted.float/NaN.Compact
 cpp2/RoundTripTest/testset.Adapted.double/NaN.Binary
 cpp2/RoundTripTest/testset.Adapted.double/NaN.Compact
+cpp2/RoundTripTest/testset.FieldAdapted.float/NaN.Binary
+cpp2/RoundTripTest/testset.FieldAdapted.float/NaN.Compact
+cpp2/RoundTripTest/testset.FieldAdapted.double/NaN.Binary
+cpp2/RoundTripTest/testset.FieldAdapted.double/NaN.Compact
 cpp2/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
 cpp2/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 cpp2/CompatibilityTest/testset.float/StructToUnion/NaN.Binary
@@ -115,6 +119,10 @@ python/RoundTripTest/testset.Adapted.float/NaN.Binary
 python/RoundTripTest/testset.Adapted.float/NaN.Compact
 python/RoundTripTest/testset.Adapted.double/NaN.Binary
 python/RoundTripTest/testset.Adapted.double/NaN.Compact
+python/RoundTripTest/testset.FieldAdapted.float/NaN.Binary
+python/RoundTripTest/testset.FieldAdapted.float/NaN.Compact
+python/RoundTripTest/testset.FieldAdapted.double/NaN.Binary
+python/RoundTripTest/testset.FieldAdapted.double/NaN.Compact
 python/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
 python/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 python/CompatibilityTest/testset.float/StructToUnion/NaN.Binary
@@ -221,6 +229,10 @@ java2/RoundTripTest/testset.Adapted.float/NaN.Binary
 java2/RoundTripTest/testset.Adapted.float/NaN.Compact
 java2/RoundTripTest/testset.Adapted.double/NaN.Binary
 java2/RoundTripTest/testset.Adapted.double/NaN.Compact
+java2/RoundTripTest/testset.FieldAdapted.float/NaN.Binary
+java2/RoundTripTest/testset.FieldAdapted.float/NaN.Compact
+java2/RoundTripTest/testset.FieldAdapted.double/NaN.Binary
+java2/RoundTripTest/testset.FieldAdapted.double/NaN.Compact
 java2/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
 java2/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 java2/CompatibilityTest/testset.float/StructToUnion/NaN.Binary
@@ -508,6 +520,10 @@ hack/RoundTripTest/testset.Adapted.float/NaN.Binary
 hack/RoundTripTest/testset.Adapted.float/NaN.Compact
 hack/RoundTripTest/testset.Adapted.double/NaN.Binary
 hack/RoundTripTest/testset.Adapted.double/NaN.Compact
+hack/RoundTripTest/testset.FieldAdapted.float/NaN.Binary
+hack/RoundTripTest/testset.FieldAdapted.float/NaN.Compact
+hack/RoundTripTest/testset.FieldAdapted.double/NaN.Binary
+hack/RoundTripTest/testset.FieldAdapted.double/NaN.Compact
 hack/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Binary
 hack/CompatibilityTest/testset.binary.string/ChangeFieldType/bad_utf8.Compact
 hack/CompatibilityTest/testset.binary/AddOptionalFieldWithCustomDefault.Binary

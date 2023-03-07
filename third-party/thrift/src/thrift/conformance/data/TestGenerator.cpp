@@ -57,7 +57,9 @@ Test createRoundTripTest(
     auto add = [&](auto modSet, auto msg) {
       using ModSet = decltype(modSet);
       typename struct_ByFieldType<TT, ModSet>::type data;
-      if constexpr (std::is_same_v<mod_set<FieldModifier::Adapter>, ModSet>) {
+      if constexpr (
+          std::is_same_v<mod_set<FieldModifier::Adapter>, ModSet> ||
+          std::is_same_v<mod_set<FieldModifier::FieldAdapter>, ModSet>) {
         data.field_1().ensure().value = value.value;
       } else {
         data.field_1() = value.value;
@@ -80,6 +82,9 @@ Test createRoundTripTest(
 
     // Test case #5: Adapted field
     add(mod_set<FieldModifier::Adapter>{}, "Adapted.");
+
+    // Test case #6: Adapted field with a Field Adapter
+    add(mod_set<FieldModifier::FieldAdapter>{}, "FieldAdapted.");
   }
 
   return test;

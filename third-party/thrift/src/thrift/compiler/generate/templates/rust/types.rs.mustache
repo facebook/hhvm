@@ -31,6 +31,8 @@
 
 }}{{#program:structs}}{{>lib/structimpl}}{{>lib/unionimpl}}{{/program:structs}}{{!
 
+}}{{#program:has_structs_with_adapters?}}{{>lib/adapter/default_test}}{{/program:has_structs_with_adapters?}}{{!
+
 }}{{#program:nonexhaustiveStructs?}}
 
 mod dot_dot {{>lib/block}}{{!

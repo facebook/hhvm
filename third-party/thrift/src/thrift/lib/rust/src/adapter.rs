@@ -71,8 +71,6 @@ pub trait ThriftAdapter {
         Self::to_original(value)
     }
 
-    // TODO(emersonford): generate unit tests for thrift libraries using Rust adapter type to
-    // ensure this does not panic with a default value.
     /// Method called when the adapted type is not present in a field during deserialization or is
     /// populated with `..Default::default()`. The value passed here is the default original type
     /// value for the field. This can be used to record that the field was not present inside
@@ -88,9 +86,12 @@ pub trait ThriftAdapter {
         field_id: i16,
         strct: TypeId,
     ) -> Self::AdaptedType {
-        Self::from_thrift_field(value, field_id, strct).expect(
-            "`from_thrift_field` should not return an `Err` with the Thrift field's default value",
-        )
+        Self::from_thrift_field(value, field_id, strct).unwrap_or_else(|e| {
+            panic!(
+                "`from_thrift_field` must not return an `Err` on field ID {} for its default value, but it did: '{:?}'",
+                field_id, e
+            );
+        })
     }
 }
 

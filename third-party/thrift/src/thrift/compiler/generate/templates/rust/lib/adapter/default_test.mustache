@@ -1,0 +1,31 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}/// These are here to ensure the `from_thrift_default` methods on adapters don't panic.
+#[cfg(test)]
+mod tests {
+    {{#program:structs_with_adapters}}
+    #[test]
+    fn test_struct_{{struct:rust_name}}_default_does_not_panic() {
+        let _ = super::{{struct:rust_name}}::default();
+    }
+    {{/program:structs_with_adapters}}
+}
+
+// This is here to ensure you enable unittests on your Thrift library.
+#[cfg(feature = "thrift_library_unittests_disabled")]
+compile_error!("You are using Rust adapters in a Thrift library that does not have unittests enabled. For safety reasons, this is forbidden. Please enable Rust unittests for this Thrift library.");
+{{!newline}}

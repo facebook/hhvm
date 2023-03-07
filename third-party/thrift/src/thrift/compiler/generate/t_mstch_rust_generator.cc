@@ -455,6 +455,10 @@ class rust_mstch_program : public mstch_program {
             {"program:docs?", &rust_mstch_program::rust_has_docs},
             {"program:docs", &rust_mstch_program::rust_docs},
             {"program:include_srcs", &rust_mstch_program::rust_include_srcs},
+            {"program:has_structs_with_adapters?",
+             &rust_mstch_program::rust_has_structs_with_adapters},
+            {"program:structs_with_adapters",
+             &rust_mstch_program::rust_structs_with_adapters},
         });
     register_has_option("program:default_enum_zero?", "default_enum_zero");
   }
@@ -569,6 +573,32 @@ class rust_mstch_program : public mstch_program {
       elements.push_back(node);
     }
     return elements;
+  }
+  mstch::node rust_has_structs_with_adapters() {
+    for (const t_struct* strct : program_->structs()) {
+      for (const t_field& field : strct->fields()) {
+        if (node_has_adapter(field)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+  mstch::node rust_structs_with_adapters() {
+    mstch::array strcts;
+
+    for (const t_struct* strct : program_->structs()) {
+      for (const t_field& field : strct->fields()) {
+        if (node_has_adapter(field)) {
+          strcts.push_back(context_.struct_factory->make_mstch_object(
+              strct, context_, pos_));
+          break;
+        }
+      }
+    }
+
+    return strcts;
   }
 
  private:

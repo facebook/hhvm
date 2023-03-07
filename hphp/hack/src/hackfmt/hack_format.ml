@@ -2132,7 +2132,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat [t env kw; Space; t env constraint_type]
     | Syntax.ContextConstraint
         { ctx_constraint_keyword = kw; ctx_constraint_ctx_list = ctx_list } ->
-      Concat [t env kw; Space; t env ctx_list]
+      Concat [Space; t env kw; Space; t env ctx_list]
     | Syntax.DarrayTypeSpecifier
         {
           darray_keyword = kw;

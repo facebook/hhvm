@@ -377,7 +377,6 @@ static unsigned char BF_atoi64[0x60] = {
 #define BF_safe_atoi64(dst, src) \
 { \
   tmp = (unsigned char)(src); \
-  if (tmp == '$') break; /* PHP hack */ \
   if ((unsigned int)(tmp -= 0x20) >= 0x60) return -1; \
   tmp = BF_atoi64[tmp]; \
   if (tmp > 63) return -1; \
@@ -390,10 +389,6 @@ static int BF_decode(BF_word *dst, const char *src, int size)
   unsigned char *end = dptr + size;
   const unsigned char *sptr = (const unsigned char *)src;
   unsigned int tmp, c1, c2, c3, c4;
-
-  if (size <= 0) {
-    return -1;
-  }
 
   do {
     BF_safe_atoi64(c1, *sptr++);
@@ -408,9 +403,6 @@ static int BF_decode(BF_word *dst, const char *src, int size)
     BF_safe_atoi64(c4, *sptr++);
     *dptr++ = ((c3 & 0x03) << 6) | c4;
   } while (dptr < end);
-
-  while (dptr < end) /* PHP hack */
-    *dptr++ = 0;
 
   return 0;
 }

@@ -246,6 +246,7 @@ let parse_options () =
   let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in
+  let skip_check_under_dynamic = ref false in
   let out_extension = ref ".out" in
   let like_type_hints = ref false in
   let union_intersection_type_hints = ref false in
@@ -560,6 +561,10 @@ let parse_options () =
       ( "--skip-tast-checks",
         Arg.Set skip_tast_checks,
         " Do not apply checks using TAST visitors" );
+      ( "--skip-check-under-dynamic",
+        Arg.Set skip_check_under_dynamic,
+        " Do not apply second check to functions and methods under dynamic assumptions"
+      );
       ( "--union-intersection-type-hints",
         Arg.Set union_intersection_type_hints,
         " Allows union and intersection types to be written in type hint positions"
@@ -979,6 +984,7 @@ let parse_options () =
       ~tco_method_call_inference:!method_call_inference
       ~tco_report_pos_from_reason:!report_pos_from_reason
       ~tco_enable_sound_dynamic:!enable_sound_dynamic
+      ~tco_skip_check_under_dynamic:!skip_check_under_dynamic
       ~tco_ifc_enabled:
         (if is_ifc_mode then
           ["/"]

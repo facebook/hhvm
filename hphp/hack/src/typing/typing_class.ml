@@ -355,7 +355,10 @@ let method_def ~is_disposable env cls m =
         m_ret = (dynamic_return_ty, return_hint);
       }
     in
-    if sdt_dynamic_check_required then
+    if
+      sdt_dynamic_check_required
+      && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
+    then
       let env = { env with checked = Tast.CUnderNormalAssumptions } in
       let method_def =
         Aast.{ method_def with m_annotation = Env.save local_tpenv env }

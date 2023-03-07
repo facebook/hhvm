@@ -237,7 +237,10 @@ let fun_def ctx fd :
     in
     fundef
     ::
-    (if sdt_dynamic_check_required then
+    (if
+     sdt_dynamic_check_required
+     && not (TypecheckerOptions.skip_check_under_dynamic tcopt)
+    then
       let dynamic_components =
         Typing.check_function_dynamically_callable
           ~this_class:None

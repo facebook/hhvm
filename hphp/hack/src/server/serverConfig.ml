@@ -436,6 +436,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
       ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
       ?tco_enable_sound_dynamic:(bool_opt "enable_sound_dynamic_type" config)
+      ?tco_skip_check_under_dynamic:(bool_opt "skip_check_under_dynamic" config)
       ?tco_enable_modules:(bool_opt "enable_modules" config)
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
       ~tco_global_access_check_enabled:

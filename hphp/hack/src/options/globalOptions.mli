@@ -259,6 +259,8 @@ type t = {
   tco_typecheck_sample_rate: float;
   (* Experimental implementation of a "sound" dynamic type *)
   tco_enable_sound_dynamic: bool;
+  (* Skip second check of method under dynamic assumptions *)
+  tco_skip_check_under_dynamic: bool;
   (* Enable ifc on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
@@ -442,6 +444,7 @@ val make :
   ?tco_report_pos_from_reason:bool ->
   ?tco_typecheck_sample_rate:float ->
   ?tco_enable_sound_dynamic:bool ->
+  ?tco_skip_check_under_dynamic:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_global_access_check_enabled:bool ->
   ?po_enable_enum_supertyping:bool ->

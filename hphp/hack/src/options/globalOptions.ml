@@ -156,6 +156,7 @@ type t = {
   tco_report_pos_from_reason: bool;
   tco_typecheck_sample_rate: float;
   tco_enable_sound_dynamic: bool;
+  tco_skip_check_under_dynamic: bool;
   tco_ifc_enabled: string list;
   tco_global_access_check_enabled: bool;
   po_enable_enum_supertyping: bool;
@@ -292,6 +293,7 @@ let default =
     tco_report_pos_from_reason = false;
     tco_typecheck_sample_rate = 1.0;
     tco_enable_sound_dynamic = false;
+    tco_skip_check_under_dynamic = false;
     tco_ifc_enabled = [];
     tco_global_access_check_enabled = false;
     po_enable_enum_supertyping = true;
@@ -436,6 +438,7 @@ let make
     ?(tco_report_pos_from_reason = default.tco_report_pos_from_reason)
     ?(tco_typecheck_sample_rate = default.tco_typecheck_sample_rate)
     ?(tco_enable_sound_dynamic = default.tco_enable_sound_dynamic)
+    ?(tco_skip_check_under_dynamic = default.tco_skip_check_under_dynamic)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
     ?(tco_global_access_check_enabled = default.tco_global_access_check_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
@@ -588,6 +591,7 @@ let make
     tco_report_pos_from_reason;
     tco_typecheck_sample_rate;
     tco_enable_sound_dynamic;
+    tco_skip_check_under_dynamic;
     tco_ifc_enabled;
     tco_global_access_check_enabled;
     po_enable_enum_supertyping;

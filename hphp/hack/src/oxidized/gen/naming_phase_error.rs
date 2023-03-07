@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d16a7c4e4f6df8b59a4b92e3a77e9538>>
+// @generated SignedSource<<68d240440800358c01cc8696a6cc0f3d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,6 +45,9 @@ pub enum ExperimentalFeature {
     #[rust_to_ocaml(attr = r#"warning "-37""#)]
     #[rust_to_ocaml(name = "Const_static_prop")]
     ConstStaticProp(pos::Pos),
+    #[rust_to_ocaml(attr = r#"warning "-37""#)]
+    #[rust_to_ocaml(name = "IFC_infer_flows")]
+    IFCInferFlows(pos::Pos),
 }
 
 #[derive(

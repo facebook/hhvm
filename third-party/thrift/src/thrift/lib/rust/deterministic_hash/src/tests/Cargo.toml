@@ -43,3 +43,7 @@ maplit = "1.0"
 
 [build-dependencies]
 thrift_compiler = { path = "../../../../../../common/rust/shed/thrift_compiler" }
+
+[features]
+default = ["thrift_library_unittests_disabled"]
+thrift_library_unittests_disabled = []

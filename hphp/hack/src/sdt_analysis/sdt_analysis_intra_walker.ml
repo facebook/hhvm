@@ -37,6 +37,21 @@ let remove_supportdyn_from_ty ty =
   | T.Tnewtype (c, [ty], _) when String.equal c SN.Classes.cSupportDyn -> ty
   | _ -> ty
 
+let signature_check decorated_constraint env id params ret =
+  let is_supportdyn_of_mixed ty =
+    Tast_env.is_sub_type env ty supportdyn_of_mixed
+  in
+  let fails_formation =
+    List.exists params ~f:(fun param ->
+        not @@ is_supportdyn_of_mixed @@ fst param.A.param_type_hint)
+    || (not @@ is_supportdyn_of_mixed @@ fst ret)
+  in
+  if fails_formation then
+    let constraint_ = Lazy.force decorated_constraint in
+    WalkResult.singleton id constraint_
+  else
+    WalkResult.empty
+
 let collect_sdts =
   object
     inherit [Constraint.t decorated WalkResult.t] Tast_visitor.reduce as super
@@ -89,13 +104,30 @@ let collect_sdts =
       in
       WalkResult.(walk_result @ super#on_expr env e)
 
-    method! on_fun_def env (A.{ fd_name = (_, sid); fd_fun; _ } as fd) =
-      let id = H.Id.Function sid in
+    method! on_method_ env m =
+      let decorated_constraint ~origin =
+        let hack_pos = m.A.m_span in
+        { origin; hack_pos; decorated_data = Constraint.NeedsSDT }
+      in
+      let sid = Tast_env.get_self_id env |> Option.value_exn in
+      let id = H.Id.ClassLike sid in
       let env = remove_supportdyn_of_mixed_upper_bound_from_tparams env in
+      let from_signature_check =
+        signature_check
+          (lazy (decorated_constraint ~origin:__LINE__))
+          env
+          id
+          m.A.m_params
+          m.A.m_ret
+      in
+      WalkResult.(from_signature_check @ super#on_method_ env m)
+
+    method! on_fun_def env (A.{ fd_name = (_, sid); fd_fun; _ } as fd) =
       let decorated_constraint ~origin =
         let hack_pos = fd_fun.A.f_span in
         { origin; hack_pos; decorated_data = Constraint.NeedsSDT }
       in
+      let id = H.Id.Function sid in
       let from_dynamically_callable =
         let is_dynamically_callable =
           List.exists ~f:(fun attr ->
@@ -109,20 +141,14 @@ let collect_sdts =
         else
           WalkResult.empty
       in
+      let env = remove_supportdyn_of_mixed_upper_bound_from_tparams env in
       let from_signature_check =
-        let is_supportdyn_of_mixed ty =
-          Tast_env.is_sub_type env ty supportdyn_of_mixed
-        in
-        let fails_formation =
-          List.exists fd_fun.A.f_params ~f:(fun param ->
-              not @@ is_supportdyn_of_mixed @@ fst param.A.param_type_hint)
-          || (not @@ is_supportdyn_of_mixed @@ fst fd_fun.A.f_ret)
-        in
-        if fails_formation then
-          let constraint_ = decorated_constraint ~origin:__LINE__ in
-          WalkResult.singleton id constraint_
-        else
-          WalkResult.empty
+        signature_check
+          (lazy (decorated_constraint ~origin:__LINE__))
+          env
+          id
+          fd_fun.A.f_params
+          fd_fun.A.f_ret
       in
       WalkResult.(
         from_dynamically_callable

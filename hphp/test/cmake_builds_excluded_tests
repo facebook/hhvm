@@ -199,3 +199,4 @@ quick/class_interface_trait_exists.d/class_interface_trait_exists.php
 quick/properties4.d/properties4.php
 quick/reflection2.d/reflection2.php
 quick/static_prop_eval_order.d/static_prop_eval_order.php
+slow/reflection/enum_get_underlying_type.php

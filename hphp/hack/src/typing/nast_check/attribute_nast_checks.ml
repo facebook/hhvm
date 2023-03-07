@@ -41,11 +41,9 @@ let check_soft_internal_on_param fp =
       Errors.add_nast_check_error
       @@ Nast_check_error.Soft_internal_without_internal pos
     | None ->
-      Errors.add_typing_error
-        Typing_error.(
-          primary
-          @@ Primary.Wrong_expression_kind_builtin_attribute
-               { expr_kind = "a parameter"; pos; attr_name })
+      Errors.add_nast_check_error
+        (Nast_check_error.Wrong_expression_kind_builtin_attribute
+           { expr_kind = "a parameter"; pos; attr_name })
   end
   | _ -> ()
 
@@ -56,19 +54,19 @@ let check_attribute_arity attrs attr_name arg_spec =
     | (`Range (min_args, _), Some { ua_name = (pos, _); ua_params })
       when List.length ua_params < min_args ->
       Some
-        (Typing_error.Primary.Attribute_too_few_arguments
+        (Nast_check_error.Attribute_too_few_arguments
            { pos; name = attr_name; expected = min_args })
       (* Errors.attribute_too_few_arguments pos attr_name min_args *)
     | (`Range (_, max_args), Some { ua_name = (pos, _); ua_params })
       when List.length ua_params > max_args ->
       Some
-        (Typing_error.Primary.Attribute_too_many_arguments
+        (Nast_check_error.Attribute_too_many_arguments
            { pos; name = attr_name; expected = max_args })
       (* Errors.attribute_too_many_arguments pos attr_name max_args *)
     | (`Exact expected_args, Some { ua_name = (pos, _); ua_params })
       when List.length ua_params <> expected_args ->
       Some
-        (Typing_error.Primary.Attribute_not_exact_number_of_args
+        (Nast_check_error.Attribute_not_exact_number_of_args
            {
              pos;
              name = attr_name;
@@ -77,9 +75,7 @@ let check_attribute_arity attrs attr_name arg_spec =
            })
     | _ -> None
   in
-  Option.iter
-    (fun err -> Errors.add_typing_error @@ Typing_error.primary err)
-    prim_err_opt
+  Option.iter Errors.add_nast_check_error prim_err_opt
 
 let attr_pos (attr : ('a, 'b) user_attribute) : Pos.t = fst attr.ua_name
 
@@ -101,11 +97,9 @@ let check_deprecated_static attrs =
   | Some { ua_name = _; ua_params = [msg; _] } -> begin
     match Nast_eval.static_string msg with
     | Error p ->
-      Errors.add_typing_error
-        Typing_error.(
-          primary
-          @@ Primary.Attribute_param_type
-               { pos = p; x = "static string literal" })
+      Errors.add_nast_check_error
+        (Nast_check_error.Attribute_param_type
+           { pos = p; x = "static string literal" })
     | _ -> ()
   end
   | _ -> ()

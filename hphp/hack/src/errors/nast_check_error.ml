@@ -134,6 +134,31 @@ type t =
       second_pos: Pos.t;
     }
   | Soft_internal_without_internal of Pos.t
+  | Wrong_expression_kind_builtin_attribute of {
+      pos: Pos.t;
+      attr_name: string;
+      expr_kind: string;
+    }
+  | Attribute_too_many_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_too_few_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_not_exact_number_of_args of {
+      pos: Pos.t;
+      name: string;
+      actual: int;
+      expected: int;
+    }
+  | Attribute_param_type of {
+      pos: Pos.t;
+      x: string;
+    }
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -618,6 +643,61 @@ let attribute_conflicting_memoize pos second_pos =
         "Conflicting memoize attribute is here" );
     ]
 
+let wrong_expression_kind_builtin_attribute pos attr expr_kind =
+  User_error.make
+    Typing_error.Error_code.(to_enum WrongExpressionKindAttribute)
+    ( pos,
+      Printf.sprintf
+        "The %s attribute cannot be used on %s."
+        (Render.strip_ns attr |> Markdown_lite.md_codify)
+        expr_kind )
+    []
+
+let attribute_too_many_arguments pos name expected =
+  User_error.make
+    Typing_error.Error_code.(to_enum AttributeTooManyArguments)
+    ( pos,
+      "The attribute "
+      ^ Markdown_lite.md_codify name
+      ^ " expects at most "
+      ^ Render.pluralize_arguments expected )
+    []
+
+let attribute_too_few_arguments pos name expected =
+  User_error.make
+    Typing_error.Error_code.(to_enum AttributeTooFewArguments)
+    ( pos,
+      "The attribute "
+      ^ Markdown_lite.md_codify name
+      ^ " expects at least "
+      ^ Render.pluralize_arguments expected )
+    []
+
+let attribute_not_exact_number_of_args pos name expected actual =
+  let code =
+    if actual > expected then
+      Typing_error.Error_code.AttributeTooManyArguments
+    else
+      Typing_error.Error_code.AttributeTooFewArguments
+  and claim =
+    ( pos,
+      "The attribute "
+      ^ Markdown_lite.md_codify name
+      ^ " expects "
+      ^
+      match expected with
+      | 0 -> "no arguments"
+      | 1 -> "exactly 1 argument"
+      | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
+  in
+  User_error.make Typing_error.Error_code.(to_enum code) claim []
+
+let attribute_param_type pos x =
+  User_error.make
+    Typing_error.Error_code.(to_enum AttributeParamType)
+    (pos, "This attribute parameter should be " ^ x)
+    []
+
 (* --------------------------------------------- *)
 let to_user_error = function
   | Repeated_record_field_name { pos; name; prev_pos } ->
@@ -688,3 +768,12 @@ let to_user_error = function
   | Attribute_conflicting_memoize { pos; second_pos } ->
     attribute_conflicting_memoize pos second_pos
   | Soft_internal_without_internal pos -> soft_internal_without_internal pos
+  | Wrong_expression_kind_builtin_attribute { pos; attr_name; expr_kind } ->
+    wrong_expression_kind_builtin_attribute pos attr_name expr_kind
+  | Attribute_too_many_arguments { pos; name; expected } ->
+    attribute_too_many_arguments pos name expected
+  | Attribute_too_few_arguments { pos; name; expected } ->
+    attribute_too_few_arguments pos name expected
+  | Attribute_not_exact_number_of_args { pos; name; expected; actual } ->
+    attribute_not_exact_number_of_args pos name expected actual
+  | Attribute_param_type { pos; x } -> attribute_param_type pos x

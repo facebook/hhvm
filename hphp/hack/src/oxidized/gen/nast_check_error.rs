@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fdb2cf520ce4c24679e7f684af4eaf67>>
+// @generated SignedSource<<559d9953e9dd4b2fe2f6e5cf8443ee6f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -237,4 +237,34 @@ pub enum NastCheckError {
     },
     #[rust_to_ocaml(name = "Soft_internal_without_internal")]
     SoftInternalWithoutInternal(pos::Pos),
+    #[rust_to_ocaml(name = "Wrong_expression_kind_builtin_attribute")]
+    WrongExpressionKindBuiltinAttribute {
+        pos: pos::Pos,
+        attr_name: String,
+        expr_kind: String,
+    },
+    #[rust_to_ocaml(name = "Attribute_too_many_arguments")]
+    AttributeTooManyArguments {
+        pos: pos::Pos,
+        name: String,
+        expected: isize,
+    },
+    #[rust_to_ocaml(name = "Attribute_too_few_arguments")]
+    AttributeTooFewArguments {
+        pos: pos::Pos,
+        name: String,
+        expected: isize,
+    },
+    #[rust_to_ocaml(name = "Attribute_not_exact_number_of_args")]
+    AttributeNotExactNumberOfArgs {
+        pos: pos::Pos,
+        name: String,
+        actual: isize,
+        expected: isize,
+    },
+    #[rust_to_ocaml(name = "Attribute_param_type")]
+    AttributeParamType {
+        pos: pos::Pos,
+        x: String,
+    },
 }

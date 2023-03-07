@@ -623,22 +623,6 @@ module Primary : sig
         decl_pos: Pos_or_decl.t;
         quickfixes: Pos.t Quickfix.t list;
       }
-    | Attribute_too_many_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_too_few_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_not_exact_number_of_args of {
-        pos: Pos.t;
-        name: string;
-        actual: int;
-        expected: int;
-      }
     | Kind_mismatch of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
@@ -804,10 +788,6 @@ module Primary : sig
         left: Pos_or_decl.t Message.t list Lazy.t;
         right: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Attribute_param_type of {
-        pos: Pos.t;
-        x: string;
-      }
     | Deprecated_use of {
         pos: Pos.t;
         decl_pos_opt: Pos_or_decl.t option;
@@ -840,11 +820,6 @@ module Primary : sig
         attr_class_pos: Pos_or_decl.t;
         attr_class_name: string;
         intf_name: string;
-      }
-    | Wrong_expression_kind_builtin_attribute of {
-        pos: Pos.t;
-        attr_name: string;
-        expr_kind: string;
       }
     | Ambiguous_object_access of {
         pos: Pos.t;

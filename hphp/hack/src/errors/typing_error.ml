@@ -1940,22 +1940,6 @@ module Primary = struct
         decl_pos: Pos_or_decl.t;
         quickfixes: Pos.t Quickfix.t list;
       }
-    | Attribute_too_many_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_too_few_arguments of {
-        pos: Pos.t;
-        name: string;
-        expected: int;
-      }
-    | Attribute_not_exact_number_of_args of {
-        pos: Pos.t;
-        name: string;
-        actual: int;
-        expected: int;
-      }
     | Kind_mismatch of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
@@ -2121,10 +2105,6 @@ module Primary = struct
         left: Pos_or_decl.t Message.t list Lazy.t;
         right: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Attribute_param_type of {
-        pos: Pos.t;
-        x: string;
-      }
     | Deprecated_use of {
         pos: Pos.t;
         decl_pos_opt: Pos_or_decl.t option;
@@ -2157,11 +2137,6 @@ module Primary = struct
         attr_class_pos: Pos_or_decl.t;
         attr_class_name: string;
         intf_name: string;
-      }
-    | Wrong_expression_kind_builtin_attribute of {
-        pos: Pos.t;
-        attr_name: string;
-        expr_kind: string;
       }
     | Ambiguous_object_access of {
         pos: Pos.t;
@@ -3343,48 +3318,6 @@ module Primary = struct
     in
     (Error_code.MemberNotImplemented, claim, reasons, quickfixes)
 
-  let attribute_too_many_arguments pos name expected =
-    let claim =
-      lazy
-        ( pos,
-          "The attribute "
-          ^ Markdown_lite.md_codify name
-          ^ " expects at most "
-          ^ Render.pluralize_arguments expected )
-    in
-    (Error_code.AttributeTooManyArguments, claim, lazy [], [])
-
-  let attribute_too_few_arguments pos name expected =
-    let claim =
-      lazy
-        ( pos,
-          "The attribute "
-          ^ Markdown_lite.md_codify name
-          ^ " expects at least "
-          ^ Render.pluralize_arguments expected )
-    in
-    (Error_code.AttributeTooFewArguments, claim, lazy [], [])
-
-  let attribute_not_exact_number_of_args pos name actual expected =
-    let code =
-      if actual > expected then
-        Error_code.AttributeTooManyArguments
-      else
-        Error_code.AttributeTooFewArguments
-    and claim =
-      lazy
-        ( pos,
-          "The attribute "
-          ^ Markdown_lite.md_codify name
-          ^ " expects "
-          ^
-          match expected with
-          | 0 -> "no arguments"
-          | 1 -> "exactly 1 argument"
-          | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
-    in
-    (code, claim, lazy [], [])
-
   let kind_mismatch pos decl_pos tparam_name expected_kind actual_kind =
     let claim =
       lazy
@@ -3926,12 +3859,6 @@ module Primary = struct
     and reason = lazy (left @ right) in
     (Error_code.StrictEqValueIncompatibleTypes, claim, reason, [])
 
-  let attribute_param_type pos x =
-    ( Error_code.AttributeParamType,
-      lazy (pos, "This attribute parameter should be " ^ x),
-      lazy [],
-      [] )
-
   let deprecated_use pos ?(pos_def = None) msg =
     let reason =
       lazy
@@ -4030,17 +3957,6 @@ module Primary = struct
         ]
     in
     (Error_code.WrongExpressionKindAttribute, claim, reason, [])
-
-  let wrong_expression_kind_builtin_attribute expr_kind pos attr =
-    let claim =
-      lazy
-        ( pos,
-          Printf.sprintf
-            "The %s attribute cannot be used on %s."
-            (Render.strip_ns attr |> Markdown_lite.md_codify)
-            expr_kind )
-    in
-    (Error_code.WrongExpressionKindAttribute, claim, lazy [], [])
 
   let ambiguous_object_access
       pos name self_pos vis subclass_pos class_self class_subclass =
@@ -5743,12 +5659,6 @@ module Primary = struct
       type_arity_mismatch pos decl_pos actual expected
     | Member_not_implemented { pos; member_name; decl_pos; quickfixes } ->
       member_not_implemented pos member_name decl_pos quickfixes
-    | Attribute_too_many_arguments { pos; name; expected } ->
-      attribute_too_many_arguments pos name expected
-    | Attribute_too_few_arguments { pos; name; expected } ->
-      attribute_too_few_arguments pos name expected
-    | Attribute_not_exact_number_of_args { pos; name; actual; expected } ->
-      attribute_not_exact_number_of_args pos name actual expected
     | Kind_mismatch { pos; decl_pos; tparam_name; expected_kind; actual_kind }
       ->
       kind_mismatch pos decl_pos tparam_name expected_kind actual_kind
@@ -5827,7 +5737,6 @@ module Primary = struct
         pos
         (Lazy.force left)
         (Lazy.force right)
-    | Attribute_param_type { pos; x } -> attribute_param_type pos x
     | Deprecated_use { pos; decl_pos_opt; msg } ->
       deprecated_use pos ~pos_def:decl_pos_opt msg
     | Cannot_declare_constant { pos; class_pos; class_name } ->
@@ -5856,8 +5765,6 @@ module Primary = struct
         attr_class_pos
         attr_class_name
         intf_name
-    | Wrong_expression_kind_builtin_attribute { pos; attr_name; expr_kind } ->
-      wrong_expression_kind_builtin_attribute expr_kind pos attr_name
     | Ambiguous_object_access
         { pos; name; self_pos; vis; subclass_pos; class_self; class_subclass }
       ->

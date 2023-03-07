@@ -51,11 +51,9 @@ let check_implements
                   attr_interface
                   ~equal:String.equal
         then
-          Errors.add_typing_error
-            Typing_error.(
-              primary
-              @@ Primary.Wrong_expression_kind_builtin_attribute
-                   { expr_kind; pos = attr_pos; attr_name });
+          Errors.add_nast_check_error
+            (Nast_check_error.Wrong_expression_kind_builtin_attribute
+               { expr_kind; pos = attr_pos; attr_name });
         true
       | None -> false
     in

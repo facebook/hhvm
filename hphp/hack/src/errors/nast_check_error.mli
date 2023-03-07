@@ -132,6 +132,31 @@ type t =
       second_pos: Pos.t;
     }
   | Soft_internal_without_internal of Pos.t
+  | Wrong_expression_kind_builtin_attribute of {
+      pos: Pos.t;
+      attr_name: string;
+      expr_kind: string;
+    }
+  | Attribute_too_many_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_too_few_arguments of {
+      pos: Pos.t;
+      name: string;
+      expected: int;
+    }
+  | Attribute_not_exact_number_of_args of {
+      pos: Pos.t;
+      name: string;
+      actual: int;
+      expected: int;
+    }
+  | Attribute_param_type of {
+      pos: Pos.t;
+      x: string;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

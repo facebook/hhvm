@@ -1739,7 +1739,8 @@ let safely_refine_class_type
 
 (** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinement of
 an instance variable. ivar_ty is the previous type of that instance variable. Return
-the intersection of the hint and variable. *)
+the intersection of the hint and variable. Returns the env, refined type, and a boolean
+true if ivar_ty was a class or tuple containing a class and false otherwise. *)
 let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   let (env, hint_ty) = Env.expand_type env hint_ty in
   match (get_node ivar_ty, get_node hint_ty) with
@@ -1749,17 +1750,20 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
       let (env, tparams_with_new_names, tyl_fresh) =
         generate_fresh_tparams env class_info p reason tyl
       in
-      safely_refine_class_type
-        env
-        p
-        _c
-        class_info
-        ivar_ty
-        hint_ty
-        reason
-        tparams_with_new_names
-        tyl_fresh
-    | None -> (env, MakeType.nothing (Reason.Rmissing_class ivar_pos))
+      let (env, ty) =
+        safely_refine_class_type
+          env
+          p
+          _c
+          class_info
+          ivar_ty
+          hint_ty
+          reason
+          tparams_with_new_names
+          tyl_fresh
+      in
+      (env, (ty, true))
+    | None -> (env, (MakeType.nothing (Reason.Rmissing_class ivar_pos), true))
   end
   | (Ttuple ivar_tyl, Ttuple hint_tyl)
     when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->
@@ -1767,17 +1771,36 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
       List.map2_env env ivar_tyl hint_tyl ~f:(fun env ivar_ty hint_ty ->
           class_for_refinement env p reason ivar_pos ivar_ty hint_ty)
     in
-    (env, MakeType.tuple reason tyl)
-  | _ -> (env, hint_ty)
+    (env, (MakeType.tuple reason (List.map ~f:fst tyl), List.exists ~f:snd tyl))
+  | _ -> (env, (hint_ty, false))
 
 let refine_and_simplify_intersection
     ~hint_first env p reason ivar_pos ivar_ty hint_ty =
+  let intersect ~hint_first ~is_class env r ty hint_ty =
+    let (env, hint_ty) =
+      if
+        is_class
+        && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+        && Typing_utils.is_supportdyn env ty
+      then
+        Typing_utils.make_supportdyn reason env hint_ty
+      else
+        (env, hint_ty)
+    in
+    (* Sometimes the type checker is sensitive to the ordering of intersections *)
+    if hint_first then
+      Inter.intersect env ~r hint_ty ty
+    else
+      Inter.intersect env ~r ty hint_ty
+  in
   let like_type_simplify ty =
     (* Distribute the intersection over the union *)
-    let (env, hint_ty) =
+    let (env, (hint_ty, is_class)) =
       class_for_refinement env p reason ivar_pos ty hint_ty
     in
-    let (env, ty2) = Inter.intersect env ~r:reason ty hint_ty in
+    let (env, ty2) =
+      intersect ~hint_first:false ~is_class env reason ty hint_ty
+    in
     match get_node hint_ty with
     (* If the hint is fully enforced, keep that information around *)
     | Tclass (_, _, [])
@@ -1792,14 +1815,10 @@ let refine_and_simplify_intersection
   | Some ty when TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) ->
     like_type_simplify ty
   | _ ->
-    let (env, hint_ty) =
+    let (env, (hint_ty, is_class)) =
       class_for_refinement env p reason ivar_pos ivar_ty hint_ty
     in
-    (* Sometimes the type checker is sensitive to the ordering of intersections *)
-    if hint_first then
-      Inter.intersect env ~r:reason hint_ty ivar_ty
-    else
-      Inter.intersect env ~r:reason ivar_ty hint_ty
+    intersect ~hint_first ~is_class env reason ivar_ty hint_ty
 
 let refine_for_is ~hint_first env tparamet ivar reason hint =
   let (env, lset) =
@@ -1896,7 +1915,7 @@ let safely_refine_is_array env ty p pred_name arg_expr =
         | HackVecOrVArray -> MakeType.vec r tfresh
       in
       let (_, arg_pos, _) = arg_expr in
-      let (env, refined_ty) =
+      let (env, (refined_ty, _)) =
         class_for_refinement env p r arg_pos arg_ty hint_ty
       in
       (* Add constraints on generic parameters that must

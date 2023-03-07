@@ -3220,9 +3220,8 @@ and simplify_subtype_can_traverse
     if TUtils.is_tyvar_error env lty_sub then
       let trav_ty = can_traverse_to_iface ct in
       simplify_subtype ~subtype_env ~sub_supportdyn ~this_ty lty_sub trav_ty env
-    else (
-      match get_node lty_sub with
-      | Tdynamic ->
+    else
+      let subtype_with_dynamic () =
         simplify_subtype
           ~subtype_env
           ~sub_supportdyn
@@ -3231,10 +3230,18 @@ and simplify_subtype_can_traverse
           ct.ct_val
           env
         &&&
-        (match ct.ct_key with
+        match ct.ct_key with
         | None -> valid
         | Some ct_key ->
-          simplify_subtype ~subtype_env ~sub_supportdyn ~this_ty lty_sub ct_key)
+          simplify_subtype ~subtype_env ~sub_supportdyn ~this_ty lty_sub ct_key
+      in
+      (match get_node lty_sub with
+      | Tdynamic -> subtype_with_dynamic ()
+      | _
+        when Option.is_some sub_supportdyn
+             && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+             && Tast.is_under_dynamic_assumptions env.checked ->
+        subtype_with_dynamic ()
       | Tclass _
       | Tvec_or_dict _
       | Tany _ ->
@@ -3254,8 +3261,7 @@ and simplify_subtype_can_traverse
           ~fail
           env
           ty_sub
-          ty_super
-    )
+          ty_super)
 
 and simplify_subtype_has_type_member
     ~subtype_env ~sub_supportdyn ~this_ty ~fail ty_sub (r, htm) env =

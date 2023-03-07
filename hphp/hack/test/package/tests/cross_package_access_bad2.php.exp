@@ -4,22 +4,26 @@ Typing[4444] Cannot access a public element from package 'pkg1' in package 'pkg3
 -> And package 'pkg3' does not include package 'pkg1 [4]
 
 cross_package_access_bad2.php--c.php:6:13
-    4 | public function test(): void {
-    5 |    $b = new B1(); // ok
-[1] 6 |    $a = new A(); // error
-    7 | }
+     4 | public function test(): void {
+     5 |    $b = new B1(); // ok
+[1]  6 |    $a = new A(); // error
+     7 | }
 
 cross_package_access_bad2.php--a.php:3:14
-    1 | <?hh
-    2 | module a;
-[2] 3 | public class A {}
+     1 | <?hh
+     2 | module a;
+[2]  3 | public class A {}
 
 cross_package_access_bad2.php--modules.php:4:12
-    2 | new module a {}     // package pkg1
-    3 | new module b.b1 {}  // package pkg2 (include pkg1)
-[3] 4 | new module c {}     // package pkg3 (include pkg2)
+     2 | new module a {}     // package pkg1
+     3 | new module b.b1 {}  // package pkg2 (include pkg1)
+[3]  4 | new module c {}     // package pkg3 (include pkg2)
 
-.:0:0
-[4] 0 | No source found
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
 
 1 error found.

@@ -51,7 +51,7 @@ pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
                 includes: convert(package.includes.as_ref()),
             };
             ffi::PackageMapEntry {
-                name: name.to_string(),
+                name: name.get_ref().to_string(),
                 package: package_ffi,
             }
         })

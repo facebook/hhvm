@@ -6,10 +6,12 @@
  *
  *)
 
+type pos_id = Pos.t * string [@@deriving eq, show]
+
 type package = {
-  name: string;
-  uses: string list;
-  includes: string list;
+  name: pos_id;
+  uses: pos_id list;
+  includes: pos_id list;
 }
 [@@deriving eq, show]
 

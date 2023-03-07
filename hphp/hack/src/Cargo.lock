@@ -3426,6 +3426,8 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "package",
+ "rc_pos",
+ "relative_path",
  "toml",
 ]
 

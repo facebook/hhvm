@@ -11,7 +11,7 @@ use toml::Spanned;
 
 // Preserve the order for ease of testing
 // Alternatively, we could use HashMap for performance
-type PackageMap = IndexMap<String, Package>;
+type PackageMap = IndexMap<Spanned<String>, Package>;
 type DeploymentMap = IndexMap<String, Deployment>;
 
 #[derive(Debug, Deserialize)]
@@ -66,6 +66,17 @@ impl PackageInfo {
     pub fn line_number(&self, byte_offset: usize) -> usize {
         match self.line_offsets.binary_search(&byte_offset) {
             Ok(n) | Err(n) => n + 1,
+        }
+    }
+
+    pub fn beginning_of_line(&self, line_number: usize) -> usize {
+        if line_number == 1 {
+            1
+        } else {
+            let line_idx = line_number - 1;
+            let prev_line_idx = line_idx - 1;
+            let prev_line_end = self.line_offsets[prev_line_idx];
+            prev_line_end + 1
         }
     }
 }

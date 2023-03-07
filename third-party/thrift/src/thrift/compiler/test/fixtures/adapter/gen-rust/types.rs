@@ -3803,8 +3803,16 @@ mod tests {
         let _ = super::Baz::default();
     }
     #[test]
+    fn test_struct_Bar_default_does_not_panic() {
+        let _ = super::Bar::default();
+    }
+    #[test]
     fn test_struct_StructWithFieldAdapter_default_does_not_panic() {
         let _ = super::StructWithFieldAdapter::default();
+    }
+    #[test]
+    fn test_struct_MyStruct_default_does_not_panic() {
+        let _ = super::MyStruct::default();
     }
     #[test]
     fn test_struct_AdaptTemplatedTestStruct_default_does_not_panic() {

@@ -32,6 +32,24 @@ typedef DoubleAdaptedI64 TripleAdaptedI64
 
 typedef list<TripleAdaptedI64> NestedTripleAdaptedI64
 
+typedef list<AdaptedString> AdaptedListNewType (rust.newtype)
+
+typedef binary (rust.type = "bytes::Bytes") IOBuf
+
+@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+typedef IOBuf AdaptedBytes
+
+typedef AdaptedBytes WrappedAdaptedBytes (rust.newtype)
+
+@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+typedef WrappedAdaptedBytes AdaptedWrappedAdaptedBytes
+
+typedef AdaptedWrappedAdaptedBytes PassThroughAdaptedWrappedAdaptedBytes
+
+typedef PassThroughAdaptedWrappedAdaptedBytes WrappedAdaptedWrappedAdaptedBytes (
+  rust.newtype,
+)
+
 struct Foo {
   1: string str_val;
   2: i64 int_val;

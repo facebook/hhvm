@@ -42,8 +42,13 @@ pub type {{typedef:rust_name}} = {{!
     }}{{#typedef:serde?}}, ::serde_derive::Serialize, ::serde_derive::Deserialize{{/typedef:serde?}}{{!
 }})]
 pub struct {{typedef:rust_name}}(pub {{!
-  }}{{#typedef:rust_type}}::{{typedef:rust_type}}{{/typedef:rust_type}}{{!
-  }}{{^typedef:rust_type}}{{#typedef:type}}{{>lib/type}}{{/typedef:type}}{{/typedef:rust_type}}{{!
+  }}{{#typedef:has_adapter?}}{{!
+    }}{{>lib/adapter/qualified}}::AdaptedType{{!
+  }}{{/typedef:has_adapter?}}{{!
+  }}{{^typedef:has_adapter?}}{{!
+    }}{{#typedef:rust_type}}::{{typedef:rust_type}}{{/typedef:rust_type}}{{!
+    }}{{^typedef:rust_type}}{{#typedef:type}}{{>lib/type}}{{/typedef:type}}{{/typedef:rust_type}}{{!
+  }}{{/typedef:has_adapter?}}{{!
 }});
 {{/typedef:newtype?}}
 {{!newline}}

@@ -19,8 +19,8 @@
 mod tests {
     {{#program:structs_with_adapters}}
     #[test]
-    fn test_struct_{{struct:rust_name}}_default_does_not_panic() {
-        let _ = super::{{struct:rust_name}}::default();
+    fn test_struct_{{.}}_default_does_not_panic() {
+        let _ = super::{{.}}::default();
     }
     {{/program:structs_with_adapters}}
 }

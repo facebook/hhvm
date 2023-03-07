@@ -330,6 +330,10 @@ bool type_has_transitive_adapter(const t_type* type) {
         return true;
       }
 
+      if ((*typedef_type).has_annotation("rust.newtype")) {
+        return false;
+      }
+
       return type_has_transitive_adapter(typedef_type->get_type());
     }
   } else if (type->is_list()) {
@@ -377,6 +381,13 @@ const std::string typedef_rust_name(const t_typedef* t) {
   return t->get_annotation("rust.name");
 }
 
+const std::string struct_rust_name(const t_struct* strct) {
+  if (!strct->has_annotation("rust.name")) {
+    return mangle_type(strct->get_name());
+  }
+  return strct->get_annotation("rust.name");
+}
+
 const std::string transitive_typedef_adapter_name(const t_typedef* t) {
   return fmt::format("{}TypedefThriftAdapter", typedef_rust_name(t));
 }
@@ -396,6 +407,10 @@ mstch::node adapter_node(
     }
 
     if (node_has_adapter(*typedef_type)) {
+      break;
+    }
+
+    if ((*typedef_type).has_annotation("rust.newtype")) {
       break;
     }
 
@@ -628,6 +643,13 @@ class rust_mstch_program : public mstch_program {
       }
     }
 
+    for (const t_typedef* t : program_->typedefs()) {
+      if (t->has_annotation("rust.newtype") &&
+          type_has_transitive_adapter(t->get_type())) {
+        return true;
+      }
+    }
+
     return false;
   }
   mstch::node rust_structs_with_adapters() {
@@ -635,11 +657,19 @@ class rust_mstch_program : public mstch_program {
 
     for (const t_struct* strct : program_->structs()) {
       for (const t_field& field : strct->fields()) {
-        if (node_has_adapter(field)) {
-          strcts.push_back(context_.struct_factory->make_mstch_object(
-              strct, context_, pos_));
+        if (node_has_adapter(field) ||
+            type_has_transitive_adapter(field.get_type())) {
+          strcts.push_back(struct_rust_name(strct));
           break;
         }
+      }
+    }
+
+    for (const t_typedef* t : program_->typedefs()) {
+      if (t->has_annotation("rust.newtype") &&
+          type_has_transitive_adapter(t->get_type())) {
+        strcts.push_back(typedef_rust_name(t));
+        break;
       }
     }
 
@@ -870,12 +900,7 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:serde?", &rust_mstch_struct::rust_serde},
         });
   }
-  mstch::node rust_name() {
-    if (!struct_->has_annotation("rust.name")) {
-      return mangle_type(struct_->get_name());
-    }
-    return struct_->get_annotation("rust.name");
-  }
+  mstch::node rust_name() { return struct_rust_name(struct_); }
   mstch::node rust_package() {
     return get_import_name(struct_->program(), options_);
   }
@@ -889,7 +914,8 @@ class rust_mstch_struct : public mstch_struct {
       }
 
       // Assume we cannot derive `Ord` on the adapted type.
-      if (node_has_adapter(field)) {
+      if (node_has_adapter(field) ||
+          type_has_transitive_adapter(field.get_type())) {
         return false;
       }
     }
@@ -1612,14 +1638,17 @@ class rust_mstch_typedef : public mstch_typedef {
   }
   mstch::node rust_ord() {
     return typedef_->has_annotation("rust.ord") ||
-        can_derive_ord(typedef_->get_type());
+        (can_derive_ord(typedef_->get_type()) &&
+         !type_has_transitive_adapter(typedef_->get_type()));
   }
   mstch::node rust_copy() {
-    auto inner = typedef_->get_true_type();
-    if (inner->is_bool() || inner->is_byte() || inner->is_i16() ||
-        inner->is_i32() || inner->is_i64() || inner->is_enum() ||
-        inner->is_void()) {
-      return true;
+    if (!type_has_transitive_adapter(typedef_->get_type())) {
+      auto inner = typedef_->get_true_type();
+      if (inner->is_bool() || inner->is_byte() || inner->is_i16() ||
+          inner->is_i32() || inner->is_i64() || inner->is_enum() ||
+          inner->is_void()) {
+        return true;
+      }
     }
     if (typedef_->has_annotation("rust.copy")) {
       return true;

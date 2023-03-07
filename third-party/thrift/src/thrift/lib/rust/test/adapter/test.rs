@@ -21,6 +21,8 @@ use adapters::SortedVec;
 use fbthrift::simplejson_protocol;
 use thrift_test::types::Bar;
 use thrift_test::types::Foo;
+use thrift_test::types::WrappedAdaptedBytes;
+use thrift_test::types::WrappedAdaptedWrappedAdaptedBytes;
 
 #[test]
 fn test_foo_default() {
@@ -313,4 +315,20 @@ fn test_bar_ser() {
         }"#
         .replace(['\n', ' '], "")
     );
+}
+
+#[test]
+fn test_newtype() {
+    let wrapped = WrappedAdaptedWrappedAdaptedBytes(WrappedAdaptedBytes("hello world".into()));
+
+    assert_eq!(
+        String::from_utf8(simplejson_protocol::serialize(wrapped.clone()).into()).unwrap(),
+        r#""aGVsbG8gd29ybGQ""#
+    );
+
+    // The '=' is just a padding and can be omitted if desired.
+    let deser: WrappedAdaptedWrappedAdaptedBytes =
+        simplejson_protocol::deserialize(r#""aGVsbG8gd29ybGQ=""#).unwrap();
+
+    assert_eq!(wrapped, deser);
 }

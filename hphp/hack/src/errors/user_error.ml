@@ -16,10 +16,6 @@ type ('prim_pos, 'pos) t = {
 }
 [@@deriving eq, ord, show]
 
-type severity =
-  | Warning
-  | Error
-
 let make code ?(is_fixmed = false) ?(quickfixes = []) claim reasons =
   { code; claim; reasons; quickfixes; is_fixmed }
 
@@ -28,17 +24,6 @@ let get_code { code; _ } = code
 let get_pos { claim; _ } = fst claim
 
 let quickfixes { quickfixes; _ } = quickfixes
-
-let get_code_severity code =
-  if
-    code
-    = Error_codes.Init.err_code Error_codes.Init.ForwardCompatibilityNotCurrent
-  then
-    Warning
-  else
-    Error
-
-let get_severity error = get_code_severity (get_code error)
 
 let to_list { claim; reasons; _ } = claim :: reasons
 

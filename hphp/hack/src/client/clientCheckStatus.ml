@@ -80,16 +80,7 @@ let go status (output_json, prefer_stdout) from error_format max_errors =
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
     if has_unsaved_changes then warn_unsaved_changes ());
 
-  (* don't indicate errors in exit code for warnings; warnings shouldn't break
-   * CI *)
-  if
-    List.exists
-      ~f:(fun e ->
-        match User_error.get_severity e with
-        | User_error.Error -> true
-        | _ -> false)
-      error_list
-  then
-    Exit_status.Type_error
-  else
+  if List.is_empty error_list then
     Exit_status.No_error
+  else
+    Exit_status.Type_error

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aed3bc185ceffe3069eb49c7bfb9459c>>
+// @generated SignedSource<<930aa557bddd718f9cd0b894e180f932>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -586,32 +586,6 @@ pub enum Typing {
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (enum, (show { with_path = false }))")]
-#[repr(C)]
-pub enum Init {
-    ForwardCompatibilityNotCurrent = 8001,
-    ForwardCompatibilityBelowMinimum = 8002,
-}
-impl TrivialDrop for Init {}
-arena_deserializer::impl_deserialize_in_arena!(Init);
 
 #[derive(
     Clone,

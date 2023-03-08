@@ -1144,15 +1144,9 @@ let hack_errors_to_lsp_diagnostic
                relatedMessage = message;
              })
     in
-    let severity =
-      User_error.(
-        match get_severity error with
-        | Error -> Some PublishDiagnostics.Error
-        | Warning -> Some PublishDiagnostics.Warning)
-    in
     {
       Lsp.PublishDiagnostics.range;
-      severity;
+      severity = Some Lsp.PublishDiagnostics.Error;
       code = PublishDiagnostics.IntCode (User_error.get_code error);
       source = Some "Hack";
       message;

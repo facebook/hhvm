@@ -761,17 +761,7 @@ end
 (* 5xxx: reserved for FB lint *)
 (* 6xxx: reserved for FB ai *)
 (* 7xxx: reserved for FB ai *)
-
-module Init = struct
-  type t =
-    | ForwardCompatibilityNotCurrent [@value 8001]
-    | ForwardCompatibilityBelowMinimum [@value 8002]
-  (* Add new Init codes here! Comment out when deprecating. *)
-  [@@deriving enum, show { with_path = false }]
-
-  let err_code = to_enum
-end
-
+(* 8xxx: had been used for forward/back-compat; no longer *)
 (* 9xxx: reserved for FB ai *)
 (* 10xxx: reserved for FB ai *)
 

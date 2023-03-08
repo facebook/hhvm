@@ -14,10 +14,6 @@ type ('prim_pos, 'pos) t = {
 }
 [@@deriving eq, ord, show]
 
-type severity =
-  | Warning
-  | Error
-
 val make :
   int ->
   ?is_fixmed:bool ->
@@ -31,10 +27,6 @@ val get_code : ('a, 'b) t -> int
 val get_pos : ('a, 'b) t -> 'a
 
 val quickfixes : ('a, 'b) t -> 'a Quickfix.t list
-
-val get_code_severity : int -> severity
-
-val get_severity : ('a, 'b) t -> severity
 
 val to_list : ('a, 'a) t -> 'a Message.t list
 

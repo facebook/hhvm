@@ -94,15 +94,7 @@ module Program = struct
 
     WorkerController.force_quit_all ();
 
-    (* as Warnings shouldn't break CI, don't change the exit status except for Errors *)
-    let has_errors =
-      List.exists
-        ~f:(fun e ->
-          match User_error.get_severity e with
-          | User_error.Error -> true
-          | _ -> false)
-        (Errors.get_error_list env.errorl)
-    in
+    let has_errors = not (Errors.is_empty env.errorl) in
     let is_saving_state_and_ignoring_errors =
       ServerArgs.gen_saved_ignore_type_errors genv.options
       && Option.is_some (ServerArgs.save_filename genv.options)

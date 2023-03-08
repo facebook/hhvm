@@ -10,15 +10,6 @@ class A {
 
 <<__EntryPoint>>
 function main(): void {
-  HH\autoload_set_paths(
-    dict[
-      'constant' => dict[
-        'BAZ' => 'constant_folding.inc',
-      ],
-    ],
-    __DIR__.'/',
-  );
-
   var_dump(FOO);
   var_dump(BAR);
   var_dump(BAZ);

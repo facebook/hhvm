@@ -1,0 +1,1 @@
+--inputs=hphp/test/slow/hhbbc/constant_folding/constant_folding.inc

@@ -7331,7 +7331,7 @@ void t_hack_generator::_generate_service_client_child_fn(
         << "\"" << tfunction->name() << "\", " << (is_void ? "true" : "false")
         << ", $currentseqid, $rpc_options";
     if (legacy_arrays) {
-      out << ", shape('read_options' => THRIFT_MARK_LEGACY_ARRAYS)";
+      out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
     }
     out << ");\n";
   } else {
@@ -7397,7 +7397,7 @@ void t_hack_generator::_generate_service_client_stream_child_fn(
       << (!tstream->has_first_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
-    out << ", shape('read_options' => THRIFT_MARK_LEGACY_ARRAYS)";
+    out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
   }
   out << ");\n";
   scope_down(out);
@@ -7460,7 +7460,7 @@ void t_hack_generator::_generate_service_client_sink_child_fn(
       << (!tsink->sink_has_first_response() ? "true" : "false")
       << ", $currentseqid, $rpc_options";
   if (legacy_arrays) {
-    out << ", shape('read_options' => THRIFT_MARK_LEGACY_ARRAYS)";
+    out << ", shape('read_options' => \\THRIFT_MARK_LEGACY_ARRAYS)";
   }
   out << ");\n";
   scope_down(out);

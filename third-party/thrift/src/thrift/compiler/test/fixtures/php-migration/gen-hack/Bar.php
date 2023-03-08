@@ -131,7 +131,7 @@ class BarAsyncClient extends \ThriftClientBase implements BarAsyncClientIf {
     ));
     await $this->asyncHandler_->genBefore("Bar", "baz", $args);
     $currentseqid = $this->sendImplHelper($args, "baz", false);
-    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options, shape('read_options' => THRIFT_MARK_LEGACY_ARRAYS));
+    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options, shape('read_options' => \THRIFT_MARK_LEGACY_ARRAYS));
   }
 
 }
@@ -194,7 +194,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
     ));
     await $this->asyncHandler_->genBefore("Bar", "baz", $args);
     $currentseqid = $this->sendImplHelper($args, "baz", false);
-    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options, shape('read_options' => THRIFT_MARK_LEGACY_ARRAYS));
+    return await $this->genAwaitResponse(Bar_baz_result::class, "baz", false, $currentseqid, $rpc_options, shape('read_options' => \THRIFT_MARK_LEGACY_ARRAYS));
   }
 
   /* send and recv functions */

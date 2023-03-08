@@ -37,9 +37,9 @@ const ResourcePoolHandle& ResourcePoolHandle::defaultAsync() {
 ResourcePoolHandle ResourcePoolHandle::makeDefaultHandle(std::size_t index) {
   CHECK(index == kDefaultSync || index == kDefaultAsync);
   if (index == kDefaultSync) {
-    return ResourcePoolHandle("DefaultSync", index, kNoOwner);
+    return ResourcePoolHandle("DefaultSync", index);
   } else {
-    return ResourcePoolHandle("DefaultAsync", index, kNoOwner);
+    return ResourcePoolHandle("DefaultAsync", index);
   }
 }
 

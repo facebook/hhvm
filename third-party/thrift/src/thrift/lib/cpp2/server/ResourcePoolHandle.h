@@ -33,28 +33,14 @@ namespace apache::thrift {
 // using checkOwner().
 class ResourcePoolHandle {
  public:
-  // An opqaue type that is used to verify that a ResourcePoolHandle is being
-  // provided to an object that originally returned it.
-  using OwnerId = intptr_t;
-
   static constexpr std::size_t kDefaultSync = 0;
   static constexpr std::size_t kDefaultAsync = 1;
   static constexpr std::size_t kMaxReservedHandle = kDefaultAsync;
-
-  static constexpr OwnerId kNoOwner = 0;
 
   ResourcePoolHandle() = default;
 
   std::size_t index() const { return index_; }
   std::string_view name() const { return name_; }
-
-  // Check that this handle either has no owner set or that the owner matches
-  // the specified ownerId (normally this verifies that this ResourcePoolHandle
-  // was created by the same object it is being provided to)
-  bool checkOwner(OwnerId ownerId) {
-    DCHECK(index_ != kInvalidHandle);
-    return (ownerId_ == kNoOwner || (ownerId == ownerId_));
-  }
 
   // Returns pointer to a singleton default Sync handle. Users should cache the
   // result of this.
@@ -67,9 +53,9 @@ class ResourcePoolHandle {
   // Create a new handle (cannot be used to create kDefaultSync or
   // kDefaultAsync handles).
   static ResourcePoolHandle makeHandle(
-      std::string_view name, std::size_t index, OwnerId ownerId = kNoOwner) {
+      std::string_view name, std::size_t index) {
     CHECK(index != kDefaultSync && index != kDefaultAsync);
-    return ResourcePoolHandle{name, index, ownerId};
+    return ResourcePoolHandle{name, index};
   }
 
  private:
@@ -78,13 +64,11 @@ class ResourcePoolHandle {
   static constexpr std::size_t kInvalidHandle =
       std::numeric_limits<std::size_t>::max();
 
-  ResourcePoolHandle(
-      std::string_view name, std::size_t index, std::intptr_t ownerId)
-      : name_(name), index_(index), ownerId_(ownerId) {}
+  ResourcePoolHandle(std::string_view name, std::size_t index)
+      : name_(name), index_(index) {}
 
   std::string name_;
   std::size_t index_{kInvalidHandle};
-  OwnerId ownerId_{kNoOwner};
 };
 
 } // namespace apache::thrift

@@ -39,7 +39,7 @@ enum class tok {
   inline_doc,
 
   // clang-format off
-  // Operators and punctuators:
+  // Operators and punctuation:
   comma,     // ","
   semi,      // ";"
   colon,     // ":"

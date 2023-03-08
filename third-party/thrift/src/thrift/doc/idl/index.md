@@ -124,13 +124,13 @@ const i16 LITTLE = 42;
 
 The literal `42` is treated as a 32-bit integer in the definition of `BIG` and as a 16-bit integer in the definition of `LITTLE`.
 
-### Separators
+### Operators and Punctuation
 
-Thrift allows the use of either semicolon, comma, or nothing at all as separators between lexical elements. Commas are used in all examples.
+The following tokens serve as operators and punctuation in Thrift:
 
 ```
-Separator ::=
-  [ ";" | "," ]
+(       )       {       }       [       ]       <       >
+,       ;       @       =       +       -
 ```
 
 ## The Thrift File

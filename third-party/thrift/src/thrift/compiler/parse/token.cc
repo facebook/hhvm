@@ -45,7 +45,7 @@ constexpr token_kind_info info[] = {
 
     {tok::inline_doc, "inline doc"},
 
-    // // Operators and punctuators:
+    // Operators and punctuation:
     {tok::comma, ","},
     {tok::semi, ";"},
     {tok::colon, ":"},

@@ -383,7 +383,7 @@ token lexer::get_next_token() {
     return token(tok::eof, token_source_range());
   }
 
-  // Lex operators and punctuators.
+  // Lex operators and punctuation.
   auto kind = detail::to_tok(c);
   return kind != tok::error ? token(kind, token_source_range())
                             : unexpected_token();

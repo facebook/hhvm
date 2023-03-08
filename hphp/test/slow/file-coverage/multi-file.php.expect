@@ -2,7 +2,6 @@ In A_foo()
   Got bool!
 In A_foo()
   Got bool!
-In handle_autoload(function, B_foo)
 In B_foo()
 In B_foo()
 In A_foo()
@@ -11,7 +10,6 @@ In A_foo()
   Got int!
 In B_foo()
 In B_foo()
-In handle_autoload(function, C_foo)
 In C_foo()
 In C_foo()
 multi-file-c.inc:4-5

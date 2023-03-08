@@ -1,15 +1,5 @@
 <?hh
 
-function handle_autoload($kind, $name) {
-  echo "In handle_autoload($kind, $name)\n";
-  if ($kind === 'function' && $name === 'B_foo') {
-    require __DIR__.'/multi-file-b.inc';
-  }
-  if ($kind === 'function' && $name === 'C_foo') {
-    require __DIR__.'/multi-file-c.inc';
-  }
-}
-
 function print_cover_maps(dict<string, vec<int>> $map) {
   foreach ($map as $path => $lines) {
     if ($lines[0] === 1) {
@@ -37,17 +27,6 @@ function print_cover_maps(dict<string, vec<int>> $map) {
 
 <<__EntryPoint>>
 function main() {
-  HH\autoload_set_paths(
-    darray[
-      'class' => varray[],
-      'function' => darray['a_foo' => __DIR__.'/multi-file-a.inc'],
-      'constant' => varray[],
-      'type' => varray[],
-      'failure' => handle_autoload<>,
-    ],
-    __DIR__
-  );
-
   A_foo(false); A_foo(false);
   B_foo();      B_foo();
   HH\enable_per_file_coverage(keyset[

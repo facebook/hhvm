@@ -79,36 +79,10 @@ zend/good/ext/date/tests/sunfuncts.php
 zend/good/ext/xsl/tests/xslt010.php
 
 # TODO(alexeyt) fail due to inability to start watchman
-slow/decl-provider/embed_type_decl.php
 slow/dynamic-calls/watchman-callback.php
 slow/dynamic-calls/watchman-callback-notice.php
 slow/dynamic-calls/watchman-callback-throw.php
 slow/ext_watchman/ext_watchman.php
-slow/facts/facts.php
-slow/native-autoload/native-autoload.php
-slow/native-autoload2/native-autoload.php
-slow/native-autoload-path-to-symbols/autoload_path_symbol_inverse.php
-slow/native-autoload-path-to-symbols/autoload_path_to_symbols.php
-slow/native-autoload-symlinked/native-autoload-symlinked.php
-slow/native-autoload-xhp/mangle.php
-slow/native-autoload-xhp/nomangle.php
-slow/readonly_tdb/basic.php
-slow/readonly_tdb/method_1.php
-slow/readonly_tdb/scope_closure_1.php
-slow/readonly_tdb/scope_for_3.php
-slow/readonly_tdb/scope_if_1.php
-slow/readonly_tdb/scope_if_2.php
-slow/readonly_tdb/scope_if_3.php
-slow/readonly_tdb/scope_switch_1.php
-slow/readonly_tdb/scope_try_1.php
-slow/readonly_tdb/scope_try_2.php
-slow/readonly_tdb/self_method_1.php
-slow/readonly_tdb/self_method_2.php
-slow/readonly_tdb/static_method_1.php
-slow/readonly_tdb/static_method_2.php
-slow/readonly_tdb/static_prop_1.php
-slow/types/autoload_alias/autoload_alias.php
-slow/autoload/requireclass/requireclass.php
 
 # TODO(alexeyt) jit assertion failure
 slow/u_converter/2135.php

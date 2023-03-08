@@ -1025,6 +1025,29 @@ void TypeConstraint::verifyFail(tv_lval c, const Class* ctx, const Func* func,
 
 //////////////////////////////////////////////////////////////////////
 
+void TypeConstraint::resolveType(AnnotType t,
+                                 bool nullable,
+                                 LowStringPtr clsName) {
+  assertx(m_type == AnnotType::Unresolved);
+  assertx(t != AnnotType::Unresolved);
+  assertx(IMPLIES(t == AnnotType::Object, clsName != nullptr));
+  assertx(IMPLIES(clsName != nullptr,
+                  t == AnnotType::Object || enumSupportsAnnot(t)));
+  auto flags = m_flags | Flags::Resolved;
+  if (nullable) flags |= Flags::Nullable;
+  m_flags = static_cast<Flags>(flags);
+  m_type = t;
+  m_clsName = clsName;
+}
+
+void TypeConstraint::unresolve() {
+  m_flags = static_cast<Flags>(m_flags & ~Flags::Resolved);
+  m_type = AnnotType::Unresolved;
+  m_clsName = nullptr;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
   using MK = MemoKeyConstraint;
 

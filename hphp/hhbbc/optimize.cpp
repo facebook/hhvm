@@ -664,32 +664,6 @@ void optimize_iterators(VisitContext& visit) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Use the information in the index to resolve a type-constraint to its
- * underlying type, if possible.
- */
-void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
-  if (!tc.isUnresolved()) return;
-
-  auto const resolved = index.resolve_type_name(tc.typeName());
-  if (resolved.type == AnnotType::Unresolved) return;
-
-  assertx(
-    IMPLIES(resolved.type == AnnotType::Object, resolved.cls.has_value())
-  );
-  tc.resolveType(
-    resolved.type,
-    resolved.nullable,
-    resolved.type == AnnotType::Object
-      ? resolved.cls->name()
-      : nullptr
-  );
-
-  FTRACE(1, "Retype tc {} -> {}\n", tc.typeName(), tc.displayName());
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void do_optimize(const Index& index, FuncAnalysis&& ainfo,
                  php::WideFunc& func) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", func->name);
@@ -769,9 +743,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
     if (block->hhbcs.capacity() == block->hhbcs.size()) continue;
     func.blocks()[bid].mutate()->hhbcs.shrink_to_fit();
   }
-
-  for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
-  fixTypeConstraint(index, func->retTypeConstraint);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -897,20 +868,6 @@ void update_bytecode(php::WideFunc& func, BlockUpdates&& blockUpdates,
     }
   }
   blockUpdates.clear();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void optimize_class_prop_type_hints(const Index& index, Context ctx) {
-  assertx(!ctx.func);
-  auto const bump = trace_bump_for(ctx.cls, nullptr);
-  Trace::Bump bumper{Trace::hhbbc, bump};
-  for (auto& prop : ctx.cls->properties) {
-    fixTypeConstraint(
-      index,
-      const_cast<TypeConstraint&>(prop.typeConstraint)
-    );
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

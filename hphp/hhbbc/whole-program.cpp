@@ -451,11 +451,6 @@ void prop_type_hint_pass(Index& index) {
   auto const contexts = opt_prop_type_hints_contexts(index);
   parallel::for_each(
     contexts,
-    [&] (Context ctx) { optimize_class_prop_type_hints(index, ctx); }
-  );
-
-  parallel::for_each(
-    contexts,
     [&] (Context ctx) {
       index.mark_no_bad_redeclare_props(const_cast<php::Class&>(*ctx.cls));
     }
@@ -515,33 +510,111 @@ void final_pass(Index& index,
 
 struct WholeProgramInput::Key::Impl {
   enum class Type {
+    None,
     Fail,
     Unit,
     Func,
     Class
   };
-  Type type;
-  LSString name;
-  LSString context;
-  std::vector<SString> dependencies;
-  bool isClosure;
 
-  Impl(Type type,
-       SString name,
-       SString context,
-       std::vector<SString> dependencies,
-       bool isClosure)
-    : type{type}
-    , name{name}
-    , context{context}
-    , dependencies{std::move(dependencies)}
-    , isClosure{isClosure}
-  {
-    assertx(IMPLIES(!dependencies.empty(), type == Type::Class));
-    assertx(IMPLIES(context, type == Type::Func || type == Type::Class));
-    assertx(IMPLIES(isClosure, type == Type::Class));
+  using UnresolvedTypes =
+    hphp_fast_set<SString, string_data_hash, string_data_isame>;
+
+  struct FailInfo {
+    LSString message;
+    template <typename SerDe> void serde(SerDe& sd) { sd(message); }
+  };
+  struct UnitInfo {
+    LSString name;
+    std::vector<TypeMapping> typeMappings;
+    template <typename SerDe> void serde(SerDe& sd) { sd(name)(typeMappings); }
+  };
+  struct FuncInfo {
+    LSString name;
+    LSString methCallerUnit;
+    UnresolvedTypes unresolvedTypes;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(name)
+        (methCallerUnit)
+        (unresolvedTypes, string_data_lti{})
+        ;
+    }
+  };
+  struct ClassInfo {
+    LSString name;
+    LSString context;
+    std::vector<SString> dependencies;
+    bool isClosure;
+    Optional<TypeMapping> typeMapping;
+    UnresolvedTypes unresolvedTypes;
+    template <typename SerDe> void serde(SerDe& sd) {
+      sd(name)
+        (context)
+        (dependencies)
+        (isClosure)
+        (typeMapping)
+        (unresolvedTypes, string_data_lti{})
+        ;
+    }
+  };
+
+  Type type;
+  union {
+    FailInfo fail;
+    UnitInfo unit;
+    FuncInfo func;
+    ClassInfo cls;
+  };
+
+  Impl() : type{Type::None} {}
+
+  explicit Impl(FailInfo i)  : type{Type::Fail},  fail{std::move(i)} {}
+  explicit Impl(UnitInfo i)  : type{Type::Unit},  unit{std::move(i)} {}
+  explicit Impl(FuncInfo i)  : type{Type::Func},  func{std::move(i)} {}
+  explicit Impl(ClassInfo i) : type{Type::Class}, cls{std::move(i)}  {}
+
+  Impl(const Impl&) = delete;
+  Impl(Impl&&) = delete;
+  Impl& operator=(const Impl&) = delete;
+  Impl& operator=(Impl&&) = delete;
+
+  void destroyInfo() {
+    switch (type) {
+      case Type::None:  break;
+      case Type::Fail:  fail.~FailInfo();  break;
+      case Type::Unit:  unit.~UnitInfo();  break;
+      case Type::Func:  func.~FuncInfo();  break;
+      case Type::Class: cls.~ClassInfo();  break;
+    }
+  }
+
+  ~Impl() { destroyInfo(); }
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    if constexpr (SerDe::deserializing) {
+      destroyInfo();
+      sd(type);
+      switch (type) {
+        case Type::None:  break;
+        case Type::Fail:  new (&fail) FailInfo();  break;
+        case Type::Unit:  new (&unit) UnitInfo();  break;
+        case Type::Func:  new (&func) FuncInfo();  break;
+        case Type::Class: new (&cls)  ClassInfo(); break;
+      }
+    } else {
+      sd(type);
+    }
+
+    switch (type) {
+      case Type::None:  break;
+      case Type::Fail:  sd(fail); break;
+      case Type::Unit:  sd(unit); break;
+      case Type::Func:  sd(func); break;
+      case Type::Class: sd(cls);  break;
+    }
   }
 };
+
 struct WholeProgramInput::Value::Impl {
   std::unique_ptr<php::Func> func;
   std::unique_ptr<php::Class> cls;
@@ -552,6 +625,7 @@ struct WholeProgramInput::Value::Impl {
   explicit Impl(std::unique_ptr<php::Class> cls) : cls{std::move(cls)} {}
   explicit Impl(std::unique_ptr<php::Unit> unit) : unit{std::move(unit)} {}
 };
+
 struct WholeProgramInput::Impl {
   folly::AtomicLinkedList<std::pair<Key, Ref<Value>>> values;
 };
@@ -571,109 +645,130 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 
   std::vector<std::pair<Key, Value>> out;
 
-  auto const add = [&] (Key::Impl::Type type,
-                        SString name,
-                        SString context,
-                        std::vector<SString> deps,
-                        bool isClosure,
-                        auto v) {
+  using KeyI = Key::Impl;
+  using ValueI = Value::Impl;
+
+  auto const add = [&] (auto k, auto v) {
     Key key;
     Value value;
-    key.m_impl.reset(
-      new Key::Impl{type, name, context, std::move(deps), isClosure}
-    );
-    value.m_impl.reset(new Value::Impl{std::move(v)});
+    key.m_impl.reset(new KeyI{std::move(k)});
+    value.m_impl.reset(new ValueI{std::move(v)});
     out.emplace_back(std::move(key), std::move(value));
+  };
+
+  auto const addType =
+    [&] (KeyI::UnresolvedTypes& u,
+         const TypeConstraint& tc,
+         const php::Class* cls = nullptr,
+         const CompactVector<TypeConstraint>* ubs = nullptr) {
+    // Skip names which match the current class name. We don't need to
+    // report these as it's implicit.
+    if (tc.isUnresolved() && (!cls || !cls->name->isame(tc.typeName()))) {
+      u.emplace(tc.typeName());
+    }
+    if (!ubs) return;
+    for (auto const& ub : *ubs) {
+      if (ub.isUnresolved() && (!cls || !cls->name->isame(ub.typeName()))) {
+        u.emplace(ub.typeName());
+      }
+    }
+  };
+
+  auto const addFuncTypes = [&] (KeyI::UnresolvedTypes& u,
+                                 const php::Func& f,
+                                 const php::Class* cls = nullptr) {
+    for (auto const& p : f.params) {
+      addType(u, p.typeConstraint, cls, &p.upperBounds);
+    }
+    addType(u, f.retTypeConstraint, cls, &f.returnUBs);
   };
 
   if (parsed.unit) {
     if (auto const& fi = parsed.unit->fatalInfo) {
+      auto const msg = makeStaticString(fi->fatalMsg);
       if (!fi->fatalLoc) {
-        add(
-          Key::Impl::Type::Fail,
-          makeStaticString(fi->fatalMsg),
-          nullptr,
-          {},
-          false,
-          nullptr
-        );
+        add(KeyI::FailInfo{msg}, nullptr);
         return out;
       }
     }
-    auto const name = parsed.unit->filename;
-    add(
-      Key::Impl::Type::Unit,
-      name,
-      nullptr,
-      {},
-      false,
-      std::move(parsed.unit)
-    );
+
+    KeyI::UnitInfo info{parsed.unit->filename};
+    for (auto const& typeAlias : parsed.unit->typeAliases) {
+      info.typeMappings.emplace_back(
+        TypeMapping{
+          typeAlias->name,
+          typeAlias->value,
+          nullptr,
+          typeAlias->type,
+          typeAlias->nullable,
+        }
+      );
+    }
+    add(std::move(info), std::move(parsed.unit));
   }
   for (auto& c : parsed.classes) {
     auto const name = c->name;
     auto const context = c->closureContextCls;
     auto const isClosure = is_closure(*c);
     auto deps = Index::Input::makeDeps(*c);
+
+    KeyI::UnresolvedTypes types;
+    for (auto const& m : c->methods) addFuncTypes(types, *m, c.get());
+    for (auto const& p : c->properties) {
+      addType(types, p.typeConstraint, c.get(), &p.ubs);
+    }
+
+    Optional<TypeMapping> typeMapping;
+    if (c->attrs & AttrEnum) {
+      auto const& tc = c->enumBaseTy;
+      assertx(!tc.isNullable());
+      addType(types, tc, nullptr);
+      auto type = tc.type();
+      if (type == AnnotType::Mixed) type = AnnotType::ArrayKey;
+      typeMapping.emplace(
+        TypeMapping{
+          c->name,
+          tc.typeName(),
+          c->name,
+          type,
+          false
+        }
+      );
+    }
+
     add(
-      Key::Impl::Type::Class,
-      name,
-      context,
-      std::move(deps),
-      isClosure,
+      KeyI::ClassInfo{
+        name,
+        context,
+        std::move(deps),
+        isClosure,
+        std::move(typeMapping),
+        std::move(types)
+      },
       std::move(c)
     );
   }
   for (auto& f : parsed.funcs) {
     auto const name = f->name;
-    auto const context =
+    auto const methCallerUnit =
       (f->attrs & AttrIsMethCaller) ? f->unit : nullptr;
-    add(
-      Key::Impl::Type::Func,
-      name,
-      context,
-      {},
-      false,
-      std::move(f)
-    );
+
+    KeyI::UnresolvedTypes types;
+    addFuncTypes(types, *f);
+
+    add(KeyI::FuncInfo{name, methCallerUnit, std::move(types)}, std::move(f));
   }
   return out;
 }
 
 void WholeProgramInput::Key::serde(BlobEncoder& sd) const {
   assertx(m_impl);
-  sd(m_impl->type)(m_impl->name);
-  if (m_impl->type == Impl::Type::Class) {
-    sd(m_impl->context);
-    sd(m_impl->dependencies);
-    sd(m_impl->isClosure);
-  } else if (m_impl->type == Impl::Type::Func) {
-    sd(m_impl->context);
-  }
+  sd(*m_impl);
 }
+
 void WholeProgramInput::Key::serde(BlobDecoder& sd) {
-  Key::Impl::Type type;
-  SString name;
-  SString context{nullptr};
-  std::vector<SString> dependencies;
-  bool isClosure{false};
-  sd(type)(name);
-  if (type == Impl::Type::Class) {
-    sd(context);
-    sd(dependencies);
-    sd(isClosure);
-  } else if (type == Impl::Type::Func) {
-    sd(context);
-  }
-  m_impl.reset(
-    new Impl{
-      type,
-      name,
-      context,
-      std::move(dependencies),
-      isClosure
-    }
-  );
+  m_impl.reset(new Impl());
+  sd(*m_impl);
 }
 
 void WholeProgramInput::Value::serde(BlobEncoder& sd) const {
@@ -713,40 +808,52 @@ Index::Input make_index_input(WholeProgramInput input) {
   input.m_impl->values.sweep(
     [&] (std::pair<WPI::Key, Ref<WPI::Value>>&& p) {
       switch (p.first.m_impl->type) {
+        case Key::Type::None:
+          break;
         case Key::Type::Fail:
           // An unit which failed the verifier. This causes us
           // to exit immediately with an error.
-           fprintf(stderr, "%s", p.first.m_impl->name->data());
-           _Exit(1);
-           break;
-         case Key::Type::Class:
-           out.classes.emplace_back(
-             Index::Input::ClassMeta{
-               p.second.cast<std::unique_ptr<php::Class>>(),
-               p.first.m_impl->name,
-               std::move(p.first.m_impl->dependencies),
-               p.first.m_impl->context,
-               p.first.m_impl->isClosure
-             }
-           );
-           break;
-         case Key::Type::Func:
-           out.funcs.emplace_back(
-             Index::Input::FuncMeta{
-               p.second.cast<std::unique_ptr<php::Func>>(),
-               p.first.m_impl->name,
-               p.first.m_impl->context
-             }
-           );
-           break;
-         case Key::Type::Unit:
-           out.units.emplace_back(
-             Index::Input::UnitMeta{
-               p.second.cast<std::unique_ptr<php::Unit>>(),
-               p.first.m_impl->name,
-             }
-           );
-           break;
+          fprintf(stderr, "%s", p.first.m_impl->fail.message->data());
+          _Exit(1);
+          break;
+        case Key::Type::Class:
+          out.classes.emplace_back(
+            Index::Input::ClassMeta{
+              p.second.cast<std::unique_ptr<php::Class>>(),
+              p.first.m_impl->cls.name,
+              std::move(p.first.m_impl->cls.dependencies),
+              p.first.m_impl->cls.context,
+              p.first.m_impl->cls.isClosure,
+              std::move(p.first.m_impl->cls.typeMapping),
+              std::vector<SString>{
+                begin(p.first.m_impl->cls.unresolvedTypes),
+                end(p.first.m_impl->cls.unresolvedTypes)
+              }
+            }
+          );
+          break;
+        case Key::Type::Func:
+          out.funcs.emplace_back(
+            Index::Input::FuncMeta{
+              p.second.cast<std::unique_ptr<php::Func>>(),
+              p.first.m_impl->func.name,
+              p.first.m_impl->func.methCallerUnit,
+              std::vector<SString>{
+                begin(p.first.m_impl->func.unresolvedTypes),
+                end(p.first.m_impl->func.unresolvedTypes)
+              }
+            }
+          );
+          break;
+        case Key::Type::Unit:
+          out.units.emplace_back(
+            Index::Input::UnitMeta{
+              p.second.cast<std::unique_ptr<php::Unit>>(),
+              p.first.m_impl->unit.name,
+              std::move(p.first.m_impl->unit.typeMappings)
+            }
+          );
+          break;
       }
     }
   );

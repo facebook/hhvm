@@ -678,6 +678,26 @@ std::string show(const Class&);
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * A type which is an alias to another. This includes standard
+ * type-aliases, but also enums (which are aliases of their underlying
+ * base type). Type mappings can alias to another type mapping.
+ */
+struct TypeMapping {
+  LSString name;
+  LSString value;
+  // If an enum, this is the same value as name. Otherwise it's the
+  // first enum encountered when resolving a type-alias.
+  LSString firstEnum;
+  AnnotType type;
+  bool nullable;
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(name)(value)(firstEnum)(type)(nullable);
+  }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+/*
  * This class encapsulates the known facts about the program, with a
  * whole-program view.
  *
@@ -703,17 +723,23 @@ struct Index {
       std::vector<SString> dependencies;
       LSString closureContext;
       bool isClosure;
+      // If this class is an enum, the type-mapping representing it's
+      // base type.
+      Optional<TypeMapping> typeMapping;
+      std::vector<SString> unresolvedTypes;
     };
 
     struct FuncMeta {
       R<php::Func> func;
       LSString name;
       LSString methCallerUnit; // nullptr if not MethCaller
+      std::vector<SString> unresolvedTypes;
     };
 
     struct UnitMeta {
       R<php::Unit> unit;
       LSString name;
+      std::vector<TypeMapping> typeMappings;
     };
 
     static std::vector<SString> makeDeps(const php::Class&);
@@ -874,19 +900,6 @@ struct Index {
    */
   Optional<res::Class> selfCls(const Context& ctx) const;
   Optional<res::Class> parentCls(const Context& ctx) const;
-
-  /*
-   * Try to resolve a type-name, looking through type-aliases and
-   * enums. If returned type is AnnotType::Unresolved, the type does
-   * not exist.
-   */
-  struct ResolvedTypeName {
-    AnnotType type;
-    bool nullable;
-    // If type == AnnotType::Object, the equivalent res::Class.
-    Optional<res::Class> cls;
-  };
-  ResolvedTypeName resolve_type_name(SString name) const;
 
   /*
    * Resolve a closure class.
@@ -1432,9 +1445,6 @@ private:
 
   res::Func resolve_func_helper(const php::Func*, SString) const;
   res::Func do_resolve(const php::Func*) const;
-
-  ConstraintType<>
-  type_from_annot_type(const Context&, AnnotType, SString, const Type&) const;
 
   void init_return_type(const php::Func* func);
 

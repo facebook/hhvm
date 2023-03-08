@@ -5242,24 +5242,32 @@ struct FlattenJob {
     std::vector<Parents> parents;
     // Classes which are interfaces.
     ISStringSet interfaces;
+    // The types used by the type-constraints of input classes and
+    // functions.
+    std::vector<ISStringSet> classTypeUses;
+    std::vector<ISStringSet> funcTypeUses;
     template <typename SerDe> void serde(SerDe& sd) {
       sd(uninstantiable, string_data_lti{})
         (newClosures)
         (parents)
         (interfaces, string_data_lti{})
+        (classTypeUses, string_data_lti{})
+        (funcTypeUses, string_data_lti{})
         ;
     }
   };
 
   /*
    * Job returns a list of (potentially modified) php::Class, a list
-   * of new ClassInfo2, and metadata for the entire job. The order of
-   * the lists reflects the order of the input classes (skipping over
+   * of new ClassInfo2, a list of (potentially modified) php::Func,
+   * and metadata for the entire job. The order of the lists reflects
+   * the order of the input classes and functions(skipping over
    * classes marked as uninstantiable in the metadata).
    */
   using Output = Multi<
     Variadic<std::unique_ptr<php::Class>>,
     Variadic<std::unique_ptr<ClassInfo2>>,
+    Variadic<std::unique_ptr<php::Func>>,
     OutputMeta
   >;
 
@@ -5269,11 +5277,30 @@ struct FlattenJob {
    * dependencies of the classes to be flattened. (A class might be
    * one of the inputs *and* a dependency, in which case it should
    * just be on the input list). It is expected that *all*
-   * dependencies are provided.
+   * dependencies are provided. All instantiable classes will have
+   * their type-constraints resolved to their ultimate type, or left
+   * as unresolved if it refers to a missing/invalid type. The
+   * provided functions only have their type-constraints updated. The
+   * provided type-mappings and list of missing types is used for
+   * type-constraint resolution (if a type isn't in a type mapping and
+   * isn't a missing type, it is assumed to be a object type).
    */
   static Output run(Variadic<std::unique_ptr<php::Class>> classes,
-                    Variadic<std::unique_ptr<php::Class>> deps) {
+                    Variadic<std::unique_ptr<php::Class>> deps,
+                    Variadic<std::unique_ptr<php::Func>> funcs,
+                    std::vector<TypeMapping> typeMappings,
+                    std::vector<SString> missingTypes) {
     LocalIndex index;
+
+    for (auto const tc : typeMappings) {
+      auto const name = tc.name;
+      always_assert(index.m_typeMappings.emplace(name, std::move(tc)).second);
+    }
+    for (auto const m : missingTypes) {
+      always_assert(index.m_missingTypes.emplace(m).second);
+    }
+    typeMappings.clear();
+    missingTypes.clear();
 
     // Some classes might be dependencies of another. Moreover, some
     // classes might share dependencies. Topologically sort all of the
@@ -5393,6 +5420,9 @@ struct FlattenJob {
         );
       }
 
+      outMeta.classTypeUses.emplace_back();
+      update_type_constraints(index, *cls, outMeta.classTypeUses.back());
+
       if (!is_closure(*cls)) {
         auto const& state = index.m_states.at(name);
         outMeta.parents.emplace_back();
@@ -5431,6 +5461,9 @@ struct FlattenJob {
       // requested to flatten.
       if (!outNames.count(clo->closureContextCls)) continue;
 
+      outMeta.classTypeUses.emplace_back();
+      update_type_constraints(index, *clo, outMeta.classTypeUses.back());
+
       auto& outNewClosures = outMeta.newClosures;
       if (outNewClosures.empty() || outNewClosures.back().unit != clo->unit) {
         outNewClosures.emplace_back();
@@ -5443,9 +5476,15 @@ struct FlattenJob {
       outInfos.vals.emplace_back(std::move(cinfo));
     }
 
+    for (auto& func : funcs.vals) {
+      outMeta.funcTypeUses.emplace_back();
+      update_type_constraints(index, *func, outMeta.funcTypeUses.back());
+    }
+
     return std::make_tuple(
       std::move(outClasses),
       std::move(outInfos),
+      std::move(funcs),
       std::move(outMeta)
     );
   }
@@ -5507,6 +5546,9 @@ private:
 
     ISStringSet m_uninstantiable;
 
+    ISStringToOneT<TypeMapping> m_typeMappings;
+    ISStringSet m_missingTypes;
+
     const php::Class& cls(SString name) const {
       if (m_ctx->name->isame(name)) return *m_ctx;
       auto const it = m_classes.find(name);
@@ -5555,6 +5597,14 @@ private:
       return m_uninstantiable.count(name);
     }
 
+    const TypeMapping* typeMapping(SString name) const {
+      return folly::get_ptr(m_typeMappings, name);
+    }
+
+    bool missingType(SString name) const {
+      return m_missingTypes.count(name);
+    }
+
     const php::Func& meth(const MethRef& r) const {
       auto const& mcls = cls(r.cls);
       assertx(r.idx < mcls.methods.size());
@@ -5583,6 +5633,9 @@ private:
     LocalIndex& index,
     const ISStringToOneT<php::Class*>& classes
   ) {
+    // We might not have any classes if we're just processing funcs.
+    if (classes.empty()) return {};
+
     auto const get = [&] (SString name) -> php::Class& {
       auto const it = classes.find(name);
       always_assert_flog(
@@ -5911,6 +5964,23 @@ private:
       cinfo->hasReifiedParent |= traitInfo.hasReifiedParent;
 
       state.m_parents.emplace_back(&trait);
+    }
+
+    if (cls.attrs & AttrEnum) {
+      auto const baseType = [&] {
+        auto const& base = cls.enumBaseTy;
+        if (!base.isUnresolved()) return base.type();
+        auto const tm = index.typeMapping(base.typeName());
+        if (!tm) return AnnotType::Unresolved;
+        return tm->type;
+      }();
+      if (!enumSupportsAnnot(baseType)) {
+        ITRACE(2,
+               "Making class-info failed for `{}' because {} "
+               "is not a valid enum base type\n",
+               cls.name, annotName(baseType));
+        return nullptr;
+      }
     }
 
     if (cls.attrs & AttrInterface) cinfo->implInterfaces.emplace(cls.name);
@@ -7280,6 +7350,74 @@ private:
 
     return newClosures;
   }
+
+  // Update a type constraint to it's ultimate type, or leave it as
+  // unresolved if it resolves to nothing valid. Record the new type
+  // in case it needs to be fixed up later.
+  static void update_type_constraint(const LocalIndex& index,
+                                     TypeConstraint& tc,
+                                     ISStringSet& uses) {
+    if (!tc.isUnresolved()) {
+      // Any TC already resolved is assumed to be correct.
+      if (tc.clsName()) uses.emplace(tc.clsName());
+      return;
+    }
+    auto const name = tc.typeName();
+
+    // Is this name a type-alias or enum?
+    if (auto const tm = index.typeMapping(name)) {
+      // Whatever it's an alias of isn't valid, so leave unresolved.
+      if (tm->type == AnnotType::Unresolved) return;
+      auto const value = [&] () -> SString {
+        // Store the first enum encountered during resolution. This
+        // lets us fixup the type later if needed.
+        if (tm->firstEnum) return tm->firstEnum;
+        if (tm->type == AnnotType::Object) {
+          assertx(tm->value);
+          return tm->value;
+        }
+        return nullptr;
+      }();
+      tc.resolveType(
+        tm->type,
+        tm->nullable,
+        value
+      );
+      if (value) uses.emplace(value);
+      return;
+    }
+
+    // Not a type-alias or enum. If it's explicitly marked as missing,
+    // leave it unresolved. Otherwise assume it's an object with that
+    // name.
+    if (index.missingType(name)) return;
+    tc.resolveType(AnnotType::Object, tc.isNullable(), name);
+    uses.emplace(name);
+  }
+
+  static void update_type_constraints(const LocalIndex& index,
+                                      php::Func& func,
+                                      ISStringSet& uses) {
+    for (auto& p : func.params) {
+      update_type_constraint(index, p.typeConstraint, uses);
+      for (auto& ub : p.upperBounds) update_type_constraint(index, ub, uses);
+    }
+    update_type_constraint(index, func.retTypeConstraint, uses);
+    for (auto& ub : func.returnUBs) update_type_constraint(index, ub, uses);
+  }
+
+  static void update_type_constraints(const LocalIndex& index,
+                                      php::Class& cls,
+                                      ISStringSet& uses) {
+    if (cls.attrs & AttrEnum) {
+      update_type_constraint(index, cls.enumBaseTy, uses);
+    }
+    for (auto& meth : cls.methods) update_type_constraints(index, *meth, uses);
+    for (auto& prop : cls.properties) {
+      update_type_constraint(index, prop.typeConstraint, uses);
+      for (auto& ub : prop.ubs) update_type_constraint(index, ub, uses);
+    }
+  }
 };
 
 /*
@@ -7340,8 +7478,69 @@ struct UnitFixupJob {
   }
 };
 
+/*
+ * We might have resolved a type-constraint during FlattenJob and then
+ * later on learned that one of the types are invalid. For example, we
+ * resolved a type-constraint to a particular object type, and then
+ * realized the associated class isn't instantiable. We have the hard
+ * invariant that a resolved type-constraint always points at a valid
+ * type (which means for objects they have a ClassInfo). So, if we
+ * determined if a type is invalid during FlattenJob, we then "fixup"
+ * the type-constraint here by making it unresolved again. This is
+ * rare, as such invalid types don't occur in well-typed code, so the
+ * extra overhead of another job is fine.
+ */
+struct MissingClassFixupJob {
+static std::string name() { return "hhbbc-flatten-missing"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static void fini() {}
+
+  using Output = Multi<
+    Variadic<std::unique_ptr<php::Class>>,
+    Variadic<std::unique_ptr<php::Func>>
+  >;
+  static Output run(Variadic<std::unique_ptr<php::Class>> classes,
+                    Variadic<std::unique_ptr<php::Func>> funcs,
+                    std::vector<SString> missingIn) {
+    ISStringSet missing{ begin(missingIn), end(missingIn) };
+    for (auto& cls : classes.vals) update(*cls, missing);
+    for (auto& func : funcs.vals) update(*func, missing);
+    return std::make_tuple(
+      std::move(classes),
+      std::move(funcs)
+    );
+  }
+private:
+  static void update(TypeConstraint& tc, const ISStringSet& missing) {
+    auto const name = tc.clsName();
+    if (!name || !missing.count(name)) return;
+    tc.unresolve();
+  }
+
+  static void update(php::Func& func, const ISStringSet& missing) {
+    for (auto& p : func.params) {
+      update(p.typeConstraint, missing);
+      for (auto& ub : p.upperBounds) update(ub, missing);
+    }
+    update(func.retTypeConstraint, missing);
+    for (auto& ub : func.returnUBs) update(ub, missing);
+  }
+
+  static void update(php::Class& cls, const ISStringSet& missing) {
+    if (cls.attrs & AttrEnum) update(cls.enumBaseTy, missing);
+    for (auto& meth : cls.methods) update(*meth, missing);
+    for (auto& prop : cls.properties) {
+      update(prop.typeConstraint, missing);
+      for (auto& ub : prop.ubs) update(ub, missing);
+    }
+  }
+};
+
 Job<FlattenJob> s_flattenJob;
 Job<UnitFixupJob> s_unitFixupJob;
+Job<MissingClassFixupJob> s_missingClassFixupJob;
 
 /*
  * For efficiency reasons, we want to do class flattening all in one
@@ -7372,10 +7571,13 @@ Job<UnitFixupJob> s_unitFixupJob;
 // Input class metadata to be turned into work buckets.
 struct IndexFlattenMetadata {
   struct ClassMeta {
-    std::vector<SString> deps;
+    ISStringSet deps;
     std::vector<SString> closures;
+    // All types mentioned in type-constraints in this class.
+    std::vector<SString> unresolvedTypes;
     size_t idx; // Index into allCls vector
     bool isClosure{false};
+    bool uninstantiable{false};
   };
   ISStringToOneT<ClassMeta> cls;
   // All classes to be flattened
@@ -7385,10 +7587,193 @@ struct IndexFlattenMetadata {
   // performed as part of "fixing up" the unit after flattening
   // because it's convenient to do so there.
   SStringToOneT<std::vector<SString>> unitDeletions;
+  struct FuncMeta {
+    // All types mentioned in type-constraints in this func.
+    std::vector<SString> unresolvedTypes;
+  };
+  ISStringToOneT<FuncMeta> func;
+  std::vector<SString> allFuncs;
+  ISStringToOneT<TypeMapping> typeMappings;
 };
 
-std::vector<HierarchialWorkBucket>
-flatten_classes_assign(const IndexFlattenMetadata& meta) {
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Update the type-mappings in the program so they all point to their
+ * ultimate type. After this step, every type-mapping that still has
+ * an unresolved type points to an invalid type.
+ */
+void flatten_type_mappings(IndexData& index,
+                           IndexFlattenMetadata& meta) {
+  trace_time tracer{"flatten type mappings"};
+  tracer.ignore_client_stats();
+
+  std::vector<const TypeMapping*> work;
+  work.reserve(meta.typeMappings.size());
+  for (auto const& [_, tm] : meta.typeMappings) work.emplace_back(&tm);
+
+  auto resolved = parallel::map(
+    work,
+    [&] (const TypeMapping* typeMapping) {
+      Optional<ISStringSet> seen;
+      auto nullable = typeMapping->nullable;
+      auto name = typeMapping->value;
+      auto firstEnum = typeMapping->firstEnum;
+
+      auto enumMeta = folly::get_ptr(meta.cls, typeMapping->name);
+
+      if (typeMapping->type != AnnotType::Unresolved) {
+        // If the type-mapping is already resolved, we mainly take it
+        // as is. The exception is if it's an enum, in which case we
+        // validate the underlying base type.
+        assertx(typeMapping->type != AnnotType::Object);
+        if (!enumMeta) return *typeMapping;
+        if (!enumSupportsAnnot(typeMapping->type)) {
+          FTRACE(
+            2, "Type-mapping '{}' is invalid because it resolves to "
+            "invalid enum type {}\n",
+            typeMapping->name,
+            annotName(typeMapping->type)
+          );
+          auto ty = *typeMapping;
+          ty.type = AnnotType::Unresolved;
+          return ty;
+        }
+        return *typeMapping;
+      }
+
+      for (size_t rounds = 0;; ++rounds) {
+        name = normalizeNS(name);
+
+        if (auto const next = folly::get_ptr(meta.typeMappings, name)) {
+          nullable |= next->nullable;
+          if (!firstEnum) firstEnum = next->firstEnum;
+
+          if (enumMeta && next->firstEnum) {
+            enumMeta->deps.emplace(next->firstEnum);
+          }
+
+          if (next->type != AnnotType::Unresolved) {
+            assertx(next->type != AnnotType::Object);
+            if (firstEnum && !enumSupportsAnnot(next->type)) {
+              FTRACE(
+                2, "Type-mapping '{}' is invalid because it resolves to "
+                "invalid enum type {}{}\n",
+                typeMapping->name,
+                annotName(next->type),
+                firstEnum->isame(typeMapping->name)
+                  ? "" : folly::sformat(" (via {})", firstEnum)
+              );
+              return TypeMapping {
+                typeMapping->name,
+                name,
+                firstEnum,
+                AnnotType::Unresolved,
+                nullable
+              };
+            }
+            return TypeMapping {
+              typeMapping->name,
+              next->value,
+              firstEnum,
+              next->type,
+              nullable
+            };
+          }
+
+          name = next->value;
+        } else if (index.classRefs.count(name)) {
+          if (firstEnum) {
+            FTRACE(
+              2, "Type-mapping '{}' is invalid because it resolves to "
+              "invalid object '{}' for enum type (via {})\n",
+              typeMapping->name,
+              name,
+              firstEnum
+            );
+          }
+
+          return TypeMapping {
+            typeMapping->name,
+            name,
+            firstEnum,
+            firstEnum ? AnnotType::Unresolved : AnnotType::Object,
+            nullable
+          };
+        } else {
+          FTRACE(
+            2, "Type-mapping '{}' is invalid because it involves "
+            "non-existent type '{}'{}\n",
+            typeMapping->name,
+            name,
+            (firstEnum && !firstEnum->isame(typeMapping->name))
+              ? folly::sformat(" (via {})", firstEnum) : ""
+          );
+          return TypeMapping {
+            typeMapping->name,
+            name,
+            firstEnum,
+            AnnotType::Unresolved,
+            nullable
+          };
+        }
+
+        // Deal with cycles. Since we don't expect to encounter them, just
+        // use a counter until we hit a chain length of 10, then start
+        // tracking the names we resolve.
+        if (rounds == 10) {
+          seen.emplace();
+          seen->insert(name);
+        } else if (rounds > 10) {
+          if (!seen->insert(name).second) {
+            FTRACE(
+              2, "Type-mapping '{}' is invalid because it's definition "
+              "is circular with '{}'\n",
+              typeMapping->name,
+              name
+            );
+            return TypeMapping {
+              typeMapping->name,
+              name,
+              firstEnum,
+              AnnotType::Unresolved,
+              nullable
+            };
+          }
+        }
+      }
+    }
+  );
+
+  for (auto& after : resolved) {
+    auto const name = after.name;
+    FTRACE(
+      4, "Type-mapping '{}' flattened to {}{}{}\n",
+      name,
+      annotName(after.type),
+      (after.value && !after.value->empty())
+        ? folly::sformat(" ({})", after.value) : "",
+      (after.firstEnum && !after.firstEnum->isame(name))
+        ? folly::sformat(" (via {})", after.firstEnum) : ""
+    );
+    if (after.type == AnnotType::Unresolved && meta.cls.count(name)) {
+      FTRACE(4, "  Marking enum '{}' as uninstantiable\n", name);
+      meta.cls.at(name).uninstantiable = true;
+    }
+    meta.typeMappings.at(name) = std::move(after);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+struct FlattenClassesWork {
+  std::vector<SString> classes;
+  std::vector<SString> deps;
+  std::vector<SString> funcs;
+};
+
+std::vector<FlattenClassesWork>
+flatten_classes_assign(IndexFlattenMetadata& meta) {
   trace_time trace{"flatten classes assign"};
   trace.ignore_client_stats();
 
@@ -7451,6 +7836,7 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
         4, "{} is not instantiable because it forms a dependency "
         "cycle with itself\n", cls
       );
+      it->second.uninstantiable = true;
       return empty;
     }
     SCOPE_EXIT { visited.erase(cls); };
@@ -7461,7 +7847,7 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
         // Otherwise get all of the transitive dependencies of it's
         // dependencies and combine them.
         DepLookup out;
-        out.instantiable = true;
+        out.instantiable = !it->second.uninstantiable;
         auto const onDep = [&] (SString d) {
           auto const& lookup = self(d, visited, self);
           out.deps.insert(begin(lookup.deps), end(lookup.deps));
@@ -7476,6 +7862,7 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
                 "which is not instantiable\n",
                 cls, d
               );
+              it->second.uninstantiable = true;
             }
             out.instantiable = false;
           } else {
@@ -7494,7 +7881,7 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
   constexpr size_t kBucketSize = 2000;
   constexpr size_t kMaxBucketSize = 30000;
 
-  auto const work = assign_hierarchial_work(
+  auto assignments = assign_hierarchial_work(
     [&] {
       std::vector<SString> l;
       auto const size = meta.allCls.size();
@@ -7516,18 +7903,192 @@ flatten_classes_assign(const IndexFlattenMetadata& meta) {
     [&] (SString c) -> Optional<size_t> { return meta.cls.at(c).idx; }
   );
 
+  // Bucketize functions separately
+
+  constexpr size_t kFuncBucketSize = 5000;
+
+  auto funcBuckets = consistently_bucketize(meta.allFuncs, kFuncBucketSize);
+
+  std::vector<FlattenClassesWork> work;
+  // If both the class and func assignments map to a single bucket,
+  // combine them both together. This is an optimization for things
+  // like unit tests, where the total amount of work is low and we
+  // want to run it all in a single job if possible.
+  if (assignments.size() == 1 && funcBuckets.size() == 1) {
+    work.emplace_back(
+      FlattenClassesWork{
+        std::move(assignments[0].classes),
+        std::move(assignments[0].deps),
+        std::move(funcBuckets[0])
+      }
+    );
+  } else {
+    // Otherwise split the classes and func work.
+    work.reserve(assignments.size() + funcBuckets.size());
+    for (auto& assignment : assignments) {
+      work.emplace_back(
+        FlattenClassesWork{
+          std::move(assignment.classes),
+          std::move(assignment.deps),
+          {}
+        }
+      );
+    }
+    for (auto& bucket : funcBuckets) {
+      work.emplace_back(
+        FlattenClassesWork{ {}, {}, std::move(bucket) }
+      );
+    }
+  }
+
   if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
     for (size_t i = 0; i < work.size(); ++i) {
-      auto const& [classes, deps] = work[i];
+      auto const& [classes, deps, funcs] = work[i];
       FTRACE(5, "flatten work item #{}:\n", i);
       FTRACE(5, "  classes ({}):\n", classes.size());
       for (auto const DEBUG_ONLY c : classes) FTRACE(5, "    {}\n", c);
       FTRACE(5, "  deps ({}):\n", deps.size());
       for (auto const DEBUG_ONLY d : deps) FTRACE(5, "    {}\n", d);
+      FTRACE(5, "  funcs ({}):\n", funcs.size());
+      for (auto const DEBUG_ONLY f : funcs) FTRACE(5, "    {}\n", f);
     }
   }
 
   return work;
+}
+
+// Run MissingClassFixupJob to fixup any type-constraints in classes
+// and funcs which were resolved to types which are now invalid.
+void flatten_classes_fixup_missing(IndexData& index,
+                                   ISStringToOneT<ISStringSet> typeUsesByClass,
+                                   ISStringToOneT<ISStringSet> typeUsesByFunc,
+                                   ISStringSet uninstantiable) {
+  // If FlattenJob didn't find anything uninstantiable, we don't need
+  // to do this (this is the common case).
+  if (uninstantiable.empty()) return;
+  trace_time timer{"flatten classes fixup missing", index.sample};
+
+  // Build a map of classes and funcs that reference the
+  // uninstantiable types.
+  ISStringToOneT<ISStringSet> classes;
+  ISStringToOneT<ISStringSet> funcs;
+  for (auto const u : uninstantiable) {
+    if (auto const uses = folly::get_ptr(typeUsesByClass, u)) {
+      for (auto const use : *uses) classes[use].emplace(u);
+    }
+    if (auto const uses = folly::get_ptr(typeUsesByFunc, u)) {
+      for (auto const use : *uses) funcs[use].emplace(u);
+    }
+  }
+  // We found uninstantiable types, but they're not actually used, so
+  // we don't have to fix anything up.
+  if (classes.empty() && funcs.empty()) return;
+
+  constexpr size_t kBucketSize = 3000;
+
+  auto buckets = consistently_bucketize(
+    [&] {
+      // NB: classes and funcs are in different namespaces and can
+      // have the same name. If that happens, they'll be de-duped
+      // here. This is harmless, as it just means the class and func
+      // will be assigned to the same bucket.
+      std::vector<SString> sorted;
+      sorted.reserve(classes.size() + funcs.size());
+      for (auto const& [c, _] : classes) sorted.emplace_back(c);
+      for (auto const& [f, _] : funcs) sorted.emplace_back(f);
+      std::sort(begin(sorted), end(sorted), string_data_lti{});
+      sorted.erase(
+        std::unique(
+          begin(sorted), end(sorted),
+          [&] (SString a, SString b) { return a->isame(b); }
+        ),
+        end(sorted)
+      );
+      return sorted;
+    }(),
+    kBucketSize
+  );
+
+  using namespace folly::gen;
+
+  auto const run = [&] (std::vector<SString> work) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (work.empty()) HPHP_CORO_RETURN_VOID;
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("fixup missing classes {}", work[0])
+    };
+
+    std::vector<UniquePtrRef<php::Class>> clsRefs;
+    std::vector<UniquePtrRef<php::Func>> funcRefs;
+    std::vector<SString> clsNames;
+    std::vector<SString> funcNames;
+    ISStringSet missingSet;
+
+    for (auto const w : work) {
+      if (auto const used = folly::get_ptr(classes, w)) {
+        missingSet.insert(begin(*used), end(*used));
+        clsRefs.emplace_back(index.classRefs.at(w));
+        clsNames.emplace_back(w);
+      }
+      // Not else if because of potentially collision between class
+      // and func names.
+      if (auto const used = folly::get_ptr(funcs, w)) {
+        missingSet.insert(begin(*used), end(*used));
+        funcRefs.emplace_back(index.funcRefs.at(w));
+        funcNames.emplace_back(w);
+      }
+    }
+    assertx(!missingSet.empty());
+
+    std::vector<SString> missing{begin(missingSet), end(missingSet)};
+    std::sort(begin(missing), end(missing), string_data_lti{});
+
+    auto [missingRef, config] = HPHP_CORO_AWAIT(
+      coro::collect(
+        index.client->store(std::move(missing)),
+        index.configRef->getCopy()
+      )
+    );
+
+    auto results = HPHP_CORO_AWAIT(
+      index.client->exec(
+        s_missingClassFixupJob,
+        std::move(config),
+        singleton_vec(
+          std::make_tuple(
+            std::move(clsRefs),
+            std::move(funcRefs),
+            std::move(missingRef)
+          )
+        ),
+        std::move(metadata)
+      )
+    );
+    assertx(results.size() == 1);
+    auto& [outClsRefs, outFuncRefs] = results[0];
+    assertx(outClsRefs.size() == clsNames.size());
+    assertx(outFuncRefs.size() == funcNames.size());
+
+    for (size_t i = 0, size = clsNames.size(); i < size; ++i) {
+      index.classRefs.at(clsNames[i]) = outClsRefs[i];
+    }
+    for (size_t i = 0, size = funcNames.size(); i < size; ++i) {
+      index.funcRefs.at(funcNames[i]) = outFuncRefs[i];
+    }
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  coro::wait(coro::collectRange(
+    from(buckets)
+      | move
+      | map([&] (std::vector<SString> work) {
+          return run(std::move(work)).scheduleOn(index.executor->sticky());
+        })
+      | as<std::vector>()
+  ));
 }
 
 // Run FixupUnitJob on all of the given fixups and store the new
@@ -7638,26 +8199,39 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
 
   using namespace folly::gen;
 
-  struct Update {
+  struct ClassUpdate {
     SString name;
     UniquePtrRef<php::Class> cls;
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
-    bool isInterface;
+    ISStringSet typeUses;
+    bool isInterface{false};
     CompactVector<SString> parents;
   };
+  struct FuncUpdate {
+    SString name;
+    UniquePtrRef<php::Func> func;
+    ISStringSet typeUses;
+  };
+  using Update = boost::variant<ClassUpdate, FuncUpdate>;
   using UpdateVec = std::vector<Update>;
 
-  auto const run = [&] (HierarchialWorkBucket work) -> coro::Task<UpdateVec> {
+  ISStringSet uninstantiable;
+  std::mutex uninstantiableLock;
+
+  auto const run = [&] (FlattenClassesWork work) -> coro::Task<UpdateVec> {
     HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
 
-    if (work.classes.empty()) {
+    if (work.classes.empty() && work.funcs.empty()) {
       assertx(work.deps.empty());
       HPHP_CORO_RETURN(UpdateVec{});
     }
 
     Client::ExecMetadata metadata{
-      .job_key = folly::sformat("flatten classes {}", work.classes[0])
+      .job_key = folly::sformat(
+        "flatten classes {}",
+        work.classes.empty() ? work.funcs[0] : work.classes[0]
+      )
     };
     auto classes = from(work.classes)
       | map([&] (SString c) { return index.classRefs.at(c); })
@@ -7665,26 +8239,87 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     auto deps = from(work.deps)
       | map([&] (SString c) { return index.classRefs.at(c); })
       | as<std::vector>();
+    auto funcs = from(work.funcs)
+      | map([&] (SString f) { return index.funcRefs.at(f); })
+      | as<std::vector>();
 
-    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+    // Gather any type-mappings or missing types referenced by these
+    // classes or funcs.
+    std::vector<TypeMapping> typeMappings;
+    std::vector<SString> missingTypes;
+    {
+      ISStringSet seen;
+
+      auto const addUnresolved = [&] (SString u) {
+        if (!seen.emplace(u).second) return;
+        if (auto const m = folly::get_ptr(meta.typeMappings, u)) {
+          // If the type-mapping maps an enum, and that enum is
+          // uninstantiable, just treat it as a missing type.
+          if (m->firstEnum && meta.cls.at(m->firstEnum).uninstantiable) {
+            missingTypes.emplace_back(u);
+          } else {
+            typeMappings.emplace_back(*m);
+          }
+        } else if (!index.classRefs.count(u) ||
+                   meta.cls.at(u).uninstantiable) {
+          missingTypes.emplace_back(u);
+        }
+      };
+
+      auto const addClass = [&] (SString c) {
+        for (auto const u : meta.cls.at(c).unresolvedTypes) addUnresolved(u);
+      };
+      auto const addFunc = [&] (SString f) {
+        for (auto const u : meta.func.at(f).unresolvedTypes) addUnresolved(u);
+      };
+
+      for (auto const c : work.classes) addClass(c);
+      for (auto const d : work.deps)    addClass(d);
+      for (auto const f : work.funcs)   addFunc(f);
+
+      std::sort(
+        begin(typeMappings), end(typeMappings),
+        [] (const TypeMapping& a, const TypeMapping& b) {
+          return string_data_lti{}(a.name, b.name);
+        }
+      );
+      std::sort(begin(missingTypes), end(missingTypes), string_data_lti{});
+    }
+
+    auto [typeMappingsRef, missingTypesRef, config] = HPHP_CORO_AWAIT(
+      coro::collect(
+        index.client->store(std::move(typeMappings)),
+        index.client->store(std::move(missingTypes)),
+        index.configRef->getCopy()
+      )
+    );
+
     auto results = HPHP_CORO_AWAIT(
       index.client->exec(
         s_flattenJob,
         std::move(config),
-        singleton_vec(std::make_tuple(std::move(classes), std::move(deps))),
+        singleton_vec(
+          std::make_tuple(
+            std::move(classes),
+            std::move(deps),
+            std::move(funcs),
+            std::move(typeMappingsRef),
+            std::move(missingTypesRef)
+          )
+        ),
         std::move(metadata)
       )
     );
     // Every flattening job is a single work-unit, so we should only
     // ever get one result for each one.
     assertx(results.size() == 1);
-    auto& [clsRefs, cinfoRefs, classMetaRef] = results[0];
+    auto& [clsRefs, cinfoRefs, funcRefs, classMetaRef] = results[0];
     assertx(clsRefs.size() == cinfoRefs.size());
+    assertx(funcRefs.size() == work.funcs.size());
 
     // We need the output metadata, but everything else stays
     // uploaded.
-    auto const clsMeta =
-      HPHP_CORO_AWAIT(index.client->load(std::move(classMetaRef)));
+    auto clsMeta = HPHP_CORO_AWAIT(index.client->load(std::move(classMetaRef)));
 
     // Create the updates by combining the job output (but skipping
     // over uninstantiable classes).
@@ -7694,14 +8329,23 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     size_t outputIdx = 0;
     size_t parentIdx = 0;
     for (auto const name : work.classes) {
-      if (clsMeta.uninstantiable.count(name)) continue;
+      if (clsMeta.uninstantiable.count(name)) {
+        // Uninstantiable classes are very rare, so taking a lock here
+        // is fine.
+        std::scoped_lock<std::mutex> _{uninstantiableLock};
+        uninstantiable.emplace(name);
+        continue;
+      }
+
       assertx(outputIdx < clsRefs.size());
+      assertx(outputIdx < clsMeta.classTypeUses.size());
       updates.emplace_back(
-        Update{
+        ClassUpdate{
           name,
           std::move(clsRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
           nullptr,
+          std::move(clsMeta.classTypeUses[outputIdx]),
           (bool)clsMeta.interfaces.count(name)
         }
       );
@@ -7711,7 +8355,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       if (!meta.cls.at(name).isClosure) {
         assertx(parentIdx < clsMeta.parents.size());
         auto const& parents = clsMeta.parents[parentIdx].names;
-        auto& update = updates.back();
+        auto& update = boost::get<ClassUpdate>(updates.back());
         update.parents.insert(
           end(update.parents), begin(parents), end(parents)
         );
@@ -7724,18 +8368,32 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     for (auto const& [unit, names] : clsMeta.newClosures) {
       for (auto const name : names) {
         assertx(outputIdx < clsRefs.size());
+        assertx(outputIdx < clsMeta.classTypeUses.size());
         updates.emplace_back(
-          Update{
+          ClassUpdate{
             name,
             std::move(clsRefs[outputIdx]),
             std::move(cinfoRefs[outputIdx]),
-            unit
+            unit,
+            std::move(clsMeta.classTypeUses[outputIdx])
           }
         );
         ++outputIdx;
       }
     }
     assertx(outputIdx == clsRefs.size());
+    assertx(outputIdx == clsMeta.classTypeUses.size());
+
+    assertx(work.funcs.size() == clsMeta.funcTypeUses.size());
+    for (size_t i = 0, size = work.funcs.size(); i < size; ++i) {
+      updates.emplace_back(
+        FuncUpdate{
+          work.funcs[i],
+          std::move(funcRefs[i]),
+          std::move(clsMeta.funcTypeUses[i])
+        }
+      );
+    }
 
     HPHP_CORO_MOVE_RETURN(updates);
   };
@@ -7749,7 +8407,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     return coro::wait(coro::collectRange(
       from(assignments)
         | move
-        | map([&] (HierarchialWorkBucket w) {
+        | map([&] (FlattenClassesWork w) {
             return run(std::move(w)).scheduleOn(index.executor->sticky());
           })
         | as<std::vector>()
@@ -7763,6 +8421,9 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   SStringToOneT<UnitFixupJob::Fixup> unitFixups;
   SubclassMetadata subclassMeta;
 
+  ISStringToOneT<ISStringSet> typeUsesByClass;
+  ISStringToOneT<ISStringSet> typeUsesByFunc;
+
   {
     trace_time trace2("flatten classes update");
     trace2.ignore_client_stats();
@@ -7771,9 +8432,11 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u) continue;
             index.classRefs.insert_or_assign(
-              update.name,
-              std::move(update.cls)
+              u->name,
+              std::move(u->cls)
             );
           }
         }
@@ -7781,10 +8444,12 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u) continue;
             always_assert(
               index.classInfoRefs.emplace(
-                update.name,
-                std::move(update.cinfo)
+                u->name,
+                std::move(u->cinfo)
               ).second
             );
           }
@@ -7793,12 +8458,37 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            if (!update.unitToAddTo) continue;
-            unitFixups[update.unitToAddTo].addClass.emplace_back(update.name);
+            auto u = boost::get<FuncUpdate>(&update);
+            if (!u) continue;
+            index.funcRefs.at(u->name) = std::move(u->func);
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u || !u->unitToAddTo) continue;
+            unitFixups[u->unitToAddTo].addClass.emplace_back(u->name);
           }
         }
         for (auto& [unit, deletions] : meta.unitDeletions) {
           unitFixups[unit].removeFunc = std::move(deletions);
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            if (auto const u = boost::get<ClassUpdate>(&update)) {
+              for (auto const t : u->typeUses) {
+                typeUsesByClass[t].emplace(u->name);
+              }
+            } else if (auto const f = boost::get<FuncUpdate>(&update)) {
+              for (auto const t : f->typeUses) {
+                typeUsesByFunc[t].emplace(f->name);
+              }
+            }
+          }
         }
       },
       [&] {
@@ -7807,23 +8497,26 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         auto& meta = subclassMeta.meta;
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u) continue;
+
             // We shouldn't have parents for closures because we
             // special case those explicitly.
-            if (is_closure_name(update.name) ||
-                update.name->isame(s_Closure.get())) {
-              assertx(update.parents.empty());
+            if (is_closure_name(u->name) ||
+                u->name->isame(s_Closure.get())) {
+              assertx(u->parents.empty());
               continue;
             }
             // Otherwise build the children lists from the parents.
-            all.emplace_back(update.name);
-            for (auto const p : update.parents) {
-              meta[p].children.emplace_back(update.name);
+            all.emplace_back(u->name);
+            for (auto const p : u->parents) {
+              meta[p].children.emplace_back(u->name);
             }
-            auto& parents = meta[update.name].parents;
+            auto& parents = meta[u->name].parents;
             assertx(parents.empty());
             parents.insert(
               end(parents),
-              begin(update.parents), end(update.parents)
+              begin(u->parents), end(u->parents)
             );
           }
         }
@@ -7837,13 +8530,21 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       [&] {
         for (auto& updates : allUpdates) {
           for (auto& update : updates) {
-            if (!update.isInterface) continue;
-            subclassMeta.interfaces.emplace(update.name);
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u || !u->isInterface) continue;
+            subclassMeta.interfaces.emplace(u->name);
           }
         }
       }
     );
   }
+
+  flatten_classes_fixup_missing(
+    index,
+    std::move(typeUsesByClass),
+    std::move(typeUsesByFunc),
+    std::move(uninstantiable)
+  );
 
   // Apply the fixups
   flatten_classes_fixup_units(index, std::move(unitFixups));
@@ -10476,12 +11177,23 @@ IndexFlattenMetadata make_remote(IndexData& index,
 
   flattenMeta.cls.reserve(input.classes.size());
   flattenMeta.allCls.reserve(input.classes.size());
+  flattenMeta.allFuncs.reserve(input.funcs.size());
 
   // Add unit and class information to their appropriate tables. This
   // is also where we'll detect duplicate funcs and class names (which
   // should be caught earlier during parsing).
   for (auto& unit : input.units) {
     FTRACE(5, "unit {} -> {}\n", unit.name, unit.unit.id().toString());
+
+    for (auto& typeMapping : unit.typeMappings) {
+      auto const name = typeMapping.name;
+      always_assert_flog(
+        flattenMeta.typeMappings.emplace(name, std::move(typeMapping)).second,
+        "Duplicate type-mapping: {}",
+        name
+      );
+    }
+
     always_assert_flog(
       index.unitRefs.emplace(unit.name, std::move(unit.unit)).second,
       "Duplicate unit: {}",
@@ -10501,9 +11213,21 @@ IndexFlattenMetadata make_remote(IndexData& index,
       flattenMeta.cls[cls.closureContext].closures.emplace_back(cls.name);
     }
     meta.isClosure = cls.isClosure;
-    meta.deps = std::move(cls.dependencies);
+    meta.deps.insert(begin(cls.dependencies), end(cls.dependencies));
+    meta.unresolvedTypes = std::move(cls.unresolvedTypes);
     meta.idx = flattenMeta.allCls.size();
     flattenMeta.allCls.emplace_back(cls.name);
+
+    if (cls.typeMapping) {
+      auto const name = cls.typeMapping->name;
+      always_assert_flog(
+        flattenMeta.typeMappings.emplace(
+          name, std::move(*cls.typeMapping)
+        ).second,
+        "Duplicate type-mapping: {}",
+        name
+      );
+    }
   }
   // Funcs have an additional wrinkle, however. A func might be a meth
   // caller. Meth callers are special in that they might be present
@@ -10556,6 +11280,11 @@ IndexFlattenMetadata make_remote(IndexData& index,
       "Duplicate func: {}",
       func.name
     );
+
+    auto& meta = flattenMeta.func[func.name];
+    meta.unresolvedTypes = std::move(func.unresolvedTypes);
+
+    flattenMeta.allFuncs.emplace_back(func.name);
   }
 
   return flattenMeta;
@@ -11552,6 +12281,8 @@ Index::Index(Input input,
     std::move(client),
     std::move(dispose)
   );
+
+  flatten_type_mappings(*m_data, flattenMeta);
   auto subclassMeta = flatten_classes(*m_data, std::move(flattenMeta));
   auto ifaceConflicts = build_subclass_lists(*m_data, std::move(subclassMeta));
   compute_iface_vtables(*m_data, std::move(ifaceConflicts));
@@ -12194,65 +12925,6 @@ const php::TypeAlias* Index::lookup_type_alias(SString name) const {
   return it->second;
 }
 
-Index::ResolvedTypeName Index::resolve_type_name(SString name) const {
-  Optional<ISStringSet> seen;
-  auto nullable = false;
-
-  auto const get = [] (auto const& m, SString k) {
-    return folly::get_default(m, k, nullptr);
-  };
-
-  for (size_t rounds = 0;; ++rounds) {
-    name = normalizeNS(name);
-
-    if (auto const cinfo = get(m_data->classInfo, name)) {
-      assertx(cinfo->cls->attrs & AttrUnique);
-      if (!(cinfo->cls->attrs & AttrEnum)) {
-        return {
-          AnnotType::Object,
-          nullable,
-          is_closure_base(*cinfo->cls)
-            ? res::Class { name }
-            : res::Class { cinfo }
-        };
-      }
-
-      auto const& tc = cinfo->cls->enumBaseTy;
-      assertx(!tc.isNullable());
-      if (!tc.isUnresolved()) {
-        auto const type = tc.isMixed() ? AnnotType::ArrayKey : tc.type();
-        assertx(type != AnnotType::Object);
-        return { type, nullable, std::nullopt };
-      }
-      name = tc.typeName();
-    } else if (auto const ta = get(m_data->typeAliases, name)) {
-      assertx(ta->attrs & AttrUnique);
-      nullable |= ta->nullable;
-      if (ta->type != AnnotType::Unresolved) {
-        assertx(ta->type != AnnotType::Object);
-        return { ta->type, nullable, std::nullopt };
-      }
-      name = ta->value;
-    } else {
-      return { AnnotType::Unresolved, nullable, std::nullopt };
-    }
-
-    // Deal with cycles. Since we don't expect to encounter them, just
-    // use a counter until we hit a chain length of 10, then start
-    // tracking the names we resolve.
-    if (rounds == 10) {
-      seen.emplace();
-      seen->insert(name);
-    } else if (rounds > 10) {
-      if (!seen->insert(name).second) {
-        return { AnnotType::Unresolved, false, std::nullopt };
-      }
-    }
-  }
-
-  always_assert(false);
-}
-
 std::pair<res::Class, const php::Class*>
 Index::resolve_closure_class(Context ctx, SString name) const {
   auto const it = m_data->classes.find(name);
@@ -12805,145 +13477,6 @@ res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
 }
 
 Index::ConstraintType<>
-Index::type_from_annot_type(const Context& ctx,
-                            AnnotType annot,
-                            SString name,
-                            const Type& candidate) const {
-  auto const resolve = [&] {
-    assertx(name);
-    auto const resolved = resolve_type_name(name);
-
-    auto ty = [&] {
-      if (resolved.type == AnnotType::Unresolved) {
-        // Resolution failed, so the type doesn't exist.
-        assertx(!resolved.cls);
-        return ConstraintType<>{ TBottom, TBottom };
-      }
-
-      if (resolved.type == AnnotType::Object) {
-        assertx(resolved.cls.has_value());
-        auto lower = subObj(*resolved.cls);
-        auto upper = lower;
-
-        // The "magic" interfaces cannot be represented with a single
-        // type. Obj=Foo|Str, for example, is not a valid type. It is
-        // safe to only provide a subset as the lower bound. We can
-        // use any provided candidate type to refine the lower bound
-        // and supply the subset which would allow us to optimize away
-        // the check.
-        if (interface_supports_arrlike(resolved.cls->name())) {
-          if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
-          upper |= TArrLike;
-        }
-        if (interface_supports_int(resolved.cls->name())) {
-          if (candidate.subtypeOf(BInt)) lower = TInt;
-          upper |= TInt;
-        }
-        if (interface_supports_double(resolved.cls->name())) {
-          if (candidate.subtypeOf(BDbl)) lower = TDbl;
-          upper |= TDbl;
-        }
-
-        if (interface_supports_string(resolved.cls->name())) {
-          if (candidate.subtypeOf(BStr)) lower = TStr;
-          upper |= union_of(TStr, TCls, TLazyCls);
-          return ConstraintType<> {
-            std::move(lower),
-            std::move(upper),
-            TriBool::Yes
-          };
-        }
-
-        return ConstraintType<>{ std::move(lower), std::move(upper) };
-      }
-
-      // Not an object. It's some other type which must be recursively
-      // resolved.
-      assertx(!resolved.cls);
-      return type_from_annot_type(ctx, resolved.type, nullptr, candidate);
-    }();
-
-    if (resolved.nullable) {
-      ty.lower = opt(std::move(ty.lower));
-      ty.upper = opt(std::move(ty.upper));
-    }
-    return ty;
-  };
-
-  auto const exact = [&] (const Type& t) {
-    return ConstraintType<>{ t, t };
-  };
-
-  switch (getAnnotMetaType(annot)) {
-    case AnnotMetaType::Precise: {
-      switch (getAnnotDataType(annot)) {
-      case KindOfNull:         return exact(TInitNull);
-      case KindOfBoolean:      return exact(TBool);
-      case KindOfInt64:        return exact(TInt);
-      case KindOfDouble:       return exact(TDbl);
-      case KindOfPersistentVec:
-      case KindOfVec:          return exact(TVec);
-      case KindOfPersistentDict:
-      case KindOfDict:         return exact(TDict);
-      case KindOfPersistentKeyset:
-      case KindOfKeyset:       return exact(TKeyset);
-      case KindOfResource:     return exact(TRes);
-      case KindOfClsMeth:      return exact(TClsMeth);
-      case KindOfObject:       return resolve();
-      case KindOfPersistentString:
-      case KindOfString:
-        return ConstraintType<>{
-          TStr,
-          union_of(TStr, TCls, TLazyCls),
-          TriBool::Yes
-        };
-      case KindOfUninit:
-      case KindOfRFunc:
-      case KindOfFunc:
-      case KindOfRClsMeth:
-      case KindOfClass:
-      case KindOfLazyClass:    break;
-      }
-      always_assert(false);
-    }
-    case AnnotMetaType::Mixed:
-      return ConstraintType<>{ TInitCell, TInitCell, TriBool::No, true };
-    case AnnotMetaType::Nothing:
-    case AnnotMetaType::NoReturn:   return exact(TBottom);
-    case AnnotMetaType::Nonnull:    return exact(TNonNull);
-    case AnnotMetaType::Number:     return exact(TNum);
-    case AnnotMetaType::VecOrDict:  return exact(TKVish);
-    case AnnotMetaType::ArrayLike:  return exact(TArrLike);
-    case AnnotMetaType::Unresolved: return resolve();
-    case AnnotMetaType::This:
-      if (auto const s = selfCls(ctx)) {
-        auto obj = subObj(*s);
-        if (!s->couldBeMocked()) return exact(setctx(obj));
-        return ConstraintType<>{ setctx(obj), obj };
-      }
-      return ConstraintType<>{ TBottom, TObj };
-    case AnnotMetaType::Callable:
-      return ConstraintType<>{
-        TBottom,
-        union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
-      };
-    case AnnotMetaType::ArrayKey:
-      return ConstraintType<>{
-        TArrKey,
-        union_of(TArrKey, TCls, TLazyCls),
-        TriBool::Yes
-      };
-    case AnnotMetaType::Classname:
-      return ConstraintType<>{
-        RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
-        union_of(TStr, TCls, TLazyCls)
-      };
-  }
-
-  always_assert(false);
-}
-
-Index::ConstraintType<>
 Index::lookup_constraint(const Context& ctx,
                          const TypeConstraint& tc,
                          const Type& candidate) const {
@@ -12952,12 +13485,116 @@ Index::lookup_constraint(const Context& ctx,
     tc.isMixed() || (tc.isUpperBound() && RO::EvalEnforceGenericsUB == 0)
   ));
 
-  auto ty = type_from_annot_type(
-    ctx,
-    tc.type(),
-    tc.isObject() ? tc.clsName() : tc.typeName(),
-    candidate
-  );
+  auto ty = [&] {
+    auto const exact = [&] (const Type& t) {
+      return ConstraintType<>{ t, t };
+    };
+
+    switch (getAnnotMetaType(tc.type())) {
+      case AnnotMetaType::Precise: {
+        switch (getAnnotDataType(tc.type())) {
+          case KindOfNull:         return exact(TInitNull);
+          case KindOfBoolean:      return exact(TBool);
+          case KindOfInt64:        return exact(TInt);
+          case KindOfDouble:       return exact(TDbl);
+          case KindOfPersistentVec:
+          case KindOfVec:          return exact(TVec);
+          case KindOfPersistentDict:
+          case KindOfDict:         return exact(TDict);
+          case KindOfPersistentKeyset:
+          case KindOfKeyset:       return exact(TKeyset);
+          case KindOfResource:     return exact(TRes);
+          case KindOfClsMeth:      return exact(TClsMeth);
+          case KindOfObject: {
+            auto const cls = resolve_class(tc.clsName());
+            assertx(cls.has_value());
+            auto lower = subObj(*cls);
+            auto upper = lower;
+
+            // The "magic" interfaces cannot be represented with a single
+            // type. Obj=Foo|Str, for example, is not a valid type. It is
+            // safe to only provide a subset as the lower bound. We can
+            // use any provided candidate type to refine the lower bound
+            // and supply the subset which would allow us to optimize away
+            // the check.
+            if (interface_supports_arrlike(cls->name())) {
+              if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
+              upper |= TArrLike;
+            }
+            if (interface_supports_int(cls->name())) {
+              if (candidate.subtypeOf(BInt)) lower = TInt;
+              upper |= TInt;
+            }
+            if (interface_supports_double(cls->name())) {
+              if (candidate.subtypeOf(BDbl)) lower = TDbl;
+              upper |= TDbl;
+            }
+
+            if (interface_supports_string(cls->name())) {
+              if (candidate.subtypeOf(BStr)) lower = TStr;
+              upper |= union_of(TStr, TCls, TLazyCls);
+              return ConstraintType<> {
+                std::move(lower),
+                std::move(upper),
+                TriBool::Yes
+              };
+            }
+
+            return ConstraintType<>{ std::move(lower), std::move(upper) };
+          }
+          case KindOfPersistentString:
+          case KindOfString:
+            return ConstraintType<>{
+              TStr,
+              union_of(TStr, TCls, TLazyCls),
+              TriBool::Yes
+            };
+          case KindOfUninit:
+          case KindOfRFunc:
+          case KindOfFunc:
+          case KindOfRClsMeth:
+          case KindOfClass:
+          case KindOfLazyClass:    break;
+        }
+        always_assert(false);
+      }
+      case AnnotMetaType::Mixed:
+        return ConstraintType<>{ TInitCell, TInitCell, TriBool::No, true };
+      case AnnotMetaType::Nothing:
+      case AnnotMetaType::NoReturn:   return exact(TBottom);
+      case AnnotMetaType::Nonnull:    return exact(TNonNull);
+      case AnnotMetaType::Number:     return exact(TNum);
+      case AnnotMetaType::VecOrDict:  return exact(TKVish);
+      case AnnotMetaType::ArrayLike:  return exact(TArrLike);
+      case AnnotMetaType::Unresolved:
+        return ConstraintType<>{ TBottom, TBottom };
+      case AnnotMetaType::This:
+        if (auto const s = selfCls(ctx)) {
+          auto obj = subObj(*s);
+          if (!s->couldBeMocked()) return exact(setctx(obj));
+          return ConstraintType<>{ setctx(obj), obj };
+        }
+        return ConstraintType<>{ TBottom, TObj };
+      case AnnotMetaType::Callable:
+        return ConstraintType<>{
+          TBottom,
+          union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
+        };
+      case AnnotMetaType::ArrayKey:
+        return ConstraintType<>{
+          TArrKey,
+          union_of(TArrKey, TCls, TLazyCls),
+          TriBool::Yes
+        };
+      case AnnotMetaType::Classname:
+        return ConstraintType<>{
+          RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
+    }
+
+    always_assert(false);
+  }();
 
   // Nullable constraint always includes TInitNull.
   if (tc.isNullable()) {
@@ -12989,12 +13626,10 @@ bool Index::could_have_reified_type(Context ctx,
     }
     return false;
   }
-  if (!tc.isObject() && !tc.isUnresolved()) return false;
-  auto const name = tc.isObject() ? tc.clsName() : tc.typeName();
-  auto const resolved = resolve_type_name(name);
-  if (resolved.type == AnnotType::Unresolved) return true;
-  if (resolved.type != AnnotType::Object) return false;
-  return resolved.cls->couldHaveReifiedGenerics();
+  if (!tc.isObject()) return false;
+  auto const cls = resolve_class(tc.clsName());
+  assertx(cls.has_value());
+  return cls->couldHaveReifiedGenerics();
 }
 
 std::tuple<Type, bool, bool> Index::verify_param_type(const Context& ctx,

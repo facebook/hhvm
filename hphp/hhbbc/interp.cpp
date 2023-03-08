@@ -2425,19 +2425,11 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   Optional<Type> resolvedClsTy;
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
-    auto tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
-    if (tc.isUnresolved()) {
-      auto res = env.index.resolve_type_name(tc.typeName());
-      if (res.type != AnnotType::Unresolved) {
-        auto const typeName = res.type == AnnotType::Object
-          ? res.cls->name() : nullptr;
-        tc.resolveType(res.type, res.nullable, typeName);
-      }
-    }
+    auto const& tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
     if (tc.isObject()) {
-      if (auto const rcls = env.index.resolve_class(tc.clsName())) {
-        resolvedClsTy = subObj(*rcls);
-      }
+      auto const rcls = env.index.resolve_class(tc.clsName());
+      assertx(rcls.has_value());
+      resolvedClsTy = subObj(*rcls);
     }
     return memoKeyConstraintFromTC(tc);
   }();

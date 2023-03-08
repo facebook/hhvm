@@ -90,6 +90,8 @@ inline AnnotType enumDataTypeToAnnotType(DataType dt) {
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
 
+const char* annotName(AnnotType);
+
 const AnnotType* nameToAnnotType(const StringData* typeName);
 const AnnotType* nameToAnnotType(const std::string& typeName);
 MaybeDataType nameToMaybeDataType(const StringData* typeName);
@@ -108,6 +110,14 @@ bool interface_supports_string(folly::StringPiece s);
 bool interface_supports_arrlike(folly::StringPiece s);
 
 TypedValue annotDefaultValue(AnnotType at);
+
+inline bool enumSupportsAnnot(AnnotType at) {
+  return
+    at == AnnotType::String ||
+    at == AnnotType::Int ||
+    at == AnnotType::ArrayKey ||
+    at == AnnotType::Classname;
+}
 
 enum class AnnotAction {
   Pass,

@@ -95,16 +95,8 @@ struct TypeConstraint {
 
   size_t stableHash() const;
 
-  void resolveType(AnnotType t, bool nullable, LowStringPtr clsName) {
-    assertx(m_type == AnnotType::Unresolved);
-    assertx(t != AnnotType::Unresolved);
-    assertx((t == AnnotType::Object) == (clsName != nullptr));
-    auto flags = m_flags | Flags::Resolved;
-    if (nullable) flags |= Flags::Nullable;
-    m_flags = static_cast<Flags>(flags);
-    m_type = t;
-    m_clsName = clsName;
-  }
+  void resolveType(AnnotType t, bool nullable, LowStringPtr clsName);
+  void unresolve();
 
   void addFlags(Flags flags) {
     m_flags = static_cast<Flags>(m_flags | flags);
@@ -415,7 +407,7 @@ private:
   // for details).
   Type m_type;
   Flags m_flags;
-  LowStringPtr m_clsName;   // valid iff isObject()
+  LowStringPtr m_clsName;   // valid iff isObject() or if an enum
   LowStringPtr m_typeName;
   LowPtr<const NamedType> m_namedType;
 };

@@ -63,15 +63,14 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   }
 
   for (auto& d : info.deployments) {
-    std::vector<std::regex> domains;
+    std::vector<std::shared_ptr<re2::RE2>> domains;
     for (auto& s : d.deployment.domains) {
-      domains.push_back(std::regex(std::string(s)));
+      domains.push_back(std::make_shared<re2::RE2>(std::string(s)));
     }
     deployments.emplace(std::string(d.name),
                         Deployment {
                           convert(d.deployment.packages),
-                          domains,
-                          convert(d.deployment.domains),
+                          std::move(domains),
                         });
   }
 #endif
@@ -90,6 +89,14 @@ folly::dynamic mangleVecForCacheKey(const hphp_vector_string_set& data) {
   for (auto& s : data) result.push_back(s);
   return result;
 }
+
+folly::dynamic mangleVecForCacheKey(
+  const std::vector<std::shared_ptr<re2::RE2>>& data
+) {
+  folly::dynamic result = folly::dynamic::array();
+  for (auto& r : data) result.push_back(r->pattern());
+  return result;
+}
 } // namespace
 
 std::string PackageInfo::mangleForCacheKey() const {
@@ -105,7 +112,7 @@ std::string PackageInfo::mangleForCacheKey() const {
   for (auto& [name, deployment] : deployments()) {
     folly::dynamic entry = folly::dynamic::object();
     entry["packages"] = mangleVecForCacheKey(deployment.m_packages);
-    entry["domains"] = mangleVecForCacheKey(deployment.m_domainsOriginal);
+    entry["domains"] = mangleVecForCacheKey(deployment.m_domains);
     result[name] = entry;
   }
 

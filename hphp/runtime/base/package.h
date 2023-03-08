@@ -17,7 +17,8 @@
 #pragma once
 
 #include <filesystem>
-#include <regex>
+#include <memory>
+#include <re2/re2.h>
 #include <vector>
 
 #include "hphp/util/hash-map.h"
@@ -33,10 +34,7 @@ struct PackageInfo {
 
   struct Deployment {
     hphp_vector_string_set m_packages;
-    std::vector<std::regex> m_domains;
-    // Need to maintain the string form of regex for cache key mangling
-    // C++ does not provide a way to convert a regex back to string
-    hphp_vector_string_set m_domainsOriginal;
+    std::vector<std::shared_ptr<re2::RE2>> m_domains;
   };
 
   using PackageMap = hphp_vector_map<std::string, Package>;

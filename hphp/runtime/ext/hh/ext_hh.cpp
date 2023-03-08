@@ -1512,9 +1512,9 @@ Array HHVM_FUNCTION(get_all_deployments) {
     for (auto& s : d.m_packages) packages.append(String{makeStaticString(s)});
     deployment.set(s_packages.get(), packages.toVariant());
 
-    VecInit domains(d.m_domainsOriginal.size());
-    for (auto& s : d.m_domainsOriginal) {
-      domains.append(String{makeStaticString(s)});
+    VecInit domains(d.m_domains.size());
+    for (auto& r : d.m_domains) {
+      domains.append(String{makeStaticString(r->pattern())});
     }
     deployment.set(s_domains.get(), domains.toVariant());
 

@@ -30,6 +30,7 @@ pub mod elab_shape_field_name;
 pub mod elab_user_attributes;
 pub mod guard_invalid;
 pub mod validate_class_consistent_construct;
+pub mod validate_class_methods;
 pub mod validate_class_req;
 pub mod validate_class_tparams;
 pub mod validate_class_user_attribute_const;

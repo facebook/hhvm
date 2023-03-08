@@ -249,6 +249,7 @@ fn elaborate<T: Transform>(
 
         passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
 
+        passes::validate_class_methods::ValidateClassMethodsPass::default(),
     ];
 
     let mut errs = Vec::default();

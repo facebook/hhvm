@@ -5007,6 +5007,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let user_attributes = user_attributes.into_bump_slice();
 
         let parsed_attributes = self.to_attributes(attributes);
+        let support_dynamic_type = self.implicit_sdt() || parsed_attributes.support_dynamic_type;
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,
@@ -5028,7 +5029,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             req_implements: &[],
             req_class: &[],
             implements: &[],
-            support_dynamic_type: parsed_attributes.support_dynamic_type,
+            support_dynamic_type,
             consts,
             typeconsts,
             props: &[],

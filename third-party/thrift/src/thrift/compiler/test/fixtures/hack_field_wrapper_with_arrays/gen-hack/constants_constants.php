@@ -9,7 +9,7 @@
 class constants_CONSTANTS implements \IThriftConstants {
   /**
    * Original thrift constant:-
-   * enum constants.Company my_company
+   * constants.MyCompany my_company
    */
   const MyCompany my_company = Company::FACEBOOK;
 
@@ -121,7 +121,7 @@ class constants_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<i64> wrapped_ints
+   * list<include.i64WithWrapper> wrapped_ints
    */
   <<__Memoize>>
   public static function wrapped_ints()[write_props]: vec<i64WithWrapper>{

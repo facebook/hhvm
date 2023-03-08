@@ -297,7 +297,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
   public dict<string, structured_annotation_recursive> $recurse_map;
   /**
    * Original thrift field:-
-   * 5: i64 int_field
+   * 5: annotations.i64WithWrapper int_field
    */
   public i64WithWrapper $int_field;
 

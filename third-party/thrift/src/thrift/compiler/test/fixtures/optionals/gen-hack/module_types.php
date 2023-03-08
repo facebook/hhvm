@@ -487,7 +487,7 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 5615342512964403351;
   /**
    * Original thrift field:-
-   * 1: i64 id
+   * 1: module.PersonID id
    */
   public int $id;
   /**
@@ -512,12 +512,12 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata {
   public ?Color $favoriteColor;
   /**
    * Original thrift field:-
-   * 6: set<i64> friends
+   * 6: set<module.PersonID> friends
    */
   public ?Set<int> $friends;
   /**
    * Original thrift field:-
-   * 7: i64 bestFriend
+   * 7: module.PersonID bestFriend
    */
   public ?int $bestFriend;
   /**

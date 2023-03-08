@@ -4061,7 +4061,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   const int STRUCTURAL_ID = 8495441692096133093;
   /**
    * Original thrift field:-
-   * 1: i32 field1
+   * 1: terse_write.MyInteger field1
    */
   public \Adapter1::THackType $field1;
   /**
@@ -4071,7 +4071,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
   public \Adapter1::THackType $field2;
   /**
    * Original thrift field:-
-   * 3: i32 field3
+   * 3: terse_write.MyInteger field3
    */
   public \Adapter1::THackType $field3;
 

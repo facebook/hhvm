@@ -37,7 +37,7 @@ class include_typedef_IncludedFoo implements \IThriftSyncStruct, \IThriftStructM
   const int STRUCTURAL_ID = 134695345279680724;
   /**
    * Original thrift field:-
-   * 1: i32 i_field
+   * 1: php_include.IncludedMyI32 i_field
    */
   public include_typedef_IncludedMyI32 $i_field;
   /**

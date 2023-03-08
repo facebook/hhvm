@@ -119,7 +119,7 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * bool type_adapted
+   * module.AdaptedBool type_adapted
    */
   const \thrift\test\AdaptedBool type_adapted = true;
 
@@ -141,7 +141,7 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<byte> container_of_adapted
+   * list<module.AdaptedByte> container_of_adapted
    */
   <<__Memoize>>
   public static function container_of_adapted()[write_props]: \ConstVector<\thrift\test\AdaptedByte>{

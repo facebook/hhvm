@@ -141,7 +141,7 @@
       },
       "SIMPLE_LIST": {
         "name": "SIMPLE_LIST",
-        "type": "list<i32>",
+        "type": "list<ThriftdocTest.BigDog>",
         "value": [42, 73],
         "docstring": "Simple list\n",
         "lineno": 259

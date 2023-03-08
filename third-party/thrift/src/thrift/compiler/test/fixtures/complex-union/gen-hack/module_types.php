@@ -115,7 +115,7 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   protected ?Vector<string> $stringListValue;
   /**
    * Original thrift field:-
-   * 9: map<i16, string> typedefValue
+   * 9: module.containerTypedef typedefValue
    */
   protected ?Map<int, string> $typedefValue;
   /**
@@ -1007,7 +1007,7 @@ class Val implements \IThriftSyncStruct, \IThriftStructMetadata {
   public int $intVal;
   /**
    * Original thrift field:-
-   * 9: map<i16, string> typedefValue
+   * 9: module.containerTypedef typedefValue
    */
   public Map<int, string> $typedefValue;
 

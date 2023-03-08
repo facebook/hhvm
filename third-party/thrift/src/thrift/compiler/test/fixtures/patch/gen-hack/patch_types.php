@@ -2011,7 +2011,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
    * Note: Only modifies set field values.
    * 
    * Original thrift field:-
-   * 1: binary assign
+   * 1: standard.ByteBuffer assign
    */
   public ?string $assign;
   /**
@@ -2025,14 +2025,14 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
    * Prepend to a given value.
    * 
    * Original thrift field:-
-   * 8: binary prepend
+   * 8: standard.ByteBuffer prepend
    */
   public string $prepend;
   /**
    * Append to a given value.
    * 
    * Original thrift field:-
-   * 9: binary append
+   * 9: standard.ByteBuffer append
    */
   public string $append;
 

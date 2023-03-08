@@ -425,22 +425,22 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   public \Adapter1::THackType $intFieldWithDefault;
   /**
    * Original thrift field:-
-   * 4: set<string> setField
+   * 4: module.SetWithAdapter setField
    */
   public \thrift\test\SetWithAdapter $setField;
   /**
    * Original thrift field:-
-   * 5: set<string> optionalSetField
+   * 5: module.SetWithAdapter optionalSetField
    */
   public ?\thrift\test\SetWithAdapter $optionalSetField;
   /**
    * Original thrift field:-
-   * 6: map<string, list<string>> mapField
+   * 6: map<string, module.ListWithElemAdapter_withAdapter> mapField
    */
   public \Adapter3::THackType $mapField;
   /**
    * Original thrift field:-
-   * 7: map<string, list<string>> optionalMapField
+   * 7: map<string, module.ListWithElemAdapter_withAdapter> optionalMapField
    */
   public ?\Adapter3::THackType $optionalMapField;
   /**
@@ -450,17 +450,17 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   public \Adapter1::THackType $binaryField;
   /**
    * Original thrift field:-
-   * 9: i64 longField
+   * 9: module.MyI64 longField
    */
   public \thrift\test\MyI64 $longField;
   /**
    * Original thrift field:-
-   * 10: i64 adaptedLongField
+   * 10: module.MyI64 adaptedLongField
    */
   public \thrift\test\MyI64 $adaptedLongField;
   /**
    * Original thrift field:-
-   * 11: i64 doubleAdaptedField
+   * 11: module.DoubleTypedefI64 doubleAdaptedField
    */
   public \thrift\test\DoubleTypedefI64 $doubleAdaptedField;
 
@@ -1296,12 +1296,12 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   public ?\Adapter1::THackType $intField;
   /**
    * Original thrift field:-
-   * 4: set<string> setField
+   * 4: module.SetWithAdapter setField
    */
   public ?\thrift\test\SetWithAdapter $setField;
   /**
    * Original thrift field:-
-   * 6: map<string, list<string>> mapField
+   * 6: map<string, module.ListWithElemAdapter_withAdapter> mapField
    */
   public ?\Adapter3::THackType $mapField;
   /**
@@ -1311,7 +1311,7 @@ class Baz implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnion<\
   public ?\Adapter1::THackType $binaryField;
   /**
    * Original thrift field:-
-   * 9: i64 longField
+   * 9: module.MyI64 longField
    */
   public ?\thrift\test\MyI64 $longField;
   protected \thrift\test\BazEnum $_type = \thrift\test\BazEnum::_EMPTY_;
@@ -1928,32 +1928,32 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const int STRUCTURAL_ID = 7938871189708910014;
   /**
    * Original thrift field:-
-   * 1: struct module.Foo structField
+   * 1: module.Foo structField
    */
   public ?\Adapter1::THackType $structField;
   /**
    * Original thrift field:-
-   * 2: struct module.Foo optionalStructField
+   * 2: module.Foo optionalStructField
    */
   public ?\Adapter1::THackType $optionalStructField;
   /**
    * Original thrift field:-
-   * 3: list<struct module.Foo> structListField
+   * 3: list<module.FooWithAdapter> structListField
    */
   public Vector<\thrift\test\FooWithAdapter> $structListField;
   /**
    * Original thrift field:-
-   * 4: list<struct module.Foo> optionalStructListField
+   * 4: list<module.FooWithAdapter> optionalStructListField
    */
   public ?Vector<\thrift\test\FooWithAdapter> $optionalStructListField;
   /**
    * Original thrift field:-
-   * 5: struct module.Baz unionField
+   * 5: module.Baz unionField
    */
   public ?\Adapter1::THackType $unionField;
   /**
    * Original thrift field:-
-   * 6: struct module.Baz optionalUnionField
+   * 6: module.Baz optionalUnionField
    */
   public ?\Adapter1::THackType $optionalUnionField;
   /**
@@ -3231,7 +3231,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   const int STRUCTURAL_ID = 1135805466744601735;
   /**
    * Original thrift field:-
-   * 1: struct module.A a
+   * 1: module.AdaptedA a
    */
   public ?\thrift\test\A $a;
 
@@ -3617,7 +3617,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public int $field;
   /**
    * Original thrift field:-
-   * 2: set<string> set_string
+   * 2: module.SetWithAdapter set_string
    */
   public \thrift\test\SetWithAdapter $set_string;
 
@@ -3865,12 +3865,12 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   const int STRUCTURAL_ID = 9217156058896773800;
   /**
    * Original thrift field:-
-   * 1: i64 delay
+   * 1: module.DurationMs delay
    */
   public \thrift\test\DurationMs $delay;
   /**
    * Original thrift field:-
-   * 2: binary custom
+   * 2: module.CustomProtocolType custom
    */
   public \thrift\test\CustomProtocolType $custom;
   /**
@@ -3890,7 +3890,7 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   public string $meta;
   /**
    * Original thrift field:-
-   * 6: string indirectionString
+   * 6: module.IndirectionString indirectionString
    */
   public \thrift\test\IndirectionString $indirectionString;
   /**
@@ -3900,12 +3900,12 @@ class AdaptTestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   public string $string_data;
   /**
    * Original thrift field:-
-   * 8: bool double_wrapped_bool
+   * 8: module.AdaptedBool double_wrapped_bool
    */
   public \thrift\test\AdaptedBool $double_wrapped_bool;
   /**
    * Original thrift field:-
-   * 9: i32 double_wrapped_integer
+   * 9: module.AdaptedInteger double_wrapped_integer
    */
   public \thrift\test\AdaptedInteger $double_wrapped_integer;
   /**
@@ -4522,37 +4522,37 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
   const int STRUCTURAL_ID = 1552800196824590900;
   /**
    * Original thrift field:-
-   * 1: bool adaptedBool
+   * 1: module.AdaptedBool adaptedBool
    */
   public \thrift\test\AdaptedBool $adaptedBool;
   /**
    * Original thrift field:-
-   * 2: byte adaptedByte
+   * 2: module.AdaptedByte adaptedByte
    */
   public \thrift\test\AdaptedByte $adaptedByte;
   /**
    * Original thrift field:-
-   * 3: i16 adaptedShort
+   * 3: module.AdaptedShort adaptedShort
    */
   public \thrift\test\AdaptedShort $adaptedShort;
   /**
    * Original thrift field:-
-   * 4: i32 adaptedInteger
+   * 4: module.AdaptedInteger adaptedInteger
    */
   public \thrift\test\AdaptedInteger $adaptedInteger;
   /**
    * Original thrift field:-
-   * 5: i64 adaptedLong
+   * 5: module.AdaptedLong adaptedLong
    */
   public \thrift\test\AdaptedLong $adaptedLong;
   /**
    * Original thrift field:-
-   * 6: double adaptedDouble
+   * 6: module.AdaptedDouble adaptedDouble
    */
   public \thrift\test\AdaptedDouble $adaptedDouble;
   /**
    * Original thrift field:-
-   * 7: string adaptedString
+   * 7: module.AdaptedString adaptedString
    */
   public \thrift\test\AdaptedString $adaptedString;
   /**
@@ -4572,42 +4572,42 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
   public Map<int, int> $adaptedMap;
   /**
    * Original thrift field:-
-   * 11: bool adaptedBoolDefault
+   * 11: module.AdaptedBool adaptedBoolDefault
    */
   public \thrift\test\AdaptedBool $adaptedBoolDefault;
   /**
    * Original thrift field:-
-   * 12: byte adaptedByteDefault
+   * 12: module.AdaptedByte adaptedByteDefault
    */
   public \thrift\test\AdaptedByte $adaptedByteDefault;
   /**
    * Original thrift field:-
-   * 13: i16 adaptedShortDefault
+   * 13: module.AdaptedShort adaptedShortDefault
    */
   public \thrift\test\AdaptedShort $adaptedShortDefault;
   /**
    * Original thrift field:-
-   * 14: i32 adaptedIntegerDefault
+   * 14: module.AdaptedInteger adaptedIntegerDefault
    */
   public \thrift\test\AdaptedInteger $adaptedIntegerDefault;
   /**
    * Original thrift field:-
-   * 15: i64 adaptedLongDefault
+   * 15: module.AdaptedLong adaptedLongDefault
    */
   public \thrift\test\AdaptedLong $adaptedLongDefault;
   /**
    * Original thrift field:-
-   * 16: double adaptedDoubleDefault
+   * 16: module.AdaptedDouble adaptedDoubleDefault
    */
   public \thrift\test\AdaptedDouble $adaptedDoubleDefault;
   /**
    * Original thrift field:-
-   * 17: string adaptedStringDefault
+   * 17: module.AdaptedString adaptedStringDefault
    */
   public \thrift\test\AdaptedString $adaptedStringDefault;
   /**
    * Original thrift field:-
-   * 18: enum module.ThriftAdaptedEnum adaptedEnum
+   * 18: module.AdaptedEnum adaptedEnum
    */
   public ?\thrift\test\AdaptedEnum $adaptedEnum;
   /**
@@ -4627,7 +4627,7 @@ class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftStructMeta
   public Map<int, int> $adaptedMapDefault;
   /**
    * Original thrift field:-
-   * 22: bool doubleTypedefBool
+   * 22: module.DoubleTypedefBool doubleTypedefBool
    */
   public \thrift\test\DoubleTypedefBool $doubleTypedefBool;
 
@@ -5771,12 +5771,12 @@ class AdaptTestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   const int STRUCTURAL_ID = 7327808847999377042;
   /**
    * Original thrift field:-
-   * 1: i64 delay
+   * 1: module.DurationMs delay
    */
   public ?\thrift\test\DurationMs $delay;
   /**
    * Original thrift field:-
-   * 2: binary custom
+   * 2: module.CustomProtocolType custom
    */
   public ?\thrift\test\CustomProtocolType $custom;
   protected \thrift\test\AdaptTestUnionEnum $_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
@@ -6273,7 +6273,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
   public ?\thrift\test\AdaptedStruct $adaptedStruct;
   /**
    * Original thrift field:-
-   * 2: struct module.AdaptedStruct adaptedTypedef
+   * 2: module.AdaptedTypedef adaptedTypedef
    */
   public ?\thrift\test\AdaptedTypedef $adaptedTypedef;
   /**
@@ -6283,7 +6283,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
   public ?\thrift\test\DirectlyAdaptedStruct $directlyAdapted;
   /**
    * Original thrift field:-
-   * 4: struct module.DirectlyAdaptedStruct typedefOfAdapted
+   * 4: module.TypedefOfDirect typedefOfAdapted
    */
   public ?\thrift\test\TypedefOfDirect $typedefOfAdapted;
 
@@ -6655,7 +6655,7 @@ class CircularStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   const int STRUCTURAL_ID = 7977518433842367675;
   /**
    * Original thrift field:-
-   * 1: struct module.CircularAdaptee field
+   * 1: module.AdaptedCircularAdaptee field
    */
   public ?\thrift\test\CircularAdaptee $field;
 
@@ -7815,7 +7815,7 @@ class CountingStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \ITh
   public ?int $regularInt;
   /**
    * Original thrift field:-
-   * 2: i64 countingInt
+   * 2: module.CountingInt countingInt
    */
   public ?\thrift\test\CountingInt $countingInt;
   /**

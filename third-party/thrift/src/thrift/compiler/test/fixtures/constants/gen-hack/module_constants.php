@@ -79,25 +79,25 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * enum module.Company my_company
+   * module.MyCompany my_company
    */
   const MyCompany my_company = Company::FACEBOOK;
 
   /**
    * Original thrift constant:-
-   * string foo
+   * module.MyStringIdentifier foo
    */
   const MyStringIdentifier foo = "foo";
 
   /**
    * Original thrift constant:-
-   * i32 bar
+   * module.MyIntIdentifier bar
    */
   const MyIntIdentifier bar = 42;
 
   /**
    * Original thrift constant:-
-   * map<string, string> mymap
+   * module.MyMapIdentifier mymap
    */
   <<__Memoize>>
   public static function mymap()[write_props]: MyMapIdentifier{

@@ -143,7 +143,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
   public ?string $school;
   /**
    * Original thrift field:-
-   * 6: i64 intern_id
+   * 6: include.i64WithWrapper intern_id
    */
   public i64WithWrapper $intern_id;
 

@@ -474,7 +474,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public ?MyUnion $my_union;
   /**
    * Original thrift field:-
-   * 10: i16 my_id
+   * 10: module.MyId my_id
    */
   public int $my_id;
 

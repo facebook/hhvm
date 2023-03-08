@@ -400,7 +400,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 
   /**
    * Original thrift field:-
-   * 5: i64 optional_adapted_and_wrapped_type
+   * 5: include.i64WithAdapter optional_adapted_and_wrapped_type
    */
   private ?\MyFieldWrapper<?i64WithAdapter, MyNestedStruct> $optional_adapted_and_wrapped_type;
 
@@ -410,7 +410,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 
   /**
    * Original thrift field:-
-   * 7: i64 wrapped_type_int
+   * 7: include.i64WithWrapper wrapped_type_int
    */
   private ?\MyFieldWrapper<i64WithWrapper, MyNestedStruct> $wrapped_type_int;
 
@@ -442,7 +442,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 
   /**
    * Original thrift field:-
-   * 9: map<string, struct include.MyStruct> optional_adapted_and_wrapped_type_map
+   * 9: include.AdaptedMap optional_adapted_and_wrapped_type_map
    */
   private ?\MyFieldWrapper<?AdaptedMap, MyNestedStruct> $optional_adapted_and_wrapped_type_map;
 
@@ -452,7 +452,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 
   /**
    * Original thrift field:-
-   * 10: struct include.MyStruct optional_adapted_and_wrapped_type_struct
+   * 10: include.AdaptedStruct optional_adapted_and_wrapped_type_struct
    */
   private ?\MyFieldWrapper<?AdaptedStruct, MyNestedStruct> $optional_adapted_and_wrapped_type_struct;
 

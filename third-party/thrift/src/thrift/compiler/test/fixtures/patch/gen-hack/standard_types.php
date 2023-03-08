@@ -125,14 +125,14 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
    * The unique Thrift URI for this type.
    * 
    * Original thrift field:-
-   * 1: string uri
+   * 1: standard.Uri uri
    */
   public ?string $uri;
   /**
    * A prefix of the SHA2-256 hash of the URI.
    * 
    * Original thrift field:-
-   * 2: binary typeHashPrefixSha2_256
+   * 2: standard.ByteString typeHashPrefixSha2_256
    */
   public ?string $typeHashPrefixSha2_256;
   protected apache_thrift_type_standard_TypeUriEnum $_type = apache_thrift_type_standard_TypeUriEnum::_EMPTY_;

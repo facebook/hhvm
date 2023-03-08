@@ -427,7 +427,7 @@ class ContainerStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public Map<int, string> $fieldG;
   /**
    * Original thrift field:-
-   * 8: map<i32, string> fieldH
+   * 8: included.SomeMap fieldH
    */
   public Map<int, string> $fieldH;
 
@@ -2620,12 +2620,12 @@ class AnnotatedTypes implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 7799859984459418183;
   /**
    * Original thrift field:-
-   * 1: binary binary_field
+   * 1: module.TBinary binary_field
    */
   public string $binary_field;
   /**
    * Original thrift field:-
-   * 2: list<map<i32, string>> list_field
+   * 2: included.SomeListOfTypeMap list_field
    */
   public Vector<Map<int, string>> $list_field;
 
@@ -5077,12 +5077,12 @@ class TypedefStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public int $i32_field;
   /**
    * Original thrift field:-
-   * 2: i32 IntTypedef_field
+   * 2: module.IntTypedef IntTypedef_field
    */
   public int $IntTypedef_field;
   /**
    * Original thrift field:-
-   * 3: i32 UintTypedef_field
+   * 3: module.UintTypedef UintTypedef_field
    */
   public int $UintTypedef_field;
 

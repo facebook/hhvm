@@ -668,7 +668,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public int $annotated_field;
   /**
    * Original thrift field:-
-   * 2: string annotated_type
+   * 2: module.annotated_inline_string annotated_type
    */
   public string $annotated_type;
   /**
@@ -1013,12 +1013,12 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   const int STRUCTURAL_ID = 1597178699879920243;
   /**
    * Original thrift field:-
-   * 1: string first
+   * 1: module.annotated_inline_string first
    */
   public ?string $first;
   /**
    * Original thrift field:-
-   * 2: i64 second
+   * 2: module.annotated_inline_i64 second
    */
   public ?int $second;
   protected \fixtures\basic-structured-annotations\MyUnionEnum $_type = \fixtures\basic-structured-annotations\MyUnionEnum::_EMPTY_;

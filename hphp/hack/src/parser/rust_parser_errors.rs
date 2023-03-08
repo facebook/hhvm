@@ -313,10 +313,6 @@ fn strip_ns(name: &str) -> &str {
     }
 }
 
-fn strip_hh_ns(name: &str) -> &str {
-    name.trim_start_matches("\\HH\\")
-}
-
 // test a node is a syntaxlist and that the list contains an element
 // satisfying a given predicate
 fn list_contains_predicate<P>(p: P, node: S<'_>) -> bool
@@ -3083,35 +3079,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 if strip_ns(self.text(recv)) == strip_ns(sn::readonly::AS_MUT) {
                     self.mark_uses_readonly()
                 }
-
-                if self.text(recv) == strip_hh_ns(sn::autoimported_functions::FUN_)
-                    && !self.env.codegen
-                {
-                    let mut arg_node_list = syntax_to_list_no_separators(arg_list);
-                    match arg_node_list.next() {
-                        Some(name) if arg_node_list.count() == 0 => self.errors.push(
-                            make_error_from_node(recv, errors::fun_disabled(self.text(name))),
-                        ),
-                        _ => self.errors.push(make_error_from_node(
-                            recv,
-                            errors::fun_requires_const_string,
-                        )),
-                    }
-                }
-
-                if self.text(recv) == strip_hh_ns(sn::autoimported_functions::CLASS_METH)
-                    && !self.env.codegen
-                {
-                    self.errors
-                        .push(make_error_from_node(recv, errors::class_meth_disabled))
-                }
-
-                if self.text(recv) == strip_hh_ns(sn::autoimported_functions::INST_METH)
-                    && !self.env.codegen
-                {
-                    self.errors
-                        .push(make_error_from_node(recv, errors::inst_meth_disabled))
-                }
             }
 
             ETSpliceExpression(_) => {
@@ -4395,11 +4362,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
         let is_whitelisted_function = |self_: &Self, receiver_token| {
             let text = self_.text(receiver_token);
-
-            (!self_.env.parser_options.po_disallow_func_ptrs_in_constants
-                && (text == strip_hh_ns(sn::autoimported_functions::FUN_)
-                    || text == strip_hh_ns(sn::autoimported_functions::CLASS_METH)))
-                || (text == sn::std_lib_functions::ARRAY_MARK_LEGACY)
+            (text == sn::std_lib_functions::ARRAY_MARK_LEGACY)
                 || (text == strip_ns(sn::std_lib_functions::ARRAY_MARK_LEGACY))
                 || (text == sn::std_lib_functions::ARRAY_UNMARK_LEGACY)
                 || (text == strip_ns(sn::std_lib_functions::ARRAY_UNMARK_LEGACY))

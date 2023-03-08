@@ -502,12 +502,6 @@ pub mod autoimported_functions {
 
     pub const INVARIANT_VIOLATION: &str = "\\HH\\invariant_violation";
 
-    pub const FUN_: &str = "\\HH\\fun";
-
-    pub const INST_METH: &str = "\\HH\\inst_meth";
-
-    pub const CLASS_METH: &str = "\\HH\\class_meth";
-
     pub const METH_CALLER: &str = "\\HH\\meth_caller";
 }
 

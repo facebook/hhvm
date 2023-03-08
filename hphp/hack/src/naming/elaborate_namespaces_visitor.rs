@@ -77,10 +77,9 @@ impl Env {
 
     fn handle_special_calls(&self, call: &mut Expr_) {
         if let Expr_::Call(box (Expr(_, _, Expr_::Id(id)), _, args, _)) = call {
-            if (self.in_codegen() && args.len() == 1 && id.1 == sn::autoimported_functions::FUN_)
-                || (!self.in_codegen()
-                    && args.len() == 2
-                    && id.1 == sn::autoimported_functions::METH_CALLER)
+            if !self.in_codegen()
+                && args.len() == 2
+                && id.1 == sn::autoimported_functions::METH_CALLER
             {
                 if let Expr(_, p, Expr_::String(fn_name)) = &args[0].1 {
                     let fn_name = core_utils::add_ns_bstr(fn_name);

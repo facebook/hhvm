@@ -367,21 +367,10 @@ pub mod autoimported_functions {
     pub static invariant_violation: Lazy<FunName> =
         lazy!(sn::autoimported_functions::INVARIANT_VIOLATION);
     pub static invariant: Lazy<FunName> = lazy!(sn::autoimported_functions::INVARIANT);
-    pub static fun: Lazy<FunName> = lazy!(sn::autoimported_functions::FUN_);
-    pub static inst_meth: Lazy<FunName> = lazy!(sn::autoimported_functions::INST_METH);
-    pub static class_meth: Lazy<FunName> = lazy!(sn::autoimported_functions::CLASS_METH);
     pub static meth_caller: Lazy<FunName> = lazy!(sn::autoimported_functions::METH_CALLER);
 
     pub fn iter() -> impl Iterator<Item = FunName> {
-        [
-            *invariant_violation,
-            *invariant,
-            *fun,
-            *inst_meth,
-            *class_meth,
-            *meth_caller,
-        ]
-        .into_iter()
+        [*invariant_violation, *invariant, *meth_caller].into_iter()
     }
 }
 

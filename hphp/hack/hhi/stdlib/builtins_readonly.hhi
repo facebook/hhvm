@@ -41,11 +41,11 @@ namespace HH\Readonly {
      * @return $value              - Value at $index, if it exists, or $default.
      *
      */
-    public static function idx(
+    public static function idx<Tv>(
       readonly ?shape(...) $shape,
       readonly arraykey $index,
-      \HH\FIXME\MISSING_PARAM_TYPE $default = null,
-    )[]: readonly mixed;
+      ?Tv $default = null,
+    )[]: readonly Tv;
 
     public static function toArray(
       readonly shape(...) $shape,
@@ -60,9 +60,9 @@ namespace HH\Readonly {
      * throws if the field is missing.
      * Use this to access optional fields on readonly shapes.
      */
-    public static function at(
+    public static function at<Tv>(
       readonly shape(...) $shape,
       readonly arraykey $index,
-    )[]: readonly mixed;
+    )[]: readonly Tv;
   }
 }

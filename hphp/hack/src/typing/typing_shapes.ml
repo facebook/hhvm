@@ -74,7 +74,6 @@ let make_locl_like_type env ty =
     Typing_union.union env dyn ty
   else
     (env, ty)
-
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
  * The function leaves all the other types (non-shapes) unchanged.
@@ -214,91 +213,44 @@ let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
  *     ----------------------------
  *     Shapes::idx(e, sfn) : ?t
  *
- *     e1 : ?shape(?sfn => t, ...)
- *     e2 : t
- *     ----------------------------
- *     Shapes::idx(e1, sfn, e2) : t
- *
  *  Typing rules when the shape has a like type:
  *
  *     e : ~?shape(?sfn => t, ...)
  *     ----------------------------
  *     Shapes::idx(e, sfn) : ~?t
- *
- *     e1 : ~?shape(?sfn => t, ...)
- *     e2 : t
- *     ----------------------------
- *     Shapes::idx(e1, sfn, e2) : ~t
  *)
-let idx
-    env
-    ~expr_pos
-    ~fun_pos
-    ~shape_pos
-    shape_ty
-    ((_, field_p, _) as field)
-    default =
+let idx_without_default env ~expr_pos ~shape_pos shape_ty field_name =
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
   let ((env, ty_err_opt), res) =
-    match TUtils.shape_field_name env field with
-    | None ->
-      let (env, ty) = Env.fresh_type_error env field_p in
-      ((env, None), ty)
-    | Some field_name ->
-      let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
-      let fake_super_shape_ty =
-        make_idx_fake_super_shape
-          shape_pos
-          "Shapes::idx"
-          field_name
-          { sft_optional = true; sft_ty = res }
-      in
-      let nullable_super_shape =
-        mk (Reason.Rnone, Toption fake_super_shape_ty)
-      in
-      let super_shape =
-        if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-          let like_nullable_super_shape =
-            MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
-          in
-          like_nullable_super_shape
-        else
-          nullable_super_shape
-      in
-      (match default with
-      | None ->
-        let (env, ty_err_opt) =
-          Typing_coercion.coerce_type
-            shape_pos
-            Reason.URparam
-            env
-            shape_ty
-            { et_type = super_shape; et_enforced = Unenforced }
-            Typing_error.Callback.unify_error
+    let fake_super_shape_ty =
+      make_idx_fake_super_shape
+        shape_pos
+        "Shapes::idx"
+        field_name
+        { sft_optional = true; sft_ty = res }
+    in
+    let nullable_super_shape = mk (Reason.Rnone, Toption fake_super_shape_ty) in
+    let super_shape =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        let like_nullable_super_shape =
+          MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
         in
-        let (env, res) = TUtils.union env res (MakeType.null fun_pos) in
-        ((env, ty_err_opt), res)
-      | Some (default_pos, default_ty) ->
-        let (env, e1) =
-          Typing_coercion.coerce_type
-            shape_pos
-            Reason.URparam
-            env
-            shape_ty
-            { et_type = super_shape; et_enforced = Unenforced }
-            Typing_error.Callback.unify_error
-        in
-        let (env, e2) =
-          Type.sub_type
-            default_pos
-            Reason.URparam
-            env
-            default_ty
-            res
-            Typing_error.Callback.unify_error
-        in
-        ((env, Option.merge e1 e2 ~f:Typing_error.both), res))
+        like_nullable_super_shape
+      else
+        nullable_super_shape
+    in
+    let (env, ty_err_opt) =
+      Typing_coercion.coerce_type
+        shape_pos
+        Reason.URparam
+        env
+        shape_ty
+        { et_type = super_shape; et_enforced = Unenforced }
+        Typing_error.Callback.unify_error
+    in
+    let (env, res) = TUtils.union env res (MakeType.null Reason.Rnone) in
+    ((env, ty_err_opt), res)
   in
   let (env, res) =
     match get_node (TUtils.strip_dynamic env shape_ty) with
@@ -310,44 +262,6 @@ let idx
   in
 
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  make_locl_like_type env res
-
-let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
-  let (env, shape_ty) = Env.expand_type env shape_ty in
-  let (env, res) = Env.fresh_type env expr_pos in
-  let (env, res) =
-    match TUtils.shape_field_name env field with
-    | None -> Env.fresh_type_error env field_p
-    | Some field_name ->
-      let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
-      let fake_super_shape_ty =
-        make_idx_fake_super_shape
-          shape_pos
-          "Shapes::at"
-          field_name
-          { sft_optional = true; sft_ty = res }
-      in
-      let like_fake_super_shape_ty =
-        MakeType.locl_like (Reason.Rwitness shape_pos) fake_super_shape_ty
-      in
-      let super_shape_ty =
-        if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-          like_fake_super_shape_ty
-        else
-          fake_super_shape_ty
-      in
-      let (env, e1) =
-        Typing_coercion.coerce_type
-          shape_pos
-          Reason.URparam
-          env
-          shape_ty
-          { et_type = super_shape_ty; et_enforced = Unenforced }
-          Typing_error.Callback.unify_error
-      in
-      Option.iter e1 ~f:Errors.add_typing_error;
-      (env, res)
-  in
   make_locl_like_type env res
 
 let remove_key_with_ty_err p env shape_ty ((_, field_p, _) as field) =
@@ -594,3 +508,128 @@ let check_shape_keys_validity env keys =
     let ty_err_opt = Typing_error.multiple_opt ty_errs in
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     env
+
+let update_param : decl_fun_param -> decl_ty -> decl_fun_param =
+ (fun param ty -> { param with fp_type = { param.fp_type with et_type = ty } })
+
+(* For function Shapes::idx called with a literal
+ * field name, transform the decl function type from the hhi file
+ * into a type that is specific to the field.
+*
+ * In the hhi file, the function has type
+ *    Shapes::idx<Tv>(
+ *      ?shape(...) $shape,
+ *      arraykey $index,
+ *      ?Tv,
+ *    )[]: ?Tv;
+ *
+ * If there are two arguments, transform it to
+ *    Shapes::idx<Tv>(
+ *      ?shape('field_name' => Tv, ...) $shape,
+ *      arraykey $index,
+ *    )[]: ?Tv;
+ *
+ * If there are three arguments, transform it to
+ *    Shapes::idx<Tv>(
+ *      ?shape('field_name' => Tv, ...) $shape,
+ *      arraykey $index,
+ *      Tv $default,
+ *    )[]: Tv;
+ *)
+let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
+  let (param1, param2, param3) =
+    match fty.ft_params with
+    | [param1; param2; param3] -> (param1, param2, param3)
+    | _ -> failwith "Expected 3 parameters for Shapes::idx in hhi file"
+  in
+  let rret = get_reason fty.ft_ret.et_type in
+  let field_ty : decl_ty =
+    MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
+  in
+  let (params, ret) =
+    let param1 =
+      update_param
+        param1
+        (mk
+           ( Reason.Rnone,
+             Toption
+               (mk
+                  ( Reason.Rwitness_from_decl param1.fp_pos,
+                    Tshape
+                      ( Open_shape,
+                        TShapeMap.singleton
+                          field_name
+                          { sft_optional = true; sft_ty = field_ty } ) )) ))
+    in
+    match nargs with
+    | 2 ->
+      (* Return type should be ?Tv *)
+      let ret = MakeType.nullable_decl rret (MakeType.generic rret "Tv") in
+      ([param1; param2], ret)
+    | 3 ->
+      (* Third parameter should have type Tv *)
+      let param3 =
+        let r3 = get_reason param1.fp_type.et_type in
+        update_param param3 (MakeType.generic r3 "Tv")
+      in
+      (* Return type should be Tv *)
+      let ret = MakeType.generic rret "Tv" in
+      ([param1; param2; param3], ret)
+    (* Shouldn't happen! *)
+    | _ -> (fty.ft_params, fty.ft_ret.et_type)
+  in
+  { fty with ft_params = params; ft_ret = { fty.ft_ret with et_type = ret } }
+
+(* For function Shapes::at called with a literal
+ * field name, transform the decl function type from the hhi file
+ * into a type that is specific to the field.
+ *
+ * In the hhi file, the function has type
+ *    Shapes::at<Tv>(
+ *      shape(...) $shape,
+ *      arraykey $index,
+ *    )[]: Tv;
+ *
+ * Transform it to
+ *    Shapes::at<Tv>(
+ *      shape('field_name' => Tv, ...) $shape,
+ *      arraykey $index,
+ *    )[]: Tv;
+ *)
+let transform_at_fun_ty (field_name : tshape_field_name) fty =
+  let (param1, param2) =
+    match fty.ft_params with
+    | [param1; param2] -> (param1, param2)
+    | _ -> failwith "Expected 2 parameters for Shapes::at in hhi file"
+  in
+  let params =
+    (* Return type should be Tv already, but first parameter is just shape(...) *)
+    let field_ty : decl_ty =
+      MakeType.generic (Reason.Rwitness_from_decl param1.fp_pos) "Tv"
+    in
+    let param1 =
+      update_param
+        param1
+        (mk
+           ( Reason.Rwitness_from_decl param1.fp_pos,
+             Tshape
+               ( Open_shape,
+                 TShapeMap.singleton
+                   field_name
+                   { sft_optional = true; sft_ty = field_ty } ) ))
+    in
+    [param1; param2]
+  in
+  { fty with ft_params = params }
+
+(* For functions Shapes::idx or Shapes::at called with a literal
+ * field name, transform the decl function type from the hhi file
+ * into a type that is specific to the field.
+ *)
+let transform_special_shapes_fun_ty field_name id nargs fty =
+  if String.equal (snd id) Naming_special_names.Shapes.at then
+    transform_at_fun_ty field_name fty
+  else if String.equal (snd id) Naming_special_names.Shapes.idx then
+    transform_idx_fun_ty field_name nargs fty
+  else
+    fty

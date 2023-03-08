@@ -40,15 +40,18 @@
              (Expr
                 ((?int), [6:3-23],
                  (Call (
-                    (((function(?shape(...) $shape, arraykey $index, mixed $default=_)[]: ?int)), [6:3-14], (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))),
-                    [], [(Pnormal, ((shape('x' => int, ?'y' => int)), [6:15-17], (Lvar ([6:15-17], $p)))); (Pnormal, ((string), [6:19-22], (String "x")))], None)))));
+                    (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index)[]: ?int)), [6:3-14], (Class_const (((Shapes), [6:3-9], (CI ([6:3-9], "\\HH\\Shapes"))), ([6:11-14], "idx")))),
+                    [((int), ([6:11-14], (Happly (([Pos.none], "_"), []))))],
+                    [(Pnormal, ((shape('x' => int, ?'y' => int)), [6:15-17], (Lvar ([6:15-17], $p)))); (Pnormal, ((string), [6:19-22], (String "x")))], None)))));
              ([7:3-27],
               (Expr
                  ((int), [7:3-26],
                   (Call (
-                     (((function(?shape(...) $shape, arraykey $index, mixed $default=_)[]: int)), [7:3-14], (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))),
-                     [], [(Pnormal, ((shape('x' => int, ?'y' => int)), [7:15-17], (Lvar ([7:15-17], $p)))); (Pnormal, ((string), [7:19-22], (String "x"))); (Pnormal, ((int), [7:24-25], (Int "3")))],
-                     None)))));
+                     (((function<Tv>(?shape(?'x' => int, ...) $shape, arraykey $index, int $default=_)[]: int)), [7:3-14],
+                      (Class_const (((Shapes), [7:3-9], (CI ([7:3-9], "\\HH\\Shapes"))), ([7:11-14], "idx")))),
+                     [((int), ([7:11-14], (Happly (([Pos.none], "_"), []))))],
+                     [(Pnormal, ((shape('x' => int, ?'y' => int)), [7:15-17], (Lvar ([7:15-17], $p)))); (Pnormal, ((string), [7:19-22], (String "x"))); (Pnormal, ((int), [7:24-25], (Int "3")))], None
+                     )))));
              ([8:3-30],
               (Expr
                  ((bool), [8:3-29],

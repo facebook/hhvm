@@ -1,0 +1,6 @@
+File "supportdyn_shapes_idx.bad.php", line 16, characters 34-40:
+Invalid argument (Typing[4110])
+  File "supportdyn_shapes_idx.bad.php", line 11, characters 20-32:
+  Expected `dynamic`
+  File "supportdyn_shapes_idx.bad.php", line 16, characters 38-38:
+  Type `C` is not a subtype of `dynamic` under dynamic-aware subtyping

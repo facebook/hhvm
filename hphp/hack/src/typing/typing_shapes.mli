@@ -13,28 +13,18 @@ val refine_shape :
   Typing_defs.locl_ty ->
   Typing_env_types.env * Typing_defs.locl_ty
 
-val idx :
+val idx_without_default :
   Typing_env_types.env ->
   expr_pos:Pos.t ->
-  fun_pos:Typing_defs.locl_phase Typing_reason.t_ ->
   shape_pos:Pos.t ->
   Typing_defs.locl_ty ->
-  ('a, 'b) Aast.expr ->
-  (Pos.t * Typing_defs.locl_ty) option ->
+  Typing_defs.tshape_field_name ->
   Typing_env_types.env * Typing_defs.locl_ty
 
 val shapes_idx_not_null :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Nast.expr ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
-val at :
-  Typing_env_types.env ->
-  expr_pos:Pos.t ->
-  shape_pos:Pos.t ->
-  Typing_defs.locl_ty ->
-  ('a, 'b) Aast.expr ->
   Typing_env_types.env * Typing_defs.locl_ty
 
 val remove_key :
@@ -53,3 +43,10 @@ val to_dict :
 
 val check_shape_keys_validity :
   Typing_env_types.env -> Ast_defs.shape_field_name list -> Typing_env_types.env
+
+val transform_special_shapes_fun_ty :
+  Typing_defs.tshape_field_name ->
+  Aast.sid ->
+  int ->
+  Typing_defs.decl_fun_type ->
+  Typing_defs.decl_fun_type

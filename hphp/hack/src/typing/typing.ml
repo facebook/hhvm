@@ -3908,6 +3908,7 @@ and expr_
       class_get
         ~is_method:true
         ~is_const:false
+        ~transform_fty:None
         ~incl_tc:false (* What is this? *)
         ~coerce_from_ty:None (* What is this? *)
         ~explicit_targs:targs
@@ -4370,6 +4371,7 @@ and expr_
       class_get
         ~is_method:(equal_prop_or_method prop_or_method Is_method)
         ~is_const:false
+        ~transform_fty:None
         ~coerce_from_ty:None
         env
         cty
@@ -4915,6 +4917,7 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
     class_get
       ~is_method:false
       ~is_const:true
+      ~transform_fty:None
       ~incl_tc
       ~coerce_from_ty:None
       env
@@ -6375,6 +6378,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
         class_get_err
           ~is_method:false
           ~is_const:false
+          ~transform_fty:None
           ~coerce_from_ty:(Some (p, ur, ety2))
           env
           cty
@@ -6745,7 +6749,11 @@ and dispatch_call
     in
     (result, should_forget_fakes)
   in
-  let dispatch_class_const env ((_, pos, e1_) as e1) m =
+  (* The optional transform_fty parameter is used to transform function
+   * type decls for special static methods, currently just Shapes::at
+   * and Shapes::idx
+   *)
+  let dispatch_class_const ?transform_fty env ((_, pos, e1_) as e1) m =
     let (env, _tal, tcid, ty1) = class_expr env [] e1 in
     let this_ty = MakeType.this (Reason.Rwitness fpos) in
     (* In static context, you can only call parent::foo() on static methods.
@@ -6781,6 +6789,7 @@ and dispatch_call
           class_get
             ~coerce_from_ty:None
             ~is_method:true
+            ~transform_fty
             ~is_const:false
             ~explicit_targs
             env
@@ -7024,87 +7033,35 @@ and dispatch_call
     when String.equal shapes SN.Shapes.cShapes
          || String.equal shapes SN.Shapes.cReadonlyShapes -> begin
     match x with
-    (* Special function `Shapes::idx` *)
-    | idx when String.equal idx SN.Shapes.idx ->
-      overload_function
-        p
-        env
-        class_id
-        method_id
-        el
-        unpacked_element
-        (fun env fty res el tel ->
-          match (el, tel) with
-          | (_, [(_, (shape_ty, shape_pos, _)); (_, field)]) ->
-            Typing_shapes.idx
-              env
-              shape_ty
-              field
-              None
-              ~expr_pos:p
-              ~fun_pos:(get_reason fty)
-              ~shape_pos
-          | ( [_; _; (_, default)],
-              [
-                (_, (shape_ty, shape_pos, _));
-                (_, field);
-                (_, (_, default_pos, _));
-              ] ) ->
-            (* We reevaluate the default argument rather than using the one
-               evaluated during the typechecking wrt to the overloaded
-               function signature in the HHI file because bidirectional
-               typechecking introduces TAnys to the system otherwise. *)
-            let (env, _td, default_ty) = expr env default in
-            Typing_shapes.idx
-              env
-              shape_ty
-              field
-              (Some (default_pos, default_ty))
-              ~expr_pos:p
-              ~fun_pos:(get_reason fty)
-              ~shape_pos
-          | _ -> (env, res))
-    (* Special function `Shapes::at` *)
-    | at when String.equal at SN.Shapes.at ->
-      overload_function
-        p
-        env
-        class_id
-        method_id
-        el
-        unpacked_element
-        (fun env _fty res _el tel ->
-          match tel with
-          | [(_, (shape_ty, shape_pos, _)); (_, field)] ->
-            Typing_shapes.at env ~expr_pos:p ~shape_pos shape_ty field
-          | _ -> (env, res))
-    (* Special function `Shapes::keyExists` *)
-    | key_exists when String.equal key_exists SN.Shapes.keyExists ->
-      overload_function
-        p
-        env
-        class_id
-        method_id
-        el
-        unpacked_element
-        (fun env fty res _el tel ->
-          match tel with
-          | [(_, (shape_ty, shape_pos, _)); (_, field)] ->
-            (* try accessing the field, to verify existence, but ignore
-               * the returned type and keep the one coming from function
-               * return type hint *)
-            let (env, _) =
-              Typing_shapes.idx
-                env
-                shape_ty
-                field
-                None
-                ~expr_pos:p
-                ~fun_pos:(get_reason fty)
-                ~shape_pos
+    (* Special functions `Shapes::at`, `Shapes::idx` and `Shapes::keyExists`.
+     * We implement these by transforming the function type decl that's fetched
+     * from the hhi
+     *)
+    | _
+      when String.equal x SN.Shapes.at
+           || String.equal x SN.Shapes.idx
+           || String.equal x SN.Shapes.keyExists ->
+      let transform_fty =
+        (* We expect the second argument to at, idx and keyExists to be a literal field name *)
+        match el with
+        | _ :: (_, field) :: _ -> begin
+          match TUtils.shape_field_name env field with
+          | None -> None
+          | Some field_name ->
+            let field_name =
+              TShapeField.of_ast Pos_or_decl.of_raw_pos field_name
             in
-            (env, res)
-          | _ -> (env, res))
+            Some
+              (fun fty ->
+                Typing_shapes.transform_special_shapes_fun_ty
+                  field_name
+                  method_id
+                  (List.length el)
+                  fty)
+        end
+        | _ -> None
+      in
+      dispatch_class_const env class_id method_id ?transform_fty
     (* Special function `Shapes::removeKey` *)
     | remove_key when String.equal remove_key SN.Shapes.removeKey ->
       overload_function
@@ -7420,6 +7377,7 @@ and dispatch_call
 and class_get_res
     ~is_method
     ~is_const
+    ~transform_fty
     ~coerce_from_ty
     ?(explicit_targs = [])
     ?(incl_tc = false)
@@ -7437,6 +7395,7 @@ and class_get_res
   class_get_inner
     ~is_method
     ~is_const
+    ~transform_fty
     ~this_ty
     ~explicit_targs
     ~incl_tc
@@ -7450,6 +7409,7 @@ and class_get_res
 and class_get_err
     ~is_method
     ~is_const
+    ~transform_fty
     ~coerce_from_ty
     ?explicit_targs
     ?incl_tc
@@ -7462,6 +7422,7 @@ and class_get_err
     class_get_res
       ~is_method
       ~is_const
+      ~transform_fty
       ~coerce_from_ty
       ?explicit_targs
       ?incl_tc
@@ -7477,6 +7438,7 @@ and class_get_err
 and class_get
     ~is_method
     ~is_const
+    ~transform_fty
     ~coerce_from_ty
     ?explicit_targs
     ?incl_tc
@@ -7489,6 +7451,7 @@ and class_get
     class_get_res
       ~is_method
       ~is_const
+      ~transform_fty
       ~coerce_from_ty
       ?explicit_targs
       ?incl_tc
@@ -7505,6 +7468,7 @@ and class_get_inner
     ~is_const
     ~this_ty
     ~coerce_from_ty
+    ~transform_fty
     ?(explicit_targs = [])
     ?(incl_tc = false)
     ?(is_function_pointer = false)
@@ -7527,6 +7491,7 @@ and class_get_inner
             class_get_res
               ~is_method
               ~is_const
+              ~transform_fty
               ~explicit_targs
               ~incl_tc
               ~coerce_from_ty
@@ -7550,6 +7515,7 @@ and class_get_inner
           class_get_inner
             ~is_method
             ~is_const
+            ~transform_fty
             ~this_ty
             ~explicit_targs
             ~incl_tc
@@ -7572,6 +7538,7 @@ and class_get_inner
     class_get_inner
       ~is_method
       ~is_const
+      ~transform_fty
       ~this_ty
       ~explicit_targs
       ~incl_tc
@@ -7609,6 +7576,7 @@ and class_get_inner
       class_get_inner
         ~is_method
         ~is_const
+        ~transform_fty
         ~this_ty
         ~explicit_targs
         ~incl_tc
@@ -7692,6 +7660,7 @@ and class_get_inner
           class_get_inner
             ~is_method
             ~is_const
+            ~transform_fty
             ~this_ty
             ~explicit_targs
             ~incl_tc
@@ -7792,6 +7761,11 @@ and class_get_inner
             match deref member_decl_ty with
             (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
             | (r, Tfun ft) when is_method ->
+              let ft =
+                match transform_fty with
+                | None -> ft
+                | Some f -> f ft
+              in
               let ((env, ty_err_opt1), explicit_targs) =
                 Phase.localize_targs
                   ~check_well_kinded:true
@@ -9587,6 +9561,7 @@ and overload_function
     class_get
       ~is_method:true
       ~is_const:false
+      ~transform_fty:None
       ~coerce_from_ty:None
       env
       ty

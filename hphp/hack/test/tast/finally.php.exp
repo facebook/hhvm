@@ -48,9 +48,10 @@ Errors:
                    (Expr
                       ((null), [14:5-27],
                        (Call (
-                          (((function(?shape(...) $shape, arraykey $index, mixed $default=_)[]: null)), [14:5-16],
+                          (((function<Tv>(?shape(?'foo' => nothing, ...) $shape, arraykey $index)[]: null)), [14:5-16],
                            (Class_const (((Shapes), [14:5-11], (CI ([14:5-11], "\\HH\\Shapes"))), ([14:13-16], "idx")))),
-                          [], [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))], None)))))
+                          [((nothing), ([14:13-16], (Happly (([Pos.none], "_"), []))))],
+                          [(Pnormal, ((shape()), [14:17-19], (Lvar ([14:17-19], $s)))); (Pnormal, ((string), [14:21-26], (String "foo")))], None)))))
                   ]
                 )))
              ]

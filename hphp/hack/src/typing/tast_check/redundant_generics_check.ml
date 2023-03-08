@@ -119,26 +119,28 @@ let make_handler ctx =
       inherit Tast_visitor.handler_base
 
       method! at_fun_def env fd =
-        match
-          Decl_provider.get_fun
-            ~tracing_info:(get_tracing_info env)
-            ctx
-            (snd fd.fd_name)
-        with
-        | Some { fe_type; _ } -> begin
-          match get_node fe_type with
-          | Tfun ft -> check_redundant_generics_fun env ft
+        if not (Tast_env.is_hhi env) then
+          match
+            Decl_provider.get_fun
+              ~tracing_info:(get_tracing_info env)
+              ctx
+              (snd fd.fd_name)
+          with
+          | Some { fe_type; _ } -> begin
+            match get_node fe_type with
+            | Tfun ft -> check_redundant_generics_fun env ft
+            | _ -> ()
+          end
           | _ -> ()
-        end
-        | _ -> ()
 
       method! at_class_ env c =
-        let cid = snd c.c_name in
-        match
-          Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
-        with
-        | None -> ()
-        | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
+        if not (Tast_env.is_hhi env) then
+          let cid = snd c.c_name in
+          match
+            Decl_provider.get_class ~tracing_info:(get_tracing_info env) ctx cid
+          with
+          | None -> ()
+          | Some cls -> check_redundant_generics_class env (snd c.c_name) cls
     end
   in
   if

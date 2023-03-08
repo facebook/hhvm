@@ -36,11 +36,11 @@ namespace HH {
      * @return $value              - Value at $index, if it exists, or $default.
      *
      */
-    public static function idx(
+    public static function idx<Tv>(
       ?shape(...) $shape,
       arraykey $index,
-      \HH\FIXME\MISSING_PARAM_TYPE $default = null,
-    )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+      ?Tv $default = null,
+    )[]: Tv;
 
     /**
      * Check if a field in shape exists.
@@ -71,10 +71,10 @@ namespace HH {
      * throws if the field is missing.
      * Use this to access optional fields on shapes.
      */
-    public static function at(
+    public static function at<Tv>(
       shape(...) $shape,
       arraykey $index,
-    )[]: \HH\FIXME\MISSING_RETURN_TYPE;
+    )[]: Tv;
 
   }
 

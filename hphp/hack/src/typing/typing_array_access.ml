@@ -650,75 +650,72 @@ let rec array_get
           let (env, ty) = err_witness env p in
           (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
       | Tshape (_, fdm) ->
-        if is_lvalue || lhs_of_null_coalesce then
-          (* The expression $s['x'] ?? $y is semantically equivalent to
-             Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
-             the left of a coalesce operator, then for type checking it
-             can be treated as if it evaluated to null instead of
-             throwing an exception if the field 'x' doesn't exist in $s.
-          *)
-          let (env, ty) =
-            Typing_shapes.idx
-              env
-              ty1
-              e2
-              None
-              ~expr_pos
-              ~fun_pos:Reason.Rnone
-              ~shape_pos:array_pos
-          in
-          (env, (ty, dflt_arr_res, Ok ty2))
-        else
-          let (_, p, _) = e2 in
-          begin
-            match TUtils.shape_field_name env e2 with
-            | None ->
-              (* there was already an error in shape_field name,
-                 don't report another one for a missing field *)
-              let (env, ty) = err_witness env p in
+        let (_, p, _) = e2 in
+        begin
+          match TUtils.shape_field_name env e2 with
+          | None ->
+            (* there was already an error in shape_field name,
+               don't report another one for a missing field *)
+            let (env, ty) = err_witness env p in
+            (env, (ty, dflt_arr_res, Ok ty2))
+          | Some field ->
+            let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
+            if is_lvalue || lhs_of_null_coalesce then
+              (* The expression $s['x'] ?? $y is semantically equivalent to
+                 Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
+                 the left of a coalesce operator, then for type checking it
+                 can be treated as if it evaluated to null instead of
+                 throwing an exception if the field 'x' doesn't exist in $s.
+              *)
+              let (env, ty) =
+                Typing_shapes.idx_without_default
+                  env
+                  ty1
+                  field
+                  ~expr_pos
+                  ~shape_pos:array_pos
+              in
               (env, (ty, dflt_arr_res, Ok ty2))
-            | Some field ->
-              let field = TShapeField.of_ast Pos_or_decl.of_raw_pos field in
-              begin
-                match TShapeMap.find_opt field fdm with
-                | None ->
+            else begin
+              match TShapeMap.find_opt field fdm with
+              | None ->
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Undefined_field
+                         {
+                           pos = p;
+                           name = TUtils.get_printable_shape_field_name field;
+                           decl_pos = Reason.to_pos r;
+                         });
+                let (env, ty) = err_witness env p in
+                (env, (ty, dflt_arr_res, Ok ty2))
+              | Some { sft_optional; sft_ty } ->
+                if sft_optional then (
+                  let declared_field =
+                    List.find_exn
+                      ~f:(fun x -> TShapeField.equal field x)
+                      (TShapeMap.keys fdm)
+                  in
                   Errors.add_typing_error
                     Typing_error.(
                       primary
-                      @@ Primary.Undefined_field
+                      @@ Primary.Array_get_with_optional_field
                            {
-                             pos = p;
-                             name = TUtils.get_printable_shape_field_name field;
-                             decl_pos = Reason.to_pos r;
+                             recv_pos = array_pos;
+                             field_pos = p;
+                             field_name =
+                               TUtils.get_printable_shape_field_name field;
+                             decl_pos =
+                               Typing_defs.TShapeField.pos declared_field;
                            });
                   let (env, ty) = err_witness env p in
                   (env, (ty, dflt_arr_res, Ok ty2))
-                | Some { sft_optional; sft_ty } ->
-                  if sft_optional then (
-                    let declared_field =
-                      List.find_exn
-                        ~f:(fun x -> TShapeField.equal field x)
-                        (TShapeMap.keys fdm)
-                    in
-                    Errors.add_typing_error
-                      Typing_error.(
-                        primary
-                        @@ Primary.Array_get_with_optional_field
-                             {
-                               recv_pos = array_pos;
-                               field_pos = p;
-                               field_name =
-                                 TUtils.get_printable_shape_field_name field;
-                               decl_pos =
-                                 Typing_defs.TShapeField.pos declared_field;
-                             });
-                    let (env, ty) = err_witness env p in
-                    (env, (ty, dflt_arr_res, Ok ty2))
-                  ) else
-                    let (env, pess_sft_ty) = maybe_pessimise_type env sft_ty in
-                    (env, (pess_sft_ty, dflt_arr_res, Ok ty2))
-              end
-          end
+                ) else
+                  let (env, pess_sft_ty) = maybe_pessimise_type env sft_ty in
+                  (env, (pess_sft_ty, dflt_arr_res, Ok ty2))
+            end
+        end
       | Toption ty ->
         let (env, (ty, err_opt_arr, err_opt_idx)) =
           nullable_container_get env ty1 ty

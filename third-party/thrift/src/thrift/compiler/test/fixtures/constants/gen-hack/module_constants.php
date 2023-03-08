@@ -108,7 +108,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.Internship instagram
+   * module.Internship instagram
    */
   <<__Memoize>>
   public static function instagram()[write_props]: Internship{
@@ -125,7 +125,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.Internship partial_const
+   * module.Internship partial_const
    */
   <<__Memoize>>
   public static function partial_const()[write_props]: Internship{
@@ -139,7 +139,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * list<struct module.Range> kRanges
+   * list<module.Range> kRanges
    */
   <<__Memoize>>
   public static function kRanges()[write_props]: \ConstVector<Range>{
@@ -161,7 +161,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * list<struct module.Internship> internList
+   * list<module.Internship> internList
    */
   <<__Memoize>>
   public static function internList()[write_props]: \ConstVector<Internship>{
@@ -188,7 +188,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct1 pod_0
+   * module.struct1 pod_0
    */
   <<__Memoize>>
   public static function pod_0()[write_props]: struct1{
@@ -200,7 +200,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct1 pod_s_0
+   * module.struct1 pod_s_0
    */
   <<__Memoize>>
   public static function pod_s_0()[write_props]: struct1{
@@ -212,7 +212,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct1 pod_1
+   * module.struct1 pod_1
    */
   <<__Memoize>>
   public static function pod_1()[write_props]: struct1{
@@ -226,7 +226,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct1 pod_s_1
+   * module.struct1 pod_s_1
    */
   <<__Memoize>>
   public static function pod_s_1()[write_props]: struct1{
@@ -240,7 +240,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct2 pod_2
+   * module.struct2 pod_2
    */
   <<__Memoize>>
   public static function pod_2()[write_props]: struct2{
@@ -265,7 +265,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct2 pod_trailing_commas
+   * module.struct2 pod_trailing_commas
    */
   <<__Memoize>>
   public static function pod_trailing_commas()[write_props]: struct2{
@@ -290,7 +290,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct2 pod_s_2
+   * module.struct2 pod_s_2
    */
   <<__Memoize>>
   public static function pod_s_2()[write_props]: struct2{
@@ -315,7 +315,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct3 pod_3
+   * module.struct3 pod_3
    */
   <<__Memoize>>
   public static function pod_3()[write_props]: struct3{
@@ -344,7 +344,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct3 pod_s_3
+   * module.struct3 pod_s_3
    */
   <<__Memoize>>
   public static function pod_s_3()[write_props]: struct3{
@@ -373,7 +373,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.struct4 pod_4
+   * module.struct4 pod_4
    */
   <<__Memoize>>
   public static function pod_4()[write_props]: struct4{
@@ -388,7 +388,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union1 u_1_1
+   * module.union1 u_1_1
    */
   <<__Memoize>>
   public static function u_1_1()[write_props]: union1{
@@ -401,7 +401,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union1 u_1_2
+   * module.union1 u_1_2
    */
   <<__Memoize>>
   public static function u_1_2()[write_props]: union1{
@@ -414,7 +414,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union1 u_1_3
+   * module.union1 u_1_3
    */
   <<__Memoize>>
   public static function u_1_3()[write_props]: union1{
@@ -426,7 +426,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union2 u_2_1
+   * module.union2 u_2_1
    */
   <<__Memoize>>
   public static function u_2_1()[write_props]: union2{
@@ -439,7 +439,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union2 u_2_2
+   * module.union2 u_2_2
    */
   <<__Memoize>>
   public static function u_2_2()[write_props]: union2{
@@ -452,7 +452,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union2 u_2_3
+   * module.union2 u_2_3
    */
   <<__Memoize>>
   public static function u_2_3()[write_props]: union2{
@@ -470,7 +470,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union2 u_2_4
+   * module.union2 u_2_4
    */
   <<__Memoize>>
   public static function u_2_4()[write_props]: union2{
@@ -487,7 +487,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union2 u_2_5
+   * module.union2 u_2_5
    */
   <<__Memoize>>
   public static function u_2_5()[write_props]: union2{
@@ -504,7 +504,7 @@ multi line string.
 
   /**
    * Original thrift constant:-
-   * struct module.union2 u_2_6
+   * module.union2 u_2_6
    */
   <<__Memoize>>
   public static function u_2_6()[write_props]: union2{

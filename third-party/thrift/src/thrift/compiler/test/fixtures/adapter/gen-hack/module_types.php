@@ -144,7 +144,7 @@ class MyAnnotation implements \IThriftSyncStruct, \IThriftStructMetadata, \IThri
   public string $signature;
   /**
    * Original thrift field:-
-   * 2: enum module.Color color
+   * 2: module.Color color
    */
   public ?\thrift\test\Color $color;
 
@@ -1958,7 +1958,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   public ?\Adapter1::THackType $optionalUnionField;
   /**
    * Original thrift field:-
-   * 7: struct module.DirectlyAdapted adaptedStructField
+   * 7: module.DirectlyAdapted adaptedStructField
    */
   public ?\thrift\test\DirectlyAdapted $adaptedStructField;
 
@@ -5636,7 +5636,7 @@ class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftStru
   const int STRUCTURAL_ID = 7684145159661226586;
   /**
    * Original thrift field:-
-   * 1: struct module.AdaptTemplatedTestStruct adaptedStruct
+   * 1: module.AdaptTemplatedTestStruct adaptedStruct
    */
   public ?\thrift\test\AdaptTemplatedTestStruct $adaptedStruct;
 
@@ -6268,7 +6268,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
   const int STRUCTURAL_ID = 3653783318222631819;
   /**
    * Original thrift field:-
-   * 1: struct module.AdaptedStruct adaptedStruct
+   * 1: module.AdaptedStruct adaptedStruct
    */
   public ?\thrift\test\AdaptedStruct $adaptedStruct;
   /**
@@ -6278,7 +6278,7 @@ class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftStructMeta
   public ?\thrift\test\AdaptedTypedef $adaptedTypedef;
   /**
    * Original thrift field:-
-   * 3: struct module.DirectlyAdaptedStruct directlyAdapted
+   * 3: module.DirectlyAdaptedStruct directlyAdapted
    */
   public ?\thrift\test\DirectlyAdaptedStruct $directlyAdapted;
   /**
@@ -6526,7 +6526,7 @@ class CircularAdaptee implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   const int STRUCTURAL_ID = 6453901709117171539;
   /**
    * Original thrift field:-
-   * 1: struct module.CircularStruct field
+   * 1: module.CircularStruct field
    */
   public ?\thrift\test\CircularStruct $field;
 
@@ -6811,7 +6811,7 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
   const int STRUCTURAL_ID = 2416271555865439268;
   /**
    * Original thrift field:-
-   * 1: struct module.DeclaredAfterStruct reordered_dependent_adapted
+   * 1: module.DeclaredAfterStruct reordered_dependent_adapted
    */
   public ?\thrift\test\DeclaredAfterStruct $reordered_dependent_adapted;
 
@@ -7368,7 +7368,7 @@ class MoveOnly implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const int STRUCTURAL_ID = 1105592653371346642;
   /**
    * Original thrift field:-
-   * 1: struct module.HeapAllocated ptr
+   * 1: module.HeapAllocated ptr
    */
   public ?\thrift\test\HeapAllocated $ptr;
 

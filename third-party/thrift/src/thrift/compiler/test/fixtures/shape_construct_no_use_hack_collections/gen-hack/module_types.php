@@ -155,7 +155,7 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   public ?dict<string, int> $map_of_string_to_ints;
   /**
    * Original thrift field:-
-   * 6: struct module.Foo struct_foo
+   * 6: module.Foo struct_foo
    */
   public ?Foo $struct_foo;
   protected TestUnionEnum $_type = TestUnionEnum::_EMPTY_;
@@ -842,22 +842,22 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   const int STRUCTURAL_ID = 6061345478592222801;
   /**
    * Original thrift field:-
-   * 1: struct module.Foo foo_struct
+   * 1: module.Foo foo_struct
    */
   public ?Foo $foo_struct;
   /**
    * Original thrift field:-
-   * 2: struct module.TestUnion union_value
+   * 2: module.TestUnion union_value
    */
   public ?TestUnion $union_value;
   /**
    * Original thrift field:-
-   * 4: list<struct module.Foo> list_of_struct_foo
+   * 4: list<module.Foo> list_of_struct_foo
    */
   public vec<Foo> $list_of_struct_foo;
   /**
    * Original thrift field:-
-   * 5: map<string, struct module.Foo> map_of_string_to_struct_foo
+   * 5: map<string, module.Foo> map_of_string_to_struct_foo
    */
   public dict<string, Foo> $map_of_string_to_struct_foo;
 
@@ -1086,7 +1086,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
   public string $message;
   /**
    * Original thrift field:-
-   * 2: struct module.Foo some_field
+   * 2: module.Foo some_field
    */
   public ?Foo $some_field;
   /**

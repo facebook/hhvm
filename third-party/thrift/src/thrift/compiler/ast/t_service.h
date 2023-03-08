@@ -39,10 +39,6 @@ class t_service : public t_interface {
 
   const t_service* extends() const { return extends_; }
 
-  std::string get_full_name() const override {
-    return make_full_name("service");
-  }
-
  private:
   const t_service* extends_ = nullptr;
 

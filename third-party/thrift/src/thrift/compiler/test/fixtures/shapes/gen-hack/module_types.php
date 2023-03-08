@@ -888,7 +888,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   const int STRUCTURAL_ID = 7290621384819644133;
   /**
    * Original thrift field:-
-   * 1: struct module.A just_an_A
+   * 1: module.A just_an_A
    */
   public ?\test\fixtures\A $just_an_A;
   /**
@@ -913,7 +913,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public Map<string, int> $map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 6: map<string, struct module.A> map_of_string_to_A
+   * 6: map<string, module.A> map_of_string_to_A
    */
   public Map<string, \test\fixtures\A> $map_of_string_to_A;
   /**
@@ -923,7 +923,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public Map<string, Vector<int>> $map_of_string_to_list_of_i32;
   /**
    * Original thrift field:-
-   * 8: map<string, list<struct module.A>> map_of_string_to_list_of_A
+   * 8: map<string, list<module.A>> map_of_string_to_list_of_A
    */
   public Map<string, Vector<\test\fixtures\A>> $map_of_string_to_list_of_A;
   /**
@@ -938,7 +938,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 11: map<string, map<string, struct module.A>> map_of_string_to_map_of_string_to_A
+   * 11: map<string, map<string, module.A>> map_of_string_to_map_of_string_to_A
    */
   public Map<string, Map<string, \test\fixtures\A>> $map_of_string_to_map_of_string_to_A;
   /**
@@ -948,27 +948,27 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public Vector<Set<int>> $list_of_set_of_i32;
   /**
    * Original thrift field:-
-   * 13: list<map<string, list<struct module.A>>> list_of_map_of_string_to_list_of_A
+   * 13: list<map<string, list<module.A>>> list_of_map_of_string_to_list_of_A
    */
   public Vector<Map<string, Vector<\test\fixtures\A>>> $list_of_map_of_string_to_list_of_A;
   /**
    * Original thrift field:-
-   * 14: list<map<string, struct module.A>> list_of_map_of_string_to_A
+   * 14: list<map<string, module.A>> list_of_map_of_string_to_A
    */
   public Vector<Map<string, \test\fixtures\A>> $list_of_map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 17: enum module.Enum just_an_enum
+   * 17: module.Enum just_an_enum
    */
   public ?\test\fixtures\Enum $just_an_enum;
   /**
    * Original thrift field:-
-   * 18: struct module.Union just_a_union
+   * 18: module.Union just_a_union
    */
   public ?\test\fixtures\Union $just_a_union;
   /**
    * Original thrift field:-
-   * 51: struct module.A optional_just_an_A
+   * 51: module.A optional_just_an_A
    */
   public ?\test\fixtures\A $optional_just_an_A;
   /**
@@ -993,7 +993,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, int> $optional_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 56: map<string, struct module.A> optional_map_of_string_to_A
+   * 56: map<string, module.A> optional_map_of_string_to_A
    */
   public ?Map<string, \test\fixtures\A> $optional_map_of_string_to_A;
   /**
@@ -1003,7 +1003,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, Vector<int>> $optional_map_of_string_to_list_of_i32;
   /**
    * Original thrift field:-
-   * 58: map<string, list<struct module.A>> optional_map_of_string_to_list_of_A
+   * 58: map<string, list<module.A>> optional_map_of_string_to_list_of_A
    */
   public ?Map<string, Vector<\test\fixtures\A>> $optional_map_of_string_to_list_of_A;
   /**
@@ -1013,12 +1013,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, Set<int>> $optional_map_of_string_to_set_of_i32;
   /**
    * Original thrift field:-
-   * 60: enum module.Enum optional_enum
+   * 60: module.Enum optional_enum
    */
   public ?\test\fixtures\Enum $optional_enum;
   /**
    * Original thrift field:-
-   * 70: enum module.Enum required_enum_with_default
+   * 70: module.Enum required_enum_with_default
    */
   public \test\fixtures\Enum $required_enum_with_default;
   /**
@@ -1038,12 +1038,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public float $double_with_default_value;
   /**
    * Original thrift field:-
-   * 83: enum module.Enum enum_with_default_value
+   * 83: module.Enum enum_with_default_value
    */
   public ?\test\fixtures\Enum $enum_with_default_value;
   /**
    * Original thrift field:-
-   * 84: struct module.A A_with_default_value
+   * 84: module.A A_with_default_value
    */
   public ?\test\fixtures\A $A_with_default_value;
   /**

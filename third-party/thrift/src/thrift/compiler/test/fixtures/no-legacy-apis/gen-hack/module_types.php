@@ -229,12 +229,12 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   const int STRUCTURAL_ID = 7590509256672853308;
   /**
    * Original thrift field:-
-   * 1: enum module.MyEnum myEnum
+   * 1: module.MyEnum myEnum
    */
   public ?\fixtures\no-legacy-apis\MyEnum $myEnum;
   /**
    * Original thrift field:-
-   * 2: struct module.MyStruct myDataItem
+   * 2: module.MyStruct myDataItem
    */
   public ?\fixtures\no-legacy-apis\MyStruct $myDataItem;
   protected \fixtures\no-legacy-apis\MyUnionEnum $_type = \fixtures\no-legacy-apis\MyUnionEnum::_EMPTY_;

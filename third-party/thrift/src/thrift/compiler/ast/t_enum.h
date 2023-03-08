@@ -57,8 +57,6 @@ class t_enum : public t_type {
   // The t_consts associated with each value.
   node_list_view<const t_const> consts() const { return constants_; }
 
-  std::string get_full_name() const override { return make_full_name("enum"); }
-
  private:
   t_enum_value_list values_;
   node_list<t_const> constants_;

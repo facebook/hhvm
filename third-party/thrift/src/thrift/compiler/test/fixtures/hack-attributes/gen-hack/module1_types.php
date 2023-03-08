@@ -215,12 +215,12 @@ class MySecondThriftStruct implements \IThriftSyncStruct, \IThriftStructMetadata
   const int STRUCTURAL_ID = 2800971917864580212;
   /**
    * Original thrift field:-
-   * 1: enum module1.MyThriftEnum foo
+   * 1: module1.MyThriftEnum foo
    */
   public ?\test\fixtures\jsenum\MyThriftEnum $foo;
   /**
    * Original thrift field:-
-   * 2: struct module1.MyThriftStruct bar
+   * 2: module1.MyThriftStruct bar
    */
   public ?\test\fixtures\jsenum\MyThriftStruct $bar;
   /**

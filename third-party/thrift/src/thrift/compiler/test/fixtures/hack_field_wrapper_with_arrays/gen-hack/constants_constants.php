@@ -15,7 +15,7 @@ class constants_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * struct constants.Internship instagram
+   * constants.Internship instagram
    */
   <<__Memoize>>
   public static function instagram()[write_props]: Internship{
@@ -37,7 +37,7 @@ class constants_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<struct constants.Internship> internList
+   * list<constants.Internship> internList
    */
   <<__Memoize>>
   public static function internList()[write_props]: vec<Internship>{
@@ -73,7 +73,7 @@ class constants_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<struct constants.SWE> engineers
+   * list<constants.SWE> engineers
    */
   <<__Memoize>>
   public static function engineers()[write_props]: vec<SWE>{
@@ -101,7 +101,7 @@ class constants_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<struct include.StructWithWrapper> wrapped_structs
+   * list<include.StructWithWrapper> wrapped_structs
    */
   <<__Memoize>>
   public static function wrapped_structs()[write_props]: vec<StructWithWrapper>{

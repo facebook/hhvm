@@ -125,7 +125,7 @@ class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
   public string $title;
   /**
    * Original thrift field:-
-   * 3: enum module.Company employer
+   * 3: module.Company employer
    */
   public ?\test\fixtures\lazy_constants\Company $employer;
 

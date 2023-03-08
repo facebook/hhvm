@@ -89,12 +89,12 @@ class BarStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   const int STRUCTURAL_ID = 2986314503120154076;
   /**
    * Original thrift field:-
-   * 1: map<enum module.FooEnum, enum module.FooEnum> e
+   * 1: map<module.FooEnum, module.FooEnum> e
    */
   public Map<FooEnum, FooEnum> $e;
   /**
    * Original thrift field:-
-   * 2: set<enum module.FooEnum> s
+   * 2: set<module.FooEnum> s
    */
   public Set<FooEnum> $s;
 

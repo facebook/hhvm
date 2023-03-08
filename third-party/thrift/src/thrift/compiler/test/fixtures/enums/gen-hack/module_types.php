@@ -342,17 +342,17 @@ class SomeStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
   const int STRUCTURAL_ID = 8159017183734005742;
   /**
    * Original thrift field:-
-   * 1: enum module.Metasyntactic reasonable
+   * 1: module.Metasyntactic reasonable
    */
   public ?\fixtures\enums\Metasyntactic $reasonable;
   /**
    * Original thrift field:-
-   * 2: enum module.Metasyntactic fine
+   * 2: module.Metasyntactic fine
    */
   public ?\fixtures\enums\Metasyntactic $fine;
   /**
    * Original thrift field:-
-   * 3: enum module.Metasyntactic questionable
+   * 3: module.Metasyntactic questionable
    */
   public ?\fixtures\enums\Metasyntactic $questionable;
   /**
@@ -582,22 +582,22 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const int STRUCTURAL_ID = 8234221749727407461;
   /**
    * Original thrift field:-
-   * 1: enum module.MyEnum2 me2_3
+   * 1: module.MyEnum2 me2_3
    */
   public ?\fixtures\enums\MyEnum2 $me2_3;
   /**
    * Original thrift field:-
-   * 2: enum module.MyEnum3 me3_n3
+   * 2: module.MyEnum3 me3_n3
    */
   public ?\fixtures\enums\MyEnum3 $me3_n3;
   /**
    * Original thrift field:-
-   * 4: enum module.MyEnum1 me1_t1
+   * 4: module.MyEnum1 me1_t1
    */
   public ?\fixtures\enums\MyEnum1 $me1_t1;
   /**
    * Original thrift field:-
-   * 6: enum module.MyEnum1 me1_t2
+   * 6: module.MyEnum1 me1_t2
    */
   public ?\fixtures\enums\MyEnum1 $me1_t2;
 

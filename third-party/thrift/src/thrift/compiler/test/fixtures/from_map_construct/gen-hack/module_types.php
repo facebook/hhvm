@@ -334,12 +334,12 @@ class TestUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftU
   public ?int $int_field;
   /**
    * Original thrift field:-
-   * 3: enum module.TestEnum enum_field
+   * 3: module.TestEnum enum_field
    */
   public ?TestEnum $enum_field;
   /**
    * Original thrift field:-
-   * 4: struct module.Foo foo_struct
+   * 4: module.Foo foo_struct
    */
   public ?Foo $foo_struct;
   protected TestUnionEnum $_type = TestUnionEnum::_EMPTY_;
@@ -627,7 +627,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
   public string $message;
   /**
    * Original thrift field:-
-   * 2: struct module.Foo some_field
+   * 2: module.Foo some_field
    */
   public ?Foo $some_field;
   /**

@@ -82,12 +82,12 @@ class FBStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public string $str_value;
   /**
    * Original thrift field:-
-   * 2: enum module.Status enum_value
+   * 2: module.Status enum_value
    */
   public ?\foo_php_ns_Status $enum_value;
   /**
    * Original thrift field:-
-   * 3: struct module.TestStruct struct_value
+   * 3: module.TestStruct struct_value
    */
   public ?\foo_php_ns_TestStruct $struct_value;
 

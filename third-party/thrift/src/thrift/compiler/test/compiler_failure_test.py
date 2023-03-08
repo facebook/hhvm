@@ -618,8 +618,8 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:baz.thrift:3] Function `MyS.lol` redefines `service foo.MySBB.lol`.\n"
-            "[ERROR:baz.thrift:4] Function `MyS.meh` redefines `service bar.MySB.meh`.\n",
+            "[ERROR:baz.thrift:3] Function `MyS.lol` redefines `foo.MySBB.lol`.\n"
+            "[ERROR:baz.thrift:4] Function `MyS.meh` redefines `bar.MySB.meh`.\n",
         )
 
     def test_duplicate_enum_value_name(self):
@@ -1932,9 +1932,9 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:foo.thrift:6] Interactions are only allowed as the leftmost return type: interaction foo.I\n"
+            "[ERROR:foo.thrift:6] Interactions are only allowed as the leftmost return type: foo.I\n"
             "[ERROR:foo.thrift:7] Too many return types: i32\n"
-            "[ERROR:foo.thrift:8] Interactions are only allowed as the leftmost return type: interaction foo.I\n",
+            "[ERROR:foo.thrift:8] Interactions are only allowed as the leftmost return type: foo.I\n",
         )
 
     def test_interaction_in_return_type(self):
@@ -1960,9 +1960,9 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:foo.thrift:6] Interactions are only allowed as the leftmost return type: interaction foo.I\n"
-            "[ERROR:foo.thrift:7] Interactions are only allowed as the leftmost return type: interaction foo.I\n"
-            "[ERROR:foo.thrift:8] Interactions are only allowed as the leftmost return type: interaction foo.I\n",
+            "[ERROR:foo.thrift:6] Interactions are only allowed as the leftmost return type: foo.I\n"
+            "[ERROR:foo.thrift:7] Interactions are only allowed as the leftmost return type: foo.I\n"
+            "[ERROR:foo.thrift:8] Interactions are only allowed as the leftmost return type: foo.I\n",
         )
 
     # Time complexity of for_each_transitive_field should be O(1)

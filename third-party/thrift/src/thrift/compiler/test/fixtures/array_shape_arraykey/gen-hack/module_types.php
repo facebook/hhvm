@@ -70,7 +70,7 @@ class A implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   const int STRUCTURAL_ID = 4307695496151664311;
   /**
    * Original thrift field:-
-   * 1: enum module.Enum just_an_enum
+   * 1: module.Enum just_an_enum
    */
   public ?Enum $just_an_enum;
   /**
@@ -478,12 +478,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public dict<string, int> $map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 3: map<string, struct module.A> map_of_string_to_A
+   * 3: map<string, module.A> map_of_string_to_A
    */
   public dict<string, A> $map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 5: map<string, list<struct module.A>> map_of_string_to_list_of_A
+   * 5: map<string, list<module.A>> map_of_string_to_list_of_A
    */
   public dict<string, vec<A>> $map_of_string_to_list_of_A;
   /**
@@ -493,7 +493,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public dict<string, dict<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 7: map<string, map<string, struct module.A>> map_of_string_to_map_of_string_to_A
+   * 7: map<string, map<string, module.A>> map_of_string_to_map_of_string_to_A
    */
   public dict<string, dict<string, A>> $map_of_string_to_map_of_string_to_A;
   /**
@@ -523,12 +523,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public vec<keyset<int>> $list_of_set_of_i32;
   /**
    * Original thrift field:-
-   * 15: list<map<string, list<struct module.A>>> list_of_map_of_string_to_list_of_A
+   * 15: list<map<string, list<module.A>>> list_of_map_of_string_to_list_of_A
    */
   public vec<dict<string, vec<A>>> $list_of_map_of_string_to_list_of_A;
   /**
    * Original thrift field:-
-   * 16: list<map<string, struct module.A>> list_of_map_of_string_to_A
+   * 16: list<map<string, module.A>> list_of_map_of_string_to_A
    */
   public vec<dict<string, A>> $list_of_map_of_string_to_A;
   /**
@@ -1516,12 +1516,12 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   const int STRUCTURAL_ID = 7779248235937077517;
   /**
    * Original thrift field:-
-   * 1: struct module.A just_an_A
+   * 1: module.A just_an_A
    */
   public ?A $just_an_A;
   /**
    * Original thrift field:-
-   * 2: enum module.Enum just_an_enum
+   * 2: module.Enum just_an_enum
    */
   public ?Enum $just_an_enum;
   /**
@@ -1536,17 +1536,17 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?dict<string, int> $map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 6: map<string, struct module.A> map_of_string_to_A
+   * 6: map<string, module.A> map_of_string_to_A
    */
   public ?dict<string, A> $map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 7: map<string, struct module.B> map_of_string_to_self
+   * 7: map<string, module.B> map_of_string_to_self
    */
   public ?dict<string, B> $map_of_string_to_self;
   /**
    * Original thrift field:-
-   * 8: map<string, list<struct module.A>> map_of_string_to_list_of_A
+   * 8: map<string, list<module.A>> map_of_string_to_list_of_A
    */
   public ?dict<string, vec<A>> $map_of_string_to_list_of_A;
   /**
@@ -1556,7 +1556,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?dict<string, dict<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 10: map<string, map<string, struct module.A>> map_of_string_to_map_of_string_to_A
+   * 10: map<string, map<string, module.A>> map_of_string_to_map_of_string_to_A
    */
   public ?dict<string, dict<string, A>> $map_of_string_to_map_of_string_to_A;
   /**
@@ -1576,12 +1576,12 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?vec<string> $list_of_string;
   /**
    * Original thrift field:-
-   * 14: list<map<string, struct module.A>> list_of_map_of_string_to_A
+   * 14: list<map<string, module.A>> list_of_map_of_string_to_A
    */
   public ?vec<dict<string, A>> $list_of_map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 17: list<map<string, list<struct module.A>>> list_of_map_of_string_to_list_of_A
+   * 17: list<map<string, list<module.A>>> list_of_map_of_string_to_list_of_A
    */
   public ?vec<dict<string, vec<A>>> $list_of_map_of_string_to_list_of_A;
   /**

@@ -66,7 +66,7 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * map<enum module.Company, i32> const_enum_map
+   * map<module.Company, i32> const_enum_map
    */
   const dict<\test\fixtures\lazy_constants\Company, int> const_enum_map = dict[
     \test\fixtures\lazy_constants\Company::FACEBOOK => 123,
@@ -75,7 +75,7 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * struct module.Internship instagram
+   * module.Internship instagram
    */
   <<__Memoize>>
   public static function instagram()[write_props]: \test\fixtures\lazy_constants\Internship{
@@ -90,7 +90,7 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<struct module.Range> kRanges
+   * list<module.Range> kRanges
    */
   <<__Memoize>>
   public static function kRanges()[write_props]: vec<\test\fixtures\lazy_constants\Range>{
@@ -112,7 +112,7 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
-   * list<struct module.Internship> internList
+   * list<module.Internship> internList
    */
   <<__Memoize>>
   public static function internList()[write_props]: vec<\test\fixtures\lazy_constants\Internship>{

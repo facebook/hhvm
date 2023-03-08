@@ -41,8 +41,6 @@ class t_type_fake : public t_type {
 
   type get_type_value() const override { return {}; }
 
-  using t_type::make_full_name;
-
   /**
    * full_name_ setter to have granular control over get_full_name() for tests
    */
@@ -54,34 +52,21 @@ class t_type_fake : public t_type {
   std::string full_name_;
 };
 
-TEST(TType, MakeFullNameNoNameOrProgram) {
-  const std::string pre = "prefix";
-
+TEST(TType, GetScopedNameNoNameOrProgram) {
   t_type_fake fake_ttype;
-
-  const std::string expect_1 = " ";
-  const std::string expect_2 = pre + " ";
-
-  EXPECT_EQ(expect_1, fake_ttype.make_full_name(""));
-  EXPECT_EQ(expect_2, fake_ttype.make_full_name(pre.c_str()));
+  EXPECT_EQ("", fake_ttype.get_scoped_name());
 }
 
-TEST(TType, MakeFullNameNoProgram) {
-  const std::string pre = "prefix";
+TEST(TType, GetScopedNameNoProgram) {
   const std::string ttype_name = "fake";
 
   t_type_fake fake_ttype;
   fake_ttype.set_name(ttype_name);
 
-  const std::string expect_1 = " " + ttype_name;
-  const std::string expect_2 = pre + " " + ttype_name;
-
-  EXPECT_EQ(expect_1, fake_ttype.make_full_name(""));
-  EXPECT_EQ(expect_2, fake_ttype.make_full_name(pre.c_str()));
+  EXPECT_EQ(ttype_name, fake_ttype.get_scoped_name());
 }
 
-TEST(TType, MakeFullName) {
-  const std::string pre = "prefix";
+TEST(TType, GetScopedName) {
   const std::string ttype_name = "fake";
   const std::string base_file_name = "ttypetest";
   const std::string file_path = "/this/is/a/path/" + base_file_name + ".thrift";
@@ -90,11 +75,7 @@ TEST(TType, MakeFullName) {
   t_type_fake fake_ttype(named_program.get());
   fake_ttype.set_name(ttype_name);
 
-  const std::string expect_1 = " " + base_file_name + "." + ttype_name;
-  const std::string expect_2 = pre + " " + base_file_name + "." + ttype_name;
-
-  EXPECT_EQ(expect_1, fake_ttype.make_full_name(""));
-  EXPECT_EQ(expect_2, fake_ttype.make_full_name(pre.c_str()));
+  EXPECT_EQ(base_file_name + "." + ttype_name, fake_ttype.get_scoped_name());
 }
 
 TEST(TType, GetTypeId) {

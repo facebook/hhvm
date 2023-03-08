@@ -137,7 +137,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const int STRUCTURAL_ID = 6466034702854646588;
   /**
    * Original thrift field:-
-   * 1: struct include.MyNestedStruct nested_struct
+   * 1: include.MyNestedStruct nested_struct
    */
   public ?MyNestedStruct $nested_struct;
 
@@ -426,7 +426,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
 
   /**
    * Original thrift field:-
-   * 8: struct include.StructWithWrapper double_wrapped_struct
+   * 8: include.StructWithWrapper double_wrapped_struct
    */
   private ?\MyFieldWrapper<?StructWithWrapper, MyNestedStruct> $double_wrapped_struct;
 
@@ -1207,12 +1207,12 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
   const int STRUCTURAL_ID = 6139035146599508839;
   /**
    * Original thrift field:-
-   * 1: map<string, struct include.MyStruct> map_of_string_to_MyStruct
+   * 1: map<string, include.MyStruct> map_of_string_to_MyStruct
    */
   public dict<string, MyStruct> $map_of_string_to_MyStruct;
   /**
    * Original thrift field:-
-   * 2: map<string, list<struct include.MyStruct>> map_of_string_to_list_of_MyStruct
+   * 2: map<string, list<include.MyStruct>> map_of_string_to_list_of_MyStruct
    */
   public dict<string, vec<MyStruct>> $map_of_string_to_list_of_MyStruct;
   /**
@@ -1222,22 +1222,22 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
   public dict<string, dict<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 4: map<string, map<string, struct include.MyStruct>> map_of_string_to_map_of_string_to_MyStruct
+   * 4: map<string, map<string, include.MyStruct>> map_of_string_to_map_of_string_to_MyStruct
    */
   public dict<string, dict<string, MyStruct>> $map_of_string_to_map_of_string_to_MyStruct;
   /**
    * Original thrift field:-
-   * 5: list<map<string, list<struct include.MyStruct>>> list_of_map_of_string_to_list_of_MyStruct
+   * 5: list<map<string, list<include.MyStruct>>> list_of_map_of_string_to_list_of_MyStruct
    */
   public vec<dict<string, vec<MyStruct>>> $list_of_map_of_string_to_list_of_MyStruct;
   /**
    * Original thrift field:-
-   * 6: list<map<string, struct include.MyStruct>> list_of_map_of_string_to_MyStruct
+   * 6: list<map<string, include.MyStruct>> list_of_map_of_string_to_MyStruct
    */
   public vec<dict<string, MyStruct>> $list_of_map_of_string_to_MyStruct;
   /**
    * Original thrift field:-
-   * 7: list<map<string, struct include.StructWithWrapper>> list_of_map_of_string_to_StructWithWrapper
+   * 7: list<map<string, include.StructWithWrapper>> list_of_map_of_string_to_StructWithWrapper
    */
   public vec<dict<string, StructWithWrapper>> $list_of_map_of_string_to_StructWithWrapper;
 

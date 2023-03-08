@@ -370,12 +370,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, int> $map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 3: map<string, struct module.A> map_of_string_to_A
+   * 3: map<string, module.A> map_of_string_to_A
    */
   public ?Map<string, A> $map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 5: map<string, list<struct module.A>> map_of_string_to_list_of_A
+   * 5: map<string, list<module.A>> map_of_string_to_list_of_A
    */
   public ?Map<string, Vector<A>> $map_of_string_to_list_of_A;
   /**
@@ -385,7 +385,7 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 7: map<string, map<string, struct module.A>> map_of_string_to_map_of_string_to_A
+   * 7: map<string, map<string, module.A>> map_of_string_to_map_of_string_to_A
    */
   public ?Map<string, Map<string, A>> $map_of_string_to_map_of_string_to_A;
   /**
@@ -395,12 +395,12 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Vector<string> $list_of_string;
   /**
    * Original thrift field:-
-   * 9: list<map<string, struct module.A>> list_of_map_of_string_to_A
+   * 9: list<map<string, module.A>> list_of_map_of_string_to_A
    */
   public ?Vector<Map<string, A>> $list_of_map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 12: list<map<string, list<struct module.A>>> list_of_map_of_string_to_list_of_A
+   * 12: list<map<string, list<module.A>>> list_of_map_of_string_to_list_of_A
    */
   public ?Vector<Map<string, Vector<A>>> $list_of_map_of_string_to_list_of_A;
 
@@ -1054,12 +1054,12 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, int> $map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 3: map<string, struct module.A> map_of_string_to_A
+   * 3: map<string, module.A> map_of_string_to_A
    */
   public ?Map<string, A> $map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 5: map<string, list<struct module.A>> map_of_string_to_list_of_A
+   * 5: map<string, list<module.A>> map_of_string_to_list_of_A
    */
   public ?Map<string, Vector<A>> $map_of_string_to_list_of_A;
   /**
@@ -1069,7 +1069,7 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 7: map<string, map<string, struct module.A>> map_of_string_to_map_of_string_to_A
+   * 7: map<string, map<string, module.A>> map_of_string_to_map_of_string_to_A
    */
   public ?Map<string, Map<string, A>> $map_of_string_to_map_of_string_to_A;
   /**
@@ -1079,12 +1079,12 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
   public ?Vector<string> $list_of_string;
   /**
    * Original thrift field:-
-   * 9: list<map<string, struct module.A>> list_of_map_of_string_to_A
+   * 9: list<map<string, module.A>> list_of_map_of_string_to_A
    */
   public ?Vector<Map<string, A>> $list_of_map_of_string_to_A;
   /**
    * Original thrift field:-
-   * 12: list<map<string, list<struct module.A>>> list_of_map_of_string_to_list_of_A
+   * 12: list<map<string, list<module.A>>> list_of_map_of_string_to_list_of_A
    */
   public ?Vector<Map<string, Vector<A>>> $list_of_map_of_string_to_list_of_A;
 

@@ -9,7 +9,7 @@
 class module_CONSTANTS implements \IThriftConstants {
   /**
    * Original thrift constant:-
-   * struct module.MyStruct myStruct
+   * module.MyStruct myStruct
    */
   <<__Memoize>>
   public static function myStruct()[write_props]: MyStruct{

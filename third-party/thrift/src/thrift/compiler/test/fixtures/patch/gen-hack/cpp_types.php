@@ -128,7 +128,7 @@ class Ref implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const int STRUCTURAL_ID = 8496209332976516665;
   /**
    * Original thrift field:-
-   * 1: enum cpp.RefType type
+   * 1: cpp.RefType type
    */
   public ?\thrift\annotation\cpp\RefType $type;
 
@@ -1525,7 +1525,7 @@ class EnumType implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const int STRUCTURAL_ID = 1724537317047809370;
   /**
    * Original thrift field:-
-   * 1: enum cpp.EnumUnderlyingType type
+   * 1: cpp.EnumUnderlyingType type
    */
   public ?\thrift\annotation\cpp\EnumUnderlyingType $type;
 

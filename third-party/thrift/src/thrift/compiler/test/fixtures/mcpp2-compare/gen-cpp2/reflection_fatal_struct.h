@@ -57,7 +57,7 @@ class ReflectionStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       reflection_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4987617794584644204ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(16334935087599571500ull)
   >;
 };
 

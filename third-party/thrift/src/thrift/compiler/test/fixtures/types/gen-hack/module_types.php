@@ -1035,12 +1035,12 @@ class MyStructWithForwardRefEnum implements \IThriftSyncStruct, \IThriftStructMe
   const int STRUCTURAL_ID = 6098225215594902198;
   /**
    * Original thrift field:-
-   * 1: enum module.MyForwardRefEnum a
+   * 1: module.MyForwardRefEnum a
    */
   public ?\thrift\fixtures\types\MyForwardRefEnum $a;
   /**
    * Original thrift field:-
-   * 2: enum module.MyForwardRefEnum b
+   * 2: module.MyForwardRefEnum b
    */
   public ?\thrift\fixtures\types\MyForwardRefEnum $b;
 
@@ -1322,7 +1322,7 @@ class TrivialNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
   public int $z;
   /**
    * Original thrift field:-
-   * 2: struct module.TrivialNumeric n
+   * 2: module.TrivialNumeric n
    */
   public ?\thrift\fixtures\types\TrivialNumeric $n;
 
@@ -1619,7 +1619,7 @@ class ComplexNestedWithDefault implements \IThriftSyncStruct, \IThriftStructMeta
   public string $z;
   /**
    * Original thrift field:-
-   * 2: struct module.ComplexString n
+   * 2: module.ComplexString n
    */
   public ?\thrift\fixtures\types\ComplexString $n;
 
@@ -2270,7 +2270,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   public int $majorVer;
   /**
    * Original thrift field:-
-   * 4: struct module.MyDataItem data
+   * 4: module.MyDataItem data
    */
   public ?\thrift\fixtures\types\MyDataItem $data;
 
@@ -2827,12 +2827,12 @@ class ForwardUsageRoot implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 839155360071855827;
   /**
    * Original thrift field:-
-   * 1: struct module.ForwardUsageStruct ForwardUsageStruct
+   * 1: module.ForwardUsageStruct ForwardUsageStruct
    */
   public ?\thrift\fixtures\types\ForwardUsageStruct $ForwardUsageStruct;
   /**
    * Original thrift field:-
-   * 2: struct module.ForwardUsageByRef ForwardUsageByRef
+   * 2: module.ForwardUsageByRef ForwardUsageByRef
    */
   public ?\thrift\fixtures\types\ForwardUsageByRef $ForwardUsageByRef;
 
@@ -2981,7 +2981,7 @@ class ForwardUsageStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 7148256645166217470;
   /**
    * Original thrift field:-
-   * 1: struct module.ForwardUsageRoot foo
+   * 1: module.ForwardUsageRoot foo
    */
   public ?\thrift\fixtures\types\ForwardUsageRoot $foo;
 
@@ -3088,7 +3088,7 @@ class ForwardUsageByRef implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 7148256645166217470;
   /**
    * Original thrift field:-
-   * 1: struct module.ForwardUsageRoot foo
+   * 1: module.ForwardUsageRoot foo
    */
   public ?\thrift\fixtures\types\ForwardUsageRoot $foo;
 
@@ -3204,7 +3204,7 @@ class IncompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: map<i32, struct module.IncompleteMapDep> field
+   * 1: map<i32, module.IncompleteMapDep> field
    */
   public ?Map<int, \thrift\fixtures\types\IncompleteMapDep> $field;
 
@@ -3418,7 +3418,7 @@ class CompleteMap implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: map<i32, struct module.CompleteMapDep> field
+   * 1: map<i32, module.CompleteMapDep> field
    */
   public ?Map<int, \thrift\fixtures\types\CompleteMapDep> $field;
 
@@ -3628,7 +3628,7 @@ class IncompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: list<struct module.IncompleteListDep> field
+   * 1: list<module.IncompleteListDep> field
    */
   public ?Vector<\thrift\fixtures\types\IncompleteListDep> $field;
 
@@ -3833,7 +3833,7 @@ class CompleteList implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: list<struct module.CompleteListDep> field
+   * 1: list<module.CompleteListDep> field
    */
   public ?Vector<\thrift\fixtures\types\CompleteListDep> $field;
 
@@ -4038,7 +4038,7 @@ class AdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: list<struct module.AdaptedListDep> field
+   * 1: list<module.AdaptedListDep> field
    */
   public ?Vector<\thrift\fixtures\types\AdaptedListDep> $field;
 
@@ -4169,7 +4169,7 @@ class AdaptedListDep implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 4190573964717330521;
   /**
    * Original thrift field:-
-   * 1: struct module.AdaptedList field
+   * 1: module.AdaptedList field
    */
   public ?\thrift\fixtures\types\AdaptedList $field;
 
@@ -4287,7 +4287,7 @@ class DependentAdaptedList implements \IThriftSyncStruct, \IThriftStructMetadata
   const int STRUCTURAL_ID = 8146873538067102953;
   /**
    * Original thrift field:-
-   * 1: list<struct module.DependentAdaptedListDep> field
+   * 1: list<module.DependentAdaptedListDep> field
    */
   public ?Vector<\thrift\fixtures\types\DependentAdaptedListDep> $field;
 

@@ -45,7 +45,7 @@ class empty_struct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2387518879996368012ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(7419850808542508140ull)
   >;
 };
 
@@ -103,7 +103,7 @@ class decorated_struct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2133116297910176940ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(13385404739325801676ull)
   >;
 };
 
@@ -250,7 +250,7 @@ class ContainerStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(11962737781608441260ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(3474903760707401964ull)
   >;
 };
 
@@ -292,7 +292,7 @@ class CppTypeStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15199837033647160364ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(7889194779953601868ull)
   >;
 };
 
@@ -347,7 +347,7 @@ class VirtualStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(6433147857901895308ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(13724968379201536076ull)
   >;
 };
 
@@ -404,7 +404,7 @@ class MyStructWithForwardRefEnum_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4311102400659715084ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(13020438871755031308ull)
   >;
 };
 
@@ -461,7 +461,7 @@ class TrivialNumeric_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15631381314040922508ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(13240042291233619340ull)
   >;
 };
 
@@ -518,7 +518,7 @@ class TrivialNestedWithDefault_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(6528453523498201964ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(14671643653509810348ull)
   >;
 };
 
@@ -575,7 +575,7 @@ class ComplexString_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15088647206859143756ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(14031875880679100460ull)
   >;
 };
 
@@ -632,7 +632,7 @@ class ComplexNestedWithDefault_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2062586248581855212ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(4696534039109938636ull)
   >;
 };
 
@@ -734,7 +734,7 @@ class MinPadding_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(1783103042197984780ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(15544025728095240172ull)
   >;
 };
 
@@ -836,7 +836,7 @@ class MinPaddingWithCustomType_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13079220944072737932ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(7684052946909757228ull)
   >;
 };
 
@@ -936,7 +936,7 @@ class MyStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7958971832214294220ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(7297685140594097580ull)
   >;
 };
 
@@ -976,7 +976,7 @@ class MyDataItem_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4790436723586763884ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(12130458833448478092ull)
   >;
 };
 
@@ -1018,7 +1018,7 @@ class Renamed_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(10718802463879262636ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(16991037874674243596ull)
   >;
 };
 
@@ -1075,7 +1075,7 @@ class AnnotatedTypes_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(17983424159904177676ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(1793176683567931084ull)
   >;
 };
 
@@ -1132,7 +1132,7 @@ class ForwardUsageRoot_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15709653741992939980ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(10538773386942393836ull)
   >;
 };
 
@@ -1174,7 +1174,7 @@ class ForwardUsageStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(17360210329199062572ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(18216634639574172236ull)
   >;
 };
 
@@ -1216,7 +1216,7 @@ class ForwardUsageByRef_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7502886793208594252ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(5700960773715231532ull)
   >;
 };
 
@@ -1258,7 +1258,7 @@ class IncompleteMap_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4263956426928267372ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(16588713789532572172ull)
   >;
 };
 
@@ -1285,7 +1285,7 @@ class IncompleteMapDep_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(18053936334525778220ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(4444540283774281516ull)
   >;
 };
 
@@ -1327,7 +1327,7 @@ class CompleteMap_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(8343028395366820076ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(9142601727424815244ull)
   >;
 };
 
@@ -1354,7 +1354,7 @@ class CompleteMapDep_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(13729134695714584908ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(2085767742389370668ull)
   >;
 };
 
@@ -1396,7 +1396,7 @@ class IncompleteList_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(6070816234583371852ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(9170269616021633420ull)
   >;
 };
 
@@ -1423,7 +1423,7 @@ class IncompleteListDep_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2937149170882946924ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(4545907507200868780ull)
   >;
 };
 
@@ -1465,7 +1465,7 @@ class CompleteList_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(3256794469108197708ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(14114502851208255084ull)
   >;
 };
 
@@ -1492,7 +1492,7 @@ class CompleteListDep_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15463451425253800684ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(2033021518320534444ull)
   >;
 };
 
@@ -1534,7 +1534,7 @@ class AdaptedList_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(419971460217063020ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(125790966858066028ull)
   >;
 };
 
@@ -1576,7 +1576,7 @@ class AdaptedListDep_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2761510975620061964ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(18047110259932940396ull)
   >;
 };
 
@@ -1618,7 +1618,7 @@ class DependentAdaptedList_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2147534213873488908ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(7176728000892714092ull)
   >;
 };
 
@@ -1660,7 +1660,7 @@ class DependentAdaptedListDep_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4387040533057387340ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(6008111321105911756ull)
   >;
 };
 
@@ -1805,7 +1805,7 @@ class AllocatorAware_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(5560513471192516556ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(435233143439422188ull)
   >;
 };
 
@@ -1875,7 +1875,7 @@ class AllocatorAware2_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(8959389212932404140ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(17013646540360458924ull)
   >;
 };
 
@@ -1947,7 +1947,7 @@ class TypedefStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(7079524667603799276ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(17342541271444691756ull)
   >;
 };
 
@@ -1989,7 +1989,7 @@ class StructWithDoubleUnderscores_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(608558106338578572ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(11308628853865465068ull)
   >;
 };
 

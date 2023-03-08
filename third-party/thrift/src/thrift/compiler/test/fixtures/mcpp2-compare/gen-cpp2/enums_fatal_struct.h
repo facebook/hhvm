@@ -57,7 +57,7 @@ class SomeStruct_struct_traits {
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
       enums_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(1381543068409327820ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(10691278903523363788ull)
   >;
 };
 

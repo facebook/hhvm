@@ -194,7 +194,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       enums_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::AnEnumA_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(428815433984633608ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(1369557940062611496ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -202,7 +202,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       enums_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::AnEnumB_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(15617140791710839720ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(18439895483441837800ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -210,7 +210,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       enums_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::AnEnumC_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2370933752103673064ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(13460746706677500392ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -218,7 +218,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       enums_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::AnEnumD_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(2735336584205230696ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(620540081711658024ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -226,7 +226,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       enums_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::AnEnumE_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(9931005972636376296ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(2060347478177142664ull)
   >
 );
 }}} // facebook::ns::qwerty

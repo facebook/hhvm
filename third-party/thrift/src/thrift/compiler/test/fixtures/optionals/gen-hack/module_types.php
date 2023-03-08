@@ -245,7 +245,7 @@ class Vehicle implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 2222890000100114781;
   /**
    * Original thrift field:-
-   * 1: struct module.Color color
+   * 1: module.Color color
    */
   public ?Color $color;
   /**
@@ -507,7 +507,7 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata {
   public ?string $address;
   /**
    * Original thrift field:-
-   * 5: struct module.Color favoriteColor
+   * 5: module.Color favoriteColor
    */
   public ?Color $favoriteColor;
   /**
@@ -522,17 +522,17 @@ class Person implements \IThriftSyncStruct, \IThriftStructMetadata {
   public ?int $bestFriend;
   /**
    * Original thrift field:-
-   * 8: map<enum module.Animal, string> petNames
+   * 8: map<module.Animal, string> petNames
    */
   public ?Map<Animal, string> $petNames;
   /**
    * Original thrift field:-
-   * 9: enum module.Animal afraidOfAnimal
+   * 9: module.Animal afraidOfAnimal
    */
   public ?Animal $afraidOfAnimal;
   /**
    * Original thrift field:-
-   * 10: list<struct module.Vehicle> vehicles
+   * 10: list<module.Vehicle> vehicles
    */
   public ?Vector<Vehicle> $vehicles;
 

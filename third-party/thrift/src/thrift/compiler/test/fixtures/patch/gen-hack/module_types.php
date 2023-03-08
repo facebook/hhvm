@@ -568,7 +568,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   public ?int $option2;
   /**
    * Original thrift field:-
-   * 3: struct module.InnerUnion option3
+   * 3: module.InnerUnion option3
    */
   public ?\fixtures\patch\InnerUnion $option3;
   protected \fixtures\patch\MyUnionEnum $_type = \fixtures\patch\MyUnionEnum::_EMPTY_;
@@ -1174,22 +1174,22 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public string $binaryVal;
   /**
    * Original thrift field:-
-   * -10: enum module.MyEnum enumVal
+   * -10: module.MyEnum enumVal
    */
   public ?\fixtures\patch\MyEnum $enumVal;
   /**
    * Original thrift field:-
-   * -11: struct module.MyData structVal
+   * -11: module.MyData structVal
    */
   public ?\fixtures\patch\MyData $structVal;
   /**
    * Original thrift field:-
-   * -12: struct module.MyUnion unionVal
+   * -12: module.MyUnion unionVal
    */
   public ?\fixtures\patch\MyUnion $unionVal;
   /**
    * Original thrift field:-
-   * -13: struct module.LateDefStruct lateStructVal
+   * -13: module.LateDefStruct lateStructVal
    */
   public ?\fixtures\patch\LateDefStruct $lateStructVal;
   /**
@@ -1239,17 +1239,17 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public ?string $optBinaryVal;
   /**
    * Original thrift field:-
-   * -23: enum module.MyEnum optEnumVal
+   * -23: module.MyEnum optEnumVal
    */
   public ?\fixtures\patch\MyEnum $optEnumVal;
   /**
    * Original thrift field:-
-   * -24: struct module.MyData optStructVal
+   * -24: module.MyData optStructVal
    */
   public ?\fixtures\patch\MyData $optStructVal;
   /**
    * Original thrift field:-
-   * -25: struct module.LateDefStruct optLateStructVal
+   * -25: module.LateDefStruct optLateStructVal
    */
   public ?\fixtures\patch\LateDefStruct $optLateStructVal;
   /**
@@ -1284,12 +1284,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public int $i32WithCustomDefault;
   /**
    * Original thrift field:-
-   * -32: struct module.MyDataWithCustomDefault structWithCustomDefault
+   * -32: module.MyDataWithCustomDefault structWithCustomDefault
    */
   public ?\fixtures\patch\MyDataWithCustomDefault $structWithCustomDefault;
   /**
    * Original thrift field:-
-   * 1: struct module.MyData structWithFieldCustomDefault
+   * 1: module.MyData structWithFieldCustomDefault
    */
   public ?\fixtures\patch\MyData $structWithFieldCustomDefault;
 
@@ -2371,7 +2371,7 @@ class Recursive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
   const int STRUCTURAL_ID = 6832467362236085104;
   /**
    * Original thrift field:-
-   * -1: map<string, struct module.Recursive> nodes
+   * -1: map<string, module.Recursive> nodes
    */
   public Map<string, \fixtures\patch\Recursive> $nodes;
 
@@ -2537,7 +2537,7 @@ class Bar implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
   const int STRUCTURAL_ID = 418974100266768802;
   /**
    * Original thrift field:-
-   * -1: struct module.Loop loop
+   * -1: module.Loop loop
    */
   public ?\fixtures\patch\Loop $loop;
 
@@ -2678,7 +2678,7 @@ class Loop implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapis
   const int STRUCTURAL_ID = 3942468431999341434;
   /**
    * Original thrift field:-
-   * -1: struct module.Bar bar
+   * -1: module.Bar bar
    */
   public ?\fixtures\patch\Bar $bar;
 
@@ -2951,12 +2951,12 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 6838201112512803660;
   /**
    * Original thrift field:-
-   * 1: struct patch.StringPatch data1
+   * 1: patch.StringPatch data1
    */
   public ?\thrift\op\StringPatch $data1;
   /**
    * Original thrift field:-
-   * 2: struct patch.I32Patch data2
+   * 2: patch.I32Patch data2
    */
   public ?\thrift\op\I32Patch $data2;
 
@@ -3165,7 +3165,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.MyData assign
+   * 1: module.MyData assign
    */
   public ?\fixtures\patch\MyData $assign;
   /**
@@ -3179,21 +3179,21 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.MyDataFieldPatch patchPrior
+   * 3: module.MyDataFieldPatch patchPrior
    */
   public ?\fixtures\patch\MyDataFieldPatch $patchPrior;
   /**
    * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
-   * 5: struct module.MyDataEnsureStruct ensure
+   * 5: module.MyDataEnsureStruct ensure
    */
   public ?\fixtures\patch\MyDataEnsureStruct $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.MyDataFieldPatch patch
+   * 6: module.MyDataFieldPatch patch
    */
   public ?\fixtures\patch\MyDataFieldPatch $patch;
 
@@ -3562,12 +3562,12 @@ class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftS
   const int STRUCTURAL_ID = 6838201112512803660;
   /**
    * Original thrift field:-
-   * 1: struct patch.StringPatch data1
+   * 1: patch.StringPatch data1
    */
   public ?\thrift\op\StringPatch $data1;
   /**
    * Original thrift field:-
-   * 2: struct patch.I32Patch data2
+   * 2: patch.I32Patch data2
    */
   public ?\thrift\op\I32Patch $data2;
 
@@ -3776,7 +3776,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.MyDataWithCustomDefault assign
+   * 1: module.MyDataWithCustomDefault assign
    */
   public ?\fixtures\patch\MyDataWithCustomDefault $assign;
   /**
@@ -3790,21 +3790,21 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.MyDataWithCustomDefaultFieldPatch patchPrior
+   * 3: module.MyDataWithCustomDefaultFieldPatch patchPrior
    */
   public ?\fixtures\patch\MyDataWithCustomDefaultFieldPatch $patchPrior;
   /**
    * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
-   * 5: struct module.MyDataWithCustomDefaultEnsureStruct ensure
+   * 5: module.MyDataWithCustomDefaultEnsureStruct ensure
    */
   public ?\fixtures\patch\MyDataWithCustomDefaultEnsureStruct $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.MyDataWithCustomDefaultFieldPatch patch
+   * 6: module.MyDataWithCustomDefaultFieldPatch patch
    */
   public ?\fixtures\patch\MyDataWithCustomDefaultFieldPatch $patch;
 
@@ -4033,7 +4033,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
   const int STRUCTURAL_ID = 7781104017677120443;
   /**
    * Original thrift field:-
-   * 1: struct patch.BinaryPatch innerOption
+   * 1: patch.BinaryPatch innerOption
    */
   public ?\thrift\op\BinaryPatch $innerOption;
 
@@ -4202,7 +4202,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.InnerUnion assign
+   * 1: module.InnerUnion assign
    */
   public ?\fixtures\patch\InnerUnion $assign;
   /**
@@ -4216,21 +4216,21 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.InnerUnionFieldPatch patchPrior
+   * 3: module.InnerUnionFieldPatch patchPrior
    */
   public ?\fixtures\patch\InnerUnionFieldPatch $patchPrior;
   /**
    * Assigns the value, if not already set to the same field. Applies third.
    * 
    * Original thrift field:-
-   * 4: struct module.InnerUnion ensure
+   * 4: module.InnerUnion ensure
    */
   public ?\fixtures\patch\InnerUnion $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.InnerUnionFieldPatch patch
+   * 6: module.InnerUnionFieldPatch patch
    */
   public ?\fixtures\patch\InnerUnionFieldPatch $patch;
 
@@ -4475,17 +4475,17 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 2282223608803987365;
   /**
    * Original thrift field:-
-   * 1: struct patch.StringPatch option1
+   * 1: patch.StringPatch option1
    */
   public ?\thrift\op\StringPatch $option1;
   /**
    * Original thrift field:-
-   * 2: struct patch.I32Patch option2
+   * 2: patch.I32Patch option2
    */
   public ?\thrift\op\I32Patch $option2;
   /**
    * Original thrift field:-
-   * 3: struct module.InnerUnionPatch option3
+   * 3: module.InnerUnionPatch option3
    */
   public ?\fixtures\patch\InnerUnionPatch $option3;
 
@@ -4735,7 +4735,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.MyUnion assign
+   * 1: module.MyUnion assign
    */
   public ?\fixtures\patch\MyUnion $assign;
   /**
@@ -4749,21 +4749,21 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.MyUnionFieldPatch patchPrior
+   * 3: module.MyUnionFieldPatch patchPrior
    */
   public ?\fixtures\patch\MyUnionFieldPatch $patchPrior;
   /**
    * Assigns the value, if not already set to the same field. Applies third.
    * 
    * Original thrift field:-
-   * 4: struct module.MyUnion ensure
+   * 4: module.MyUnion ensure
    */
   public ?\fixtures\patch\MyUnion $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.MyUnionFieldPatch patch
+   * 6: module.MyUnionFieldPatch patch
    */
   public ?\fixtures\patch\MyUnionFieldPatch $patch;
 
@@ -5244,7 +5244,7 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
   const int STRUCTURAL_ID = 8458031364624826074;
   /**
    * Original thrift field:-
-   * -32: struct module.MyDataWithCustomDefault structWithCustomDefault
+   * -32: module.MyDataWithCustomDefault structWithCustomDefault
    */
   public ?\fixtures\patch\MyDataWithCustomDefault $structWithCustomDefault;
   /**
@@ -5279,17 +5279,17 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
   public ?Vector<int> $optListVal;
   /**
    * Original thrift field:-
-   * -25: struct module.LateDefStruct optLateStructVal
+   * -25: module.LateDefStruct optLateStructVal
    */
   public ?\fixtures\patch\LateDefStruct $optLateStructVal;
   /**
    * Original thrift field:-
-   * -24: struct module.MyData optStructVal
+   * -24: module.MyData optStructVal
    */
   public ?\fixtures\patch\MyData $optStructVal;
   /**
    * Original thrift field:-
-   * -23: enum module.MyEnum optEnumVal
+   * -23: module.MyEnum optEnumVal
    */
   public ?\fixtures\patch\MyEnum $optEnumVal;
   /**
@@ -5339,22 +5339,22 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
   public ?bool $optBoolVal;
   /**
    * Original thrift field:-
-   * -13: struct module.LateDefStruct lateStructVal
+   * -13: module.LateDefStruct lateStructVal
    */
   public ?\fixtures\patch\LateDefStruct $lateStructVal;
   /**
    * Original thrift field:-
-   * -12: struct module.MyUnion unionVal
+   * -12: module.MyUnion unionVal
    */
   public ?\fixtures\patch\MyUnion $unionVal;
   /**
    * Original thrift field:-
-   * -11: struct module.MyData structVal
+   * -11: module.MyData structVal
    */
   public ?\fixtures\patch\MyData $structVal;
   /**
    * Original thrift field:-
-   * -10: enum module.MyEnum enumVal
+   * -10: module.MyEnum enumVal
    */
   public ?\fixtures\patch\MyEnum $enumVal;
   /**
@@ -5404,7 +5404,7 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
   public ?bool $boolVal;
   /**
    * Original thrift field:-
-   * 1: struct module.MyData structWithFieldCustomDefault
+   * 1: module.MyData structWithFieldCustomDefault
    */
   public ?\fixtures\patch\MyData $structWithFieldCustomDefault;
 
@@ -6312,7 +6312,7 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * 
    * 
    * Original thrift field:-
-   * 1: enum module.MyEnum assign
+   * 1: module.MyEnum assign
    */
   public ?\fixtures\patch\MyEnum $assign;
   /**
@@ -6462,7 +6462,7 @@ class MyStructField23Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * 
    * 
    * Original thrift field:-
-   * 1: enum module.MyEnum assign
+   * 1: module.MyEnum assign
    */
   public ?\fixtures\patch\MyEnum $assign;
   /**
@@ -6683,7 +6683,7 @@ class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches list values by index. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<i32, struct patch.I16Patch> patch
+   * 3: map<i32, patch.I16Patch> patch
    */
   public Map<int, \thrift\op\I16Patch> $patch;
   /**
@@ -7385,7 +7385,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<string, struct patch.StringPatch> patchPrior
+   * 3: map<string, patch.StringPatch> patchPrior
    */
   public Map<string, \thrift\op\StringPatch> $patchPrior;
   /**
@@ -7399,7 +7399,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: map<string, struct patch.StringPatch> patch
+   * 6: map<string, patch.StringPatch> patch
    */
   public Map<string, \thrift\op\StringPatch> $patch;
   /**
@@ -7873,7 +7873,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches list values by index. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<i32, struct module.MyStructField29Patch1> patch
+   * 3: map<i32, module.MyStructField29Patch1> patch
    */
   public Map<int, \fixtures\patch\MyStructField29Patch1> $patch;
   /**
@@ -8388,7 +8388,7 @@ class MyStructField29Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<string, struct patch.I32Patch> patchPrior
+   * 3: map<string, patch.I32Patch> patchPrior
    */
   public Map<string, \thrift\op\I32Patch> $patchPrior;
   /**
@@ -8402,7 +8402,7 @@ class MyStructField29Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: map<string, struct patch.I32Patch> patch
+   * 6: map<string, patch.I32Patch> patch
    */
   public Map<string, \thrift\op\I32Patch> $patch;
   /**
@@ -8911,7 +8911,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<string, struct module.MyStructField30Patch1> patchPrior
+   * 3: map<string, module.MyStructField30Patch1> patchPrior
    */
   public Map<string, \fixtures\patch\MyStructField30Patch1> $patchPrior;
   /**
@@ -8925,7 +8925,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: map<string, struct module.MyStructField30Patch1> patch
+   * 6: map<string, module.MyStructField30Patch1> patch
    */
   public Map<string, \fixtures\patch\MyStructField30Patch1> $patch;
   /**
@@ -9467,7 +9467,7 @@ class MyStructField30Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<string, struct patch.I32Patch> patchPrior
+   * 3: map<string, patch.I32Patch> patchPrior
    */
   public Map<string, \thrift\op\I32Patch> $patchPrior;
   /**
@@ -9481,7 +9481,7 @@ class MyStructField30Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: map<string, struct patch.I32Patch> patch
+   * 6: map<string, patch.I32Patch> patch
    */
   public Map<string, \thrift\op\I32Patch> $patch;
   /**
@@ -10106,167 +10106,167 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 2177152892435994657;
   /**
    * Original thrift field:-
-   * -32: struct module.MyDataWithCustomDefaultPatch structWithCustomDefault
+   * -32: module.MyDataWithCustomDefaultPatch structWithCustomDefault
    */
   public ?\fixtures\patch\MyDataWithCustomDefaultPatch $structWithCustomDefault;
   /**
    * Original thrift field:-
-   * -31: struct patch.I32Patch i32WithCustomDefault
+   * -31: patch.I32Patch i32WithCustomDefault
    */
   public ?\thrift\op\I32Patch $i32WithCustomDefault;
   /**
    * Original thrift field:-
-   * -30: struct module.MyStructField30Patch mapMap
+   * -30: module.MyStructField30Patch mapMap
    */
   public ?\fixtures\patch\MyStructField30Patch $mapMap;
   /**
    * Original thrift field:-
-   * -29: struct module.MyStructField29Patch listMap
+   * -29: module.MyStructField29Patch listMap
    */
   public ?\fixtures\patch\MyStructField29Patch $listMap;
   /**
    * Original thrift field:-
-   * -28: struct module.MyStructField28Patch optMapVal
+   * -28: module.MyStructField28Patch optMapVal
    */
   public ?\fixtures\patch\MyStructField28Patch $optMapVal;
   /**
    * Original thrift field:-
-   * -27: struct module.MyStructField27Patch optSetVal
+   * -27: module.MyStructField27Patch optSetVal
    */
   public ?\fixtures\patch\MyStructField27Patch $optSetVal;
   /**
    * Original thrift field:-
-   * -26: struct module.MyStructField26Patch optListVal
+   * -26: module.MyStructField26Patch optListVal
    */
   public ?\fixtures\patch\MyStructField26Patch $optListVal;
   /**
    * Original thrift field:-
-   * -25: struct module.LateDefStructPatch optLateStructVal
+   * -25: module.LateDefStructPatch optLateStructVal
    */
   public ?\fixtures\patch\LateDefStructPatch $optLateStructVal;
   /**
    * Original thrift field:-
-   * -24: struct module.MyDataPatch optStructVal
+   * -24: module.MyDataPatch optStructVal
    */
   public ?\fixtures\patch\MyDataPatch $optStructVal;
   /**
    * Original thrift field:-
-   * -23: struct module.MyStructField23Patch optEnumVal
+   * -23: module.MyStructField23Patch optEnumVal
    */
   public ?\fixtures\patch\MyStructField23Patch $optEnumVal;
   /**
    * Original thrift field:-
-   * -22: struct patch.BinaryPatch optBinaryVal
+   * -22: patch.BinaryPatch optBinaryVal
    */
   public ?\thrift\op\BinaryPatch $optBinaryVal;
   /**
    * Original thrift field:-
-   * -21: struct patch.StringPatch optStringVal
+   * -21: patch.StringPatch optStringVal
    */
   public ?\thrift\op\StringPatch $optStringVal;
   /**
    * Original thrift field:-
-   * -20: struct patch.DoublePatch optDoubleVal
+   * -20: patch.DoublePatch optDoubleVal
    */
   public ?\thrift\op\DoublePatch $optDoubleVal;
   /**
    * Original thrift field:-
-   * -19: struct patch.FloatPatch optFloatVal
+   * -19: patch.FloatPatch optFloatVal
    */
   public ?\thrift\op\FloatPatch $optFloatVal;
   /**
    * Original thrift field:-
-   * -18: struct patch.I64Patch optI64Val
+   * -18: patch.I64Patch optI64Val
    */
   public ?\thrift\op\I64Patch $optI64Val;
   /**
    * Original thrift field:-
-   * -17: struct patch.I32Patch optI32Val
+   * -17: patch.I32Patch optI32Val
    */
   public ?\thrift\op\I32Patch $optI32Val;
   /**
    * Original thrift field:-
-   * -16: struct patch.I16Patch optI16Val
+   * -16: patch.I16Patch optI16Val
    */
   public ?\thrift\op\I16Patch $optI16Val;
   /**
    * Original thrift field:-
-   * -15: struct patch.BytePatch optByteVal
+   * -15: patch.BytePatch optByteVal
    */
   public ?\thrift\op\BytePatch $optByteVal;
   /**
    * Original thrift field:-
-   * -14: struct patch.BoolPatch optBoolVal
+   * -14: patch.BoolPatch optBoolVal
    */
   public ?\thrift\op\BoolPatch $optBoolVal;
   /**
    * Original thrift field:-
-   * -13: struct module.LateDefStructPatch lateStructVal
+   * -13: module.LateDefStructPatch lateStructVal
    */
   public ?\fixtures\patch\LateDefStructPatch $lateStructVal;
   /**
    * Original thrift field:-
-   * -12: struct module.MyUnionPatch unionVal
+   * -12: module.MyUnionPatch unionVal
    */
   public ?\fixtures\patch\MyUnionPatch $unionVal;
   /**
    * Original thrift field:-
-   * -11: struct module.MyDataPatch structVal
+   * -11: module.MyDataPatch structVal
    */
   public ?\fixtures\patch\MyDataPatch $structVal;
   /**
    * Original thrift field:-
-   * -10: struct module.MyStructField10Patch enumVal
+   * -10: module.MyStructField10Patch enumVal
    */
   public ?\fixtures\patch\MyStructField10Patch $enumVal;
   /**
    * Original thrift field:-
-   * -9: struct patch.BinaryPatch binaryVal
+   * -9: patch.BinaryPatch binaryVal
    */
   public ?\thrift\op\BinaryPatch $binaryVal;
   /**
    * Original thrift field:-
-   * -8: struct patch.StringPatch stringVal
+   * -8: patch.StringPatch stringVal
    */
   public ?\thrift\op\StringPatch $stringVal;
   /**
    * Original thrift field:-
-   * -7: struct patch.DoublePatch doubleVal
+   * -7: patch.DoublePatch doubleVal
    */
   public ?\thrift\op\DoublePatch $doubleVal;
   /**
    * Original thrift field:-
-   * -6: struct patch.FloatPatch floatVal
+   * -6: patch.FloatPatch floatVal
    */
   public ?\thrift\op\FloatPatch $floatVal;
   /**
    * Original thrift field:-
-   * -5: struct patch.I64Patch i64Val
+   * -5: patch.I64Patch i64Val
    */
   public ?\thrift\op\I64Patch $i64Val;
   /**
    * Original thrift field:-
-   * -4: struct patch.I32Patch i32Val
+   * -4: patch.I32Patch i32Val
    */
   public ?\thrift\op\I32Patch $i32Val;
   /**
    * Original thrift field:-
-   * -3: struct patch.I16Patch i16Val
+   * -3: patch.I16Patch i16Val
    */
   public ?\thrift\op\I16Patch $i16Val;
   /**
    * Original thrift field:-
-   * -2: struct patch.BytePatch byteVal
+   * -2: patch.BytePatch byteVal
    */
   public ?\thrift\op\BytePatch $byteVal;
   /**
    * Original thrift field:-
-   * -1: struct patch.BoolPatch boolVal
+   * -1: patch.BoolPatch boolVal
    */
   public ?\thrift\op\BoolPatch $boolVal;
   /**
    * Original thrift field:-
-   * 1: struct module.MyDataPatch structWithFieldCustomDefault
+   * 1: module.MyDataPatch structWithFieldCustomDefault
    */
   public ?\fixtures\patch\MyDataPatch $structWithFieldCustomDefault;
 
@@ -11747,7 +11747,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.MyStruct assign
+   * 1: module.MyStruct assign
    */
   public ?\fixtures\patch\MyStruct $assign;
   /**
@@ -11761,21 +11761,21 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.MyStructFieldPatch patchPrior
+   * 3: module.MyStructFieldPatch patchPrior
    */
   public ?\fixtures\patch\MyStructFieldPatch $patchPrior;
   /**
    * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
-   * 5: struct module.MyStructEnsureStruct ensure
+   * 5: module.MyStructEnsureStruct ensure
    */
   public ?\fixtures\patch\MyStructEnsureStruct $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.MyStructFieldPatch patch
+   * 6: module.MyStructFieldPatch patch
    */
   public ?\fixtures\patch\MyStructFieldPatch $patch;
 
@@ -12196,7 +12196,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.LateDefStruct assign
+   * 1: module.LateDefStruct assign
    */
   public ?\fixtures\patch\LateDefStruct $assign;
   /**
@@ -12210,21 +12210,21 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.LateDefStructFieldPatch patchPrior
+   * 3: module.LateDefStructFieldPatch patchPrior
    */
   public ?\fixtures\patch\LateDefStructFieldPatch $patchPrior;
   /**
    * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
-   * 5: struct module.LateDefStructEnsureStruct ensure
+   * 5: module.LateDefStructEnsureStruct ensure
    */
   public ?\fixtures\patch\LateDefStructEnsureStruct $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.LateDefStructFieldPatch patch
+   * 6: module.LateDefStructFieldPatch patch
    */
   public ?\fixtures\patch\LateDefStructFieldPatch $patch;
 
@@ -12461,7 +12461,7 @@ class RecursiveEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadat
   const int STRUCTURAL_ID = 3722360834412776999;
   /**
    * Original thrift field:-
-   * -1: map<string, struct module.Recursive> nodes
+   * -1: map<string, module.Recursive> nodes
    */
   public ?Map<string, \fixtures\patch\Recursive> $nodes;
 
@@ -12620,7 +12620,7 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * 
    * 
    * Original thrift field:-
-   * 1: map<string, struct module.Recursive> assign
+   * 1: map<string, module.Recursive> assign
    */
   public ?Map<string, \fixtures\patch\Recursive> $assign;
   /**
@@ -12789,7 +12789,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
   const int STRUCTURAL_ID = 5650747686776624114;
   /**
    * Original thrift field:-
-   * -1: struct module.RecursiveField1Patch nodes
+   * -1: module.RecursiveField1Patch nodes
    */
   public ?\fixtures\patch\RecursiveField1Patch $nodes;
 
@@ -12959,7 +12959,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.Recursive assign
+   * 1: module.Recursive assign
    */
   public ?\fixtures\patch\Recursive $assign;
   /**
@@ -12973,21 +12973,21 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.RecursiveFieldPatch patchPrior
+   * 3: module.RecursiveFieldPatch patchPrior
    */
   public ?\fixtures\patch\RecursiveFieldPatch $patchPrior;
   /**
    * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
-   * 5: struct module.RecursiveEnsureStruct ensure
+   * 5: module.RecursiveEnsureStruct ensure
    */
   public ?\fixtures\patch\RecursiveEnsureStruct $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.RecursiveFieldPatch patch
+   * 6: module.RecursiveFieldPatch patch
    */
   public ?\fixtures\patch\RecursiveFieldPatch $patch;
 
@@ -13215,7 +13215,7 @@ class BarEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 2398939770440216623;
   /**
    * Original thrift field:-
-   * -1: struct module.Loop loop
+   * -1: module.Loop loop
    */
   public ?\fixtures\patch\Loop $loop;
 
@@ -13341,7 +13341,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 3282171960754554582;
   /**
    * Original thrift field:-
-   * -1: struct module.LoopPatch loop
+   * -1: module.LoopPatch loop
    */
   public ?\fixtures\patch\LoopPatch $loop;
 
@@ -13520,7 +13520,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.Bar assign
+   * 1: module.Bar assign
    */
   public ?\fixtures\patch\Bar $assign;
   /**
@@ -13534,21 +13534,21 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * Patches any previously set values. Applies second.
    * 
    * Original thrift field:-
-   * 3: struct module.BarFieldPatch patchPrior
+   * 3: module.BarFieldPatch patchPrior
    */
   public ?\fixtures\patch\BarFieldPatch $patchPrior;
   /**
    * Initialize fields, using the given defaults. Applies third.
    * 
    * Original thrift field:-
-   * 5: struct module.BarEnsureStruct ensure
+   * 5: module.BarEnsureStruct ensure
    */
   public ?\fixtures\patch\BarEnsureStruct $ensure;
   /**
    * Patches any set value, including newly set values. Applies last.
    * 
    * Original thrift field:-
-   * 6: struct module.BarFieldPatch patch
+   * 6: module.BarFieldPatch patch
    */
   public ?\fixtures\patch\BarFieldPatch $patch;
 
@@ -13776,7 +13776,7 @@ class LoopEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 1618364776431756825;
   /**
    * Original thrift field:-
-   * -1: struct module.Bar bar
+   * -1: module.Bar bar
    */
   public ?\fixtures\patch\Bar $bar;
 
@@ -13884,7 +13884,7 @@ class LoopFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
   const int STRUCTURAL_ID = 3070424594391246387;
   /**
    * Original thrift field:-
-   * -1: struct module.BarPatch bar
+   * -1: module.BarPatch bar
    */
   public ?\fixtures\patch\BarPatch $bar;
 
@@ -14030,7 +14030,7 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
    * 
    * 
    * Original thrift field:-
-   * 1: struct module.Loop assign
+   * 1: module.Loop assign
    */
   public ?\fixtures\patch\Loop $assign;
   /**

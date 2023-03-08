@@ -300,12 +300,12 @@ class structured_annotation_recursive implements \IThriftSyncStruct, \IThriftStr
   public string $name;
   /**
    * Original thrift field:-
-   * 2: struct module.structured_annotation_recursive recurse
+   * 2: module.structured_annotation_recursive recurse
    */
   public ?\fixtures\basic-structured-annotations\structured_annotation_recursive $recurse;
   /**
    * Original thrift field:-
-   * 3: struct module.structured_annotation_forward forward
+   * 3: module.structured_annotation_forward forward
    */
   public ?\fixtures\basic-structured-annotations\structured_annotation_forward $forward;
 
@@ -542,7 +542,7 @@ class structured_annotation_nested implements \IThriftSyncStruct, \IThriftStruct
   public string $name;
   /**
    * Original thrift field:-
-   * 2: struct module.structured_annotation_with_default nest
+   * 2: module.structured_annotation_with_default nest
    */
   public ?\fixtures\basic-structured-annotations\structured_annotation_with_default $nest;
 

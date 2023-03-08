@@ -164,7 +164,7 @@ class Internship implements \IThriftSyncStruct, \IThriftStructMetadata {
   public string $title;
   /**
    * Original thrift field:-
-   * 3: enum module.Company employer
+   * 3: module.Company employer
    */
   public ?Company $employer;
   /**
@@ -570,7 +570,7 @@ class struct2 implements \IThriftSyncStruct, \IThriftStructMetadata {
   public string $b;
   /**
    * Original thrift field:-
-   * 3: struct module.struct1 c
+   * 3: module.struct1 c
    */
   public ?struct1 $c;
   /**
@@ -734,7 +734,7 @@ class struct3 implements \IThriftSyncStruct, \IThriftStructMetadata {
   public int $b;
   /**
    * Original thrift field:-
-   * 3: struct module.struct2 c
+   * 3: module.struct2 c
    */
   public ?struct2 $c;
 
@@ -1209,12 +1209,12 @@ class union2 implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUnio
   public ?float $d;
   /**
    * Original thrift field:-
-   * 3: struct module.struct1 s
+   * 3: module.struct1 s
    */
   public ?struct1 $s;
   /**
    * Original thrift field:-
-   * 4: struct module.union1 u
+   * 4: module.union1 u
    */
   public ?union1 $u;
   protected union2Enum $_type = union2Enum::_EMPTY_;

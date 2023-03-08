@@ -277,7 +277,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
   public string $name;
   /**
    * Original thrift field:-
-   * 2: struct annotations.structured_annotation_recursive recurse
+   * 2: annotations.structured_annotation_recursive recurse
    */
   private ?MyFieldWrapper<?structured_annotation_recursive, structured_annotation_recursive> $recurse;
 
@@ -287,12 +287,12 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
 
   /**
    * Original thrift field:-
-   * 3: struct annotations.structured_annotation_with_default default
+   * 3: annotations.structured_annotation_with_default default
    */
   public ?structured_annotation_with_default $default;
   /**
    * Original thrift field:-
-   * 4: map<string, struct annotations.structured_annotation_recursive> recurse_map
+   * 4: map<string, annotations.structured_annotation_recursive> recurse_map
    */
   public dict<string, structured_annotation_recursive> $recurse_map;
   /**

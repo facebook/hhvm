@@ -54,7 +54,7 @@ class t_type : public t_named {
 
   // Returns the full name for the given type. For example:
   // `list<string, string>`
-  virtual std::string get_full_name() const = 0;
+  virtual std::string get_full_name() const { return get_scoped_name(); }
 
   /**
    * Resolves all typedefs (if any) to get the true type.
@@ -92,13 +92,6 @@ class t_type : public t_named {
    */
   t_type(const t_program* program, std::string name)
       : t_named(std::move(name)), program_(program) {}
-
-  /**
-   * Returns a string in the format "prefix program_name.type_name"
-   *
-   * @param prefix - A string to add before the program name / type name
-   */
-  std::string make_full_name(const char* prefix) const;
 
   // TODO(afuller): Make this private.
   const t_program* program_ = nullptr;

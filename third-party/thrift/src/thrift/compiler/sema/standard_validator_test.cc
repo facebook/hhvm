@@ -234,8 +234,8 @@ TEST_F(StandardValidatorTest, RepeatedNameInExtendedService) {
   // An error will be found
   EXPECT_THAT(
       validate(),
-      ::testing::UnorderedElementsAre(error(
-          1, "Function `Derived.baz` redefines `service file.Base.baz`.")));
+      ::testing::UnorderedElementsAre(
+          error(1, "Function `Derived.baz` redefines `file.Base.baz`.")));
 }
 
 TEST_F(StandardValidatorTest, DuplicatedEnumValues) {

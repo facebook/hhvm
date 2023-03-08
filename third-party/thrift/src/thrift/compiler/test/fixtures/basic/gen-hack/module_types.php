@@ -169,12 +169,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   public string $MyStringField;
   /**
    * Original thrift field:-
-   * 3: struct module.MyDataItem MyDataField
+   * 3: module.MyDataItem MyDataField
    */
   public ?\fixtures\basic\MyDataItem $MyDataField;
   /**
    * Original thrift field:-
-   * 4: enum module.MyEnum myEnum
+   * 4: module.MyEnum myEnum
    */
   public ?\fixtures\basic\MyEnum $myEnum;
   /**
@@ -538,17 +538,17 @@ class MyUnion implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftUni
   const int STRUCTURAL_ID = 4641160414833587430;
   /**
    * Original thrift field:-
-   * 1: enum module.MyEnum myEnum
+   * 1: module.MyEnum myEnum
    */
   public ?\fixtures\basic\MyEnum $myEnum;
   /**
    * Original thrift field:-
-   * 2: struct module.MyStruct myStruct
+   * 2: module.MyStruct myStruct
    */
   public ?\fixtures\basic\MyStruct $myStruct;
   /**
    * Original thrift field:-
-   * 3: struct module.MyDataItem myDataItem
+   * 3: module.MyDataItem myDataItem
    */
   public ?\fixtures\basic\MyDataItem $myDataItem;
   protected \fixtures\basic\MyUnionEnum $_type = \fixtures\basic\MyUnionEnum::_EMPTY_;

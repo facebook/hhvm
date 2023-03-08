@@ -79,10 +79,6 @@ std::string t_type::get_scoped_name() const {
   return os.str();
 }
 
-std::string t_type::make_full_name(const char* prefix) const {
-  return std::string(prefix) + " " + get_scoped_name();
-}
-
 const t_type* t_type::get_true_type() const {
   return t_typedef::find_type_if(
       this, [](const t_type* type) { return !type->is_typedef(); });

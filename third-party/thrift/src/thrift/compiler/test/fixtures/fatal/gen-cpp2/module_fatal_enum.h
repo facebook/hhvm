@@ -484,7 +484,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::enum1_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4992076682252594856ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(208192744385601544ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -492,7 +492,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::enum2_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(6888467747342894920ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(12040799367005187432ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -500,7 +500,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::enum3_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(4626344424889780008ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(8068328626500945544ull)
   >
 );
 FATAL_REGISTER_ENUM_TRAITS(
@@ -508,7 +508,7 @@ FATAL_REGISTER_ENUM_TRAITS(
   ::apache::thrift::detail::type_common_metadata_impl<
       module_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_refl::enum_with_special_names_enum_traits::annotations>,
-      static_cast<::apache::thrift::legacy_type_id_t>(958943865626138984ull)
+      static_cast<::apache::thrift::legacy_type_id_t>(1630079061865176360ull)
   >
 );
 }} // test_cpp2::cpp_reflection

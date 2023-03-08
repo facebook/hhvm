@@ -44,10 +44,6 @@ class t_struct : public t_structured {
   t_struct(const t_program* program, std::string name)
       : t_structured(program, std::move(name)) {}
 
-  std::string get_full_name() const override {
-    return make_full_name("struct");
-  }
-
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:

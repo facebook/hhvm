@@ -541,119 +541,119 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
    * True(1) or False(0)
    * 
    * Original thrift field:-
-   * 1: enum standard.Void boolType
+   * 1: standard.Void boolType
    */
   public ?apache_thrift_type_standard_Void $boolType;
   /**
    * 8-bit signed integer
    * 
    * Original thrift field:-
-   * 2: enum standard.Void byteType
+   * 2: standard.Void byteType
    */
   public ?apache_thrift_type_standard_Void $byteType;
   /**
    * 16-bit signed integer
    * 
    * Original thrift field:-
-   * 3: enum standard.Void i16Type
+   * 3: standard.Void i16Type
    */
   public ?apache_thrift_type_standard_Void $i16Type;
   /**
    * 32-bit signed integer
    * 
    * Original thrift field:-
-   * 4: enum standard.Void i32Type
+   * 4: standard.Void i32Type
    */
   public ?apache_thrift_type_standard_Void $i32Type;
   /**
    * 64-bit signed integer
    * 
    * Original thrift field:-
-   * 5: enum standard.Void i64Type
+   * 5: standard.Void i64Type
    */
   public ?apache_thrift_type_standard_Void $i64Type;
   /**
    * 32-bit floating point
    * 
    * Original thrift field:-
-   * 6: enum standard.Void floatType
+   * 6: standard.Void floatType
    */
   public ?apache_thrift_type_standard_Void $floatType;
   /**
    * 64-bit floating point
    * 
    * Original thrift field:-
-   * 7: enum standard.Void doubleType
+   * 7: standard.Void doubleType
    */
   public ?apache_thrift_type_standard_Void $doubleType;
   /**
    * UTF-8 encoded string
    * 
    * Original thrift field:-
-   * 8: enum standard.Void stringType
+   * 8: standard.Void stringType
    */
   public ?apache_thrift_type_standard_Void $stringType;
   /**
    * Arbitrary byte string
    * 
    * Original thrift field:-
-   * 9: enum standard.Void binaryType
+   * 9: standard.Void binaryType
    */
   public ?apache_thrift_type_standard_Void $binaryType;
   /**
    * 32-bit signed integer, with named values.
    * 
    * Original thrift field:-
-   * 10: struct standard.TypeUri enumType
+   * 10: standard.TypeUri enumType
    */
   public ?apache_thrift_type_standard_TypeUri $enumType;
   /**
    * `typedef` definition
    * 
    * Original thrift field:-
-   * 17: struct standard.TypeUri typedefType
+   * 17: standard.TypeUri typedefType
    */
   public ?apache_thrift_type_standard_TypeUri $typedefType;
   /**
    * `struct` definition
    * 
    * Original thrift field:-
-   * 11: struct standard.TypeUri structType
+   * 11: standard.TypeUri structType
    */
   public ?apache_thrift_type_standard_TypeUri $structType;
   /**
    * `union` definition
    * 
    * Original thrift field:-
-   * 12: struct standard.TypeUri unionType
+   * 12: standard.TypeUri unionType
    */
   public ?apache_thrift_type_standard_TypeUri $unionType;
   /**
    * `exception` definition
    * 
    * Original thrift field:-
-   * 13: struct standard.TypeUri exceptionType
+   * 13: standard.TypeUri exceptionType
    */
   public ?apache_thrift_type_standard_TypeUri $exceptionType;
   /**
    * `list<V>` definition
    * 
    * Original thrift field:-
-   * 14: enum standard.Void listType
+   * 14: standard.Void listType
    */
   public ?apache_thrift_type_standard_Void $listType;
   /**
    * `set<K>` definition
    * 
    * Original thrift field:-
-   * 15: enum standard.Void setType
+   * 15: standard.Void setType
    */
   public ?apache_thrift_type_standard_Void $setType;
   /**
    * `map<K, V>` definition
    * 
    * Original thrift field:-
-   * 16: enum standard.Void mapType
+   * 16: standard.Void mapType
    */
   public ?apache_thrift_type_standard_Void $mapType;
   protected apache_thrift_type_standard_TypeNameEnum $_type = apache_thrift_type_standard_TypeNameEnum::_EMPTY_;

@@ -73,7 +73,7 @@ class MyException extends \TException implements \IThriftSyncStruct, \IThriftExc
   public string $message;
   /**
    * Original thrift field:-
-   * 2: enum module.MyEnum code
+   * 2: module.MyEnum code
    */
   public /* Originally defined as MyEnum */ int $code;
 

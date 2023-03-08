@@ -288,7 +288,7 @@ class Baz extends \TException implements \IThriftSyncStruct, \IThriftExceptionMe
   public string $message;
   /**
    * Original thrift field:-
-   * 2: struct module.Foo some_field
+   * 2: module.Foo some_field
    */
   public ?Foo $some_field;
   /**

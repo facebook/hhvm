@@ -73,7 +73,7 @@ class MyException1 extends \TException implements \IThriftSyncStruct, \IThriftEx
   public string $message;
   /**
    * Original thrift field:-
-   * 2: enum module.MyEnum code
+   * 2: module.MyEnum code
    */
   public /* Originally defined as MyEnum */ int $code;
 
@@ -196,7 +196,7 @@ class MyException2 extends \TException implements \IThriftSyncStruct, \IThriftEx
   public string $message;
   /**
    * Original thrift field:-
-   * 2: enum module.MyEnum code
+   * 2: module.MyEnum code
    */
   public /* Originally defined as MyEnum */ int $code;
 
@@ -318,7 +318,7 @@ class MyException3 extends \TException implements \IThriftSyncStruct, \IThriftEx
   public string $message;
   /**
    * Original thrift field:-
-   * 2: enum module.MyEnum code
+   * 2: module.MyEnum code
    */
   public /* Originally defined as MyEnum */ int $code;
 
@@ -440,7 +440,7 @@ class MyException4 extends \TException implements \IThriftSyncStruct, \IThriftEx
   public string $message;
   /**
    * Original thrift field:-
-   * 2: enum module.MyEnum code
+   * 2: module.MyEnum code
    */
   public /* Originally defined as MyEnum */ int $code;
 

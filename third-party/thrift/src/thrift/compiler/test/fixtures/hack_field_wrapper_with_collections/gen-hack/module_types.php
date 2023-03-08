@@ -131,7 +131,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
   const int STRUCTURAL_ID = 6466034702854646588;
   /**
    * Original thrift field:-
-   * 1: struct module.MyNestedStruct nested_struct
+   * 1: module.MyNestedStruct nested_struct
    */
   public ?MyNestedStruct $nested_struct;
 
@@ -643,12 +643,12 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
   const int STRUCTURAL_ID = 8703607584527805207;
   /**
    * Original thrift field:-
-   * 1: map<string, struct module.MyStruct> map_of_string_to_MyStruct
+   * 1: map<string, module.MyStruct> map_of_string_to_MyStruct
    */
   public Map<string, MyStruct> $map_of_string_to_MyStruct;
   /**
    * Original thrift field:-
-   * 2: map<string, list<struct module.MyStruct>> map_of_string_to_list_of_MyStruct
+   * 2: map<string, list<module.MyStruct>> map_of_string_to_list_of_MyStruct
    */
   private ?\MyFieldWrapper<Map<string, Vector<MyStruct>>, MyComplexStruct> $map_of_string_to_list_of_MyStruct;
 
@@ -663,17 +663,17 @@ class MyComplexStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \I
   public Map<string, Map<string, int>> $map_of_string_to_map_of_string_to_i32;
   /**
    * Original thrift field:-
-   * 4: map<string, map<string, struct module.MyStruct>> map_of_string_to_map_of_string_to_MyStruct
+   * 4: map<string, map<string, module.MyStruct>> map_of_string_to_map_of_string_to_MyStruct
    */
   public Map<string, Map<string, MyStruct>> $map_of_string_to_map_of_string_to_MyStruct;
   /**
    * Original thrift field:-
-   * 5: list<map<string, list<struct module.MyStruct>>> list_of_map_of_string_to_list_of_MyStruct
+   * 5: list<map<string, list<module.MyStruct>>> list_of_map_of_string_to_list_of_MyStruct
    */
   public Vector<Map<string, Vector<MyStruct>>> $list_of_map_of_string_to_list_of_MyStruct;
   /**
    * Original thrift field:-
-   * 6: list<map<string, struct module.MyStruct>> list_of_map_of_string_to_MyStruct
+   * 6: list<map<string, module.MyStruct>> list_of_map_of_string_to_MyStruct
    */
   public Vector<Map<string, MyStruct>> $list_of_map_of_string_to_MyStruct;
 

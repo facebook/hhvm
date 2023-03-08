@@ -35,10 +35,6 @@ class t_interaction : public t_service {
  public:
   using t_service::t_service;
 
-  std::string get_full_name() const override {
-    return make_full_name("interaction");
-  }
-
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:

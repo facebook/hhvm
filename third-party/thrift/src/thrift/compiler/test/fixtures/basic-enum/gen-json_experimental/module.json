@@ -10,13 +10,13 @@
   "constants": {
       "kOne": {
         "name": "kOne",
-        "type": "enum module.MyEnum",
+        "type": "module.MyEnum",
         "value": 1,
         "lineno": 53
       },
       "enumNames": {
         "name": "enumNames",
-        "type": "map<enum module.MyEnum, string>",
+        "type": "map<module.MyEnum, string>",
         "value": {"1": "one", "2": "two"},
         "lineno": 55
       }

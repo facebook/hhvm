@@ -1,7 +1,2 @@
 string(1) "a"
-vec(3) {
-  string(6) "module"
-  string(1) "b"
-  NULL
-}
 string(25) "Module 'b' does not exist"

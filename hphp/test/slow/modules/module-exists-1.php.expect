@@ -1,9 +1,4 @@
 bool(true)
-vec(3) {
-  string(6) "module"
-  string(1) "b"
-  NULL
-}
 bool(false)
 bool(true)
 bool(false)

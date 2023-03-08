@@ -14,7 +14,7 @@ function apc_add(
   HH\FIXME\MISSING_PARAM_TYPE $var,
   int $ttl = 0,
   int $bump_ttl = 0,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_add_with_pure_sleep(
   HH\FIXME\MISSING_PARAM_TYPE $key,
@@ -28,7 +28,7 @@ function apc_store(
   HH\FIXME\MISSING_PARAM_TYPE $var,
   int $ttl = 0,
   int $bump_ttl = 0,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_store_with_pure_sleep(
   HH\FIXME\MISSING_PARAM_TYPE $key,
@@ -40,7 +40,7 @@ function apc_store_with_pure_sleep(
 function apc_fetch(
   HH\FIXME\MISSING_PARAM_TYPE $key,
   inout ?bool $success,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[defaults]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_fetch_with_pure_wakeup(
   HH\FIXME\MISSING_PARAM_TYPE $key,
@@ -49,42 +49,42 @@ function apc_fetch_with_pure_wakeup(
 <<__PHPStdLib>>
 function apc_delete(
   HH\FIXME\MISSING_PARAM_TYPE $key,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_cache_info(
   string $cache_type = "",
   bool $limited = false,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_clear_cache(string $cache_id = ""): HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_clear_cache(string $cache_id = "")[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_sma_info(bool $limited = false): HH\FIXME\MISSING_RETURN_TYPE {}
+function apc_sma_info(bool $limited = false)[]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_inc(
   string $key,
   int $step,
   inout ?bool $success,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_dec(
   string $key,
   int $step,
   inout ?bool $success,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_cas(
   string $key,
   int $old_cas,
   int $new_cas,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
 function apc_exists(
   HH\FIXME\MISSING_PARAM_TYPE $key,
-): HH\FIXME\MISSING_RETURN_TYPE {}
+)[read_globals]: HH\FIXME\MISSING_RETURN_TYPE {}
 <<__PHPStdLib>>
-function apc_extend_ttl(string $key, int $ttl): bool;
+function apc_extend_ttl(string $key, int $ttl)[globals]: bool;
 <<__PHPStdLib>>
-function apc_size(string $key): ?int;
+function apc_size(string $key)[read_globals]: ?int;
 
 // The following are php std lib functions not supported by HHVM:
 //

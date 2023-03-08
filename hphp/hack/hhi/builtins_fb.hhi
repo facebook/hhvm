@@ -32,6 +32,7 @@ namespace {
   /* This flag enables access to $this upon instance method entry in the
    * setprofile handler. It *may break* in the future. */
   const int SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK;
+  const int SETPROFILE_FLAGS_FILE_LINE;
 
   const int PREG_FB__PRIVATE__HSL_IMPL;
 

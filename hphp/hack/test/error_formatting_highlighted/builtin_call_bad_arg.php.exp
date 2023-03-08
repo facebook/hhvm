@@ -3,16 +3,16 @@ Typing[4110] Invalid argument [1]
 -> But got int [1]
 
 builtin_call_bad_arg.php:4:22
-      2 | 
+      2 |
       3 | function f(): void {
 [1]   4 |   xhprof_frame_begin(3);
       5 | }
 
-/tmp/BrJxmzZP6U/builtins_fb.hhi:100:31
-     98 |   function xhprof_network_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
-     99 |   <<__PHPStdLib>>
-[2] 100 |   function xhprof_frame_begin(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
-    101 |   <<__PHPStdLib>>
-    102 |   function xhprof_frame_end(): \HH\FIXME\MISSING_RETURN_TYPE;
+/tmp/lAPI2lVGJ0/builtins_fb.hhi:101:31
+     99 |   function xhprof_network_disable(): \HH\FIXME\MISSING_RETURN_TYPE;
+    100 |   <<__PHPStdLib>>
+[2] 101 |   function xhprof_frame_begin(string $name): \HH\FIXME\MISSING_RETURN_TYPE;
+    102 |   <<__PHPStdLib>>
+    103 |   function xhprof_frame_end(): \HH\FIXME\MISSING_RETURN_TYPE;
 
 1 error found.

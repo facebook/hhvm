@@ -57,6 +57,8 @@ const StaticString
   s_parent_frame_ptr("parent_frame_ptr"),
   s_this_ptr("this_ptr"),
   s_this_obj("this_obj"),
+  s_file("file"),
+  s_line("line"),
   s_enter("enter"),
   s_exit("exit"),
   s_suspend("suspend"),
@@ -234,8 +236,8 @@ Array getReifiedClasses(const ActRec* ar) {
 }
 
 ALWAYS_INLINE
-ActRec* getParentFrame(const ActRec* ar) {
-  return g_context->getPrevVMStateSkipFrame(ar);
+ActRec* getParentFrame(const ActRec* ar, Offset* prevPc = nullptr) {
+  return g_context->getPrevVMStateSkipFrame(ar, prevPc);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
@@ -261,6 +263,17 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isCall) {
   ActRec* parent_ar = getParentFrame(ar);
   if (parent_ar != nullptr) {
     frameinfo.set(s_parent_frame_ptr, Variant(intptr_t(parent_ar)));
+  }
+}
+
+void addFileLine(const ActRec* ar, Array& frameinfo) {
+  if ((g_context->m_setprofileFlags & EventHook::ProfileFileLine) != 0) {
+    Offset offset;
+    ActRec* parent_ar = getParentFrame(ar, &offset);
+    if (parent_ar != nullptr) {
+      frameinfo.set(s_file, Variant(const_cast<StringData*>(parent_ar->func()->filename())));
+      frameinfo.set(s_line, Variant(parent_ar->func()->getLineNumber(offset)));
+    }
   }
 }
 
@@ -291,6 +304,9 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   }
 
   addFramePointers(ar, frameinfo, !isResume);
+  if (!isResume) {
+    addFileLine(ar, frameinfo);
+  }
 
   if (!isResume && ar->func()->hasReifiedGenerics()) {
     // Add reified generics only if this is a function call.

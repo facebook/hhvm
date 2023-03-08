@@ -128,6 +128,7 @@ struct XHProfExtension : Extension {
     HHVM_RC_INT(SETPROFILE_FLAGS_RESUME_AWARE, EventHook::ProfileResumeAware);
     HHVM_RC_INT(SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK,
                 EventHook::ProfileThisObject);
+    HHVM_RC_INT(SETPROFILE_FLAGS_FILE_LINE, EventHook::ProfileFileLine);
 
     HHVM_FE(fb_setprofile);
     HHVM_FE(xhprof_frame_begin);

@@ -53,6 +53,7 @@ struct EventHook {
     /* This flag enables access to $this when profiling instance methods. It
      * is used for internal profiling tools. It *may break* in the future. */
     ProfileThisObject = 32,
+    ProfileFileLine = 64,
   };
   enum class Source {
     Asio,

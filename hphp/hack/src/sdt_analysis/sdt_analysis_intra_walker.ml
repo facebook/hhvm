@@ -21,7 +21,7 @@ let supportdyn_of_mixed = MakeType.supportdyn Reason.Rnone mixed
 
 let remove_supportdyn_of_mixed_upper_bound_from_tparams env =
   let typing_env = Tast_env.tast_env_as_typing_env env in
-  let tpenv = Typing_env.get_tpenv typing_env in
+  let tpenv = typing_env.Typing_env_types.tpenv in
   let remove_upper_bound tpname tpinfo tpenv =
     let open Typing_kinding_defs in
     let upper_bounds = TySet.remove supportdyn_of_mixed tpinfo.upper_bounds in

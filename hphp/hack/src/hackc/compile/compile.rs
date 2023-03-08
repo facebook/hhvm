@@ -95,6 +95,7 @@ impl NativeEnv {
             hhvm: Hhvm {
                 parser_options: ParserOptions {
                     po_disable_legacy_soft_typehints: false,
+                    po_disable_lval_as_an_expression: false,
                     ..self.hhvm.parser_options.clone()
                 },
                 ..self.hhvm.clone()

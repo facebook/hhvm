@@ -475,7 +475,7 @@ type t = {
   go_to_implementation: bool;
       (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;
-      (** Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
+      (** Allows unstable features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)

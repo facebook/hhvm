@@ -106,7 +106,7 @@ Program(
                     name: None,
                     auto_ns_map: [],
                     is_codegen: false,
-                    disable_xhp_element_mangling: false,
+                    disable_xhp_element_mangling: true,
                 },
                 file_attributes: [],
                 mode: Mstrict,

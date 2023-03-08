@@ -8,7 +8,7 @@
 trait MyTrait {}
 interface I {}
 class MyClass {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_declared_traits_basic_001(): void {
 echo "*** Testing get_declared_traits() : basic functionality ***\n";
 
 // Zero arguments

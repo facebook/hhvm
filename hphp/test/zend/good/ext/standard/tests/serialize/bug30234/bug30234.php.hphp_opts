@@ -1,0 +1,2 @@
+--inputs=hphp/test/zend/good/ext/standard/tests/serialize/bug30234/autoload_interface.inc
+--inputs=hphp/test/zend/good/ext/standard/tests/serialize/bug30234/autoload_implements.inc

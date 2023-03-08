@@ -10,7 +10,7 @@ class C {
         return "C Instance";
     }
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_a_variation_002(): void {
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)

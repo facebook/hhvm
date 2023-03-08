@@ -1,0 +1,2 @@
+--inputs=hphp/test/zend/good/tests/classes/autoload/autoload_interface.inc
+--inputs=hphp/test/zend/good/tests/classes/autoload/autoload_implements.inc

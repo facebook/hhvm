@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function interface_exists_error(): void {
 echo "*** Testing interface_exists() : error conditions ***\n";
 
 // Zero arguments

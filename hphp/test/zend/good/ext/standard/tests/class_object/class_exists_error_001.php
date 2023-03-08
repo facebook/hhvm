@@ -8,7 +8,7 @@
 /**
  * Test wrong number of arguments
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function class_exists_error_001(): void {
 echo "*** Testing class_exists() : error conditions ***\n";
 
 // Zero arguments

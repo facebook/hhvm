@@ -56,7 +56,7 @@ class derived_d extends derived_c {
 
 
 <<__EntryPoint>>
-function main_entry(): void {
+function is_a_entry(): void {
 
   $t = new base();
   $t->test();

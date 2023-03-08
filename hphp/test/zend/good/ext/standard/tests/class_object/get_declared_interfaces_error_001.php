@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_declared_interfaces_error_001(): void {
 echo "*** Testing get_declared_interfaces() : error conditions ***\n";
 
 // One argument

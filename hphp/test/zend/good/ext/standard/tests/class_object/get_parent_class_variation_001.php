@@ -9,7 +9,7 @@
 
 class caseSensitivityTest {}
 class caseSensitivityTestChild extends caseSensitivityTest {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_parent_class_variation_001(): void {
 echo "*** Testing get_parent_class() : variation ***\n";
 
 var_dump(get_parent_class('CasesensitivitytestCHILD'));

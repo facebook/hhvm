@@ -5,16 +5,7 @@
  * Alias to functions:
  */
 
-<<__EntryPoint>> function main(): void {
-HH\autoload_set_paths(
-  dict[
-    'class' => dict[
-      'autointerface' => 'AutoInterface.inc',
-    ],
-  ],
-  __DIR__.'/',
-);
-
+<<__EntryPoint>> function interface_exists_variation3(): void {
 echo "*** Testing interface_exists() : autoloaded interface ***\n";
 
 echo "\n-- no autoloading --\n";

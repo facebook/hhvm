@@ -53,7 +53,7 @@ class X {
         var_dump(get_class_methods("X"));
     }
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_methods_basic_002(): void {
 echo "Accessing D from global scope:\n";
 var_dump(get_class_methods("D"));
 

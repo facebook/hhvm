@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_vars_error(): void {
 echo "*** Testing get_class_vars() : error conditions ***\n";
 
 

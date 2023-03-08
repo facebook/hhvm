@@ -6,7 +6,7 @@
  */
 
 trait MyTrait {}
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function trait_exists_basic_001(): void {
 echo "*** Testing trait_exists() : basic functionality ***\n";
 
 echo "Calling trait_exists() on non-existent trait with autoload explicitly enabled:\n";

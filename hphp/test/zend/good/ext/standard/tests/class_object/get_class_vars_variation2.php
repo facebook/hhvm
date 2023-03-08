@@ -42,7 +42,7 @@ class Child extends Tester {
     var_dump(get_class_vars("Tester"));
   }
 }
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function get_class_vars_variation2(): void {
 echo "*** Testing get_class_vars() : testing visibility\n";
 
 echo "\n-- From global context --\n";

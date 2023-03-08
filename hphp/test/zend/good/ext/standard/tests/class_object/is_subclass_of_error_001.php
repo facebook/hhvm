@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-<<__EntryPoint>> function main(): void {
+<<__EntryPoint>> function is_subclass_of_error_001(): void {
 echo "*** Testing is_subclass_of() : error conditions ***\n";
 
 

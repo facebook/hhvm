@@ -133,29 +133,36 @@ The following tokens serve as operators and punctuation in Thrift:
 ,       ;       @       =       +       -
 ```
 
-## The Thrift File
+Thrift uses an optional comma (`,`) or semicolon (`;`) as delimiters in certain constructs such as argument and field lists:
 
-The Thrift file starts with include statements followed by an optional package and optional namespace directives and then followed by a sequence of constant definitions, type definitions, and service definitions.
-
-```
-ThriftFile ::=
-  IncludeStatement*
-  PackageDeclaration*
-  NamespaceDirective*
-  ( TypeDefinition
-  | ConstantDefinition
-  | ServiceDefinition )+
+```grammar
+delimiter ::=  ["," | ";"]
 ```
 
-The following example illustrates concepts introduced so far:
+## Thrift Files
+
+A Thrift file starts with an optional package declaration and a, possibly empty, sequence of include statements and namespace directives. It is followed by a sequence of definitions which can also be empty. There can be at most one package declaration and it is normally placed at the beginning of a source file.
+
+```
+thrift_file ::=
+  (package_declaration | include_statement | namespace_directive)* definition*
+```
+
+Thrift supports three kinds of definitions: type definitions, constant definitions and service definitions.
+
+```grammar
+definition ::=  type_definition | constant_definition | service_definition
+```
+
+Here is an example of a Thrift file:
 
 ```thrift
+// Prefix for universal name of each element type.
+package "facebook.com/peoplesearch"
+
 // Allows the definitions in search_types.thrift to be used here qualified with
 // the prefix `search_types.`.
 include "common/if/search_types.thrift"
-
-// Prefix for universal name of each element type
-package "facebook.com/peoplesearch"
 
 // Directs the compiler to generate C++ code inside the namespace
 // `facebook::peoplesearch::cpp2`, and to generate Java code inside the
@@ -165,40 +172,39 @@ namespace java com.facebook.peoplesearch
 
 // The port where the server listens for requests. This is a convenient way to
 // define constants visible to code in all languages.
-const i32 PORT = 3456
+const i32 PORT = 3456;
 
 // The default number of search results used below as the default value for
 // `numResults`.
-const i32 DEFAULT_NUM_RESULTS = 10
+const i32 DEFAULT_NUM_RESULTS = 10;
 
 // The argument to the `search` RPC. Contains two fields - the query and the
 // number of results desired.
 struct PeopleSearchRequest {
-  1: search_types.Query query,
-  2: i32 numResults = DEFAULT_NUM_RESULTS,
+  1: search_types.Query query;
+  2: i32 numResults = DEFAULT_NUM_RESULTS;
 }
 
 // The response from the `search` RPC. Contains the list of results.
 struct PeopleSearchResponse {
-  1: list<search_types.PersonMetadata> results,
+  1: list<search_types.PersonMetadata> results;
 }
 
 /*
  * The service definition. This defines a single RPC `search`.
  */
 service PeopleSearch {
-  PeopleSearchResponse search(1: PeopleSearchRequest request),
+  PeopleSearchResponse search(1: PeopleSearchRequest request);
 }
 ```
 
 ## Include Statements
 
-```
-IncludeStatement ::=
-  "include" string_literal
+```grammar
+include_statement ::=  "include" string_literal
 ```
 
-Include statements allow the use of constants, types, and services from other Thrift files by prefixing the name of the included Thrift file followed by a period.
+Include statements allow the use of constants, types, and services from other Thrift files by prefixing the name (without extension) of the included Thrift file followed by a period.
 
 ```
 include "common/if/search_types.thrift"
@@ -226,9 +232,9 @@ Includes are more like Python imports rather than a textual copy as in C/C++ inc
 A package declaration defines the default [Universal Name](spec/definition/universal-name.md) prefix and optional annotations, under which all definitions in the program are declared:
 
 ```
-PackageDeclaration:
+package_declaration:
     {Annotations}
-    package "Domain/Identifier{/Identifier}";
+    package "Domain/identifier{/identifier}";
 ```
 
 For example:
@@ -256,7 +262,7 @@ NamespaceDirective ::=
   "namespace" Name ( Name | string_literal )
 
 Name ::=
-  Identifier ( "." Identifier )*
+  identifier ( "." identifier )*
 ```
 
 Namespace directives instruct the compiler on top level structure of the generated code. The details are language-specific (*we need link to compiler doc*). Namespace directives do not affect the Thrift file semantics.
@@ -400,10 +406,10 @@ NOTE: All type definitions (see section below) define a type with a name - this 
 
 ```
 EnumerationType ::=
-  "enum" Identifier "{" ( Enumerator Separator )* "}"
+  "enum" identifier "{" ( Enumerator delimiter )* "}"
 
 Enumerator ::=
-  Identifier "=" integer
+  identifier "=" integer
 ```
 
 Thrift supports C++ style enumeration types. The enumerators (the named constants) must be explicitly bound to an integer value. The identifier after the reserved word `enum` may be used to denote the enumeration type.
@@ -433,7 +439,7 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 
 ```
 TypeDef ::=
-  "typedef" TypeSpecification Identifier
+  "typedef" TypeSpecification identifier
 ```
 
 Typedefs introduce a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
@@ -450,12 +456,12 @@ This section defines the primary aspects of the struct type. Separate sections b
 
 ```
 StructType ::=
-  "struct" Identifier "{"
-    ( FieldSpecification Separator )*
+  "struct" identifier "{"
+    ( FieldSpecification delimiter )*
   "}"
 
 FieldSpecification ::=
-  FieldId ":" [ Qualifier ] TypeSpecification Identifier [ DefaultValue ]
+  FieldId ":" [ Qualifier ] TypeSpecification identifier [ DefaultValue ]
 
 FieldId ::=
   integer
@@ -524,8 +530,8 @@ Qualifiers and default values are described in a later section.
 
 ```
 UnionType ::=
-  "union" Identifier "{"
-    ( FieldSpecification Separator )*
+  "union" identifier "{"
+    ( FieldSpecification delimiter )*
   "}"
 ```
 
@@ -549,8 +555,8 @@ NOTE: It is possible to serialize from an union type and deserialize into a comp
 
 ```
 ExceptionType ::=
-  "exception" Identifier "{"
-    ( FieldSpecification Separator )*
+  "exception" identifier "{"
+    ( FieldSpecification delimiter )*
   "}"
 ```
 
@@ -582,8 +588,8 @@ The name introduced by type definitions can be used anywhere in the Thrift file 
 ## Constant Definitions
 
 ```
-ConstantDefinition ::=
-  "const" TypeSpecification Identifier "=" Constant
+constant_definition ::=
+  "const" TypeSpecification identifier "=" Constant
 ```
 
 A constant definition introduces a name for a value. This name can be used instead of the value after the completion of constant definition, and in other Thrift files that include this Thrift file.
@@ -642,7 +648,7 @@ const search_types.Gender NV = search_types.Gender.FEMALE
 
 ```
 ListOrSetConstant ::=
-  "[" ( Constant Separator )* "]"
+  "[" ( Constant delimiter )* "]"
 
 MapConstant ::=
   "{" ( Constant ":" Constant )* "}"
@@ -773,13 +779,13 @@ Terse fields do not distinguish whether they are explicitly set. They are skippe
 ## **Services**
 
 ```
-ServiceDefinition ::=
-  "service" Identifier [ "extends" Name ] "{"
+service_definition ::=
+  "service" identifier [ "extends" Name ] "{"
     ( FunctionSpecification )*
   "}"
 
 FunctionSpecification ::=
-  ResultType Identifier
+  ResultType identifier
   "("
   ( ParameterSpecification )*
   ")"
@@ -788,7 +794,7 @@ FunctionSpecification ::=
 
 ResultType ::= "void" | "oneway void" | [ "stream" ] TypeSpecification
 
-ParameterSpecification ::= FieldId ":" TypeSpecification Identifier [ DefaultValue ]
+ParameterSpecification ::= FieldId ":" TypeSpecification identifier [ DefaultValue ]
 ```
 
 An interface for RPC is defined in a Thrift file as a service.

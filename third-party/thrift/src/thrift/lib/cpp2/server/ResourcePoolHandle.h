@@ -59,8 +59,6 @@ class ResourcePoolHandle {
   }
 
  private:
-  static ResourcePoolHandle makeDefaultHandle(std::size_t index);
-
   static constexpr std::size_t kInvalidHandle =
       std::numeric_limits<std::size_t>::max();
 

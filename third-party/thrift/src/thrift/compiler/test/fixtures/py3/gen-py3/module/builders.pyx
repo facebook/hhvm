@@ -28,6 +28,12 @@ cdef class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "real", self.real
         yield "smaller_real", self.smaller_real
 
+cdef class HiddenTypeFieldsStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.HiddenTypeFieldsStruct
+
+    def __iter__(self):
+        pass
+
 cdef class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.ComplexStruct
 

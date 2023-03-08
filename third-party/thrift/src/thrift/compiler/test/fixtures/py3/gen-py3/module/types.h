@@ -115,6 +115,13 @@ inline void reset_field<::py3::simple::SimpleStruct>(
 }
 
 template<>
+inline void reset_field<::py3::simple::HiddenTypeFieldsStruct>(
+    ::py3::simple::HiddenTypeFieldsStruct& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline void reset_field<::py3::simple::ComplexStruct>(
     ::py3::simple::ComplexStruct& obj, uint16_t index) {
   switch (index) {
@@ -181,6 +188,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::SimpleStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::py3::simple::HiddenTypeFieldsStruct>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

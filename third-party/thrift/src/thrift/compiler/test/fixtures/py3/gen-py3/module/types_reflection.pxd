@@ -20,6 +20,8 @@ cdef __StructSpec get_reflection__OptionalRefStruct()
 
 cdef __StructSpec get_reflection__SimpleStruct()
 
+cdef __StructSpec get_reflection__HiddenTypeFieldsStruct()
+
 cdef __StructSpec get_reflection__ComplexStruct()
 
 cdef __StructSpec get_reflection__BinaryUnion()
@@ -67,6 +69,8 @@ cdef __ListSpec get_reflection__List__binary()
 cdef __SetSpec get_reflection__Set__binary()
 
 cdef __ListSpec get_reflection__List__AnEnum()
+
+cdef __MapSpec get_reflection___std_unordered_map__Map__i32_SimpleStruct()
 
 cdef __MapSpec get_reflection__Map__i32_double()
 

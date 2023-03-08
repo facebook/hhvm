@@ -25,6 +25,9 @@ struct big_int;
 struct real;
 struct smaller_real;
 struct hidden_field;
+struct field1;
+struct field2;
+struct field3;
 struct the;
 struct best;
 struct test;
@@ -80,6 +83,18 @@ APACHE_THRIFT_DEFINE_ACCESSOR(smaller_real);
 #ifndef APACHE_THRIFT_ACCESSOR_hidden_field
 #define APACHE_THRIFT_ACCESSOR_hidden_field
 APACHE_THRIFT_DEFINE_ACCESSOR(hidden_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field1
+#define APACHE_THRIFT_ACCESSOR_field1
+APACHE_THRIFT_DEFINE_ACCESSOR(field1);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field2
+#define APACHE_THRIFT_ACCESSOR_field2
+APACHE_THRIFT_DEFINE_ACCESSOR(field2);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field3
+#define APACHE_THRIFT_ACCESSOR_field3
+APACHE_THRIFT_DEFINE_ACCESSOR(field3);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_the
 #define APACHE_THRIFT_ACCESSOR_the
@@ -296,6 +311,7 @@ namespace py3 { namespace simple {
 class SimpleException;
 class OptionalRefStruct;
 class SimpleStruct;
+class HiddenTypeFieldsStruct;
 class GeneratedStruct;
 namespace detail {
 class AdaptedUnion;
@@ -1394,6 +1410,247 @@ class OptionalRefStruct final  {
 
 template <class Protocol_>
 unsigned long OptionalRefStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class HiddenTypeFieldsStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::field1,
+    ::apache::thrift::ident::field2,
+    ::apache::thrift::ident::field3
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>,
+    ::apache::thrift::type::list<::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>,
+    ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<Adapter, ::apache::thrift::type::struct_t<::py3::simple::SimpleStruct>>>>
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 3;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = HiddenTypeFieldsStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  HiddenTypeFieldsStruct() {
+    ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  HiddenTypeFieldsStruct(apache::thrift::FragileConstructor, ::py3::simple::AdaptedTypeDef field1__arg, ::std::vector<::py3::simple::AdaptedTypeDef> field2__arg, ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> field3__arg);
+
+  HiddenTypeFieldsStruct(HiddenTypeFieldsStruct&&) noexcept;
+  HiddenTypeFieldsStruct(const HiddenTypeFieldsStruct& src);
+
+
+  HiddenTypeFieldsStruct& operator=(HiddenTypeFieldsStruct&&) noexcept;
+  HiddenTypeFieldsStruct& operator=(const HiddenTypeFieldsStruct& src);
+ private:
+  ::py3::simple::AdaptedTypeDef __fbthrift_field_field1;
+ private:
+  ::std::vector<::py3::simple::AdaptedTypeDef> __fbthrift_field_field2;
+ private:
+  ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> __fbthrift_field_field3;
+ private:
+  apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const HiddenTypeFieldsStruct&) const;
+  bool operator<(const HiddenTypeFieldsStruct&) const;
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field1_ref() const& {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field1_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field1_ref() & {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field1_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field1() const& {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field1() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field1() & {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::AdaptedTypeDef>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field1() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field2_ref() const& {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field2_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field2_ref() & {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field2_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field2() const& {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field2() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field2() & {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field2() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field3_ref() const& {
+    return {this->__fbthrift_field_field3, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field3_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field3), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field3_ref() & {
+    return {this->__fbthrift_field_field3, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field3_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field3), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field3() const& {
+    return {this->__fbthrift_field_field3, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field3() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field3), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field3() & {
+    return {this->__fbthrift_field_field3, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field3() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field3), __isset.at(2), __isset.bit(2)};
+  }
+  const ::std::vector<::py3::simple::AdaptedTypeDef>& get_field2() const&;
+  ::std::vector<::py3::simple::AdaptedTypeDef> get_field2() &&;
+
+  template <typename T_HiddenTypeFieldsStruct_field2_struct_setter = ::std::vector<::py3::simple::AdaptedTypeDef>>
+  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  ::std::vector<::py3::simple::AdaptedTypeDef>& set_field2(T_HiddenTypeFieldsStruct_field2_struct_setter&& field2_) {
+    field2_ref() = std::forward<T_HiddenTypeFieldsStruct_field2_struct_setter>(field2_);
+    return __fbthrift_field_field2;
+  }
+  const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& get_field3() const&;
+  ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> get_field3() &&;
+
+  template <typename T_HiddenTypeFieldsStruct_field3_struct_setter = ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>>
+  [[deprecated("Use `FOO.field3_ref() = BAR;` instead of `FOO.set_field3(BAR);`")]]
+  ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& set_field3(T_HiddenTypeFieldsStruct_field3_struct_setter&& field3_) {
+    field3_ref() = std::forward<T_HiddenTypeFieldsStruct_field3_struct_setter>(field3_);
+    return __fbthrift_field_field3;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<HiddenTypeFieldsStruct>;
+  friend void swap(HiddenTypeFieldsStruct& a, HiddenTypeFieldsStruct& b);
+};
+
+template <class Protocol_>
+unsigned long HiddenTypeFieldsStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

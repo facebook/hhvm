@@ -142,6 +142,32 @@ StructMetadata<::py3::simple::SimpleStruct>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::HiddenTypeFieldsStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.HiddenTypeFieldsStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_HiddenTypeFieldsStruct = res.first->second;
+  module_HiddenTypeFieldsStruct.name() = "module.HiddenTypeFieldsStruct";
+  module_HiddenTypeFieldsStruct.is_union() = false;
+  static const auto* const
+  module_HiddenTypeFieldsStruct_fields = new std::array<EncodedThriftField, 3>{{
+    {1, "field1", false, std::make_unique<Typedef>("module.AdaptedTypeDef", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(Adapter)")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {2, "field2", false, std::make_unique<List>(std::make_unique<Typedef>("module.AdaptedTypeDef", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(Adapter)")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
+    {3, "field3", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Typedef>("module.AdaptedTypeDef", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(Adapter)")}}).cv_struct_ref(), })), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_HiddenTypeFieldsStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_HiddenTypeFieldsStruct.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::py3::simple::GeneratedStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.GeneratedStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

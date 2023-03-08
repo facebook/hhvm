@@ -195,6 +195,62 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleStruct, self)
 
 
+class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "field1",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "field2",  # name
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "field3",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(SimpleStruct)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.HiddenTypeFieldsStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_HiddenTypeFieldsStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.HiddenTypeFieldsStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.HiddenTypeFieldsStruct, self)
+
+
 class GeneratedStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -595,6 +651,8 @@ def _fbthrift_metadata__struct_OptionalRefStruct():
     return module.thrift_metadata.gen_metadata_struct_OptionalRefStruct()
 def _fbthrift_metadata__struct_SimpleStruct():
     return module.thrift_metadata.gen_metadata_struct_SimpleStruct()
+def _fbthrift_metadata__struct_HiddenTypeFieldsStruct():
+    return module.thrift_metadata.gen_metadata_struct_HiddenTypeFieldsStruct()
 def _fbthrift_metadata__struct_GeneratedStruct():
     return module.thrift_metadata.gen_metadata_struct_GeneratedStruct()
 def _fbthrift_metadata__struct_AdaptedUnion():
@@ -612,6 +670,7 @@ _fbthrift_all_structs = [
     SimpleException,
     OptionalRefStruct,
     SimpleStruct,
+    HiddenTypeFieldsStruct,
     GeneratedStruct,
     AdaptedUnion,
     HiddenException,

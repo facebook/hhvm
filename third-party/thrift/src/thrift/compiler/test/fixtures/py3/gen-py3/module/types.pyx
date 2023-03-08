@@ -662,6 +662,107 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.SimpleStruct, self)
 @__cython.auto_pickle(False)
+cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
+    def __init__(HiddenTypeFieldsStruct self, **kwargs):
+        self._cpp_obj = make_shared[cHiddenTypeFieldsStruct]()
+        self._fields_setter = _fbthrift_types_fields.__HiddenTypeFieldsStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(HiddenTypeFieldsStruct self, **kwargs):
+        return self
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("HiddenTypeFieldsStruct", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cHiddenTypeFieldsStruct] cpp_obj):
+        __fbthrift_inst = <HiddenTypeFieldsStruct>HiddenTypeFieldsStruct.__new__(HiddenTypeFieldsStruct)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+
+    def __hash__(HiddenTypeFieldsStruct self):
+        return super().__hash__()
+
+    def __repr__(HiddenTypeFieldsStruct self):
+        return super().__repr__()
+
+    def __str__(HiddenTypeFieldsStruct self):
+        return super().__str__()
+
+
+    def __copy__(HiddenTypeFieldsStruct self):
+        cdef shared_ptr[cHiddenTypeFieldsStruct] cpp_obj = make_shared[cHiddenTypeFieldsStruct](
+            deref(self._cpp_obj)
+        )
+        return HiddenTypeFieldsStruct._fbthrift_create(cmove(cpp_obj))
+
+    def __eq__(HiddenTypeFieldsStruct self, other):
+        if not isinstance(other, HiddenTypeFieldsStruct):
+            return False
+        return deref(self._cpp_obj.get()) == deref((<HiddenTypeFieldsStruct>other)._cpp_obj.get())
+
+    def __ne__(HiddenTypeFieldsStruct self, other):
+        if not isinstance(other, HiddenTypeFieldsStruct):
+            return True
+        return deref(self._cpp_obj) != deref((<HiddenTypeFieldsStruct>other)._cpp_obj)
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__HiddenTypeFieldsStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cHiddenTypeFieldsStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.HiddenTypeFieldsStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cHiddenTypeFieldsStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(HiddenTypeFieldsStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cHiddenTypeFieldsStruct](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(HiddenTypeFieldsStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cHiddenTypeFieldsStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[cHiddenTypeFieldsStruct](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.HiddenTypeFieldsStruct, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.HiddenTypeFieldsStruct, self)
+@__cython.auto_pickle(False)
 cdef class ComplexStruct(thrift.py3.types.Struct):
     def __init__(ComplexStruct self, **kwargs):
         self._cpp_obj = make_shared[cComplexStruct]()
@@ -2874,6 +2975,102 @@ cdef class List__AnEnum(thrift.py3.types.List):
 
 
 Sequence.register(List__AnEnum)
+
+@__cython.auto_pickle(False)
+cdef class _std_unordered_map__Map__i32_SimpleStruct(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, _std_unordered_map__Map__i32_SimpleStruct):
+            self._cpp_obj = (<_std_unordered_map__Map__i32_SimpleStruct> items)._cpp_obj
+        else:
+            self._cpp_obj = _std_unordered_map__Map__i32_SimpleStruct._make_instance(items)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]] c_items):
+        __fbthrift_inst = <_std_unordered_map__Map__i32_SimpleStruct>_std_unordered_map__Map__i32_SimpleStruct.__new__(_std_unordered_map__Map__i32_SimpleStruct)
+        __fbthrift_inst._cpp_obj = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(_std_unordered_map__Map__i32_SimpleStruct self):
+        cdef shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]] cpp_obj = make_shared[_std_unordered_map[cint32_t,cSimpleStruct]](
+            deref(self._cpp_obj)
+        )
+        return _std_unordered_map__Map__i32_SimpleStruct._fbthrift_create(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj).size()
+
+    @staticmethod
+    cdef shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]] _make_instance(object items) except *:
+        cdef shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]] c_inst = make_shared[_std_unordered_map[cint32_t,cSimpleStruct]]()
+        if items is not None:
+            for key, item in items.items():
+                if not isinstance(key, int):
+                    raise TypeError(f"{key!r} is not of type int")
+                key = <cint32_t> key
+                if not isinstance(item, SimpleStruct):
+                    raise TypeError(f"{item!r} is not of type SimpleStruct")
+
+                deref(c_inst)[key] = deref((<SimpleStruct>item)._cpp_obj)
+        return c_inst
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, int):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef cint32_t ckey = key
+        if not __map_contains(self._cpp_obj, ckey):
+            raise err
+        cdef shared_ptr[cSimpleStruct] citem
+        __map_getitem(self._cpp_obj, ckey, citem)
+        return SimpleStruct._fbthrift_create(citem)
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[_std_unordered_map[cint32_t,cSimpleStruct]] itr = __map_iter[_std_unordered_map[cint32_t,cSimpleStruct]](self._cpp_obj)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextKey(self._cpp_obj, citem)
+            yield citem
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef cint32_t ckey = key
+        return __map_contains(self._cpp_obj, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[_std_unordered_map[cint32_t,cSimpleStruct]] itr = __map_iter[_std_unordered_map[cint32_t,cSimpleStruct]](self._cpp_obj)
+        cdef shared_ptr[cSimpleStruct] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextValue(self._cpp_obj, citem)
+            yield SimpleStruct._fbthrift_create(citem)
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[_std_unordered_map[cint32_t,cSimpleStruct]] itr = __map_iter[_std_unordered_map[cint32_t,cSimpleStruct]](self._cpp_obj)
+        cdef cint32_t ckey = 0
+        cdef shared_ptr[cSimpleStruct] citem
+        for i in range(deref(self._cpp_obj).size()):
+            itr.genNextItem(self._cpp_obj, ckey, citem)
+            yield (ckey, SimpleStruct._fbthrift_create(citem))
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection___std_unordered_map__Map__i32_SimpleStruct()
+
+Mapping.register(_std_unordered_map__Map__i32_SimpleStruct)
 
 @__cython.auto_pickle(False)
 cdef class Map__i32_double(thrift.py3.types.Map):

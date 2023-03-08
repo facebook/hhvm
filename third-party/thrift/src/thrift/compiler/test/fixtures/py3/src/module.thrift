@@ -67,6 +67,14 @@ struct SimpleStruct {
 typedef SimpleStruct AdaptedTypeDef
 typedef SimpleStruct HiddenTypeDef (py3.hidden)
 
+struct HiddenTypeFieldsStruct {
+  1: AdaptedTypeDef field1 (py3.hidden);
+  2: list<AdaptedTypeDef> field2 (py3.hidden);
+  3: map<i32, AdaptedTypeDef> (cpp.template = "::std::unordered_map") field3 (
+    py3.hidden,
+  );
+}
+
 @meta.SetGenerated
 struct GeneratedStruct {
   1: i16 the;

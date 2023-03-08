@@ -110,6 +110,37 @@ def gen_metadata_struct_SimpleStruct() -> _fbthrift_metadata.ThriftMetadata:
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_HiddenTypeFieldsStruct(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.HiddenTypeFieldsStruct"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.SimpleStruct")), name="field1", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.SimpleStruct")))), name="field2", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=3, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE),valueType=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.SimpleStruct")))), name="field3", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # field1
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # field2
+     # key
+    new_struct = _fbthrift_gen_metadata_struct_SimpleStruct(new_struct) # val  # field3
+
+    return new_struct
+def gen_metadata_struct_HiddenTypeFieldsStruct() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_HiddenTypeFieldsStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
 def _fbthrift_gen_metadata_struct_GeneratedStruct(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.GeneratedStruct"
 
@@ -952,6 +983,7 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_exception_SimpleException(meta)
     meta = _fbthrift_gen_metadata_struct_OptionalRefStruct(meta)
     meta = _fbthrift_gen_metadata_struct_SimpleStruct(meta)
+    meta = _fbthrift_gen_metadata_struct_HiddenTypeFieldsStruct(meta)
     meta = _fbthrift_gen_metadata_struct_GeneratedStruct(meta)
     meta = _fbthrift_gen_metadata_struct_AdaptedUnion(meta)
     meta = _fbthrift_gen_metadata_exception_HiddenException(meta)

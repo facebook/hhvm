@@ -480,6 +480,148 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::py3::simple::HiddenTypeFieldsStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace py3 { namespace simple {
+
+const folly::StringPiece HiddenTypeFieldsStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<HiddenTypeFieldsStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(const HiddenTypeFieldsStruct& srcObj) :
+    __fbthrift_field_field1(srcObj.__fbthrift_field_field1),
+    __fbthrift_field_field2(srcObj.__fbthrift_field_field2),
+    __fbthrift_field_field3(srcObj.__fbthrift_field_field3),
+    __isset(srcObj.__isset) {
+  ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
+}
+
+HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=(const HiddenTypeFieldsStruct& other) {
+  HiddenTypeFieldsStruct tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct&& other) noexcept :
+    __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
+    __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
+    __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
+    __isset(other.__isset) {
+  ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
+}
+
+HiddenTypeFieldsStruct& HiddenTypeFieldsStruct::operator=(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct&& other) noexcept {
+    this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
+    this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
+    this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(apache::thrift::FragileConstructor, ::py3::simple::AdaptedTypeDef field1__arg, ::std::vector<::py3::simple::AdaptedTypeDef> field2__arg, ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> field3__arg) :
+    __fbthrift_field_field1(std::move(field1__arg)),
+    __fbthrift_field_field2(std::move(field2__arg)),
+    __fbthrift_field_field3(std::move(field3__arg)) {
+  ::apache::thrift::adapt_detail::construct<Adapter, 1>(__fbthrift_field_field1, *this);
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+}
+
+
+void HiddenTypeFieldsStruct::__fbthrift_clear() {
+  // clear all fields
+  ::apache::thrift::adapt_detail::clear<Adapter, 1>(__fbthrift_field_field1, *this);
+  this->__fbthrift_field_field2.clear();
+  this->__fbthrift_field_field3.clear();
+  __isset = {};
+}
+
+void HiddenTypeFieldsStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool HiddenTypeFieldsStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool HiddenTypeFieldsStruct::operator==(FOLLY_MAYBE_UNUSED const HiddenTypeFieldsStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (::apache::thrift::adapt_detail::not_equal<Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1)) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  if (!(lhs.field3_ref() == rhs.field3_ref())) {
+    return false;
+  }
+  return true;
+}
+
+const ::std::vector<::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field2() const& {
+  return __fbthrift_field_field2;
+}
+
+::std::vector<::py3::simple::AdaptedTypeDef> HiddenTypeFieldsStruct::get_field2() && {
+  return std::move(__fbthrift_field_field2);
+}
+
+const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field3() const& {
+  return __fbthrift_field_field3;
+}
+
+::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> HiddenTypeFieldsStruct::get_field3() && {
+  return std::move(__fbthrift_field_field3);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct& a, FOLLY_MAYBE_UNUSED HiddenTypeFieldsStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
+  swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
+  swap(a.__fbthrift_field_field3, b.__fbthrift_field_field3);
+  swap(a.__isset, b.__isset);
+}
+
+template void HiddenTypeFieldsStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t HiddenTypeFieldsStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t HiddenTypeFieldsStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t HiddenTypeFieldsStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void HiddenTypeFieldsStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t HiddenTypeFieldsStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t HiddenTypeFieldsStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t HiddenTypeFieldsStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        HiddenTypeFieldsStruct,
+        ::apache::thrift::type_class::structure,
+        ::py3::simple::AdaptedTypeDef>,
+    "inconsistent use of json option");
+
+}} // py3::simple
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::py3::simple::GeneratedStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -1170,6 +1312,7 @@ static_assert(
 
 namespace py3 { namespace simple { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+  ::apache::thrift::adapt_detail::validateFieldAdapter<Adapter, 1, ::py3::simple::SimpleStruct, ::py3::simple::HiddenTypeFieldsStruct>();
   ::apache::thrift::adapt_detail::validateAdapter<Adapter, ::py3::simple::detail::AdaptedUnion>();
 }
 }}} // py3::simple

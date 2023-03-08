@@ -35,6 +35,10 @@ cdef class SimpleStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pfloat smaller_real
 
 
+cdef class HiddenTypeFieldsStruct_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+
 cdef class ComplexStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public object structOne
     cdef public object structTwo

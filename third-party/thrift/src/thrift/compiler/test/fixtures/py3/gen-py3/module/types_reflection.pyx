@@ -172,6 +172,19 @@ cdef __StructSpec get_reflection__SimpleStruct():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__HiddenTypeFieldsStruct():
+    cdef _module_types.HiddenTypeFieldsStruct defaults = _module_types.HiddenTypeFieldsStruct._fbthrift_create(
+        constant_shared_ptr[_module_types.cHiddenTypeFieldsStruct](
+            default_inst[_module_types.cHiddenTypeFieldsStruct]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="HiddenTypeFieldsStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    return spec
 cdef __StructSpec get_reflection__ComplexStruct():
     cdef _module_types.ComplexStruct defaults = _module_types.ComplexStruct._fbthrift_create(
         constant_shared_ptr[_module_types.cComplexStruct](
@@ -474,6 +487,14 @@ cdef __ListSpec get_reflection__List__AnEnum():
     return __ListSpec._fbthrift_create(
         value=_module_types.AnEnum,
         kind=__NumberType.NOT_A_NUMBER,
+    )
+
+cdef __MapSpec get_reflection___std_unordered_map__Map__i32_SimpleStruct():
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=_module_types.SimpleStruct,
+        value_kind=__NumberType.NOT_A_NUMBER,
     )
 
 cdef __MapSpec get_reflection__Map__i32_double():

@@ -116,6 +116,32 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::py3::simple::Si
   7,
 }};
 
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_names = {{
+  "field1",
+  "field2",
+  "field3",
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_types = {{
+  TType::T_STRUCT,
+  TType::T_LIST,
+  TType::T_MAP,
+}};
+THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::storage_names = {{
+  "__fbthrift_field_field1",
+  "__fbthrift_field_field2",
+  "__fbthrift_field_field3",
+}};
+THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+}};
+
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::GeneratedStruct>::fields_names = {{
   "the",
 }};

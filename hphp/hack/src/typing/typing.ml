@@ -4796,15 +4796,15 @@ and expr_
   | Shape fdm ->
     let expr_helper ?expected env (k, e) =
       let (env, et, ty) = expr ?expected env e in
-      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-        let (env, ty) = Typing_array_access.pessimised_tup_assign p env ty in
-        (env, (k, et, ty))
-      else
-        (env, (k, et, ty))
+      (env, (k, et, ty))
     in
     let (env, tfdm) =
       match
-        expand_expected_and_get_node ~strip_supportdyn:true env expected
+        expand_expected_and_get_node
+          ~pessimisable_builtin:false
+          ~strip_supportdyn:true
+          env
+          expected
       with
       | (env, Some (pos, ur, _, _, Tshape (_, expected_fdm))) ->
         List.map_env
@@ -4814,10 +4814,7 @@ and expr_
             match TShapeMap.find_opt tk expected_fdm with
             | None -> expr_helper env ke
             | Some sft ->
-              let (env, ty) =
-                Typing_array_access.maybe_pessimise_type env sft.sft_ty
-              in
-              expr_helper ~expected:(ExpectedTy.make pos ur ty) env ke)
+              expr_helper ~expected:(ExpectedTy.make pos ur sft.sft_ty) env ke)
           fdm
       | _ -> List.map_env env ~f:expr_helper fdm
     in

@@ -36,6 +36,7 @@ namespace HH {
      * @return $value              - Value at $index, if it exists, or $default.
      *
      */
+    <<__NoAutoDynamic, __SupportDynamicType>>
     public static function idx<Tv>(
       ?shape(...) $shape,
       arraykey $index,
@@ -46,6 +47,7 @@ namespace HH {
      * Check if a field in shape exists.
      * Similar to array_key_exists, but for shapes.
      */
+    <<__NoAutoDynamic, __SupportDynamicType>>
     public static function keyExists(
       readonly shape(...) $shape,
       arraykey $index,
@@ -55,6 +57,7 @@ namespace HH {
      * Removes the $index field from the $shape (passed in as an inout argument).
      * As with all inout arguments, it can only be used with local variables.
      */
+    <<__NoAutoDynamic, __SupportDynamicType>>
     public static function removeKey<T as shape(...)>(
       inout T $shape,
       arraykey $index,
@@ -71,6 +74,7 @@ namespace HH {
      * throws if the field is missing.
      * Use this to access optional fields on shapes.
      */
+    <<__NoAutoDynamic, __SupportDynamicType>>
     public static function at<Tv>(
       shape(...) $shape,
       arraykey $index,

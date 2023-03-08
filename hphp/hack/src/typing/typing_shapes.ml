@@ -74,6 +74,7 @@ let make_locl_like_type env ty =
     Typing_union.union env dyn ty
   else
     (env, ty)
+
 (*****************************************************************************)
 (* Remove a field from all the shapes found in a given type.
  * The function leaves all the other types (non-shapes) unchanged.
@@ -358,7 +359,7 @@ let to_dict env pos shape_ty res =
   in
   Option.iter ~f:Errors.add_typing_error e1;
   to_collection env pos shape_ty res (fun env r key value ->
-      make_locl_like_type env (MakeType.dict r key value))
+      (env, MakeType.dict r key value))
 
 let shape_field_pos = function
   | Ast_defs.SFlit_int (p, _)

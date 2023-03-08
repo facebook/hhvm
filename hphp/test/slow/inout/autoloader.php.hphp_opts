@@ -1,4 +1,0 @@
---inputs=hphp/test/slow/inout/autoloader1.inc
---inputs=hphp/test/slow/inout/autoloader2.inc
---inputs=hphp/test/slow/inout/autoloader3.inc
---inputs=hphp/test/slow/inout/autoloader4.inc

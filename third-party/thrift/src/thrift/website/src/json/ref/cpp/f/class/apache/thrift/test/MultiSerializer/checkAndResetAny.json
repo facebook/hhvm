@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "258",
+        "line": "259",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "117",
-        "bodyend": "120"
+        "bodystart": "133",
+        "bodyend": "136"
       },
       "definition": {
         "simple_html": "void checkAndResetAny(size_t dec) const",

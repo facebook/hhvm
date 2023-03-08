@@ -17,11 +17,11 @@
       "name_html": "checkIntEnc",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "261",
+        "line": "262",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "130",
-        "bodyend": "133"
+        "bodystart": "146",
+        "bodyend": "149"
       },
       "definition": {
         "simple_html": "void checkIntEnc() const",

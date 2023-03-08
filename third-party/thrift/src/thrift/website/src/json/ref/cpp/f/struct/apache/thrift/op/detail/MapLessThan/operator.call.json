@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::MapLessThan::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapLessThan_1a30a62a14e2a32365ca5dbae92933b9bb",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapLessThan_1adf4d09e9bef4a575f0a7fef9345d1e64",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -12,7 +12,7 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "bool",
-      "definition_html": "bool apache::thrift::op::detail::MapLessThan&lt; T, K, V &gt;::operator()",
+      "definition_html": "bool apache::thrift::op::detail::MapLessThan&lt; T, K, V, LessThanImpl &gt;::operator()",
       "argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const",
       "name_html": "operator()",
       "param": [
@@ -38,7 +38,7 @@
         "simple_raw": "bool operator()(const T& lhs, const T& rhs) const",
         "detailed_html": "inline bool operator()(const T&amp; lhs, const T&amp; rhs) const",
         "detailed_raw": "inline bool operator()(const T& lhs, const T& rhs) const",
-        "original_definition_html": "bool apache::thrift::op::detail::MapLessThan&lt; T, K, V &gt;::operator()",
+        "original_definition_html": "bool apache::thrift::op::detail::MapLessThan&lt; T, K, V, LessThanImpl &gt;::operator()",
         "original_argsstring_html": "(const T &amp;lhs, const T &amp;rhs) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/MapLessThan/operator.call",

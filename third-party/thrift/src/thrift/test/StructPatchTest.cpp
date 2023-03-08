@@ -505,6 +505,12 @@ TEST(StructPatchTest, MapPatch) {
   test::expectPatch(
       addPatch, {{"a", "0"}, {"c", "3"}}, {{"a", "0"}, {"b", "2"}, {"c", "3"}});
 
+  MapPatch putPatch;
+  putPatch.put({{"a", "1"}, {"b", "2"}});
+  test::expectPatch(putPatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      putPatch, {{"a", "0"}, {"c", "3"}}, {{"a", "1"}, {"b", "2"}, {"c", "3"}});
+
   MapPatch erasePatch;
   erasePatch.add({{"a", "1"}, {"b", "2"}});
   erasePatch.erase("c");

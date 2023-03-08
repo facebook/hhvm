@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "479",
+        "line": "485",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "479",
-        "bodyend": "483"
+        "bodystart": "485",
+        "bodyend": "489"
       },
       "definition": {
         "simple_html": "void mergePatches(P&amp; ourPatch, P&amp; otherPatch)",

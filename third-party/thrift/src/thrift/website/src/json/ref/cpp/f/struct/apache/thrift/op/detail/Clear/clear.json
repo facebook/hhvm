@@ -31,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "75",
+        "line": "68",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "75",
-        "bodyend": "77"
+        "bodystart": "68",
+        "bodyend": "70"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::structured_c)",
@@ -78,11 +78,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "79",
+        "line": "72",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "79",
-        "bodyend": "81"
+        "bodystart": "72",
+        "bodyend": "74"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic void clear(T&amp; val, type::container_c)",
@@ -125,11 +125,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "83",
+        "line": "76",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "83",
-        "bodyend": "85"
+        "bodystart": "76",
+        "bodyend": "78"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic constexpr void clear(T&amp; val, type::all_c)",

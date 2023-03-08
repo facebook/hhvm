@@ -17,11 +17,11 @@
       "name_html": "checkAndResetAll",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "259",
+        "line": "260",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "121",
-        "bodyend": "125"
+        "bodystart": "137",
+        "bodyend": "141"
       },
       "definition": {
         "simple_html": "void checkAndResetAll() const",

@@ -17,11 +17,11 @@
       "name_html": "derived",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "132",
+        "line": "138",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "bodystart": "132",
-        "bodyend": "132"
+        "bodystart": "138",
+        "bodyend": "138"
       },
       "definition": {
         "simple_html": "const Derived&amp; derived() const",

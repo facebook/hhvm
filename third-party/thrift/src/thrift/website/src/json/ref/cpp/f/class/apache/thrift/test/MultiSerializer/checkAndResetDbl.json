@@ -27,11 +27,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "257",
+        "line": "258",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "111",
-        "bodyend": "116"
+        "bodystart": "127",
+        "bodyend": "132"
       },
       "definition": {
         "simple_html": "void checkAndResetDbl(size_t enc, size_t dec) const",

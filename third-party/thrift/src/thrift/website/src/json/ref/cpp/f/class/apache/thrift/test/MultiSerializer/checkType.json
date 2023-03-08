@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "88",
+        "line": "89",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Serializer.cpp",
         "bodystart": "33",

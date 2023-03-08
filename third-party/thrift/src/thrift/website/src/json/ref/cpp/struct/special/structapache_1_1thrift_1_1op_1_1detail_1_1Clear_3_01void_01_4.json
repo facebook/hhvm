@@ -42,11 +42,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "97",
+        "line": "90",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "97",
-        "bodyend": "99"
+        "bodystart": "90",
+        "bodyend": "92"
       },
       "definition": {
         "simple_html": "template &lt;typename Id, typename T&gt;\nconstexpr void operator()(Id, T&amp; val) const",
@@ -84,11 +84,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "101",
+        "line": "94",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "101",
-        "bodyend": "103"
+        "bodystart": "94",
+        "bodyend": "96"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nconstexpr void operator()(T&amp; val) const",
@@ -104,11 +104,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "95",
+    "line": "88",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "95",
-    "bodyend": "104"
+    "bodystart": "88",
+    "bodyend": "97"
   },
   "namespacednames_html": [
     "apache",
@@ -166,11 +166,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "97",
+                "line": "90",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "97",
-                "bodyend": "99"
+                "bodystart": "90",
+                "bodyend": "92"
               },
               "definition": {
                 "simple_html": "template &lt;typename Id, typename T&gt;\nconstexpr void operator()(Id, T&amp; val) const",
@@ -210,11 +210,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "101",
+                "line": "94",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "101",
-                "bodyend": "103"
+                "bodystart": "94",
+                "bodyend": "96"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nconstexpr void operator()(T&amp; val) const",

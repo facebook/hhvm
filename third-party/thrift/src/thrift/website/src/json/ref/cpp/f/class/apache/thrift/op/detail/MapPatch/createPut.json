@@ -44,7 +44,7 @@
         "original_argsstring_html": "(C &amp;&amp;entries)"
       },
       "description": {
-        "brief_html": "<p>Creates a patch that inserts entries. Ignore entries that already exists. </p>"
+        "brief_html": "<p>Creates a patch that inserts entries. Override entries if exists. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/MapPatch/createPut",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/createPut",
@@ -55,7 +55,7 @@
   "filepath": "f/class/apache/thrift/op/detail/MapPatch/createPut",
   "minprot": "public",
   "displayname_html": "createPut",
-  "brief_html": "<p>Creates a patch that inserts entries. Ignore entries that already exists. </p>",
+  "brief_html": "<p>Creates a patch that inserts entries. Override entries if exists. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createPut",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createPut"

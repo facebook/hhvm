@@ -34,8 +34,8 @@
         "line": "245",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "38",
-        "bodyend": "53"
+        "bodystart": "39",
+        "bodyend": "54"
       },
       "definition": {
         "simple_html": "virtual void encode(\n    type::ConstRef value, folly::io::QueueAppender&amp;&amp; appender) const",
@@ -81,8 +81,8 @@
         "line": "247",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "55",
-        "bodyend": "70"
+        "bodystart": "56",
+        "bodyend": "71"
       },
       "definition": {
         "simple_html": "virtual void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const",

@@ -17,11 +17,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "222",
+        "line": "227",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "222",
-        "bodyend": "229"
+        "bodystart": "227",
+        "bodyend": "233"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",

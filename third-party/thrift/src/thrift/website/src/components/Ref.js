@@ -1,17 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
  */
 
 import React from 'react';
@@ -57,7 +45,7 @@ export function Bases({data}) {
       <h3>
         {publicBases.length == 1 ? "Base class" : "Base classes"}
       </h3>
-      <table class={styles.refTable}>
+      <table>
         {publicBases.map(b => {
           return (
             <tr>
@@ -96,7 +84,7 @@ export function TemplateParameters({data}) {
       <h3>
         Template parameters
       </h3>
-      <table class={styles.refTable}>
+      <table>
         {tds.map(td => {
           return (
             <tr>
@@ -124,7 +112,7 @@ export function MemberTypes({data}) {
       <h3>
         Member types
       </h3>
-      <table class={styles.refTable}>
+      <table>
         <tr>
           <th>
             Type
@@ -174,7 +162,7 @@ export function Overloadgroup({data}) {
       {data.groupname_html != "" &&
         <h4 dangerouslySetInnerHTML={{__html: data.groupname_html}} />
       }
-      <table class={styles.refTable}>
+      <table>
         <tbody>
           {publicOverloadsets.map(os => {
             return (
@@ -245,7 +233,7 @@ export function Macros({data}) {
       <h3>
         Macros
       </h3>
-      <table class={styles.refTable}>
+      <table>
         <tbody>
           {toShow.map(macro => {
             return (
@@ -277,7 +265,7 @@ export function FreeVariables({data}) {
       <h3>
         Free variables
       </h3>
-      <table class={styles.refTable}>
+      <table>
         <tbody>
           {vs.map(v => {
             return (
@@ -321,7 +309,7 @@ export function MethodDecls({data}) {
   const funcs = (data.functions || []).filter(f => f.prot == "public")
   var i = 0;
   return (
-    <table class={styles.refTable}>
+    <table>
       {funcs.map(f => {
         return (
           <tr className={styles.topAlign} >
@@ -356,7 +344,7 @@ export function MethodDescriptions({data}) {
             <div dangerouslySetInnerHTML={{__html: (f.description || {}).detailed_html}} />
             <div>
               {(f.description || {}).param &&
-                <table class={styles.refTable}>
+                <table>
                   {f.description.param.map(p => {
                     return (
                       <tr>
@@ -381,7 +369,7 @@ export function MethodDescriptions({data}) {
               }
             </div>
             {(f.description || {}).exception &&
-              <table class={styles.refTable}>
+              <table>
                 <td>
                   <b>Throws</b>
                 </td>

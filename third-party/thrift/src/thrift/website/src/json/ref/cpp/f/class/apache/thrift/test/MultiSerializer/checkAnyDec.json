@@ -17,11 +17,11 @@
       "name_html": "checkAnyDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "260",
+        "line": "261",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "126",
-        "bodyend": "129"
+        "bodystart": "142",
+        "bodyend": "145"
       },
       "definition": {
         "simple_html": "void checkAnyDec() const",

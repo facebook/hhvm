@@ -23,11 +23,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "272",
+        "line": "284",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "272",
-        "bodyend": "274"
+        "bodystart": "284",
+        "bodyend": "286"
       },
       "definition": {
         "simple_html": "constexpr bool operator()(const type::native_type&lt;Tag&gt;&amp; value) const",

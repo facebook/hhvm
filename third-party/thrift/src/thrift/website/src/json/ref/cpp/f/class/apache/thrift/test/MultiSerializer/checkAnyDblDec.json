@@ -17,11 +17,11 @@
       "name_html": "checkAnyDblDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "266",
+        "line": "267",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "151",
-        "bodyend": "155"
+        "bodystart": "167",
+        "bodyend": "171"
       },
       "definition": {
         "simple_html": "void checkAnyDblDec() const",

@@ -17,11 +17,11 @@
       "name_html": "checkDblEnc",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "263",
+        "line": "264",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "138",
-        "bodyend": "141"
+        "bodystart": "154",
+        "bodyend": "157"
       },
       "definition": {
         "simple_html": "void checkDblEnc() const",

@@ -24,8 +24,8 @@
         "line": "189",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "33",
-        "bodyend": "36"
+        "bodystart": "34",
+        "bodyend": "37"
       },
       "definition": {
         "simple_html": "virtual const type::Protocol&amp; getProtocol() const",

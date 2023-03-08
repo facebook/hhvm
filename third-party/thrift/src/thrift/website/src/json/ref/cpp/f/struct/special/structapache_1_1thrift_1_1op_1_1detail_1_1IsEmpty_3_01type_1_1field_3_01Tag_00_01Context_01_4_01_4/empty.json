@@ -31,11 +31,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "115",
+        "line": "108",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "115",
-        "bodyend": "117"
+        "bodystart": "108",
+        "bodyend": "110"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic bool empty(const T&amp; val, type::structured_c)",
@@ -78,11 +78,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "119",
+        "line": "112",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "119",
-        "bodyend": "121"
+        "bodystart": "112",
+        "bodyend": "114"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic bool empty(const T&amp; val, type::container_c)",
@@ -125,11 +125,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "123",
+        "line": "116",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "123",
-        "bodyend": "125"
+        "bodystart": "116",
+        "bodyend": "118"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic bool empty(const T&amp; val, type::string_c)",
@@ -172,11 +172,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "127",
+        "line": "120",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "127",
-        "bodyend": "129"
+        "bodystart": "120",
+        "bodyend": "122"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nstatic constexpr bool empty(const T&amp; val, type::all_c)",
@@ -220,11 +220,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "131",
+        "line": "124",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "131",
-        "bodyend": "133"
+        "bodystart": "124",
+        "bodyend": "126"
       },
       "definition": {
         "simple_html": "template &lt;typename ATag&gt;\nstatic bool empty(const std::unique_ptr&lt;folly::IOBuf&gt;&amp; val, ATag tag)",

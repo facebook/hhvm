@@ -156,7 +156,7 @@
         "original_argsstring_html": "(C &amp;&amp;entries)"
       },
       "description": {
-        "brief_html": "<p>Creates a patch that inserts entries. Ignore entries that already exists. </p>"
+        "brief_html": "<p>Creates a patch that inserts entries. Override entries if exists. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/MapPatch/createPut",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/createPut"
@@ -202,7 +202,7 @@
         "original_argsstring_html": "(C &amp;&amp;entries)"
       },
       "description": {
-        "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>"
+        "brief_html": "<p>Inserts entries. Override entries if exists. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/MapPatch/put",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/put"
@@ -300,7 +300,7 @@
         "original_argsstring_html": "(C &amp;&amp;entries)"
       },
       "description": {
-        "brief_html": "<p>Inserts entries. Override entries if exists. </p>"
+        "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/MapPatch/add",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/add"
@@ -444,6 +444,52 @@
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/patchByKey"
     },
     {
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1ae5c069329e219c0ebd70da221c0fc719",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "yes",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename K",
+          "defval_html": "typename T::key_type"
+        }
+      ],
+      "type_html": "FOLLY_NODISCARD VP &amp;",
+      "definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensureAndPatchByKey",
+      "argsstring_html": "(K &amp;&amp;key)",
+      "name_html": "ensureAndPatchByKey",
+      "param": [
+        {
+          "type_html": "K &amp;&amp;",
+          "declname_html": "key"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "line": "414",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+        "bodystart": "414",
+        "bodyend": "416"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename K = typename T::key_type&gt;\nFOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",
+        "simple_raw": "template <typename K = typename T::key_type>\nFOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key)",
+        "detailed_html": "template &lt;typename K = typename T::key_type&gt;\ninline FOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",
+        "detailed_raw": "template <typename K = typename T::key_type>\ninline FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key)",
+        "original_definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensureAndPatchByKey",
+        "original_argsstring_html": "(K &amp;&amp;key)"
+      },
+      "description": {
+        "brief_html": "<p>Ensures that key exists and patches the entry. </p>"
+      },
+      "filepath": "fns/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+      "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey"
+    },
+    {
       "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1a6a9cfc4b2186d6ac9f5ea7c01ce79b7a",
       "prot": "public",
       "static": "no",
@@ -463,11 +509,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "412",
+        "line": "418",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "412",
-        "bodyend": "423"
+        "bodystart": "418",
+        "bodyend": "429"
       },
       "definition": {
         "simple_html": "void apply(T&amp; val) const",
@@ -505,11 +551,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "427",
+        "line": "433",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "427",
-        "bodyend": "455"
+        "bodystart": "433",
+        "bodyend": "461"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\nvoid merge(U&amp;&amp; next)",
@@ -551,11 +597,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "459",
+        "line": "465",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "459",
-        "bodyend": "462"
+        "bodystart": "465",
+        "bodyend": "468"
       },
       "definition": {
         "simple_html": "template &lt;typename K = typename T::key_type&gt;\nbool isKeyModified(K&amp;&amp; key)",
@@ -594,11 +640,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "465",
+        "line": "471",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "465",
-        "bodyend": "468"
+        "bodystart": "471",
+        "bodyend": "474"
       },
       "definition": {
         "simple_html": "template &lt;typename K = typename T::key_type&gt;\nbool isKeyModifiedOrRemoved(K&amp;&amp; key)",
@@ -635,11 +681,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "470",
+        "line": "476",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "470",
-        "bodyend": "477"
+        "bodystart": "476",
+        "bodyend": "483"
       },
       "definition": {
         "simple_html": "void applyPatch(T&amp; val, const P&amp; patch) const",
@@ -676,11 +722,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "479",
+        "line": "485",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "bodystart": "479",
-        "bodyend": "483"
+        "bodystart": "485",
+        "bodyend": "489"
       },
       "definition": {
         "simple_html": "void mergePatches(P&amp; ourPatch, P&amp; otherPatch)",
@@ -707,7 +753,7 @@
       "name_html": "applyAssignOrClear",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-        "line": "485",
+        "line": "491",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
         "bodystart": "298",
@@ -734,7 +780,7 @@
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
     "bodystart": "330",
-    "bodyend": "489"
+    "bodyend": "495"
   },
   "namespacednames_html": [
     "apache",
@@ -1237,7 +1283,7 @@
                 "original_argsstring_html": "(C &amp;&amp;entries)"
               },
               "description": {
-                "brief_html": "<p>Creates a patch that inserts entries. Ignore entries that already exists. </p>"
+                "brief_html": "<p>Creates a patch that inserts entries. Override entries if exists. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/MapPatch/createPut",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/createPut",
@@ -1248,7 +1294,7 @@
           "filepath": "f/class/apache/thrift/op/detail/MapPatch/createPut",
           "minprot": "public",
           "displayname_html": "createPut",
-          "brief_html": "<p>Creates a patch that inserts entries. Ignore entries that already exists. </p>",
+          "brief_html": "<p>Creates a patch that inserts entries. Override entries if exists. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createPut",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/createPut"
@@ -1299,7 +1345,7 @@
                 "original_argsstring_html": "(C &amp;&amp;entries)"
               },
               "description": {
-                "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>"
+                "brief_html": "<p>Inserts entries. Override entries if exists. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/MapPatch/put",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/put",
@@ -1310,7 +1356,7 @@
           "filepath": "f/class/apache/thrift/op/detail/MapPatch/put",
           "minprot": "public",
           "displayname_html": "put",
-          "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>",
+          "brief_html": "<p>Inserts entries. Override entries if exists. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/put",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/put"
@@ -1429,7 +1475,7 @@
                 "original_argsstring_html": "(C &amp;&amp;entries)"
               },
               "description": {
-                "brief_html": "<p>Inserts entries. Override entries if exists. </p>"
+                "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>"
               },
               "filepath": "fns/class/apache/thrift/op/detail/MapPatch/add",
               "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/add",
@@ -1440,7 +1486,7 @@
           "filepath": "f/class/apache/thrift/op/detail/MapPatch/add",
           "minprot": "public",
           "displayname_html": "add",
-          "brief_html": "<p>Inserts entries. Override entries if exists. </p>",
+          "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>",
           "groupname_html": "",
           "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
           "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add"
@@ -1633,6 +1679,68 @@
         },
         {
           "kind": "overloadset",
+          "name_html": "ensureAndPatchByKey",
+          "compoundname_html": "apache::thrift::op::detail::MapPatch::ensureAndPatchByKey",
+          "functions": [
+            {
+              "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch_1ae5c069329e219c0ebd70da221c0fc719",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename K",
+                  "defval_html": "typename T::key_type"
+                }
+              ],
+              "type_html": "FOLLY_NODISCARD VP &amp;",
+              "definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensureAndPatchByKey",
+              "argsstring_html": "(K &amp;&amp;key)",
+              "name_html": "ensureAndPatchByKey",
+              "param": [
+                {
+                  "type_html": "K &amp;&amp;",
+                  "declname_html": "key"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+                "line": "414",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
+                "bodystart": "414",
+                "bodyend": "416"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename K = typename T::key_type&gt;\nFOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",
+                "simple_raw": "template <typename K = typename T::key_type>\nFOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key)",
+                "detailed_html": "template &lt;typename K = typename T::key_type&gt;\ninline FOLLY_NODISCARD VP&amp; ensureAndPatchByKey(K&amp;&amp; key)",
+                "detailed_raw": "template <typename K = typename T::key_type>\ninline FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key)",
+                "original_definition_html": "FOLLY_NODISCARD VP&amp; apache::thrift::op::detail::MapPatch&lt; Patch &gt;::ensureAndPatchByKey",
+                "original_argsstring_html": "(K &amp;&amp;key)"
+              },
+              "description": {
+                "brief_html": "<p>Ensures that key exists and patches the entry. </p>"
+              },
+              "filepath": "fns/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+              "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+              "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1MapPatch",
+              "compoundname_html": "apache::thrift::op::detail::MapPatch::ensureAndPatchByKey"
+            }
+          ],
+          "filepath": "f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+          "minprot": "public",
+          "displayname_html": "ensureAndPatchByKey",
+          "brief_html": "<p>Ensures that key exists and patches the entry. </p>",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey",
+          "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/ensureAndPatchByKey"
+        },
+        {
+          "kind": "overloadset",
           "name_html": "apply",
           "compoundname_html": "apache::thrift::op::detail::MapPatch::apply",
           "functions": [
@@ -1656,11 +1764,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "412",
+                "line": "418",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "412",
-                "bodyend": "423"
+                "bodystart": "418",
+                "bodyend": "429"
               },
               "definition": {
                 "simple_html": "void apply(T&amp; val) const",
@@ -1940,11 +2048,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "427",
+                "line": "433",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "427",
-                "bodyend": "455"
+                "bodystart": "433",
+                "bodyend": "461"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\nvoid merge(U&amp;&amp; next)",
@@ -2002,11 +2110,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "459",
+                "line": "465",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "459",
-                "bodyend": "462"
+                "bodystart": "465",
+                "bodyend": "468"
               },
               "definition": {
                 "simple_html": "template &lt;typename K = typename T::key_type&gt;\nbool isKeyModified(K&amp;&amp; key)",
@@ -2061,11 +2169,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "465",
+                "line": "471",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "465",
-                "bodyend": "468"
+                "bodystart": "471",
+                "bodyend": "474"
               },
               "definition": {
                 "simple_html": "template &lt;typename K = typename T::key_type&gt;\nbool isKeyModifiedOrRemoved(K&amp;&amp; key)",
@@ -2118,11 +2226,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "470",
+                "line": "476",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "470",
-                "bodyend": "477"
+                "bodystart": "476",
+                "bodyend": "483"
               },
               "definition": {
                 "simple_html": "void applyPatch(T&amp; val, const P&amp; patch) const",
@@ -2175,11 +2283,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "479",
+                "line": "485",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "bodystart": "479",
-                "bodyend": "483"
+                "bodystart": "485",
+                "bodyend": "489"
               },
               "definition": {
                 "simple_html": "void mergePatches(P&amp; ourPatch, P&amp; otherPatch)",
@@ -2222,7 +2330,7 @@
               "name_html": "applyAssignOrClear",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/ContainerPatch.h",
-                "line": "485",
+                "line": "491",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/BasePatch.h",
                 "bodystart": "298",

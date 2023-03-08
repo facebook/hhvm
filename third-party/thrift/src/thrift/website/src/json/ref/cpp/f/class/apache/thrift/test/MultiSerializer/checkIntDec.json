@@ -17,11 +17,11 @@
       "name_html": "checkIntDec",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.h",
-        "line": "262",
+        "line": "263",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "134",
-        "bodyend": "137"
+        "bodystart": "150",
+        "bodyend": "153"
       },
       "definition": {
         "simple_html": "void checkIntDec() const",

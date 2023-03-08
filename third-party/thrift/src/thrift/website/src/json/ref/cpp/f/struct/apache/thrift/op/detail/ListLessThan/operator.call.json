@@ -4,7 +4,7 @@
   "compoundname_html": "apache::thrift::op::detail::ListLessThan::operator()",
   "functions": [
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListLessThan_1a4bb86fb31195393bd57800acaa3eeab6",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListLessThan_1ae40e21c439000bfbf86b3133ab92430f",
       "prot": "public",
       "static": "no",
       "const": "yes",
@@ -12,7 +12,7 @@
       "inline": "yes",
       "virtual": "non-virtual",
       "type_html": "bool",
-      "definition_html": "bool apache::thrift::op::detail::ListLessThan&lt; T, E &gt;::operator()",
+      "definition_html": "bool apache::thrift::op::detail::ListLessThan&lt; T, E, LessThanImpl &gt;::operator()",
       "argsstring_html": "(const T &amp;l, const T &amp;r) const",
       "name_html": "operator()",
       "param": [
@@ -27,18 +27,18 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "line": "346",
+        "line": "342",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Compare.h",
-        "bodystart": "346",
-        "bodyend": "349"
+        "bodystart": "342",
+        "bodyend": "345"
       },
       "definition": {
         "simple_html": "bool operator()(const T&amp; l, const T&amp; r) const",
         "simple_raw": "bool operator()(const T& l, const T& r) const",
         "detailed_html": "inline bool operator()(const T&amp; l, const T&amp; r) const",
         "detailed_raw": "inline bool operator()(const T& l, const T& r) const",
-        "original_definition_html": "bool apache::thrift::op::detail::ListLessThan&lt; T, E &gt;::operator()",
+        "original_definition_html": "bool apache::thrift::op::detail::ListLessThan&lt; T, E, LessThanImpl &gt;::operator()",
         "original_argsstring_html": "(const T &amp;l, const T &amp;r) const"
       },
       "filepath": "fns/struct/apache/thrift/op/detail/ListLessThan/operator.call",

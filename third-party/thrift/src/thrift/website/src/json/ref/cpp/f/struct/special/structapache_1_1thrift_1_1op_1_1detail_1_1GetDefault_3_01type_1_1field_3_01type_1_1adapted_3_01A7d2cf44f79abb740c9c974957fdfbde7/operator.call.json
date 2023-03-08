@@ -23,11 +23,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "203",
+        "line": "201",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "203",
-        "bodyend": "205"
+        "bodystart": "201",
+        "bodyend": "203"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -62,11 +62,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "210",
+        "line": "208",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "210",
-        "bodyend": "217"
+        "bodystart": "208",
+        "bodyend": "222"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",

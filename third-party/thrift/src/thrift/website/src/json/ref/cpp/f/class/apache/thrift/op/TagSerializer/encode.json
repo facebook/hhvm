@@ -32,11 +32,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "104",
+        "line": "105",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "bodystart": "104",
-        "bodyend": "107"
+        "bodystart": "105",
+        "bodyend": "108"
       },
       "definition": {
         "simple_html": "virtual void encode(\n    type::ConstRef value, folly::io::QueueAppender&amp;&amp; appender) const final",
@@ -80,11 +80,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "108",
+        "line": "109",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "bodystart": "108",
-        "bodyend": "111"
+        "bodystart": "109",
+        "bodyend": "112"
       },
       "definition": {
         "simple_html": "virtual void encode(\n    type::AnyConstRef value, folly::io::QueueAppender&amp;&amp; appender) const final",
@@ -113,7 +113,7 @@
       "name_html": "encode",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "103",
+        "line": "104",
         "column": "1"
       },
       "definition": {
@@ -143,7 +143,7 @@
       "name_html": "encode",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Serializer.h",
-        "line": "103",
+        "line": "104",
         "column": "1"
       },
       "definition": {

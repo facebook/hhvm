@@ -46,10 +46,10 @@
       "initializer_html": "=\n    Protocol::fromName(thriftType(\"FollyToString\"))",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "line": "30",
+        "line": "31",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Testing.cpp",
-        "bodystart": "30",
+        "bodystart": "31",
         "bodyend": "-1"
       }
     }

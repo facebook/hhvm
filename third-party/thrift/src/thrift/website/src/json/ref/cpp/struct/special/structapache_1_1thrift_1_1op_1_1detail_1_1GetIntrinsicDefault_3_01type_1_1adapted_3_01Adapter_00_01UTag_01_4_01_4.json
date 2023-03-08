@@ -27,10 +27,10 @@
       "name_html": "Tag",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "221",
+        "line": "226",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "221",
+        "bodystart": "226",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetIntrinsicDefault_3_01type_1_1adapted_3_01Adapter_00_01UTag_01_4_01_4"
@@ -51,11 +51,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "222",
+        "line": "227",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "222",
-        "bodyend": "229"
+        "bodystart": "227",
+        "bodyend": "233"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -71,11 +71,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "220",
+    "line": "225",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "220",
-    "bodyend": "230"
+    "bodystart": "225",
+    "bodyend": "234"
   },
   "namespacednames_html": [
     "apache",
@@ -115,11 +115,11 @@
               "name_html": "operator()",
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "222",
+                "line": "227",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "222",
-                "bodyend": "229"
+                "bodystart": "227",
+                "bodyend": "233"
               },
               "definition": {
                 "simple_html": "const auto&amp; operator()() const",

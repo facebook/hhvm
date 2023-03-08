@@ -23,11 +23,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "237",
+        "line": "241",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "237",
-        "bodyend": "239"
+        "bodystart": "241",
+        "bodyend": "243"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -62,11 +62,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "244",
+        "line": "248",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "244",
-        "bodyend": "256"
+        "bodystart": "248",
+        "bodyend": "268"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -95,11 +95,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "222",
+        "line": "227",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "222",
-        "bodyend": "229"
+        "bodystart": "227",
+        "bodyend": "233"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -128,11 +128,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "148",
+        "line": "141",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "148",
-        "bodyend": "154"
+        "bodystart": "141",
+        "bodyend": "153"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -161,11 +161,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "148",
+        "line": "141",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "148",
-        "bodyend": "154"
+        "bodystart": "141",
+        "bodyend": "153"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -194,11 +194,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "148",
+        "line": "141",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "148",
-        "bodyend": "154"
+        "bodystart": "141",
+        "bodyend": "153"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -227,11 +227,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "54",
+        "line": "47",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "54",
-        "bodyend": "54"
+        "bodystart": "47",
+        "bodyend": "47"
       },
       "definition": {
         "simple_html": "constexpr auto operator()() const",
@@ -260,11 +260,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "160",
+        "line": "159",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "160",
-        "bodyend": "164"
+        "bodystart": "159",
+        "bodyend": "162"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -293,11 +293,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "160",
+        "line": "159",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "160",
-        "bodyend": "164"
+        "bodystart": "159",
+        "bodyend": "162"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -332,11 +332,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "203",
+        "line": "201",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "203",
-        "bodyend": "205"
+        "bodystart": "201",
+        "bodyend": "203"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_not_field_adapter&lt;AdapterT, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -371,11 +371,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "210",
+        "line": "208",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "210",
-        "bodyend": "217"
+        "bodystart": "208",
+        "bodyend": "222"
       },
       "definition": {
         "simple_html": "template &lt;typename AdapterT = Adapter&gt;\nconst adapt_detail::\n    if_field_adapter&lt;AdapterT, FieldId, type::native_type&lt;UTag&gt;, Struct&gt;&amp;\n    operator()() const",
@@ -404,11 +404,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "160",
+        "line": "159",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "160",
-        "bodyend": "164"
+        "bodystart": "159",
+        "bodyend": "162"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",
@@ -437,11 +437,11 @@
       "name_html": "operator()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "160",
+        "line": "159",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "160",
-        "bodyend": "164"
+        "bodystart": "159",
+        "bodyend": "162"
       },
       "definition": {
         "simple_html": "const auto&amp; operator()() const",

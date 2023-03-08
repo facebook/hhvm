@@ -44,7 +44,7 @@
         "original_argsstring_html": "(C &amp;&amp;entries)"
       },
       "description": {
-        "brief_html": "<p>Inserts entries. Override entries if exists. </p>"
+        "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>"
       },
       "filepath": "fns/class/apache/thrift/op/detail/MapPatch/add",
       "href": "/ref/cpp/fns/class/apache/thrift/op/detail/MapPatch/add",
@@ -55,7 +55,7 @@
   "filepath": "f/class/apache/thrift/op/detail/MapPatch/add",
   "minprot": "public",
   "displayname_html": "add",
-  "brief_html": "<p>Inserts entries. Override entries if exists. </p>",
+  "brief_html": "<p>Inserts entries. Ignore entries that already exists. </p>",
   "groupname_html": "",
   "href": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add",
   "refid": "/ref/cpp/f/class/apache/thrift/op/detail/MapPatch/add"

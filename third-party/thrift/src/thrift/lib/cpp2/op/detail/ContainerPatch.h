@@ -338,7 +338,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base::Base;
   using Base::operator=;
 
-  /// Creates a patch that inserts entries. Ignore entries that already exists.
+  /// Creates a patch that inserts entries. Override entries if exists.
   template <typename C = T>
   static MapPatch createPut(C&& entries) {
     MapPatch result;
@@ -346,7 +346,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     return result;
   }
 
-  /// Inserts entries. Ignore entries that already exists.
+  /// Inserts entries. Override entries if exists.
   template <typename C = T>
   void put(C&& entries) {
     auto& field = assignOr(*data_.put());
@@ -368,7 +368,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     data_.patchPrior()->erase(key);
   }
 
-  /// Inserts entries. Override entries if exists.
+  /// Inserts entries. Ignore entries that already exists.
   template <typename C = T>
   void add(C&& entries) {
     auto& field = assignOr(*data_.add());
@@ -409,7 +409,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
                                        : data_.patchPrior()->operator[](key);
   }
 
-  // Ensures that key exists and patches the entry
+  /// Ensures that key exists and patches the entry.
   template <typename K = typename T::key_type>
   FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key) {
     return (data_.add().value()[key], data_.patch()->operator[](key));

@@ -34,11 +34,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "295",
+        "line": "307",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "295",
-        "bodyend": "297"
+        "bodystart": "307",
+        "bodyend": "309"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(optional_boxed_field_ref&lt;T&gt; field, Struct&amp;) const",
@@ -84,11 +84,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "299",
+        "line": "311",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "299",
-        "bodyend": "301"
+        "bodystart": "311",
+        "bodyend": "313"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(optional_field_ref&lt;T&gt; field, Struct&amp;) const",
@@ -135,11 +135,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "303",
+        "line": "315",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "303",
-        "bodyend": "308"
+        "bodystart": "315",
+        "bodyend": "320"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Union&gt;\nvoid operator()(union_field_ref&lt;T&gt; field, Union&amp; u) const",
@@ -185,11 +185,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "310",
+        "line": "322",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "310",
-        "bodyend": "312"
+        "bodystart": "322",
+        "bodyend": "324"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(terse_intern_boxed_field_ref&lt;T&gt; field, Struct&amp;) const",
@@ -235,11 +235,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "314",
+        "line": "326",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "314",
-        "bodyend": "316"
+        "bodystart": "326",
+        "bodyend": "328"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(std::shared_ptr&lt;T&gt;&amp; field, Struct&amp;) const",
@@ -285,11 +285,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "318",
+        "line": "330",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "318",
-        "bodyend": "320"
+        "bodystart": "330",
+        "bodyend": "332"
       },
       "definition": {
         "simple_html": "template &lt;typename T, typename Struct&gt;\nvoid operator()(std::unique_ptr&lt;T&gt;&amp; field, Struct&amp;) const",

@@ -36,11 +36,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "line": "138",
+        "line": "131",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-        "bodystart": "138",
-        "bodyend": "140"
+        "bodystart": "131",
+        "bodyend": "133"
       },
       "definition": {
         "simple_html": "template &lt;typename T&gt;\nconstexpr bool operator()(T&amp; val) const",
@@ -56,11 +56,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "line": "136",
+    "line": "129",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-    "bodystart": "136",
-    "bodyend": "141"
+    "bodystart": "129",
+    "bodyend": "134"
   },
   "namespacednames_html": [
     "apache",
@@ -112,11 +112,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "line": "138",
+                "line": "131",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Clear.h",
-                "bodystart": "138",
-                "bodyend": "140"
+                "bodystart": "131",
+                "bodyend": "133"
               },
               "definition": {
                 "simple_html": "template &lt;typename T&gt;\nconstexpr bool operator()(T&amp; val) const",

@@ -489,14 +489,6 @@ cdef __ListSpec get_reflection__List__AnEnum():
         kind=__NumberType.NOT_A_NUMBER,
     )
 
-cdef __MapSpec get_reflection___std_unordered_map__Map__i32_SimpleStruct():
-    return __MapSpec._fbthrift_create(
-        key=int,
-        key_kind=__NumberType.I32,
-        value=_module_types.SimpleStruct,
-        value_kind=__NumberType.NOT_A_NUMBER,
-    )
-
 cdef __MapSpec get_reflection__Map__i32_double():
     return __MapSpec._fbthrift_create(
         key=int,

@@ -49,46 +49,6 @@ cimport module.types_fields as _fbthrift_types_fields
 cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3/module/types.h":
   pass
 
-cdef extern from * nogil:
-    cdef cppclass _std_unordered_map "::std::unordered_map"[T, U]:
-        ctypedef T key_type
-        ctypedef U mapped_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            cpair[T, U]& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            cpair[T, U]& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        _std_unordered_map() except +
-        _std_unordered_map(_std_unordered_map&) except +
-
-        U& operator[](T&)
-        iterator find(const T&)
-        const_iterator const_find "find"(const T&)
-        size_type count(const T&)
-        size_type size()
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
 cdef extern from *:
     ctypedef bstring foo_Bar "foo::Bar"
 
@@ -463,13 +423,6 @@ cdef class List__AnEnum(thrift.py3.types.List):
     cdef _fbthrift_create(shared_ptr[vector[cAnEnum]])
     @staticmethod
     cdef shared_ptr[vector[cAnEnum]] _make_instance(object items) except *
-
-cdef class _std_unordered_map__Map__i32_SimpleStruct(thrift.py3.types.Map):
-    cdef shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]] _cpp_obj
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]])
-    @staticmethod
-    cdef shared_ptr[_std_unordered_map[cint32_t,cSimpleStruct]] _make_instance(object items) except *
 
 cdef class Map__i32_double(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,double]] _cpp_obj

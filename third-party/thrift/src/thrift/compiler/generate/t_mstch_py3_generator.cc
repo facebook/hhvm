@@ -121,8 +121,8 @@ const t_type* get_stream_elem_type(const t_type& type) {
   return dynamic_cast<const t_stream_response&>(type).get_elem_type();
 }
 
-bool is_hidden(const t_function& func) {
-  return func.has_annotation("py3.hidden");
+bool is_hidden(const t_named& node) {
+  return node.has_annotation("py3.hidden");
 }
 
 bool is_func_supported(bool no_stream, const t_function* func) {
@@ -345,6 +345,9 @@ class py3_mstch_program : public mstch_program {
         continue;
       }
       for (const auto& field : object->fields()) {
+        if (is_hidden(field)) {
+          continue;
+        }
         visit_type(field.get_type());
       }
       objects_.push_back(object);

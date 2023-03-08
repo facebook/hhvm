@@ -70,8 +70,6 @@ cdef __SetSpec get_reflection__Set__binary()
 
 cdef __ListSpec get_reflection__List__AnEnum()
 
-cdef __MapSpec get_reflection___std_unordered_map__Map__i32_SimpleStruct()
-
 cdef __MapSpec get_reflection__Map__i32_double()
 
 cdef __ListSpec get_reflection__List__Map__i32_double()

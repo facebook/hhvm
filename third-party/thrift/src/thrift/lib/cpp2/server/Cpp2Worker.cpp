@@ -510,7 +510,7 @@ void Cpp2Worker::dispatchRequest(
           // Allow the priority to override the default resource pool
           if (priority != concurrency::NORMAL &&
               resourcePoolHandle->get().index() ==
-                  ResourcePoolHandle::kDefaultAsync) {
+                  ResourcePoolHandle::kDefaultAsyncIndex) {
             resourcePool = &serverConfigs->resourcePoolSet()
                                 .resourcePoolByPriority_deprecated(priority);
           }

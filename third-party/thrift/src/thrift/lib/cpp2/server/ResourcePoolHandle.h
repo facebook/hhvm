@@ -33,11 +33,9 @@ namespace apache::thrift {
 // using checkOwner().
 class ResourcePoolHandle {
  public:
-  static constexpr std::size_t kDefaultSync = 0;
-  static constexpr std::size_t kDefaultAsync = 1;
-  static constexpr std::size_t kMaxReservedHandle = kDefaultAsync;
-
-  ResourcePoolHandle() = default;
+  static constexpr std::size_t kDefaultSyncIndex = 0;
+  static constexpr std::size_t kDefaultAsyncIndex = 1;
+  static constexpr std::size_t kMaxReservedIndex = kDefaultAsyncIndex;
 
   std::size_t index() const { return index_; }
   std::string_view name() const { return name_; }
@@ -54,19 +52,16 @@ class ResourcePoolHandle {
   // kDefaultAsync handles).
   static ResourcePoolHandle makeHandle(
       std::string_view name, std::size_t index) {
-    CHECK(index != kDefaultSync && index != kDefaultAsync);
+    CHECK(index != kDefaultSyncIndex && index != kDefaultAsyncIndex);
     return ResourcePoolHandle{name, index};
   }
 
  private:
-  static constexpr std::size_t kInvalidHandle =
-      std::numeric_limits<std::size_t>::max();
-
   ResourcePoolHandle(std::string_view name, std::size_t index)
       : name_(name), index_(index) {}
 
   std::string name_;
-  std::size_t index_{kInvalidHandle};
+  std::size_t index_;
 };
 
 } // namespace apache::thrift

@@ -22,14 +22,14 @@ namespace apache::thrift {
 
 const ResourcePoolHandle& ResourcePoolHandle::defaultSync() {
   static folly::Indestructible<ResourcePoolHandle> defaultSyncSingleton{
-      ResourcePoolHandle("DefaultSync", kDefaultSync)};
+      ResourcePoolHandle("DefaultSync", kDefaultSyncIndex)};
 
   return *defaultSyncSingleton;
 }
 
 const ResourcePoolHandle& ResourcePoolHandle::defaultAsync() {
   static folly::Indestructible<ResourcePoolHandle> defaultAsyncSingleton{
-      ResourcePoolHandle("DefaultAsync", kDefaultAsync)};
+      ResourcePoolHandle("DefaultAsync", kDefaultAsyncIndex)};
 
   return *defaultAsyncSingleton;
 }

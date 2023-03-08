@@ -137,11 +137,11 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
   // Ensure that any default slots have been initialized (with empty unique_ptr
   // if necessary).
   resourcePools_.resize(std::max(
-      resourcePools_.size(), ResourcePoolHandle::kMaxReservedHandle + 1));
+      resourcePools_.size(), ResourcePoolHandle::kMaxReservedIndex + 1));
   resourcePools_.emplace_back(std::move(pool));
 
   priorities_.resize(
-      std::max(priorities_.size(), ResourcePoolHandle::kMaxReservedHandle + 1));
+      std::max(priorities_.size(), ResourcePoolHandle::kMaxReservedIndex + 1));
   priorities_.emplace_back(priorityHint_deprecated);
 
   return ResourcePoolHandle::makeHandle(poolName, resourcePools_.size() - 1);
@@ -211,9 +211,9 @@ std::optional<ResourcePoolHandle> ResourcePoolSet::findResourcePool(
                        : std::unique_lock<std::mutex>(mutex_);
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
     if (resourcePools_.at(i) && resourcePools_.at(i)->name() == poolName) {
-      if (i == ResourcePoolHandle::kDefaultSync) {
+      if (i == ResourcePoolHandle::kDefaultSyncIndex) {
         return ResourcePoolHandle::defaultSync();
-      } else if (i == ResourcePoolHandle::kDefaultAsync) {
+      } else if (i == ResourcePoolHandle::kDefaultAsyncIndex) {
         return ResourcePoolHandle::defaultAsync();
       }
       return ResourcePoolHandle::makeHandle(poolName, i);

@@ -40,8 +40,22 @@ const t_const* t_typedef::get_first_structured_annotation_or_null(
   return result;
 }
 
-bool t_typedef::is_defined() const {
-  return dynamic_cast<const t_placeholder_typedef*>(this) == nullptr;
+t_typedef::kind t_typedef::typedef_kind() const {
+  if (dynamic_cast<const t_placeholder_typedef*>(this) != nullptr) {
+    assert(!unnamed_);
+    return kind::placeholder;
+  } else if (unnamed_) {
+    return kind::unnamed;
+  } else {
+    return kind::defined;
+  }
+}
+
+std::unique_ptr<t_typedef> t_typedef::make_unnamed(
+    t_program* program, std::string name, t_type_ref type) {
+  auto ret = std::make_unique<t_typedef>(program, std::move(name), type);
+  ret->unnamed_ = true;
+  return ret;
 }
 
 bool t_placeholder_typedef::resolve() {

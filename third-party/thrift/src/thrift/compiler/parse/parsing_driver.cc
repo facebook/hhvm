@@ -501,7 +501,7 @@ t_type_ref parsing_driver::new_type_ref(
   // NOTE(afuller): This is not a safe assumption as it breaks all
   // dynamic casts and t_type::is_* calls.
   return *add_unnamed_typedef(
-      std::make_unique<t_typedef>(
+      t_typedef::make_unnamed(
           const_cast<t_program*>(type.program()), type.get_name(), type),
       std::move(annotations),
       range);

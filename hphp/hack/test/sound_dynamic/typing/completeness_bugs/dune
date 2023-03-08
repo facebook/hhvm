@@ -15,6 +15,7 @@
    %{project_root}/hack/test/sound_dynamic/typing/completeness_bugs
    --program
    %{exe:../../../../src/hh_single_type_check.exe}
+   --batch
    --in-extension
    .bad.php
    --out-extension

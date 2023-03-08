@@ -15,7 +15,7 @@ namespace HH {
    * This currently includes both Hack Arrays (vec, dict, keyset) and Legacy
    * Arrays (varray, darray).
    */
-  <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType>>
+  <<__Sealed(dict::class, keyset::class, vec::class), __SupportDynamicType, __NoAutoDynamic>>
   abstract class AnyArray<
     +Tk as arraykey,
     +Tv,
@@ -28,7 +28,7 @@ namespace HH {
    *
    * `dict` is a value type, so any mutation produces a new value.
    */
-  <<__SupportDynamicType>>
+  <<__SupportDynamicType, __NoAutoDynamic>>
   abstract final class dict<
     +Tk as arraykey,
     +Tv,
@@ -39,7 +39,7 @@ namespace HH {
    *
    * `keyset` is a value type, so any mutation produces a new value.
    */
-  <<__SupportDynamicType>>
+  <<__SupportDynamicType, __NoAutoDynamic>>
   abstract final class keyset<+T as arraykey>
     extends AnyArray<T, T> {}
 
@@ -48,7 +48,7 @@ namespace HH {
    *
    * `vec` is a value type, so any mutation produces a new value.
    */
-  <<__SupportDynamicType>>
+  <<__SupportDynamicType, __NoAutoDynamic>>
   abstract final class vec<+T> extends AnyArray<int, T> {}
 
 } // namespace HH

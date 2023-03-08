@@ -40,7 +40,7 @@ namespace HH {
     KeyedTraversable::class,
     \ResourceBundle::class,
     \SplHeap::class,
-  )>>
+  ), __SupportDynamicType, __NoAutoDynamic>>
   interface Traversable<+Tv> {
 
   }
@@ -73,8 +73,8 @@ namespace HH {
     KeyedIterable::class,
     KeyedIterator::class,
     \MysqlRow::class,
-  )>>
-  interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
+  ), __NoAutoDynamic, __SupportDynamicType>>
+  interface KeyedTraversable<+Tk as FIXME\SUPPORTDYN_MARKER<mixed>, +Tv> extends Traversable<Tv> {}
 
   /**
    * Represents an entity that can be iterated over using `foreach`, without
@@ -88,7 +88,7 @@ namespace HH {
    * @guide /hack/collections/introduction
    * @guide /hack/collections/interfaces
    */
-  <<__Sealed(KeyedContainer::class)>>
+  <<__Sealed(KeyedContainer::class), __NoAutoDynamic, __SupportDynamicType>>
   interface Container<+Tv> extends Traversable<Tv> {
 
   }
@@ -110,7 +110,7 @@ namespace HH {
     \ConstMap::class,
     \ConstSet::class,
     AnyArray::class,
-  )>>
+  ), __SupportDynamicType, __NoAutoDynamic>>
   interface KeyedContainer<+Tk as arraykey, +Tv>
     extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
 

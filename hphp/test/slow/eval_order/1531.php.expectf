@@ -1,7 +1,7 @@
-Warning: class_parents(): Class A does not exist in %s/test/slow/eval_order/1531.php on line 16
+Warning: class_parents(): Class A1531 does not exist in %s/test/slow/eval_order/1531.php on line 8
 bool(false)
 dict(1) {
-  ["B"]=>
-  string(1) "B"
+  ["B1531"]=>
+  string(5) "B1531"
 }
 bool(true)

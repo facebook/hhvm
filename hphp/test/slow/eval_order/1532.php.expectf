@@ -1,7 +1,7 @@
-Warning: class_uses(): Class A does not exist in %s/test/slow/eval_order/1532.php on line 16
+Warning: class_uses(): Class A1532 does not exist in %s/test/slow/eval_order/1532.php on line 8
 bool(false)
 dict(1) {
-  ["T"]=>
-  string(1) "T"
+  ["T1532"]=>
+  string(5) "T1532"
 }
 bool(true)

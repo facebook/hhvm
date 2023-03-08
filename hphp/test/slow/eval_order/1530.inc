@@ -1,3 +1,3 @@
 <?hh
 
-class A implements I {}
+class A1530 implements I {}

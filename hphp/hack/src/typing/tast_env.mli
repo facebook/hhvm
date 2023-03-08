@@ -324,3 +324,7 @@ val fill_in_pos_filename_if_in_current_decl :
 
 (** Check if the environment is for a definition in a while that is a builtin. *)
 val is_hhi : env -> bool
+
+(** See {!Tast.check_status} to understand what this function returns from the
+    environment. *)
+val get_check_status : env -> Tast.check_status

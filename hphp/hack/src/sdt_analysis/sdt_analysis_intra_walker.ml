@@ -38,19 +38,22 @@ let remove_supportdyn_from_ty ty =
   | _ -> ty
 
 let signature_check decorated_constraint env id params ret =
-  let is_supportdyn_of_mixed ty =
-    Tast_env.is_sub_type env ty supportdyn_of_mixed
-  in
-  let fails_formation =
-    List.exists params ~f:(fun param ->
-        not @@ is_supportdyn_of_mixed @@ fst param.A.param_type_hint)
-    || (not @@ is_supportdyn_of_mixed @@ fst ret)
-  in
-  if fails_formation then
-    let constraint_ = Lazy.force decorated_constraint in
-    WalkResult.singleton id constraint_
-  else
+  if Tast.is_under_dynamic_assumptions @@ Tast_env.get_check_status env then
     WalkResult.empty
+  else
+    let is_supportdyn_of_mixed ty =
+      Tast_env.is_sub_type env ty supportdyn_of_mixed
+    in
+    let fails_formation =
+      List.exists params ~f:(fun param ->
+          not @@ is_supportdyn_of_mixed @@ fst param.A.param_type_hint)
+      || (not @@ is_supportdyn_of_mixed @@ fst ret)
+    in
+    if fails_formation then
+      let constraint_ = Lazy.force decorated_constraint in
+      WalkResult.singleton id constraint_
+    else
+      WalkResult.empty
 
 let collect_sdts =
   object

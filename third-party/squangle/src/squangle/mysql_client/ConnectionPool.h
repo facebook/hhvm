@@ -354,7 +354,7 @@ class ConnectionPool
         mysql_client_(std::move(mysql_client)),
         conn_storage_(totalLimit(), idleTimeout()) {}
 
-  virtual ~ConnectionPool() {}
+  virtual ~ConnectionPool() override {}
 
   virtual void shutdown() = 0;
 

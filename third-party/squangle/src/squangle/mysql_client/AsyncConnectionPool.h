@@ -57,7 +57,7 @@ class AsyncConnectionPool : public ConnectionPool<AsyncMysqlClient> {
       PoolOptions pool_options = PoolOptions());
 
   // The destructor will start the shutdown phase
-  ~AsyncConnectionPool();
+  ~AsyncConnectionPool() override;
 
   FOLLY_NODISCARD folly::SemiFuture<ConnectResult> connectSemiFuture(
       const std::string& host,

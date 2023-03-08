@@ -1,5 +1,5 @@
 FoldedClass {
-    name: "\\quux",
+    name: "\\:quux",
     kind: Cclass(
         Concrete,
     ),
@@ -10,13 +10,13 @@ FoldedClass {
             kind: CCConcrete,
             pos: NPos,
             ty: HH\classname<this>,
-            origin: "\\quux",
+            origin: "\\:quux",
             refs: [],
         },
     },
 }
 FoldedClass {
-    name: "\\bar",
+    name: "\\:bar",
     kind: Cclass(
         Concrete,
     ),
@@ -27,16 +27,16 @@ FoldedClass {
             kind: CCConcrete,
             pos: NPos,
             ty: HH\classname<this>,
-            origin: "\\bar",
+            origin: "\\:bar",
             refs: [],
         },
     },
     xhp_attr_deps: {
-        "\\quux",
+        "\\:quux",
     },
 }
 FoldedClass {
-    name: "\\foo",
+    name: "\\:foo",
     kind: Cclass(
         Concrete,
     ),
@@ -47,12 +47,12 @@ FoldedClass {
             kind: CCConcrete,
             pos: NPos,
             ty: HH\classname<this>,
-            origin: "\\foo",
+            origin: "\\:foo",
             refs: [],
         },
     },
     xhp_attr_deps: {
-        "\\bar",
-        "\\quux",
+        "\\:bar",
+        "\\:quux",
     },
 }

@@ -407,7 +407,7 @@ Mask path(
       if (mask.includes_ref()) { // already set
         return;
       }
-      if (op::get_name_v<Id, Struct> == fieldNames[index]) {
+      if (op::get_name_v<Struct, Id> == fieldNames[index]) {
         mask.includes_ref().emplace()[folly::to_underlying(id())] =
             path<op::get_type_tag<Id, Struct>>(fieldNames, index + 1, other);
       }

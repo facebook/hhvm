@@ -130,16 +130,16 @@ using get_native_type = type::native_type<get_field_tag<Id, T>>;
 
 /// Gets the thrift field name, for example:
 ///
-/// * op::get_name_v<field_id<7>, MyStruct>
+/// * op::get_name_v<MyStruct, field_id<7>>
 ///   // Returns the thrift field name associated with field 7 in MyStruct.
 ///
-template <typename Id, typename T>
+template <typename T, typename Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
     detail::pa::__fbthrift_get_field_name<T, get_ordinal<Id, T>>();
 
-template <typename S, class Id>
-FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
-    detail::pa::__fbthrift_get_field_name<S, get_ordinal<Id, S>>();
+// TODO: replace get_name with get_name_v
+template <typename T, typename Id>
+FOLLY_INLINE_VARIABLE const folly::StringPiece get_name = get_name_v<T, Id>;
 
 /// Gets the Thrift field, for example:
 ///

@@ -48,7 +48,7 @@ TEST(GetTest, GetField) {
 template <typename T>
 FieldId findIdByName(const std::string& name) {
   return find_by_field_id<T>([&](auto id) {
-    return op::get_name_v<decltype(id), T> == name ? id() : FieldId{};
+    return op::get_name_v<T, decltype(id)> == name ? id() : FieldId{};
   });
 }
 

@@ -21,21 +21,22 @@
 #include <vector>
 
 #include "hphp/util/hash-map.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 
 struct PackageInfo {
   struct Package {
-    std::vector<std::string> m_uses;
-    std::vector<std::string> m_includes;
+    hphp_vector_string_set m_uses;
+    hphp_vector_string_set m_includes;
   };
 
   struct Deployment {
-    std::vector<std::string> m_packages;
+    hphp_vector_string_set m_packages;
     std::vector<std::regex> m_domains;
     // Need to maintain the string form of regex for cache key mangling
     // C++ does not provide a way to convert a regex back to string
-    std::vector<std::string> m_domainsOriginal;
+    hphp_vector_string_set m_domainsOriginal;
   };
 
   using PackageMap = hphp_vector_map<std::string, Package>;

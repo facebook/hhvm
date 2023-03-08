@@ -14,7 +14,6 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 cxx = "1.0.91"
 package = { version = "0.0.0", path = "../cargo" }
-toml = "=0.5.8"
 
 [build-dependencies]
 cxx-build = "1.0.91"

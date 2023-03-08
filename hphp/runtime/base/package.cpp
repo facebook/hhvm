@@ -29,7 +29,7 @@ namespace HPHP {
 
 PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
   std::ifstream file(path, std::ios::in);
-  if (!file.is_open()) return {};
+  if (!file.is_open()) return defaults();
 
   PackageMap packages;
   DeploymentMap deployments;
@@ -43,23 +43,36 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
 
   auto info = package::package_info_cpp_ffi(packages_toml);
 
+  auto const convert = [&] (auto const& v) {
+    hphp_vector_string_set result;
+    // hphp_vector_string_set inserts to the beginning instead of to the end,
+    // insert in reverse order to make up for this.
+    // rust::Vec does not define rbegin and rend.
+    for (size_t i = v.size(); i > 0; --i) {
+      result.insert(std::string(v[i-1]));
+    }
+    return result;
+  };
+
   for (auto& p : info.packages) {
-    std::vector<std::string> uses, includes;
-    for (auto& s : p.package.uses) uses.push_back(std::string(s));
-    for (auto& s : p.package.includes) includes.push_back(std::string(s));
-    packages.emplace(std::string(p.name), Package { uses, includes });
+    packages.emplace(std::string(p.name),
+                     Package {
+                       convert(p.package.uses),
+                       convert(p.package.includes)
+                     });
   }
 
   for (auto& d : info.deployments) {
-    std::vector<std::string> packages, domainsOriginal;
     std::vector<std::regex> domains;
-    for (auto& s : d.deployment.packages) packages.push_back(std::string(s));
     for (auto& s : d.deployment.domains) {
       domains.push_back(std::regex(std::string(s)));
-      domainsOriginal.push_back(std::string(s));
     }
     deployments.emplace(std::string(d.name),
-                        Deployment { packages, domains, domainsOriginal });
+                        Deployment {
+                          convert(d.deployment.packages),
+                          domains,
+                          convert(d.deployment.domains),
+                        });
   }
 #endif
 
@@ -72,9 +85,9 @@ PackageInfo PackageInfo::defaults() {
 }
 
 namespace {
-folly::dynamic mangleVecForCacheKey(const std::vector<std::string>& vec) {
+folly::dynamic mangleVecForCacheKey(const hphp_vector_string_set& data) {
   folly::dynamic result = folly::dynamic::array();
-  for (auto& s : vec) result.push_back(s);
+  for (auto& s : data) result.push_back(s);
   return result;
 }
 } // namespace

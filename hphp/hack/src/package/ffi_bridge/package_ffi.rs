@@ -38,7 +38,7 @@ mod ffi {
 
 pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
     let info = package::PackageInfo::from_text(&source_text.to_string()).unwrap();
-    let convert = |v: Option<&Vec<toml::Spanned<String>>>| {
+    let convert = |v: Option<&package::NameSet>| {
         v.map(|v| v.iter().map(|v| v.get_ref().clone()).collect())
             .unwrap_or_default()
     };

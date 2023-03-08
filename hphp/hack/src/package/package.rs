@@ -6,6 +6,7 @@
 use anyhow::Context;
 use anyhow::Result;
 use hash::IndexMap;
+use hash::IndexSet;
 use serde::Deserialize;
 use toml::Spanned;
 
@@ -13,6 +14,7 @@ use toml::Spanned;
 // Alternatively, we could use HashMap for performance
 type PackageMap = IndexMap<Spanned<String>, Package>;
 type DeploymentMap = IndexMap<String, Deployment>;
+pub type NameSet = IndexSet<Spanned<String>>;
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -22,14 +24,14 @@ struct Config {
 
 #[derive(Debug, Deserialize)]
 pub struct Package {
-    pub uses: Option<Vec<Spanned<String>>>,
-    pub includes: Option<Vec<Spanned<String>>>,
+    pub uses: Option<NameSet>,
+    pub includes: Option<NameSet>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Deployment {
-    pub packages: Option<Vec<Spanned<String>>>,
-    pub domains: Option<Vec<Spanned<String>>>,
+    pub packages: Option<NameSet>,
+    pub domains: Option<NameSet>,
 }
 
 #[derive(Debug)]

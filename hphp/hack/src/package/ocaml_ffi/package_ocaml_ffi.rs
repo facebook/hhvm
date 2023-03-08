@@ -53,7 +53,7 @@ ocaml_ffi! {
                     let id = x.into_inner();
                     (pos, id)
                 };
-                let convert_many = |xs: Vec<Spanned<String>>| -> Vec<PosId> {
+                let convert_many = |xs: package::NameSet| -> Vec<PosId> {
                     xs.into_iter().map(convert).collect()
                 };
 

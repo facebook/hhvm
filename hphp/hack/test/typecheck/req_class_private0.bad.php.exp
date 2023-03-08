@@ -1,0 +1,4 @@
+File "req_class_private0.bad.php", line 22, characters 16-25:
+You cannot access this member (Typing[4112])
+  File "req_class_private0.bad.php", line 7, characters 27-36:
+  This member is private

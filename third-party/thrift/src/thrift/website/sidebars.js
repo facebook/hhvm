@@ -65,8 +65,7 @@ module.exports = {
         "idl/field-qualifiers",
         "idl/structured-annotations",
         "idl/standard-thrift-annotation-library",
-        "idl/mixins",
-        "idl/schema-evolution"
+        "idl/mixins"
       ]
     },
     {
@@ -90,9 +89,6 @@ module.exports = {
             "spec/definition/universal-name",
             "spec/definition/program",
             "spec/definition/data",
-            "spec/definition/exception",
-            "spec/definition/compatibility",
-            "spec/definition/tolerance",
             "spec/definition/value",
             "spec/definition/annotation",
             "spec/definition/adapter",
@@ -154,6 +150,9 @@ module.exports = {
         },
         'fb/features/interactions',
         'features/adapters',
+        'features/exception',
+        'features/compatibility',
+        'features/tolerance',
 
         // Beta features:
         {

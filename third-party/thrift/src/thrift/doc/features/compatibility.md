@@ -10,9 +10,50 @@ Clearly not all changes to a Thrift struct permit the old and new version to be 
 
 This section describes when two Thrift structs are compatible with each other - i.e., when it is always possible to serialize from one struct and deserialize into the other without problems.  This section simply clarifies information already presented in the previous sections on **Serialization** and **Deserialization**.  Everything described here can be inferred by reading those sections.
 
+The following scenarios get considered when defining compatibility. Note that not all combinations are currently possible
+
+The following outlines the compatibility for changes to data:
+
+|Change    |Wire compatible  [^1] |Code compatible  [^2] |Notes    |
+|---    |---    |---    |---    |
+|Add a field    |yes    |yes    |Dropped by old    |
+|Remove a field    |yes    |no    |Dropped by new    |
+|Rename a field    |yes    |no    |Only affect code gen and text format    |
+|Change field type    |rarely    |no    |Only changes between utf-8 encoded string and binary are wire compatible    |
+|Add enum value    |yes    |yes    |Preserved by old    |
+|Remove enum value    |yes    |no    |Preserved by new    |
+|New enum field with no 0 value    |yes    |yes    |    |
+|Default on new non-optional field    |yes    |yes    |Gets new default    |
+|Default on new optional field    |yes    |yes    |Stays unset    |
+|Default changed on an non-optional field    |yes    |yes    |    |
+|Default changed on an optional field    |yes    |yes    |    |
+|Constant changed    |yes    |yes    |Old constant in old, new constant in new    |
+|Required to unspecified    |yes    |no    |    |
+|Unspecified to required    |yes    |no    |    |
+|Optional to unspecified    |yes    |no    |    |
+|Unspecified to optional    |yes    |no    |    |
+|Optional to required    |yes    |no    |    |
+|Required to optional    |yes    |no    |    |
+|Required to terse    |yes    |no    |    |
+|Terse to required    |yes    |no    |    |
+|Optional to terse    |yes    |no    |    |
+|Terse to optional    |yes    |no    |    |
+|Unspecified to terse    |yes    |no    |    |
+|Terse to unspecified    |yes    |no    |    |
+|Mixin to non-mixin    |yes    |no    |Only code gen changes    |
+|Non-mixin to mixin    |yes    |yes    |Only code gen changes    |
+|Struct to union    |no    |no    |    |
+|Union to struct    |no    |no    |    |
+|Struct to exception    |yes    |yes    |    |
+|Exception to struct    |yes    |yes    |    |
+|Union to exception    |no    |no    |    |
+|Exception to union    |no    |no    |    |
+|Singular to container    |no    |no    |    |
+|Container to singular    |no    |no    |    |
+
 :::note
 
-Thrift fields using **"[default requiredness](./field-qualifiers#fields-that-dont-have-a-specifier-or-thrifttersewrite)"** are defined as **"unqualified"** in this document.
+Thrift fields using **"[default requiredness](../idl/field-qualifiers#fields-that-dont-have-a-specifier-or-thrifttersewrite)"** are defined as **"unqualified"** in this document.
 
 :::
 
@@ -140,4 +181,5 @@ When a Thrift struct contains fields with enumeration types, the following modif
 * Adding a new enumerator
 * Renaming an enumerator but keeping its integer value the same (only when serializing by field id)
 
----
+[^1]: Whether the data is changed over the wire.
+[^2]: Whether the code change is needed.

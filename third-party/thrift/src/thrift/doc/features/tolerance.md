@@ -8,6 +8,11 @@ This category of conformance describes the expected behavior when a reader reads
 * Corrupted data: Reader returns data that might be different from what's serialized.
 * Exception or corrupted data: Either ProtocolException will be thrown, or reader returns incorrect data.
 
+:::note
+This document covers aspirational behavior of existing Thrift implementations.
+Thrift does not currently support all cases below
+:::
+
 ## Cases
 
  | Issue                                        | Result                      |

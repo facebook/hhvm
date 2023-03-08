@@ -426,7 +426,7 @@ Enums are treated like integer by Thrift, if you send a value which is not in th
 :::
 
 :::caution
-Removing and adding enum values can be dangerous - see [Schema Compatibility](schema-evolution.md).
+Removing and adding enum values can be dangerous - see [Schema Compatibility](/features/compatibility.md).
 :::
 
 ### Typedefs
@@ -852,7 +852,7 @@ WARNING: New arguments could be added to a method, but it is better to define an
 
 * RPC idempotency keywords: `readonly`, `idempotent`.
 
-Please refer [Automatic Retries, RPC idempotency and Error Classification](/spec/definition/exception.md) for more information on why you should use these keywords and how these combined can enable automatic retries in SR.
+Please refer [Automatic Retries, RPC idempotency and Error Classification](/features/exception.md) for more information on why you should use these keywords and how these combined can enable automatic retries in SR.
 
 ### Streaming
 

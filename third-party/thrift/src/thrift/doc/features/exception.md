@@ -1,8 +1,9 @@
----
-state: draft
----
-
 # Errors and Exceptions
+
+:::note
+This document covers aspirational behavior of existing Thrift implementations.
+Thrift does not currently support all cases below
+:::
 
 How error classifications, functions qualifiers, and exceptions work together.
 
@@ -67,7 +68,7 @@ permanent client exception UnSupportedType {...}
 
 ## RPC Idempotency
 
-**RPC idempotency** determines the retryability of the RPC method using reserved function qualifier keywords `readonly` and `idempotent`. A *readonly* method has no meaningful side effects, so it can be called any time. A *idempotent* method can be immediately retried after a transient failure. Please refer to the [schema](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift) and the [interface definition](interface.md) for more detail and syntax.
+**RPC idempotency** determines the retryability of the RPC method using reserved function qualifier keywords `readonly` and `idempotent`. A *readonly* method has no meaningful side effects, so it can be called any time. A *idempotent* method can be immediately retried after a transient failure. Please refer to the [schema](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift) and the [interface definition](../spec/definition/interface.md) for more detail and syntax.
 
 ### Example
 

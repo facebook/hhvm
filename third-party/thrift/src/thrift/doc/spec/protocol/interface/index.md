@@ -59,7 +59,7 @@ The server **must** serialize the response depending on the response type as des
 
 ### Declared Response and Declared Exception
 
-The Thrift struct used to represent declared responses and [declared exceptions](../../definition/exception.md#exceptions) **must** be a union with an empty name (`""`). The first field in the union with Field ID of `0` **must** be for the declared response. If the declared response type is `void` then the field for the declared response **must** be skipped. The Thrift struct **must** also have a field for each declared exception for that Interface with Field IDs matching those specified in the IDL. The correct field **must** be filled in by the server and then serialized using one of Thrift’s data protocols.
+The Thrift struct used to represent declared responses and [declared exceptions](/features/exception.md#exceptions) **must** be a union with an empty name (`""`). The first field in the union with Field ID of `0` **must** be for the declared response. If the declared response type is `void` then the field for the declared response **must** be skipped. The Thrift struct **must** also have a field for each declared exception for that Interface with Field IDs matching those specified in the IDL. The correct field **must** be filled in by the server and then serialized using one of Thrift’s data protocols.
 
 For example, this method:
 
@@ -83,7 +83,7 @@ If the response is a declared exception, the response metadata **must** indicate
 
 ### Undeclared Exception
 
-[Undeclared exceptions](../../definition/exception.md#exceptions) **must** be sent through the response metadata and the metadata **must** indicate that the response is an undeclared exception and **must** contain the exception name and the message.
+[Undeclared exceptions](/features/exception.md#exceptions) **must** be sent through the response metadata and the metadata **must** indicate that the response is an undeclared exception and **must** contain the exception name and the message.
 
 ### Any Exception
 

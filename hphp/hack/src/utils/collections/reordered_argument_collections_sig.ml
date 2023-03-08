@@ -13,7 +13,7 @@ module type Map_S = sig
 
   val filter : 'a t -> f:(key -> 'a -> bool) -> 'a t
 
-  val filter_map : 'a t -> f:('a -> 'b option) -> 'b t
+  val filter_map : 'a t -> f:(key -> 'a -> 'b option) -> 'b t
 
   val fold : 'a t -> init:'b -> f:(key -> 'a -> 'b -> 'b) -> 'b
 

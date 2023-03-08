@@ -45,7 +45,7 @@ let find_symbol_in_context
     ~(is_symbol : string -> bool) :
     (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
   Provider_context.get_entries ctx
-  |> Relative_path.Map.filter_map ~f:(fun entry ->
+  |> Relative_path.Map.filter_map ~f:(fun _path entry ->
          let file_info =
            Ast_provider.compute_file_info
              ~popt:(Provider_context.get_popt ctx)

@@ -1038,12 +1038,13 @@ and class_decl
       dc_docs_url = c.sc_docs_url;
     }
   in
+  let filter_snd map = SMap.filter_map (fun _k v -> snd v) map in
   let member_heaps_values =
     {
-      Decl_store.m_static_properties = SMap.filter_map snd static_props;
-      m_properties = SMap.filter_map snd props;
-      m_static_methods = SMap.filter_map snd static_methods;
-      m_methods = SMap.filter_map snd methods;
+      Decl_store.m_static_properties = filter_snd static_props;
+      m_properties = filter_snd props;
+      m_static_methods = filter_snd static_methods;
+      m_methods = filter_snd methods;
       m_constructor = Option.(cstr |> fst >>= snd);
     }
   in

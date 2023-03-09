@@ -39,14 +39,20 @@ Thrift supports single-line and multiline comments. Single-line comments start w
 
 ### Identifiers
 
-Identifiers begin with an uppercase or lowercase letter `A` through `Z` or an underscore (`_`). Subsequent characters can also be digits `0` through `9` or a dot (`.`). Identifiers with dots are used for qualified names such as `search_types.Query`.
+Identifiers begin with an uppercase or lowercase letter `A` through `Z` or an underscore (`_`). Subsequent characters can also be digits `0` through `9`.
 
 Identifiers in Thrift are case-sensitive.
 
 ```grammar
 identifier  ::=  id_start id_continue*
 id_start    ::=  "a"..."z" | "A"..."Z" | "_"
-id_continue ::=  id_start | digit | "."
+id_continue ::=  id_start | digit
+```
+
+A qualified identifier is a sequence of two or more identifiers separated by dots, e.g. `search_types.Query`. `maybe_qualified_id` denotes a qualified or unqualified identifier.
+
+```grammar
+maybe_qualified_id ::=  identifier ["." identifier]*
 ```
 
 ### Keywords
@@ -257,15 +263,12 @@ This turns all fields in the current file into terse-write fields when possible.
 
 ## Namespace Directives
 
-```
-NamespaceDirective ::=
-  "namespace" Name ( Name | string_literal )
-
-Name ::=
-  identifier ( "." identifier )*
+```grammar
+namespace_directive ::=  "namespace" maybe_qualified_id namespace_name
+namespace_name      ::=  maybe_qualified_id | string_literal
 ```
 
-Namespace directives instruct the compiler on top level structure of the generated code. The details are language-specific (*we need link to compiler doc*). Namespace directives do not affect the Thrift file semantics.
+Namespace directives instruct the compiler on top level structure of the generated code. The details are language-specific. Namespace directives do not affect the Thrift file semantics.
 
 ```thrift
 // Directs the compiler to generate C++ code inside the namespace
@@ -395,7 +398,7 @@ The element, key, and value types can be any Thrift type, including nested conta
 TypeSpecification ::=
   PrimitiveType
 | ContainerType
-| Name
+| maybe_qualified_id
 ```
 
 A type specification is used to refer to a type. It can be a primitive type, a container type, or a name that denotes a type defined elsewhere. The name can be an identifier that denotes a type defined in the same Thrift file, or a qualified name of the form `filename.typename` where `filename` and `typename` are identifiers, and `typename` denotes a type defined in the Thrift file denoted by `filename`.
@@ -600,7 +603,7 @@ Constant ::=
 | float
 | string_literal
 | bool_literal
-| Name
+| maybe_qualified_id
 | ListOrSetConstant
 | MapConstant
 
@@ -780,7 +783,7 @@ Terse fields do not distinguish whether they are explicitly set. They are skippe
 
 ```
 service_definition ::=
-  "service" identifier [ "extends" Name ] "{"
+  "service" identifier [ "extends" maybe_qualified_id ] "{"
     ( FunctionSpecification )*
   "}"
 
@@ -790,7 +793,6 @@ FunctionSpecification ::=
   ( ParameterSpecification )*
   ")"
   [ "throws" "(" ( FieldSpecification )+ ")" ]
-  [ "stream throws" "(" ( FieldSpecification )+ ")" ]
 
 ResultType ::= "void" | "oneway void" | [ "stream" ] TypeSpecification
 

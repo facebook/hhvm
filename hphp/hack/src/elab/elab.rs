@@ -252,6 +252,8 @@ fn elaborate<T: Transform>(
         passes::validate_class_methods::ValidateClassMethodsPass::default(),
 
         passes::validate_global_const::ValidateGlobalConstPass::default(),
+
+        passes::validate_class_member::ValidateClassMemberPass::default(),
     ];
 
     let mut errs = Vec::default();

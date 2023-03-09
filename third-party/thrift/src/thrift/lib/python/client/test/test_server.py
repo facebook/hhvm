@@ -20,7 +20,7 @@ import contextlib
 import tempfile
 import time
 import typing
-from multiprocessing import Process
+from multiprocessing import Event, Process, synchronize
 
 from thrift.py3.server import get_context, SocketAddress, ThriftServer
 from thrift.python.leaf.services import LeafServiceInterface
@@ -92,22 +92,40 @@ class LeafServiceHandler(EchoServiceHandler, LeafServiceInterface):
 
 @contextlib.contextmanager
 def server_in_another_process() -> typing.Generator[str, None, None]:
-    async def start_server_async(path: str) -> None:
+    async def start_server_async(
+        path: str,
+        server_ready_event: synchronize.Event,
+        test_done_event: synchronize.Event,
+    ) -> None:
         server = ThriftServer(LeafServiceHandler(), path=path)
-        await server.serve()
+        task = asyncio.create_task(server.serve())
+        await server.get_address()
+        server_ready_event.set()
+        while not test_done_event.is_set():
+            await asyncio.sleep(0)
+        server.stop()
+        await task
 
-    def start_server(path: str) -> None:
-        asyncio.run(start_server_async(path))
+    def start_server(
+        path: str,
+        server_ready_event: synchronize.Event,
+        test_done_event: synchronize.Event,
+    ) -> None:
+        asyncio.run(start_server_async(path, server_ready_event, test_done_event))
 
     with tempfile.NamedTemporaryFile() as socket:
         socket.close()
-        process = Process(target=start_server, args=(socket.name,))
+        server_ready_event = Event()
+        test_done_event = Event()
+        process = Process(
+            target=start_server, args=(socket.name, server_ready_event, test_done_event)
+        )
         process.start()
-        time.sleep(1)  # wait for server to start up
+        server_ready_event.wait()
         try:
             yield socket.name
         finally:
-            process.terminate()
+            test_done_event.set()
             process.join()
 
 

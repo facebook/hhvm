@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-// NOTE: Most of the types in this file come from runtime/vm/hhbc.h and need to
+// NOTE: Most of the types in this file come from runtime/vm/opcodes.h and need to
 // be kept in sync.
 
 use std::collections::HashMap;

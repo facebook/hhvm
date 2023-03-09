@@ -7,6 +7,7 @@ use hhbc_gen::ImmType;
 use hhbc_gen::Inputs;
 use hhbc_gen::InstrFlags;
 use hhbc_gen::OpcodeData;
+use hhbc_gen::Outputs;
 use proc_macro2::Ident;
 use proc_macro2::Punct;
 use proc_macro2::Spacing;
@@ -73,6 +74,7 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         let mut variant_names_matches = Vec::new();
         let mut variant_index_matches = Vec::new();
         let mut num_inputs_matches = Vec::new();
+        let mut num_outputs_matches = Vec::new();
         for (idx, opcode) in opcodes.iter().enumerate() {
             let name = Ident::new(opcode.name, Span::call_site());
             let name_str = &opcode.name;
@@ -110,6 +112,16 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                 }
             };
             num_inputs_matches.push(num_inputs);
+
+            let num_outputs = match opcode.outputs {
+                Outputs::NOV => quote!(#enum_name :: #name #ignore_args => 0),
+                Outputs::Fixed(ref outputs) => {
+                    let n = outputs.len();
+                    quote!(#enum_name :: #name #ignore_args => #n)
+                }
+                Outputs::FCall => quote!(#enum_name :: #name #ignore_args => 0),
+            };
+            num_outputs_matches.push(num_outputs);
         }
         quote!(
             impl #impl_generics #enum_name #impl_types #impl_where {
@@ -128,6 +140,12 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                 pub fn num_inputs(&self) -> usize {
                     match self {
                         #(#num_inputs_matches),*,
+                    }
+                }
+
+                pub fn num_outputs(&self) -> usize {
+                    match self {
+                        #(#num_outputs_matches),*,
                     }
                 }
             }
@@ -665,6 +683,37 @@ mod tests {
                         }
                     }
                     pub fn num_inputs(&self) -> usize {
+                        match self {
+                            MyOps::TestZeroImm => 0,
+                            MyOps::TestOneImm(..) => 0,
+                            MyOps::TestTwoImm(..) => 0,
+                            MyOps::TestThreeImm(..) => 0,
+                            MyOps::TestAsStruct { .. } => 0,
+                            MyOps::TestAA(..) => 0,
+                            MyOps::TestARR(..) => 0,
+                            MyOps::TestBA(..) => 0,
+                            MyOps::TestBA2(..) => 0,
+                            MyOps::TestBLA(..) => 0,
+                            MyOps::TestDA(..) => 0,
+                            MyOps::TestFCA(..) => 0,
+                            MyOps::TestI64A(..) => 0,
+                            MyOps::TestIA(..) => 0,
+                            MyOps::TestILA(..) => 0,
+                            MyOps::TestITA(..) => 0,
+                            MyOps::TestIVA(..) => 0,
+                            MyOps::TestKA(..) => 0,
+                            MyOps::TestLA(..) => 0,
+                            MyOps::TestLAR(..) => 0,
+                            MyOps::TestNLA(..) => 0,
+                            MyOps::TestOA(..) => 0,
+                            MyOps::TestOAL(..) => 0,
+                            MyOps::TestRATA(..) => 0,
+                            MyOps::TestSA(..) => 0,
+                            MyOps::TestSLA(..) => 0,
+                            MyOps::TestVSA(..) => 0,
+                        }
+                    }
+                    pub fn num_outputs(&self) -> usize {
                         match self {
                             MyOps::TestZeroImm => 0,
                             MyOps::TestOneImm(..) => 0,

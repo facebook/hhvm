@@ -119,7 +119,7 @@ bool validate_mask(MaskRef ref) {
   std::unordered_set<FieldId> ids;
   ids.reserve(op::size_v<Struct>);
   op::for_each_ordinal<Struct>(
-      [&](auto ord) { ids.insert(op::get_field_id<decltype(ord), Struct>()); });
+      [&](auto ord) { ids.insert(op::get_field_id<Struct, decltype(ord)>()); });
   const FieldIdToMask& map = ref.mask.includes_ref()
       ? ref.mask.includes_ref().value()
       : ref.mask.excludes_ref().value();
@@ -145,7 +145,7 @@ bool validate_fields(MaskRef ref) {
       return;
     }
     using Ord = decltype(ord);
-    MaskRef next = ref.get(op::get_field_id<Ord, Struct>());
+    MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
     if (next.isAllMask() || next.isNoneMask()) {
       return;
     }
@@ -220,7 +220,7 @@ void ensure_fields(MaskRef ref, Struct& t) {
   if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
     op::for_each_ordinal<Struct>([&](auto ord) {
       using Ord = decltype(ord);
-      MaskRef next = ref.get(op::get_field_id<Ord, Struct>());
+      MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
       if (next.isNoneMask()) {
         return;
       }
@@ -254,7 +254,7 @@ void clear_fields(MaskRef ref, Struct& t) {
   if constexpr (!std::is_const_v<std::remove_reference_t<Struct>>) {
     op::for_each_ordinal<Struct>([&](auto ord) {
       using Ord = decltype(ord);
-      MaskRef next = ref.get(op::get_field_id<Ord, Struct>());
+      MaskRef next = ref.get(op::get_field_id<Struct, Ord>());
       if (next.isNoneMask()) {
         return;
       }
@@ -310,7 +310,7 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
     bool copied = false;
     op::for_each_ordinal<DstStruct>([&](auto ord) {
       using Ord = decltype(ord);
-      MaskRef next = ref.get(op::get_field_id<Ord, DstStruct>());
+      MaskRef next = ref.get(op::get_field_id<DstStruct, Ord>());
       // Id doesn't exist in field mask, skip.
       if (next.isNoneMask()) {
         return;
@@ -380,7 +380,7 @@ Mask path(const Mask& other) {
   using Struct = type::native_type<Tag>;
   static_assert(is_thrift_struct_v<Struct>);
   Mask mask;
-  using fieldId = op::get_field_id<Id, Struct>;
+  using fieldId = op::get_field_id<Struct, Id>;
   static_assert(fieldId::value != FieldId{});
   mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
       path<op::get_type_tag<Struct, Id>, Ids...>(other);

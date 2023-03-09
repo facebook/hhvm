@@ -232,7 +232,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   template <typename Id, typename U>
   decltype(auto) getRawPatch(U&& patch) const {
     // Field Ids must always be used to access patch(Prior).
-    return *patch->get(get_field_id<Id, T>{});
+    return *patch->get(get_field_id<T, Id>{});
   }
 };
 

@@ -65,7 +65,7 @@ std::enable_if_t<size_v<T> == 0, bool> find_by_ordinal(F&&) {
   return false;
 }
 
-template <typename Id, typename T>
+template <typename T, typename Id>
 using get_field_id = folly::conditional_t<
     get_ordinal<T, Id>::value == type::Ordinal{},
     type::field_id<0>,
@@ -73,16 +73,16 @@ using get_field_id = folly::conditional_t<
 
 /// Gets the field id, for example:
 ///
-/// * using FieldId = get_field_id<ident::foo, MyS>
+/// * using FieldId = get_field_id<MyS, ident::foo>
 ///   // Resolves to field id assigned to the field "foo" in MyS.
-template <typename Id, typename T>
+template <typename T, typename Id>
 FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
-    get_field_id<Id, T>::value;
+    get_field_id<T, Id>::value;
 
 /// Calls the given function with each field_id<{id}> in Thrift class.
 template <typename T, typename F>
 void for_each_field_id(F&& f) {
-  for_each_ordinal<T>([&](auto ord) { f(get_field_id<decltype(ord), T>{}); });
+  for_each_ordinal<T>([&](auto ord) { f(get_field_id<T, decltype(ord)>{}); });
 }
 
 /// Calls the given function with with each field_id<{id}>, returing the
@@ -90,7 +90,7 @@ void for_each_field_id(F&& f) {
 template <typename T, typename F>
 decltype(auto) find_by_field_id(F&& f) {
   return find_by_ordinal<T>(
-      [&](auto ord) { return f(get_field_id<decltype(ord), T>{}); });
+      [&](auto ord) { return f(get_field_id<T, decltype(ord)>{}); });
 }
 
 /// Gets the ident, for example:
@@ -123,7 +123,7 @@ using get_field_tag = typename std::conditional_t<
     void,
     type::field<
         get_type_tag<T, Id>,
-        FieldContext<T, folly::to_underlying(get_field_id<Id, T>::value)>>>;
+        FieldContext<T, folly::to_underlying(get_field_id<T, Id>::value)>>>;
 
 template <typename Id, typename T>
 using get_native_type = type::native_type<get_field_tag<T, Id>>;

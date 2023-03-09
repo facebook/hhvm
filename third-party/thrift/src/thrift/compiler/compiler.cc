@@ -455,12 +455,13 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     source_manager& sm,
     diagnostic_context& ctx,
     const std::string& filename,
-    parsing_params params) {
+    parsing_params params,
+    bool return_nullptr_on_failure) {
   parsing_driver driver(sm, ctx, filename, std::move(params));
   auto program = driver.parse();
   if (program != nullptr) {
     auto result = standard_mutators()(ctx, *program);
-    if (result.unresolvable_typeref) {
+    if (result.unresolvable_typeref && return_nullptr_on_failure) {
       // Stop processing if there is unresolvable typeref
       program = nullptr;
     }
@@ -526,7 +527,11 @@ compile_result compile(const std::vector<std::string>& arguments) {
 
   // Parse it!
   auto program = parse_and_mutate_program(
-      source_mgr, ctx, input_filename, std::move(pparams));
+      source_mgr,
+      ctx,
+      input_filename,
+      std::move(pparams),
+      true /* return_nullptr_on_failure */);
   if (!program) {
     return result;
   }

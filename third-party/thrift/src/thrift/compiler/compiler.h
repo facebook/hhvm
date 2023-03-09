@@ -66,7 +66,8 @@ std::unique_ptr<t_program_bundle> parse_and_mutate_program(
     source_manager& sm,
     diagnostic_context& ctx,
     const std::string& filename,
-    parsing_params params);
+    parsing_params params,
+    bool return_nullptr_on_failure = false);
 
 /**
  * Runs the Thrift parser with the specified (command-line) arguments and

@@ -117,7 +117,7 @@ struct ast_mutators {
   bool resolve_all_types(diagnostics_engine& diags, t_program_bundle& bundle) {
     bool success = true;
     for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
-      success |= diags.check(
+      success &= diags.check(
           td.resolve(),
           td,
           "{} `{}` not defined.",

@@ -2476,6 +2476,12 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:9] Definition `Bar3` cannot have both @cpp.StrongType and @cpp.Adapter annotations\n",
         )
 
+    def test_nonexist_type_in_variable(self):
+        write_file("foo.thrift", 'const map<i8, string> foo = {1: "str"}')
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(err, "[ERROR:foo.thrift:1] Type `foo.i8` not defined.\n")
+
     def test_cycle(self):
         write_file(
             "foo.thrift",

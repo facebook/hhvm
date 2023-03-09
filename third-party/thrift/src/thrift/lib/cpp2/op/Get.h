@@ -96,9 +96,9 @@ decltype(auto) find_by_field_id(F&& f) {
 /// Gets the ident, for example:
 ///
 ///   // Resolves to thrift::ident::* type associated with field 7 in MyS.
-///   using Ident = get_ident<field_id<7>, MyS>
+///   using Ident = get_ident<MyS, field_id<7>>
 ///
-template <typename Id, typename T>
+template <typename T, typename Id>
 using get_ident = detail::pa::ident<T, get_ordinal<T, Id>>;
 
 /// It calls the given function with each folly::tag<thrift::ident::*>{} in
@@ -106,7 +106,7 @@ using get_ident = detail::pa::ident<T, get_ordinal<T, Id>>;
 template <typename T, typename F>
 void for_each_ident(F&& f) {
   for_each_ordinal<T>(
-      [&](auto ord) { f(folly::tag_t<get_ident<decltype(ord), T>>{}); });
+      [&](auto ord) { f(folly::tag_t<get_ident<T, decltype(ord)>>{}); });
 }
 
 /// Gets the Thrift type tag, for example:
@@ -210,7 +210,7 @@ template <typename Id, typename T, typename>
 struct Get {
   template <typename U>
   constexpr decltype(auto) operator()(U&& obj) const {
-    return access_field<get_ident<Id, T>>(std::forward<U>(obj));
+    return access_field<get_ident<T, Id>>(std::forward<U>(obj));
   }
 };
 template <typename Id, typename Tag>

@@ -1469,6 +1469,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "bstr 1.2.0",
+ "core_utils_rust",
  "file_info",
  "hash",
  "itertools 0.10.5",

@@ -250,6 +250,8 @@ fn elaborate<T: Transform>(
         passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
 
         passes::validate_class_methods::ValidateClassMethodsPass::default(),
+
+        passes::validate_global_const::ValidateGlobalConstPass::default(),
     ];
 
     let mut errs = Vec::default();

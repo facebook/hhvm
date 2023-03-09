@@ -55,8 +55,8 @@ TEST_F(LexerTest, eof) {
 }
 
 TEST_F(LexerTest, identifier) {
-  auto lexer = make_lexer("foo _ bar42 baz.");
-  const std::string values[] = {"foo", "_", "bar42", "baz."};
+  auto lexer = make_lexer("foo _ bar42 foo.bar");
+  const std::string values[] = {"foo", "_", "bar42", "foo.bar"};
   for (auto value : values) {
     auto token = lexer.get_next_token();
     EXPECT_EQ(token.kind, tok::identifier);

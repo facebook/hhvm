@@ -56,8 +56,19 @@ bool is_hex_digit(char c) {
       (c >= 'A' && c <= 'F');
 }
 
-bool is_identifier_char(char c) {
-  return is_letter(c) || is_dec_digit(c) || c == '_' || c == '.';
+bool is_id_start(char c) {
+  return is_letter(c) || c == '_';
+}
+const char* lex_id_continuation(const char* p) {
+  while (is_id_start(*p) || is_dec_digit(*p)) {
+    ++p;
+  }
+  return p;
+}
+
+// Returns true if p is a start of a qualified id component `"." id_start`.
+bool is_qualified_component_start(const char* p) {
+  return p[0] == '.' && is_id_start(p[1]);
 }
 
 // Lexes a decimal constant of the form [0-9]+. Returns a pointer past the end
@@ -294,10 +305,14 @@ token lexer::get_next_token() {
   start_token();
 
   char c = *ptr_++;
-  if (is_letter(c) || c == '_') {
+  if (is_id_start(c)) {
     // Lex an identifier or a keyword.
-    while (is_identifier_char(*ptr_)) {
-      ++ptr_;
+    ptr_ = lex_id_continuation(ptr_);
+    if (is_qualified_component_start(ptr_)) {
+      do {
+        ptr_ = lex_id_continuation(ptr_ + 2);
+      } while (is_qualified_component_start(ptr_));
+      return token::make_identifier(token_source_range(), token_text());
     }
     auto text = token_text();
     auto it = keywords.find(std::string(text.data(), text.size()));

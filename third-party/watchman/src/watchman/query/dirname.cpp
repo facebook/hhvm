@@ -123,8 +123,18 @@ class DirNameExpr : public QueryExpr {
       depth_comp.op = W_QUERY_ICMP_GE;
     }
 
+    w_string dirname = json_to_w_string(name);
+    auto view = dirname.view();
+    auto last_not_slash = view.find_last_not_of('/');
+    w_string trimmed_dirname;
+    if (last_not_slash == std::string_view::npos) {
+      trimmed_dirname = dirname;
+    } else {
+      trimmed_dirname = w_string{view.substr(0, last_not_slash + 1)};
+    }
+
     return std::make_unique<DirNameExpr>(
-        json_to_w_string(name), depth_comp, case_sensitive);
+        std::move(trimmed_dirname), depth_comp, case_sensitive);
   }
   static std::unique_ptr<QueryExpr> parseDirName(
       Query* query,
@@ -161,6 +171,7 @@ class DirNameExpr : public QueryExpr {
     if (outputCaseSensitive == CaseSensitivity::CaseInSensitive) {
       outputPattern = outputPattern.piece().asLowerCase();
     }
+
     return std::vector<std::string>{outputPattern.string() + "/**"};
   }
 };

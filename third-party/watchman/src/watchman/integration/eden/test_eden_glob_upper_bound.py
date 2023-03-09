@@ -68,6 +68,24 @@ class TestEdenGlobUpperBound(WatchmanEdenTestCase.WatchmanEdenTestCase):
         )
         self.assertGlobUpperBound({"adir/**", "bdir/**"})
 
+    def test_eden_trailing_slash(self) -> None:
+        root = self.makeEdenMount(populate)
+        res = self.watchmanCommand("watch", root)
+        self.assertEqual("eden", res["watcher"])
+
+        res = self.watchmanCommand(
+            "query",
+            root,
+            {
+                "expression": ["allof", ["type", "f"], ["dirname", "adir/"]],
+                "fields": ["name"],
+                "since": "c:0:0",
+            },
+        )
+        self.assertTrue(res["is_fresh_instance"])
+        self.assertFileListsEqual(res["files"], ["adir/file"])
+        self.assertGlobUpperBound({"adir/**"})
+
     def test_eden_since_empty_upper_bound(self) -> None:
         root = self.makeEdenMount(populate)
         res = self.watchmanCommand("watch", root)

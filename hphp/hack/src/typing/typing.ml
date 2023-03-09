@@ -1820,6 +1820,27 @@ let refine_and_simplify_intersection
     in
     intersect ~hint_first ~is_class env reason ivar_ty hint_ty
 
+let ish_weakening env hint hint_ty =
+  match hint with
+  | (_, Aast.Happly ((_, name), _)) ->
+    let enum_opt = Option.(Env.get_enum env name >>= Cls.enum_type) in
+    begin
+      match enum_opt with
+      | Some { te_base; _ } -> begin
+        match Typing_defs.get_node te_base with
+        | Typing_defs.(Tprim Tarraykey) -> hint_ty
+        | _ ->
+          MakeType.intersection
+            Reason.Rnone
+            [
+              MakeType.locl_like Reason.Rnone hint_ty;
+              MakeType.arraykey Reason.Rnone;
+            ]
+      end
+      | _ -> hint_ty
+    end
+  | _ -> hint_ty
+
 let refine_for_is ~hint_first env tparamet ivar reason hint =
   let (env, lset) =
     match snd hint with
@@ -1837,6 +1858,12 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
     in
     Option.iter ~f:Errors.add_typing_error ty_err_opt;
     let hint_ty = strip_supportdyn hint_ty in
+    let hint_ty =
+      if Env.get_tcopt env |> TypecheckerOptions.enable_sound_dynamic then
+        ish_weakening env hint hint_ty
+      else
+        hint_ty
+    in
     let (env, hint_ty) =
       if not tparamet then
         Inter.negate_type env reason hint_ty ~approx:TUtils.ApproxUp
@@ -4665,6 +4692,12 @@ and expr_
     let hint_ty = strip_supportdyn hint_ty in
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
+    in
+    let hint_ty =
+      if enable_sound_dynamic then
+        ish_weakening env hint hint_ty
+      else
+        hint_ty
     in
     let ((env, ty_err_opt2), hint_ty) =
       if Typing_defs.is_dynamic hint_ty then

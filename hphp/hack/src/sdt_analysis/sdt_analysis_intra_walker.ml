@@ -105,7 +105,10 @@ let collect_sdts_body enclosing_def_id ret_ty =
             | T.Tfun ft ->
               let param_arg_pairs =
                 let open List.Or_unequal_lengths in
-                match List.zip ft.T.ft_params el with
+                let curtailed_params =
+                  List.take ft.T.ft_params (List.length el)
+                in
+                match List.zip curtailed_params el with
                 | Ok pairs -> pairs
                 | Unequal_lengths -> []
               in

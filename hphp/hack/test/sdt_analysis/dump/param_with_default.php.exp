@@ -1,0 +1,12 @@
+=== SDT analysis results for param_with_default.php
+Intraprocedural Constraints for (Function "\\f"):
+   9: NeedsSDT
+
+Interprocedural Constraints for (Function "\\f"):
+     3: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+
+Interprocedural Constraints for (Function "\\main"):
+     8: (CustomInterConstraint
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+

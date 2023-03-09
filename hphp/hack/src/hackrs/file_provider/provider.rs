@@ -15,15 +15,14 @@ use tempdir::TempDir;
 pub struct DiskProvider {
     relative_path_ctx: Arc<RelativePathCtx>,
     // Drop the tempdir when the disk provider goes out of scope
-    #[allow(dead_code)]
-    hhi_root: Option<TempDir>,
+    _hhi_root: Option<TempDir>,
 }
 
 impl DiskProvider {
     pub fn new(relative_path_ctx: Arc<RelativePathCtx>, hhi_root: Option<TempDir>) -> Self {
         Self {
             relative_path_ctx,
-            hhi_root,
+            _hhi_root: hhi_root,
         }
     }
 

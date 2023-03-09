@@ -55,7 +55,6 @@ mod decl_enum;
 
 #[derive(Debug)]
 pub struct DeclFolder<'a, R: Reason> {
-    #[allow(dead_code)] // This can be removed after this field's first use.
     /// Options affecting typechecking behaviors.
     opts: &'a GlobalOptions,
     /// The class whose folded decl we are producing.

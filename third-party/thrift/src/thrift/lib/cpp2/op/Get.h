@@ -32,18 +32,18 @@ template <typename T>
 FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
     detail::pa::__fbthrift_field_size_v<T>;
 
-template <typename Id, typename T>
+template <typename T, typename Id>
 using get_ordinal =
     typename detail::GetOrdinalImpl<Id, type::infer_tag<T>>::type;
 
 /// Gets the ordinal, for example:
 ///
-/// * using Ord = get_ordinal_v<ident::foo, MyS>
+/// * using Ord = get_ordinal_v<MyS, ident::foo>
 ///   // Resolves to ordinal at which the field "foo" was defined in MyS.
 ///
-template <typename Id, typename T>
+template <typename T, typename Id>
 FOLLY_INLINE_VARIABLE constexpr type::Ordinal get_ordinal_v =
-    get_ordinal<Id, T>::value;
+    get_ordinal<T, Id>::value;
 
 /// Calls the given function with ordinal<1> to ordinal<N>.
 template <typename T, typename F>
@@ -67,9 +67,9 @@ std::enable_if_t<size_v<T> == 0, bool> find_by_ordinal(F&&) {
 
 template <typename Id, typename T>
 using get_field_id = folly::conditional_t<
-    get_ordinal<Id, T>::value == type::Ordinal{},
+    get_ordinal<T, Id>::value == type::Ordinal{},
     type::field_id<0>,
-    detail::pa::field_id<T, get_ordinal<Id, T>>>;
+    detail::pa::field_id<T, get_ordinal<T, Id>>>;
 
 /// Gets the field id, for example:
 ///
@@ -99,7 +99,7 @@ decltype(auto) find_by_field_id(F&& f) {
 ///   using Ident = get_ident<field_id<7>, MyS>
 ///
 template <typename Id, typename T>
-using get_ident = detail::pa::ident<T, get_ordinal<Id, T>>;
+using get_ident = detail::pa::ident<T, get_ordinal<T, Id>>;
 
 /// It calls the given function with each folly::tag<thrift::ident::*>{} in
 /// Thrift class.
@@ -115,11 +115,11 @@ void for_each_ident(F&& f) {
 ///   using Tag = get_type_tag<ident::foo, MyS>
 ///
 template <typename Id, typename T>
-using get_type_tag = detail::pa::type_tag<T, get_ordinal<Id, T>>;
+using get_type_tag = detail::pa::type_tag<T, get_ordinal<T, Id>>;
 
 template <typename Id, typename T>
 using get_field_tag = typename std::conditional_t<
-    get_ordinal<Id, T>::value == type::Ordinal{},
+    get_ordinal<T, Id>::value == type::Ordinal{},
     void,
     type::field<
         get_type_tag<Id, T>,
@@ -135,7 +135,7 @@ using get_native_type = type::native_type<get_field_tag<Id, T>>;
 ///
 template <typename T, typename Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
-    detail::pa::__fbthrift_get_field_name<T, get_ordinal<Id, T>>();
+    detail::pa::__fbthrift_get_field_name<T, get_ordinal<T, Id>>();
 
 // TODO: replace get_name with get_name_v
 template <typename T, typename Id>

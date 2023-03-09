@@ -34,16 +34,11 @@ let calc reader : Summary.t =
       |> Sequence.find_map ~f:(function
              | H.CustomInterConstraint
                  CustomInterConstraint.{ classish_kind_opt; _ } ->
-               let classish_kind =
-                 classish_kind_opt
-                 |> Option.value_exn
-                      ~message:"every class is expected to have a classish_kind"
-               in
-               Some Summary.{ id; kind = ClassLike classish_kind }
+               Some Summary.{ id; kind = ClassLike classish_kind_opt }
              | _ -> None)
-      |> Option.value_exn
-           ~message:
-             "every class id is expected to have a corresponding CustomInterConstraint"
+      (* The default is used when there is no CustomInterConstraint,
+         which can happen for classes defined in .hhi files *)
+      |> Option.value ~default:Summary.{ id; kind = ClassLike None }
   in
 
   let to_nadable = Sequence.map ~f:to_nadable_single in
@@ -53,8 +48,11 @@ let calc reader : Summary.t =
         Summary.(
           function
           | { kind = Function; _ } -> true
-          | { kind = ClassLike classish_kind; _ } ->
-            is_syntactically_nadable classish_kind)
+          | { kind = ClassLike classish_kind_opt; _ } ->
+            Option.(
+              classish_kind_opt
+              >>| is_syntactically_nadable
+              |> value ~default:false))
   in
 
   let filter_to_no_needs_sdt =

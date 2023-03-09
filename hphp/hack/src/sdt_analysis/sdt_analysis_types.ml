@@ -46,7 +46,6 @@ let hash_classish_kind : classish_kind -> int =
 module CustomInterConstraint = struct
   type t = {
     classish_kind_opt: classish_kind option;
-        (** classish_kind is `None` for functions *)
     hierarchy_for_final_item: string list option;
   }
   [@@deriving eq, hash, ord, show { with_path = false }]
@@ -95,7 +94,7 @@ end
 
 module Summary = struct
   type nadable_kind =
-    | ClassLike of classish_kind
+    | ClassLike of classish_kind option
     | Function
 
   type nadable = {

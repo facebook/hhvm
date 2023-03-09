@@ -25,7 +25,11 @@ let stats_json_of_group nadables =
     let kind_str =
       match kind with
       | Summary.Function -> "function"
-      | Summary.ClassLike classish_kind -> show_classish_kind classish_kind
+      | Summary.ClassLike classish_kind_opt ->
+        Option.(
+          classish_kind_opt
+          >>| show_classish_kind
+          |> value ~default:"classish_kind_unknown")
     in
     J.JSON_Object
       [("sid", J.string_ @@ H.Id.sid_of_t id); ("kind", J.string_ kind_str)]

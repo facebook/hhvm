@@ -53,7 +53,7 @@ module CustomInterConstraint : sig
   (** Facts that help us summarize results. *)
   type t = {
     classish_kind_opt: classish_kind option;
-        (** classish_kind is `None` for functions *)
+        (** In `CustomInterConstraint`s, classish_kind is always `None` for functions *)
     hierarchy_for_final_item: string list option;
         (**
         `Some []` indicates something with no parents or descendents, such as a top-level function or final class with no `extends` or `implements`.
@@ -93,7 +93,8 @@ end
 
 module Summary : sig
   type nadable_kind =
-    | ClassLike of classish_kind
+    | ClassLike of classish_kind option
+        (** classish_kind of `None` indicates unknown, which can happen for definitions in hhis *)
     | Function
 
   type nadable = {

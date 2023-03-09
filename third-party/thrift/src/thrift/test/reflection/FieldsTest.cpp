@@ -103,14 +103,14 @@ void checkField(const char* identName) {
   test::same_tag<op::get_field_id<Ordinal, Struct>, Id>;
   test::same_tag<op::get_type_tag<Struct, Ordinal>, TypeTag>;
   test::same_tag<op::get_ident<Struct, Ordinal>, Ident>;
-  test::same_tag<op::get_field_tag<Ordinal, Struct>, FieldTag>;
+  test::same_tag<op::get_field_tag<Struct, Ordinal>, FieldTag>;
   EXPECT_EQ((op::get_name_v<Struct, Ordinal>), identName);
 
   test::same_tag<op::get_ordinal<Struct, Id>, Ordinal>;
   test::same_tag<op::get_field_id<Id, Struct>, Id>;
   test::same_tag<op::get_type_tag<Struct, Id>, TypeTag>;
   test::same_tag<op::get_ident<Struct, Id>, Ident>;
-  test::same_tag<op::get_field_tag<Id, Struct>, FieldTag>;
+  test::same_tag<op::get_field_tag<Struct, Id>, FieldTag>;
   EXPECT_EQ((op::get_name_v<Struct, Id>), identName);
 
   if constexpr (is_type_tag_unique && !std::is_void_v<TypeTag>) {
@@ -118,7 +118,7 @@ void checkField(const char* identName) {
     test::same_tag<op::get_field_id<TypeTag, Struct>, Id>;
     test::same_tag<op::get_type_tag<Struct, TypeTag>, TypeTag>;
     test::same_tag<op::get_ident<Struct, TypeTag>, Ident>;
-    test::same_tag<op::get_field_tag<TypeTag, Struct>, FieldTag>;
+    test::same_tag<op::get_field_tag<Struct, TypeTag>, FieldTag>;
     EXPECT_EQ((op::get_name_v<Struct, TypeTag>), identName);
   }
 
@@ -127,7 +127,7 @@ void checkField(const char* identName) {
     test::same_tag<op::get_field_id<Ident, Struct>, Id>;
     test::same_tag<op::get_type_tag<Struct, Ident>, TypeTag>;
     test::same_tag<op::get_ident<Struct, Ident>, Ident>;
-    test::same_tag<op::get_field_tag<Ident, Struct>, FieldTag>;
+    test::same_tag<op::get_field_tag<Struct, Ident>, FieldTag>;
     EXPECT_EQ((op::get_name_v<Struct, Ident>), identName);
   }
 
@@ -136,7 +136,7 @@ void checkField(const char* identName) {
     test::same_tag<op::get_field_id<FieldTag, Struct>, Id>;
     test::same_tag<op::get_type_tag<Struct, FieldTag>, TypeTag>;
     test::same_tag<op::get_ident<Struct, FieldTag>, Ident>;
-    test::same_tag<op::get_field_tag<FieldTag, Struct>, FieldTag>;
+    test::same_tag<op::get_field_tag<Struct, FieldTag>, FieldTag>;
     EXPECT_EQ((op::get_name_v<Struct, FieldTag>), identName);
   }
 }
@@ -272,25 +272,25 @@ TEST(FieldsTest, NotFoundFieldInfo) {
   test::same_tag<op::get_field_id<field_ordinal<0>, Struct>, field_id<0>>;
   test::same_tag<op::get_type_tag<Struct, field_ordinal<0>>, void>;
   test::same_tag<op::get_ident<Struct, field_ordinal<0>>, void>;
-  test::same_tag<op::get_field_tag<field_ordinal<0>, Struct>, void>;
+  test::same_tag<op::get_field_tag<Struct, field_ordinal<0>>, void>;
 
   test::same_tag<op::get_ordinal<Struct, field_id<200>>, field_ordinal<0>>;
   test::same_tag<op::get_field_id<field_id<200>, Struct>, field_id<0>>;
   test::same_tag<op::get_type_tag<Struct, field_id<200>>, void>;
   test::same_tag<op::get_ident<Struct, field_id<200>>, void>;
-  test::same_tag<op::get_field_tag<field_id<200>, Struct>, void>;
+  test::same_tag<op::get_field_tag<Struct, field_id<200>>, void>;
 
   test::same_tag<op::get_ordinal<Struct, binary_t>, field_ordinal<0>>;
   test::same_tag<op::get_field_id<binary_t, Struct>, field_id<0>>;
   test::same_tag<op::get_type_tag<Struct, binary_t>, void>;
   test::same_tag<op::get_ident<Struct, binary_t>, void>;
-  test::same_tag<op::get_field_tag<binary_t, Struct>, void>;
+  test::same_tag<op::get_field_tag<Struct, binary_t>, void>;
 
   test::same_tag<op::get_ordinal<Struct, ident::a>, field_ordinal<0>>;
   test::same_tag<op::get_field_id<ident::a, Struct>, field_id<0>>;
   test::same_tag<op::get_type_tag<Struct, ident::a>, void>;
   test::same_tag<op::get_ident<Struct, ident::a>, void>;
-  test::same_tag<op::get_field_tag<ident::a, Struct>, void>;
+  test::same_tag<op::get_field_tag<Struct, ident::a>, void>;
 }
 
 

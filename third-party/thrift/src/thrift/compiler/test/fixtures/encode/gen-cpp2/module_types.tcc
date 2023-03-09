@@ -641,7 +641,7 @@ _readField_bar_field:
 _readField_adapted_list_field:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<12>, OpEncodeStruct>>(*iprot, this->__fbthrift_field_adapted_list_field, *this);
+    ::apache::thrift::op::decode<::apache::thrift::op::get_field_tag<OpEncodeStruct, ::apache::thrift::field_id<12>>>(*iprot, this->__fbthrift_field_adapted_list_field, *this);
     _readState.afterSubobject(iprot);
     
   }

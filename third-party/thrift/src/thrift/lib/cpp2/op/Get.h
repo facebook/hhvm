@@ -117,7 +117,7 @@ void for_each_ident(F&& f) {
 template <typename T, typename Id>
 using get_type_tag = detail::pa::type_tag<T, get_ordinal<T, Id>>;
 
-template <typename Id, typename T>
+template <typename T, typename Id>
 using get_field_tag = typename std::conditional_t<
     get_ordinal<T, Id>::value == type::Ordinal{},
     void,
@@ -126,7 +126,7 @@ using get_field_tag = typename std::conditional_t<
         FieldContext<T, folly::to_underlying(get_field_id<Id, T>::value)>>>;
 
 template <typename Id, typename T>
-using get_native_type = type::native_type<get_field_tag<Id, T>>;
+using get_native_type = type::native_type<get_field_tag<T, Id>>;
 
 /// Gets the thrift field name, for example:
 ///

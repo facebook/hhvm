@@ -383,7 +383,7 @@ struct Clear<Id, Tag, type::if_thrift_type_tag<Tag>> {
   static_assert(type::is_id_v<Id>, "");
   using T = type::native_type<Tag>;
   constexpr void operator()(T& val) const {
-    using FieldTag = op::get_field_tag<Id, T>;
+    using FieldTag = op::get_field_tag<T, Id>;
     ClearField<FieldTag>{}(op::get<Id, Tag>(val), val);
   }
 };

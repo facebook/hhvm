@@ -1183,9 +1183,9 @@ void TerseAdaptedFields::__fbthrift_clear_terse_fields() {
 }
 
 bool TerseAdaptedFields::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, TerseAdaptedFields>>(this->__fbthrift_field_int_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, TerseAdaptedFields>>(this->__fbthrift_field_string_field) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, TerseAdaptedFields>>(this->__fbthrift_field_set_field);
+  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<1>>>(this->__fbthrift_field_int_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<2>>>(this->__fbthrift_field_string_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<TerseAdaptedFields, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_set_field);
 }
 
 bool TerseAdaptedFields::operator==(FOLLY_MAYBE_UNUSED const TerseAdaptedFields& rhs) const {

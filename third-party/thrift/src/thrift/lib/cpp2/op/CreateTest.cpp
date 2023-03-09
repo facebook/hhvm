@@ -236,7 +236,7 @@ TEST(EnsureTest, SmartPointer) {
 
 TEST(EnsureTest, Optional) {
   FieldRefStruct obj;
-  using FieldTag = op::get_field_tag<field_ordinal<2>, FieldRefStruct>;
+  using FieldTag = op::get_field_tag<FieldRefStruct, field_ordinal<2>>;
   auto opt = obj.optional_i32_ref().to_optional();
   op::ensure<FieldTag>(opt, obj);
   EXPECT_EQ(*opt, 0);

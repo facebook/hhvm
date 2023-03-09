@@ -1435,7 +1435,7 @@ void MinPaddingWithCustomType::__fbthrift_clear_terse_fields() {
 bool MinPaddingWithCustomType::__fbthrift_is_empty() const {
   return ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_small) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_big) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, MinPaddingWithCustomType>>(this->__fbthrift_field_medium) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<MinPaddingWithCustomType, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_medium) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_biggish) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_tiny);
 }

@@ -101,7 +101,7 @@ void testCopyOptional(Src src, Dst dst, Ord ord) {
 template <typename Src, typename Dst, typename Ord>
 void testCopyUniquePointer(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  using FieldTag = op::get_field_tag<Struct, decltype(ord)>;
   auto& srcField = op::get<decltype(ord), Struct>(src);
   auto& dstField = op::get<decltype(ord), Struct>(dst);
 
@@ -136,7 +136,7 @@ void testCopyUniquePointer(Src src, Dst dst, Ord ord) {
 template <typename Src, typename Dst, typename Ord>
 void testCopySharedPointer(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  using FieldTag = op::get_field_tag<Struct, decltype(ord)>;
   auto& srcField = op::get<decltype(ord), Struct>(src);
   auto& dstField = op::get<decltype(ord), Struct>(dst);
 

@@ -104,7 +104,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   using Base = BaseClearPatch<Patch, Derived>;
   using T = typename Base::value_type;
   template <typename Id>
-  using F = type::native_type<get_field_tag<Id, T>>;
+  using F = type::native_type<get_field_tag<T, Id>>;
 
  public:
   using Base::Base;
@@ -251,7 +251,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using Base = BaseEnsurePatch<Patch, StructPatch>;
   using T = typename Base::value_type;
   template <typename Id>
-  using F = type::native_type<get_field_tag<Id, T>>;
+  using F = type::native_type<get_field_tag<T, Id>>;
 
  public:
   using Base::apply;
@@ -401,7 +401,7 @@ class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
   using T = typename Base::value_type;
   using P = typename Base::patch_type;
   template <typename Id>
-  using F = type::native_type<get_field_tag<Id, T>>;
+  using F = type::native_type<get_field_tag<T, Id>>;
 
  public:
   using Base::Base;

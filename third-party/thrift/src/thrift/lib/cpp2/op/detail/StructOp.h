@@ -43,7 +43,7 @@ struct StructuredOp : BaseOp<Tag> {
   using Base::ret;
   using Base::unimplemented;
   template <typename Id>
-  using FTag = op::get_field_tag<Id, T>;
+  using FTag = op::get_field_tag<T, Id>;
 
   template <typename Id>
   static bool putIf(bool cond, T& self, const Dyn& val) {

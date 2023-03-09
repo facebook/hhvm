@@ -224,7 +224,7 @@ void ensure_fields(MaskRef ref, Struct& t) {
       if (next.isNoneMask()) {
         return;
       }
-      using FieldTag = op::get_field_tag<Ord, Struct>;
+      using FieldTag = op::get_field_tag<Struct, Ord>;
       auto&& field_ref = op::get<Ord>(t);
       op::ensure<FieldTag>(field_ref, t);
       // Need to ensure the struct object.
@@ -258,7 +258,7 @@ void clear_fields(MaskRef ref, Struct& t) {
       if (next.isNoneMask()) {
         return;
       }
-      using FieldTag = op::get_field_tag<Ord, Struct>;
+      using FieldTag = op::get_field_tag<Struct, Ord>;
       auto&& field_ref = op::get<Ord>(t);
       if (next.isAllMask()) {
         op::clear_field<FieldTag>(field_ref, t);
@@ -315,7 +315,7 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
       if (next.isNoneMask()) {
         return;
       }
-      using FieldTag = op::get_field_tag<Ord, DstStruct>;
+      using FieldTag = op::get_field_tag<DstStruct, Ord>;
       using FieldType = op::get_native_type<Ord, DstStruct>;
       auto&& src_ref = op::get<Ord>(src);
       auto&& dst_ref = op::get<Ord>(dst);

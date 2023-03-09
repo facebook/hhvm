@@ -95,6 +95,13 @@ let collect_sdts_body enclosing_def_id ret_ty =
       in
       let walk_result =
         match e_ with
+        | A.Upcast ((ty, _, _), _) -> begin
+          match T.get_node ty with
+          | T.Tclass ((_, sid), _, _) ->
+            let constraint_ = decorated_constraint ~origin:__LINE__ in
+            WalkResult.singleton (H.Id.ClassLike sid) constraint_
+          | _ -> WalkResult.empty
+        end
         | A.Call ((base_ty, _, base_exp), _tel, el, _unpacked_el) ->
           let doesnt_subtype (fp, (_, (arg_ty, _, _))) =
             not @@ Tast_env.is_sub_type env arg_ty fp.T.fp_type.T.et_type

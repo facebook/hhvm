@@ -209,7 +209,7 @@ std::unique_ptr<folly::IOBuf> evpEncrypt(
 
   if (!allowInplaceEdit && !allowAlloc) {
     throw std::runtime_error(
-        "Cannot decrypt (must be in-place or allow allocation)");
+        "Cannot encrypt (must be in-place or allow allocation)");
   }
 
   if (allowInplaceEdit) {
@@ -556,7 +556,7 @@ std::array<uint8_t, OpenSSLEVPCipher::kMaxIVLength> OpenSSLEVPCipher::createIV(
   uint64_t bigEndianSeqNum = folly::Endian::big(seqNum);
   const size_t prefixLength = ivLength_ - sizeof(uint64_t);
   memset(iv.data(), 0, prefixLength);
-  memcpy(iv.data() + prefixLength, &bigEndianSeqNum, 8);
+  memcpy(iv.data() + prefixLength, &bigEndianSeqNum, sizeof(uint64_t));
   folly::MutableByteRange mutableIv{iv.data(), ivLength_};
   XOR(trafficIvKey_, mutableIv);
   return iv;

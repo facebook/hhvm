@@ -142,11 +142,6 @@ class RocketServerConnection final
       apache::thrift::MessageChannel::SendCallbackPtr cb = nullptr);
   void sendRequestN(StreamId streamId, int32_t n);
   void sendCancel(StreamId streamId);
-  void sendExt(
-      StreamId streamId,
-      Payload&& payload,
-      Flags flags,
-      ExtFrameType extFrameType);
   void sendMetadataPush(std::unique_ptr<folly::IOBuf> metadata);
 
   void freeStream(StreamId streamId, bool markRequestComplete);

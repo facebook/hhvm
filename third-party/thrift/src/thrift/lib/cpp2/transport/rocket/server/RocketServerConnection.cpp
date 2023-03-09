@@ -913,16 +913,6 @@ void RocketServerConnection::sendCancel(StreamId streamId) {
   send(CancelFrame(streamId).serialize(), nullptr, streamId);
 }
 
-void RocketServerConnection::sendExt(
-    StreamId streamId,
-    Payload&& payload,
-    Flags flags,
-    ExtFrameType extFrameType) {
-  send(
-      ExtFrame(streamId, std::move(payload), flags, extFrameType).serialize(),
-      nullptr,
-      streamId);
-}
 void RocketServerConnection::sendMetadataPush(
     std::unique_ptr<folly::IOBuf> metadata) {
   send(MetadataPushFrame::makeFromMetadata(std::move(metadata)).serialize());

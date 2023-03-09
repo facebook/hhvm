@@ -1,5 +1,0 @@
-string(4) "type"
-string(2) "I2"
-NULL
-
-Fatal error: Undefined interface: I2 in %s/test/slow/autoload/autoload-fail-e.inc on line 3

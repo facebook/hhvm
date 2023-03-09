@@ -5217,7 +5217,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.env.context.active_classish = Some(node)
             }
             TypeRefinement(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::TypeRefinements);
                 self.type_refinement_errors(node);
             }
             FileAttributeSpecification(_) => self.file_attribute_spec(node),

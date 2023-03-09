@@ -1,6 +1,6 @@
 <?hh
 
-<<file: __EnableUnstableFeatures('type_refinements')>>
+
 
 abstract class MyUBase {
   abstract const type TV as MyVBase with { type TU as this; };

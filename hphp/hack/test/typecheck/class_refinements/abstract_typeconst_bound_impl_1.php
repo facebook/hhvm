@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('type_refinements')>>
+
 
 interface IUserData {}
 

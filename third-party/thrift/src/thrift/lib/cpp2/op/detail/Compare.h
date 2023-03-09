@@ -554,7 +554,7 @@ struct StructLessThan {
       }
 
       using Ord = decltype(ord);
-      using Tag = get_type_tag<Ord, T>;
+      using Tag = get_type_tag<T, Ord>;
       const auto* lhsValue = getValueOrNull(get<Ord>(lhs));
       const auto* rhsValue = getValueOrNull(get<Ord>(rhs));
 

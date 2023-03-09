@@ -205,7 +205,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
       for_each_field_id<T>([&](auto id) { // ensure
         auto&& field = op::get<>(id, *data_.assign());
         if (!isAbsent(field) &&
-            !op::isEmpty<op::get_type_tag<decltype(id), T>>(*field)) {
+            !op::isEmpty<op::get_type_tag<T, decltype(id)>>(*field)) {
           op::get<>(id, *data_.ensure()) = *field;
         }
       });

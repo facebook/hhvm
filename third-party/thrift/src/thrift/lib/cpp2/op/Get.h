@@ -112,9 +112,9 @@ void for_each_ident(F&& f) {
 /// Gets the Thrift type tag, for example:
 ///
 ///   // Resolves to Thrift type tag for the field "foo" in MyS.
-///   using Tag = get_type_tag<ident::foo, MyS>
+///   using Tag = get_type_tag<MyS, ident::foo>
 ///
-template <typename Id, typename T>
+template <typename T, typename Id>
 using get_type_tag = detail::pa::type_tag<T, get_ordinal<T, Id>>;
 
 template <typename Id, typename T>
@@ -122,7 +122,7 @@ using get_field_tag = typename std::conditional_t<
     get_ordinal<T, Id>::value == type::Ordinal{},
     void,
     type::field<
-        get_type_tag<Id, T>,
+        get_type_tag<T, Id>,
         FieldContext<T, folly::to_underlying(get_field_id<Id, T>::value)>>>;
 
 template <typename Id, typename T>

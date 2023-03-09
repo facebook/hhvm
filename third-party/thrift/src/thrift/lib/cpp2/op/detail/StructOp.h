@@ -77,7 +77,7 @@ struct StructuredOp : BaseOp<Tag> {
   static bool getIf(bool cond, T& self, Ptr& result) {
     auto&& field = op::get<Id>(self);
     if (cond && !isAbsent(field)) {
-      result = ret(op::get_type_tag<Id, T>{}, *field);
+      result = ret(op::get_type_tag<T, Id>{}, *field);
     }
     return cond;
   }
@@ -152,7 +152,7 @@ struct StructuredOp : BaseOp<Tag> {
           ensureValue(field);
         }
       }
-      result = ret(get_type_tag<Id, T>{}, *field);
+      result = ret(get_type_tag<T, Id>{}, *field);
     }
     return cond;
   }

@@ -129,7 +129,7 @@ TEST(StructPatchTest, AssignSplit) {
   EXPECT_TRUE(*patch.toThrift().clear());
   op::for_each_field_id<MyStruct>([&](auto id) {
     if (auto&& field = op::get<>(id, *patch.toThrift().ensure())) {
-      EXPECT_TRUE((op::equal<op::get_type_tag<decltype(id), MyStruct>>(
+      EXPECT_TRUE((op::equal<op::get_type_tag<MyStruct, decltype(id)>>(
           *field, *op::get<>(id, original))))
           << "for field id " << static_cast<int>(id.value);
     }

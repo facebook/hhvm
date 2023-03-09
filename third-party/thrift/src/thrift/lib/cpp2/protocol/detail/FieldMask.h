@@ -267,7 +267,7 @@ void clear_fields(MaskRef ref, Struct& t) {
       using FieldType = op::get_native_type<Ord, Struct>;
       auto* field_value = op::getValueOrNull(field_ref);
       if (!field_value) {
-        errorIfNotCompatible<op::get_type_tag<Ord, Struct>>(next.mask);
+        errorIfNotCompatible<op::get_type_tag<Struct, Ord>>(next.mask);
         return;
       }
       // Need to clear the struct object.
@@ -322,7 +322,7 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
       bool srcHasValue = bool(op::getValueOrNull(src_ref));
       bool dstHasValue = bool(op::getValueOrNull(dst_ref));
       if (!srcHasValue && !dstHasValue) { // skip
-        errorIfNotCompatible<op::get_type_tag<Ord, DstStruct>>(next.mask);
+        errorIfNotCompatible<op::get_type_tag<DstStruct, Ord>>(next.mask);
         return;
       }
       // Id that we want to copy.
@@ -383,7 +383,7 @@ Mask path(const Mask& other) {
   using fieldId = op::get_field_id<Id, Struct>;
   static_assert(fieldId::value != FieldId{});
   mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
-      path<op::get_type_tag<Id, Struct>, Ids...>(other);
+      path<op::get_type_tag<Struct, Id>, Ids...>(other);
   return mask;
 }
 
@@ -409,7 +409,7 @@ Mask path(
       }
       if (op::get_name_v<Struct, Id> == fieldNames[index]) {
         mask.includes_ref().emplace()[folly::to_underlying(id())] =
-            path<op::get_type_tag<Id, Struct>>(fieldNames, index + 1, other);
+            path<op::get_type_tag<Struct, Id>>(fieldNames, index + 1, other);
       }
     });
     if (!mask.includes_ref()) { // field not found

@@ -2281,23 +2281,23 @@ TEST(FieldMaskTest, MaskBuilderOtherTypes) {
   }
   {
     MaskBuilder<Bar2> builder2(noneMask());
-    builder2.includes<op::get_type_tag<ident::field_3, Bar2>>();
+    builder2.includes<op::get_type_tag<Bar2, ident::field_3>>();
     builder2.excludes<
-        op::get_type_tag<ident::field_3, Bar2>,
-        op::get_type_tag<ident::field_2, Foo2>>();
+        op::get_type_tag<Bar2, ident::field_3>,
+        op::get_type_tag<Foo2, ident::field_2>>();
     EXPECT_EQ(builder.toThrift(), builder2.toThrift());
   }
   // test mixing different id type
   {
     MaskBuilder<Bar2> builder2(noneMask());
-    builder2.includes<op::get_type_tag<type::ordinal<1>, Bar2>>();
+    builder2.includes<op::get_type_tag<Bar2, type::ordinal<1>>>();
     builder2
-        .excludes<type::field_id<1>, op::get_type_tag<ident::field_2, Foo2>>();
+        .excludes<type::field_id<1>, op::get_type_tag<Foo2, ident::field_2>>();
     EXPECT_EQ(builder.toThrift(), builder2.toThrift());
   }
   {
     MaskBuilder<Bar2> builder2(noneMask());
-    builder2.includes<op::get_type_tag<ident::field_3, Bar2>>();
+    builder2.includes<op::get_type_tag<Bar2, ident::field_3>>();
     builder2
         .excludes<type::ordinal<1>, op::get_field_tag<ident::field_2, Foo2>>();
     EXPECT_EQ(builder.toThrift(), builder2.toThrift());

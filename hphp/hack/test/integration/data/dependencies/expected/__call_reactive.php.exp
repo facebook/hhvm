@@ -1,7 +1,7 @@
 //// toplevel.php
 <?hh
 
-function reactive(mixed $x = \extract_standalone_make_default()): void {
+function reactive(mixed $x = \EXTRACT_STANDALONE_DEFAULT): void {
   throw new \Exception();
 }
 
@@ -12,6 +12,4 @@ function call_reactive(): void {
 //// __extract_standalone__.php
 <?hh
 
-function extract_standalone_make_default()[]: nothing {
-  throw new \Exception();
-}
+const nothing EXTRACT_STANDALONE_DEFAULT = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");

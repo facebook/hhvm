@@ -34,7 +34,7 @@ let value_or_not_found err_msg opt = value_exn (DependencyNotFound err_msg) opt
 
 (* -- Pretty-printing constants --------------------------------------------- *)
 
-let __FN_MAKE_DEFAULT__ = "extract_standalone_make_default"
+let __CONST_DEFAULT__ = "EXTRACT_STANDALONE_DEFAULT"
 
 let __FILE_PREFIX__ = "////"
 
@@ -1126,7 +1126,7 @@ end = struct
     else
       Fmt.string ppf param_name
 
-  let pp_fun_param_default ppf _ = Fmt.pf ppf {| = \%s()|} __FN_MAKE_DEFAULT__
+  let pp_fun_param_default ppf _ = Fmt.pf ppf {| = \%s|} __CONST_DEFAULT__
 
   let update_hfun_context (pos, hints) ~name =
     ( pos,
@@ -2339,8 +2339,8 @@ end = struct
 
   let __DEPS_ON_DEFAULT__ =
     Format.sprintf
-      {|@.function %s()[]: nothing {@.  throw new \Exception();@.}|}
-      __FN_MAKE_DEFAULT__
+      {|@.const nothing %s = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");@.|}
+      __CONST_DEFAULT__
 
   let __DEPS_ON_ANY__ =
     Format.sprintf

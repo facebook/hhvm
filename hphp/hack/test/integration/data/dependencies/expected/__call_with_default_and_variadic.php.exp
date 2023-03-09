@@ -3,7 +3,7 @@
 
 function with_default_and_variadic(
   mixed $x,
-  ?string $y = \extract_standalone_make_default(),
+  ?string $y = \EXTRACT_STANDALONE_DEFAULT,
   mixed ...$z
 ): void {
   throw new \Exception();
@@ -18,6 +18,4 @@ function call_with_default_and_variadic(string $s): void {
 //// __extract_standalone__.php
 <?hh
 
-function extract_standalone_make_default()[]: nothing {
-  throw new \Exception();
-}
+const nothing EXTRACT_STANDALONE_DEFAULT = HH\FIXME\UNSAFE_CAST<mixed, nothing>("");

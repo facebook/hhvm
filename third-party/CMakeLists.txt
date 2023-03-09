@@ -114,6 +114,9 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
+# Add bundled TBB
+list(APPEND THIRD_PARTY_MODULES tbb)
+list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/tbb/src/include")
 
 ##### rustc #####
 

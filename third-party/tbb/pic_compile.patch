@@ -1,0 +1,13 @@
+diff --git a/third-party/tbb/src/build/linux.gcc.inc b/third-party/tbb/src/build/linux.gcc.inc
+index 214b38377bc..1f0302d5b62 100644
+--- a/third-party/tbb/src/build/linux.gcc.inc
++++ b/third-party/tbb/src/build/linux.gcc.inc
+@@ -22,7 +22,7 @@ INCLUDE_KEY = -I
+ DEFINE_KEY = -D
+ OUTPUT_KEY = -o #
+ OUTPUTOBJ_KEY = -o #
+-PIC_KEY = #-fPIC
++PIC_KEY = -fPIC
+ WARNING_AS_ERROR_KEY = -Werror
+ WARNING_KEY = -Wall
+ TEST_WARNING_KEY = -Wshadow -Wcast-qual -Woverloaded-virtual -Wnon-virtual-dtor

@@ -240,6 +240,8 @@ fn elaborate<T: Transform>(
         passes::validate_class_member::ValidateClassMemberPass::default(),
 
         passes::validate_shape_name::ValidateShapeNamePass::default(),
+
+        passes::validate_function_pointer::ValidateFunctionPointerPass::default(),
     ];
 
     node.transform(&env, &mut passes);

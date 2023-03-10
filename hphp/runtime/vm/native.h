@@ -87,7 +87,12 @@ struct Extension;
 
 #define HHVM_REGISTER_NATIVE_FUNC(nativeFuncs, name, f) do { \
   if (RuntimeOption::EvalRecordReplay) { \
-    auto wrap = Recorder::wrapNativeFunc<decltype(&f), f>(name); \
+    using F = std::conditional_t< \
+      std::is_member_function_pointer_v<decltype(f)>, \
+      decltype(f), \
+      std::add_pointer_t<decltype(f)> \
+    >; \
+    const auto wrap{Recorder::wrapNativeFunc<F, f>(name)}; \
     Native::registerNativeFunc(nativeFuncs, name, wrap); \
   } else { \
     Native::registerNativeFunc(nativeFuncs, name, f); \
@@ -125,7 +130,7 @@ struct Extension;
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) \
-        Native::registerNativeFunc(nativeFuncs(), #cn "->" #fn, mimpl)
+  HHVM_REGISTER_NATIVE_FUNC(nativeFuncs(), #cn "->" #fn, mimpl);
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
@@ -135,8 +140,8 @@ struct Extension;
  */
 #define HHVM_SYS_FE(fn)\
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), Native::s_systemNativeFuncs)
-#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) Native::registerNativeFunc(\
-    Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
+#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) \
+  HHVM_REGISTER_NATIVE_FUNC(Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
 #define HHVM_SYS_ME(cn,fn) HHVM_NAMED_SYS_ME(cn,fn, HHVM_MN(cn,fn))
 
 /* Macros related to declaring/registering internal implementations
@@ -152,7 +157,7 @@ struct Extension;
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) \
-        Native::registerNativeFunc(nativeFuncs(), #cn "::" #fn, mimpl)
+  HHVM_REGISTER_NATIVE_FUNC(nativeFuncs(), #cn "::" #fn, mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))

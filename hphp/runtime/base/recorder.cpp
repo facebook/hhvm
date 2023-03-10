@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/recorder.h"
 
+#include <cstddef>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -30,8 +31,14 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/timestamp.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-resource.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/logger.h"
@@ -48,9 +55,9 @@ void Recorder::onSessionInit() {
 
 void Recorder::onSessionExit() {
   if (UNLIKELY(m_enabled)) {
-    const auto dir = FileUtil::expandUser(RuntimeOption::EvalRecordDir) + '/';
+    const auto dir{FileUtil::expandUser(RuntimeOption::EvalRecordDir) + '/'};
     FileUtil::mkdir(dir);
-    const auto file = dir + std::to_string(folly::Random::rand64()) + ".json";
+    const auto file{dir + std::to_string(folly::Random::rand64()) + ".json"};
     VariableSerializer vs{VariableSerializer::Type::JSON};
     std::ofstream{file} << vs.serializeValue(toVariant(), false).data();
     m_enabled = false;
@@ -58,18 +65,13 @@ void Recorder::onSessionExit() {
   }
 }
 
-std::unordered_map<std::uintptr_t, String>& Recorder::getNativeFuncNames() {
-  static std::unordered_map<std::uintptr_t, String> nativeFuncNames;
+Recorder::NativeFuncNames& Recorder::getNativeFuncNames() {
+  static NativeFuncNames nativeFuncNames;
   return nativeFuncNames;
 }
 
 Recorder& Recorder::getRecorder() {
   return RI().m_recorder;
-}
-
-void Recorder::onNativeCall(std::uintptr_t id, const Variant& ret,
-                            const req::vector<Variant>& args) {
-  m_nativeCalls[id].emplace_back(ret, args);
 }
 
 Variant Recorder::toVariant() const {
@@ -78,7 +80,7 @@ Variant Recorder::toVariant() const {
   header.set(StringData::Make("build_id"), buildId().toString());
   header.set(StringData::Make("compiler_id"), compilerId().toString());
   DictInit env{static_cast<std::size_t>(g_context->getEnvs().size())};
-  for (auto i = g_context->getEnvs().begin(); i; ++i) {
+  for (auto i{g_context->getEnvs().begin()}; i; ++i) {
     env.set(i.first().getStringData(), i.second().getStringData()->data());
   }
   header.set(StringData::Make("env"), env.toVariant());
@@ -112,7 +114,8 @@ Variant Recorder::toVariant() const {
       nativeCall.set(StringData::Make("args"), callArgs.toVariant());
       nativeNameCalls.append(nativeCall.toVariant());
     }
-    nativeCalls.set(getNativeFuncNames().at(id), nativeNameCalls.toVariant());
+    const auto name{StringData::Make(getNativeFuncNames()[id])};
+    nativeCalls.set(name, nativeNameCalls.toVariant());
   }
   object.set(StringData::Make("nativeCalls"), nativeCalls.toVariant());
   return object.toVariant();
@@ -155,17 +158,17 @@ Variant Recorder::toVariant(Class const* value) {
 
 template<>
 Variant Recorder::toVariant(Object value) {
-  return Variant{value.get()->clone()};
+  return value;
 }
 
 template<>
 Variant Recorder::toVariant(ObjectArg value) {
-  return Variant{value.get()->clone()};
+  return Variant{value.get()};
 }
 
 template<>
 Variant Recorder::toVariant(ObjectData* value) {
-  return Variant{value->clone()};
+  return Variant{value};
 }
 
 template<>

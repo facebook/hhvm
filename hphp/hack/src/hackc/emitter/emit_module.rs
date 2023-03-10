@@ -16,17 +16,17 @@ use oxidized::ast;
 
 use crate::emit_attribute;
 
-fn emit_rule<'arena>(alloc: &'arena bumpalo::Bump, rule: &ast::Rule) -> Rule<'arena> {
+fn emit_rule<'arena>(alloc: &'arena bumpalo::Bump, rule: &ast::MdNameKind) -> Rule<'arena> {
     match rule {
-        ast::Rule::MDNameGlobal(_) => Rule {
+        ast::MdNameKind::MDNameGlobal(_) => Rule {
             kind: RuleKind::Global,
             name: Maybe::Nothing,
         },
-        ast::Rule::MDNamePrefix(id) => Rule {
+        ast::MdNameKind::MDNamePrefix(id) => Rule {
             kind: RuleKind::Prefix,
             name: Maybe::Just(Str::new_str(alloc, &id.1)),
         },
-        ast::Rule::MDNameExact(id) => Rule {
+        ast::MdNameKind::MDNameExact(id) => Rule {
             kind: RuleKind::Exact,
             name: Maybe::Just(Str::new_str(alloc, &id.1)),
         },
@@ -36,7 +36,7 @@ fn emit_rule<'arena>(alloc: &'arena bumpalo::Bump, rule: &ast::Rule) -> Rule<'ar
 pub fn emit_module<'a, 'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    ast_module: &'a ast::Module,
+    ast_module: &'a ast::ModuleDef,
 ) -> Result<Module<'arena>> {
     let attributes = emit_attribute::from_asts(emitter, &ast_module.user_attributes)?;
     let name = ClassName::from_ast_name_and_mangle(alloc, &ast_module.name.1);

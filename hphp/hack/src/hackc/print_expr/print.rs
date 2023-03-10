@@ -767,7 +767,7 @@ fn print_efun(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     env: &ExprEnv<'_, '_>,
-    efun: &ast::Efun<(), ()>,
+    efun: &ast::Efun,
 ) -> Result<()> {
     let f = &efun.fun;
     if f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator() {

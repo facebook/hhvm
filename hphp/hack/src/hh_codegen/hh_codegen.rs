@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod common;
+mod gen_asts;
 mod gen_by_ref_decl_visitor;
 mod gen_elab_transform;
 mod gen_enum_helper;
@@ -43,6 +44,8 @@ enum Subcommand {
     EnumHelpers(gen_enum_helper::Args),
     /// Generate Visitor and VisitorMut traits.
     Visitor(gen_visitor::Args),
+    /// Generate AST and NAST modules containing instantiated (non-generic) AAST types.
+    Asts(gen_asts::Args),
     /// Generate a Visitor trait for by-reference types.
     ByRefDeclVisitor(gen_by_ref_decl_visitor::Args),
     /// Generate a transformer and Pass trait for AST elaboration.
@@ -61,6 +64,7 @@ fn main() -> Result<()> {
     let files = match opts.subcommand {
         Subcommand::EnumHelpers(args) => gen_enum_helper::run(&args)?,
         Subcommand::Visitor(args) => gen_visitor::run(&args)?,
+        Subcommand::Asts(args) => gen_asts::run(&args)?,
         Subcommand::ByRefDeclVisitor(args) => gen_by_ref_decl_visitor::run(&args)?,
         Subcommand::ElabTransform(args) => gen_elab_transform::run(&args)?,
     };

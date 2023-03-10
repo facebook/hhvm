@@ -53,7 +53,6 @@ summary "Write oxidized/gen/"
   hphp/hack/src/errors/naming_error.ml                                        \
   hphp/hack/src/errors/nast_check_error.ml                                    \
   hphp/hack/src/errors/quickfix.ml                                            \
-  hphp/hack/src/naming/nast.ml                                                \
   hphp/hack/src/naming/naming_phase_error.ml                                  \
   hphp/hack/src/options/declParserOptions.ml                                  \
   hphp/hack/src/options/globalOptions.ml                                      \
@@ -102,6 +101,16 @@ summary "Write oxidized/aast_visitor/"
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
   --output "hphp/hack/src/oxidized/aast_visitor/"                             \
+  --root "Program"                                                            \
+
+summary "Write oxidized/asts"
+"${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \
+  --regen-cmd "$REGEN_COMMAND"                                                \
+  --rustfmt "$RUSTFMT_PATH"                                                   \
+  asts                                                                        \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
+  --output "hphp/hack/src/oxidized/asts/"                                     \
   --root "Program"                                                            \
 
 summary "Write elab/transform/"

@@ -21,7 +21,6 @@ mod manual;
 pub use manual::aast;
 pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
-pub use manual::ast;
 pub use manual::ast_defs_impl;
 pub use manual::global_options_impl;
 pub use manual::i_map;
@@ -54,6 +53,10 @@ pub use impl_gen::*;
 
 pub mod aast_visitor;
 
+mod asts;
+pub use asts::ast;
+pub use asts::nast;
+
 mod gen;
 
 pub use gen::aast_defs;
@@ -70,7 +73,6 @@ pub use gen::name_context;
 pub use gen::namespace_env;
 pub use gen::naming_error;
 pub use gen::naming_phase_error;
-pub use gen::nast;
 pub use gen::nast_check_error;
 pub use gen::parser_options;
 pub use gen::pos_or_decl;

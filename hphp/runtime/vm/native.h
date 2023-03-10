@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -83,6 +84,16 @@ struct Extension;
  * function or for registering functions that live in a namespace.
  *
  */
+
+#define HHVM_REGISTER_NATIVE_FUNC(nativeFuncs, name, f) do { \
+  if (RuntimeOption::EvalRecordReplay) { \
+    auto wrap = Recorder::wrapNativeFunc<decltype(&f), f>(name); \
+    Native::registerNativeFunc(nativeFuncs, name, wrap); \
+  } else { \
+    Native::registerNativeFunc(nativeFuncs, name, f); \
+  } \
+} while(0)
+
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
@@ -90,7 +101,7 @@ struct Extension;
         do { \
           String name{makeStaticString(fn)}; \
           registerExtensionFunction(name); \
-          Native::registerNativeFunc(functable, name, fimpl); \
+          HHVM_REGISTER_NATIVE_FUNC(functable, name, fimpl); \
         } while(0)
 #define HHVM_NAMED_FE(fn, fimpl)\
   HHVM_NAMED_FE_STR(#fn, fimpl, nativeFuncs())
@@ -264,6 +275,7 @@ struct NativeArg {
    * Delete move assignment operator to make this non-copyable.
    */
   NativeArg& operator=(NativeArg&&) = delete;
+  NativeArg(NativeArg&&) = default;
   T* operator->()        { return m_px; }
   T* get()               { return m_px; }
   bool operator!() const { return m_px == nullptr; }

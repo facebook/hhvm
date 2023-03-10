@@ -238,6 +238,8 @@ fn elaborate<T: Transform>(
         passes::validate_global_const::ValidateGlobalConstPass::default(),
 
         passes::validate_class_member::ValidateClassMemberPass::default(),
+
+        passes::validate_shape_name::ValidateShapeNamePass::default(),
     ];
 
     node.transform(&env, &mut passes);

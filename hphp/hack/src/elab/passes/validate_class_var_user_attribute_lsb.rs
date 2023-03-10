@@ -5,9 +5,9 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::ClassVar;
-use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::ClassVar;
+use oxidized::nast::Id;
 
 use crate::env::Env;
 use crate::Pass;
@@ -18,14 +18,11 @@ pub struct ValidateClassVarUserAttributeLsbPass {
 }
 
 impl Pass for ValidateClassVarUserAttributeLsbPass {
-    fn on_ty_class__bottom_up<Ex, En>(
+    fn on_ty_class__bottom_up(
         &mut self,
-        elem: &mut oxidized::aast::Class_<Ex, En>,
+        elem: &mut oxidized::nast::Class_,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.final_class = if elem.final_ {
             Some(elem.name.clone())
         } else {
@@ -34,14 +31,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_var_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut ClassVar<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class_var_bottom_up(&mut self, elem: &mut ClassVar, env: &Env) -> ControlFlow<()> {
         if let Some(ua) = elem
             .user_attributes
             .0

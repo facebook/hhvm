@@ -27,8 +27,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
         use std::ops::ControlFlow::Break;
 
-        use oxidized::ast_defs::*;
-        use oxidized::aast_defs::*;
+        use oxidized::nast::*;
 
         use crate::env::Env;
         use crate::Pass;
@@ -58,7 +57,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         impl Transform for oxidized::pos::Pos {}
         impl Transform for oxidized::file_info::Mode {}
         impl Transform for oxidized::namespace_env::Env {}
-        impl<Ex> Transform for oxidized::LocalIdMap<(Pos, Ex)> {}
+        impl Transform for oxidized::LocalIdMap<(Pos, ())> {}
 
         #(#manual_impls)*
 
@@ -102,16 +101,10 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
         quote!(self.traverse(env, pass)),
     );
     let traverse_body = gen_traverse_body(&ty_name, &s);
-    let ex_bound = if s.referenced_ty_params().iter().any(|tp| *tp == "Ex") {
-        quote!(where Ex: Default)
-    } else {
-        quote!()
-    };
+    let ty_name = quote::format_ident!("{}", ty_name);
 
-    s.gen_impl(quote! {
-        gen impl Transform for @Self
-            #ex_bound
-        {
+    quote! {
+        impl Transform for #ty_name {
             fn transform(
                 &mut self,
                 env: &Env,
@@ -128,7 +121,7 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
                 match self { #traverse_body }
             }
         }
-    })
+    }
 }
 
 fn gen_traverse_body(ty_name: &str, s: &synstructure::Structure<'_>) -> TokenStream {

@@ -5,10 +5,10 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Class_;
+use oxidized::nast::Expr_;
+use oxidized::nast::ShapeFieldInfo;
 use oxidized::nast::ShapeFieldName;
 
 use crate::env::Env;
@@ -20,32 +20,18 @@ pub struct ElabShapeFieldNamePass {
 }
 
 impl ElabShapeFieldNamePass {
-    pub fn in_class<Ex, En>(&mut self, cls: &Class_<Ex, En>) {
+    pub fn in_class(&mut self, cls: &Class_) {
         self.current_class = Some(cls.name.name().to_string())
     }
 }
 
 impl Pass for ElabShapeFieldNamePass {
-    fn on_ty_class__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.in_class(elem);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Expr_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Shape(fields) => fields
                 .iter_mut()
@@ -59,7 +45,7 @@ impl Pass for ElabShapeFieldNamePass {
         &mut self,
         elem: &mut ShapeFieldInfo,
         env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         canonical_shape_name(env, &mut elem.name, &self.current_class);
         ControlFlow::Continue(())
     }
@@ -81,11 +67,11 @@ fn canonical_shape_name(env: &Env, nm: &mut ShapeFieldName, current_class: &Opti
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Hint;
-    use oxidized::aast_defs::Hint_;
-    use oxidized::ast_defs::Id;
     use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Hint;
+    use oxidized::nast::Hint_;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::elab_utils;
@@ -101,7 +87,7 @@ mod tests {
         let mut pass = ElabShapeFieldNamePass {
             current_class: Some(class_name.to_string()),
         };
-        let mut elem: Expr_<(), ()> = Expr_::Shape(vec![(
+        let mut elem = Expr_::Shape(vec![(
             ShapeFieldName::SFclassConst(
                 Id(Pos::default(), sn::classes::SELF.to_string()),
                 (Pos::default(), String::default()),
@@ -158,7 +144,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabShapeFieldNamePass::default();
-        let mut elem: Expr_<(), ()> = Expr_::Shape(vec![(
+        let mut elem = Expr_::Shape(vec![(
             ShapeFieldName::SFclassConst(
                 Id(Pos::default(), sn::classes::SELF.to_string()),
                 (Pos::default(), String::default()),

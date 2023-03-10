@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::ClassTypeconstDef;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::ast_defs::Id;
+use oxidized::nast::ClassTypeconstDef;
+use oxidized::nast::Class_;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -21,31 +21,21 @@ pub struct ValidateClassTparamsPass {
 }
 
 impl Pass for ValidateClassTparamsPass {
-    fn on_ty_class__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.class_tparams = Some(elem.tparams.iter().map(|tp| tp.name.clone()).collect());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_typeconst_def_top_down<Ex, En>(
+    fn on_ty_class_typeconst_def_top_down(
         &mut self,
-        _elem: &mut ClassTypeconstDef<Ex, En>,
+        _elem: &mut ClassTypeconstDef,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.in_typeconst_def = true;
         ControlFlow::Break(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         if self.in_typeconst_def {
             match &*elem.1 {
                 Hint_::Habstr(tp_name, _) => {

@@ -5,10 +5,10 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast::Class_;
-use oxidized::aast::Sid;
-use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Class_;
+use oxidized::nast::Id;
+use oxidized::nast::Sid;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,11 +17,7 @@ use crate::Pass;
 pub struct ValidateClassMemberPass;
 
 impl Pass for ValidateClassMemberPass {
-    fn on_ty_class__bottom_up<Ex: Default, En>(
-        &mut self,
-        class: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__bottom_up(&mut self, class: &mut Class_, env: &Env) -> ControlFlow<()> {
         let typeconst_names = class.typeconsts.iter().map(|tc| &tc.name);
         let const_names = class.consts.iter().map(|c| &c.id);
         error_if_repeated_name(env, typeconst_names.chain(const_names));
@@ -47,18 +43,18 @@ fn error_if_repeated_name<'a>(env: &Env, names: impl Iterator<Item = &'a Sid>) {
 #[cfg(test)]
 mod tests {
     use ocamlrep::rc::RcOc;
-    use oxidized::aast::ClassConcreteTypeconst;
-    use oxidized::aast::ClassConst;
-    use oxidized::aast::ClassConstKind;
-    use oxidized::aast::ClassTypeconst;
-    use oxidized::aast::ClassTypeconstDef;
-    use oxidized::aast::Pos;
-    use oxidized::aast::UserAttributes;
-    use oxidized::ast::Id;
-    use oxidized::ast_defs::Abstraction;
-    use oxidized::ast_defs::ClassishKind;
     use oxidized::namespace_env;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Abstraction;
+    use oxidized::nast::ClassConcreteTypeconst;
+    use oxidized::nast::ClassConst;
+    use oxidized::nast::ClassConstKind;
+    use oxidized::nast::ClassTypeconst;
+    use oxidized::nast::ClassTypeconstDef;
+    use oxidized::nast::ClassishKind;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
+    use oxidized::nast::UserAttributes;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -67,7 +63,7 @@ mod tests {
     use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
-    fn mk_class_const(name: String) -> ClassConst<(), ()> {
+    fn mk_class_const(name: String) -> ClassConst {
         ClassConst {
             user_attributes: UserAttributes::default(),
             type_: None,
@@ -78,7 +74,7 @@ mod tests {
         }
     }
 
-    fn mk_class_typeconst(name: String) -> ClassTypeconstDef<(), ()> {
+    fn mk_class_typeconst(name: String) -> ClassTypeconstDef {
         ClassTypeconstDef {
             user_attributes: UserAttributes::default(),
             name: Id(Pos::NONE, name),
@@ -93,9 +89,9 @@ mod tests {
 
     fn mk_class(
         name: String,
-        consts: Vec<ClassConst<(), ()>>,
-        typeconsts: Vec<ClassTypeconstDef<(), ()>>,
-    ) -> Class_<(), ()> {
+        consts: Vec<ClassConst>,
+        typeconsts: Vec<ClassTypeconstDef>,
+    ) -> Class_ {
         Class_ {
             span: Pos::NONE,
             annotation: (),

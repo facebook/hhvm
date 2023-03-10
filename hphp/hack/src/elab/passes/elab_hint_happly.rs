@@ -6,19 +6,19 @@ use std::ops::ControlFlow;
 
 use hash::HashSet;
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::FunDef;
-use oxidized::aast_defs::Gconst;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::Method_;
-use oxidized::aast_defs::ModuleDef;
-use oxidized::aast_defs::Tparam;
-use oxidized::aast_defs::Typedef;
-use oxidized::ast_defs::Id;
-use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
-use oxidized::tast::Tprim;
+use oxidized::nast::Class_;
+use oxidized::nast::FunDef;
+use oxidized::nast::Gconst;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
+use oxidized::nast::Method_;
+use oxidized::nast::ModuleDef;
+use oxidized::nast::Pos;
+use oxidized::nast::Tparam;
+use oxidized::nast::Tprim;
+use oxidized::nast::Typedef;
 
 use crate::env::Env;
 use crate::Pass;
@@ -29,7 +29,7 @@ pub struct ElabHintHapplyPass {
 }
 
 impl ElabHintHapplyPass {
-    pub fn extend_tparams<Ex, En>(&mut self, tps: &[Tparam<Ex, En>]) {
+    pub fn extend_tparams(&mut self, tps: &[Tparam]) {
         tps.iter().for_each(|tparam| {
             self.tparams.insert(tparam.name.1.clone());
         })
@@ -37,7 +37,7 @@ impl ElabHintHapplyPass {
     pub fn reset_tparams(&mut self) {
         self.tparams.clear()
     }
-    pub fn set_tparams<Ex, En>(&mut self, tps: &[Tparam<Ex, En>]) {
+    pub fn set_tparams(&mut self, tps: &[Tparam]) {
         self.reset_tparams();
         self.extend_tparams(tps);
     }
@@ -50,70 +50,42 @@ impl Pass for ElabHintHapplyPass {
     // We can't write this - how can we make the contexts modular?
     // type Ctx = impl CanonicalHapplyCtx;
 
-    fn on_ty_typedef_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Typedef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _env: &Env) -> ControlFlow<()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down<Ex: Default, En>(
-        &mut self,
-        _elem: &mut Gconst<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_gconst_top_down(&mut self, _elem: &mut Gconst, _env: &Env) -> ControlFlow<()> {
         self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
         self.set_tparams(&elem.fun.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down<Ex: Default, En>(
-        &mut self,
-        _elem: &mut ModuleDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_module_def_top_down(&mut self, _elem: &mut ModuleDef, _env: &Env) -> ControlFlow<()> {
         self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _env: &Env) -> ControlFlow<()> {
         self.extend_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Tparam<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_tparam_top_down(&mut self, elem: &mut Tparam, _env: &Env) -> ControlFlow<()> {
         self.extend_tparams(&elem.parameters);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         match &mut *elem.1 {
             Hint_::Happly(id, hints) => match canonical_happly(id, hints, self.tparams()) {
                 ControlFlow::Continue((hint_opt, err_opt)) => {

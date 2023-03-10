@@ -6,10 +6,10 @@
 use std::collections::VecDeque;
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Def;
-use oxidized::aast_defs::Program;
-use oxidized::aast_defs::Stmt;
-use oxidized::aast_defs::Stmt_;
+use oxidized::nast::Def;
+use oxidized::nast::Program;
+use oxidized::nast::Stmt;
+use oxidized::nast::Stmt_;
 
 use crate::env::Env;
 use crate::Pass;
@@ -18,11 +18,7 @@ use crate::Pass;
 pub struct ElabDefsPass;
 
 impl Pass for ElabDefsPass {
-    fn on_ty_program_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Program<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_program_top_down(&mut self, elem: &mut Program, _env: &Env) -> ControlFlow<()> {
         let Program(defs) = elem;
         let mut q: VecDeque<_> = defs.drain(0..).collect();
         while let Some(e) = q.pop_front() {
@@ -62,12 +58,12 @@ impl Pass for ElabDefsPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Def;
-    use oxidized::aast_defs::Program;
-    use oxidized::aast_defs::Stmt;
-    use oxidized::aast_defs::Stmt_;
-    use oxidized::ast_defs::Id;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Def;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
+    use oxidized::nast::Program;
+    use oxidized::nast::Stmt;
+    use oxidized::nast::Stmt_;
 
     use super::*;
     use crate::Transform;
@@ -76,7 +72,7 @@ mod tests {
     fn test() {
         let env = Env::default();
 
-        let mut elem: Program<(), ()> = Program(vec![
+        let mut elem = Program(vec![
             Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Break))),
             Def::NamespaceUse(Vec::default()),
             Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Noop))),

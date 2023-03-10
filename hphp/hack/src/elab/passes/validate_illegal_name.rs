@@ -5,16 +5,16 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::ClassId;
-use oxidized::aast_defs::ClassId_;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::FunDef;
-use oxidized::aast_defs::Method_;
-use oxidized::ast_defs::ClassishKind;
-use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::ClassId;
+use oxidized::nast::ClassId_;
+use oxidized::nast::Class_;
+use oxidized::nast::ClassishKind;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::FunDef;
+use oxidized::nast::Id;
+use oxidized::nast::Method_;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -41,26 +41,12 @@ impl ValidateIllegalNamePass {
 }
 
 impl Pass for ValidateIllegalNamePass {
-    fn on_ty_class__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.classish_kind = Some(elem.kind);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__bottom_up(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
         elem.typeconsts
             .iter()
             .for_each(|tc| check_illegal_member_variable_class(env, &tc.name));
@@ -70,26 +56,12 @@ impl Pass for ValidateIllegalNamePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down<Ex, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun_def_bottom_up(&mut self, elem: &mut FunDef, env: &Env) -> ControlFlow<()> {
         let lower_name = elem.name.name().to_ascii_lowercase();
         let lower_norm = lower_name
             .strip_prefix('/')
@@ -104,40 +76,19 @@ impl Pass for ValidateIllegalNamePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _env: &Env) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_method__bottom_up(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
         if elem.name.name() == sn::members::__DESTRUCT {
             env.emit_error(NastCheckError::IllegalDestructor(elem.name.pos().clone()))
         }
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Expr_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Id(box id)
                 if id.name() == sn::pseudo_consts::G__CLASS__ && self.classish_kind.is_none() =>

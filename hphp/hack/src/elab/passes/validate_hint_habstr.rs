@@ -8,18 +8,18 @@ use std::ops::ControlFlow;
 use bitflags::bitflags;
 use hash::HashMap;
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Fun_;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::Method_;
-use oxidized::aast_defs::Pos;
-use oxidized::aast_defs::Tparam;
-use oxidized::aast_defs::Typedef;
-use oxidized::aast_defs::WhereConstraintHint;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_error::UnsupportedFeature;
-use oxidized::tast::ReifyKind;
+use oxidized::nast::Class_;
+use oxidized::nast::Fun_;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Method_;
+use oxidized::nast::Pos;
+use oxidized::nast::ReifyKind;
+use oxidized::nast::Tparam;
+use oxidized::nast::Typedef;
+use oxidized::nast::WhereConstraintHint;
 
 use crate::env::Env;
 use crate::Pass;
@@ -64,7 +64,7 @@ impl ValidateHintHabstrPass {
     fn clear_tparams(&mut self) {
         self.tparam_info.clear();
     }
-    fn check_tparams<Ex, En>(&mut self, env: &Env, tparams: &[Tparam<Ex, En>], nested: bool) {
+    fn check_tparams(&mut self, env: &Env, tparams: &[Tparam], nested: bool) {
         // Put each tparam in scope and record its kind; raise errors for
         // shadowed tparams in scope and non-shadowing reuse of previously seen
         // params of higher-kinded params
@@ -115,7 +115,7 @@ impl ValidateHintHabstrPass {
         }
     }
 
-    fn check_tparam<Ex, En>(&mut self, env: &Env, tparam: &Tparam<Ex, En>, nested: bool) {
+    fn check_tparam(&mut self, env: &Env, tparam: &Tparam, nested: bool) {
         let is_hk = !tparam.parameters.is_empty();
         let name = tparam.name.name();
         let pos = tparam.name.pos();
@@ -218,14 +218,7 @@ impl ValidateHintHabstrPass {
 // TODO[mjt] we're doing quite a bit of work here to support higher-kinded
 // types which are pretty bit-rotted. We should make a call on removing
 impl Pass for ValidateHintHabstrPass {
-    fn on_ty_class__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
         // [Class_]es exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
@@ -236,14 +229,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down<Ex, En>(
-        &mut self,
-        elem: &mut Typedef<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, env: &Env) -> ControlFlow<()> {
         // [Typedef]s exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
@@ -251,14 +237,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Fun_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun__top_down(&mut self, elem: &mut Fun_, env: &Env) -> ControlFlow<()> {
         // [Fun_]s exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
@@ -270,14 +249,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
         // Validate method level tparams given the already in-scope
         // class level tparams
         self.check_tparams(env, &elem.tparams, false);
@@ -292,14 +264,14 @@ impl Pass for ValidateHintHabstrPass {
         &mut self,
         _elem: &mut WhereConstraintHint,
         _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         // We want to check hints inside function / method where constraints
         // so we need to record this in the context
         self.set_in_where_constraint(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         // NB this relies on [Happly] -> [Habstr] elaboration happening
         // in a preceeding top-down pass
         if self.in_method_or_fun() && self.in_where_constraint() {
@@ -322,20 +294,20 @@ impl Pass for ValidateHintHabstrPass {
 mod tests {
 
     use ocamlrep::rc::RcOc;
-    use oxidized::aast_defs::Block;
-    use oxidized::aast_defs::FuncBody;
-    use oxidized::aast_defs::TypeHint;
-    use oxidized::ast_defs::Abstraction;
-    use oxidized::ast_defs::ClassishKind;
-    use oxidized::ast_defs::Id;
-    use oxidized::ast_defs::Variance;
     use oxidized::namespace_env;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Abstraction;
+    use oxidized::nast::Block;
+    use oxidized::nast::ClassishKind;
+    use oxidized::nast::FuncBody;
+    use oxidized::nast::Id;
+    use oxidized::nast::TypeHint;
+    use oxidized::nast::Variance;
 
     use super::*;
     use crate::transform::Transform;
 
-    fn mk_class(tparams: Vec<Tparam<(), ()>>, methods: Vec<Method_<(), ()>>) -> Class_<(), ()> {
+    fn mk_class(tparams: Vec<Tparam>, methods: Vec<Method_>) -> Class_ {
         Class_ {
             span: Default::default(),
             annotation: Default::default(),
@@ -371,10 +343,7 @@ mod tests {
         }
     }
 
-    fn mk_method(
-        tparams: Vec<Tparam<(), ()>>,
-        where_constraints: Vec<WhereConstraintHint>,
-    ) -> Method_<(), ()> {
+    fn mk_method(tparams: Vec<Tparam>, where_constraints: Vec<WhereConstraintHint>) -> Method_ {
         Method_ {
             span: Default::default(),
             annotation: Default::default(),
@@ -382,7 +351,7 @@ mod tests {
             abstract_: Default::default(),
             static_: Default::default(),
             readonly_this: Default::default(),
-            visibility: oxidized::tast::Visibility::Public,
+            visibility: oxidized::nast::Visibility::Public,
             name: Default::default(),
             tparams,
             where_constraints,
@@ -392,7 +361,7 @@ mod tests {
             body: FuncBody {
                 fb_ast: Block(Default::default()),
             },
-            fun_kind: oxidized::ast_defs::FunKind::FSync,
+            fun_kind: oxidized::nast::FunKind::FSync,
             user_attributes: Default::default(),
             readonly_ret: Default::default(),
             ret: TypeHint(Default::default(), None),
@@ -407,7 +376,7 @@ mod tests {
 
         let mut pass = ValidateHintHabstrPass::default();
 
-        let tparam_class: Tparam<(), ()> = Tparam {
+        let tparam_class = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "T".to_string()),
             parameters: Default::default(),
@@ -433,7 +402,7 @@ mod tests {
 
         let mut pass = ValidateHintHabstrPass::default();
 
-        let tparam: Tparam<(), ()> = Tparam {
+        let tparam = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "T".to_string()),
             parameters: Default::default(),
@@ -457,7 +426,7 @@ mod tests {
 
         let mut pass = ValidateHintHabstrPass::default();
 
-        let tparam: Tparam<(), ()> = Tparam {
+        let tparam = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "T".to_string()),
             parameters: Default::default(),
@@ -481,7 +450,7 @@ mod tests {
 
         let mut pass = ValidateHintHabstrPass::default();
 
-        let tparam_concrete: Tparam<(), ()> = Tparam {
+        let tparam_concrete = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "T".to_string()),
             parameters: Default::default(),
@@ -490,7 +459,7 @@ mod tests {
             user_attributes: Default::default(),
         };
 
-        let tparam_higher: Tparam<(), ()> = Tparam {
+        let tparam_higher = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "TH".to_string()),
             parameters: vec![tparam_concrete.clone()],
@@ -518,7 +487,7 @@ mod tests {
 
         let mut pass = ValidateHintHabstrPass::default();
 
-        let tparam: Tparam<(), ()> = Tparam {
+        let tparam = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "X".to_string()),
             parameters: Default::default(),
@@ -542,7 +511,7 @@ mod tests {
 
         let mut pass = ValidateHintHabstrPass::default();
 
-        let tparam: Tparam<(), ()> = Tparam {
+        let tparam = Tparam {
             variance: Variance::Invariant,
             name: Id(Default::default(), "This".to_string()),
             parameters: Default::default(),

@@ -5,9 +5,9 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::tast::Pos;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Pos;
 
 use crate::env::Env;
 use crate::Pass;
@@ -19,18 +19,13 @@ impl Pass for ElabExprImportPass {
     // Wrap all occurrence of `Import` in an `Invalid` marker
     // TODO[mjt] Oddly there is no error reporting about the occurrence of these
     // expressions and no invariant is assumed. I would expect one of these
-    fn on_ty_expr_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, _env: &Env) -> ControlFlow<()> {
         let Expr(_, _, expr_) = elem;
         match expr_ {
             Expr_::Import(_) => {
-                let inner_expr =
-                    std::mem::replace(elem, Expr(Ex::default(), Pos::NONE, Expr_::Null));
+                let inner_expr = std::mem::replace(elem, Expr((), Pos::NONE, Expr_::Null));
                 *elem = Expr(
-                    Ex::default(),
+                    (),
                     inner_expr.1.clone(),
                     Expr_::Invalid(Box::new(Some(inner_expr))),
                 );
@@ -43,7 +38,7 @@ impl Pass for ElabExprImportPass {
 
 #[cfg(test)]
 mod tests {
-    use oxidized::aast_defs::ImportFlavor;
+    use oxidized::nast::ImportFlavor;
 
     use super::*;
     use crate::Transform;
@@ -55,7 +50,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabExprImportPass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem: Expr = Expr(
             (),
             Pos::NONE,
             Expr_::Import(Box::new((

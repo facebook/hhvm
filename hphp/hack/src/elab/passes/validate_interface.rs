@@ -6,8 +6,8 @@ use std::ops::ControlFlow;
 
 use itertools::FoldWhile;
 use itertools::Itertools;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Hint;
+use oxidized::nast::Class_;
+use oxidized::nast::Hint;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -17,14 +17,7 @@ use crate::Pass;
 pub struct ValidateInterfacePass;
 
 impl Pass for ValidateInterfacePass {
-    fn on_ty_class__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__bottom_up(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
         if elem.kind.is_cinterface() {
             // Raise an error for each `use` clause
             elem.uses.iter().for_each(|Hint(pos, _)| {

@@ -5,14 +5,14 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Fun_;
-use oxidized::aast_defs::Method_;
-use oxidized::aast_defs::Pos;
-use oxidized::aast_defs::ReifyKind;
-use oxidized::aast_defs::Tparam;
-use oxidized::aast_defs::UserAttribute;
-use oxidized::aast_defs::Visibility;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Fun_;
+use oxidized::nast::Method_;
+use oxidized::nast::Pos;
+use oxidized::nast::ReifyKind;
+use oxidized::nast::Tparam;
+use oxidized::nast::UserAttribute;
+use oxidized::nast::Visibility;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -22,14 +22,7 @@ use crate::Pass;
 pub struct ValidaetUserAttributeDynamicallyCallable;
 
 impl Pass for ValidaetUserAttributeDynamicallyCallable {
-    fn on_ty_fun__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Fun_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun__top_down(&mut self, elem: &mut Fun_, env: &Env) -> ControlFlow<()> {
         dynamically_callable_attr_pos(&elem.user_attributes)
             .into_iter()
             .for_each(|pos| {
@@ -41,14 +34,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
         dynamically_callable_attr_pos(&elem.user_attributes)
             .into_iter()
             .for_each(|pos| {
@@ -72,13 +58,13 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
     }
 }
 
-fn has_reified_generics<Ex, En>(tparams: &[Tparam<Ex, En>]) -> bool {
+fn has_reified_generics(tparams: &[Tparam]) -> bool {
     tparams
         .iter()
         .any(|tp| matches!(tp.reified, ReifyKind::Reified | ReifyKind::SoftReified))
 }
 
-fn dynamically_callable_attr_pos<Ex, En>(attrs: &[UserAttribute<Ex, En>]) -> Option<&Pos> {
+fn dynamically_callable_attr_pos(attrs: &[UserAttribute]) -> Option<&Pos> {
     attrs
         .iter()
         .find(|ua| ua.name.name() == sn::user_attributes::DYNAMICALLY_CALLABLE)

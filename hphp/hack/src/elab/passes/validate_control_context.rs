@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::FinallyBlock;
-use oxidized::aast_defs::Stmt;
-use oxidized::aast_defs::Stmt_;
+use oxidized::nast::Expr_;
+use oxidized::nast::FinallyBlock;
+use oxidized::nast::Stmt;
+use oxidized::nast::Stmt_;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -32,14 +32,7 @@ pub struct ValidateControlContextPass {
 }
 
 impl Pass for ValidateControlContextPass {
-    fn on_ty_stmt_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Stmt<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_stmt_bottom_up(&mut self, elem: &mut Stmt, env: &Env) -> ControlFlow<()> {
         match (&elem.1, self.control_context) {
             (Stmt_::Break, ControlContext::TopLevel) => {
                 env.emit_error(NastCheckError::ToplevelBreak(elem.0.clone()))
@@ -58,14 +51,7 @@ impl Pass for ValidateControlContextPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_stmt__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Stmt_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_stmt__top_down(&mut self, elem: &mut Stmt_, _env: &Env) -> ControlFlow<()> {
         match elem {
             Stmt_::Do(..) | Stmt_::While(..) | Stmt_::For(..) | Stmt_::Foreach(..) => {
                 self.control_context = ControlContext::Loop
@@ -76,26 +62,16 @@ impl Pass for ValidateControlContextPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_finally_block_top_down<Ex, En>(
+    fn on_ty_finally_block_top_down(
         &mut self,
-        _elem: &mut FinallyBlock<Ex, En>,
+        _elem: &mut FinallyBlock,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.in_finally_block = true;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Expr_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Efun(..) | Expr_::Lfun(..) => self.control_context = ControlContext::TopLevel,
             _ => (),

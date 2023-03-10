@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::AsExpr;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Lid;
 use oxidized::local_id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::AsExpr;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Lid;
 
 use crate::env::Env;
 use crate::Pass;
@@ -18,14 +18,7 @@ use crate::Pass;
 pub struct ElabAsExprPass;
 
 impl Pass for ElabAsExprPass {
-    fn on_ty_as_expr_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut oxidized::tast::AsExpr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_as_expr_bottom_up(&mut self, elem: &mut AsExpr, env: &Env) -> ControlFlow<()> {
         match elem {
             AsExpr::AsV(e) | AsExpr::AwaitAsV(_, e) => elab_value(env, e),
             AsExpr::AsKv(ek, ev) | AsExpr::AwaitAsKv(_, ek, ev) => {
@@ -37,7 +30,7 @@ impl Pass for ElabAsExprPass {
     }
 }
 
-fn elab_value<Ex, En>(env: &Env, expr: &mut Expr<Ex, En>) {
+fn elab_value(env: &Env, expr: &mut Expr) {
     let Expr(_, pos, expr_) = expr;
     if matches!(expr_, Expr_::Id(..)) {
         env.emit_error(NamingError::ExpectedVariable(pos.clone()));
@@ -48,7 +41,7 @@ fn elab_value<Ex, En>(env: &Env, expr: &mut Expr<Ex, En>) {
     }
 }
 
-fn elab_key<Ex, En>(env: &Env, expr: &mut Expr<Ex, En>) {
+fn elab_key(env: &Env, expr: &mut Expr) {
     let Expr(_, pos, expr_) = expr;
     match expr_ {
         Expr_::Lvar(..) | Expr_::Lplaceholder(..) => (),
@@ -65,9 +58,9 @@ fn elab_key<Ex, En>(env: &Env, expr: &mut Expr<Ex, En>) {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::ast_defs::Id;
     use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::elab_utils;
@@ -79,7 +72,7 @@ mod tests {
 
         let mut pass = ElabAsExprPass;
 
-        let mut elem: AsExpr<(), ()> = AsExpr::AsV(Expr(
+        let mut elem = AsExpr::AsV(Expr(
             (),
             Pos::default(),
             Expr_::Id(Box::new(Id(Pos::default(), String::default()))),
@@ -103,7 +96,7 @@ mod tests {
 
         let mut pass = ElabAsExprPass;
 
-        let mut elem: AsExpr<(), ()> = AsExpr::AsV(elab_utils::expr::null());
+        let mut elem = AsExpr::AsV(elab_utils::expr::null());
         elem.transform(&env, &mut pass);
 
         assert!(env.into_errors().is_empty());
@@ -116,8 +109,7 @@ mod tests {
 
         let mut pass = ElabAsExprPass;
 
-        let mut elem: AsExpr<(), ()> =
-            AsExpr::AsKv(elab_utils::expr::null(), elab_utils::expr::null());
+        let mut elem = AsExpr::AsKv(elab_utils::expr::null(), elab_utils::expr::null());
         elem.transform(&env, &mut pass);
 
         assert!(matches!(
@@ -137,7 +129,7 @@ mod tests {
 
         let mut pass = ElabAsExprPass;
 
-        let mut elem: AsExpr<(), ()> = AsExpr::AsKv(
+        let mut elem = AsExpr::AsKv(
             Expr((), Pos::default(), Expr_::Lplaceholder(Box::default())),
             elab_utils::expr::null(),
         );

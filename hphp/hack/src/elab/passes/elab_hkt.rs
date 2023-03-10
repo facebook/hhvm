@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::Tparam;
-use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
+use oxidized::nast::Tparam;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ElabHktPass;
 
 impl Pass for ElabHktPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         if !env.hkt_enabled() {
             let Hint(pos, hint_) = elem;
             if let Hint_::Habstr(tp_name, tp_params) = &mut **hint_ {
@@ -33,11 +33,7 @@ impl Pass for ElabHktPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Tparam<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_tparam_top_down(&mut self, elem: &mut Tparam, env: &Env) -> ControlFlow<()> {
         if !env.hkt_enabled() {
             if !elem.parameters.is_empty() {
                 let Id(pos, tp_name) = &elem.name;
@@ -55,10 +51,10 @@ impl Pass for ElabHktPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::ReifyKind;
-    use oxidized::aast_defs::UserAttributes;
-    use oxidized::ast_defs::Variance;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Pos;
+    use oxidized::nast::ReifyKind;
+    use oxidized::nast::UserAttributes;
+    use oxidized::nast::Variance;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -121,7 +117,7 @@ mod tests {
 
         let mut pass = ElabHktPass;
 
-        let mut elem: Tparam<(), ()> = Tparam {
+        let mut elem = Tparam {
             variance: Variance::Invariant,
             name: Id(Pos::NONE, "T".to_string()),
             parameters: vec![Tparam {

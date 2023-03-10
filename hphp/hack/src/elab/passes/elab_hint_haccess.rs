@@ -6,12 +6,12 @@ use std::ops::ControlFlow;
 
 use bitflags::bitflags;
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Contexts;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::WhereConstraintHint;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Class_;
+use oxidized::nast::Contexts;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::WhereConstraintHint;
 
 use crate::env::Env;
 use crate::Pass;
@@ -32,7 +32,7 @@ bitflags! {
 }
 
 impl ElabHintHaccessPass {
-    fn set_in_class<Ex, En>(&mut self, cls: &Class_<Ex, En>) {
+    fn set_in_class(&mut self, cls: &Class_) {
         self.current_class = Some(cls.name.name().to_string())
     }
 
@@ -62,7 +62,7 @@ impl ElabHintHaccessPass {
 }
 
 impl Pass for ElabHintHaccessPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         if !self.in_haccess() {
             return ControlFlow::Continue(());
         }
@@ -111,19 +111,12 @@ impl Pass for ElabHintHaccessPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<()> {
         self.set_in_haccess(matches!(elem, Hint_::Haccess(..)));
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.set_in_class(elem);
         ControlFlow::Continue(())
     }
@@ -132,12 +125,12 @@ impl Pass for ElabHintHaccessPass {
         &mut self,
         _elem: &mut WhereConstraintHint,
         _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         self.set_in_where_clause(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_contexts_top_down(&mut self, _elem: &mut Contexts, _env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_contexts_top_down(&mut self, _elem: &mut Contexts, _env: &Env) -> ControlFlow<()> {
         self.set_in_context(true);
         ControlFlow::Continue(())
     }
@@ -146,10 +139,10 @@ impl Pass for ElabHintHaccessPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::ast_defs::ConstraintKind;
-    use oxidized::ast_defs::Id;
     use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::tast::Pos;
+    use oxidized::nast::ConstraintKind;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::Transform;

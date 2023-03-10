@@ -5,10 +5,10 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Pos;
-use oxidized::aast_defs::UserAttributes;
 use oxidized::naming_phase_error::ExperimentalFeature;
+use oxidized::nast::Class_;
+use oxidized::nast::Pos;
+use oxidized::nast::UserAttributes;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,14 +17,7 @@ use crate::Pass;
 pub struct ValidateClassUserAttributeConstPass;
 
 impl Pass for ValidateClassUserAttributeConstPass {
-    fn on_ty_class__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__bottom_up(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
         if !env.const_attribute() {
             // Disallow `__Const` attribute unless typechecker option is enabled
             check_const(env, elem.name.pos(), &elem.user_attributes);
@@ -36,7 +29,7 @@ impl Pass for ValidateClassUserAttributeConstPass {
     }
 }
 
-fn check_const<Ex, En>(env: &Env, pos: &Pos, attrs: &UserAttributes<Ex, En>) {
+fn check_const(env: &Env, pos: &Pos, attrs: &UserAttributes) {
     if attrs
         .0
         .iter()

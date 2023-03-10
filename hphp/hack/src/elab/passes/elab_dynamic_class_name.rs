@@ -6,15 +6,15 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast::ClassGetExpr;
-use oxidized::aast_defs::ClassId;
-use oxidized::aast_defs::ClassId_;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::FunctionPtrId;
-use oxidized::aast_defs::PropOrMethod;
-use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::ClassGetExpr;
+use oxidized::nast::ClassId;
+use oxidized::nast::ClassId_;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::FunctionPtrId;
+use oxidized::nast::Id;
+use oxidized::nast::PropOrMethod;
 
 use crate::elab_utils;
 use crate::env::Env;
@@ -24,15 +24,8 @@ use crate::Pass;
 pub struct ElabDynamicClassNamePass;
 
 impl Pass for ElabDynamicClassNamePass {
-    fn on_ty_expr_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
-        let invalid = |expr_: &mut Expr_<_, _>| {
+    fn on_ty_expr_bottom_up(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+        let invalid = |expr_: &mut Expr_| {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
             let inner_expr = elab_utils::expr::from_expr__with_pos_(elem.1.clone(), inner_expr_);
             *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
@@ -91,7 +84,7 @@ impl Pass for ElabDynamicClassNamePass {
     }
 }
 
-fn is_dynamic<Ex, En>(class_id: &ClassId<Ex, En>) -> bool {
+fn is_dynamic(class_id: &ClassId) -> bool {
     match &class_id.2 {
         ClassId_::CIparent
         | ClassId_::CIself
@@ -108,12 +101,12 @@ fn is_dynamic<Ex, En>(class_id: &ClassId<Ex, En>) -> bool {
 mod tests {
 
     use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::Transform;
 
-    fn mk_dynamic_class_id() -> ClassId<(), ()> {
+    fn mk_dynamic_class_id() -> ClassId {
         ClassId(
             (),
             Pos::default(),
@@ -121,7 +114,7 @@ mod tests {
         )
     }
 
-    fn mk_non_dynamic_class_id() -> ClassId<(), ()> {
+    fn mk_non_dynamic_class_id() -> ClassId {
         ClassId((), Pos::default(), ClassId_::CIself)
     }
 
@@ -132,7 +125,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::New(Box::new((
@@ -158,7 +151,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::New(Box::new((
@@ -191,7 +184,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::FunctionPointer(Box::new((
@@ -217,7 +210,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::FunctionPointer(Box::new((
@@ -239,7 +232,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::ClassConst(Box::new((mk_non_dynamic_class_id(), Default::default()))),
@@ -262,7 +255,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::ClassConst(Box::new((mk_dynamic_class_id(), Default::default()))),
@@ -290,7 +283,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::ClassGet(Box::new((
@@ -317,7 +310,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::ClassGet(Box::new((
@@ -343,7 +336,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabDynamicClassNamePass;
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::default(),
             Expr_::ClassGet(Box::new((

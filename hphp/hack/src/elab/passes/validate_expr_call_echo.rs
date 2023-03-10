@@ -5,10 +5,10 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Id;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,11 +17,7 @@ use crate::Pass;
 pub struct ValidateExprCallEchoPass;
 
 impl Pass for ValidateExprCallEchoPass {
-    fn on_ty_expr__bottom_up<Ex: Default, En>(
-        &mut self,
-        elem: &mut Expr_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Call(box (
                 Expr(_, _, Expr_::Id(box Id(_, fn_name))),
@@ -49,7 +45,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ValidateExprCallEchoPass;
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -85,7 +81,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ValidateExprCallEchoPass;
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),

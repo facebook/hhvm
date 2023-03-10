@@ -6,9 +6,9 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::ast::ClassishKind;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Class_;
+use oxidized::nast::ClassishKind;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,11 +17,7 @@ use crate::Pass;
 pub struct ValidateClassConsistentConstructPass;
 
 impl Pass for ValidateClassConsistentConstructPass {
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        class: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, class: &mut Class_, env: &Env) -> ControlFlow<()> {
         if env.consistent_ctor_level <= 0 {
             return ControlFlow::Continue(());
         }

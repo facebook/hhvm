@@ -5,10 +5,10 @@
 use std::collections::VecDeque;
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Block;
-use oxidized::aast_defs::Stmt;
-use oxidized::aast_defs::Stmt_;
-use oxidized::aast_defs::UsingStmt;
+use oxidized::nast::Block;
+use oxidized::nast::Stmt;
+use oxidized::nast::Stmt_;
+use oxidized::nast::UsingStmt;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,11 +17,7 @@ use crate::Pass;
 pub struct ElabBlockPass;
 
 impl Pass for ElabBlockPass {
-    fn on_ty_block_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Block<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_block_top_down(&mut self, elem: &mut Block, _env: &Env) -> ControlFlow<()> {
         let mut q: VecDeque<_> = elem.drain(0..).collect();
         while let Some(Stmt(pos, stmt_)) = q.pop_front() {
             match stmt_ {
@@ -32,11 +28,7 @@ impl Pass for ElabBlockPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_using_stmt_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut UsingStmt<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_using_stmt_top_down(&mut self, elem: &mut UsingStmt, _env: &Env) -> ControlFlow<()> {
         elem.is_block_scoped = false;
         ControlFlow::Continue(())
     }
@@ -45,10 +37,10 @@ impl Pass for ElabBlockPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Block;
-    use oxidized::aast_defs::Stmt;
-    use oxidized::aast_defs::Stmt_;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Block;
+    use oxidized::nast::Pos;
+    use oxidized::nast::Stmt;
+    use oxidized::nast::Stmt_;
 
     use super::*;
     use crate::Transform;
@@ -59,7 +51,7 @@ mod tests {
 
         let mut pass = ElabBlockPass;
 
-        let mut elem: Block<(), ()> = Block(vec![Stmt(
+        let mut elem: Block = Block(vec![Stmt(
             Pos::NONE,
             Stmt_::Block(Block(vec![
                 Stmt(Pos::NONE, Stmt_::Noop),

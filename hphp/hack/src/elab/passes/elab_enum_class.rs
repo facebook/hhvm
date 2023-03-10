@@ -6,13 +6,13 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::ast_defs::Abstraction;
-use oxidized::ast_defs::ClassishKind;
-use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Abstraction;
+use oxidized::nast::Class_;
+use oxidized::nast::ClassishKind;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
 
 use crate::env::Env;
 use crate::Pass;
@@ -21,11 +21,7 @@ use crate::Pass;
 pub struct ElabEnumClassPass;
 
 impl Pass for ElabEnumClassPass {
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         if let Some(enum_) = &elem.enum_ {
             let Id(pos, _) = &elem.name;
             let enum_hint = Hint(
@@ -57,11 +53,7 @@ impl Pass for ElabEnumClassPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint__top_down(
-        &mut self,
-        elem: &mut oxidized::tast::Hint_,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, env: &Env) -> ControlFlow<()> {
         if !(env.is_hhi() || env.is_systemlib()) {
             match elem {
                 Hint_::Happly(Id(pos, ty_name), _)
@@ -85,16 +77,16 @@ impl Pass for ElabEnumClassPass {
 mod tests {
 
     use ocamlrep::rc::RcOc;
-    use oxidized::aast_defs::Enum_;
-    use oxidized::aast_defs::UserAttributes;
     use oxidized::namespace_env;
+    use oxidized::nast::Enum_;
+    use oxidized::nast::Pos;
+    use oxidized::nast::UserAttributes;
     use oxidized::s_map::SMap;
-    use oxidized::tast::Pos;
 
     use super::*;
     use crate::Transform;
 
-    fn make_enum_class_(kind: ClassishKind, enum_: Enum_) -> Class_<(), ()> {
+    fn make_enum_class_(kind: ClassishKind, enum_: Enum_) -> Class_ {
         Class_ {
             span: Pos::NONE,
             annotation: (),
@@ -145,7 +137,7 @@ mod tests {
 
         let mut pass = ElabEnumClassPass;
 
-        let mut elem: Class_<(), ()> = make_enum_class_(
+        let mut elem = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Concrete),
             Enum_ {
                 base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
@@ -183,7 +175,7 @@ mod tests {
 
         let mut pass = ElabEnumClassPass;
 
-        let mut elem: Class_<(), ()> = make_enum_class_(
+        let mut elem = make_enum_class_(
             ClassishKind::CenumClass(Abstraction::Abstract),
             Enum_ {
                 base: Hint(Pos::NONE, Box::new(Hint_::Herr)),
@@ -209,7 +201,7 @@ mod tests {
 
         let mut pass = ElabEnumClassPass;
 
-        let mut elem: Class_<(), ()> = make_enum_class_(
+        let mut elem = make_enum_class_(
             ClassishKind::Cenum,
             Enum_ {
                 base: Hint(Pos::NONE, Box::new(Hint_::Herr)),

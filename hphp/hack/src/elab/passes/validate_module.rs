@@ -5,8 +5,8 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast::ModuleDef;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::ModuleDef;
 
 use crate::env::Env;
 use crate::Pass;
@@ -15,11 +15,7 @@ use crate::Pass;
 pub struct ValidateModulePass;
 
 impl Pass for ValidateModulePass {
-    fn on_ty_module_def_bottom_up<Ex: Default, En>(
-        &mut self,
-        module: &mut ModuleDef<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_module_def_bottom_up(&mut self, module: &mut ModuleDef, env: &Env) -> ControlFlow<()> {
         if !env.allow_module_declarations() {
             env.emit_error(NamingError::ModuleDeclarationOutsideAllowedFiles(
                 module.span.clone(),
@@ -32,18 +28,18 @@ impl Pass for ValidateModulePass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast::ModuleDef;
-    use oxidized::aast::Pos;
-    use oxidized::aast::UserAttributes;
-    use oxidized::ast::Id;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Id;
+    use oxidized::nast::ModuleDef;
+    use oxidized::nast::Pos;
+    use oxidized::nast::UserAttributes;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
     use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
-    fn mk_module(name: &str) -> ModuleDef<(), ()> {
+    fn mk_module(name: &str) -> ModuleDef {
         ModuleDef {
             annotation: (),
             name: Id(Pos::NONE, name.to_string()),

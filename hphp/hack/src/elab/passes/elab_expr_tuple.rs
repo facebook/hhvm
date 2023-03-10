@@ -5,9 +5,9 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
 
 use crate::elab_utils;
 use crate::env::Env;
@@ -18,11 +18,7 @@ use crate::Pass;
 pub struct ElabExprTuplePass;
 
 impl Pass for ElabExprTuplePass {
-    fn on_ty_expr_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
         if let Expr(_annot, pos, Expr_::Tuple(es)) = elem {
             if es.is_empty() {
                 // Loc. of the empty tuple.
@@ -54,7 +50,7 @@ mod tests {
 
         let mut pass = ElabExprTuplePass;
 
-        let mut elem: Expr<(), ()> = elab_utils::expr::from_expr_(Expr_::Tuple(vec![]));
+        let mut elem = elab_utils::expr::from_expr_(Expr_::Tuple(vec![]));
         elem.transform(&env, &mut pass);
         assert!(matches!(elem, Expr(_, _, Expr_::Invalid(_))));
     }

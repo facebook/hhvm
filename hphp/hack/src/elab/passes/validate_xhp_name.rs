@@ -5,9 +5,9 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Hint_;
-use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
 
 use crate::env::Env;
 use crate::Pass;
@@ -16,7 +16,7 @@ use crate::Pass;
 pub struct ValidateXhpNamePass;
 
 impl Pass for ValidateXhpNamePass {
-    fn on_ty_hint__top_down(&mut self, hint_: &mut Hint_, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, hint_: &mut Hint_, env: &Env) -> ControlFlow<()> {
         match hint_ {
             // "some common Xhp screw ups"
             Hint_::Happly(Id(pos, name), _) if ["Xhp", ":Xhp", "XHP"].contains(&name.as_str()) => {
@@ -34,8 +34,8 @@ impl Pass for ValidateXhpNamePass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Pos;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::transform::Transform;

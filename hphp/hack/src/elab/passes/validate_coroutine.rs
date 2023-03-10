@@ -5,16 +5,16 @@
 use std::ops::ControlFlow;
 
 use bitflags::bitflags;
-use oxidized::aast_defs::AsExpr;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::FunDef;
-use oxidized::aast_defs::Method_;
-use oxidized::aast_defs::Pos;
-use oxidized::aast_defs::Stmt;
-use oxidized::aast_defs::Stmt_;
-use oxidized::aast_defs::UsingStmt;
-use oxidized::ast_defs::FunKind;
+use oxidized::nast::AsExpr;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::FunDef;
+use oxidized::nast::FunKind;
+use oxidized::nast::Method_;
+use oxidized::nast::Pos;
+use oxidized::nast::Stmt;
+use oxidized::nast::Stmt_;
+use oxidized::nast::UsingStmt;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -55,14 +55,7 @@ impl ValidateCoroutinePass {
 }
 
 impl Pass for ValidateCoroutinePass {
-    fn on_ty_stmt_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Stmt<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_stmt_bottom_up(&mut self, elem: &mut Stmt, env: &Env) -> ControlFlow<()> {
         match &elem.1 {
             Stmt_::Using(box UsingStmt {
                 has_await, exprs, ..
@@ -94,14 +87,7 @@ impl Pass for ValidateCoroutinePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr_top_down<Ex, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
         match elem.2 {
             Expr_::Await(..) if self.is_sync() => {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
@@ -114,27 +100,13 @@ impl Pass for ValidateCoroutinePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _env: &Env) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down<Ex, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
         ControlFlow::Continue(())

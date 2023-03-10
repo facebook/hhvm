@@ -5,11 +5,11 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Contexts;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Contexts;
+use oxidized::nast::Expr_;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
 
 use crate::env::Env;
 use crate::Pass;
@@ -30,7 +30,7 @@ impl ElabHintWildcardPass {
 }
 
 impl Pass for ElabHintWildcardPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         let Hint(pos, box hint_) = elem;
         //   Swap for `Herr`
         let in_hint_ = std::mem::replace(hint_, Hint_::Herr);
@@ -71,7 +71,7 @@ impl Pass for ElabHintWildcardPass {
     // Wildcard hints are _always_ disallowed in contexts
     // TODO: we define this on `context` in OCaml - we need a newtype
     // to do the same here
-    fn on_ty_contexts_top_down(&mut self, elem: &mut Contexts, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_contexts_top_down(&mut self, elem: &mut Contexts, env: &Env) -> ControlFlow<()> {
         let Contexts(_, hints) = elem;
         hints
             .iter_mut()
@@ -84,14 +84,11 @@ impl Pass for ElabHintWildcardPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__top_down<Ex, En>(
+    fn on_ty_expr__top_down(
         &mut self,
-        elem: &mut oxidized::aast::Expr_<Ex, En>,
+        elem: &mut oxidized::nast::Expr_,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         match elem {
             Expr_::Cast(..) => self.incr_depth(),
             Expr_::Is(..) | Expr_::As(..) => self.allow_wildcard = true,
@@ -101,20 +98,17 @@ impl Pass for ElabHintWildcardPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_targ_top_down<Ex>(
+    fn on_ty_targ_top_down(
         &mut self,
-        _elem: &mut oxidized::aast::Targ<Ex>,
+        _elem: &mut oxidized::nast::Targ,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.allow_wildcard = true;
         self.incr_depth();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<()> {
         match elem {
             Hint_::Hunion(_)
             | Hint_::Hintersection(_)
@@ -132,9 +126,9 @@ impl Pass for ElabHintWildcardPass {
 
     fn on_ty_shape_field_info_top_down(
         &mut self,
-        _elem: &mut oxidized::tast::ShapeFieldInfo,
+        _elem: &mut oxidized::nast::ShapeFieldInfo,
         _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         self.incr_depth();
         ControlFlow::Continue(())
     }
@@ -150,10 +144,10 @@ fn is_wildcard(hint: &Hint) -> bool {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Targ;
-    use oxidized::ast_defs::Id;
     use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
+    use oxidized::nast::Targ;
 
     use super::*;
     use crate::elab_utils;
@@ -182,8 +176,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> =
-            Expr_::Is(Box::new((elab_utils::expr::null(), make_wildcard(vec![]))));
+        let mut elem = Expr_::Is(Box::new((elab_utils::expr::null(), make_wildcard(vec![]))));
         elem.transform(&env, &mut pass);
 
         let wildcard_hint_disallowed_err_opt = env.into_errors().pop();
@@ -205,7 +198,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> = Expr_::Is(Box::new((
+        let mut elem = Expr_::Is(Box::new((
             elab_utils::expr::null(),
             Hint(
                 Pos::default(),
@@ -229,7 +222,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> = Expr_::Is(Box::new((
+        let mut elem = Expr_::Is(Box::new((
             elab_utils::expr::null(),
             make_wildcard(vec![Hint(Pos::default(), Box::new(Hint_::Herr))]),
         )));
@@ -253,7 +246,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> = Expr_::Is(Box::new((
+        let mut elem = Expr_::Is(Box::new((
             elab_utils::expr::null(),
             Hint(
                 Pos::default(),
@@ -292,8 +285,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> =
-            Expr_::Upcast(Box::new((elab_utils::expr::null(), make_wildcard(vec![]))));
+        let mut elem = Expr_::Upcast(Box::new((elab_utils::expr::null(), make_wildcard(vec![]))));
         elem.transform(&env, &mut pass);
 
         let wildcard_hint_disallowed_err_opt = env.into_errors().pop();
@@ -318,7 +310,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> = Expr_::Upcast(Box::new((
+        let mut elem = Expr_::Upcast(Box::new((
             elab_utils::expr::null(),
             Hint(
                 Pos::default(),
@@ -356,8 +348,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Expr_<(), ()> =
-            Expr_::Cast(Box::new((make_wildcard(vec![]), elab_utils::expr::null())));
+        let mut elem = Expr_::Cast(Box::new((make_wildcard(vec![]), elab_utils::expr::null())));
         elem.transform(&env, &mut pass);
 
         let wildcard_hint_disallowed_err_opt = env.into_errors().pop();
@@ -382,7 +373,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Contexts = Contexts(Pos::default(), vec![make_wildcard(vec![])]);
+        let mut elem = Contexts(Pos::default(), vec![make_wildcard(vec![])]);
         elem.transform(&env, &mut pass);
 
         let invalid_wildcard_context_err_opt = env.into_errors().pop();
@@ -407,7 +398,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintWildcardPass::default();
-        let mut elem: Targ<()> = Targ((), make_wildcard(vec![]));
+        let mut elem = Targ((), make_wildcard(vec![]));
         elem.transform(&env, &mut pass);
 
         assert!(env.into_errors().is_empty());

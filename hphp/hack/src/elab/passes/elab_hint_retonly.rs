@@ -4,11 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::ast_defs::Tprim;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_error::ReturnOnlyHint;
+use oxidized::nast;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Tprim;
 
 use crate::env::Env;
 use crate::Pass;
@@ -19,7 +20,7 @@ pub struct ElabHintRetonlyPass {
 }
 
 impl Pass for ElabHintRetonlyPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
         match elem {
             Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tvoid)) if !self.allow_retonly => {
                 env.emit_error(NamingError::ReturnOnlyTypehint {
@@ -41,7 +42,7 @@ impl Pass for ElabHintRetonlyPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<()> {
         match elem {
             Hint_::Happly(..) | Hint_::Habstr(..) => self.allow_retonly = true,
             _ => (),
@@ -49,14 +50,7 @@ impl Pass for ElabHintRetonlyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_targ_top_down<Ex>(
-        &mut self,
-        _elem: &mut oxidized::aast::Targ<Ex>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_targ_top_down(&mut self, _elem: &mut nast::Targ, _env: &Env) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
@@ -65,31 +59,25 @@ impl Pass for ElabHintRetonlyPass {
         &mut self,
         _elem: &mut Hint,
         _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
 
-    fn on_fld_fun__ret_top_down<Ex>(
+    fn on_fld_fun__ret_top_down(
         &mut self,
-        _elem: &mut oxidized::aast::TypeHint<Ex>,
+        _elem: &mut nast::TypeHint,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
 
-    fn on_fld_method__ret_top_down<Ex>(
+    fn on_fld_method__ret_top_down(
         &mut self,
-        _elem: &mut oxidized::aast::TypeHint<Ex>,
+        _elem: &mut nast::TypeHint,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
@@ -98,17 +86,17 @@ impl Pass for ElabHintRetonlyPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Block;
-    use oxidized::aast_defs::FunParam;
-    use oxidized::aast_defs::Fun_;
-    use oxidized::aast_defs::FuncBody;
-    use oxidized::aast_defs::HintFun;
-    use oxidized::aast_defs::Targ;
-    use oxidized::aast_defs::TypeHint;
-    use oxidized::ast_defs::Id;
-    use oxidized::ast_defs::ParamKind;
     use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Block;
+    use oxidized::nast::FunParam;
+    use oxidized::nast::Fun_;
+    use oxidized::nast::FuncBody;
+    use oxidized::nast::HintFun;
+    use oxidized::nast::Id;
+    use oxidized::nast::ParamKind;
+    use oxidized::nast::Pos;
+    use oxidized::nast::Targ;
+    use oxidized::nast::TypeHint;
 
     use super::*;
     use crate::Transform;
@@ -118,7 +106,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
-        let mut elem: Fun_<(), ()> = Fun_ {
+        let mut elem = Fun_ {
             span: Default::default(),
             readonly_this: Default::default(),
             annotation: Default::default(),
@@ -135,7 +123,7 @@ mod tests {
             body: FuncBody {
                 fb_ast: Block(vec![]),
             },
-            fun_kind: oxidized::ast_defs::FunKind::FSync,
+            fun_kind: oxidized::nast::FunKind::FSync,
             user_attributes: Default::default(),
             external: Default::default(),
             doc_comment: Default::default(),
@@ -154,7 +142,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
-        let mut elem: HintFun = HintFun {
+        let mut elem = HintFun {
             is_readonly: Default::default(),
             param_tys: Default::default(),
             param_info: Default::default(),
@@ -178,7 +166,7 @@ mod tests {
 
         let mut pass = ElabHintRetonlyPass::default();
         // Whatever<void>
-        let mut elem: Hint = Hint(
+        let mut elem = Hint(
             Pos::default(),
             Box::new(Hint_::Happly(
                 Id::default(),
@@ -201,7 +189,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
-        let mut elem: Targ<()> = Targ(
+        let mut elem = Targ(
             (),
             Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid))),
         );
@@ -216,7 +204,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
-        let mut elem: Hint = Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid)));
+        let mut elem = Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid)));
         elem.transform(&env, &mut pass);
 
         let retonly_hint_err_opt = env.into_errors().pop();
@@ -234,7 +222,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
-        let mut elem: Fun_<(), ()> = Fun_ {
+        let mut elem = Fun_ {
             span: Default::default(),
             readonly_this: Default::default(),
             annotation: Default::default(),
@@ -262,7 +250,7 @@ mod tests {
             body: FuncBody {
                 fb_ast: Block(vec![]),
             },
-            fun_kind: oxidized::ast_defs::FunKind::FSync,
+            fun_kind: oxidized::nast::FunKind::FSync,
             user_attributes: Default::default(),
             external: Default::default(),
             doc_comment: Default::default(),

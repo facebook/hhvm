@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::tast::Pos;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Pos;
 
 use crate::env::Env;
 use crate::Pass;
@@ -15,7 +15,7 @@ use crate::Pass;
 pub struct ElabHintHsoftPass;
 
 impl Pass for ElabHintHsoftPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> std::ops::ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> std::ops::ControlFlow<()> {
         let Hint(_, hint_) = elem;
         if let Hint_::Hsoft(inner) = hint_ as &mut Hint_ {
             if env.soft_as_like() {
@@ -41,9 +41,9 @@ impl Pass for ElabHintHsoftPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Hint;
-    use oxidized::aast_defs::Hint_;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Hint;
+    use oxidized::nast::Hint_;
+    use oxidized::nast::Pos;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;

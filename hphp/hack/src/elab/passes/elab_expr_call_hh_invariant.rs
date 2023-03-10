@@ -5,17 +5,17 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Block;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Stmt;
-use oxidized::aast_defs::Stmt_;
-use oxidized::ast_defs::Id;
-use oxidized::ast_defs::ParamKind;
-use oxidized::ast_defs::Pos;
-use oxidized::ast_defs::Uop;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::NamingPhaseError;
+use oxidized::nast::Block;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Id;
+use oxidized::nast::ParamKind;
+use oxidized::nast::Pos;
+use oxidized::nast::Stmt;
+use oxidized::nast::Stmt_;
+use oxidized::nast::Uop;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::elab_utils;
@@ -28,11 +28,7 @@ pub struct ElabExprCallHhInvariantPass;
 impl Pass for ElabExprCallHhInvariantPass {
     // We are elaborating a `Call` `Expr` into a `Stmt` so the transformation
     // is defined on `Stmt`
-    fn on_ty_stmt__bottom_up<Ex: Default, En>(
-        &mut self,
-        elem: &mut Stmt_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_stmt__bottom_up(&mut self, elem: &mut Stmt_, env: &Env) -> ControlFlow<()> {
         match check_call(env, elem) {
             Check::Ignore => ControlFlow::Continue(()),
             Check::Invalidate => {
@@ -90,7 +86,7 @@ impl Pass for ElabExprCallHhInvariantPass {
                             let false_block =
                                 Block(vec![Stmt(elab_utils::pos::null(), Stmt_::Noop)]);
                             let cond_expr = Expr(
-                                Ex::default(),
+                                (),
                                 cond_pos.clone(),
                                 Expr_::Unop(Box::new((
                                     Uop::Unot,
@@ -113,7 +109,7 @@ enum Check {
     Elaborate,
 }
 
-fn check_call<Ex, En>(env: &Env, stmt: &Stmt_<Ex, En>) -> Check {
+fn check_call(env: &Env, stmt: &Stmt_) -> Check {
     match stmt {
         Stmt_::Expr(box Expr(
             _,
@@ -154,7 +150,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabExprCallHhInvariantPass;
-        let mut elem: Stmt_<(), ()> = Stmt_::Expr(Box::new(Expr(
+        let mut elem = Stmt_::Expr(Box::new(Expr(
             (),
             elab_utils::pos::null(),
             Expr_::Call(Box::new((
@@ -214,7 +210,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabExprCallHhInvariantPass;
-        let mut elem: Stmt_<(), ()> = Stmt_::Expr(Box::new(Expr(
+        let mut elem = Stmt_::Expr(Box::new(Expr(
             (),
             elab_utils::pos::null(),
             Expr_::Call(Box::new((
@@ -253,7 +249,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabExprCallHhInvariantPass;
-        let mut elem: Stmt_<(), ()> = Stmt_::Expr(Box::new(Expr(
+        let mut elem = Stmt_::Expr(Box::new(Expr(
             (),
             elab_utils::pos::null(),
             Expr_::Call(Box::new((

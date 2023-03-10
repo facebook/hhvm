@@ -5,10 +5,10 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Lid;
 use oxidized::local_id;
-use oxidized::tast::Pos;
+use oxidized::nast::Expr_;
+use oxidized::nast::Lid;
+use oxidized::nast::Pos;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,11 +17,7 @@ use crate::Pass;
 pub struct ElabExprLvarPass;
 
 impl Pass for ElabExprLvarPass {
-    fn on_ty_expr__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut oxidized::aast::Expr_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Lvar(lid) => {
                 let Lid(pos, lcl_id) = lid as &mut Lid;
@@ -62,7 +58,7 @@ mod tests {
 
         let mut pass = ElabExprLvarPass;
 
-        let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
+        let mut elem = Expr_::Lvar(Box::new(Lid(
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::THIS),
         )));
@@ -76,7 +72,7 @@ mod tests {
 
         let mut pass = ElabExprLvarPass;
 
-        let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
+        let mut elem = Expr_::Lvar(Box::new(Lid(
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::PLACEHOLDER),
         )));
@@ -90,7 +86,7 @@ mod tests {
 
         let mut pass = ElabExprLvarPass;
 
-        let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
+        let mut elem = Expr_::Lvar(Box::new(Lid(
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR),
         )));

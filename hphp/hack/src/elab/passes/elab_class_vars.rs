@@ -6,21 +6,21 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::ClassVar;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::TypeHint;
-use oxidized::aast_defs::UserAttribute;
-use oxidized::aast_defs::XhpAttr;
-use oxidized::aast_defs::XhpAttrInfo;
-use oxidized::ast_defs::ClassishKind;
-use oxidized::ast_defs::Id;
-use oxidized::ast_defs::Tprim;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::ExperimentalFeature;
+use oxidized::nast::ClassVar;
+use oxidized::nast::Class_;
+use oxidized::nast::ClassishKind;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
+use oxidized::nast::Tprim;
+use oxidized::nast::TypeHint;
+use oxidized::nast::UserAttribute;
+use oxidized::nast::XhpAttr;
+use oxidized::nast::XhpAttrInfo;
 
 use crate::env::Env;
 use crate::Pass;
@@ -30,11 +30,7 @@ pub struct ElabClassVarsPass;
 
 impl Pass for ElabClassVarsPass {
     // TODO[mjt] split out elaboration of `XhpAttr`s?
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
         let const_user_attr_opt = elem
             .user_attributes
             .iter()
@@ -98,7 +94,7 @@ impl Pass for ElabClassVarsPass {
 //  ii) the list of `Expr` can actually only be int or string literals
 //  iii) `ClassVar` `XhpAttrInfo` `enum_values` already contains a validated and restricted
 //       representation of the `Expr`s
-fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, env: &Env) -> ClassVar<Ex, En> {
+fn class_var_of_xhp_attr(xhp_attr: XhpAttr, env: &Env) -> ClassVar {
     let XhpAttr(type_hint, mut cv, xhp_attr_tag_opt, enum_opt) = xhp_attr;
     let is_required = xhp_attr_tag_opt.is_some();
     let has_default = if let Some(Expr(_, _, expr_)) = &cv.expr {
@@ -212,7 +208,7 @@ impl XhpHint {
 // `String` / `String2` expression. At that point we say the hint should
 // be `Hmixed`. It isn't clear why (1) we are doing a limited version of
 // inference and (2) why we aren't inferring `Hprim Tarraykey` in this case
-fn xhp_attr_hint<Ex, En>(items: Vec<Expr<Ex, En>>) -> Hint_ {
+fn xhp_attr_hint(items: Vec<Expr>) -> Hint_ {
     match items
         .into_iter()
         .try_fold(XhpHint::Neither, |acc, Expr(_, _, expr_)| match expr_ {

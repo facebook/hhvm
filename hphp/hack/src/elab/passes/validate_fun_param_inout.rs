@@ -5,12 +5,12 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::FunDef;
-use oxidized::aast_defs::FunParam;
-use oxidized::aast_defs::Method_;
-use oxidized::aast_defs::UserAttributes;
-use oxidized::ast_defs::Id;
-use oxidized::ast_defs::ParamKind;
+use oxidized::nast::FunDef;
+use oxidized::nast::FunParam;
+use oxidized::nast::Id;
+use oxidized::nast::Method_;
+use oxidized::nast::ParamKind;
+use oxidized::nast::UserAttributes;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -20,36 +20,17 @@ use crate::Pass;
 pub struct ValidateFunParamInoutPass;
 
 impl Pass for ValidateFunParamInoutPass {
-    fn on_ty_fun_def_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun_def_bottom_up(&mut self, elem: &mut FunDef, env: &Env) -> ControlFlow<()> {
         check_params(env, &elem.name, &elem.fun.user_attributes, &elem.fun.params);
         ControlFlow::Continue(())
     }
-    fn on_ty_method__bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_method__bottom_up(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
         check_params(env, &elem.name, &elem.user_attributes, &elem.params);
         ControlFlow::Continue(())
     }
 }
 
-fn check_params<Ex, En>(
-    env: &Env,
-    id: &Id,
-    attrs: &UserAttributes<Ex, En>,
-    params: &[FunParam<Ex, En>],
-) {
+fn check_params(env: &Env, id: &Id, attrs: &UserAttributes, params: &[FunParam]) {
     let in_as_set_function = sn::members::AS_LOWERCASE_SET.contains(id.name());
     let has_memoize_user_attr = has_memoize_user_attr(attrs);
     // We can skip the check entirely if neither condition is true since we would never
@@ -77,7 +58,7 @@ fn check_params<Ex, En>(
     }
 }
 
-fn has_memoize_user_attr<Ex, En>(attrs: &UserAttributes<Ex, En>) -> bool {
+fn has_memoize_user_attr(attrs: &UserAttributes) -> bool {
     attrs.0.iter().any(|ua| {
         ua.name.name() == sn::user_attributes::MEMOIZE
             || ua.name.name() == sn::user_attributes::MEMOIZE_LSB

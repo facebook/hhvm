@@ -5,12 +5,12 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast::Hint;
-use oxidized::aast::RequireKind;
-use oxidized::aast_defs::ClassReq;
-use oxidized::aast_defs::Class_;
-use oxidized::ast_defs::ClassishKind;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::ClassReq;
+use oxidized::nast::Class_;
+use oxidized::nast::ClassishKind;
+use oxidized::nast::Hint;
+use oxidized::nast::RequireKind;
 
 use crate::env::Env;
 use crate::Pass;
@@ -19,11 +19,7 @@ use crate::Pass;
 pub struct ValidateClassReqPass;
 
 impl Pass for ValidateClassReqPass {
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        cls: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, cls: &mut Class_, env: &Env) -> ControlFlow<()> {
         let is_trait = cls.kind == ClassishKind::Ctrait;
         let is_interface = cls.kind == ClassishKind::Cinterface;
         let find_req = |kind| cls.reqs.iter().find(|&&ClassReq(_, k)| k == kind);

@@ -6,24 +6,24 @@ use std::ops::ControlFlow;
 
 use bitflags::bitflags;
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::ClassConstKind;
-use oxidized::aast_defs::ClassId;
-use oxidized::aast_defs::ClassId_;
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::FunDef;
-use oxidized::aast_defs::Gconst;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::KvcKind;
-use oxidized::aast_defs::ModuleDef;
-use oxidized::aast_defs::Typedef;
-use oxidized::aast_defs::VcKind;
-use oxidized::ast_defs::Bop;
-use oxidized::ast_defs::ClassishKind;
-use oxidized::ast_defs::Uop;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Bop;
+use oxidized::nast::ClassConstKind;
+use oxidized::nast::ClassId;
+use oxidized::nast::ClassId_;
+use oxidized::nast::Class_;
+use oxidized::nast::ClassishKind;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::FunDef;
+use oxidized::nast::Gconst;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::KvcKind;
+use oxidized::nast::ModuleDef;
+use oxidized::nast::Typedef;
+use oxidized::nast::Uop;
+use oxidized::nast::VcKind;
 
 use crate::elab_utils;
 use crate::env::Env;
@@ -75,19 +75,12 @@ impl Pass for ElabConstExprPass {
     // pattern matching. We prefer to do this since we can stop the transformation
     // early in these cases. For cases where we need to pattern match on the
     // expression more deeply, we use the bottom-up pass
-    fn on_ty_expr_top_down<Ex, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
         if !self.enforce_const_expr() {
             ControlFlow::Continue(())
         } else {
             let Expr(_, pos, expr_) = elem;
-            let invalid = |expr_: &mut Expr_<_, _>| {
+            let invalid = |expr_: &mut Expr_| {
                 let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
                 let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
                 *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
@@ -225,19 +218,12 @@ impl Pass for ElabConstExprPass {
 
     // Handle non-constant expressions which require pattern matching on some
     // element of the expression which is not yet transformed in the top-down pass
-    fn on_ty_expr_bottom_up<Ex, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_expr_bottom_up(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
         if !self.enforce_const_expr() {
             ControlFlow::Continue(())
         } else {
             let Expr(_, pos, expr_) = elem;
-            let invalid = |expr_: &mut Expr_<_, _>| {
+            let invalid = |expr_: &mut Expr_| {
                 let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
                 let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
                 *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
@@ -268,14 +254,7 @@ impl Pass for ElabConstExprPass {
         }
     }
 
-    fn on_ty_class__top_down<Ex, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.set_in_enum_class(match elem.kind {
             ClassishKind::CenumClass(_) => true,
             ClassishKind::Cclass(..)
@@ -287,65 +266,34 @@ impl Pass for ElabConstExprPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_const_kind_top_down<Ex, En>(
+    fn on_ty_class_const_kind_top_down(
         &mut self,
-        elem: &mut ClassConstKind<Ex, En>,
+        elem: &mut ClassConstKind,
         _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    ) -> ControlFlow<()> {
         self.set_enforce_const_expr(
             !self.in_enum_class() && matches!(elem, ClassConstKind::CCConcrete(_)),
         );
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down<Ex, En>(
-        &mut self,
-        elem: &mut Typedef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down<Ex, En>(
-        &mut self,
-        elem: &mut Gconst<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         self.set_enforce_const_expr(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down<Ex, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down<Ex, En>(
-        &mut self,
-        elem: &mut ModuleDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()>
-    where
-        Ex: Default,
-    {
+    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }

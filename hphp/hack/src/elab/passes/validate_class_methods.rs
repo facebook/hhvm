@@ -7,10 +7,10 @@ use std::collections::HashSet;
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast::Class_;
-use oxidized::aast::Method_;
-use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Class_;
+use oxidized::nast::Id;
+use oxidized::nast::Method_;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::env::Env;
@@ -20,11 +20,7 @@ use crate::Pass;
 pub struct ValidateClassMethodsPass;
 
 impl Pass for ValidateClassMethodsPass {
-    fn on_ty_class__bottom_up<Ex: Default, En>(
-        &mut self,
-        class: &mut Class_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__bottom_up(&mut self, class: &mut Class_, env: &Env) -> ControlFlow<()> {
         let mut seen = HashSet::<&str>::new();
         for method in class.methods.iter() {
             let Id(pos, name) = &method.name;
@@ -39,11 +35,7 @@ impl Pass for ValidateClassMethodsPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__bottom_up<Ex: Default, En>(
-        &mut self,
-        method: &mut Method_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_method__bottom_up(&mut self, method: &mut Method_, env: &Env) -> ControlFlow<()> {
         if method.abstract_
             && method.user_attributes.iter().any(|attr| {
                 let Id(_, ua) = &attr.name;
@@ -60,30 +52,26 @@ impl Pass for ValidateClassMethodsPass {
 mod tests {
 
     use ocamlrep::rc::RcOc;
-    use oxidized::aast::Block;
-    use oxidized::aast::FuncBody;
-    use oxidized::aast::Pos;
-    use oxidized::aast::TypeHint;
-    use oxidized::aast::UserAttribute;
-    use oxidized::aast::UserAttributes;
-    use oxidized::aast::Visibility;
-    use oxidized::ast::FunKind;
-    use oxidized::ast::Id;
     use oxidized::ast_defs::Abstraction;
     use oxidized::ast_defs::ClassishKind;
     use oxidized::namespace_env;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Block;
+    use oxidized::nast::FunKind;
+    use oxidized::nast::FuncBody;
+    use oxidized::nast::Id;
+    use oxidized::nast::Pos;
+    use oxidized::nast::TypeHint;
+    use oxidized::nast::UserAttribute;
+    use oxidized::nast::UserAttributes;
+    use oxidized::nast::Visibility;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
     use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
-    fn mk_method(
-        name: String,
-        r#abstract: bool,
-        attrs: Vec<UserAttribute<(), ()>>,
-    ) -> Method_<(), ()> {
+    fn mk_method(name: String, r#abstract: bool, attrs: Vec<UserAttribute>) -> Method_ {
         Method_ {
             span: Pos::NONE,
             annotation: (),
@@ -110,7 +98,7 @@ mod tests {
         }
     }
 
-    fn mk_class(name: String, methods: Vec<Method_<(), ()>>) -> Class_<(), ()> {
+    fn mk_class(name: String, methods: Vec<Method_>) -> Class_ {
         Class_ {
             span: Pos::NONE,
             annotation: (),
@@ -171,7 +159,7 @@ mod tests {
             &ProgramSpecificOptions::default(),
         );
 
-        let memoized_attr = UserAttribute::<(), ()> {
+        let memoized_attr = UserAttribute {
             name: Id(Pos::NONE, sn::user_attributes::MEMOIZE.to_string()),
             params: vec![],
         };

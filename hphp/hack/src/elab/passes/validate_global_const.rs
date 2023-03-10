@@ -7,11 +7,11 @@ use std::ops::ControlFlow;
 
 use file_info::Mode;
 use naming_special_names_rust as sn;
-use oxidized::aast::Expr;
-use oxidized::aast::Expr_;
-use oxidized::aast::Gconst;
-use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Gconst;
+use oxidized::nast::Id;
 
 use crate::env::Env;
 use crate::Pass;
@@ -20,18 +20,14 @@ use crate::Pass;
 pub struct ValidateGlobalConstPass;
 
 impl Pass for ValidateGlobalConstPass {
-    fn on_ty_gconst_bottom_up<Ex: Default, En>(
-        &mut self,
-        gconst: &mut Gconst<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_gconst_bottom_up(&mut self, gconst: &mut Gconst, env: &Env) -> ControlFlow<()> {
         error_if_no_typehint(env, gconst);
         error_if_pseudo_constant(env, gconst);
         ControlFlow::Continue(())
     }
 }
 
-fn error_if_no_typehint<Ex, En>(env: &Env, gconst: &Gconst<Ex, En>) {
+fn error_if_no_typehint(env: &Env, gconst: &Gconst) {
     if !matches!(gconst.mode, Mode::Mhhi) && matches!(gconst.type_, None) {
         let Expr(_, _, expr_) = &gconst.value;
         let Id(pos, const_name) = &gconst.name;
@@ -49,7 +45,7 @@ fn error_if_no_typehint<Ex, En>(env: &Env, gconst: &Gconst<Ex, En>) {
     }
 }
 
-fn error_if_pseudo_constant<Ex, En>(env: &Env, gconst: &Gconst<Ex, En>) {
+fn error_if_pseudo_constant(env: &Env, gconst: &Gconst) {
     if gconst.namespace.name.is_some() {
         let Id(pos, n) = &gconst.name;
         let name = core_utils_rust::add_ns(core_utils_rust::strip_all_ns(n));
@@ -65,10 +61,10 @@ fn error_if_pseudo_constant<Ex, En>(env: &Env, gconst: &Gconst<Ex, En>) {
 #[cfg(test)]
 mod tests {
     use ocamlrep::rc::RcOc;
-    use oxidized::aast::Hint;
-    use oxidized::aast::Pos;
     use oxidized::namespace_env;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Hint;
+    use oxidized::nast::Pos;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -78,10 +74,10 @@ mod tests {
 
     fn mk_gconst(
         name: String,
-        value: Expr<(), ()>,
+        value: Expr,
         r#type: Option<Hint>,
         namespace: Option<String>,
-    ) -> Gconst<(), ()> {
+    ) -> Gconst {
         Gconst {
             annotation: (),
             mode: file_info::Mode::Mstrict,

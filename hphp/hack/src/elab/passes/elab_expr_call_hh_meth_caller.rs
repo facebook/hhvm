@@ -10,13 +10,13 @@ use std::mem::take;
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::ClassId;
-use oxidized::aast_defs::ClassId_;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::ast_defs::Id;
-use oxidized::ast_defs::ParamKind;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::ClassId;
+use oxidized::nast::ClassId_;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Id;
+use oxidized::nast::ParamKind;
 
 use crate::elab_utils;
 use crate::env::Env;
@@ -26,12 +26,8 @@ use crate::Pass;
 pub struct ElabExprCallHhMethCallerPass;
 
 impl Pass for ElabExprCallHhMethCallerPass {
-    fn on_ty_expr__bottom_up<Ex: Default, En>(
-        &mut self,
-        elem: &mut Expr_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
-        let invalid = |expr_: &mut Expr_<_, _>| {
+    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
+        let invalid = |expr_: &mut Expr_| {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
             let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
             *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
@@ -118,7 +114,7 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -162,7 +158,7 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -217,7 +213,7 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -265,7 +261,7 @@ mod tests {
 
         let mut pass = ElabExprCallHhMethCallerPass;
         let meth_name = "foo";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -320,7 +316,7 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -374,7 +370,7 @@ mod tests {
 
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),
@@ -423,7 +419,7 @@ mod tests {
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
-        let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
+        let mut elem = Expr_::Call(Box::new((
             Expr(
                 (),
                 elab_utils::pos::null(),

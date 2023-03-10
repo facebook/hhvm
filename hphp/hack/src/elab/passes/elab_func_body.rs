@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Class_;
-use oxidized::aast_defs::FunDef;
-use oxidized::aast_defs::FuncBody;
-use oxidized::aast_defs::Gconst;
-use oxidized::aast_defs::ModuleDef;
-use oxidized::aast_defs::Typedef;
+use oxidized::nast::Class_;
+use oxidized::nast::FunDef;
+use oxidized::nast::FuncBody;
+use oxidized::nast::Gconst;
+use oxidized::nast::ModuleDef;
+use oxidized::nast::Typedef;
 
 use crate::env::Env;
 use crate::Pass;
@@ -28,58 +28,34 @@ impl Default for ElabFuncBodyPass {
 }
 
 impl Pass for ElabFuncBodyPass {
-    fn on_ty_func_body_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut FuncBody<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_func_body_top_down(&mut self, elem: &mut FuncBody, _env: &Env) -> ControlFlow<()> {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
         }
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Typedef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Gconst<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut FunDef<Ex, En>,
-        _cf: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _cf: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut ModuleDef<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _env: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
@@ -88,10 +64,10 @@ impl Pass for ElabFuncBodyPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::FuncBody;
-    use oxidized::aast_defs::Stmt;
-    use oxidized::aast_defs::Stmt_;
-    use oxidized::tast::Pos;
+    use oxidized::nast::FuncBody;
+    use oxidized::nast::Pos;
+    use oxidized::nast::Stmt;
+    use oxidized::nast::Stmt_;
 
     use super::*;
     use crate::Transform;
@@ -100,8 +76,8 @@ mod tests {
     fn test_add() {
         let env = Env::default();
 
-        let mut elem: FuncBody<(), ()> = FuncBody {
-            fb_ast: oxidized::ast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
+        let mut elem = FuncBody {
+            fb_ast: oxidized::nast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
         };
 
         let mut pass = ElabFuncBodyPass::default();

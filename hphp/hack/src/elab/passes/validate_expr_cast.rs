@@ -6,12 +6,12 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::Tprim::*;
-use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Expr_;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
+use oxidized::nast::Tprim::*;
 
 use crate::env::Env;
 use crate::Pass;
@@ -20,11 +20,7 @@ use crate::Pass;
 pub struct ValidateExprCastPass;
 
 impl Pass for ValidateExprCastPass {
-    fn on_ty_expr__bottom_up<Ex: Default, En>(
-        &mut self,
-        expr: &mut Expr_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr__bottom_up(&mut self, expr: &mut Expr_, env: &Env) -> ControlFlow<()> {
         match &*expr {
             Expr_::Cast(box (Hint(_, box Hint_::Hprim(Tint | Tbool | Tfloat | Tstring)), _)) => {
                 ControlFlow::Continue(())
@@ -49,8 +45,8 @@ impl Pass for ValidateExprCastPass {
 
 #[cfg(test)]
 mod tests {
-    use oxidized::ast::Expr;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Expr;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::elab_utils;

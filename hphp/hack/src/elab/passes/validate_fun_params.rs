@@ -6,10 +6,10 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::FunParam;
-use oxidized::aast_defs::Fun_;
-use oxidized::aast_defs::Method_;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::FunParam;
+use oxidized::nast::Fun_;
+use oxidized::nast::Method_;
 
 use crate::env::Env;
 use crate::Pass;
@@ -18,29 +18,17 @@ use crate::Pass;
 pub struct ValidateFunParamsPass;
 
 impl Pass for ValidateFunParamsPass {
-    fn on_ty_fun__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Fun_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_fun__top_down(&mut self, elem: &mut Fun_, env: &Env) -> ControlFlow<()> {
         self.validate_fun_params(env, &elem.params)
     }
 
-    fn on_ty_method__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Method_<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
         self.validate_fun_params(env, &elem.params)
     }
 }
 
 impl ValidateFunParamsPass {
-    fn validate_fun_params<Ex: Default, En>(
-        &self,
-        env: &Env,
-        params: &Vec<FunParam<Ex, En>>,
-    ) -> ControlFlow<(), ()> {
+    fn validate_fun_params(&self, env: &Env, params: &Vec<FunParam>) -> ControlFlow<()> {
         let mut seen = std::collections::BTreeSet::<&String>::new();
         for FunParam { name, pos, .. } in params {
             if name == sn::special_idents::PLACEHOLDER {
@@ -61,21 +49,21 @@ impl ValidateFunParamsPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast::Block;
-    use oxidized::aast::FuncBody;
-    use oxidized::aast::TypeHint;
-    use oxidized::aast::UserAttributes;
-    use oxidized::aast::Visibility;
-    use oxidized::aast_defs::Pos;
-    use oxidized::ast::FunKind;
-    use oxidized::ast::Id;
-    use oxidized::ast::ParamKind;
     use oxidized::naming_phase_error::NamingPhaseError;
+    use oxidized::nast::Block;
+    use oxidized::nast::FunKind;
+    use oxidized::nast::FuncBody;
+    use oxidized::nast::Id;
+    use oxidized::nast::ParamKind;
+    use oxidized::nast::Pos;
+    use oxidized::nast::TypeHint;
+    use oxidized::nast::UserAttributes;
+    use oxidized::nast::Visibility;
 
     use super::*;
     use crate::transform::Transform;
 
-    fn mk_fun(params: Vec<FunParam<(), ()>>) -> Fun_<(), ()> {
+    fn mk_fun(params: Vec<FunParam>) -> Fun_ {
         Fun_ {
             span: Pos::NONE,
             readonly_this: None,
@@ -97,7 +85,7 @@ mod tests {
         }
     }
 
-    fn mk_method(name: String, params: Vec<FunParam<(), ()>>) -> Method_<(), ()> {
+    fn mk_method(name: String, params: Vec<FunParam>) -> Method_ {
         Method_ {
             span: Pos::NONE,
             annotation: (),
@@ -124,7 +112,7 @@ mod tests {
         }
     }
 
-    fn mk_param(name: String) -> FunParam<(), ()> {
+    fn mk_param(name: String) -> FunParam {
         FunParam {
             name,
             annotation: (),

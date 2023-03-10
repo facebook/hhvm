@@ -5,21 +5,21 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::Afield;
-use oxidized::aast_defs::CollectionTarg;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Field;
-use oxidized::aast_defs::Hint;
-use oxidized::aast_defs::Hint_;
-use oxidized::aast_defs::KvcKind;
-use oxidized::aast_defs::Lid;
-use oxidized::aast_defs::Targ;
-use oxidized::aast_defs::VcKind;
-use oxidized::ast_defs::Id;
 use oxidized::local_id;
 use oxidized::naming_error::NamingError;
-use oxidized::tast::Pos;
+use oxidized::nast::Afield;
+use oxidized::nast::CollectionTarg;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Field;
+use oxidized::nast::Hint;
+use oxidized::nast::Hint_;
+use oxidized::nast::Id;
+use oxidized::nast::KvcKind;
+use oxidized::nast::Lid;
+use oxidized::nast::Pos;
+use oxidized::nast::Targ;
+use oxidized::nast::VcKind;
 
 use crate::env::Env;
 use crate::Pass;
@@ -41,20 +41,16 @@ impl Pass for ElabExprCollectionPass {
     /// errors in the explicit type arguments and the expressions
     /// within the collection literal.
 
-    fn on_ty_expr_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Expr<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
         let Expr(_annot, _pos, expr_) = elem;
 
         if let Expr_::Collection(c) = expr_ {
-            let (Id(pos, cname), ctarg_opt, afields) = c as &mut (_, _, Vec<Afield<Ex, En>>);
+            let (Id(pos, cname), ctarg_opt, afields) = c as &mut (_, _, Vec<Afield>);
 
             match collection_kind(cname) {
                 CollectionKind::VcKind(vc_kind) => {
                     let targ_opt = targ_from_collection_targs(env, ctarg_opt, pos);
-                    let exprs: Vec<Expr<Ex, En>> = afields
+                    let exprs: Vec<Expr> = afields
                         .iter_mut()
                         .map(|afield| expr_from_afield(env, afield, cname))
                         .collect();
@@ -68,7 +64,7 @@ impl Pass for ElabExprCollectionPass {
 
                 CollectionKind::KvcKind(kvc_kind) => {
                     let targs_opt = targs_from_collection_targs(env, ctarg_opt, pos);
-                    let fields: Vec<Field<Ex, En>> = afields
+                    let fields: Vec<Field> = afields
                         .iter_mut()
                         .map(|afield| field_from_afield(env, afield, cname))
                         .collect();
@@ -95,12 +91,10 @@ impl Pass for ElabExprCollectionPass {
                         // with [Invalid]
                         (_, None, _) => {
                             env.emit_error(NamingError::TooFewArguments(pos.clone()));
-                            let inner_expr = std::mem::replace(
-                                elem,
-                                Expr(Ex::default(), Pos::NONE, Expr_::Null),
-                            );
+                            let inner_expr =
+                                std::mem::replace(elem, Expr((), Pos::NONE, Expr_::Null));
                             *elem = Expr(
-                                Ex::default(),
+                                (),
                                 inner_expr.1.clone(),
                                 Expr_::Invalid(Box::new(Some(inner_expr))),
                             );
@@ -111,12 +105,10 @@ impl Pass for ElabExprCollectionPass {
                         // with `Invalid`.
                         _ => {
                             env.emit_error(NamingError::TooManyArguments(pos.clone()));
-                            let inner_expr = std::mem::replace(
-                                elem,
-                                Expr(Ex::default(), Pos::NONE, Expr_::Null),
-                            );
+                            let inner_expr =
+                                std::mem::replace(elem, Expr((), Pos::NONE, Expr_::Null));
                             *elem = Expr(
-                                Ex::default(),
+                                (),
                                 inner_expr.1.clone(),
                                 Expr_::Invalid(Box::new(Some(inner_expr))),
                             );
@@ -130,11 +122,10 @@ impl Pass for ElabExprCollectionPass {
                         pos: pos.clone(),
                         cname: cname.clone(),
                     });
-                    let inner_expr =
-                        std::mem::replace(elem, Expr(Ex::default(), Pos::NONE, Expr_::Null));
+                    let inner_expr = std::mem::replace(elem, Expr((), Pos::NONE, Expr_::Null));
                     let Expr(_, expr_pos, _) = &inner_expr;
                     *elem = Expr(
-                        Ex::default(),
+                        (),
                         expr_pos.clone(),
                         Expr_::Invalid(Box::new(Some(inner_expr))),
                     );
@@ -149,20 +140,16 @@ impl Pass for ElabExprCollectionPass {
 
 /// Extract the expression from [AFvalue]s; if we encounter an [AFkvalue] we
 /// raise an error and drop the value expression
-fn expr_from_afield<Ex: Default, En>(
-    env: &Env,
-    afield: &mut Afield<Ex, En>,
-    cname: &str,
-) -> Expr<Ex, En> {
+fn expr_from_afield(env: &Env, afield: &mut Afield, cname: &str) -> Expr {
     match afield {
-        Afield::AFvalue(e) => std::mem::replace(e, Expr(Ex::default(), Pos::NONE, Expr_::Null)),
+        Afield::AFvalue(e) => std::mem::replace(e, Expr((), Pos::NONE, Expr_::Null)),
         Afield::AFkvalue(e, _) => {
             let Expr(_, expr_pos, _) = &e;
             env.emit_error(NamingError::UnexpectedArrow {
                 pos: expr_pos.clone(),
                 cname: cname.to_string(),
             });
-            std::mem::replace(e, Expr(Ex::default(), Pos::NONE, Expr_::Null))
+            std::mem::replace(e, Expr((), Pos::NONE, Expr_::Null))
         }
     }
 }
@@ -170,15 +157,11 @@ fn expr_from_afield<Ex: Default, En>(
 /// Extract the expressions from [AFkvalue]s into a `Field`; if we encounter an
 /// `AFvalue` we raise an error and generate a synthetic lvar as the second
 /// expression in the `Field`
-fn field_from_afield<Ex: Default, En>(
-    env: &Env,
-    afield: &mut Afield<Ex, En>,
-    cname: &str,
-) -> Field<Ex, En> {
+fn field_from_afield(env: &Env, afield: &mut Afield, cname: &str) -> Field {
     match afield {
         Afield::AFkvalue(ek, ev) => {
-            let ek = std::mem::replace(ek, Expr(Ex::default(), Pos::NONE, Expr_::Null));
-            let ev = std::mem::replace(ev, Expr(Ex::default(), Pos::NONE, Expr_::Null));
+            let ek = std::mem::replace(ek, Expr((), Pos::NONE, Expr_::Null));
+            let ev = std::mem::replace(ev, Expr((), Pos::NONE, Expr_::Null));
             Field(ek, ev)
         }
         Afield::AFvalue(e) => {
@@ -186,10 +169,10 @@ fn field_from_afield<Ex: Default, En>(
                 pos: e.1.clone(),
                 cname: cname.to_string(),
             });
-            let ek = std::mem::replace(e, Expr(Ex::default(), Pos::NONE, Expr_::Null));
+            let ek = std::mem::replace(e, Expr((), Pos::NONE, Expr_::Null));
             // TODO[mjt]: replace with `Invalid` expression?
             let ev = Expr(
-                Ex::default(),
+                (),
                 Pos::NONE,
                 Expr_::Lvar(Box::new(Lid(
                     ek.1.clone(),
@@ -202,18 +185,15 @@ fn field_from_afield<Ex: Default, En>(
 }
 
 // Get val collection hint if present; if we a keyval hint, raise an error and return `None`
-fn targ_from_collection_targs<Ex: Default>(
+fn targ_from_collection_targs(
     env: &Env,
-    ctarg_opt: &mut Option<CollectionTarg<Ex>>,
+    ctarg_opt: &mut Option<CollectionTarg>,
     pos: &Pos,
-) -> Option<Targ<Ex>> {
+) -> Option<Targ> {
     if let Some(ctarg) = ctarg_opt {
         match ctarg {
             CollectionTarg::CollectionTV(tv) => {
-                let tv = std::mem::replace(
-                    tv,
-                    Targ(Ex::default(), Hint(Pos::NONE, Box::new(Hint_::Herr))),
-                );
+                let tv = std::mem::replace(tv, Targ((), Hint(Pos::NONE, Box::new(Hint_::Herr))));
                 Some(tv)
             }
             CollectionTarg::CollectionTKV(..) => {
@@ -227,22 +207,16 @@ fn targ_from_collection_targs<Ex: Default>(
 }
 
 // Get keyval collection hint if present; if we a val hint, raise an error and return `None`
-fn targs_from_collection_targs<Ex: Default>(
+fn targs_from_collection_targs(
     env: &Env,
-    ctarg_opt: &mut Option<CollectionTarg<Ex>>,
+    ctarg_opt: &mut Option<CollectionTarg>,
     pos: &Pos,
-) -> Option<(Targ<Ex>, Targ<Ex>)> {
+) -> Option<(Targ, Targ)> {
     if let Some(ctarg) = ctarg_opt {
         match ctarg {
             CollectionTarg::CollectionTKV(tk, tv) => {
-                let tk = std::mem::replace(
-                    tk,
-                    Targ(Ex::default(), Hint(Pos::NONE, Box::new(Hint_::Herr))),
-                );
-                let tv = std::mem::replace(
-                    tv,
-                    Targ(Ex::default(), Hint(Pos::NONE, Box::new(Hint_::Herr))),
-                );
+                let tk = std::mem::replace(tk, Targ((), Hint(Pos::NONE, Box::new(Hint_::Herr))));
+                let tv = std::mem::replace(tv, Targ((), Hint(Pos::NONE, Box::new(Hint_::Herr))));
                 Some((tk, tv))
             }
             CollectionTarg::CollectionTV(..) => {
@@ -312,7 +286,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -335,7 +309,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -362,7 +336,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -393,7 +367,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -419,7 +393,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -456,7 +430,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -479,7 +453,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -509,7 +483,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -535,7 +509,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -570,7 +544,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -596,7 +570,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -622,7 +596,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -652,7 +626,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -682,7 +656,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -720,7 +694,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((
@@ -749,7 +723,7 @@ mod tests {
 
         let mut pass = ElabExprCollectionPass;
 
-        let mut elem: Expr<(), ()> = Expr(
+        let mut elem = Expr(
             (),
             Pos::NONE,
             Expr_::Collection(Box::new((

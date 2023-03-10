@@ -7,7 +7,7 @@
 
 /// Factory functions constructing positions.
 pub(crate) mod pos {
-    use oxidized::aast_defs::Pos;
+    use oxidized::nast::Pos;
 
     /// Construct a "null" position.
     #[inline(always)]
@@ -31,36 +31,33 @@ pub(crate) mod hint {
 
 /// Factory functions constructing expressions.
 pub(crate) mod expr {
-    use oxidized::aast_defs::Expr;
-    use oxidized::aast_defs::Expr_;
-    use oxidized::aast_defs::Pos;
+    use oxidized::nast::Expr;
+    use oxidized::nast::Expr_;
+    use oxidized::nast::Pos;
 
     /// Construct a "null" expression.
     #[inline(always)]
-    pub(crate) fn null<Ex: Default, En>() -> Expr<Ex, En> {
+    pub(crate) fn null() -> Expr {
         from_expr_(Expr_::Null)
     }
 
     /// Construct an "invalid" expression.
     #[inline(always)]
-    pub(crate) fn invalid<Ex: Default, En>(expr: Expr<Ex, En>) -> Expr<Ex, En> {
+    pub(crate) fn invalid(expr: Expr) -> Expr {
         let Expr(_, pos, _) = &expr;
         from_expr__with_pos_(pos.clone(), Expr_::Invalid(Box::new(Some(expr))))
     }
 
     /// Construct an expression (with a null position) from an `Expr_`.
     #[inline(always)]
-    pub(crate) fn from_expr_<Ex: Default, En>(expr_: Expr_<Ex, En>) -> Expr<Ex, En> {
+    pub(crate) fn from_expr_(expr_: Expr_) -> Expr {
         from_expr__with_pos_(super::pos::null(), expr_)
     }
 
     /// Construct an expression from a `Pos` and an `Expr_`.
     #[inline(always)]
     #[allow(non_snake_case)]
-    pub(crate) fn from_expr__with_pos_<Ex: Default, En>(
-        pos: Pos,
-        expr_: Expr_<Ex, En>,
-    ) -> Expr<Ex, En> {
-        Expr(Ex::default(), pos, expr_)
+    pub(crate) fn from_expr__with_pos_(pos: Pos, expr_: Expr_) -> Expr {
+        Expr((), pos, expr_)
     }
 }

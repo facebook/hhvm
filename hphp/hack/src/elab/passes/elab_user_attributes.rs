@@ -5,10 +5,10 @@
 use std::ops::ControlFlow;
 
 use hash::HashMap;
-use oxidized::aast_defs::UserAttributes;
-use oxidized::ast_defs::Id;
-use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
+use oxidized::nast::Id;
+use oxidized::nast::Pos;
+use oxidized::nast::UserAttributes;
 
 use crate::env::Env;
 use crate::Pass;
@@ -17,11 +17,11 @@ use crate::Pass;
 pub struct ElabUserAttributesPass;
 
 impl Pass for ElabUserAttributesPass {
-    fn on_ty_user_attributes_top_down<Ex: Default, En>(
+    fn on_ty_user_attributes_top_down(
         &mut self,
-        elem: &mut UserAttributes<Ex, En>,
+        elem: &mut UserAttributes,
         env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         let mut seen: HashMap<String, Pos> = HashMap::default();
         let UserAttributes(uas) = elem;
         uas.retain(|ua| {
@@ -44,7 +44,7 @@ impl Pass for ElabUserAttributesPass {
 
 #[cfg(test)]
 mod tests {
-    use oxidized::aast_defs::UserAttribute;
+    use oxidized::nast::UserAttribute;
 
     use super::*;
     use crate::Transform;
@@ -55,7 +55,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabUserAttributesPass;
-        let mut elem: UserAttributes<(), ()> = UserAttributes(vec![
+        let mut elem = UserAttributes(vec![
             UserAttribute {
                 name: Id(Pos::NONE, "One".to_string()),
                 params: vec![],

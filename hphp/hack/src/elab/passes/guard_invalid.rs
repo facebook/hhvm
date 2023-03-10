@@ -5,7 +5,7 @@
 
 use std::ops::ControlFlow;
 
-use oxidized::aast_defs::Expr_;
+use oxidized::nast::Expr_;
 
 use crate::env::Env;
 use crate::Pass;
@@ -14,11 +14,7 @@ use crate::Pass;
 pub struct GuardInvalidPass;
 
 impl Pass for GuardInvalidPass {
-    fn on_ty_expr__top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut Expr_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
         if matches!(elem, Expr_::Invalid(..)) {
             ControlFlow::Break(())
         } else {
@@ -30,10 +26,10 @@ impl Pass for GuardInvalidPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::aast_defs::Expr;
-    use oxidized::aast_defs::Expr_;
-    use oxidized::ast_defs::Bop;
-    use oxidized::tast::Pos;
+    use oxidized::nast::Bop;
+    use oxidized::nast::Expr;
+    use oxidized::nast::Expr_;
+    use oxidized::nast::Pos;
 
     use super::*;
     use crate::Pass;
@@ -42,11 +38,7 @@ mod tests {
     #[derive(Clone)]
     pub struct RewriteZero;
     impl Pass for RewriteZero {
-        fn on_ty_expr__bottom_up<Ex: Default, En>(
-            &mut self,
-            elem: &mut Expr_<Ex, En>,
-            _env: &Env,
-        ) -> ControlFlow<(), ()> {
+        fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
             match elem {
                 Expr_::Int(..) => *elem = Expr_::Int("0".to_string()),
                 _ => (),
@@ -61,7 +53,7 @@ mod tests {
 
         let mut pass = passes![GuardInvalidPass, RewriteZero];
 
-        let mut elem: Expr_<(), ()> = Expr_::Binop(Box::new((
+        let mut elem = Expr_::Binop(Box::new((
             Bop::Lt,
             Expr(
                 (),

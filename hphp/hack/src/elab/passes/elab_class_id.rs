@@ -6,16 +6,17 @@
 use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
-use oxidized::aast_defs::ClassId;
-use oxidized::aast_defs::ClassId_;
-use oxidized::aast_defs::Expr;
-use oxidized::aast_defs::Expr_;
-use oxidized::aast_defs::Lid;
-use oxidized::aast_defs::Sid;
-use oxidized::ast_defs::Id;
 use oxidized::local_id;
 use oxidized::naming_error::NamingError;
-use oxidized::tast::Pos;
+use oxidized::nast;
+use oxidized::nast::ClassId;
+use oxidized::nast::ClassId_;
+use oxidized::nast::Expr;
+use oxidized::nast::Expr_;
+use oxidized::nast::Id;
+use oxidized::nast::Lid;
+use oxidized::nast::Pos;
+use oxidized::nast::Sid;
 
 use crate::env::Env;
 use crate::Pass;
@@ -45,13 +46,9 @@ impl Pass for ElabClassIdPass {
      TODO[mjt] Lowering gives us a very specific representation but we don't
      enforce this invariant at all here
     */
-    fn on_ty_class_id_top_down<Ex: Default, En>(
-        &mut self,
-        elem: &mut ClassId<Ex, En>,
-        env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class_id_top_down(&mut self, elem: &mut ClassId, env: &Env) -> ControlFlow<()> {
         let ClassId(_annot, pos, class_id_) = elem;
-        if let ClassId_::CIexpr(Expr(_, expr_pos, expr_)) = class_id_ as &mut ClassId_<_, _> {
+        if let ClassId_::CIexpr(Expr(_, expr_pos, expr_)) = class_id_ as &mut ClassId_ {
             // [mjt] For some reason the legacy code modifies the position of
             // the surrounding [ClassId]. This seems wrong and causes a clone
             *pos = expr_pos.clone();
@@ -115,22 +112,18 @@ impl Pass for ElabClassIdPass {
         }
     }
 
-    fn on_ty_class__top_down<Ex: Default, En>(
-        &mut self,
-        _elem: &mut oxidized::aast::Class_<Ex, En>,
-        _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_class__top_down(&mut self, _elem: &mut nast::Class_, _env: &Env) -> ControlFlow<()> {
         self.in_class = true;
         ControlFlow::Continue(())
     }
 
     /* The attributes applied to a class exist outside the current class so
     references to `self` are invalid */
-    fn on_fld_class__user_attributes_top_down<Ex: Default, En>(
+    fn on_fld_class__user_attributes_top_down(
         &mut self,
-        _elem: &mut oxidized::tast::UserAttributes<Ex, En>,
+        _elem: &mut nast::UserAttributes,
         _env: &Env,
-    ) -> ControlFlow<(), ()> {
+    ) -> ControlFlow<()> {
         self.in_class = true;
         ControlFlow::Continue(())
     }
@@ -147,7 +140,7 @@ mod tests {
 
         let mut pass = ElabClassIdPass::default();
 
-        let cases: Vec<(&str, ClassId_<(), ()>)> = vec![
+        let cases = vec![
             (sn::classes::SELF, ClassId_::CIself),
             (sn::classes::PARENT, ClassId_::CIparent),
             (sn::classes::STATIC, ClassId_::CIstatic),
@@ -192,7 +185,7 @@ mod tests {
         let mut pass = ElabClassIdPass::default();
         let cname = "Classy";
 
-        let mut elem_outside: ClassId<(), ()> = ClassId(
+        let mut elem_outside = ClassId(
             (),
             Pos::NONE,
             ClassId_::CIexpr(Expr(
@@ -231,7 +224,7 @@ mod tests {
 
         let mut pass = ElabClassIdPass::default();
 
-        let mut elem_outside: ClassId<(), ()> = ClassId(
+        let mut elem_outside = ClassId(
             (),
             Pos::NONE,
             ClassId_::CIexpr(Expr(
@@ -286,7 +279,7 @@ mod tests {
         ];
 
         for expr_ in exprs_ {
-            let mut elem_outside: ClassId<(), ()> = ClassId(
+            let mut elem_outside = ClassId(
                 (),
                 Pos::NONE,
                 ClassId_::CIexpr(Expr((), Pos::NONE, expr_.clone())),

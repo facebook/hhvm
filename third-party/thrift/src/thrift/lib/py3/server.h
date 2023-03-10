@@ -45,7 +45,7 @@ class Py3ServerEventHandler
       folly::Executor* executor, AddressHandler address_handler)
       : executor_(executor), address_handler_(std::move(address_handler)) {}
 
-  void preServe(const folly::SocketAddress* address) {
+  void preStart(const folly::SocketAddress* address) {
     executor_->add([addr = *address, this]() mutable {
       address_handler_(std::move(addr));
     });

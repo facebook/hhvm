@@ -28,7 +28,6 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
         use oxidized::ast_defs::*;
         use oxidized::aast_defs::*;
-        use oxidized::naming_phase_error::NamingPhaseError;
 
         use crate::config::Config;
 
@@ -84,7 +83,6 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
             &mut self,
             elem: &mut #ty #ty_generics,
             cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -94,7 +92,6 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
             &mut self,
             elem: &mut #ty #ty_generics,
             cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }
@@ -114,8 +111,8 @@ impl Body {
         match self {
             Body::Default => quote!(Continue(())),
             Body::Passes => quote! {
-                self.fst.#name(elem, cfg, errs)?;
-                self.snd.#name(elem, cfg, errs)
+                self.fst.#name(elem, cfg)?;
+                self.snd.#name(elem, cfg)
             },
         }
     }
@@ -166,7 +163,6 @@ fn gen_fld_method(
             &mut self,
             elem: &mut #field_ty,
             cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -176,7 +172,6 @@ fn gen_fld_method(
             &mut self,
             elem: &mut #field_ty,
             cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }
@@ -207,7 +202,6 @@ fn gen_ctor_method(
             &mut self,
             elem: &mut #variant_ty,
             cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -217,7 +211,6 @@ fn gen_ctor_method(
             &mut self,
             elem: &mut #variant_ty,
             cfg: &Config,
-            errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }

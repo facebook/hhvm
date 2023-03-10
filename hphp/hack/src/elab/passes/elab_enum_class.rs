@@ -13,7 +13,6 @@ use oxidized::ast_defs::Abstraction;
 use oxidized::ast_defs::ClassishKind;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -27,7 +26,6 @@ impl Pass for ElabEnumClassPass {
         &mut self,
         elem: &mut Class_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if let Some(enum_) = &elem.enum_ {
             let Id(pos, _) = &elem.name;
@@ -65,7 +63,6 @@ impl Pass for ElabEnumClassPass {
         &mut self,
         elem: &mut oxidized::tast::Hint_,
         cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if !(cfg.is_hhi() || cfg.is_systemlib()) {
             match elem {
@@ -74,10 +71,10 @@ impl Pass for ElabEnumClassPass {
                         || ty_name == sn::classes::HH_BUILTIN_ENUM_CLASS
                         || ty_name == sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS =>
                 {
-                    errs.push(NamingPhaseError::Naming(NamingError::UsingInternalClass {
+                    cfg.emit_error(NamingError::UsingInternalClass {
                         pos: pos.clone(),
                         class_name: ty_name.clone(),
-                    }))
+                    })
                 }
                 _ => (),
             }
@@ -147,7 +144,7 @@ mod tests {
     #[test]
     fn test_enum_class_concrete() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabEnumClassPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
@@ -159,7 +156,7 @@ mod tests {
             },
         );
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {
@@ -185,7 +182,7 @@ mod tests {
     #[test]
     fn test_enum_class_abstract() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabEnumClassPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
@@ -197,7 +194,7 @@ mod tests {
             },
         );
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {
@@ -211,7 +208,7 @@ mod tests {
     #[test]
     fn test_enum() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabEnumClassPass;
 
         let mut elem: Class_<(), ()> = make_enum_class_(
@@ -223,7 +220,7 @@ mod tests {
             },
         );
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {

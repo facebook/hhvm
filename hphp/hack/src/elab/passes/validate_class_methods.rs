@@ -11,7 +11,6 @@ use oxidized::aast::Class_;
 use oxidized::aast::Method_;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::config::Config;
@@ -24,17 +23,16 @@ impl Pass for ValidateClassMethodsPass {
     fn on_ty_class__bottom_up<Ex: Default, En>(
         &mut self,
         class: &mut Class_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         let mut seen = HashSet::<&str>::new();
         for method in class.methods.iter() {
             let Id(pos, name) = &method.name;
             if seen.contains(name as &str) {
-                errs.push(NamingPhaseError::Naming(NamingError::AlreadyBound {
+                cfg.emit_error(NamingError::AlreadyBound {
                     pos: pos.clone(),
                     name: name.clone(),
-                }));
+                });
             }
             seen.insert(name);
         }
@@ -44,8 +42,7 @@ impl Pass for ValidateClassMethodsPass {
     fn on_ty_method__bottom_up<Ex: Default, En>(
         &mut self,
         method: &mut Method_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         if method.abstract_
             && method.user_attributes.iter().any(|attr| {
@@ -53,9 +50,7 @@ impl Pass for ValidateClassMethodsPass {
                 ua == sn::user_attributes::MEMOIZE || ua == sn::user_attributes::MEMOIZE_LSB
             })
         {
-            errs.push(NamingPhaseError::NastCheck(
-                NastCheckError::AbstractMethodMemoize(method.span.clone()),
-            ))
+            cfg.emit_error(NastCheckError::AbstractMethodMemoize(method.span.clone()))
         }
         ControlFlow::Continue(())
     }
@@ -77,6 +72,7 @@ mod tests {
     use oxidized::ast_defs::Abstraction;
     use oxidized::ast_defs::ClassishKind;
     use oxidized::namespace_env::Env;
+    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -152,8 +148,7 @@ mod tests {
 
     #[test]
     fn test_multiply_bound_method_name() {
-        let mut errs = Vec::default();
-        let config = Config::new(
+        let cfg = Config::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -162,17 +157,16 @@ mod tests {
         let n = mk_method("foo".to_string(), false, vec![]);
         let mut class = mk_class("Foo".to_string(), vec![m, n]);
 
-        class.transform(&config, &mut errs, &mut ValidateClassMethodsPass);
+        class.transform(&cfg, &mut ValidateClassMethodsPass);
         assert!(matches!(
-            &errs[..],
+            cfg.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ));
     }
 
     #[test]
     fn test_abstract_memoized_method() {
-        let mut errs = Vec::default();
-        let config = Config::new(
+        let cfg = Config::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -182,9 +176,9 @@ mod tests {
             params: vec![],
         };
         let mut method = mk_method("foo".to_string(), true, vec![memoized_attr]);
-        method.transform(&config, &mut errs, &mut ValidateClassMethodsPass);
+        method.transform(&cfg, &mut ValidateClassMethodsPass);
         assert!(matches!(
-            &errs[..],
+            cfg.into_errors().as_slice(),
             [NamingPhaseError::NastCheck(
                 NastCheckError::AbstractMethodMemoize(_)
             )]

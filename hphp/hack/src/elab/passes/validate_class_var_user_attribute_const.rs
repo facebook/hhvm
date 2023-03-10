@@ -9,7 +9,6 @@ use oxidized::aast_defs::ClassVar;
 use oxidized::aast_defs::Pos;
 use oxidized::aast_defs::UserAttributes;
 use oxidized::naming_phase_error::ExperimentalFeature;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -22,30 +21,23 @@ impl Pass for ValidateClassVarUserAttributeConstPass {
         &mut self,
         elem: &mut ClassVar<Ex, En>,
         cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         if !cfg.const_static_props() && elem.is_static {
-            check_const(elem.id.pos(), &elem.user_attributes, errs)
+            check_const(cfg, elem.id.pos(), &elem.user_attributes)
         }
         ControlFlow::Continue(())
     }
 }
 
-fn check_const<Ex, En>(
-    pos: &Pos,
-    attrs: &UserAttributes<Ex, En>,
-    errs: &mut Vec<NamingPhaseError>,
-) {
+fn check_const<Ex, En>(cfg: &Config, pos: &Pos, attrs: &UserAttributes<Ex, En>) {
     if attrs
         .0
         .iter()
         .any(|ua| ua.name.name() == sn::user_attributes::CONST)
     {
-        errs.push(NamingPhaseError::ExperimentalFeature(
-            ExperimentalFeature::ConstStaticProp(pos.clone()),
-        ))
+        cfg.emit_error(ExperimentalFeature::ConstStaticProp(pos.clone()))
     }
 }

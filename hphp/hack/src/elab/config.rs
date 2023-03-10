@@ -3,7 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cell::RefCell;
+
 use bitflags::bitflags;
+use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::typechecker_options::TypecheckerOptions;
 
 #[derive(Debug, Clone, Default)]
@@ -49,9 +52,10 @@ impl Flags {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Config {
     flags: Flags,
+    errors: RefCell<Vec<NamingPhaseError>>,
     pub consistent_ctor_level: isize,
 }
 
@@ -68,8 +72,17 @@ impl Config {
     pub fn new(tco: &TypecheckerOptions, pso: &ProgramSpecificOptions) -> Self {
         Self {
             flags: Flags::new(tco, pso),
+            errors: RefCell::new(vec![]),
             consistent_ctor_level: tco.tco_explicit_consistent_constructors,
         }
+    }
+
+    pub fn emit_error(&self, err: impl Into<NamingPhaseError>) {
+        self.errors.borrow_mut().push(err.into())
+    }
+
+    pub fn into_errors(self) -> Vec<NamingPhaseError> {
+        self.errors.into_inner()
     }
 
     pub fn soft_as_like(&self) -> bool {

@@ -15,7 +15,6 @@ use oxidized::aast_defs::FunctionPtrId;
 use oxidized::aast_defs::PropOrMethod;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::elab_utils;
@@ -28,8 +27,7 @@ impl Pass for ElabDynamicClassNamePass {
     fn on_ty_expr_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -43,9 +41,7 @@ impl Pass for ElabDynamicClassNamePass {
 
         match &mut elem.2 {
             Expr_::New(box (class_id, _, _, _, _)) if is_dynamic(class_id) => {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::DynamicNewInStrictMode(class_id.1.clone()),
-                ));
+                cfg.emit_error(NamingError::DynamicNewInStrictMode(class_id.1.clone()));
                 class_id.2 = ClassId_::CI(Id(class_id.1.clone(), sn::classes::UNKNOWN.to_string()));
                 ControlFlow::Continue(())
             }
@@ -59,9 +55,7 @@ impl Pass for ElabDynamicClassNamePass {
                 ClassGetExpr::CGexpr(cg_expr),
                 PropOrMethod::IsMethod,
             )) if !is_dynamic(class_id) => {
-                errs.push(NamingPhaseError::Naming(NamingError::DynamicMethodAccess(
-                    cg_expr.1.clone(),
-                )));
+                cfg.emit_error(NamingError::DynamicMethodAccess(cg_expr.1.clone()));
                 ControlFlow::Continue(())
             }
             Expr_::ClassGet(box (
@@ -70,9 +64,7 @@ impl Pass for ElabDynamicClassNamePass {
                 | ClassGetExpr::CGexpr(Expr(_, _, Expr_::Lvar(..) | Expr_::This)),
                 _,
             )) => {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::DynamicClassNameInStrictMode(ci_expr.1.clone()),
-                ));
+                cfg.emit_error(NamingError::DynamicClassNameInStrictMode(ci_expr.1.clone()));
                 invalid(&mut elem.2)
             }
             Expr_::ClassGet(box (
@@ -80,18 +72,12 @@ impl Pass for ElabDynamicClassNamePass {
                 ClassGetExpr::CGexpr(cg_expr),
                 _,
             )) => {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::DynamicClassNameInStrictMode(ci_expr.1.clone()),
-                ));
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::DynamicClassNameInStrictMode(cg_expr.1.clone()),
-                ));
+                cfg.emit_error(NamingError::DynamicClassNameInStrictMode(ci_expr.1.clone()));
+                cfg.emit_error(NamingError::DynamicClassNameInStrictMode(cg_expr.1.clone()));
                 invalid(&mut elem.2)
             }
             Expr_::ClassGet(box (_, ClassGetExpr::CGexpr(cg_expr), _)) => {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::DynamicClassNameInStrictMode(cg_expr.1.clone()),
-                ));
+                cfg.emit_error(NamingError::DynamicClassNameInStrictMode(cg_expr.1.clone()));
                 invalid(&mut elem.2)
             }
             Expr_::FunctionPointer(box (FunctionPtrId::FPClassConst(class_id, _), _))
@@ -121,6 +107,7 @@ fn is_dynamic<Ex, En>(class_id: &ClassId<Ex, En>) -> bool {
 #[cfg(test)]
 mod tests {
 
+    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
 
     use super::*;
@@ -143,7 +130,7 @@ mod tests {
     #[test]
     fn test_new_valid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -156,9 +143,9 @@ mod tests {
                 Default::default(),
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
             expr_,
@@ -169,7 +156,7 @@ mod tests {
     #[test]
     fn test_new_invalid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -182,9 +169,9 @@ mod tests {
                 Default::default(),
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        let err_opt = errs.pop();
+        let err_opt = cfg.into_errors().pop();
         assert!(matches!(
             err_opt,
             Some(NamingPhaseError::Naming(
@@ -202,7 +189,7 @@ mod tests {
     #[test]
     fn test_function_pointer_valid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -212,9 +199,9 @@ mod tests {
                 Default::default(),
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         let Expr(_, _, expr_) = elem;
         assert!(matches!(
             expr_,
@@ -228,7 +215,7 @@ mod tests {
     #[test]
     fn test_function_pointer_invalid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -238,9 +225,9 @@ mod tests {
                 Default::default(),
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         let Expr(_, _, expr_) = elem;
         assert!(matches!(expr_, Expr_::Invalid(_)))
     }
@@ -250,16 +237,16 @@ mod tests {
     #[test]
     fn test_class_const_valid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::default(),
             Expr_::ClassConst(Box::new((mk_non_dynamic_class_id(), Default::default()))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         assert!(matches!(
             elem,
             Expr(
@@ -273,16 +260,16 @@ mod tests {
     #[test]
     fn test_class_const_invalid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
             Pos::default(),
             Expr_::ClassConst(Box::new((mk_dynamic_class_id(), Default::default()))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         assert!(matches!(
             elem,
             Expr(
@@ -301,7 +288,7 @@ mod tests {
     #[test]
     fn test_class_get_cg_string_valid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -312,9 +299,9 @@ mod tests {
                 PropOrMethod::IsProp,
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         assert!(matches!(
             elem,
             Expr(
@@ -328,7 +315,7 @@ mod tests {
     #[test]
     fn test_class_get_cg_string_invalid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -339,9 +326,9 @@ mod tests {
                 PropOrMethod::IsProp,
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        let err_opt = errs.pop();
+        let err_opt = cfg.into_errors().pop();
         assert!(matches!(
             err_opt,
             Some(NamingPhaseError::Naming(
@@ -354,7 +341,7 @@ mod tests {
     #[test]
     fn test_class_get_cg_expr_invalid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabDynamicClassNamePass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -365,10 +352,10 @@ mod tests {
                 PropOrMethod::IsProp,
             ))),
         );
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             [
                 NamingPhaseError::Naming(NamingError::DynamicClassNameInStrictMode(..)),
                 NamingPhaseError::Naming(NamingError::DynamicClassNameInStrictMode(..))

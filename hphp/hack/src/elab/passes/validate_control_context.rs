@@ -8,7 +8,6 @@ use oxidized::aast_defs::Expr_;
 use oxidized::aast_defs::FinallyBlock;
 use oxidized::aast_defs::Stmt;
 use oxidized::aast_defs::Stmt_;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::config::Config;
@@ -36,25 +35,24 @@ impl Pass for ValidateControlContextPass {
     fn on_ty_stmt_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Stmt<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         match (&elem.1, self.control_context) {
-            (Stmt_::Break, ControlContext::TopLevel) => errs.push(NamingPhaseError::NastCheck(
-                NastCheckError::ToplevelBreak(elem.0.clone()),
-            )),
-            (Stmt_::Continue, ControlContext::TopLevel) => errs.push(NamingPhaseError::NastCheck(
-                NastCheckError::ToplevelContinue(elem.0.clone()),
-            )),
-            (Stmt_::Continue, ControlContext::Switch) => errs.push(NamingPhaseError::NastCheck(
-                NastCheckError::ContinueInSwitch(elem.0.clone()),
-            )),
-            (Stmt_::Return(..), _) if self.in_finally_block => errs.push(
-                NamingPhaseError::NastCheck(NastCheckError::ReturnInFinally(elem.0.clone())),
-            ),
+            (Stmt_::Break, ControlContext::TopLevel) => {
+                cfg.emit_error(NastCheckError::ToplevelBreak(elem.0.clone()))
+            }
+            (Stmt_::Continue, ControlContext::TopLevel) => {
+                cfg.emit_error(NastCheckError::ToplevelContinue(elem.0.clone()))
+            }
+            (Stmt_::Continue, ControlContext::Switch) => {
+                cfg.emit_error(NastCheckError::ContinueInSwitch(elem.0.clone()))
+            }
+            (Stmt_::Return(..), _) if self.in_finally_block => {
+                cfg.emit_error(NastCheckError::ReturnInFinally(elem.0.clone()))
+            }
             _ => (),
         }
         ControlFlow::Continue(())
@@ -64,7 +62,6 @@ impl Pass for ValidateControlContextPass {
         &mut self,
         elem: &mut Stmt_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -83,7 +80,6 @@ impl Pass for ValidateControlContextPass {
         &mut self,
         _elem: &mut FinallyBlock<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -96,7 +92,6 @@ impl Pass for ValidateControlContextPass {
         &mut self,
         elem: &mut Expr_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,

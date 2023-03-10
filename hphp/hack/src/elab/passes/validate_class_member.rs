@@ -9,7 +9,6 @@ use oxidized::aast::Class_;
 use oxidized::aast::Sid;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -21,29 +20,25 @@ impl Pass for ValidateClassMemberPass {
     fn on_ty_class__bottom_up<Ex: Default, En>(
         &mut self,
         class: &mut Class_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         let typeconst_names = class.typeconsts.iter().map(|tc| &tc.name);
         let const_names = class.consts.iter().map(|c| &c.id);
-        error_if_repeated_name(typeconst_names.chain(const_names), errs);
+        error_if_repeated_name(cfg, typeconst_names.chain(const_names));
         ControlFlow::Continue(())
     }
 }
 
 // We use the same namespace as constants within the class so we cannot have
 // a const and type const with the same name.
-fn error_if_repeated_name<'a>(
-    names: impl Iterator<Item = &'a Sid>,
-    errs: &mut Vec<NamingPhaseError>,
-) {
+fn error_if_repeated_name<'a>(cfg: &Config, names: impl Iterator<Item = &'a Sid>) {
     let mut seen = hash::HashSet::<&str>::default();
     for Id(pos, name) in names {
         if seen.contains(name as &str) {
-            errs.push(NamingPhaseError::Naming(NamingError::AlreadyBound {
+            cfg.emit_error(NamingError::AlreadyBound {
                 pos: pos.clone(),
                 name: name.clone(),
-            }));
+            });
         }
         seen.insert(name);
     }
@@ -63,6 +58,7 @@ mod tests {
     use oxidized::ast_defs::Abstraction;
     use oxidized::ast_defs::ClassishKind;
     use oxidized::namespace_env::Env;
+    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
@@ -136,8 +132,7 @@ mod tests {
 
     #[test]
     fn test_class_constant_names_clash() {
-        let mut errs = Vec::default();
-        let config = Config::new(
+        let cfg = Config::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -146,9 +141,9 @@ mod tests {
             vec![mk_class_const("FOO".to_string())],
             vec![mk_class_typeconst("FOO".to_string())],
         );
-        class.transform(&config, &mut errs, &mut ValidateClassMemberPass);
+        class.transform(&cfg, &mut ValidateClassMemberPass);
         assert!(matches!(
-            &errs[..],
+            cfg.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ));
     }

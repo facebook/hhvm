@@ -21,7 +21,6 @@ use oxidized::ast_defs::Id;
 use oxidized::ast_defs::Tprim;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::ExperimentalFeature;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -35,7 +34,6 @@ impl Pass for ElabClassVarsPass {
         &mut self,
         elem: &mut Class_<Ex, En>,
         cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let const_user_attr_opt = elem
             .user_attributes
@@ -69,7 +67,7 @@ impl Pass for ElabClassVarsPass {
         // Represent xhp_attrs as vars
         elem.xhp_attrs
             .drain(0..)
-            .for_each(|xhp_attr| elem.vars.push(class_var_of_xhp_attr(xhp_attr, cfg, errs)));
+            .for_each(|xhp_attr| elem.vars.push(class_var_of_xhp_attr(xhp_attr, cfg)));
 
         // If this is an interface mark all methods as abstract
         if matches!(elem.kind, ClassishKind::Cinterface) {
@@ -100,11 +98,7 @@ impl Pass for ElabClassVarsPass {
 //  ii) the list of `Expr` can actually only be int or string literals
 //  iii) `ClassVar` `XhpAttrInfo` `enum_values` already contains a validated and restricted
 //       representation of the `Expr`s
-fn class_var_of_xhp_attr<Ex, En>(
-    xhp_attr: XhpAttr<Ex, En>,
-    cfg: &Config,
-    errs: &mut Vec<NamingPhaseError>,
-) -> ClassVar<Ex, En> {
+fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, cfg: &Config) -> ClassVar<Ex, En> {
     let XhpAttr(type_hint, mut cv, xhp_attr_tag_opt, enum_opt) = xhp_attr;
     let is_required = xhp_attr_tag_opt.is_some();
     let has_default = if let Some(Expr(_, _, expr_)) = &cv.expr {
@@ -139,12 +133,10 @@ fn class_var_of_xhp_attr<Ex, En>(
             // error and put back the `Hint_`
             Hint_::Hoption(_) if is_required => {
                 let Id(_, attr_name) = &cv.id;
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::XhpOptionalRequiredAttr {
-                        pos: hint.0.clone(),
-                        attr_name: attr_name.clone(),
-                    },
-                ));
+                cfg.emit_error(NamingError::XhpOptionalRequiredAttr {
+                    pos: hint.0.clone(),
+                    attr_name: attr_name.clone(),
+                });
                 *hint.1 = hint_
             }
             // If the hint is `Hmixed` or we have either `is_required` or
@@ -168,9 +160,7 @@ fn class_var_of_xhp_attr<Ex, En>(
             .zip(hint_opt.as_ref())
         {
             if matches!(hint_ as &Hint_, Hint_::Hlike(_)) {
-                errs.push(NamingPhaseError::ExperimentalFeature(
-                    ExperimentalFeature::LikeType(pos.clone()),
-                ))
+                cfg.emit_error(ExperimentalFeature::LikeType(pos.clone()))
             }
         }
     }

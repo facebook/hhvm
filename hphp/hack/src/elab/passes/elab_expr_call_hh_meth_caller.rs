@@ -17,7 +17,6 @@ use oxidized::aast_defs::Expr_;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ParamKind;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::elab_utils;
@@ -30,8 +29,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         let invalid = |expr_: &mut Expr_<_, _>| {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
@@ -49,16 +47,12 @@ impl Pass for ElabExprCallHhMethCallerPass {
             )) if id.name() == sn::autoimported_functions::METH_CALLER => {
                 // Raise an error if we have a variadic arg
                 if let Some(Expr(_, pos, _)) = fn_variadic_param_opt {
-                    errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
-                        pos.clone(),
-                    )))
+                    cfg.emit_error(NamingError::TooFewArguments(pos.clone()))
                 }
 
                 match fn_param_exprs.as_mut_slice() {
                     [_, _, _, ..] => {
-                        errs.push(NamingPhaseError::Naming(NamingError::TooManyArguments(
-                            fn_expr_pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::TooManyArguments(fn_expr_pos.clone()));
                         invalid(elem)
                     }
                     [
@@ -82,9 +76,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
                             ControlFlow::Continue(())
                         }
                         _ => {
-                            errs.push(NamingPhaseError::Naming(NamingError::IllegalMethCaller(
-                                fn_expr_pos.clone(),
-                            )));
+                            cfg.emit_error(NamingError::IllegalMethCaller(fn_expr_pos.clone()));
                             invalid(elem)
                         }
                     },
@@ -92,17 +84,13 @@ impl Pass for ElabExprCallHhMethCallerPass {
                     // We expect a string literal as the second argument and neither param
                     // can be inout; raise an error and invalidate
                     [_, _] => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalMethCaller(
-                            fn_expr_pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalMethCaller(fn_expr_pos.clone()));
                         invalid(elem)
                     }
 
                     // We are expecting exactly two args
                     [] | [_] => {
-                        errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
-                            fn_expr_pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::TooFewArguments(fn_expr_pos.clone()));
                         invalid(elem)
                     }
                 }
@@ -115,6 +103,8 @@ impl Pass for ElabExprCallHhMethCallerPass {
 #[cfg(test)]
 mod tests {
 
+    use oxidized::naming_phase_error::NamingPhaseError;
+
     use super::*;
     use crate::elab_utils;
     use crate::Transform;
@@ -124,7 +114,7 @@ mod tests {
     #[test]
     fn test_valid_two_string_args() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
@@ -150,10 +140,10 @@ mod tests {
             ],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         // Expect no errors
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
 
         // Expect our `Expr_` to elaborate to a `MethodCaller`
         assert!(match elem {
@@ -168,7 +158,7 @@ mod tests {
     #[test]
     fn test_valid_class_const_string_args() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
@@ -205,10 +195,10 @@ mod tests {
             ],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         // Expect no errors
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
 
         // Expect our `Expr_` to elaborate to a `MethodCaller`
         assert!(match elem {
@@ -223,7 +213,7 @@ mod tests {
     #[test]
     fn test_valid_with_variadic_arg() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
@@ -249,10 +239,10 @@ mod tests {
             ],
             Some(elab_utils::expr::null()),
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         // Expect `TooFewArgs` error from variadic param
-        let too_few_args_err_opt = errs.pop();
+        let too_few_args_err_opt = cfg.into_errors().pop();
         assert!(matches!(
             too_few_args_err_opt,
             Some(NamingPhaseError::Naming(NamingError::TooFewArguments(_)))
@@ -272,7 +262,7 @@ mod tests {
     #[test]
     fn test_invalid_arg_type() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let meth_name = "foo";
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
@@ -297,9 +287,9 @@ mod tests {
             ],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        let illegal_err_opt = errs.pop();
+        let illegal_err_opt = cfg.into_errors().pop();
         assert!(matches!(
             illegal_err_opt,
             Some(NamingPhaseError::Naming(NamingError::IllegalMethCaller(..)))
@@ -326,7 +316,7 @@ mod tests {
     #[test]
     fn test_invalid_param_kind() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
@@ -352,9 +342,9 @@ mod tests {
             ],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        let illegal_err_opt = errs.pop();
+        let illegal_err_opt = cfg.into_errors().pop();
         assert!(matches!(
             illegal_err_opt,
             Some(NamingPhaseError::Naming(NamingError::IllegalMethCaller(..)))
@@ -381,7 +371,7 @@ mod tests {
     #[test]
     fn test_too_few_args() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
@@ -400,9 +390,9 @@ mod tests {
             )],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        let too_few_args_err_opt = errs.pop();
+        let too_few_args_err_opt = cfg.into_errors().pop();
         assert!(matches!(
             too_few_args_err_opt,
             Some(NamingPhaseError::Naming(NamingError::TooFewArguments(_)))
@@ -429,7 +419,7 @@ mod tests {
     #[test]
     fn test_too_many_args() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallHhMethCallerPass;
         let rcvr_name = "wut";
         let meth_name = "foo";
@@ -456,9 +446,9 @@ mod tests {
             ],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        let too_many_args_err_opt = errs.pop();
+        let too_many_args_err_opt = cfg.into_errors().pop();
         assert!(matches!(
             too_many_args_err_opt,
             Some(NamingPhaseError::Naming(NamingError::TooManyArguments(_)))

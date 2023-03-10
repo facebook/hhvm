@@ -24,7 +24,6 @@ use oxidized::ast_defs::Bop;
 use oxidized::ast_defs::ClassishKind;
 use oxidized::ast_defs::Uop;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::elab_utils;
@@ -79,8 +78,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_expr_top_down<Ex, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -129,32 +127,24 @@ impl Pass for ElabConstExprPass {
                     }
                     // TODO[mjt] another example of inconsistency around error positions
                     Hint_::Happly(id, _) => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            id.0.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(id.0.clone()));
                         invalid(expr_)
                     }
                     _ => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
                 Expr_::Unop(box (uop, _)) => match uop {
                     Uop::Uplus | Uop::Uminus | Uop::Utild | Uop::Unot => ControlFlow::Continue(()),
                     _ => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
                 Expr_::Binop(box (bop, _, _)) => match bop {
                     Bop::Eq(_) => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                     _ => ControlFlow::Continue(()),
@@ -162,18 +152,14 @@ impl Pass for ElabConstExprPass {
                 Expr_::ValCollection(box ((_, vc_kind), _, _)) => match vc_kind {
                     VcKind::Vec | VcKind::Keyset => ControlFlow::Continue(()),
                     _ => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
                 Expr_::KeyValCollection(box ((_, kvc_kind), _, _)) => match kvc_kind {
                     KvcKind::Dict => ControlFlow::Continue(()),
                     _ => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
@@ -186,9 +172,7 @@ impl Pass for ElabConstExprPass {
                         ControlFlow::Continue(())
                     }
                     _ => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
@@ -197,9 +181,7 @@ impl Pass for ElabConstExprPass {
                     if matches!(self.mode, file_info::Mode::Mhhi) {
                         ControlFlow::Continue(())
                     } else {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 }
@@ -231,9 +213,7 @@ impl Pass for ElabConstExprPass {
                 | Expr_::String2(..)
                 | Expr_::Yield(..)
                 | Expr_::Xml(..) => {
-                    errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                        pos.clone(),
-                    )));
+                    cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                     invalid(expr_)
                 }
 
@@ -248,8 +228,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_expr_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -268,9 +247,7 @@ impl Pass for ElabConstExprPass {
             match expr_ {
                 Expr_::ClassConst(box (ClassId(_, _, class_id_), _)) => match class_id_ {
                     ClassId_::CIstatic => {
-                        errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                            pos.clone(),
-                        )));
+                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
 
@@ -281,9 +258,7 @@ impl Pass for ElabConstExprPass {
                     ClassId_::CIexpr(Expr(_, _, expr_)) => match expr_ {
                         Expr_::This | Expr_::Id(..) => ControlFlow::Continue(()),
                         _ => {
-                            errs.push(NamingPhaseError::Naming(NamingError::IllegalConstant(
-                                pos.clone(),
-                            )));
+                            cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
                             invalid(expr_)
                         }
                     },
@@ -297,7 +272,6 @@ impl Pass for ElabConstExprPass {
         &mut self,
         elem: &mut Class_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -317,7 +291,6 @@ impl Pass for ElabConstExprPass {
         &mut self,
         elem: &mut ClassConstKind<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -332,7 +305,6 @@ impl Pass for ElabConstExprPass {
         &mut self,
         elem: &mut Typedef<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -345,7 +317,6 @@ impl Pass for ElabConstExprPass {
         &mut self,
         elem: &mut Gconst<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -359,7 +330,6 @@ impl Pass for ElabConstExprPass {
         &mut self,
         elem: &mut FunDef<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -372,7 +342,6 @@ impl Pass for ElabConstExprPass {
         &mut self,
         elem: &mut ModuleDef<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,

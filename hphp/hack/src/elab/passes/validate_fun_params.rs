@@ -10,7 +10,6 @@ use oxidized::aast_defs::FunParam;
 use oxidized::aast_defs::Fun_;
 use oxidized::aast_defs::Method_;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -22,37 +21,35 @@ impl Pass for ValidateFunParamsPass {
     fn on_ty_fun__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Fun_<Ex, En>,
-        _: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
-        self.validate_fun_params(&elem.params, errs)
+        self.validate_fun_params(cfg, &elem.params)
     }
 
     fn on_ty_method__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
-        self.validate_fun_params(&elem.params, errs)
+        self.validate_fun_params(cfg, &elem.params)
     }
 }
 
 impl ValidateFunParamsPass {
     fn validate_fun_params<Ex: Default, En>(
         &self,
+        cfg: &Config,
         params: &Vec<FunParam<Ex, En>>,
-        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let mut seen = std::collections::BTreeSet::<&String>::new();
         for FunParam { name, pos, .. } in params {
             if name == sn::special_idents::PLACEHOLDER {
                 continue;
             } else if seen.contains(name) {
-                errs.push(NamingPhaseError::Naming(NamingError::AlreadyBound {
+                cfg.emit_error(NamingError::AlreadyBound {
                     pos: pos.clone(),
                     name: name.clone(),
-                }));
+                });
             } else {
                 seen.insert(name);
             }
@@ -73,6 +70,7 @@ mod tests {
     use oxidized::ast::FunKind;
     use oxidized::ast::Id;
     use oxidized::ast::ParamKind;
+    use oxidized::naming_phase_error::NamingPhaseError;
 
     use super::*;
     use crate::transform::Transform;
@@ -144,67 +142,67 @@ mod tests {
     #[test]
     fn test_fn_no_args() {
         let cfg = Config::default();
-        let mut errs: Vec<NamingPhaseError> = Vec::default();
+
         let mut pass = ValidateFunParamsPass;
 
         let mut fun = mk_fun(vec![]);
 
-        fun.transform(&cfg, &mut errs, &mut pass);
-        assert!(errs.is_empty())
+        fun.transform(&cfg, &mut pass);
+        assert!(cfg.into_errors().is_empty())
     }
 
     #[test]
     fn test_meth_no_args() {
         let cfg = Config::default();
-        let mut errs: Vec<NamingPhaseError> = Vec::default();
+
         let mut pass = ValidateFunParamsPass;
 
         let mut meth = mk_method("foo".to_string(), vec![]);
 
-        meth.transform(&cfg, &mut errs, &mut pass);
-        assert!(errs.is_empty())
+        meth.transform(&cfg, &mut pass);
+        assert!(cfg.into_errors().is_empty())
     }
 
     #[test]
     fn test_fn_good_args() {
         let cfg = Config::default();
-        let mut errs: Vec<NamingPhaseError> = Vec::default();
+
         let mut pass = ValidateFunParamsPass;
 
         let x = mk_param("x".to_string());
         let y = mk_param("y".to_string());
         let mut fun = mk_fun(vec![x, y]);
 
-        fun.transform(&cfg, &mut errs, &mut pass);
-        assert!(errs.is_empty())
+        fun.transform(&cfg, &mut pass);
+        assert!(cfg.into_errors().is_empty())
     }
 
     #[test]
     fn test_meth_good_args() {
         let cfg = Config::default();
-        let mut errs: Vec<NamingPhaseError> = Vec::default();
+
         let mut pass = ValidateFunParamsPass;
 
         let x = mk_param("x".to_string());
         let y = mk_param("y".to_string());
         let mut meth = mk_method("foo".to_string(), vec![x, y]);
 
-        meth.transform(&cfg, &mut errs, &mut pass);
-        assert!(errs.is_empty())
+        meth.transform(&cfg, &mut pass);
+        assert!(cfg.into_errors().is_empty())
     }
 
     #[test]
     fn test_fn_args_multiply_bound() {
         let cfg = Config::default();
-        let mut errs: Vec<NamingPhaseError> = Vec::default();
+
         let mut pass = ValidateFunParamsPass;
 
         let x = mk_param("x".to_string());
         let mut fun = mk_fun(vec![x.clone(), x]);
 
-        fun.transform(&cfg, &mut errs, &mut pass);
+        fun.transform(&cfg, &mut pass);
         assert!(matches!(
-            &errs[..],
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ))
     }
@@ -212,15 +210,15 @@ mod tests {
     #[test]
     fn test_meth_args_multiply_bound() {
         let cfg = Config::default();
-        let mut errs: Vec<NamingPhaseError> = Vec::default();
+
         let mut pass = ValidateFunParamsPass;
 
         let x = mk_param("x".to_string());
         let mut meth = mk_method("foo".to_string(), vec![x.clone(), x]);
 
-        meth.transform(&cfg, &mut errs, &mut pass);
+        meth.transform(&cfg, &mut pass);
         assert!(matches!(
-            &errs[..],
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ))
     }

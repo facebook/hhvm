@@ -10,7 +10,6 @@ use oxidized::aast_defs::FuncBody;
 use oxidized::aast_defs::Gconst;
 use oxidized::aast_defs::ModuleDef;
 use oxidized::aast_defs::Typedef;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -33,7 +32,6 @@ impl Pass for ElabFuncBodyPass {
         &mut self,
         elem: &mut FuncBody<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
@@ -46,7 +44,6 @@ impl Pass for ElabFuncBodyPass {
         &mut self,
         elem: &mut Class_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -56,7 +53,6 @@ impl Pass for ElabFuncBodyPass {
         &mut self,
         elem: &mut Typedef<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -66,7 +62,6 @@ impl Pass for ElabFuncBodyPass {
         &mut self,
         elem: &mut Gconst<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -76,7 +71,6 @@ impl Pass for ElabFuncBodyPass {
         &mut self,
         elem: &mut FunDef<Ex, En>,
         _cf: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -86,7 +80,6 @@ impl Pass for ElabFuncBodyPass {
         &mut self,
         elem: &mut ModuleDef<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -112,17 +105,15 @@ mod tests {
             fb_ast: oxidized::ast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
         };
 
-        let mut errs = Vec::default();
-
         let mut pass = ElabFuncBodyPass::default();
 
         // Transform when not in Mode::Mhhi should be unchanged
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert!(!elem.fb_ast.is_empty());
 
         // Transform when in Mode::Mhhi should result in [fb_ast] being cleared
         pass.mode = file_info::Mode::Mhhi;
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert!(elem.fb_ast.is_empty());
     }
 }

@@ -240,7 +240,6 @@ fn elaborate<T: Transform>(
         passes::validate_class_member::ValidateClassMemberPass::default(),
     ];
 
-    let mut errs = Vec::default();
-    node.transform(&cfg, &mut errs, &mut passes);
-    errs
+    node.transform(&cfg, &mut passes);
+    cfg.into_errors()
 }

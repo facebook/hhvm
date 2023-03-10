@@ -10,7 +10,6 @@ use oxidized::aast_defs::Def;
 use oxidized::aast_defs::Program;
 use oxidized::aast_defs::Stmt;
 use oxidized::aast_defs::Stmt_;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -23,7 +22,6 @@ impl Pass for ElabDefsPass {
         &mut self,
         elem: &mut Program<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let Program(defs) = elem;
         let mut q: VecDeque<_> = defs.drain(0..).collect();
@@ -103,11 +101,9 @@ mod tests {
             Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Noop))),
         ]);
 
-        let mut errs = Vec::default();
-
         let mut pass = ElabDefsPass;
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         // Given our initial program:
         //

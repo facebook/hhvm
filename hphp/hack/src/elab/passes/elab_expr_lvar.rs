@@ -8,7 +8,6 @@ use naming_special_names_rust as sn;
 use oxidized::aast_defs::Expr_;
 use oxidized::aast_defs::Lid;
 use oxidized::local_id;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 
 use crate::config::Config;
@@ -23,7 +22,6 @@ impl Pass for ElabExprLvarPass {
         &mut self,
         elem: &mut oxidized::aast::Expr_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Lvar(lid) => {
@@ -62,42 +60,42 @@ mod tests {
     #[test]
     fn test_lvar_this() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprLvarPass;
 
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::THIS),
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert!(matches!(elem, Expr_::This))
     }
 
     #[test]
     fn test_lvar_placeholder() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprLvarPass;
 
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::PLACEHOLDER),
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert!(matches!(elem, Expr_::Lplaceholder(_)))
     }
 
     #[test]
     fn test_lvar_dollar_dollar() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprLvarPass;
 
         let mut elem: Expr_<(), ()> = Expr_::Lvar(Box::new(Lid(
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR),
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert!(matches!(elem, Expr_::Dollardollar(_)))
     }
 }

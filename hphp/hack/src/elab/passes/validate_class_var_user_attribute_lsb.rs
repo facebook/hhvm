@@ -8,7 +8,6 @@ use naming_special_names_rust as sn;
 use oxidized::aast_defs::ClassVar;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -23,7 +22,6 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
         &mut self,
         elem: &mut oxidized::aast::Class_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -39,8 +37,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
     fn on_ty_class_var_bottom_up<Ex, En>(
         &mut self,
         elem: &mut ClassVar<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -53,21 +50,17 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
         {
             // Non-static properties cannot have attribute `__LSB`
             if !elem.is_static {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::NonstaticPropertyWithLsb(ua.name.pos().clone()),
-                ))
+                cfg.emit_error(NamingError::NonstaticPropertyWithLsb(ua.name.pos().clone()))
             }
             // `__LSB` attribute is unnecessary in final classes
             if let Some(id) = &self.final_class {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::UnnecessaryAttribute {
-                        pos: ua.name.pos().clone(),
-                        attr: sn::user_attributes::LSB.to_string(),
-                        class_pos: id.pos().clone(),
-                        class_name: id.name().to_string(),
-                        suggestion: None,
-                    },
-                ));
+                cfg.emit_error(NamingError::UnnecessaryAttribute {
+                    pos: ua.name.pos().clone(),
+                    attr: sn::user_attributes::LSB.to_string(),
+                    class_pos: id.pos().clone(),
+                    class_name: id.name().to_string(),
+                    suggestion: None,
+                });
             }
         }
         ControlFlow::Continue(())

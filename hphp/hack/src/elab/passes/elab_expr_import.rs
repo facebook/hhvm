@@ -7,7 +7,6 @@ use std::ops::ControlFlow;
 
 use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 
 use crate::config::Config;
@@ -24,7 +23,6 @@ impl Pass for ElabExprImportPass {
         &mut self,
         elem: &mut Expr<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let Expr(_, _, expr_) = elem;
         match expr_ {
@@ -55,7 +53,7 @@ mod tests {
     #[test]
     fn test_val_collection_empty() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprImportPass;
         let mut elem: Expr<(), ()> = Expr(
             (),
@@ -66,7 +64,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(expr_, Expr_::Invalid(_)));

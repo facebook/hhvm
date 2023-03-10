@@ -9,7 +9,6 @@ use oxidized::aast_defs::Block;
 use oxidized::aast_defs::Stmt;
 use oxidized::aast_defs::Stmt_;
 use oxidized::aast_defs::UsingStmt;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -22,7 +21,6 @@ impl Pass for ElabBlockPass {
         &mut self,
         elem: &mut Block<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         let mut q: VecDeque<_> = elem.drain(0..).collect();
         while let Some(Stmt(pos, stmt_)) = q.pop_front() {
@@ -38,7 +36,6 @@ impl Pass for ElabBlockPass {
         &mut self,
         elem: &mut UsingStmt<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         elem.is_block_scoped = false;
         ControlFlow::Continue(())
@@ -59,7 +56,7 @@ mod tests {
     #[test]
     fn test() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabBlockPass;
 
         let mut elem: Block<(), ()> = Block(vec![Stmt(
@@ -94,7 +91,7 @@ mod tests {
                 Stmt(Pos::NONE, Stmt_::Noop),
             ])),
         )]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert_eq!(elem.len(), 9);
         assert!(elem.into_iter().all(|s| matches!(s.1, Stmt_::Noop)));

@@ -11,7 +11,6 @@ use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ParamKind;
 use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::config::Config;
@@ -25,8 +24,7 @@ impl Pass for ElabExprCallCallUserFuncPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Call(box (
@@ -36,13 +34,11 @@ impl Pass for ElabExprCallCallUserFuncPass {
                 _,
             )) if fn_name == sn::std_lib_functions::CALL_USER_FUNC && fn_param_exprs.is_empty() => {
                 // We're cloning here since we need to preserve the entire expression
-                errs.push(NamingPhaseError::Naming(NamingError::DeprecatedUse {
+                cfg.emit_error(NamingError::DeprecatedUse {
                     pos: fn_expr_pos.clone(),
                     fn_name: fn_name.clone(),
-                }));
-                errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(
-                    fn_expr_pos.clone(),
-                )));
+                });
+                cfg.emit_error(NamingError::TooFewArguments(fn_expr_pos.clone()));
                 let inner_expr_ = std::mem::replace(elem, Expr_::Null);
                 let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
                 *elem = Expr_::Invalid(Box::new(Some(inner_expr)));
@@ -50,19 +46,17 @@ impl Pass for ElabExprCallCallUserFuncPass {
             }
 
             Expr_::Call(box (fn_expr, _, fn_param_exprs, fn_variadic_param_opt))
-                if is_expr_call_user_func(fn_expr, errs) && !fn_param_exprs.is_empty() =>
+                if is_expr_call_user_func(cfg, fn_expr) && !fn_param_exprs.is_empty() =>
             {
                 // remove the first element of `fn_param_exprs`
                 let (param_kind, head_expr) = fn_param_exprs.remove(0);
                 // raise an error if this is an inout param
                 if let ParamKind::Pinout(pk_pos) = &param_kind {
                     let pos = Pos::merge(pk_pos, &fn_expr.1).unwrap();
-                    errs.push(NamingPhaseError::NastCheck(
-                        NastCheckError::InoutInTransformedPseudofunction {
-                            pos,
-                            fn_name: sn::std_lib_functions::CALL_USER_FUNC.to_string(),
-                        },
-                    ))
+                    cfg.emit_error(NastCheckError::InoutInTransformedPseudofunction {
+                        pos,
+                        fn_name: sn::std_lib_functions::CALL_USER_FUNC.to_string(),
+                    })
                 }
                 // use the first argument as the function expression
                 *fn_expr = head_expr;
@@ -75,13 +69,13 @@ impl Pass for ElabExprCallCallUserFuncPass {
     }
 }
 
-fn is_expr_call_user_func<Ex, En>(expr: &Expr<Ex, En>, errs: &mut Vec<NamingPhaseError>) -> bool {
+fn is_expr_call_user_func<Ex, En>(cfg: &Config, expr: &Expr<Ex, En>) -> bool {
     match expr {
         Expr(_, pos, Expr_::Id(box id)) if id.name() == sn::std_lib_functions::CALL_USER_FUNC => {
-            errs.push(NamingPhaseError::Naming(NamingError::DeprecatedUse {
+            cfg.emit_error(NamingError::DeprecatedUse {
                 pos: pos.clone(),
                 fn_name: id.name().to_string(),
-            }));
+            });
             true
         }
         _ => false,
@@ -91,6 +85,8 @@ fn is_expr_call_user_func<Ex, En>(expr: &Expr<Ex, En>, errs: &mut Vec<NamingPhas
 #[cfg(test)]
 mod tests {
 
+    use oxidized::naming_phase_error::NamingPhaseError;
+
     use super::*;
     use crate::elab_utils;
     use crate::Transform;
@@ -98,7 +94,7 @@ mod tests {
     #[test]
     fn test_valid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallCallUserFuncPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
             Expr(
@@ -113,10 +109,10 @@ mod tests {
             vec![(ParamKind::Pnormal, elab_utils::expr::null())],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         // Expect one deprecation error in the valid case
-        let depr_err_opt = errs.pop();
+        let depr_err_opt = cfg.into_errors().pop();
         assert!(matches!(
             depr_err_opt,
             Some(NamingPhaseError::Naming(NamingError::DeprecatedUse { .. }))
@@ -135,7 +131,7 @@ mod tests {
     #[test]
     fn test_no_args() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprCallCallUserFuncPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
             Expr(
@@ -150,7 +146,8 @@ mod tests {
             vec![],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
+        let mut errs = cfg.into_errors();
 
         // Expect errors for too few args and deprecation
         let too_few_args_err_opt = errs.pop();

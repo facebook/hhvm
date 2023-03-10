@@ -19,7 +19,6 @@ use oxidized::aast_defs::Typedef;
 use oxidized::aast_defs::WhereConstraintHint;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_error::UnsupportedFeature;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::ReifyKind;
 
 use crate::config::Config;
@@ -65,12 +64,7 @@ impl ValidateHintHabstrPass {
     fn clear_tparams(&mut self) {
         self.tparam_info.clear();
     }
-    fn check_tparams<Ex, En>(
-        &mut self,
-        tparams: &[Tparam<Ex, En>],
-        nested: bool,
-        errs: &mut Vec<NamingPhaseError>,
-    ) {
+    fn check_tparams<Ex, En>(&mut self, cfg: &Config, tparams: &[Tparam<Ex, En>], nested: bool) {
         // Put each tparam in scope and record its kind; raise errors for
         // shadowed tparams in scope and non-shadowing reuse of previously seen
         // params of higher-kinded params
@@ -80,20 +74,16 @@ impl ValidateHintHabstrPass {
             .for_each(|tp| {
                 match self.tparam_info.get(tp.name.name()) {
                     // Shadows either a tparam either previously bound in the current scope or bound at some outer scope
-                    Some((prev_pos, true, _)) => {
-                        errs.push(NamingPhaseError::Naming(NamingError::ShadowedTparam {
-                            pos: tp.name.pos().clone(),
-                            tparam_name: tp.name.name().to_string(),
-                            prev_pos: prev_pos.clone(),
-                        }))
-                    }
+                    Some((prev_pos, true, _)) => cfg.emit_error(NamingError::ShadowedTparam {
+                        pos: tp.name.pos().clone(),
+                        tparam_name: tp.name.name().to_string(),
+                        prev_pos: prev_pos.clone(),
+                    }),
                     // Shares a name with a higher kind tparam which is not in scope
-                    Some((_, false, _)) => errs.push(NamingPhaseError::Naming(
-                        NamingError::TparamNonShadowingReuse {
-                            pos: tp.name.pos().clone(),
-                            tparam_name: tp.name.name().to_string(),
-                        },
-                    )),
+                    Some((_, false, _)) => cfg.emit_error(NamingError::TparamNonShadowingReuse {
+                        pos: tp.name.pos().clone(),
+                        tparam_name: tp.name.name().to_string(),
+                    }),
                     _ => (),
                 }
                 let kind = if tp.parameters.is_empty() {
@@ -109,7 +99,7 @@ impl ValidateHintHabstrPass {
 
         tparams
             .iter()
-            .for_each(|tp| self.check_tparam(tp, nested, errs));
+            .for_each(|tp| self.check_tparam(cfg, tp, nested));
 
         // if we are checking tparams of a higher-kinded tparams, remove them from scope
         // but remember we have seen them for non-shadow reuse warnings
@@ -125,12 +115,7 @@ impl ValidateHintHabstrPass {
         }
     }
 
-    fn check_tparam<Ex, En>(
-        &mut self,
-        tparam: &Tparam<Ex, En>,
-        nested: bool,
-        errs: &mut Vec<NamingPhaseError>,
-    ) {
+    fn check_tparam<Ex, En>(&mut self, cfg: &Config, tparam: &Tparam<Ex, En>, nested: bool) {
         let is_hk = !tparam.parameters.is_empty();
         let name = tparam.name.name();
         let pos = tparam.name.pos();
@@ -138,19 +123,13 @@ impl ValidateHintHabstrPass {
 
         // Raise an error if the lowercase tparam name is `this`
         if name.to_lowercase() == sn::typehints::THIS {
-            errs.push(NamingPhaseError::Naming(NamingError::ThisReserved(
-                pos.clone(),
-            )))
+            cfg.emit_error(NamingError::ThisReserved(pos.clone()))
         }
         // Raise an error for wildcard top-level tparams
         else if name == sn::typehints::WILDCARD && (!nested || is_hk) {
-            errs.push(NamingPhaseError::Naming(
-                NamingError::WildcardHintDisallowed(pos.clone()),
-            ))
+            cfg.emit_error(NamingError::WildcardHintDisallowed(pos.clone()))
         } else if name.is_empty() || !name.starts_with('T') {
-            errs.push(NamingPhaseError::Naming(NamingError::StartWithT(
-                pos.clone(),
-            )))
+            cfg.emit_error(NamingError::StartWithT(pos.clone()))
         }
 
         // -- Errors related to features that are not supported in combination
@@ -158,97 +137,81 @@ impl ValidateHintHabstrPass {
 
         if !tparam.constraints.is_empty() {
             if nested {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: true,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtConstraints,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: true,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtConstraints,
+                })
             }
             if is_hk {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: false,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtConstraints,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: false,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtConstraints,
+                })
             }
         }
 
         if tparam.reified != ReifyKind::Erased {
             if nested {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: true,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtReification,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: true,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtReification,
+                })
             }
             if is_hk {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: false,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtReification,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: false,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtReification,
+                })
             }
         }
 
         if !tparam.user_attributes.is_empty() {
             if nested {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: true,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtUserAttrs,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: true,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtUserAttrs,
+                })
             }
             if is_hk {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: false,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtUserAttrs,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: false,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtUserAttrs,
+                })
             }
         }
 
         if !tparam.variance.is_invariant() {
             if nested {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: true,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtVariance,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: true,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtVariance,
+                })
             }
             if is_hk {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::HKTUnsupportedFeature {
-                        pos: pos.clone(),
-                        because_nested: false,
-                        var_name: name.to_string(),
-                        feature: UnsupportedFeature::FtVariance,
-                    },
-                ))
+                cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                    pos: pos.clone(),
+                    because_nested: false,
+                    var_name: name.to_string(),
+                    feature: UnsupportedFeature::FtVariance,
+                })
             }
         }
 
-        self.check_tparams(&tparam.parameters, true, errs)
+        self.check_tparams(cfg, &tparam.parameters, true)
     }
 }
 
@@ -258,8 +221,7 @@ impl Pass for ValidateHintHabstrPass {
     fn on_ty_class__top_down<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -269,7 +231,7 @@ impl Pass for ValidateHintHabstrPass {
         self.clear_tparams();
 
         // Validate class level tparams and bring them into scope
-        self.check_tparams(&elem.tparams, false, errs);
+        self.check_tparams(cfg, &elem.tparams, false);
 
         ControlFlow::Continue(())
     }
@@ -277,8 +239,7 @@ impl Pass for ValidateHintHabstrPass {
     fn on_ty_typedef_top_down<Ex, En>(
         &mut self,
         elem: &mut Typedef<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -286,15 +247,14 @@ impl Pass for ValidateHintHabstrPass {
         // [Typedef]s exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
-        self.check_tparams(&elem.tparams, false, errs);
+        self.check_tparams(cfg, &elem.tparams, false);
         ControlFlow::Continue(())
     }
 
     fn on_ty_fun__top_down<Ex, En>(
         &mut self,
         elem: &mut Fun_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -302,7 +262,7 @@ impl Pass for ValidateHintHabstrPass {
         // [Fun_]s exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
-        self.check_tparams(&elem.tparams, false, errs);
+        self.check_tparams(cfg, &elem.tparams, false);
         // We want to check hints inside where constraints for functions
         // and methods only (i.e. not class level constraints) so we record
         // this in the context
@@ -313,15 +273,14 @@ impl Pass for ValidateHintHabstrPass {
     fn on_ty_method__top_down<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         // Validate method level tparams given the already in-scope
         // class level tparams
-        self.check_tparams(&elem.tparams, false, errs);
+        self.check_tparams(cfg, &elem.tparams, false);
         // We want to check hints inside where constraints for functions
         // and methods only (i.e. not class level constraints) so we record
         // this in the context
@@ -333,7 +292,6 @@ impl Pass for ValidateHintHabstrPass {
         &mut self,
         _elem: &mut WhereConstraintHint,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         // We want to check hints inside function / method where constraints
         // so we need to record this in the context
@@ -341,25 +299,18 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_top_down(
-        &mut self,
-        elem: &mut Hint,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, cfg: &Config) -> ControlFlow<(), ()> {
         // NB this relies on [Happly] -> [Habstr] elaboration happening
         // in a preceeding top-down pass
         if self.in_method_or_fun() && self.in_where_constraint() {
             if let Hint(pos, box Hint_::Habstr(t, _)) = &elem {
                 if let Some((_, true, TparamKind::Higher)) = self.tparam_info.get(t) {
-                    errs.push(NamingPhaseError::Naming(
-                        NamingError::HKTUnsupportedFeature {
-                            pos: pos.clone(),
-                            because_nested: false,
-                            var_name: t.clone(),
-                            feature: UnsupportedFeature::FtWhereConstraints,
-                        },
-                    ))
+                    cfg.emit_error(NamingError::HKTUnsupportedFeature {
+                        pos: pos.clone(),
+                        because_nested: false,
+                        var_name: t.clone(),
+                        feature: UnsupportedFeature::FtWhereConstraints,
+                    })
                 }
             }
         }
@@ -379,6 +330,7 @@ mod tests {
     use oxidized::ast_defs::Id;
     use oxidized::ast_defs::Variance;
     use oxidized::namespace_env::Env;
+    use oxidized::naming_phase_error::NamingPhaseError;
 
     use super::*;
     use crate::transform::Transform;
@@ -452,7 +404,7 @@ mod tests {
     #[test]
     fn test_shadowed_class_member() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateHintHabstrPass::default();
 
         let tparam_class: Tparam<(), ()> = Tparam {
@@ -467,10 +419,10 @@ mod tests {
         let meth = mk_method(vec![tparam_class.clone()], vec![]);
 
         let mut elem = mk_class(vec![tparam_class], vec![meth]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::ShadowedTparam { .. })]
         ));
     }
@@ -478,7 +430,7 @@ mod tests {
     #[test]
     fn test_shadowed_member() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateHintHabstrPass::default();
 
         let tparam: Tparam<(), ()> = Tparam {
@@ -491,10 +443,10 @@ mod tests {
         };
 
         let mut elem = mk_method(vec![tparam.clone(), tparam], vec![]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::ShadowedTparam { .. })]
         ));
     }
@@ -502,7 +454,7 @@ mod tests {
     #[test]
     fn test_shadowed_class() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateHintHabstrPass::default();
 
         let tparam: Tparam<(), ()> = Tparam {
@@ -515,10 +467,10 @@ mod tests {
         };
 
         let mut elem = mk_class(vec![tparam.clone(), tparam], vec![]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::ShadowedTparam { .. })]
         ));
     }
@@ -526,7 +478,7 @@ mod tests {
     #[test]
     fn test_non_shadowed_reuse_class_member() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateHintHabstrPass::default();
 
         let tparam_concrete: Tparam<(), ()> = Tparam {
@@ -550,10 +502,10 @@ mod tests {
         let meth = mk_method(vec![tparam_concrete], vec![]);
 
         let mut elem = mk_class(vec![tparam_higher], vec![meth]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(
                 NamingError::TparamNonShadowingReuse { .. }
             )]
@@ -563,7 +515,7 @@ mod tests {
     #[test]
     fn test_starts_with_t() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateHintHabstrPass::default();
 
         let tparam: Tparam<(), ()> = Tparam {
@@ -576,10 +528,10 @@ mod tests {
         };
 
         let mut elem = mk_method(vec![tparam], vec![]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::StartWithT(..))]
         ));
     }
@@ -587,7 +539,7 @@ mod tests {
     #[test]
     fn test_this_reserved() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateHintHabstrPass::default();
 
         let tparam: Tparam<(), ()> = Tparam {
@@ -600,10 +552,10 @@ mod tests {
         };
 
         let mut elem = mk_method(vec![tparam], vec![]);
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(matches!(
-            errs.as_slice(),
+            cfg.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::ThisReserved(..))]
         ));
     }

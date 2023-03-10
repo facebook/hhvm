@@ -13,7 +13,6 @@ use oxidized::aast_defs::Tparam;
 use oxidized::aast_defs::UserAttribute;
 use oxidized::aast_defs::Visibility;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::config::Config;
@@ -26,8 +25,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
     fn on_ty_fun__top_down<Ex, En>(
         &mut self,
         elem: &mut Fun_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -36,9 +34,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
             .into_iter()
             .for_each(|pos| {
                 if has_reified_generics(&elem.tparams) {
-                    errs.push(NamingPhaseError::NastCheck(
-                        NastCheckError::DynamicallyCallableReified(pos.clone()),
-                    ))
+                    cfg.emit_error(NastCheckError::DynamicallyCallableReified(pos.clone()))
                 }
             });
 
@@ -48,8 +44,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
     fn on_ty_method__top_down<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -59,21 +54,17 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
             .for_each(|pos| {
                 match &elem.visibility {
                     Visibility::Private | Visibility::Protected => {
-                        errs.push(NamingPhaseError::Naming(
-                            NamingError::IllegalUseOfDynamicallyCallable {
-                                attr_pos: pos.clone(),
-                                meth_pos: elem.name.pos().clone(),
-                                vis: elem.visibility.into(),
-                            },
-                        ));
+                        cfg.emit_error(NamingError::IllegalUseOfDynamicallyCallable {
+                            attr_pos: pos.clone(),
+                            meth_pos: elem.name.pos().clone(),
+                            vis: elem.visibility.into(),
+                        });
                     }
                     Visibility::Public | Visibility::Internal => (),
                 }
 
                 if has_reified_generics(&elem.tparams) {
-                    errs.push(NamingPhaseError::NastCheck(
-                        NastCheckError::DynamicallyCallableReified(pos.clone()),
-                    ))
+                    cfg.emit_error(NastCheckError::DynamicallyCallableReified(pos.clone()))
                 }
             });
 

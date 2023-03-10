@@ -8,7 +8,6 @@ use std::ops::ControlFlow;
 use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::elab_utils;
@@ -22,8 +21,7 @@ impl Pass for ElabExprTuplePass {
     fn on_ty_expr_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         if let Expr(_annot, pos, Expr_::Tuple(es)) = elem {
             if es.is_empty() {
@@ -35,7 +33,7 @@ impl Pass for ElabExprTuplePass {
                 // `elem`.
                 *elem = elab_utils::expr::invalid(expr);
                 // Record the error and break.
-                errs.push(NamingPhaseError::Naming(NamingError::TooFewArguments(pos)));
+                cfg.emit_error(NamingError::TooFewArguments(pos));
                 return ControlFlow::Break(());
             }
         }
@@ -53,11 +51,11 @@ mod tests {
     #[test]
     fn test_empty_tuple() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabExprTuplePass;
 
         let mut elem: Expr<(), ()> = elab_utils::expr::from_expr_(Expr_::Tuple(vec![]));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert!(matches!(elem, Expr(_, _, Expr_::Invalid(_))));
     }
 }

@@ -6,7 +6,6 @@
 use std::ops::ControlFlow;
 
 use oxidized::aast_defs::Expr_;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -20,7 +19,6 @@ impl Pass for GuardInvalidPass {
         &mut self,
         elem: &mut Expr_<Ex, En>,
         _cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if matches!(elem, Expr_::Invalid(..)) {
             ControlFlow::Break(())
@@ -36,7 +34,6 @@ mod tests {
     use oxidized::aast_defs::Expr;
     use oxidized::aast_defs::Expr_;
     use oxidized::ast_defs::Bop;
-    use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::tast::Pos;
 
     use super::*;
@@ -46,12 +43,10 @@ mod tests {
     #[derive(Clone)]
     pub struct RewriteZero;
     impl Pass for RewriteZero {
-        #[allow(non_snake_case)]
         fn on_ty_expr__bottom_up<Ex: Default, En>(
             &mut self,
             elem: &mut Expr_<Ex, En>,
             _cfg: &Config,
-            _errs: &mut Vec<NamingPhaseError>,
         ) -> ControlFlow<(), ()> {
             match elem {
                 Expr_::Int(..) => *elem = Expr_::Int("0".to_string()),
@@ -64,7 +59,7 @@ mod tests {
     #[test]
     fn test() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = passes![GuardInvalidPass, RewriteZero];
 
         let mut elem: Expr_<(), ()> = Expr_::Binop(Box::new((
@@ -81,7 +76,7 @@ mod tests {
             Expr((), Pos::NONE, Expr_::Int("43".to_string())),
         )));
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
         assert!(match elem {
             Expr_::Binop(inner) => {

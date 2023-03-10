@@ -29,7 +29,6 @@ pub fn gen(ctx: &Context) -> TokenStream {
 
         use oxidized::ast_defs::*;
         use oxidized::aast_defs::*;
-        use oxidized::naming_phase_error::NamingPhaseError;
 
         use crate::config::Config;
         use crate::Pass;
@@ -39,16 +38,14 @@ pub fn gen(ctx: &Context) -> TokenStream {
             fn transform(
                 &mut self,
                 cfg: &Config,
-                errs: &mut Vec<NamingPhaseError>,
                 pass: &mut (impl Pass + Clone),
             ) {
-                self.traverse(cfg, errs, pass);
+                self.traverse(cfg, pass);
             }
             #[inline(always)]
             fn traverse(
                 &mut self,
                 cfg: &Config,
-                errs: &mut Vec<NamingPhaseError>,
                 pass: &mut (impl Pass + Clone),
             ) {}
         }
@@ -102,7 +99,7 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
         &super::gen_pass_method_name(&ty_name, Direction::TopDown),
         &super::gen_pass_method_name(&ty_name, Direction::BottomUp),
         quote!(self),
-        quote!(self.traverse(cfg, errs, pass)),
+        quote!(self.traverse(cfg, pass)),
     );
     let traverse_body = gen_traverse_body(&ty_name, &s);
     let ex_bound = if s.referenced_ty_params().iter().any(|tp| *tp == "Ex") {
@@ -118,7 +115,6 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
             fn transform(
                 &mut self,
                 cfg: &Config,
-                errs: &mut Vec<NamingPhaseError>,
                 pass: &mut (impl Pass + Clone),
             ) {
                 #transform_body
@@ -127,7 +123,6 @@ fn gen_transform_and_traverse(ctx: &Context, mut s: synstructure::Structure<'_>)
             fn traverse(
                 &mut self,
                 cfg: &Config,
-                errs: &mut Vec<NamingPhaseError>,
                 pass: &mut (impl Pass + Clone),
             ) {
                 match self { #traverse_body }
@@ -164,13 +159,13 @@ fn gen_variant_traverse(ty_name: &str, v: &synstructure::VariantInfo<'_>) -> Tok
             &pass_method_td,
             &pass_method_bu,
             quote!(#bi),
-            quote! { #bi.transform(cfg, errs, &mut td_pass) },
+            quote! { #bi.transform(cfg, &mut td_pass) },
         )
     })
 }
 
 fn gen_fld_traverse(ty_name: &str, bi: &synstructure::BindingInfo<'_>) -> TokenStream {
-    let transform_bi = quote! { #bi.transform(cfg, errs, pass) };
+    let transform_bi = quote! { #bi.transform(cfg, pass) };
     if !contains_ocaml_attr(&bi.ast().attrs, "transform.explicit") {
         return transform_bi;
     }
@@ -202,11 +197,11 @@ fn gen_transform_body(
 ) -> TokenStream {
     quote! {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.#pass_method_td(#elem, cfg, errs) {
+        if let Break(..) = pass.#pass_method_td(#elem, cfg) {
             return;
         }
         #recurse;
-        in_pass.#pass_method_bu(#elem, cfg, errs);
+        in_pass.#pass_method_bu(#elem, cfg);
     }
 }
 
@@ -226,7 +221,7 @@ fn gen_transform_body_explicit(
 }
 
 fn gen_manual_impls() -> Vec<TokenStream> {
-    let transform = quote!(transform(cfg, errs, &mut pass.clone()));
+    let transform = quote!(transform(cfg, &mut pass.clone()));
 
     #[rustfmt::skip]
     let manual_impls = vec![
@@ -312,7 +307,6 @@ fn gen_manual_impl(
             fn traverse(
                 &mut self,
                 cfg: &Config,
-                errs: &mut Vec<NamingPhaseError>,
                 pass: &mut (impl Pass + Clone),
             ) {
                 #traverse_body

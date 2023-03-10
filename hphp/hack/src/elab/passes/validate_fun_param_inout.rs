@@ -11,7 +11,6 @@ use oxidized::aast_defs::Method_;
 use oxidized::aast_defs::UserAttributes;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ParamKind;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast_check_error::NastCheckError;
 
 use crate::config::Config;
@@ -24,39 +23,32 @@ impl Pass for ValidateFunParamInoutPass {
     fn on_ty_fun_def_bottom_up<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        check_params(
-            &elem.name,
-            &elem.fun.user_attributes,
-            &elem.fun.params,
-            errs,
-        );
+        check_params(cfg, &elem.name, &elem.fun.user_attributes, &elem.fun.params);
         ControlFlow::Continue(())
     }
     fn on_ty_method__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        check_params(&elem.name, &elem.user_attributes, &elem.params, errs);
+        check_params(cfg, &elem.name, &elem.user_attributes, &elem.params);
         ControlFlow::Continue(())
     }
 }
 
 fn check_params<Ex, En>(
+    cfg: &Config,
     id: &Id,
     attrs: &UserAttributes<Ex, En>,
     params: &[FunParam<Ex, En>],
-    errs: &mut Vec<NamingPhaseError>,
 ) {
     let in_as_set_function = sn::members::AS_LOWERCASE_SET.contains(id.name());
     let has_memoize_user_attr = has_memoize_user_attr(attrs);
@@ -75,14 +67,12 @@ fn check_params<Ex, En>(
                     has_inout_param = Some(fp.pos.clone());
                 }
                 if in_as_set_function {
-                    errs.push(NamingPhaseError::NastCheck(
-                        NastCheckError::InoutParamsSpecial(fp.pos.clone()),
-                    ))
+                    cfg.emit_error(NastCheckError::InoutParamsSpecial(fp.pos.clone()))
                 }
             }
         });
         if let Some(param_pos) = has_inout_param && has_memoize_user_attr {
-        errs.push(NamingPhaseError::NastCheck(NastCheckError::InoutParamsMemoize { pos: id.pos().clone(), param_pos }))
+        cfg.emit_error(NastCheckError::InoutParamsMemoize { pos: id.pos().clone(), param_pos })
       }
     }
 }

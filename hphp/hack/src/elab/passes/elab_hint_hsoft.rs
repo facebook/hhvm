@@ -6,7 +6,6 @@ use std::ops::ControlFlow;
 
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
-use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::tast::Pos;
 
 use crate::config::Config;
@@ -20,7 +19,6 @@ impl Pass for ElabHintHsoftPass {
         &mut self,
         elem: &mut Hint,
         cfg: &Config,
-        _errs: &mut Vec<NamingPhaseError>,
     ) -> std::ops::ControlFlow<(), ()> {
         let Hint(_, hint_) = elem;
         if let Hint_::Hsoft(inner) = hint_ as &mut Hint_ {
@@ -58,7 +56,6 @@ mod tests {
 
     #[test]
     fn test() {
-        let mut errs = Vec::default();
         let mut pass = ElabHintHsoftPass;
 
         let mut elem1: Hint = Hint(
@@ -76,7 +73,7 @@ mod tests {
             ..Default::default()
         };
         let cfg = Config::new(&tco, &pso);
-        elem1.transform(&cfg, &mut errs, &mut pass);
+        elem1.transform(&cfg, &mut pass);
         assert!(matches!(*elem1.1, Hint_::Hdynamic));
 
         // Transform `elem2` with flag `SOFT_AS_LIKE` set & expect `Hlike(_,
@@ -89,7 +86,7 @@ mod tests {
             ..Default::default()
         };
         let cfg = Config::new(&tco, &pso);
-        elem2.transform(&cfg, &mut errs, &mut pass);
+        elem2.transform(&cfg, &mut pass);
         assert!(matches!(&*elem2.1, Hint_::Hlike(_)));
         assert!(match &*elem2.1 {
             Hint_::Hlike(inner) => matches!(*inner.1, Hint_::Hdynamic),

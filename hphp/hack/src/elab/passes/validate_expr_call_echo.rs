@@ -9,7 +9,6 @@ use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -22,8 +21,7 @@ impl Pass for ValidateExprCallEchoPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Call(box (
@@ -31,9 +29,9 @@ impl Pass for ValidateExprCallEchoPass {
                 _,
                 _,
                 Some(Expr(_, pos, _)),
-            )) if fn_name == sn::special_functions::ECHO => errs.push(NamingPhaseError::Naming(
-                NamingError::TooFewTypeArguments(pos.clone()),
-            )),
+            )) if fn_name == sn::special_functions::ECHO => {
+                cfg.emit_error(NamingError::TooFewTypeArguments(pos.clone()))
+            }
             _ => (),
         }
         ControlFlow::Continue(())
@@ -50,7 +48,7 @@ mod tests {
     #[test]
     fn test_valid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateExprCallEchoPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
             Expr(
@@ -65,9 +63,9 @@ mod tests {
             vec![],
             None,
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert!(errs.is_empty());
+        assert!(cfg.into_errors().is_empty());
         assert!(match elem {
             Expr_::Call(cc) => {
                 let (Expr(_, _, expr_), _, _, _) = *cc;
@@ -86,7 +84,7 @@ mod tests {
     #[test]
     fn test_invalid() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ValidateExprCallEchoPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
             Expr(
@@ -101,9 +99,9 @@ mod tests {
             vec![],
             Some(elab_utils::expr::null()),
         )));
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
 
-        assert_eq!(errs.len(), 1);
+        assert_eq!(cfg.into_errors().len(), 1);
         assert!(match elem {
             Expr_::Call(cc) => {
                 let (Expr(_, _, expr_), _, _, _) = *cc;

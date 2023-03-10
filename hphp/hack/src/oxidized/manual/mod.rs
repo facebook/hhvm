@@ -35,3 +35,4 @@ pub mod typing_set;
 
 mod decl_parser_options_impl;
 mod full_fidelity_parser_env_impl;
+mod naming_phase_error_impl;

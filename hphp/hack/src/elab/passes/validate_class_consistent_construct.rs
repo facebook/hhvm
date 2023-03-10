@@ -9,7 +9,6 @@ use naming_special_names_rust as sn;
 use oxidized::aast_defs::Class_;
 use oxidized::ast::ClassishKind;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -22,7 +21,6 @@ impl Pass for ValidateClassConsistentConstructPass {
         &mut self,
         class: &mut Class_<Ex, En>,
         cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
     ) -> ControlFlow<(), ()> {
         if cfg.consistent_ctor_level <= 0 {
             return ControlFlow::Continue(());
@@ -44,12 +42,10 @@ impl Pass for ValidateClassConsistentConstructPass {
                 if !has_ctor
                     && (class.kind == ClassishKind::Ctrait || cfg.consistent_ctor_level > 1) =>
             {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::ExplicitConsistentConstructor {
-                        classish_kind: class.kind,
-                        pos: pos.clone(),
-                    },
-                ))
+                cfg.emit_error(NamingError::ExplicitConsistentConstructor {
+                    classish_kind: class.kind,
+                    pos: pos.clone(),
+                })
             }
             _ => (),
         }

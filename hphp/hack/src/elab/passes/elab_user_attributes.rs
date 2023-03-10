@@ -9,7 +9,6 @@ use oxidized::aast_defs::UserAttributes;
 use oxidized::ast_defs::Id;
 use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -21,21 +20,18 @@ impl Pass for ElabUserAttributesPass {
     fn on_ty_user_attributes_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        _cfg: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         let mut seen: HashMap<String, Pos> = HashMap::default();
         let UserAttributes(uas) = elem;
         uas.retain(|ua| {
             let Id(pos, attr_name) = &ua.name;
             if let Some(prev_pos) = seen.get(attr_name) {
-                errs.push(NamingPhaseError::Naming(
-                    NamingError::DuplicateUserAttribute {
-                        pos: pos.clone(),
-                        attr_name: attr_name.clone(),
-                        prev_pos: prev_pos.clone(),
-                    },
-                ));
+                cfg.emit_error(NamingError::DuplicateUserAttribute {
+                    pos: pos.clone(),
+                    attr_name: attr_name.clone(),
+                    prev_pos: prev_pos.clone(),
+                });
                 false
             } else {
                 seen.insert(attr_name.clone(), pos.clone());
@@ -57,7 +53,7 @@ mod tests {
     #[test]
     fn test_ciexpr_id_class_ref() {
         let cfg = Config::default();
-        let mut errs = Vec::default();
+
         let mut pass = ElabUserAttributesPass;
         let mut elem: UserAttributes<(), ()> = UserAttributes(vec![
             UserAttribute {
@@ -86,8 +82,8 @@ mod tests {
             },
         ]);
 
-        elem.transform(&cfg, &mut errs, &mut pass);
+        elem.transform(&cfg, &mut pass);
         assert_eq!(elem.len(), 2);
-        assert_eq!(errs.len(), 4);
+        assert_eq!(cfg.into_errors().len(), 4);
     }
 }

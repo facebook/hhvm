@@ -12,7 +12,6 @@ use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::Tprim::*;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
 
 use crate::config::Config;
 use crate::Pass;
@@ -24,8 +23,7 @@ impl Pass for ValidateExprCastPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         expr: &mut Expr_<Ex, En>,
-        _: &Config,
-        errs: &mut Vec<NamingPhaseError>,
+        cfg: &Config,
     ) -> ControlFlow<(), ()> {
         match &*expr {
             Expr_::Cast(box (Hint(_, box Hint_::Hprim(Tint | Tbool | Tfloat | Tstring)), _)) => {
@@ -41,7 +39,7 @@ impl Pass for ValidateExprCastPass {
             // `dict`/`vec`--we don't error on this case to preserve behaviour.
             Expr_::Cast(box (Hint(_, box Hint_::Hany), _)) => ControlFlow::Continue(()),
             Expr_::Cast(box (Hint(p, _), _)) => {
-                errs.push(NamingPhaseError::Naming(NamingError::ObjectCast(p.clone())));
+                cfg.emit_error(NamingError::ObjectCast(p.clone()));
                 ControlFlow::Break(())
             }
             _ => ControlFlow::Continue(()),
@@ -60,12 +58,12 @@ mod tests {
 
     #[test]
     fn test_invalid_cast() {
-        let mut errs = Vec::default();
         let mut expr: Expr = elab_utils::expr::from_expr_(Expr_::Cast(Box::new((
             Hint(Pos::NONE, Box::new(Hint_::Hthis)),
             elab_utils::expr::null(),
         ))));
-        expr.transform(&Config::default(), &mut errs, &mut ValidateExprCastPass);
-        assert_eq!(errs.len(), 1);
+        let cfg = Config::default();
+        expr.transform(&cfg, &mut ValidateExprCastPass);
+        assert_eq!(cfg.into_errors().len(), 1);
     }
 }

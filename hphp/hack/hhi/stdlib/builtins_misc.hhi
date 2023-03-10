@@ -12,13 +12,13 @@ namespace HH {
   function server_warmup_status(): string;
   function execution_context()[read_globals]: string;
 
-  <<__SupportDynamicType>>
+  <<__NoAutoDynamic>>
   function array_mark_legacy<T>(T $in, bool $recursive = false)[]: T;
-  <<__SupportDynamicType>>
+  <<__NoAutoDynamic>>
   function array_unmark_legacy<T>(T $in, bool $recursive = false)[]: T;
-  <<__SupportDynamicType>>
+  <<__NoAutoDynamic>>
   function array_mark_legacy_recursive<T>(T $in)[]: T;
-  <<__SupportDynamicType>>
+  <<__NoAutoDynamic>>
   function array_unmark_legacy_recursive<T>(T $in)[]: T;
   function is_array_marked_legacy(mixed $in)[]: bool;
 }

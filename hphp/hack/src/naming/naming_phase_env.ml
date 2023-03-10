@@ -149,7 +149,6 @@ type t = {
   supportdynamic_type_hint_enabled: bool;
   is_systemlib: bool;
   is_hhi: bool;
-  allow_typeconst_in_enum_class: bool;
   allow_module_def: bool;
 }
 
@@ -175,6 +174,5 @@ let empty =
     supportdynamic_type_hint_enabled = false;
     is_systemlib = false;
     is_hhi = false;
-    allow_typeconst_in_enum_class = false;
     allow_module_def = false;
   }

@@ -9,7 +9,6 @@ use oxidized::typechecker_options::TypecheckerOptions;
 #[derive(Debug, Clone, Default)]
 pub struct ProgramSpecificOptions {
     pub is_hhi: bool,
-    pub allow_type_constant_in_enum_class: bool,
     pub allow_module_declarations: bool,
 }
 
@@ -22,8 +21,7 @@ bitflags! {
         const LIKE_TYPE_HINTS_ENABLED = 1 << 4;
         const CONST_ATTRIBUTE = 1 << 5;
         const CONST_STATIC_PROPS = 1 << 6;
-        const ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS = 1 << 7;
-        const ALLOW_MODULE_DECLARATIONS = 1 << 8;
+        const ALLOW_MODULE_DECLARATIONS = 1 << 7;
     }
 }
 
@@ -42,10 +40,6 @@ impl Flags {
         flags.set(Self::CONST_STATIC_PROPS, tco.tco_const_static_props);
 
         flags.set(Self::IS_HHI, pso.is_hhi);
-        flags.set(
-            Self::ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS,
-            pso.allow_type_constant_in_enum_class,
-        );
         flags.set(
             Self::ALLOW_MODULE_DECLARATIONS,
             pso.allow_module_declarations,
@@ -80,11 +74,6 @@ impl Config {
 
     pub fn soft_as_like(&self) -> bool {
         self.flags.contains(Flags::SOFT_AS_LIKE)
-    }
-
-    pub fn allow_type_constant_in_enum_class(&self) -> bool {
-        self.flags
-            .contains(Flags::ALLOW_TYPE_CONSTANT_IN_ENUM_CLASS)
     }
 
     pub fn allow_module_declarations(&self) -> bool {

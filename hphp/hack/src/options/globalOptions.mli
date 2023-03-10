@@ -336,8 +336,6 @@ type t = {
      typechecks the mutated program *)
   tco_substitution_mutation: bool;
   tco_use_type_alias_heap: bool;
-  tco_allow_all_locations_for_type_constant_in_enum_class: bool;
-  tco_allowed_locations_for_type_constant_in_enum_class: string list;
   (* Dead UNSAFE_CAST codemod stashes patches through a TAST visitor in shared
      heap. This is only needed in dead UNSAFE_CAST removal mode. This option
      controls whether the heap will be populated or not. *)
@@ -477,8 +475,6 @@ val make :
   ?tco_expression_tree_virtualize_functions:bool ->
   ?tco_substitution_mutation:bool ->
   ?tco_use_type_alias_heap:bool ->
-  ?tco_allow_all_locations_for_type_constant_in_enum_class:bool ->
-  ?tco_allowed_locations_for_type_constant_in_enum_class:string list ->
   ?tco_populate_dead_unsafe_cast_heap:bool ->
   ?po_disallow_static_constants_in_default_func_args:bool ->
   ?tco_load_hack_64_distc_saved_state:bool ->

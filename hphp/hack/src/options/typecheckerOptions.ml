@@ -275,12 +275,6 @@ let allow_all_files_for_module_declarations t =
 let allowed_files_for_module_declarations t =
   t.GlobalOptions.tco_allowed_files_for_module_declarations
 
-let allow_all_locations_for_type_constant_in_enum_class t =
-  t.GlobalOptions.tco_allow_all_locations_for_type_constant_in_enum_class
-
-let allowed_locations_for_type_constant_in_enum_class t =
-  t.GlobalOptions.tco_allowed_locations_for_type_constant_in_enum_class
-
 let record_fine_grained_dependencies t =
   t.GlobalOptions.tco_record_fine_grained_dependencies
 

@@ -38,8 +38,6 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "--config",
     "allow_all_files_for_module_declarations=true",
     "--config",
-    "allow_all_locations_for_type_constant_in_enum_class=true",
-    "--config",
     "disable_xhp_element_mangling=false",
 ]
 

@@ -32,14 +32,8 @@ let invalid_expr_ = Naming_phase_error.invalid_expr_
 
 let mk_env filename tcopt =
   let file_str = Relative_path.suffix filename in
-  let dir_str = Filename.dirname file_str in
   let is_hhi = String.is_suffix (Relative_path.suffix filename) ~suffix:".hhi"
   and is_systemlib = TypecheckerOptions.is_systemlib tcopt
-  and allow_typeconst_in_enum_class =
-    TypecheckerOptions.allow_all_locations_for_type_constant_in_enum_class tcopt
-    || List.exists ~f:(fun prefix -> String.is_prefix ~prefix dir_str)
-       @@ TypecheckerOptions.allowed_locations_for_type_constant_in_enum_class
-            tcopt
   and allow_module_def =
     TypecheckerOptions.allow_all_files_for_module_declarations tcopt
     || List.exists
@@ -73,7 +67,6 @@ let mk_env filename tcopt =
       is_hhi;
       is_systemlib;
       consistent_ctor_level;
-      allow_typeconst_in_enum_class;
       allow_module_def;
       everything_sdt;
       supportdynamic_type_hint_enabled;
@@ -167,12 +160,6 @@ let passes =
     (* Validate  use of `SupportDyn` class - depends on `enable-supportdyn`
        and `everything_sdt` typechecker options *)
     Naming_validate_supportdyn.pass on_error;
-    (* Validate uses of enum class type constants - depends on:
-       - `allow_all_locations_for_type_constant_in_enum_class`
-       - `allowed_locations_for_type_constant_in_enum_class`
-       typecheck options
-    *)
-    Naming_validate_enum_class_typeconst.pass on_error;
     (* Validate use of module definitions - depends on:
         - `allow_all_files_for_module_declarations`
         - `allowed_files_for_module_declarations`

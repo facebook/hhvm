@@ -189,8 +189,6 @@ type t = {
   tco_expression_tree_virtualize_functions: bool;
   tco_substitution_mutation: bool;
   tco_use_type_alias_heap: bool;
-  tco_allow_all_locations_for_type_constant_in_enum_class: bool;
-  tco_allowed_locations_for_type_constant_in_enum_class: string list;
   tco_populate_dead_unsafe_cast_heap: bool;
   po_disallow_static_constants_in_default_func_args: bool;
   tco_load_hack_64_distc_saved_state: bool;
@@ -326,8 +324,6 @@ let default =
     tco_expression_tree_virtualize_functions = false;
     tco_substitution_mutation = false;
     tco_use_type_alias_heap = false;
-    tco_allow_all_locations_for_type_constant_in_enum_class = false;
-    tco_allowed_locations_for_type_constant_in_enum_class = [];
     tco_populate_dead_unsafe_cast_heap = false;
     po_disallow_static_constants_in_default_func_args = false;
     tco_load_hack_64_distc_saved_state = false;
@@ -484,10 +480,6 @@ let make
       default.tco_expression_tree_virtualize_functions)
     ?(tco_substitution_mutation = default.tco_substitution_mutation)
     ?(tco_use_type_alias_heap = default.tco_use_type_alias_heap)
-    ?(tco_allow_all_locations_for_type_constant_in_enum_class =
-      default.tco_allow_all_locations_for_type_constant_in_enum_class)
-    ?(tco_allowed_locations_for_type_constant_in_enum_class =
-      default.tco_allowed_locations_for_type_constant_in_enum_class)
     ?(tco_populate_dead_unsafe_cast_heap =
       default.tco_populate_dead_unsafe_cast_heap)
     ?(po_disallow_static_constants_in_default_func_args =
@@ -624,8 +616,6 @@ let make
     tco_expression_tree_virtualize_functions;
     tco_substitution_mutation;
     tco_use_type_alias_heap;
-    tco_allow_all_locations_for_type_constant_in_enum_class;
-    tco_allowed_locations_for_type_constant_in_enum_class;
     tco_populate_dead_unsafe_cast_heap;
     po_disallow_static_constants_in_default_func_args;
     tco_load_hack_64_distc_saved_state;

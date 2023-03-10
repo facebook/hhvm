@@ -38,19 +38,10 @@ pub fn elaborate_program(
 ) -> Vec<NamingPhaseError> {
     let pos = program.first_pos();
     let filename = pos.map(|pos| pos.filename().path());
-    let dir = filename.and_then(|file| file.parent());
 
     let is_hhi = pos.map_or(false, |pos| {
         pos.filename().prefix() == relative_path::Prefix::Hhi
     });
-
-    let allow_type_constant_in_enum_class = tco
-        .tco_allow_all_locations_for_type_constant_in_enum_class
-        || dir.map_or(false, |dir| {
-            tco.tco_allowed_locations_for_type_constant_in_enum_class
-                .iter()
-                .any(|prefix| dir.starts_with(prefix))
-        });
 
     let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
         || tco
@@ -69,7 +60,6 @@ pub fn elaborate_program(
         tco,
         &ProgramSpecificOptions {
             is_hhi,
-            allow_type_constant_in_enum_class,
             allow_module_declarations,
         },
     )
@@ -200,12 +190,6 @@ fn elaborate<T: Transform>(
         // Validate  use of `SupportDyn` class - depends on `enable-supportdyn`
         // and `everything_sdt` typechecker options
         // passes::validate_supportdyn::ValidateSupportdynPass::default(),
-
-        // Validate uses of enum class type constants - depends on:
-        // - `allow_all_locations_for_type_constant_in_enum_class`
-        // - `allowed_locations_for_type_constant_in_enum_class`
-        // typecheck options
-        passes::validate_enum_class_typeconst::ValidateEnumClassTypeconstPass::default(),
 
         // Validate use of module definitions - depends on:
         // - `allow_all_files_for_module_declarations`

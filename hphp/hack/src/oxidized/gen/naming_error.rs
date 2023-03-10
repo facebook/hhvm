@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c40b2ef09ef777d17816532ff1ea5340>>
+// @generated SignedSource<<933d6bb82926d54f9663423cb675c2ef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -382,8 +382,6 @@ pub enum NamingError {
     ModuleDeclarationOutsideAllowedFiles(pos::Pos),
     #[rust_to_ocaml(name = "Dynamic_method_access")]
     DynamicMethodAccess(pos::Pos),
-    #[rust_to_ocaml(name = "Type_constant_in_enum_class_outside_allowed_locations")]
-    TypeConstantInEnumClassOutsideAllowedLocations(pos::Pos),
     #[rust_to_ocaml(name = "Deprecated_use")]
     DeprecatedUse { pos: pos::Pos, fn_name: String },
     #[rust_to_ocaml(name = "Unnecessary_attribute")]

@@ -331,7 +331,6 @@ let parse_options () =
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
   let substitution_mutation = ref false in
-  let allow_all_locations_for_type_constant_in_enum_class = ref true in
   let tast_under_dynamic = ref false in
   let options =
     [
@@ -1014,8 +1013,6 @@ let parse_options () =
       ~tco_expression_tree_virtualize_functions:
         !expression_tree_virtualize_functions
       ~tco_substitution_mutation:!substitution_mutation
-      ~tco_allow_all_locations_for_type_constant_in_enum_class:
-        !allow_all_locations_for_type_constant_in_enum_class
       ~tco_tast_under_dynamic:!tast_under_dynamic
       ~tco_rust_elab:!rust_elab
       ()

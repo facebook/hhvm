@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d602cce336c3e9fdb67b67b79e8e6a09>>
+// @generated SignedSource<<4f3022578914eb6c484fd4322bb0e17a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -205,8 +205,6 @@ pub struct GlobalOptions {
     pub tco_expression_tree_virtualize_functions: bool,
     pub tco_substitution_mutation: bool,
     pub tco_use_type_alias_heap: bool,
-    pub tco_allow_all_locations_for_type_constant_in_enum_class: bool,
-    pub tco_allowed_locations_for_type_constant_in_enum_class: Vec<String>,
     pub tco_populate_dead_unsafe_cast_heap: bool,
     pub po_disallow_static_constants_in_default_func_args: bool,
     pub tco_load_hack_64_distc_saved_state: bool,

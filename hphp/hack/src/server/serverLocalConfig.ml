@@ -1528,7 +1528,6 @@ let load :
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.
     {
-      longlived_workers = options.longlived_workers;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
       log_saved_state_age_and_distance =

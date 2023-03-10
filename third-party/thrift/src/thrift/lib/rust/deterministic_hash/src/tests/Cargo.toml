@@ -35,7 +35,7 @@ serde_derive = "1.0"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
 thiserror = "1.0.36"
 tracing = "0.1.35"
-tracing-futures = "0.2.5"
+tracing-futures = { version = "0.2.5", features = ["futures-03"] }
 
 [dev-dependencies]
 fbthrift_deterministic_hash = { path = "../.." }

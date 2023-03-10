@@ -25,7 +25,7 @@ serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_derive = "1.0"
 thiserror = "1.0.36"
 tracing = "0.1.35"
-tracing-futures = "0.2.5"
+tracing-futures = { version = "0.2.5", features = ["futures-03"] }
 
 [build-dependencies]
 thrift_compiler = { path = "../../../../../../common/rust/shed/thrift_compiler" }

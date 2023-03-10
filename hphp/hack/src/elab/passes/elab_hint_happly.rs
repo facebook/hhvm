@@ -86,7 +86,6 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    #[allow(non_snake_case)]
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
@@ -96,7 +95,6 @@ impl Pass for ElabHintHapplyPass {
         ControlFlow::Continue(())
     }
 
-    #[allow(non_snake_case)]
     fn on_ty_method__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,

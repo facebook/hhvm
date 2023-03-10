@@ -14,7 +14,6 @@ use crate::Pass;
 pub struct GuardInvalidPass;
 
 impl Pass for GuardInvalidPass {
-    #[allow(non_snake_case)]
     fn on_ty_expr__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,

@@ -115,7 +115,6 @@ impl Pass for ElabClassIdPass {
         }
     }
 
-    #[allow(non_snake_case)]
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut oxidized::aast::Class_<Ex, En>,

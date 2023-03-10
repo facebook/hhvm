@@ -17,7 +17,6 @@ use crate::Pass;
 pub struct ValidateExprCallEchoPass;
 
 impl Pass for ValidateExprCallEchoPass {
-    #[allow(non_snake_case)]
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,

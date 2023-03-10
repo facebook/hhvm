@@ -17,7 +17,6 @@ use crate::Pass;
 pub struct ElabExprLvarPass;
 
 impl Pass for ElabExprLvarPass {
-    #[allow(non_snake_case)]
     fn on_ty_expr__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut oxidized::aast::Expr_<Ex, En>,

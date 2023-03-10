@@ -21,7 +21,6 @@ use crate::Pass;
 pub struct ElabEnumClassPass;
 
 impl Pass for ElabEnumClassPass {
-    #[allow(non_snake_case)]
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
@@ -58,7 +57,6 @@ impl Pass for ElabEnumClassPass {
         ControlFlow::Continue(())
     }
 
-    #[allow(non_snake_case)]
     fn on_ty_hint__top_down(
         &mut self,
         elem: &mut oxidized::tast::Hint_,

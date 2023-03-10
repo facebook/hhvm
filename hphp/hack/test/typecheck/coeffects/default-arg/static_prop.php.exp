@@ -1,6 +1,24 @@
+File "static_prop.php", line 7, characters 19-28:
+Expected constant expression for initializer (Parsing[1002])
+File "static_prop.php", line 11, characters 19-28:
+Expected constant expression for initializer (Parsing[1002])
 File "static_prop.php", line 11, characters 19-28:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "static_prop.php", line 15, characters 19-26:
+Expected constant expression for initializer (Parsing[1002])
+File "static_prop.php", line 19, characters 19-26:
+Expected constant expression for initializer (Parsing[1002])
 File "static_prop.php", line 19, characters 19-26:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "static_prop.php", line 24, characters 17-22:
+Expected constant expression for initializer (Parsing[1002])
+File "static_prop.php", line 28, characters 17-22:
+Expected constant expression for initializer (Parsing[1002])
 File "static_prop.php", line 28, characters 17-22:
 Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "static_prop.php", line 32, characters 17-22:
+Expected constant expression for initializer (Parsing[1002])
+File "static_prop.php", line 37, characters 19-24:
+Expected constant expression for initializer (Parsing[1002])
+File "static_prop.php", line 41, characters 19-28:
+Expected constant expression for initializer (Parsing[1002])

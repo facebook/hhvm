@@ -1,4 +1,8 @@
 (9,32)-(9,41) Expected constant expression for initializer
+(9,32)-(9,41) Expected constant expression for initializer
+(9,43)-(9,52) Expected constant expression for initializer
 (9,43)-(9,52) Expected constant expression for initializer
 (14,34)-(14,43) Expected constant expression for initializer
+(14,34)-(14,43) Expected constant expression for initializer
+(14,45)-(14,54) Expected constant expression for initializer
 (14,45)-(14,54) Expected constant expression for initializer

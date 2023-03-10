@@ -1,2 +1,4 @@
 File "default_param.php", line 7, characters 47-57:
+Expected constant expression for initializer (Parsing[1002])
+File "default_param.php", line 7, characters 47-57:
 This expression is readonly, but we expected a mutable value because this parameter is not marked readonly (Parsing[1002])

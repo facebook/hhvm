@@ -1,2 +1,3 @@
 (4,19)-(4,31) `await` cannot be used as an expression in this location because it's conditionally executed.
 (4,19)-(4,31) Expected constant expression for initializer
+(4,19)-(4,31) Expected constant expression for initializer

@@ -98,7 +98,7 @@ struct RepoOptionsFlags {
   H(bool,           Hacksperimental,                  false)          \
   H(bool,           DisableLvalAsAnExpression,        false)          \
   H(bool,           AllowNewAttributeSyntax,          false)          \
-  H(bool,           ConstDefaultFuncArgs,             false)          \
+  H(bool,           ConstDefaultFuncArgs,             true)           \
   H(bool,           ConstStaticProps,                 false)          \
   H(bool,           AbstractStaticProps,              false)          \
   H(bool,           DisallowFuncPtrsInConstants,      false)          \

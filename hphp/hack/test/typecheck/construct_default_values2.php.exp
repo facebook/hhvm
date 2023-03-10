@@ -1,3 +1,7 @@
+File "construct_default_values2.php", line 11, characters 20-26:
+Expected constant expression for initializer (Parsing[1002])
+File "construct_default_values2.php", line 12, characters 14-28:
+Expected constant expression for initializer (Parsing[1002])
 File "construct_default_values2.php", line 12, characters 21-21:
 Read access to `$this->b` before initialization (Typing[4083])
 File "construct_default_values2.php", line 12, characters 24-26:

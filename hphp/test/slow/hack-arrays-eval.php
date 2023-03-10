@@ -1,7 +1,8 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test_eval() {
+<<__EntryPoint>>
+function main_hack_arrays_eval() {
   echo "============ test_eval =======================================\n";
 
   eval('function f1() { return vec[1, 2, 3]; }');
@@ -32,23 +33,4 @@ function test_eval() {
   f7($v);
   f8($d);
   f9($k);
-}
-function wrap($arr, $v) { return $arr[] = $v; }
-function test_func($v = wrap(varray[], vec[1, 2]),
-                   $d = wrap(varray[], dict[100 => 'a', 200 => 'b']),
-                   $k = wrap(varray[], keyset['a', 'b'])) {}
-
-function test_default_value() {
-  echo "============ test_default_value ==============================\n";
-  $r = new ReflectionFunction('test_func');
-  var_dump($r->getParameters()[0]->info['default']);
-  var_dump($r->getParameters()[1]->info['default']);
-  var_dump($r->getParameters()[2]->info['default']);
-}
-
-
-<<__EntryPoint>>
-function main_hack_arrays_eval() {
-test_eval();
-test_default_value();
 }

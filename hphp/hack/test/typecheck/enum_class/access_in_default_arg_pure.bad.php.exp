@@ -1,3 +1,5 @@
+File "access_in_default_arg_pure.bad.php", line 17, characters 35-70:
+Expected constant expression for initializer (Parsing[1002])
 File "access_in_default_arg_pure.bad.php", line 12, characters 19-27:
 Was expecting a return type hint (Typing[4030])
 File "access_in_default_arg_pure.bad.php", line 8, characters 37-50:

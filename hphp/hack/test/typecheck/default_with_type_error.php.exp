@@ -1,3 +1,5 @@
+File "default_with_type_error.php", line 7, characters 38-44:
+Expected constant expression for initializer (Parsing[1002])
 File "default_with_type_error.php", line 10, characters 9-10:
 Typing error (Typing[4110])
   File "default_with_type_error.php", line 10, characters 9-14:

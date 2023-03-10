@@ -1,0 +1,11 @@
+In main
+In thread_main
+bool(false)
+bool(false)
+bool(false)
+object(Foo) (0) {
+}
+bool(true)
+object(Foo) (0) {
+}
+bool(true)

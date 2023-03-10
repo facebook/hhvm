@@ -1,0 +1,2 @@
+--inputs=hphp/test/slow/apc-locking/apc-locking2.inc
+--inputs=hphp/test/slow/apc-locking/apc-locking.inc

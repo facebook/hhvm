@@ -440,6 +440,7 @@ final class Options {
     public ?string $hh_single_type_check;
     public bool $write_to_checkout = false;
     public bool $bespoke = false;
+    public bool $record_replay = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -499,6 +500,7 @@ function get_options(
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
+    '*record-replay' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -1011,6 +1013,29 @@ function hhvm_cmd_impl(
     if ($options->bespoke) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
       $args[] = '-vServer.APC.MemModelTreadmill=true';
+    }
+
+    if ($options->record_replay) {
+      // Create a temporary directory for the recording
+      $test_run_index = -1;
+      foreach ($extra_args as $i => $replay_extra_arg) {
+        if ($replay_extra_arg === '--file') {
+          $test_run_index = $i + 1;
+          break;
+        }
+      }
+      $test_run = substr($extra_args[$test_run_index], 1, -1);
+      $record_dir = Status::getTestTmpPath($test_run, 'record');
+      @mkdir($record_dir, 0777, true);
+
+      // Create two commands, first to record and second to replay
+      $args[] = '-vEval.RecordReplay=true';
+      $record_args = $args;
+      $record_args[] = '-vEval.RecordSampleRate=1';
+      $record_args[] = "-vEval.RecordDir=$record_dir";
+      $cmds[] = implode(' ', array_merge($record_args, $extra_args));
+      $args[] = '-vEval.Replay=true';
+      $extra_args[$test_run_index] = "$record_dir/*.hhvm";
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));

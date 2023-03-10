@@ -29,7 +29,6 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
-  log_on_slow_monitor_connect: bool;
   remote: bool;
   progress_callback: (string option -> unit) option;
   do_post_handoff_handshake: bool;
@@ -342,13 +341,9 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     "ClientConnect.connect: attempting MonitorConnection.connect_once (%ds)"
     timeout;
   let conn =
-    MonitorConnection.connect_once
-      ~log_on_slow_connect:env.log_on_slow_monitor_connect
-      ~tracker
-      ~timeout
-      env.root
-      handoff_options
+    MonitorConnection.connect_once ~tracker ~timeout env.root handoff_options
   in
+
   let t_connected_to_monitor = Unix.gettimeofday () in
   match conn with
   | Ok (ic, oc, server_specific_files) ->
@@ -440,7 +435,6 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           no_load;
           watchman_debug_logging;
           log_inference_constraints;
-          log_on_slow_monitor_connect = _;
           remote = _;
           progress_callback = _;
           do_post_handoff_handshake = _;

@@ -21,7 +21,6 @@ type env = {
   no_load: bool;
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
-  log_on_slow_monitor_connect: bool;
   remote: bool;
   progress_callback: (string option -> unit) option;
   do_post_handoff_handshake: bool;

@@ -1242,8 +1242,6 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       (* only relevant when autostart=true *)
       log_inference_constraints = false;
       (* irrelevant *)
-      log_on_slow_monitor_connect = false;
-      (* Only used when running hh from terminal *)
       remote = false;
       (* only relevant when autostart=true *)
       progress_callback = None;

@@ -336,8 +336,7 @@ let connect_and_shut_down ~tracker root =
           Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
       end
 
-let connect_once
-    ?(log_on_slow_connect = false) ~tracker ~timeout root handoff_options =
+let connect_once ~tracker ~timeout root handoff_options =
   let open Result.Monad_infix in
   let config = hh_monitor_config root in
   let t_start = Unix.gettimeofday () in
@@ -345,8 +344,7 @@ let connect_once
     let tracker =
       Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
     in
-    connect_to_monitor ~tracker ~timeout ~log_on_slow_connect config
-    >>= fun (ic, oc, tracker) ->
+    connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, tracker) ->
     let tracker =
       Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
     in

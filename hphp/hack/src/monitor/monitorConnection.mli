@@ -10,7 +10,6 @@
 val server_exists : string -> bool
 
 val connect_once :
-  ?log_on_slow_connect:bool ->
   tracker:Connection_tracker.t ->
   timeout:int ->
   Path.t ->

@@ -154,9 +154,6 @@ let connect ?(use_priority_pipe = false) args =
         no_load;
         watchman_debug_logging;
         log_inference_constraints;
-        log_on_slow_monitor_connect =
-          local_config
-            .ServerLocalConfig.log_from_client_when_slow_monitor_connections;
         remote;
         progress_callback =
           Option.some_if show_spinner (ClientConnect.tty_progress_reporter ());

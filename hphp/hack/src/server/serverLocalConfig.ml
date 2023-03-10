@@ -477,8 +477,6 @@ type t = {
   allow_unstable_features: bool;
       (** Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
-  log_from_client_when_slow_monitor_connections: bool;
-      (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
   naming_sqlite_in_hack_64: bool;
       (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
@@ -603,7 +601,6 @@ let default =
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
-    log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
     rollout_group = None;
@@ -1224,13 +1221,6 @@ let load_
       ~current_version
       config
   in
-  let log_from_client_when_slow_monitor_connections =
-    bool_if_min_version
-      "log_from_client_when_slow_monitor_connections"
-      ~default:default.log_from_client_when_slow_monitor_connections
-      ~current_version
-      config
-  in
   let log_saved_state_age_and_distance =
     bool_if_min_version
       "log_saved_state_age_and_distance"
@@ -1496,7 +1486,6 @@ let load_
     allow_unstable_features;
     watchman;
     force_remote_type_check;
-    log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;
     rollout_group;
@@ -1528,8 +1517,6 @@ let load :
 let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
   HackEventLogger.
     {
-      log_from_client_when_slow_monitor_connections =
-        options.log_from_client_when_slow_monitor_connections;
       log_saved_state_age_and_distance =
         GlobalOptions.(
           options.saved_state.loading.log_saved_state_age_and_distance);

@@ -503,7 +503,7 @@ class mstch_java_struct : public mstch_struct {
   mstch::node is_union_field_type_unique() {
     std::set<std::string> field_types;
     for (const auto& field : struct_->fields()) {
-      auto type_name = field.type()->get_full_name();
+      auto type_name = field.type()->get_true_type()->get_full_name();
       std::string type_with_erasure = type_name.substr(0, type_name.find('<'));
       if (field_types.find(type_with_erasure) != field_types.end()) {
         return false;
@@ -972,7 +972,7 @@ class mstch_java_field : public mstch_field {
   mstch::node java_name() { return get_java_swift_name(field_); }
 
   mstch::node type_field_name() {
-    auto type_name = field_->get_type()->get_full_name();
+    auto type_name = field_->get_type()->get_true_type()->get_full_name();
     return java::mangle_java_name(type_name, true);
   }
 

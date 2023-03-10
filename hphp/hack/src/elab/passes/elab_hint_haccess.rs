@@ -111,26 +111,26 @@ impl Pass for ElabHintHaccessPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _: &Env) -> ControlFlow<()> {
         self.set_in_haccess(matches!(elem, Hint_::Haccess(..)));
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         self.set_in_class(elem);
         ControlFlow::Continue(())
     }
 
     fn on_ty_where_constraint_hint_top_down(
         &mut self,
-        _elem: &mut WhereConstraintHint,
-        _env: &Env,
+        _: &mut WhereConstraintHint,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.set_in_where_clause(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_contexts_top_down(&mut self, _elem: &mut Contexts, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_contexts_top_down(&mut self, _: &mut Contexts, _: &Env) -> ControlFlow<()> {
         self.set_in_context(true);
         ControlFlow::Continue(())
     }

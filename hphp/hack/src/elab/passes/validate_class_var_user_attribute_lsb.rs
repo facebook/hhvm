@@ -21,7 +21,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
     fn on_ty_class__bottom_up(
         &mut self,
         elem: &mut oxidized::nast::Class_,
-        _env: &Env,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.final_class = if elem.final_ {
             Some(elem.name.clone())

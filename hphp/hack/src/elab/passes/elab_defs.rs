@@ -18,7 +18,7 @@ use crate::Pass;
 pub struct ElabDefsPass;
 
 impl Pass for ElabDefsPass {
-    fn on_ty_program_top_down(&mut self, elem: &mut Program, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_program_top_down(&mut self, elem: &mut Program, _: &Env) -> ControlFlow<()> {
         let Program(defs) = elem;
         let mut q: VecDeque<_> = defs.drain(0..).collect();
         while let Some(e) = q.pop_front() {

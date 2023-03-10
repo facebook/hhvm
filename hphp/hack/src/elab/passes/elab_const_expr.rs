@@ -254,7 +254,7 @@ impl Pass for ElabConstExprPass {
         }
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         self.set_in_enum_class(match elem.kind {
             ClassishKind::CenumClass(_) => true,
             ClassishKind::Cclass(..)
@@ -269,7 +269,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_class_const_kind_top_down(
         &mut self,
         elem: &mut ClassConstKind,
-        _env: &Env,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.set_enforce_const_expr(
             !self.in_enum_class() && matches!(elem, ClassConstKind::CCConcrete(_)),
@@ -277,23 +277,23 @@ impl Pass for ElabConstExprPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         self.set_enforce_const_expr(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }

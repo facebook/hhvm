@@ -262,8 +262,8 @@ impl Pass for ValidateHintHabstrPass {
 
     fn on_ty_where_constraint_hint_top_down(
         &mut self,
-        _elem: &mut WhereConstraintHint,
-        _env: &Env,
+        _: &mut WhereConstraintHint,
+        _: &Env,
     ) -> ControlFlow<()> {
         // We want to check hints inside function / method where constraints
         // so we need to record this in the context

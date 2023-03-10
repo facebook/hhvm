@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ElabExprLvarPass;
 
 impl Pass for ElabExprLvarPass {
-    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Lvar(lid) => {
                 let Lid(pos, lcl_id) = lid as &mut Lid;

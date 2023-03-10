@@ -112,7 +112,7 @@ impl Pass for ElabClassIdPass {
         }
     }
 
-    fn on_ty_class__top_down(&mut self, _elem: &mut nast::Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &mut nast::Class_, _: &Env) -> ControlFlow<()> {
         self.in_class = true;
         ControlFlow::Continue(())
     }
@@ -121,8 +121,8 @@ impl Pass for ElabClassIdPass {
     references to `self` are invalid */
     fn on_fld_class__user_attributes_top_down(
         &mut self,
-        _elem: &mut nast::UserAttributes,
-        _env: &Env,
+        _: &mut nast::UserAttributes,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.in_class = true;
         ControlFlow::Continue(())

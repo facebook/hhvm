@@ -87,7 +87,7 @@ impl Pass for ElabHintWildcardPass {
     fn on_ty_expr__top_down(
         &mut self,
         elem: &mut oxidized::nast::Expr_,
-        _env: &Env,
+        _: &Env,
     ) -> ControlFlow<()> {
         match elem {
             Expr_::Cast(..) => self.incr_depth(),
@@ -98,17 +98,13 @@ impl Pass for ElabHintWildcardPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_targ_top_down(
-        &mut self,
-        _elem: &mut oxidized::nast::Targ,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_ty_targ_top_down(&mut self, _: &mut oxidized::nast::Targ, _: &Env) -> ControlFlow<()> {
         self.allow_wildcard = true;
         self.incr_depth();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _: &Env) -> ControlFlow<()> {
         match elem {
             Hint_::Hunion(_)
             | Hint_::Hintersection(_)
@@ -126,8 +122,8 @@ impl Pass for ElabHintWildcardPass {
 
     fn on_ty_shape_field_info_top_down(
         &mut self,
-        _elem: &mut oxidized::nast::ShapeFieldInfo,
-        _env: &Env,
+        _: &mut oxidized::nast::ShapeFieldInfo,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.incr_depth();
         ControlFlow::Continue(())

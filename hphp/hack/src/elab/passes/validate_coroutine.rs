@@ -100,13 +100,13 @@ impl Pass for ValidateCoroutinePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _: &Env) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
         ControlFlow::Continue(())

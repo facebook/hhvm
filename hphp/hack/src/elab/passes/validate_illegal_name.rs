@@ -41,7 +41,7 @@ impl ValidateIllegalNamePass {
 }
 
 impl Pass for ValidateIllegalNamePass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         self.classish_kind = Some(elem.kind);
         ControlFlow::Continue(())
     }
@@ -56,7 +56,7 @@ impl Pass for ValidateIllegalNamePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
         ControlFlow::Continue(())
     }
@@ -76,7 +76,7 @@ impl Pass for ValidateIllegalNamePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _: &Env) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
         ControlFlow::Continue(())
     }

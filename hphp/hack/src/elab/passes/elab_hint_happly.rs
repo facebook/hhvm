@@ -50,37 +50,37 @@ impl Pass for ElabHintHapplyPass {
     // We can't write this - how can we make the contexts modular?
     // type Ctx = impl CanonicalHapplyCtx;
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _: &Env) -> ControlFlow<()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down(&mut self, _elem: &mut Gconst, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_top_down(&mut self, _: &mut Gconst, _: &Env) -> ControlFlow<()> {
         self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
         self.set_tparams(&elem.fun.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down(&mut self, _elem: &mut ModuleDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_top_down(&mut self, _: &mut ModuleDef, _: &Env) -> ControlFlow<()> {
         self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _: &Env) -> ControlFlow<()> {
         self.extend_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam_top_down(&mut self, elem: &mut Tparam, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_tparam_top_down(&mut self, elem: &mut Tparam, _: &Env) -> ControlFlow<()> {
         self.extend_tparams(&elem.parameters);
         ControlFlow::Continue(())
     }

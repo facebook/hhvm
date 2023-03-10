@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ElabBlockPass;
 
 impl Pass for ElabBlockPass {
-    fn on_ty_block_top_down(&mut self, elem: &mut Block, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_block_top_down(&mut self, elem: &mut Block, _: &Env) -> ControlFlow<()> {
         let mut q: VecDeque<_> = elem.drain(0..).collect();
         while let Some(Stmt(pos, stmt_)) = q.pop_front() {
             match stmt_ {
@@ -28,7 +28,7 @@ impl Pass for ElabBlockPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_using_stmt_top_down(&mut self, elem: &mut UsingStmt, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_using_stmt_top_down(&mut self, elem: &mut UsingStmt, _: &Env) -> ControlFlow<()> {
         elem.is_block_scoped = false;
         ControlFlow::Continue(())
     }

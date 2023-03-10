@@ -141,7 +141,7 @@ impl Pass for ElabHintThisPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         let in_interface = matches!(elem.kind, ClassishKind::Cinterface);
         let in_invariant_final = elem.final_
             && elem
@@ -153,37 +153,29 @@ impl Pass for ElabHintThisPass {
         ControlFlow::Continue(())
     }
 
-    fn on_fld_class__tparams_top_down(
-        &mut self,
-        _elem: &mut Vec<Tparam>,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_fld_class__tparams_top_down(&mut self, _: &mut Vec<Tparam>, _: &Env) -> ControlFlow<()> {
         self.set_forbid_this(true);
         ControlFlow::Continue(())
     }
 
     fn on_fld_class__extends_top_down(
         &mut self,
-        _elem: &mut Vec<ClassHint>,
-        _env: &Env,
+        _: &mut Vec<ClassHint>,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.set_in_extends();
         ControlFlow::Continue(())
     }
 
-    fn on_fld_class__uses_top_down(
-        &mut self,
-        _elem: &mut Vec<TraitHint>,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_fld_class__uses_top_down(&mut self, _: &mut Vec<TraitHint>, _: &Env) -> ControlFlow<()> {
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
     fn on_fld_class__xhp_attrs_top_down(
         &mut self,
-        _elem: &mut Vec<XhpAttr>,
-        _env: &Env,
+        _: &mut Vec<XhpAttr>,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.set_forbid_this(false);
         ControlFlow::Continue(())
@@ -191,23 +183,19 @@ impl Pass for ElabHintThisPass {
 
     fn on_fld_class__xhp_attr_uses_top_down(
         &mut self,
-        _elem: &mut Vec<XhpAttrHint>,
-        _env: &Env,
+        _: &mut Vec<XhpAttrHint>,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
-    fn on_fld_class__reqs_top_down(
-        &mut self,
-        _elem: &mut Vec<ClassReq>,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_fld_class__reqs_top_down(&mut self, _: &mut Vec<ClassReq>, _: &Env) -> ControlFlow<()> {
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_req_top_down(&mut self, elem: &mut ClassReq, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class_req_top_down(&mut self, elem: &mut ClassReq, _: &Env) -> ControlFlow<()> {
         if elem.1 == RequireKind::RequireExtends {
             self.set_in_req_extends()
         }
@@ -216,14 +204,14 @@ impl Pass for ElabHintThisPass {
 
     fn on_fld_class__implements_top_down(
         &mut self,
-        _elem: &mut Vec<ClassHint>,
-        _env: &Env,
+        _: &mut Vec<ClassHint>,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_var_top_down(&mut self, elem: &mut ClassVar, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class_var_top_down(&mut self, elem: &mut ClassVar, _: &Env) -> ControlFlow<()> {
         self.set_static_class_var(
             elem.is_static
                 && !elem
@@ -234,11 +222,7 @@ impl Pass for ElabHintThisPass {
         ControlFlow::Continue(())
     }
 
-    fn on_fld_class_var_type__top_down(
-        &mut self,
-        _elem: &mut TypeHint,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_fld_class_var_type__top_down(&mut self, _: &mut TypeHint, _: &Env) -> ControlFlow<()> {
         let forbid_this = match self.context {
             Some(Context::StaticClassVar(lsb)) => lsb,
             _ => panic!("impossible"),
@@ -248,13 +232,13 @@ impl Pass for ElabHintThisPass {
         ControlFlow::Continue(())
     }
 
-    fn on_fld_fun__ret_top_down(&mut self, _elem: &mut TypeHint, _env: &Env) -> ControlFlow<()> {
+    fn on_fld_fun__ret_top_down(&mut self, _: &mut TypeHint, _: &Env) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Cast(..) | Expr_::Is(..) | Expr_::As(..) | Expr_::Upcast(..) => {
                 self.context = None;
@@ -267,25 +251,21 @@ impl Pass for ElabHintThisPass {
 
     fn on_ty_shape_field_info_top_down(
         &mut self,
-        _elem: &mut ShapeFieldInfo,
-        _env: &Env,
+        _: &mut ShapeFieldInfo,
+        _: &Env,
     ) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
-    fn on_fld_hint_fun_return_ty_top_down(
-        &mut self,
-        _elem: &mut Hint,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_fld_hint_fun_return_ty_top_down(&mut self, _: &mut Hint, _: &Env) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_targ_top_down(&mut self, _elem: &mut Targ, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_targ_top_down(&mut self, _: &mut Targ, _: &Env) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
         ControlFlow::Continue(())

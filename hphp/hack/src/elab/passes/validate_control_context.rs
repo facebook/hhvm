@@ -51,7 +51,7 @@ impl Pass for ValidateControlContextPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_stmt__top_down(&mut self, elem: &mut Stmt_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_stmt__top_down(&mut self, elem: &mut Stmt_, _: &Env) -> ControlFlow<()> {
         match elem {
             Stmt_::Do(..) | Stmt_::While(..) | Stmt_::For(..) | Stmt_::Foreach(..) => {
                 self.control_context = ControlContext::Loop
@@ -62,16 +62,12 @@ impl Pass for ValidateControlContextPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_finally_block_top_down(
-        &mut self,
-        _elem: &mut FinallyBlock,
-        _env: &Env,
-    ) -> ControlFlow<()> {
+    fn on_ty_finally_block_top_down(&mut self, _: &mut FinallyBlock, _: &Env) -> ControlFlow<()> {
         self.in_finally_block = true;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _: &Env) -> ControlFlow<()> {
         match elem {
             Expr_::Efun(..) | Expr_::Lfun(..) => self.control_context = ControlContext::TopLevel,
             _ => (),

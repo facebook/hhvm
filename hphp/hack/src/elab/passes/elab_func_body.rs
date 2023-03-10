@@ -28,24 +28,24 @@ impl Default for ElabFuncBodyPass {
 }
 
 impl Pass for ElabFuncBodyPass {
-    fn on_ty_func_body_top_down(&mut self, elem: &mut FuncBody, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_func_body_top_down(&mut self, elem: &mut FuncBody, _: &Env) -> ControlFlow<()> {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
         }
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
@@ -55,7 +55,7 @@ impl Pass for ElabFuncBodyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _: &Env) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }

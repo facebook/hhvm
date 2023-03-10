@@ -14,7 +14,7 @@ use crate::Pass;
 pub struct GuardInvalidPass;
 
 impl Pass for GuardInvalidPass {
-    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _: &Env) -> ControlFlow<()> {
         if matches!(elem, Expr_::Invalid(..)) {
             ControlFlow::Break(())
         } else {
@@ -38,7 +38,7 @@ mod tests {
     #[derive(Clone)]
     pub struct RewriteZero;
     impl Pass for RewriteZero {
-        fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, _env: &Env) -> ControlFlow<()> {
+        fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, _: &Env) -> ControlFlow<()> {
             match elem {
                 Expr_::Int(..) => *elem = Expr_::Int("0".to_string()),
                 _ => (),

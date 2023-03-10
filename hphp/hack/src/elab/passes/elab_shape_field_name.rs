@@ -26,7 +26,7 @@ impl ElabShapeFieldNamePass {
 }
 
 impl Pass for ElabShapeFieldNamePass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
         self.in_class(elem);
         ControlFlow::Continue(())
     }

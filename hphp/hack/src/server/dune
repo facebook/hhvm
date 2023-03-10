@@ -121,9 +121,48 @@
   (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name monitor_rpc)
+  (wrapped false)
+  (modules monitorRpc)
+  (libraries
+    connection_tracker
+    hh_json
+    logging
+    sys_utils
+  )
+)
+
+(library
+ (name server_args)
+ (wrapped false)
+ (modules serverArgs)
+ (libraries
+   ai_options
+   cli_args
+   string
+   sys_utils
+   utils_core
+   utils_exit
+   utils_www_root
+   version
+
+ )
+)
+
+(library
+ (name server_progress)
+ (wrapped false)
+ (modules serverProgress)
+ (libraries
+   server_command_types
+   server_files
+ )
+)
+
+(library
  (name server_env)
  (wrapped false)
- (modules serverArgs serverArgs_sig serverConfig serverEnv serverLocalConfig)
+ (modules serverConfig serverEnv serverLocalConfig)
  (libraries
   ai_options
   build_options
@@ -135,6 +174,7 @@
   experiments_config_file
   file_info
   glean_options
+  server_args
   server_local_config_knobs_stubs
   symbol_write_options
   package
@@ -144,7 +184,6 @@
   saved_state_rollouts
   server_client_provider
   server_command_types
-  server_monitor
   state_loader
   typechecker_options
   typing_service_api
@@ -179,7 +218,6 @@
   procs_procs
   relative_path
   server_files
-  server_monitor
   sys_utils
   utils_core
   watchman)
@@ -237,8 +275,10 @@
   testClientProvider)
  (libraries
   libancillary
+  monitor_rpc
   relative_path
   server_command_types
+  server_progress
   server_utils
   utils_core)
  (preprocess
@@ -541,10 +581,6 @@
   (wrapped false)
   (modules
     client_command_handler
-    hhMonitorInformant
-    hhMonitorInformant_sig
-    hhServerMonitor
-    hhServerMonitorConfig
     packageConfig
     serverCommand
     serverCommandLwt

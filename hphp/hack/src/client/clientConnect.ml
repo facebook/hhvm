@@ -306,13 +306,13 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
     {
       MonitorRpc.force_dormant_start = env.force_dormant_start;
       pipe_name =
-        HhServerMonitorConfig.pipe_type_to_string
+        ServerController.pipe_type_to_string
           (if env.force_dormant_start then
-            HhServerMonitorConfig.Force_dormant_start_only
+            ServerController.Force_dormant_start_only
           else if env.use_priority_pipe then
-            HhServerMonitorConfig.Priority
+            ServerController.Priority
           else
-            HhServerMonitorConfig.Default);
+            ServerController.Default);
     }
   in
   let tracker = Connection_tracker.create () in
@@ -327,7 +327,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
      if it timed out. That's because I distrust infinite timeouts, just in case something got stuck for
      unknown causes, and maybe retrying the connection attempt will get it unstuck? -- a sort of
      "try turning it off then on again". This timeout must be comfortably longer than the monitor's
-     own 30s timeout in serverMonitor.hand_off_client_connection_wrapper to handoff to the server;
+     own 30s timeout in MonitorMain.hand_off_client_connection_wrapper to handoff to the server;
      if it were shorter, then the monitor's incoming queue would be entirely full of requests that
      were all stale by the time it got to handle them. *)
   let timeout =
@@ -381,7 +381,7 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         if the server needs to run a long typecheck phase before communication
         with the client, e.g. for cold starts.
 
-        For shorter startup times, ServerMonitor.Sent_fds_collector attempts to
+        For shorter startup times, MonitorMain.Sent_fds_collector attempts to
         compensate for this issue by having the monitor wait a few seconds after
         handoff before attempting to close its connection fd.
 
@@ -415,14 +415,12 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         }
   | Error e ->
     (match e with
-    | ServerMonitorUtils.Server_died
-    | ServerMonitorUtils.(
-        Connect_to_monitor_failure { server_exists = true; _ }) ->
+    | MonitorUtils.Server_died
+    | MonitorUtils.(Connect_to_monitor_failure { server_exists = true; _ }) ->
       log ~tracker "connect: no response yet from server; will retry...";
       Unix.sleepf 0.1;
       connect env start_time
-    | ServerMonitorUtils.(
-        Connect_to_monitor_failure { server_exists = false; _ }) ->
+    | MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ }) ->
       log ~tracker "connect: autostart=%b" env.autostart;
       if env.autostart then (
         let {
@@ -481,21 +479,21 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
           ^^ " yourself or run hh_client without --autostart-server false\n%!");
         raise Exit_status.(Exit_with No_server_running_should_retry)
       )
-    | ServerMonitorUtils.Server_dormant_out_of_retries ->
+    | MonitorUtils.Server_dormant_out_of_retries ->
       Printf.eprintf
         ("Ran out of retries while waiting for Mercurial to finish rebase. Starting "
         ^^ "the server in the middle of rebase is strongly not recommended and you should "
         ^^ "first finish the rebase before retrying. If you really "
         ^^ "know what you're doing, maybe try --force-dormant-start true\n%!");
       raise Exit_status.(Exit_with Out_of_retries)
-    | ServerMonitorUtils.Server_dormant ->
+    | MonitorUtils.Server_dormant ->
       Printf.eprintf
         ("Error: No server running and connection limit reached for waiting"
         ^^ " on next server to be started. Please wait patiently. If you really"
         ^^ " know what you're doing, maybe try --force-dormant-start true\n%!");
       raise Exit_status.(Exit_with No_server_running_should_retry)
-    | ServerMonitorUtils.Build_id_mismatched mismatch_info_opt ->
-      ServerMonitorUtils.(
+    | MonitorUtils.Build_id_mismatched mismatch_info_opt ->
+      MonitorUtils.(
         Printf.eprintf
           "hh_server's version doesn't match the client's, so it will exit.\n";
         begin

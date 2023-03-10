@@ -611,9 +611,16 @@ let log_recheck_end (stats : ServerEnv.RecheckLoopStats.t) ~errors ~diag_reason
     (Telemetry.to_string telemetry);
   ()
 
+let exit_if_parent_dead () =
+  (* Cross-platform compatible way; parent PID becomes 1 when parent dies. *)
+  if Unix.getppid () = 1 then (
+    Hh_logger.log "Server's parent has died; exiting.\n";
+    Exit.exit Exit_status.Lost_parent_monitor
+  )
+
 let serve_one_iteration genv env client_provider =
   let (env, recheck_id) = generate_and_update_recheck_id env in
-  ServerMonitorUtils.exit_if_parent_dead ();
+  exit_if_parent_dead ();
   let acceptable_new_client_kind =
     let has_default_client_pending =
       Option.is_some env.nonpersistent_client_pending_command_needs_full_check

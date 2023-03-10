@@ -119,7 +119,6 @@
  (modules saved_state_loader state_loader_futures state_loader_lwt)
  (libraries
   hg
-  server_monitor
   typechecker_options)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

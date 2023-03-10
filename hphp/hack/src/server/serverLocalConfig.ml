@@ -369,7 +369,7 @@ type t = {
   max_workers: int option;
   max_bucket_size: int;
       (** max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
-  use_dummy_informant: bool;  (** See HhMonitorInformant. *)
+  use_dummy_informant: bool;  (** See Informant. *)
   informant_min_distance_restart: int;
   use_full_fidelity_parser: bool;
   interrupt_on_watchman: bool;

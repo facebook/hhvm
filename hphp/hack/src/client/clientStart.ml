@@ -235,7 +235,7 @@ let start_server (env : env) =
 
     match Sys_utils.waitpid_non_intr [] server_pid with
     | (_, Unix.WEXITED 0) ->
-      assert (String.equal (Stdlib.input_line ic) ServerMonitorUtils.ready);
+      assert (String.equal (Stdlib.input_line ic) MonitorUtils.ready);
       Stdlib.close_in ic
     | (_, Unix.WEXITED i) ->
       if not silent then
@@ -257,7 +257,7 @@ let should_start env =
     MonitorRpc.
       {
         force_dormant_start = false;
-        pipe_name = HhServerMonitorConfig.(pipe_type_to_string Default);
+        pipe_name = ServerController.(pipe_type_to_string Default);
       }
   in
   let tracker = Connection_tracker.create () in
@@ -268,19 +268,16 @@ let should_start env =
     MonitorConnection.connect_once ~tracker ~timeout:3 env.root handoff_options
   with
   | Ok _conn -> false
-  | Error
-      ServerMonitorUtils.(
-        Connect_to_monitor_failure { server_exists = false; _ })
-  | Error (ServerMonitorUtils.Build_id_mismatched _)
-  | Error ServerMonitorUtils.Server_died ->
+  | Error MonitorUtils.(Connect_to_monitor_failure { server_exists = false; _ })
+  | Error (MonitorUtils.Build_id_mismatched _)
+  | Error MonitorUtils.Server_died ->
     true
-  | Error ServerMonitorUtils.Server_dormant
-  | Error ServerMonitorUtils.Server_dormant_out_of_retries ->
+  | Error MonitorUtils.Server_dormant
+  | Error MonitorUtils.Server_dormant_out_of_retries ->
     Printf.eprintf "Server already exists but is dormant";
     false
-  | Error
-      ServerMonitorUtils.(
-        Connect_to_monitor_failure { server_exists = true; _ }) ->
+  | Error MonitorUtils.(Connect_to_monitor_failure { server_exists = true; _ })
+    ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
     ClientStop.kill_server env.root env.from;
     true

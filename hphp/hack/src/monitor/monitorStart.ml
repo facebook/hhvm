@@ -20,11 +20,6 @@
 
 let () = Random.self_init ()
 
-module SM =
-  ServerMonitor.Make_monitor
-    (HhServerMonitorConfig.HhServerConfig)
-    (HhMonitorInformant)
-
 let make_tmp_dir () =
   let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "files") in
   Relative_path.set_path_prefix Relative_path.Tmp tmpdir
@@ -115,7 +110,7 @@ let monitor_daemon_main
     in
     let informant_options =
       {
-        HhMonitorInformant.root = ServerArgs.root options;
+        Informant.root = ServerArgs.root options;
         allow_subscriptions;
         use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
         watchman_debug_logging =
@@ -129,14 +124,14 @@ let monitor_daemon_main
           | _ -> false);
       }
     in
-    SM.start_monitoring
+    MonitorMain.start_monitoring
       ~current_version
       ~waiting_client
       ~max_purgatory_clients:
         local_config.ServerLocalConfig.max_purgatory_clients
       options
       informant_options
-      ServerMonitorUtils.
+      MonitorUtils.
         {
           socket_file = ServerFiles.socket_file www_root;
           lock_file = ServerFiles.lock_file www_root;

@@ -8,9 +8,35 @@
  *)
 
 open Hh_prelude
-include HhMonitorInformant_sig.Types
-module WEWClient = WatchmanEventWatcherClient
-module WEWConfig = WatchmanEventWatcherConfig
+
+type report =
+  | Move_along  (** Nothing to see here. *)
+  | Restart_server
+      (** Kill the server (if one is running) and start a new one. *)
+[@@deriving show]
+
+type server_state =
+  | Server_not_yet_started
+  | Server_alive
+  | Server_dead
+[@@deriving show]
+
+type options = {
+  root: Path.t;
+  allow_subscriptions: bool;
+      (** Disable the informant - use the dummy instead. *)
+  use_dummy: bool;
+      (** Don't trigger a server restart if the distance between two
+            revisions we are moving between is less than this. *)
+  min_distance_restart: int;
+  watchman_debug_logging: bool;
+      (** Informant should ignore the hh_version when doing version checks. *)
+  ignore_hh_version: bool;
+      (** Was the server initialized with a precomputed saved-state? *)
+  is_saved_state_precomputed: bool;
+}
+
+type init_env = options
 
 (** We need to query mercurial to convert an hg revision into a numerical
  * global revision. These queries need to be non-blocking, so we keep a cache
@@ -222,38 +248,37 @@ module Revision_tracker = struct
    * global_rev: The corresponding global rev for this transition's hg rev.
    *)
   let form_decision ~significant transition server_state env =
-    Informant_sig.(
-      match (significant, transition, server_state) with
-      | (_, State_leave _, Server_not_yet_started) ->
-        (* This is reachable when server stopped in the middle of rebase. Instead
-           * of restarting immediately, we go back to Server_not_yet_started, and want
-           * to restart only when hg.update state is vacated *)
-        Restart_server
-      | (_, State_leave _, Server_dead) ->
-        (* Regardless of whether we had a significant change or not, when the
-         * server is not alive, we restart it on a state leave.*)
-        Restart_server
-      | (false, _, _) ->
-        let () = Hh_logger.log "Informant insignificant transition" in
+    match (significant, transition, server_state) with
+    | (_, State_leave _, Server_not_yet_started) ->
+      (* This is reachable when server stopped in the middle of rebase. Instead
+         * of restarting immediately, we go back to Server_not_yet_started, and want
+         * to restart only when hg.update state is vacated *)
+      Restart_server
+    | (_, State_leave _, Server_dead) ->
+      (* Regardless of whether we had a significant change or not, when the
+       * server is not alive, we restart it on a state leave.*)
+      Restart_server
+    | (false, _, _) ->
+      let () = Hh_logger.log "Informant insignificant transition" in
+      Move_along
+    | (true, State_enter _, _)
+    | (true, State_leave _, _) ->
+      (* We use the State enter and leave events to kick off asynchronous
+       * computations off the hg revisions when they arrive (during preprocess)
+       * But actual actions are taken only on changed_merge_base below. *)
+      Move_along
+    | (true, Changed_merge_base _, _) ->
+      (* If the current server was started using a precomputed saved-state,
+       * we don't want to relaunch the server. If we do, it'll reuse
+       * the previously used saved-state for the new mergebase and more
+       * importantly the **same list of changed files!!!** which is
+       * totally wrong *)
+      if env.inits.is_saved_state_precomputed then begin
+        Hh_logger.log
+          "Server was started using a precomputed saved-state, not restarting.";
         Move_along
-      | (true, State_enter _, _)
-      | (true, State_leave _, _) ->
-        (* We use the State enter and leave events to kick off asynchronous
-         * computations off the hg revisions when they arrive (during preprocess)
-         * But actual actions are taken only on changed_merge_base below. *)
-        Move_along
-      | (true, Changed_merge_base _, _) ->
-        (* If the current server was started using a precomputed saved-state,
-         * we don't want to relaunch the server. If we do, it'll reuse
-         * the previously used saved-state for the new mergebase and more
-         * importantly the **same list of changed files!!!** which is
-         * totally wrong *)
-        if env.inits.is_saved_state_precomputed then begin
-          Hh_logger.log
-            "Server was started using a precomputed saved-state, not restarting.";
-          Move_along
-        end else
-          Restart_server)
+      end else
+        Restart_server
 
   (**
    * If we have a cached global_rev for this hg_rev, make a decision on
@@ -316,20 +341,19 @@ module Revision_tracker = struct
    * Run through the ready changs in the queue; then make a decision.
    *)
   let churn_changes server_state env =
-    Informant_sig.(
-      if Queue.is_empty env.state_changes then
-        Move_along
-      else
-        let decisions = churn_ready_changes ~acc:[] env server_state in
-        (* left is more recent transition, so we prefer its saved state target. *)
-        let select_relevant left right =
-          match (left, right) with
-          | (Restart_server, _)
-          | (_, Restart_server) ->
-            Restart_server
-          | (_, _) -> Move_along
-        in
-        List.fold_left ~f:select_relevant ~init:Move_along decisions)
+    if Queue.is_empty env.state_changes then
+      Move_along
+    else
+      let decisions = churn_ready_changes ~acc:[] env server_state in
+      (* left is more recent transition, so we prefer its saved state target. *)
+      let select_relevant left right =
+        match (left, right) with
+        | (Restart_server, _)
+        | (_, Restart_server) ->
+          Restart_server
+        | (_, _) -> Move_along
+      in
+      List.fold_left ~f:select_relevant ~init:Move_along decisions
 
   let get_change env =
     let (watchman, change) = Watchman.get_changes !(env.inits.watchman) in
@@ -405,44 +429,43 @@ module Revision_tracker = struct
    *      queue of pending changes.
    * *)
   let process_once server_state env =
-    Informant_sig.(
-      let change = get_change env in
-      let early_decision =
-        match change with
-        | None -> None
-        | Some (State_enter hg_rev) ->
-          let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
-          preprocess server_state (State_enter hg_rev) env
-        | Some (State_leave hg_rev) ->
-          let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
-          preprocess server_state (State_leave hg_rev) env
-        | Some (Changed_merge_base (hg_rev, _, _) as change) ->
-          let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
-          preprocess server_state change env
-      in
-      (* If we make an "early" decision to either kill or restart, we toss
-       * out earlier state changes and don't need to pump the queue anymore.
-       *
-       * This is an optimization.
-       *
-       * Otherwise, we continue as per usual. *)
-      let report =
-        match early_decision with
-        | Some (Restart_server, global_rev) ->
-          (* Early decision to restart, so the prior state changes don't
-           * matter anymore. *)
-          Hh_logger.log "Informant early decision: restart server";
-          let () = Queue.clear env.state_changes in
-          let () = set_base_revision global_rev env in
-          Restart_server
-        | Some (Move_along, _)
-        | None ->
-          handle_change_then_churn server_state change env
-      in
-      (* All the cases that `(change <> None)` cover should be also covered by
-       * has_more_watchman_messages, but this alternate method of pumping messages
-       * is heavily used in tests *)
-      (report, has_more_watchman_messages env || Option.is_some change))
+    let change = get_change env in
+    let early_decision =
+      match change with
+      | None -> None
+      | Some (State_enter hg_rev) ->
+        let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
+        preprocess server_state (State_enter hg_rev) env
+      | Some (State_leave hg_rev) ->
+        let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
+        preprocess server_state (State_leave hg_rev) env
+      | Some (Changed_merge_base (hg_rev, _, _) as change) ->
+        let () = Revision_map.add_query ~hg_rev env.inits.root env.rev_map in
+        preprocess server_state change env
+    in
+    (* If we make an "early" decision to either kill or restart, we toss
+     * out earlier state changes and don't need to pump the queue anymore.
+     *
+     * This is an optimization.
+     *
+     * Otherwise, we continue as per usual. *)
+    let report =
+      match early_decision with
+      | Some (Restart_server, global_rev) ->
+        (* Early decision to restart, so the prior state changes don't
+         * matter anymore. *)
+        Hh_logger.log "Informant early decision: restart server";
+        let () = Queue.clear env.state_changes in
+        let () = set_base_revision global_rev env in
+        Restart_server
+      | Some (Move_along, _)
+      | None ->
+        handle_change_then_churn server_state change env
+    in
+    (* All the cases that `(change <> None)` cover should be also covered by
+     * has_more_watchman_messages, but this alternate method of pumping messages
+     * is heavily used in tests *)
+    (report, has_more_watchman_messages env || Option.is_some change)
 
   let rec process (server_state, env, reports_acc) =
     (* Sometimes Watchman pushes many file changes as many sequential
@@ -458,30 +481,29 @@ module Revision_tracker = struct
       reports_acc
 
   let process server_state env =
-    Informant_sig.(
-      let reports = process (server_state, env, []) in
-      (* We fold through the reports and take the "most active" one. *)
-      let max_report a b =
-        match (a, b) with
-        | (Restart_server, _)
-        | (_, Restart_server) ->
-          Restart_server
-        | (_, _) -> Move_along
-      in
-      let default_decision =
-        match server_state with
-        | Server_not_yet_started when not (is_hg_updating env) -> Restart_server
-        | _ -> Move_along
-      in
-      let decision =
-        List.fold_left ~f:max_report ~init:default_decision reports
-      in
-      match decision with
-      | Restart_server when is_hg_updating env ->
-        Hh_logger.log
-          "Ignoring Restart_server because we are already in next hg.update state";
-        Move_along
-      | decision -> decision)
+    let reports = process (server_state, env, []) in
+    (* We fold through the reports and take the "most active" one. *)
+    let max_report a b =
+      match (a, b) with
+      | (Restart_server, _)
+      | (_, Restart_server) ->
+        Restart_server
+      | (_, _) -> Move_along
+    in
+    let default_decision =
+      match server_state with
+      | Server_not_yet_started when not (is_hg_updating env) -> Restart_server
+      | _ -> Move_along
+    in
+    let decision =
+      List.fold_left ~f:max_report ~init:default_decision reports
+    in
+    match decision with
+    | Restart_server when is_hg_updating env ->
+      Hh_logger.log
+        "Ignoring Restart_server because we are already in next hg.update state";
+      Move_along
+    | decision -> decision
 
   let reinit t =
     (* The results of old initialization query might be stale by now, so we need
@@ -530,7 +552,7 @@ module Revision_tracker = struct
         let env = active_env init_settings global_rev in
         let () = t := Tracking env in
         process server_state env
-      | None -> Informant_sig.Move_along
+      | None -> Move_along
     end
     | Reinitializing (env, future) -> begin
       match check_init_future future with
@@ -538,7 +560,7 @@ module Revision_tracker = struct
         let env = reinitialized_env env global_rev in
         let () = t := Tracking env in
         process server_state env
-      | None -> Informant_sig.Move_along
+      | None -> Move_along
     end
     | Tracking env -> process server_state env
 end
@@ -547,7 +569,7 @@ type env = {
   (* Reports for an Active informant are made by pinging the
    * revision_tracker. *)
   revision_tracker: Revision_tracker.t;
-  watchman_event_watcher: WEWClient.t;
+  watchman_event_watcher: WatchmanEventWatcherClient.t;
 }
 
 type t =
@@ -605,7 +627,7 @@ let init
               ~is_saved_state_precomputed
               (Watchman.Watchman_alive watchman_env)
               root;
-          watchman_event_watcher = WEWClient.init root;
+          watchman_event_watcher = WatchmanEventWatcherClient.init root;
         }
 
 let reinit t =
@@ -622,7 +644,9 @@ let should_start_first_server t =
      * instance should always be started during startup. *)
     true
   | Active env ->
-    let status = WEWClient.get_status env.watchman_event_watcher in
+    let status =
+      WatchmanEventWatcherClient.get_status env.watchman_event_watcher
+    in
     begin
       match status with
       | None ->
@@ -632,7 +656,7 @@ let should_start_first_server t =
          *)
         HackEventLogger.informant_watcher_not_available ();
         true
-      | Some WEWConfig.Responses.Unknown ->
+      | Some WatchmanEventWatcherConfig.Responses.Unknown ->
         (*
          * Watcher doens't know what state the repo is. We don't
          * know when the next "hg update" will happen, so we let the
@@ -640,11 +664,11 @@ let should_start_first_server t =
          *)
         HackEventLogger.informant_watcher_unknown_state ();
         true
-      | Some WEWConfig.Responses.Mid_update ->
+      | Some WatchmanEventWatcherConfig.Responses.Mid_update ->
         (* Wait until the update is finished  *)
         HackEventLogger.informant_watcher_mid_update_state ();
         false
-      | Some WEWConfig.Responses.Settled ->
+      | Some WatchmanEventWatcherConfig.Responses.Settled ->
         HackEventLogger.informant_watcher_settled_state ();
         true
     end
@@ -657,14 +681,14 @@ let is_managing = function
 
 let report informant server_state =
   match (informant, server_state) with
-  | (Resigned, Informant_sig.Server_not_yet_started) ->
+  | (Resigned, Server_not_yet_started) ->
     (* Actually, this case should never happen. But we force a restart
      * to avoid accidental wedged states anyway. *)
     Hh_logger.log
       "Unexpected Resigned informant without a server started, restarting server";
-    Informant_sig.Restart_server
-  | (Resigned, _) -> Informant_sig.Move_along
-  | (Active env, Informant_sig.Server_not_yet_started) ->
+    Restart_server
+  | (Resigned, _) -> Move_along
+  | (Active env, Server_not_yet_started) ->
     if should_start_first_server informant then (
       (* should_start_first_server (as name implies) prevents us from starting first (since
        * monitor start) server in the middle of update, when Revision_tracker is not reliable.
@@ -675,12 +699,12 @@ let report informant server_state =
         Revision_tracker.make_report server_state env.revision_tracker
       in
       (match report with
-      | Informant_sig.Restart_server ->
+      | Restart_server ->
         Hh_logger.log "Informant watcher starting server from settling";
         HackEventLogger.informant_watcher_starting_server_from_settling ()
-      | Informant_sig.Move_along -> ());
+      | Move_along -> ());
       report
     ) else
-      Informant_sig.Move_along
+      Move_along
   | (Active env, _) ->
     Revision_tracker.make_report server_state env.revision_tracker

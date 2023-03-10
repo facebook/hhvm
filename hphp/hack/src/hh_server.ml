@@ -45,4 +45,4 @@
  *      signatures are correct).
  *)
 
-let () = HhServerMonitor.start ()
+let () = MonitorStart.start ()

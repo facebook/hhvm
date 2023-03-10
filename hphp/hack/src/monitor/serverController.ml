@@ -9,8 +9,6 @@
 
 (** Responsible for starting up a Hack server process.  *)
 
-module SP = ServerProcess
-
 type pipe_type =
   | Default
   | Priority
@@ -108,7 +106,7 @@ let start_server_daemon
     ~server_progress;
 
   let server =
-    SP.
+    ServerProcess.
       {
         pid;
         server_specific_files =
@@ -135,56 +133,50 @@ let start_hh_server ~informant_managed options =
   let log_link = ServerFiles.log_link (ServerArgs.root options) in
   start_server_daemon ~informant_managed options log_link ServerMain.entry
 
-module HhServerConfig = struct
-  type server_start_options = ServerArgs.options
+type server_start_options = ServerArgs.options
 
-  let start_server ~informant_managed ~prior_exit_status options =
-    match prior_exit_status with
-    | Some c
-      when (c = Exit_status.(exit_code Sql_assertion_failure))
-           || (c = Exit_status.(exit_code Sql_cantopen))
-           || (c = Exit_status.(exit_code Sql_corrupt))
-           || c = Exit_status.(exit_code Sql_misuse) ->
-      start_hh_server ~informant_managed (ServerArgs.set_no_load options true)
-    | _ -> start_hh_server ~informant_managed options
+let start_server ~informant_managed ~prior_exit_status options =
+  match prior_exit_status with
+  | Some c
+    when (c = Exit_status.(exit_code Sql_assertion_failure))
+         || (c = Exit_status.(exit_code Sql_cantopen))
+         || (c = Exit_status.(exit_code Sql_corrupt))
+         || c = Exit_status.(exit_code Sql_misuse) ->
+    start_hh_server ~informant_managed (ServerArgs.set_no_load options true)
+  | _ -> start_hh_server ~informant_managed options
 
-  let kill_server ~violently process =
-    if not violently then begin
-      Hh_logger.log
-        "kill_server: sending SIGUSR2 to %d"
-        process.ServerProcess.pid;
-      try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
-      | _ -> ()
-    end else begin
-      Hh_logger.log
-        "Failed to send sigusr2 signal to server process. Trying violently";
-      try Unix.kill process.ServerProcess.pid Sys.sigkill with
-      | exn ->
-        let e = Exception.wrap exn in
-        Hh_logger.exception_
-          ~prefix:"Failed to violently kill server process: "
-          e
-    end
+let kill_server ~violently process =
+  if not violently then begin
+    Hh_logger.log "kill_server: sending SIGUSR2 to %d" process.ServerProcess.pid;
+    try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
+    | _ -> ()
+  end else begin
+    Hh_logger.log
+      "Failed to send sigusr2 signal to server process. Trying violently";
+    try Unix.kill process.ServerProcess.pid Sys.sigkill with
+    | exn ->
+      let e = Exception.wrap exn in
+      Hh_logger.exception_ ~prefix:"Failed to violently kill server process: " e
+  end
 
-  let wait_for_server_exit ~(timeout_t : float) process =
-    let rec wait_for_server_exit_impl () =
-      let now_t = Unix.gettimeofday () in
-      if now_t > timeout_t then
-        false
-      else
-        let exit_status =
-          Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
-        in
-        match exit_status with
-        | (0, _) ->
-          Unix.sleep 1;
-          wait_for_server_exit_impl ()
-        | _ -> true
-    in
-    wait_for_server_exit_impl ()
+let wait_for_server_exit ~(timeout_t : float) process =
+  let rec wait_for_server_exit_impl () =
+    let now_t = Unix.gettimeofday () in
+    if now_t > timeout_t then
+      false
+    else
+      let exit_status =
+        Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+      in
+      match exit_status with
+      | (0, _) ->
+        Unix.sleep 1;
+        wait_for_server_exit_impl ()
+      | _ -> true
+  in
+  wait_for_server_exit_impl ()
 
-  let wait_pid process =
-    Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
+let wait_pid process =
+  Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid
 
-  let is_saved_state_precomputed = ServerArgs.is_using_precomputed_saved_state
-end
+let is_saved_state_precomputed = ServerArgs.is_using_precomputed_saved_state

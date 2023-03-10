@@ -15,12 +15,10 @@ val connect_once :
   Path.t ->
   MonitorRpc.handoff_options ->
   ( Timeout.in_channel * out_channel * ServerCommandTypes.server_specific_files,
-    ServerMonitorUtils.connection_error )
+    MonitorUtils.connection_error )
   result
 
 val connect_and_shut_down :
   tracker:Connection_tracker.t ->
   Path.t ->
-  ( ServerMonitorUtils.shutdown_result,
-    ServerMonitorUtils.connection_error )
-  result
+  (MonitorUtils.shutdown_result, MonitorUtils.connection_error) result

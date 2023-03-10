@@ -42,27 +42,6 @@ let watchman_mergebase_to_string
     (SSet.cardinal files_changed)
     watchman_clock
 
-module type Server_config = sig
-  type server_start_options
-
-  (** Start the server. Optionally takes in the exit code of the previously
-      running server that exited. *)
-  val start_server :
-    informant_managed:bool ->
-    prior_exit_status:int option ->
-    server_start_options ->
-    ServerProcess.process_data
-
-  val kill_server : violently:bool -> ServerProcess.process_data -> unit
-
-  val wait_for_server_exit :
-    timeout_t:float -> ServerProcess.process_data -> bool
-
-  val wait_pid : ServerProcess.process_data -> int * Unix.process_status
-
-  val is_saved_state_precomputed : server_start_options -> bool
-end
-
 type build_mismatch_info = {
   existing_version: string;
   existing_build_commit_time: string;
@@ -173,10 +152,3 @@ type shutdown_result =
 
 (* Message we send to the --waiting-client *)
 let ready = "ready"
-
-let exit_if_parent_dead () =
-  (* Cross-platform compatible way; parent PID becomes 1 when parent dies. *)
-  if Unix.getppid () = 1 then (
-    Hh_logger.log "Server's parent has died; exiting.\n";
-    Exit.exit Exit_status.Lost_parent_monitor
-  )

@@ -409,6 +409,9 @@ let parse_check_args cmd =
       ( "--ide-find-refs",
         Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x)),
         "" );
+      ( "--ide-go-to-impl",
+        Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL x)),
+        "" );
       ( "--ide-get-definition",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x)),
         (* alias for --identify-function *) "" );

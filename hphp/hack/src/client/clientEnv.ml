@@ -36,6 +36,7 @@ type client_mode =
   | MODE_GO_TO_IMPL_CLASS_REMOTE of string
   | MODE_GO_TO_IMPL_METHOD of string
   | MODE_IDE_FIND_REFS of string
+  | MODE_IDE_GO_TO_IMPL of string
   | MODE_IDE_HIGHLIGHT_REFS of string
   | MODE_IDE_REFACTOR of string
   | MODE_IDENTIFY_SYMBOL1 of string

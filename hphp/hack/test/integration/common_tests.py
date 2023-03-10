@@ -726,6 +726,22 @@ class CommonTests(BarebonesTests):
             options=["--ide-find-refs", "{}:3,18".format(path)],
         )
 
+    def test_ide_go_to_impl(self) -> None:
+        self.test_driver.start_hh_server()
+        path = os.path.join(self.test_driver.repo_dir, "foo_6.php")
+        self.test_driver.check_cmd_and_json_cmd(
+            [
+                "IFoo",
+                'File "{root}foo_6.php", line 7, characters 7-23:',
+                "1 total results",
+            ],
+            [
+                '[{{"name":"IFoo","filename":"{root}foo_6.php",'
+                '"line":7,"char_start":7,"char_end":23}}]'
+            ],
+            options=["--ide-go-to-impl", "{}:3,11".format(path)],
+        )
+
     def test_ide_highlight_refs(self) -> None:
         self.test_driver.start_hh_server()
 

@@ -25,8 +25,8 @@ use oxidized::ast_defs::ClassishKind;
 use oxidized::ast_defs::Uop;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
 use crate::elab_utils;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Copy, Clone)]
@@ -78,7 +78,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_expr_top_down<Ex, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -127,24 +127,24 @@ impl Pass for ElabConstExprPass {
                     }
                     // TODO[mjt] another example of inconsistency around error positions
                     Hint_::Happly(id, _) => {
-                        cfg.emit_error(NamingError::IllegalConstant(id.0.clone()));
+                        env.emit_error(NamingError::IllegalConstant(id.0.clone()));
                         invalid(expr_)
                     }
                     _ => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
                 Expr_::Unop(box (uop, _)) => match uop {
                     Uop::Uplus | Uop::Uminus | Uop::Utild | Uop::Unot => ControlFlow::Continue(()),
                     _ => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
                 Expr_::Binop(box (bop, _, _)) => match bop {
                     Bop::Eq(_) => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                     _ => ControlFlow::Continue(()),
@@ -152,14 +152,14 @@ impl Pass for ElabConstExprPass {
                 Expr_::ValCollection(box ((_, vc_kind), _, _)) => match vc_kind {
                     VcKind::Vec | VcKind::Keyset => ControlFlow::Continue(()),
                     _ => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
                 Expr_::KeyValCollection(box ((_, kvc_kind), _, _)) => match kvc_kind {
                     KvcKind::Dict => ControlFlow::Continue(()),
                     _ => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
@@ -172,7 +172,7 @@ impl Pass for ElabConstExprPass {
                         ControlFlow::Continue(())
                     }
                     _ => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 },
@@ -181,7 +181,7 @@ impl Pass for ElabConstExprPass {
                     if matches!(self.mode, file_info::Mode::Mhhi) {
                         ControlFlow::Continue(())
                     } else {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
                 }
@@ -213,7 +213,7 @@ impl Pass for ElabConstExprPass {
                 | Expr_::String2(..)
                 | Expr_::Yield(..)
                 | Expr_::Xml(..) => {
-                    cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                    env.emit_error(NamingError::IllegalConstant(pos.clone()));
                     invalid(expr_)
                 }
 
@@ -228,7 +228,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_expr_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -247,7 +247,7 @@ impl Pass for ElabConstExprPass {
             match expr_ {
                 Expr_::ClassConst(box (ClassId(_, _, class_id_), _)) => match class_id_ {
                     ClassId_::CIstatic => {
-                        cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                        env.emit_error(NamingError::IllegalConstant(pos.clone()));
                         invalid(expr_)
                     }
 
@@ -258,7 +258,7 @@ impl Pass for ElabConstExprPass {
                     ClassId_::CIexpr(Expr(_, _, expr_)) => match expr_ {
                         Expr_::This | Expr_::Id(..) => ControlFlow::Continue(()),
                         _ => {
-                            cfg.emit_error(NamingError::IllegalConstant(pos.clone()));
+                            env.emit_error(NamingError::IllegalConstant(pos.clone()));
                             invalid(expr_)
                         }
                     },
@@ -271,7 +271,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_class__top_down<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -290,7 +290,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_class_const_kind_top_down<Ex, En>(
         &mut self,
         elem: &mut ClassConstKind<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -304,7 +304,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_typedef_top_down<Ex, En>(
         &mut self,
         elem: &mut Typedef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -316,7 +316,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_gconst_top_down<Ex, En>(
         &mut self,
         elem: &mut Gconst<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -329,7 +329,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_fun_def_top_down<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -341,7 +341,7 @@ impl Pass for ElabConstExprPass {
     fn on_ty_module_def_top_down<Ex, En>(
         &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,

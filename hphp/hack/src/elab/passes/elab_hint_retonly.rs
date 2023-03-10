@@ -10,7 +10,7 @@ use oxidized::ast_defs::Tprim;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_error::ReturnOnlyHint;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -19,10 +19,10 @@ pub struct ElabHintRetonlyPass {
 }
 
 impl Pass for ElabHintRetonlyPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
         match elem {
             Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tvoid)) if !self.allow_retonly => {
-                cfg.emit_error(NamingError::ReturnOnlyTypehint {
+                env.emit_error(NamingError::ReturnOnlyTypehint {
                     pos: pos.clone(),
                     kind: ReturnOnlyHint::Hvoid,
                 });
@@ -30,7 +30,7 @@ impl Pass for ElabHintRetonlyPass {
                 ControlFlow::Break(())
             }
             Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tnoreturn)) if !self.allow_retonly => {
-                cfg.emit_error(NamingError::ReturnOnlyTypehint {
+                env.emit_error(NamingError::ReturnOnlyTypehint {
                     pos: pos.clone(),
                     kind: ReturnOnlyHint::Hnoreturn,
                 });
@@ -41,7 +41,7 @@ impl Pass for ElabHintRetonlyPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<(), ()> {
         match elem {
             Hint_::Happly(..) | Hint_::Habstr(..) => self.allow_retonly = true,
             _ => (),
@@ -52,7 +52,7 @@ impl Pass for ElabHintRetonlyPass {
     fn on_ty_targ_top_down<Ex>(
         &mut self,
         _elem: &mut oxidized::aast::Targ<Ex>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -64,7 +64,7 @@ impl Pass for ElabHintRetonlyPass {
     fn on_fld_hint_fun_return_ty_top_down(
         &mut self,
         _elem: &mut Hint,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
@@ -73,7 +73,7 @@ impl Pass for ElabHintRetonlyPass {
     fn on_fld_fun__ret_top_down<Ex>(
         &mut self,
         _elem: &mut oxidized::aast::TypeHint<Ex>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -85,7 +85,7 @@ impl Pass for ElabHintRetonlyPass {
     fn on_fld_method__ret_top_down<Ex>(
         &mut self,
         _elem: &mut oxidized::aast::TypeHint<Ex>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn test_fun_ret_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
         let mut elem: Fun_<(), ()> = Fun_ {
@@ -140,9 +140,9 @@ mod tests {
             external: Default::default(),
             doc_comment: Default::default(),
         };
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(matches!(
             elem.ret.1,
             Some(Hint(_, box Hint_::Hprim(Tprim::Tvoid)))
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn test_hint_fun_return_ty_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
         let mut elem: HintFun = HintFun {
@@ -163,9 +163,9 @@ mod tests {
             return_ty: Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid))),
             is_readonly_return: Default::default(),
         };
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(matches!(
             elem.return_ty,
             Hint(_, box Hint_::Hprim(Tprim::Tvoid))
@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     fn test_hint_in_happly_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
         // Whatever<void>
@@ -185,9 +185,9 @@ mod tests {
                 vec![Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid)))],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(match elem {
             Hint(_, box Hint_::Happly(_, hints)) =>
                 matches!(hints.as_slice(), [Hint(_, box Hint_::Hprim(Tprim::Tvoid))]),
@@ -198,28 +198,28 @@ mod tests {
 
     #[test]
     fn test_hint_in_targ_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
         let mut elem: Targ<()> = Targ(
             (),
             Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid))),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(matches!(elem.1, Hint(_, box Hint_::Hprim(Tprim::Tvoid))))
     }
 
     #[test]
     fn test_hint_top_level_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
         let mut elem: Hint = Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid)));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let retonly_hint_err_opt = cfg.into_errors().pop();
+        let retonly_hint_err_opt = env.into_errors().pop();
         assert!(matches!(
             retonly_hint_err_opt,
             Some(NamingPhaseError::Naming(
@@ -231,7 +231,7 @@ mod tests {
 
     #[test]
     fn test_fun_param_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintRetonlyPass::default();
         let mut elem: Fun_<(), ()> = Fun_ {
@@ -267,9 +267,9 @@ mod tests {
             external: Default::default(),
             doc_comment: Default::default(),
         };
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let retonly_hint_err_opt = cfg.into_errors().pop();
+        let retonly_hint_err_opt = env.into_errors().pop();
         assert!(matches!(
             retonly_hint_err_opt,
             Some(NamingPhaseError::Naming(

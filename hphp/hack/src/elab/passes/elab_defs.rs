@@ -11,7 +11,7 @@ use oxidized::aast_defs::Program;
 use oxidized::aast_defs::Stmt;
 use oxidized::aast_defs::Stmt_;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -21,7 +21,7 @@ impl Pass for ElabDefsPass {
     fn on_ty_program_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Program<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         let Program(defs) = elem;
         let mut q: VecDeque<_> = defs.drain(0..).collect();
@@ -74,7 +74,7 @@ mod tests {
 
     #[test]
     fn test() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut elem: Program<(), ()> = Program(vec![
             Def::Stmt(Box::new(Stmt(Pos::NONE, Stmt_::Break))),
@@ -103,7 +103,7 @@ mod tests {
 
         let mut pass = ElabDefsPass;
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         // Given our initial program:
         //

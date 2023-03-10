@@ -11,7 +11,7 @@ use oxidized::aast_defs::Gconst;
 use oxidized::aast_defs::ModuleDef;
 use oxidized::aast_defs::Typedef;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy)]
@@ -31,7 +31,7 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_func_body_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut FuncBody<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
@@ -43,7 +43,7 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -52,7 +52,7 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_typedef_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Typedef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -61,7 +61,7 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_gconst_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Gconst<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -70,7 +70,7 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_fun_def_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cf: &Config,
+        _cf: &Env,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -79,7 +79,7 @@ impl Pass for ElabFuncBodyPass {
     fn on_ty_module_def_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut ModuleDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_add() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut elem: FuncBody<(), ()> = FuncBody {
             fb_ast: oxidized::ast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
@@ -108,12 +108,12 @@ mod tests {
         let mut pass = ElabFuncBodyPass::default();
 
         // Transform when not in Mode::Mhhi should be unchanged
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert!(!elem.fb_ast.is_empty());
 
         // Transform when in Mode::Mhhi should result in [fb_ast] being cleared
         pass.mode = file_info::Mode::Mhhi;
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert!(elem.fb_ast.is_empty());
     }
 }

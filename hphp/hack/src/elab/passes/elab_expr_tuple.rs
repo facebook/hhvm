@@ -9,8 +9,8 @@ use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
 use crate::elab_utils;
+use crate::env::Env;
 use crate::Pass;
 
 /// Replace empty tuples with invalid expressions and record errors.
@@ -21,7 +21,7 @@ impl Pass for ElabExprTuplePass {
     fn on_ty_expr_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         if let Expr(_annot, pos, Expr_::Tuple(es)) = elem {
             if es.is_empty() {
@@ -33,7 +33,7 @@ impl Pass for ElabExprTuplePass {
                 // `elem`.
                 *elem = elab_utils::expr::invalid(expr);
                 // Record the error and break.
-                cfg.emit_error(NamingError::TooFewArguments(pos));
+                env.emit_error(NamingError::TooFewArguments(pos));
                 return ControlFlow::Break(());
             }
         }
@@ -50,12 +50,12 @@ mod tests {
 
     #[test]
     fn test_empty_tuple() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprTuplePass;
 
         let mut elem: Expr<(), ()> = elab_utils::expr::from_expr_(Expr_::Tuple(vec![]));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert!(matches!(elem, Expr(_, _, Expr_::Invalid(_))));
     }
 }

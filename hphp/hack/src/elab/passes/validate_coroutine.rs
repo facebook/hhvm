@@ -17,7 +17,7 @@ use oxidized::aast_defs::UsingStmt;
 use oxidized::ast_defs::FunKind;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -58,7 +58,7 @@ impl Pass for ValidateCoroutinePass {
     fn on_ty_stmt_bottom_up<Ex, En>(
         &mut self,
         elem: &mut Stmt<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -67,7 +67,7 @@ impl Pass for ValidateCoroutinePass {
             Stmt_::Using(box UsingStmt {
                 has_await, exprs, ..
             }) if *has_await && self.is_sync() => {
-                cfg.emit_error(NastCheckError::AwaitInSyncFunction {
+                env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: exprs.0.clone(),
                     func_pos: None,
                 })
@@ -75,19 +75,19 @@ impl Pass for ValidateCoroutinePass {
             Stmt_::Foreach(box (_, AsExpr::AwaitAsV(pos, _) | AsExpr::AwaitAsKv(pos, _, _), _))
                 if self.is_sync() =>
             {
-                cfg.emit_error(NastCheckError::AwaitInSyncFunction {
+                env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: pos.clone(),
                     func_pos: None,
                 })
             }
             Stmt_::Awaitall(..) if self.is_sync() => {
-                cfg.emit_error(NastCheckError::AwaitInSyncFunction {
+                env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: elem.0.clone(),
                     func_pos: None,
                 })
             }
             Stmt_::Return(box Some(_)) if self.is_generator() => {
-                cfg.emit_error(NastCheckError::ReturnInGen(elem.0.clone()))
+                env.emit_error(NastCheckError::ReturnInGen(elem.0.clone()))
             }
             _ => (),
         }
@@ -97,14 +97,14 @@ impl Pass for ValidateCoroutinePass {
     fn on_ty_expr_top_down<Ex, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         match elem.2 {
             Expr_::Await(..) if self.is_sync() => {
-                cfg.emit_error(NastCheckError::AwaitInSyncFunction {
+                env.emit_error(NastCheckError::AwaitInSyncFunction {
                     pos: elem.1.clone(),
                     func_pos: self.func_pos.clone(),
                 })
@@ -117,7 +117,7 @@ impl Pass for ValidateCoroutinePass {
     fn on_ty_method__top_down<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -130,7 +130,7 @@ impl Pass for ValidateCoroutinePass {
     fn on_ty_fun_def_top_down<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,

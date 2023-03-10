@@ -22,7 +22,7 @@ use oxidized::ast_defs::Tprim;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_phase_error::ExperimentalFeature;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Copy, Clone, Default)]
@@ -33,7 +33,7 @@ impl Pass for ElabClassVarsPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         let const_user_attr_opt = elem
             .user_attributes
@@ -67,7 +67,7 @@ impl Pass for ElabClassVarsPass {
         // Represent xhp_attrs as vars
         elem.xhp_attrs
             .drain(0..)
-            .for_each(|xhp_attr| elem.vars.push(class_var_of_xhp_attr(xhp_attr, cfg)));
+            .for_each(|xhp_attr| elem.vars.push(class_var_of_xhp_attr(xhp_attr, env)));
 
         // If this is an interface mark all methods as abstract
         if matches!(elem.kind, ClassishKind::Cinterface) {
@@ -98,7 +98,7 @@ impl Pass for ElabClassVarsPass {
 //  ii) the list of `Expr` can actually only be int or string literals
 //  iii) `ClassVar` `XhpAttrInfo` `enum_values` already contains a validated and restricted
 //       representation of the `Expr`s
-fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, cfg: &Config) -> ClassVar<Ex, En> {
+fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, env: &Env) -> ClassVar<Ex, En> {
     let XhpAttr(type_hint, mut cv, xhp_attr_tag_opt, enum_opt) = xhp_attr;
     let is_required = xhp_attr_tag_opt.is_some();
     let has_default = if let Some(Expr(_, _, expr_)) = &cv.expr {
@@ -133,7 +133,7 @@ fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, cfg: &Config) -> Cla
             // error and put back the `Hint_`
             Hint_::Hoption(_) if is_required => {
                 let Id(_, attr_name) = &cv.id;
-                cfg.emit_error(NamingError::XhpOptionalRequiredAttr {
+                env.emit_error(NamingError::XhpOptionalRequiredAttr {
                     pos: hint.0.clone(),
                     attr_name: attr_name.clone(),
                 });
@@ -152,7 +152,7 @@ fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, cfg: &Config) -> Cla
     // `xhp_hint`
     // If both are present wrap the hint in an `Hlike` using the position;
     // raise an error if like hints aren't enabled
-    if !cfg.like_type_hints_enabled() {
+    if !env.like_type_hints_enabled() {
         if let Some((pos, Hint(_, hint_))) = cv
             .xhp_attr
             .as_ref()
@@ -160,7 +160,7 @@ fn class_var_of_xhp_attr<Ex, En>(xhp_attr: XhpAttr<Ex, En>, cfg: &Config) -> Cla
             .zip(hint_opt.as_ref())
         {
             if matches!(hint_ as &Hint_, Hint_::Hlike(_)) {
-                cfg.emit_error(ExperimentalFeature::LikeType(pos.clone()))
+                env.emit_error(ExperimentalFeature::LikeType(pos.clone()))
             }
         }
     }

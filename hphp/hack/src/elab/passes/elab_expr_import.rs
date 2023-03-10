@@ -9,7 +9,7 @@ use oxidized::aast_defs::Expr;
 use oxidized::aast_defs::Expr_;
 use oxidized::tast::Pos;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -22,7 +22,7 @@ impl Pass for ElabExprImportPass {
     fn on_ty_expr_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         let Expr(_, _, expr_) = elem;
         match expr_ {
@@ -52,7 +52,7 @@ mod tests {
 
     #[test]
     fn test_val_collection_empty() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprImportPass;
         let mut elem: Expr<(), ()> = Expr(
@@ -64,7 +64,7 @@ mod tests {
             ))),
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         let Expr(_, _, expr_) = elem;
         assert!(matches!(expr_, Expr_::Invalid(_)));

@@ -13,7 +13,7 @@ use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -23,13 +23,13 @@ impl Pass for ValidateClassMethodsPass {
     fn on_ty_class__bottom_up<Ex: Default, En>(
         &mut self,
         class: &mut Class_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         let mut seen = HashSet::<&str>::new();
         for method in class.methods.iter() {
             let Id(pos, name) = &method.name;
             if seen.contains(name as &str) {
-                cfg.emit_error(NamingError::AlreadyBound {
+                env.emit_error(NamingError::AlreadyBound {
                     pos: pos.clone(),
                     name: name.clone(),
                 });
@@ -42,7 +42,7 @@ impl Pass for ValidateClassMethodsPass {
     fn on_ty_method__bottom_up<Ex: Default, En>(
         &mut self,
         method: &mut Method_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         if method.abstract_
             && method.user_attributes.iter().any(|attr| {
@@ -50,7 +50,7 @@ impl Pass for ValidateClassMethodsPass {
                 ua == sn::user_attributes::MEMOIZE || ua == sn::user_attributes::MEMOIZE_LSB
             })
         {
-            cfg.emit_error(NastCheckError::AbstractMethodMemoize(method.span.clone()))
+            env.emit_error(NastCheckError::AbstractMethodMemoize(method.span.clone()))
         }
         ControlFlow::Continue(())
     }
@@ -71,12 +71,12 @@ mod tests {
     use oxidized::ast::Id;
     use oxidized::ast_defs::Abstraction;
     use oxidized::ast_defs::ClassishKind;
-    use oxidized::namespace_env::Env;
+    use oxidized::namespace_env;
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::config::ProgramSpecificOptions;
+    use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
     fn mk_method(
@@ -134,7 +134,7 @@ mod tests {
             methods,
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: RcOc::new(Env::empty(vec![], false, false)),
+            namespace: RcOc::new(namespace_env::Env::empty(vec![], false, false)),
             user_attributes: Default::default(),
             file_attributes: vec![],
             docs_url: None,
@@ -148,7 +148,7 @@ mod tests {
 
     #[test]
     fn test_multiply_bound_method_name() {
-        let cfg = Config::new(
+        let env = Env::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -157,16 +157,16 @@ mod tests {
         let n = mk_method("foo".to_string(), false, vec![]);
         let mut class = mk_class("Foo".to_string(), vec![m, n]);
 
-        class.transform(&cfg, &mut ValidateClassMethodsPass);
+        class.transform(&env, &mut ValidateClassMethodsPass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ));
     }
 
     #[test]
     fn test_abstract_memoized_method() {
-        let cfg = Config::new(
+        let env = Env::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -176,9 +176,9 @@ mod tests {
             params: vec![],
         };
         let mut method = mk_method("foo".to_string(), true, vec![memoized_attr]);
-        method.transform(&cfg, &mut ValidateClassMethodsPass);
+        method.transform(&env, &mut ValidateClassMethodsPass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::NastCheck(
                 NastCheckError::AbstractMethodMemoize(_)
             )]

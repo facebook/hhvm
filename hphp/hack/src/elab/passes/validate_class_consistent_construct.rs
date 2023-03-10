@@ -10,7 +10,7 @@ use oxidized::aast_defs::Class_;
 use oxidized::ast::ClassishKind;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -20,9 +20,9 @@ impl Pass for ValidateClassConsistentConstructPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         class: &mut Class_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        if cfg.consistent_ctor_level <= 0 {
+        if env.consistent_ctor_level <= 0 {
             return ControlFlow::Continue(());
         }
         let attr_pos_opt = class
@@ -40,9 +40,9 @@ impl Pass for ValidateClassConsistentConstructPass {
             // `consistent_ctor_level` > 1, it's an error.
             Some(pos)
                 if !has_ctor
-                    && (class.kind == ClassishKind::Ctrait || cfg.consistent_ctor_level > 1) =>
+                    && (class.kind == ClassishKind::Ctrait || env.consistent_ctor_level > 1) =>
             {
-                cfg.emit_error(NamingError::ExplicitConsistentConstructor {
+                env.emit_error(NamingError::ExplicitConsistentConstructor {
                     classish_kind: class.kind,
                     pos: pos.clone(),
                 })

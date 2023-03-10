@@ -10,7 +10,7 @@ use oxidized::ast_defs::Id;
 use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -20,14 +20,14 @@ impl Pass for ElabUserAttributesPass {
     fn on_ty_user_attributes_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut UserAttributes<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         let mut seen: HashMap<String, Pos> = HashMap::default();
         let UserAttributes(uas) = elem;
         uas.retain(|ua| {
             let Id(pos, attr_name) = &ua.name;
             if let Some(prev_pos) = seen.get(attr_name) {
-                cfg.emit_error(NamingError::DuplicateUserAttribute {
+                env.emit_error(NamingError::DuplicateUserAttribute {
                     pos: pos.clone(),
                     attr_name: attr_name.clone(),
                     prev_pos: prev_pos.clone(),
@@ -52,7 +52,7 @@ mod tests {
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]
     fn test_ciexpr_id_class_ref() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabUserAttributesPass;
         let mut elem: UserAttributes<(), ()> = UserAttributes(vec![
@@ -82,8 +82,8 @@ mod tests {
             },
         ]);
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert_eq!(elem.len(), 2);
-        assert_eq!(cfg.into_errors().len(), 4);
+        assert_eq!(env.into_errors().len(), 4);
     }
 }

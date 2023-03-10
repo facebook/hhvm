@@ -11,7 +11,7 @@ use oxidized::aast_defs::Lid;
 use oxidized::local_id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Copy, Clone, Default)]
@@ -21,26 +21,26 @@ impl Pass for ElabAsExprPass {
     fn on_ty_as_expr_bottom_up<Ex, En>(
         &mut self,
         elem: &mut oxidized::tast::AsExpr<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         match elem {
-            AsExpr::AsV(e) | AsExpr::AwaitAsV(_, e) => elab_value(cfg, e),
+            AsExpr::AsV(e) | AsExpr::AwaitAsV(_, e) => elab_value(env, e),
             AsExpr::AsKv(ek, ev) | AsExpr::AwaitAsKv(_, ek, ev) => {
-                elab_key(cfg, ek);
-                elab_value(cfg, ev);
+                elab_key(env, ek);
+                elab_value(env, ev);
             }
         }
         ControlFlow::Continue(())
     }
 }
 
-fn elab_value<Ex, En>(cfg: &Config, expr: &mut Expr<Ex, En>) {
+fn elab_value<Ex, En>(env: &Env, expr: &mut Expr<Ex, En>) {
     let Expr(_, pos, expr_) = expr;
     if matches!(expr_, Expr_::Id(..)) {
-        cfg.emit_error(NamingError::ExpectedVariable(pos.clone()));
+        env.emit_error(NamingError::ExpectedVariable(pos.clone()));
         *expr_ = Expr_::Lvar(Box::new(Lid(
             pos.clone(),
             local_id::make_unscoped("__internal_placeholder"),
@@ -48,12 +48,12 @@ fn elab_value<Ex, En>(cfg: &Config, expr: &mut Expr<Ex, En>) {
     }
 }
 
-fn elab_key<Ex, En>(cfg: &Config, expr: &mut Expr<Ex, En>) {
+fn elab_key<Ex, En>(env: &Env, expr: &mut Expr<Ex, En>) {
     let Expr(_, pos, expr_) = expr;
     match expr_ {
         Expr_::Lvar(..) | Expr_::Lplaceholder(..) => (),
         _ => {
-            cfg.emit_error(NamingError::ExpectedVariable(pos.clone()));
+            env.emit_error(NamingError::ExpectedVariable(pos.clone()));
             *expr_ = Expr_::Lvar(Box::new(Lid(
                 pos.clone(),
                 local_id::make_unscoped("__internal_placeholder"),
@@ -75,7 +75,7 @@ mod tests {
 
     #[test]
     fn test_value_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabAsExprPass;
 
@@ -84,10 +84,10 @@ mod tests {
             Pos::default(),
             Expr_::Id(Box::new(Id(Pos::default(), String::default()))),
         ));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::ExpectedVariable(..))]
         ));
         assert!(match elem {
@@ -99,29 +99,29 @@ mod tests {
 
     #[test]
     fn test_value_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabAsExprPass;
 
         let mut elem: AsExpr<(), ()> = AsExpr::AsV(elab_utils::expr::null());
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(matches!(elem, AsExpr::AsV(Expr(_, _, Expr_::Null))))
     }
 
     #[test]
     fn test_key_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabAsExprPass;
 
         let mut elem: AsExpr<(), ()> =
             AsExpr::AsKv(elab_utils::expr::null(), elab_utils::expr::null());
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::ExpectedVariable(..))]
         ));
         assert!(match elem {
@@ -133,7 +133,7 @@ mod tests {
 
     #[test]
     fn test_key_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabAsExprPass;
 
@@ -141,9 +141,9 @@ mod tests {
             Expr((), Pos::default(), Expr_::Lplaceholder(Box::default())),
             elab_utils::expr::null(),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(matches!(
             elem,
             AsExpr::AsKv(Expr(_, _, Expr_::Lplaceholder(..)), Expr(_, _, Expr_::Null))

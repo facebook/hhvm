@@ -19,13 +19,13 @@ macro_rules! passes {
     };
 }
 
-pub mod config;
 mod elab_utils;
+mod env;
 mod pass;
 mod passes;
 mod transform;
 
-use config::ProgramSpecificOptions;
+use env::ProgramSpecificOptions;
 use oxidized::ast;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::typechecker_options::TypecheckerOptions;
@@ -70,7 +70,7 @@ fn elaborate<T: Transform>(
     tco: &TypecheckerOptions,
     pso: &ProgramSpecificOptions,
 ) -> Vec<NamingPhaseError> {
-    let cfg = config::Config::new(tco, pso);
+    let env = env::Env::new(tco, pso);
 
     #[rustfmt::skip]
     let mut passes = passes![
@@ -240,6 +240,6 @@ fn elaborate<T: Transform>(
         passes::validate_class_member::ValidateClassMemberPass::default(),
     ];
 
-    node.transform(&cfg, &mut passes);
-    cfg.into_errors()
+    node.transform(&env, &mut passes);
+    env.into_errors()
 }

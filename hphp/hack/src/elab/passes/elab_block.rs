@@ -10,7 +10,7 @@ use oxidized::aast_defs::Stmt;
 use oxidized::aast_defs::Stmt_;
 use oxidized::aast_defs::UsingStmt;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -20,7 +20,7 @@ impl Pass for ElabBlockPass {
     fn on_ty_block_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Block<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         let mut q: VecDeque<_> = elem.drain(0..).collect();
         while let Some(Stmt(pos, stmt_)) = q.pop_front() {
@@ -35,7 +35,7 @@ impl Pass for ElabBlockPass {
     fn on_ty_using_stmt_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut UsingStmt<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         elem.is_block_scoped = false;
         ControlFlow::Continue(())
@@ -55,7 +55,7 @@ mod tests {
 
     #[test]
     fn test() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabBlockPass;
 
@@ -91,7 +91,7 @@ mod tests {
                 Stmt(Pos::NONE, Stmt_::Noop),
             ])),
         )]);
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         assert_eq!(elem.len(), 9);
         assert!(elem.into_iter().all(|s| matches!(s.1, Stmt_::Noop)));

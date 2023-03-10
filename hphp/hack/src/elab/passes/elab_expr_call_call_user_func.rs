@@ -13,8 +13,8 @@ use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
 use crate::elab_utils;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -24,7 +24,7 @@ impl Pass for ElabExprCallCallUserFuncPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Call(box (
@@ -34,11 +34,11 @@ impl Pass for ElabExprCallCallUserFuncPass {
                 _,
             )) if fn_name == sn::std_lib_functions::CALL_USER_FUNC && fn_param_exprs.is_empty() => {
                 // We're cloning here since we need to preserve the entire expression
-                cfg.emit_error(NamingError::DeprecatedUse {
+                env.emit_error(NamingError::DeprecatedUse {
                     pos: fn_expr_pos.clone(),
                     fn_name: fn_name.clone(),
                 });
-                cfg.emit_error(NamingError::TooFewArguments(fn_expr_pos.clone()));
+                env.emit_error(NamingError::TooFewArguments(fn_expr_pos.clone()));
                 let inner_expr_ = std::mem::replace(elem, Expr_::Null);
                 let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
                 *elem = Expr_::Invalid(Box::new(Some(inner_expr)));
@@ -46,14 +46,14 @@ impl Pass for ElabExprCallCallUserFuncPass {
             }
 
             Expr_::Call(box (fn_expr, _, fn_param_exprs, fn_variadic_param_opt))
-                if is_expr_call_user_func(cfg, fn_expr) && !fn_param_exprs.is_empty() =>
+                if is_expr_call_user_func(env, fn_expr) && !fn_param_exprs.is_empty() =>
             {
                 // remove the first element of `fn_param_exprs`
                 let (param_kind, head_expr) = fn_param_exprs.remove(0);
                 // raise an error if this is an inout param
                 if let ParamKind::Pinout(pk_pos) = &param_kind {
                     let pos = Pos::merge(pk_pos, &fn_expr.1).unwrap();
-                    cfg.emit_error(NastCheckError::InoutInTransformedPseudofunction {
+                    env.emit_error(NastCheckError::InoutInTransformedPseudofunction {
                         pos,
                         fn_name: sn::std_lib_functions::CALL_USER_FUNC.to_string(),
                     })
@@ -69,10 +69,10 @@ impl Pass for ElabExprCallCallUserFuncPass {
     }
 }
 
-fn is_expr_call_user_func<Ex, En>(cfg: &Config, expr: &Expr<Ex, En>) -> bool {
+fn is_expr_call_user_func<Ex, En>(env: &Env, expr: &Expr<Ex, En>) -> bool {
     match expr {
         Expr(_, pos, Expr_::Id(box id)) if id.name() == sn::std_lib_functions::CALL_USER_FUNC => {
-            cfg.emit_error(NamingError::DeprecatedUse {
+            env.emit_error(NamingError::DeprecatedUse {
                 pos: pos.clone(),
                 fn_name: id.name().to_string(),
             });
@@ -93,7 +93,7 @@ mod tests {
 
     #[test]
     fn test_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprCallCallUserFuncPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
@@ -109,10 +109,10 @@ mod tests {
             vec![(ParamKind::Pnormal, elab_utils::expr::null())],
             None,
         )));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         // Expect one deprecation error in the valid case
-        let depr_err_opt = cfg.into_errors().pop();
+        let depr_err_opt = env.into_errors().pop();
         assert!(matches!(
             depr_err_opt,
             Some(NamingPhaseError::Naming(NamingError::DeprecatedUse { .. }))
@@ -130,7 +130,7 @@ mod tests {
 
     #[test]
     fn test_no_args() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprCallCallUserFuncPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
@@ -146,8 +146,8 @@ mod tests {
             vec![],
             None,
         )));
-        elem.transform(&cfg, &mut pass);
-        let mut errs = cfg.into_errors();
+        elem.transform(&env, &mut pass);
+        let mut errs = env.into_errors();
 
         // Expect errors for too few args and deprecation
         let too_few_args_err_opt = errs.pop();

@@ -20,7 +20,7 @@ use oxidized::ast_defs::Pos;
 use oxidized::naming_error::NamingError;
 use oxidized::tast::Tprim;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -53,7 +53,7 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_typedef_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Typedef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
@@ -62,7 +62,7 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_gconst_top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut Gconst<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.reset_tparams();
         ControlFlow::Continue(())
@@ -71,7 +71,7 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_fun_def_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.set_tparams(&elem.fun.tparams);
         ControlFlow::Continue(())
@@ -80,7 +80,7 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_module_def_top_down<Ex: Default, En>(
         &mut self,
         _elem: &mut ModuleDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.reset_tparams();
         ControlFlow::Continue(())
@@ -90,7 +90,7 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
@@ -100,7 +100,7 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_method__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.extend_tparams(&elem.tparams);
         ControlFlow::Continue(())
@@ -109,13 +109,13 @@ impl Pass for ElabHintHapplyPass {
     fn on_ty_tparam_top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Tparam<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.extend_tparams(&elem.parameters);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
         match &mut *elem.1 {
             Hint_::Happly(id, hints) => match canonical_happly(id, hints, self.tparams()) {
                 ControlFlow::Continue((hint_opt, err_opt)) => {
@@ -123,7 +123,7 @@ impl Pass for ElabHintHapplyPass {
                         *elem.1 = hint_
                     }
                     if let Some(err) = err_opt {
-                        cfg.emit_error(err)
+                        env.emit_error(err)
                     }
                     ControlFlow::Continue(())
                 }
@@ -131,7 +131,7 @@ impl Pass for ElabHintHapplyPass {
                     if let Some(hint_) = hint_opt {
                         *elem.1 = hint_
                     }
-                    cfg.emit_error(err);
+                    env.emit_error(err);
                     ControlFlow::Break(())
                 }
             },
@@ -368,7 +368,7 @@ mod tests {
 
     #[test]
     fn test_vec_or_dict_two_tyargs() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHapplyPass::default();
 
@@ -383,7 +383,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         let Hint(_, hint_) = elem;
         assert!(match &*hint_ {
             Hint_::HvecOrDict(Some(h1), h2) => {
@@ -397,7 +397,7 @@ mod tests {
 
     #[test]
     fn test_vec_or_dict_one_tyargs() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHapplyPass::default();
 
@@ -409,7 +409,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         let Hint(_, hint_) = elem;
         assert!(match &*hint_ {
             Hint_::HvecOrDict(None, h) => {
@@ -422,7 +422,7 @@ mod tests {
 
     #[test]
     fn test_vec_or_dict_zero_tyargs() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHapplyPass::default();
 
@@ -434,7 +434,7 @@ mod tests {
             )),
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         let Hint(_, hint_) = elem;
         assert!(match &*hint_ {
             Hint_::HvecOrDict(None, h) => {

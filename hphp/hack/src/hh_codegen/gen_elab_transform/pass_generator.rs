@@ -29,7 +29,7 @@ pub fn gen(ctx: &Context) -> TokenStream {
         use oxidized::ast_defs::*;
         use oxidized::aast_defs::*;
 
-        use crate::config::Config;
+        use crate::env::Env;
 
         pub trait Pass {
             #(#pass_methods)*
@@ -82,7 +82,7 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         fn #name_td #ty_params(
             &mut self,
             elem: &mut #ty #ty_generics,
-            cfg: &Config,
+            env: &Env,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -91,7 +91,7 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         fn #name_bu #ty_params(
             &mut self,
             elem: &mut #ty #ty_generics,
-            cfg: &Config,
+            env: &Env,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }
@@ -111,8 +111,8 @@ impl Body {
         match self {
             Body::Default => quote!(Continue(())),
             Body::Passes => quote! {
-                self.fst.#name(elem, cfg)?;
-                self.snd.#name(elem, cfg)
+                self.fst.#name(elem, env)?;
+                self.snd.#name(elem, env)
             },
         }
     }
@@ -162,7 +162,7 @@ fn gen_fld_method(
         fn #name_td <#(#ty_params,)*>(
             &mut self,
             elem: &mut #field_ty,
-            cfg: &Config,
+            env: &Env,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -171,7 +171,7 @@ fn gen_fld_method(
         fn #name_bu <#(#ty_params,)*>(
             &mut self,
             elem: &mut #field_ty,
-            cfg: &Config,
+            env: &Env,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }
@@ -201,7 +201,7 @@ fn gen_ctor_method(
         fn #name_td <#(#ty_params,)*>(
             &mut self,
             elem: &mut #variant_ty,
-            cfg: &Config,
+            env: &Env,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_td
         }
@@ -210,7 +210,7 @@ fn gen_ctor_method(
         fn #name_bu <#(#ty_params,)*>(
             &mut self,
             elem: &mut #variant_ty,
-            cfg: &Config,
+            env: &Env,
         ) -> ControlFlow<(), ()> #where_clause {
             #body_bu
         }

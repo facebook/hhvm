@@ -14,7 +14,7 @@ use oxidized::ast_defs::ClassishKind;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -25,7 +25,7 @@ impl Pass for ElabEnumClassPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         if let Some(enum_) = &elem.enum_ {
             let Id(pos, _) = &elem.name;
@@ -62,16 +62,16 @@ impl Pass for ElabEnumClassPass {
     fn on_ty_hint__top_down(
         &mut self,
         elem: &mut oxidized::tast::Hint_,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        if !(cfg.is_hhi() || cfg.is_systemlib()) {
+        if !(env.is_hhi() || env.is_systemlib()) {
             match elem {
                 Hint_::Happly(Id(pos, ty_name), _)
                     if ty_name == sn::classes::HH_BUILTIN_ENUM
                         || ty_name == sn::classes::HH_BUILTIN_ENUM_CLASS
                         || ty_name == sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS =>
                 {
-                    cfg.emit_error(NamingError::UsingInternalClass {
+                    env.emit_error(NamingError::UsingInternalClass {
                         pos: pos.clone(),
                         class_name: ty_name.clone(),
                     })
@@ -89,7 +89,7 @@ mod tests {
     use ocamlrep::rc::RcOc;
     use oxidized::aast_defs::Enum_;
     use oxidized::aast_defs::UserAttributes;
-    use oxidized::namespace_env::Env;
+    use oxidized::namespace_env;
     use oxidized::s_map::SMap;
     use oxidized::tast::Pos;
 
@@ -120,7 +120,7 @@ mod tests {
             methods: vec![],
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: RcOc::new(Env {
+            namespace: RcOc::new(namespace_env::Env {
                 ns_uses: SMap::default(),
                 class_uses: SMap::default(),
                 fun_uses: SMap::default(),
@@ -143,7 +143,7 @@ mod tests {
 
     #[test]
     fn test_enum_class_concrete() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabEnumClassPass;
 
@@ -156,7 +156,7 @@ mod tests {
             },
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {
@@ -181,7 +181,7 @@ mod tests {
 
     #[test]
     fn test_enum_class_abstract() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabEnumClassPass;
 
@@ -194,7 +194,7 @@ mod tests {
             },
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {
@@ -207,7 +207,7 @@ mod tests {
 
     #[test]
     fn test_enum() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabEnumClassPass;
 
@@ -220,7 +220,7 @@ mod tests {
             },
         );
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         let Hint(_, hint_) = &mut elem.extends.pop().unwrap();
 
         assert!(match &mut **hint_ {

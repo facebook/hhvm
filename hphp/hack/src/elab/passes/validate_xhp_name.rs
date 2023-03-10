@@ -9,18 +9,18 @@ use oxidized::aast_defs::Hint_;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateXhpNamePass;
 
 impl Pass for ValidateXhpNamePass {
-    fn on_ty_hint__top_down(&mut self, hint_: &mut Hint_, cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, hint_: &mut Hint_, env: &Env) -> ControlFlow<(), ()> {
         match hint_ {
             // "some common Xhp screw ups"
             Hint_::Happly(Id(pos, name), _) if ["Xhp", ":Xhp", "XHP"].contains(&name.as_str()) => {
-                cfg.emit_error(NamingError::DisallowedXhpType {
+                env.emit_error(NamingError::DisallowedXhpType {
                     pos: pos.clone(),
                     ty_name: name.clone(),
                 })
@@ -42,14 +42,14 @@ mod tests {
 
     #[test]
     fn test_bad_xhp_name() {
-        let cfg = Config::default();
+        let env = Env::default();
         let mut pass = ValidateXhpNamePass;
 
         let mut hint_ = Hint_::Happly(Id(Pos::NONE, "Xhp".to_string()), vec![]);
 
-        hint_.transform(&cfg, &mut pass);
+        hint_.transform(&env, &mut pass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             &[NamingPhaseError::Naming(
                 NamingError::DisallowedXhpType { .. }
             )]

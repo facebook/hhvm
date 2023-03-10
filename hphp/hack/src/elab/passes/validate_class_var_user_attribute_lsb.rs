@@ -9,7 +9,7 @@ use oxidized::aast_defs::ClassVar;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -21,7 +21,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
     fn on_ty_class__bottom_up<Ex, En>(
         &mut self,
         elem: &mut oxidized::aast::Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -37,7 +37,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
     fn on_ty_class_var_bottom_up<Ex, En>(
         &mut self,
         elem: &mut ClassVar<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -50,11 +50,11 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
         {
             // Non-static properties cannot have attribute `__LSB`
             if !elem.is_static {
-                cfg.emit_error(NamingError::NonstaticPropertyWithLsb(ua.name.pos().clone()))
+                env.emit_error(NamingError::NonstaticPropertyWithLsb(ua.name.pos().clone()))
             }
             // `__LSB` attribute is unnecessary in final classes
             if let Some(id) = &self.final_class {
-                cfg.emit_error(NamingError::UnnecessaryAttribute {
+                env.emit_error(NamingError::UnnecessaryAttribute {
                     pos: ua.name.pos().clone(),
                     attr: sn::user_attributes::LSB.to_string(),
                     class_pos: id.pos().clone(),

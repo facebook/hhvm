@@ -11,7 +11,7 @@ use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::naming_error::NamingError;
 use oxidized::nast::ShapeFieldName;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -29,7 +29,7 @@ impl Pass for ElabShapeFieldNamePass {
     fn on_ty_class__top_down<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -41,7 +41,7 @@ impl Pass for ElabShapeFieldNamePass {
     fn on_ty_expr__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -49,7 +49,7 @@ impl Pass for ElabShapeFieldNamePass {
         match elem {
             Expr_::Shape(fields) => fields
                 .iter_mut()
-                .for_each(|(nm, _)| canonical_shape_name(cfg, nm, &self.current_class)),
+                .for_each(|(nm, _)| canonical_shape_name(env, nm, &self.current_class)),
             _ => (),
         }
         ControlFlow::Continue(())
@@ -58,20 +58,20 @@ impl Pass for ElabShapeFieldNamePass {
     fn on_ty_shape_field_info_bottom_up(
         &mut self,
         elem: &mut ShapeFieldInfo,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        canonical_shape_name(cfg, &mut elem.name, &self.current_class);
+        canonical_shape_name(env, &mut elem.name, &self.current_class);
         ControlFlow::Continue(())
     }
 }
 
-fn canonical_shape_name(cfg: &Config, nm: &mut ShapeFieldName, current_class: &Option<String>) {
+fn canonical_shape_name(env: &Env, nm: &mut ShapeFieldName, current_class: &Option<String>) {
     match (nm, current_class) {
         (ShapeFieldName::SFclassConst(id, _), Some(cls_nm)) if id.name() == sn::classes::SELF => {
             id.1 = cls_nm.to_string();
         }
         (ShapeFieldName::SFclassConst(id, _), _) if id.name() == sn::classes::SELF => {
-            cfg.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
+            env.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
             id.1 = sn::classes::UNKNOWN.to_string();
         }
         _ => (),
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_shape_in_class() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let class_name = "Classy";
         let mut pass = ElabShapeFieldNamePass {
@@ -108,10 +108,10 @@ mod tests {
             ),
             elab_utils::expr::null(),
         )]);
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         // Expect no errors
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
 
         assert!(if let Expr_::Shape(mut fields) = elem {
             let field_opt = fields.pop();
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_shape_field_info_in_class() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let class_name = "Classy";
         let mut pass = ElabShapeFieldNamePass {
@@ -140,10 +140,10 @@ mod tests {
                 (Pos::default(), String::default()),
             ),
         };
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         // Expect no errors
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
 
         assert!(match elem.name {
             ShapeFieldName::SFclassConst(id, _) => id.name() == class_name,
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_shape_not_in_class() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabShapeFieldNamePass::default();
         let mut elem: Expr_<(), ()> = Expr_::Shape(vec![(
@@ -165,9 +165,9 @@ mod tests {
             ),
             elab_utils::expr::null(),
         )]);
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let self_outside_class_err_opt = cfg.into_errors().pop();
+        let self_outside_class_err_opt = env.into_errors().pop();
         assert!(matches!(
             self_outside_class_err_opt,
             Some(NamingPhaseError::Naming(NamingError::SelfOutsideClass(..)))
@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn test_shape_field_info_not_in_class() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabShapeFieldNamePass::default();
         let mut elem = ShapeFieldInfo {
@@ -197,9 +197,9 @@ mod tests {
                 (Pos::default(), String::default()),
             ),
         };
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let self_outside_class_err_opt = cfg.into_errors().pop();
+        let self_outside_class_err_opt = env.into_errors().pop();
         assert!(matches!(
             self_outside_class_err_opt,
             Some(NamingPhaseError::Naming(NamingError::SelfOutsideClass(..)))

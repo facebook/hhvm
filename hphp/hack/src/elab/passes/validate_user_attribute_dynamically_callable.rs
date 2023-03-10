@@ -15,7 +15,7 @@ use oxidized::aast_defs::Visibility;
 use oxidized::naming_error::NamingError;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Copy, Clone, Default)]
@@ -25,7 +25,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
     fn on_ty_fun__top_down<Ex, En>(
         &mut self,
         elem: &mut Fun_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -34,7 +34,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
             .into_iter()
             .for_each(|pos| {
                 if has_reified_generics(&elem.tparams) {
-                    cfg.emit_error(NastCheckError::DynamicallyCallableReified(pos.clone()))
+                    env.emit_error(NastCheckError::DynamicallyCallableReified(pos.clone()))
                 }
             });
 
@@ -44,7 +44,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
     fn on_ty_method__top_down<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -54,7 +54,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
             .for_each(|pos| {
                 match &elem.visibility {
                     Visibility::Private | Visibility::Protected => {
-                        cfg.emit_error(NamingError::IllegalUseOfDynamicallyCallable {
+                        env.emit_error(NamingError::IllegalUseOfDynamicallyCallable {
                             attr_pos: pos.clone(),
                             meth_pos: elem.name.pos().clone(),
                             vis: elem.visibility.into(),
@@ -64,7 +64,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
                 }
 
                 if has_reified_generics(&elem.tparams) {
-                    cfg.emit_error(NastCheckError::DynamicallyCallableReified(pos.clone()))
+                    env.emit_error(NastCheckError::DynamicallyCallableReified(pos.clone()))
                 }
             });
 

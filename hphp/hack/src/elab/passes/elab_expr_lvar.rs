@@ -10,7 +10,7 @@ use oxidized::aast_defs::Lid;
 use oxidized::local_id;
 use oxidized::tast::Pos;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -21,7 +21,7 @@ impl Pass for ElabExprLvarPass {
     fn on_ty_expr__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut oxidized::aast::Expr_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Lvar(lid) => {
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn test_lvar_this() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprLvarPass;
 
@@ -67,13 +67,13 @@ mod tests {
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::THIS),
         )));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert!(matches!(elem, Expr_::This))
     }
 
     #[test]
     fn test_lvar_placeholder() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprLvarPass;
 
@@ -81,13 +81,13 @@ mod tests {
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::PLACEHOLDER),
         )));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert!(matches!(elem, Expr_::Lplaceholder(_)))
     }
 
     #[test]
     fn test_lvar_dollar_dollar() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabExprLvarPass;
 
@@ -95,7 +95,7 @@ mod tests {
             Pos::NONE,
             local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR),
         )));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
         assert!(matches!(elem, Expr_::Dollardollar(_)))
     }
 }

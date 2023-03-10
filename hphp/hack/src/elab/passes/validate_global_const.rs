@@ -13,7 +13,7 @@ use oxidized::aast::Gconst;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -23,15 +23,15 @@ impl Pass for ValidateGlobalConstPass {
     fn on_ty_gconst_bottom_up<Ex: Default, En>(
         &mut self,
         gconst: &mut Gconst<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        error_if_no_typehint(cfg, gconst);
-        error_if_pseudo_constant(cfg, gconst);
+        error_if_no_typehint(env, gconst);
+        error_if_pseudo_constant(env, gconst);
         ControlFlow::Continue(())
     }
 }
 
-fn error_if_no_typehint<Ex, En>(cfg: &Config, gconst: &Gconst<Ex, En>) {
+fn error_if_no_typehint<Ex, En>(env: &Env, gconst: &Gconst<Ex, En>) {
     if !matches!(gconst.mode, Mode::Mhhi) && matches!(gconst.type_, None) {
         let Expr(_, _, expr_) = &gconst.value;
         let Id(pos, const_name) = &gconst.name;
@@ -41,7 +41,7 @@ fn error_if_no_typehint<Ex, En>(cfg: &Config, gconst: &Gconst<Ex, En>) {
             Expr_::Float(_) => "float",
             _ => "mixed",
         };
-        cfg.emit_error(NamingError::ConstWithoutTypehint {
+        env.emit_error(NamingError::ConstWithoutTypehint {
             pos: pos.clone(),
             const_name: const_name.clone(),
             ty_name: ty_name.to_string(),
@@ -49,12 +49,12 @@ fn error_if_no_typehint<Ex, En>(cfg: &Config, gconst: &Gconst<Ex, En>) {
     }
 }
 
-fn error_if_pseudo_constant<Ex, En>(cfg: &Config, gconst: &Gconst<Ex, En>) {
+fn error_if_pseudo_constant<Ex, En>(env: &Env, gconst: &Gconst<Ex, En>) {
     if gconst.namespace.name.is_some() {
         let Id(pos, n) = &gconst.name;
         let name = core_utils_rust::add_ns(core_utils_rust::strip_all_ns(n));
         if sn::pseudo_consts::is_pseudo_const(&name) {
-            cfg.emit_error(NamingError::NameIsReserved {
+            env.emit_error(NamingError::NameIsReserved {
                 pos: pos.clone(),
                 name: name.to_string(),
             });
@@ -72,8 +72,8 @@ mod tests {
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::config::ProgramSpecificOptions;
     use crate::elab_utils;
+    use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
     fn mk_gconst(
@@ -99,14 +99,14 @@ mod tests {
 
     #[test]
     fn test_no_type_hint() {
-        let cfg = Config::new(
+        let env = Env::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
         let mut r#const = mk_gconst("FOO".to_string(), elab_utils::expr::null(), None, None);
-        r#const.transform(&cfg, &mut ValidateGlobalConstPass);
+        r#const.transform(&env, &mut ValidateGlobalConstPass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(
                 NamingError::ConstWithoutTypehint { .. }
             )]
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn test_pseudo_constant() {
-        let cfg = Config::new(
+        let env = Env::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -125,9 +125,9 @@ mod tests {
             Some(elab_utils::hint::null()),
             Some("Foo".to_string()),
         );
-        r#const.transform(&cfg, &mut ValidateGlobalConstPass);
+        r#const.transform(&env, &mut ValidateGlobalConstPass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::NameIsReserved { .. })]
         ));
     }

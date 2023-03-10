@@ -7,7 +7,7 @@ use std::ops::ControlFlow;
 
 use oxidized::aast_defs::Expr_;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -18,7 +18,7 @@ impl Pass for GuardInvalidPass {
     fn on_ty_expr__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         if matches!(elem, Expr_::Invalid(..)) {
             ControlFlow::Break(())
@@ -46,7 +46,7 @@ mod tests {
         fn on_ty_expr__bottom_up<Ex: Default, En>(
             &mut self,
             elem: &mut Expr_<Ex, En>,
-            _cfg: &Config,
+            _env: &Env,
         ) -> ControlFlow<(), ()> {
             match elem {
                 Expr_::Int(..) => *elem = Expr_::Int("0".to_string()),
@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn test() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = passes![GuardInvalidPass, RewriteZero];
 
@@ -76,7 +76,7 @@ mod tests {
             Expr((), Pos::NONE, Expr_::Int("43".to_string())),
         )));
 
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
         assert!(match elem {
             Expr_::Binop(inner) => {

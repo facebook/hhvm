@@ -53,13 +53,13 @@ impl Flags {
 }
 
 #[derive(Debug)]
-pub struct Config {
+pub struct Env {
     flags: Flags,
     errors: RefCell<Vec<NamingPhaseError>>,
     pub consistent_ctor_level: isize,
 }
 
-impl Default for Config {
+impl Default for Env {
     fn default() -> Self {
         Self::new(
             &TypecheckerOptions::default(),
@@ -68,7 +68,7 @@ impl Default for Config {
     }
 }
 
-impl Config {
+impl Env {
     pub fn new(tco: &TypecheckerOptions, pso: &ProgramSpecificOptions) -> Self {
         Self {
             flags: Flags::new(tco, pso),

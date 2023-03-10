@@ -13,7 +13,7 @@ use oxidized::aast_defs::Tprim::*;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -23,7 +23,7 @@ impl Pass for ValidateExprCastPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         expr: &mut Expr_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         match &*expr {
             Expr_::Cast(box (Hint(_, box Hint_::Hprim(Tint | Tbool | Tfloat | Tstring)), _)) => {
@@ -39,7 +39,7 @@ impl Pass for ValidateExprCastPass {
             // `dict`/`vec`--we don't error on this case to preserve behaviour.
             Expr_::Cast(box (Hint(_, box Hint_::Hany), _)) => ControlFlow::Continue(()),
             Expr_::Cast(box (Hint(p, _), _)) => {
-                cfg.emit_error(NamingError::ObjectCast(p.clone()));
+                env.emit_error(NamingError::ObjectCast(p.clone()));
                 ControlFlow::Break(())
             }
             _ => ControlFlow::Continue(()),
@@ -62,8 +62,8 @@ mod tests {
             Hint(Pos::NONE, Box::new(Hint_::Hthis)),
             elab_utils::expr::null(),
         ))));
-        let cfg = Config::default();
-        expr.transform(&cfg, &mut ValidateExprCastPass);
-        assert_eq!(cfg.into_errors().len(), 1);
+        let env = Env::default();
+        expr.transform(&env, &mut ValidateExprCastPass);
+        assert_eq!(env.into_errors().len(), 1);
     }
 }

@@ -13,7 +13,7 @@ use oxidized::ast_defs::Id;
 use oxidized::ast_defs::ParamKind;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Copy, Clone, Default)]
@@ -23,29 +23,29 @@ impl Pass for ValidateFunParamInoutPass {
     fn on_ty_fun_def_bottom_up<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        check_params(cfg, &elem.name, &elem.fun.user_attributes, &elem.fun.params);
+        check_params(env, &elem.name, &elem.fun.user_attributes, &elem.fun.params);
         ControlFlow::Continue(())
     }
     fn on_ty_method__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
-        check_params(cfg, &elem.name, &elem.user_attributes, &elem.params);
+        check_params(env, &elem.name, &elem.user_attributes, &elem.params);
         ControlFlow::Continue(())
     }
 }
 
 fn check_params<Ex, En>(
-    cfg: &Config,
+    env: &Env,
     id: &Id,
     attrs: &UserAttributes<Ex, En>,
     params: &[FunParam<Ex, En>],
@@ -67,12 +67,12 @@ fn check_params<Ex, En>(
                     has_inout_param = Some(fp.pos.clone());
                 }
                 if in_as_set_function {
-                    cfg.emit_error(NastCheckError::InoutParamsSpecial(fp.pos.clone()))
+                    env.emit_error(NastCheckError::InoutParamsSpecial(fp.pos.clone()))
                 }
             }
         });
         if let Some(param_pos) = has_inout_param && has_memoize_user_attr {
-        cfg.emit_error(NastCheckError::InoutParamsMemoize { pos: id.pos().clone(), param_pos })
+        env.emit_error(NastCheckError::InoutParamsMemoize { pos: id.pos().clone(), param_pos })
       }
     }
 }

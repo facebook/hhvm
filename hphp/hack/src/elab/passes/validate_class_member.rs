@@ -10,7 +10,7 @@ use oxidized::aast::Sid;
 use oxidized::ast::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -20,22 +20,22 @@ impl Pass for ValidateClassMemberPass {
     fn on_ty_class__bottom_up<Ex: Default, En>(
         &mut self,
         class: &mut Class_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         let typeconst_names = class.typeconsts.iter().map(|tc| &tc.name);
         let const_names = class.consts.iter().map(|c| &c.id);
-        error_if_repeated_name(cfg, typeconst_names.chain(const_names));
+        error_if_repeated_name(env, typeconst_names.chain(const_names));
         ControlFlow::Continue(())
     }
 }
 
 // We use the same namespace as constants within the class so we cannot have
 // a const and type const with the same name.
-fn error_if_repeated_name<'a>(cfg: &Config, names: impl Iterator<Item = &'a Sid>) {
+fn error_if_repeated_name<'a>(env: &Env, names: impl Iterator<Item = &'a Sid>) {
     let mut seen = hash::HashSet::<&str>::default();
     for Id(pos, name) in names {
         if seen.contains(name as &str) {
-            cfg.emit_error(NamingError::AlreadyBound {
+            env.emit_error(NamingError::AlreadyBound {
                 pos: pos.clone(),
                 name: name.clone(),
             });
@@ -57,13 +57,14 @@ mod tests {
     use oxidized::ast::Id;
     use oxidized::ast_defs::Abstraction;
     use oxidized::ast_defs::ClassishKind;
-    use oxidized::namespace_env::Env;
+    use oxidized::namespace_env;
     use oxidized::naming_phase_error::NamingPhaseError;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::config::ProgramSpecificOptions;
     use crate::elab_utils;
+    use crate::env::Env;
+    use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
     fn mk_class_const(name: String) -> ClassConst<(), ()> {
@@ -118,7 +119,7 @@ mod tests {
             methods: vec![],
             xhp_children: vec![],
             xhp_attrs: vec![],
-            namespace: RcOc::new(Env::empty(vec![], false, false)),
+            namespace: RcOc::new(namespace_env::Env::empty(vec![], false, false)),
             user_attributes: Default::default(),
             file_attributes: vec![],
             docs_url: None,
@@ -132,7 +133,7 @@ mod tests {
 
     #[test]
     fn test_class_constant_names_clash() {
-        let cfg = Config::new(
+        let env = Env::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions::default(),
         );
@@ -141,9 +142,9 @@ mod tests {
             vec![mk_class_const("FOO".to_string())],
             vec![mk_class_typeconst("FOO".to_string())],
         );
-        class.transform(&cfg, &mut ValidateClassMemberPass);
+        class.transform(&env, &mut ValidateClassMemberPass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ));
     }

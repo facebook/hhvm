@@ -13,7 +13,7 @@ use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::WhereConstraintHint;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -62,7 +62,7 @@ impl ElabHintHaccessPass {
 }
 
 impl Pass for ElabHintHaccessPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
         if !self.in_haccess() {
             return ControlFlow::Continue(());
         }
@@ -74,7 +74,7 @@ impl Pass for ElabHintHaccessPass {
                     hints.clear();
                     ControlFlow::Continue(())
                 } else {
-                    cfg.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
+                    env.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
                     *elem.1 = Hint_::Herr;
                     ControlFlow::Break(())
                 }
@@ -83,7 +83,7 @@ impl Pass for ElabHintHaccessPass {
             Hint_::Happly(id, _)
                 if id.name() == sn::classes::STATIC || id.name() == sn::classes::PARENT =>
             {
-                cfg.emit_error(NamingError::InvalidTypeAccessRoot {
+                env.emit_error(NamingError::InvalidTypeAccessRoot {
                     pos: id.pos().clone(),
                     id: Some(id.name().to_string()),
                 });
@@ -101,7 +101,7 @@ impl Pass for ElabHintHaccessPass {
             Hint_::Hvar(..) => ControlFlow::Continue(()),
 
             _ => {
-                cfg.emit_error(NamingError::InvalidTypeAccessRoot {
+                env.emit_error(NamingError::InvalidTypeAccessRoot {
                     pos: elem.0.clone(),
                     id: None,
                 });
@@ -111,7 +111,7 @@ impl Pass for ElabHintHaccessPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _env: &Env) -> ControlFlow<(), ()> {
         self.set_in_haccess(matches!(elem, Hint_::Haccess(..)));
         ControlFlow::Continue(())
     }
@@ -119,7 +119,7 @@ impl Pass for ElabHintHaccessPass {
     fn on_ty_class__top_down<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -131,17 +131,13 @@ impl Pass for ElabHintHaccessPass {
     fn on_ty_where_constraint_hint_top_down(
         &mut self,
         _elem: &mut WhereConstraintHint,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()> {
         self.set_in_where_clause(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_contexts_top_down(
-        &mut self,
-        _elem: &mut Contexts,
-        _cfg: &Config,
-    ) -> ControlFlow<(), ()> {
+    fn on_ty_contexts_top_down(&mut self, _elem: &mut Contexts, _env: &Env) -> ControlFlow<(), ()> {
         self.set_in_context(true);
         ControlFlow::Continue(())
     }
@@ -163,7 +159,7 @@ mod tests {
     #[test]
     // type access through `self` is valid inside a class
     fn test_haccess_self_in_class_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let class_name = "Classy";
         let mut pass = ElabHintHaccessPass {
@@ -183,9 +179,9 @@ mod tests {
                 vec![Id(Pos::default(), "T".to_string())],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(match elem {
             Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Happly(id, hints)), _)) =>
                 id.name() == class_name && hints.is_empty(),
@@ -197,7 +193,7 @@ mod tests {
     // currently we erase any type params to which `self` is applied; adding
     // test for tracking
     fn test_haccess_self_in_class_erased_tparams_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let class_name = "Classy";
         let mut pass = ElabHintHaccessPass {
@@ -217,9 +213,9 @@ mod tests {
                 vec![Id(Pos::default(), "T".to_string())],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(match elem {
             Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Happly(id, hints)), _)) =>
                 id.name() == class_name && hints.is_empty(),
@@ -230,7 +226,7 @@ mod tests {
     #[test]
     // type access through `self` is invalid outside a class
     fn test_haccess_self_outside_class_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHaccessPass::default();
         let mut elem = Hint(
@@ -246,9 +242,9 @@ mod tests {
                 vec![Id(Pos::default(), "T".to_string())],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let err_opt = cfg.into_errors().pop();
+        let err_opt = env.into_errors().pop();
         assert!(matches!(
             err_opt,
             Some(NamingPhaseError::Naming(NamingError::SelfOutsideClass(..)))
@@ -263,7 +259,7 @@ mod tests {
     #[test]
     // type access through `this` is always valid
     fn test_haccess_this_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHaccessPass::default();
         let mut elem = Hint(
@@ -273,9 +269,9 @@ mod tests {
                 vec![Id(Pos::default(), "T".to_string())],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(matches!(
             elem,
             Hint(_, box Hint_::Haccess(Hint(_, box Hint_::Hthis), _))
@@ -286,7 +282,7 @@ mod tests {
     #[test]
     // type access through `static` is invalid
     fn test_haccess_static_in_class_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHaccessPass {
             current_class: Some("Classy".to_string()),
@@ -305,9 +301,9 @@ mod tests {
                 vec![Id(Pos::default(), "T".to_string())],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let err_opt = cfg.into_errors().pop();
+        let err_opt = env.into_errors().pop();
         assert!(matches!(
             err_opt,
             Some(NamingPhaseError::Naming(
@@ -325,7 +321,7 @@ mod tests {
     #[test]
     // type access through type parameter is valid inside a context
     fn test_haccess_tparam_in_context_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHaccessPass::default();
         let mut elem = Contexts(
@@ -341,9 +337,9 @@ mod tests {
                 )),
             )],
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         let Contexts(_, mut hints) = elem;
         assert!(matches!(
             hints.pop(),
@@ -357,7 +353,7 @@ mod tests {
     #[test]
     // type access through type parameter is valid inside a where clause
     fn test_haccess_tparam_in_where_clause_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHaccessPass::default();
         let mut elem = WhereConstraintHint(
@@ -374,9 +370,9 @@ mod tests {
             ConstraintKind::ConstraintSuper,
             Hint(Pos::default(), Box::new(Hint_::Herr)),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         let WhereConstraintHint(hint, _, _) = elem;
         assert!(matches!(
             hint,
@@ -387,7 +383,7 @@ mod tests {
     #[test]
     // type access through type parameter in any other context is invalid
     fn test_haccess_tparam_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ElabHintHaccessPass::default();
         let mut elem = Hint(
@@ -400,9 +396,9 @@ mod tests {
                 vec![Id(Pos::default(), "C".to_string())],
             )),
         );
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        let err_opt = cfg.into_errors().pop();
+        let err_opt = env.into_errors().pop();
         assert!(matches!(
             err_opt,
             Some(NamingPhaseError::Naming(

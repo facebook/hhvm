@@ -17,7 +17,7 @@ use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -44,7 +44,7 @@ impl Pass for ValidateIllegalNamePass {
     fn on_ty_class__top_down<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -56,24 +56,24 @@ impl Pass for ValidateIllegalNamePass {
     fn on_ty_class__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         elem.typeconsts
             .iter()
-            .for_each(|tc| check_illegal_member_variable_class(cfg, &tc.name));
+            .for_each(|tc| check_illegal_member_variable_class(env, &tc.name));
         elem.consts
             .iter()
-            .for_each(|cc| check_illegal_member_variable_class(cfg, &cc.id));
+            .for_each(|cc| check_illegal_member_variable_class(env, &cc.id));
         ControlFlow::Continue(())
     }
 
     fn on_ty_fun_def_top_down<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -85,7 +85,7 @@ impl Pass for ValidateIllegalNamePass {
     fn on_ty_fun_def_bottom_up<Ex, En>(
         &mut self,
         elem: &mut FunDef<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -96,7 +96,7 @@ impl Pass for ValidateIllegalNamePass {
             .unwrap_or(&lower_name)
             .to_string();
         if lower_norm == sn::members::__CONSTRUCT || lower_norm == "using" {
-            cfg.emit_error(NastCheckError::IllegalFunctionName {
+            env.emit_error(NastCheckError::IllegalFunctionName {
                 pos: elem.name.pos().clone(),
                 name: elem.name.name().to_string(),
             })
@@ -107,7 +107,7 @@ impl Pass for ValidateIllegalNamePass {
     fn on_ty_method__top_down<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -119,13 +119,13 @@ impl Pass for ValidateIllegalNamePass {
     fn on_ty_method__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
     {
         if elem.name.name() == sn::members::__DESTRUCT {
-            cfg.emit_error(NastCheckError::IllegalDestructor(elem.name.pos().clone()))
+            env.emit_error(NastCheckError::IllegalDestructor(elem.name.pos().clone()))
         }
         ControlFlow::Continue(())
     }
@@ -133,7 +133,7 @@ impl Pass for ValidateIllegalNamePass {
     fn on_ty_expr__bottom_up<Ex, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -142,11 +142,11 @@ impl Pass for ValidateIllegalNamePass {
             Expr_::Id(box id)
                 if id.name() == sn::pseudo_consts::G__CLASS__ && self.classish_kind.is_none() =>
             {
-                cfg.emit_error(NamingError::IllegalCLASS(id.pos().clone()))
+                env.emit_error(NamingError::IllegalCLASS(id.pos().clone()))
             }
 
             Expr_::Id(box id) if id.name() == sn::pseudo_consts::G__TRAIT__ && !self.in_trait() => {
-                cfg.emit_error(NamingError::IllegalTRAIT(id.pos().clone()))
+                env.emit_error(NamingError::IllegalTRAIT(id.pos().clone()))
             }
 
             // TODO[mjt] Check if this will have already been elaborated to `CIparent`
@@ -158,20 +158,20 @@ impl Pass for ValidateIllegalNamePass {
             Expr_::ClassConst(box (_, (pos, meth_name)))
                 if is_magic(meth_name) && !self.is_current_func(meth_name) =>
             {
-                cfg.emit_error(NastCheckError::Magic {
+                env.emit_error(NastCheckError::Magic {
                     pos: pos.clone(),
                     meth_name: meth_name.clone(),
                 })
             }
 
             Expr_::ObjGet(box (_, Expr(_, _, Expr_::Id(box id)), _, _)) if is_magic(id.name()) => {
-                cfg.emit_error(NastCheckError::Magic {
+                env.emit_error(NastCheckError::Magic {
                     pos: id.pos().clone(),
                     meth_name: id.name().to_string(),
                 })
             }
 
-            Expr_::MethodCaller(box (_, (pos, meth_name))) if is_magic(meth_name) => cfg
+            Expr_::MethodCaller(box (_, (pos, meth_name))) if is_magic(meth_name) => env
                 .emit_error(NastCheckError::Magic {
                     pos: pos.clone(),
                     meth_name: meth_name.clone(),
@@ -182,9 +182,9 @@ impl Pass for ValidateIllegalNamePass {
     }
 }
 
-fn check_illegal_member_variable_class(cfg: &Config, id: &Id) {
+fn check_illegal_member_variable_class(env: &Env, id: &Id) {
     if id.name().to_ascii_lowercase() == sn::members::M_CLASS {
-        cfg.emit_error(NamingError::IllegalMemberVariableClass(id.pos().clone()))
+        env.emit_error(NamingError::IllegalMemberVariableClass(id.pos().clone()))
     }
 }
 

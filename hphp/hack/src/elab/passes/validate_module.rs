@@ -8,7 +8,7 @@ use std::ops::ControlFlow;
 use oxidized::aast::ModuleDef;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -18,10 +18,10 @@ impl Pass for ValidateModulePass {
     fn on_ty_module_def_bottom_up<Ex: Default, En>(
         &mut self,
         module: &mut ModuleDef<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        if !cfg.allow_module_declarations() {
-            cfg.emit_error(NamingError::ModuleDeclarationOutsideAllowedFiles(
+        if !env.allow_module_declarations() {
+            env.emit_error(NamingError::ModuleDeclarationOutsideAllowedFiles(
                 module.span.clone(),
             ));
         }
@@ -40,7 +40,7 @@ mod tests {
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::config::ProgramSpecificOptions;
+    use crate::env::ProgramSpecificOptions;
     use crate::Transform;
 
     fn mk_module(name: &str) -> ModuleDef<(), ()> {
@@ -59,7 +59,7 @@ mod tests {
 
     #[test]
     fn test_module_def_not_allowed() {
-        let config = Config::new(
+        let env = Env::new(
             &TypecheckerOptions::default(),
             &ProgramSpecificOptions {
                 allow_module_declarations: false,
@@ -67,9 +67,9 @@ mod tests {
             },
         );
         let mut module = mk_module("foo");
-        module.transform(&config, &mut ValidateModulePass);
+        module.transform(&env, &mut ValidateModulePass);
         assert!(matches!(
-            config.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             [NamingPhaseError::Naming(
                 NamingError::ModuleDeclarationOutsideAllowedFiles(_)
             )]

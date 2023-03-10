@@ -12,7 +12,7 @@ use oxidized::aast_defs::Class_;
 use oxidized::ast_defs::ClassishKind;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -22,7 +22,7 @@ impl Pass for ValidateClassReqPass {
     fn on_ty_class__top_down<Ex: Default, En>(
         &mut self,
         cls: &mut Class_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         let is_trait = cls.kind == ClassishKind::Ctrait;
         let is_interface = cls.kind == ClassishKind::Cinterface;
@@ -30,17 +30,17 @@ impl Pass for ValidateClassReqPass {
         // `require implements` and `require class` are only allowed in traits.
         if !is_trait {
             if let Some(ClassReq(Hint(pos, _), _)) = find_req(RequireKind::RequireImplements) {
-                cfg.emit_error(NamingError::InvalidRequireImplements(pos.clone()));
+                env.emit_error(NamingError::InvalidRequireImplements(pos.clone()));
             }
             if let Some(ClassReq(Hint(pos, _), _)) = find_req(RequireKind::RequireClass) {
-                cfg.emit_error(NamingError::InvalidRequireClass(pos.clone()));
+                env.emit_error(NamingError::InvalidRequireClass(pos.clone()));
             }
         }
         // `require extends` is only allowed in traits and interfaces, so if
         // this classish is neither that's an error.
         if !(is_trait || is_interface) {
             if let Some(ClassReq(Hint(pos, _), _)) = find_req(RequireKind::RequireExtends) {
-                cfg.emit_error(NamingError::InvalidRequireExtends(pos.clone()));
+                env.emit_error(NamingError::InvalidRequireExtends(pos.clone()));
             }
         }
         ControlFlow::Continue(())

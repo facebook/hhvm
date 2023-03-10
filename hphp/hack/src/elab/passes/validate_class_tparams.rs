@@ -11,7 +11,7 @@ use oxidized::aast_defs::Hint_;
 use oxidized::ast_defs::Id;
 use oxidized::nast_check_error::NastCheckError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Default)]
@@ -24,7 +24,7 @@ impl Pass for ValidateClassTparamsPass {
     fn on_ty_class__top_down<Ex, En>(
         &mut self,
         elem: &mut Class_<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -36,7 +36,7 @@ impl Pass for ValidateClassTparamsPass {
     fn on_ty_class_typeconst_def_top_down<Ex, En>(
         &mut self,
         _elem: &mut ClassTypeconstDef<Ex, En>,
-        _cfg: &Config,
+        _env: &Env,
     ) -> ControlFlow<(), ()>
     where
         Ex: Default,
@@ -45,7 +45,7 @@ impl Pass for ValidateClassTparamsPass {
         ControlFlow::Break(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, cfg: &Config) -> ControlFlow<(), ()> {
+    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<(), ()> {
         if self.in_typeconst_def {
             match &*elem.1 {
                 Hint_::Habstr(tp_name, _) => {
@@ -54,7 +54,7 @@ impl Pass for ValidateClassTparamsPass {
                             .iter()
                             .filter(|tp| tp.name() == tp_name)
                             .for_each(|tp| {
-                                cfg.emit_error(NastCheckError::TypeconstDependsOnExternalTparam {
+                                env.emit_error(NastCheckError::TypeconstDependsOnExternalTparam {
                                     pos: elem.0.clone(),
                                     ext_pos: tp.pos().clone(),
                                     ext_name: tp.name().to_string(),

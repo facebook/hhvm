@@ -10,7 +10,7 @@ use oxidized::aast_defs::Expr_;
 use oxidized::ast_defs::Id;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -21,7 +21,7 @@ impl Pass for ValidateExprCallEchoPass {
     fn on_ty_expr__bottom_up<Ex: Default, En>(
         &mut self,
         elem: &mut Expr_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
         match elem {
             Expr_::Call(box (
@@ -30,7 +30,7 @@ impl Pass for ValidateExprCallEchoPass {
                 _,
                 Some(Expr(_, pos, _)),
             )) if fn_name == sn::special_functions::ECHO => {
-                cfg.emit_error(NamingError::TooFewTypeArguments(pos.clone()))
+                env.emit_error(NamingError::TooFewTypeArguments(pos.clone()))
             }
             _ => (),
         }
@@ -47,7 +47,7 @@ mod tests {
 
     #[test]
     fn test_valid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateExprCallEchoPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
@@ -63,9 +63,9 @@ mod tests {
             vec![],
             None,
         )));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert!(cfg.into_errors().is_empty());
+        assert!(env.into_errors().is_empty());
         assert!(match elem {
             Expr_::Call(cc) => {
                 let (Expr(_, _, expr_), _, _, _) = *cc;
@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn test_invalid() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateExprCallEchoPass;
         let mut elem: Expr_<(), ()> = Expr_::Call(Box::new((
@@ -99,9 +99,9 @@ mod tests {
             vec![],
             Some(elab_utils::expr::null()),
         )));
-        elem.transform(&cfg, &mut pass);
+        elem.transform(&env, &mut pass);
 
-        assert_eq!(cfg.into_errors().len(), 1);
+        assert_eq!(env.into_errors().len(), 1);
         assert!(match elem {
             Expr_::Call(cc) => {
                 let (Expr(_, _, expr_), _, _, _) = *cc;

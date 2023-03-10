@@ -11,7 +11,7 @@ use oxidized::aast_defs::Fun_;
 use oxidized::aast_defs::Method_;
 use oxidized::naming_error::NamingError;
 
-use crate::config::Config;
+use crate::env::Env;
 use crate::Pass;
 
 #[derive(Clone, Copy, Default)]
@@ -21,24 +21,24 @@ impl Pass for ValidateFunParamsPass {
     fn on_ty_fun__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Fun_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        self.validate_fun_params(cfg, &elem.params)
+        self.validate_fun_params(env, &elem.params)
     }
 
     fn on_ty_method__top_down<Ex: Default, En>(
         &mut self,
         elem: &mut Method_<Ex, En>,
-        cfg: &Config,
+        env: &Env,
     ) -> ControlFlow<(), ()> {
-        self.validate_fun_params(cfg, &elem.params)
+        self.validate_fun_params(env, &elem.params)
     }
 }
 
 impl ValidateFunParamsPass {
     fn validate_fun_params<Ex: Default, En>(
         &self,
-        cfg: &Config,
+        env: &Env,
         params: &Vec<FunParam<Ex, En>>,
     ) -> ControlFlow<(), ()> {
         let mut seen = std::collections::BTreeSet::<&String>::new();
@@ -46,7 +46,7 @@ impl ValidateFunParamsPass {
             if name == sn::special_idents::PLACEHOLDER {
                 continue;
             } else if seen.contains(name) {
-                cfg.emit_error(NamingError::AlreadyBound {
+                env.emit_error(NamingError::AlreadyBound {
                     pos: pos.clone(),
                     name: name.clone(),
                 });
@@ -141,31 +141,31 @@ mod tests {
 
     #[test]
     fn test_fn_no_args() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateFunParamsPass;
 
         let mut fun = mk_fun(vec![]);
 
-        fun.transform(&cfg, &mut pass);
-        assert!(cfg.into_errors().is_empty())
+        fun.transform(&env, &mut pass);
+        assert!(env.into_errors().is_empty())
     }
 
     #[test]
     fn test_meth_no_args() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateFunParamsPass;
 
         let mut meth = mk_method("foo".to_string(), vec![]);
 
-        meth.transform(&cfg, &mut pass);
-        assert!(cfg.into_errors().is_empty())
+        meth.transform(&env, &mut pass);
+        assert!(env.into_errors().is_empty())
     }
 
     #[test]
     fn test_fn_good_args() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateFunParamsPass;
 
@@ -173,13 +173,13 @@ mod tests {
         let y = mk_param("y".to_string());
         let mut fun = mk_fun(vec![x, y]);
 
-        fun.transform(&cfg, &mut pass);
-        assert!(cfg.into_errors().is_empty())
+        fun.transform(&env, &mut pass);
+        assert!(env.into_errors().is_empty())
     }
 
     #[test]
     fn test_meth_good_args() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateFunParamsPass;
 
@@ -187,38 +187,38 @@ mod tests {
         let y = mk_param("y".to_string());
         let mut meth = mk_method("foo".to_string(), vec![x, y]);
 
-        meth.transform(&cfg, &mut pass);
-        assert!(cfg.into_errors().is_empty())
+        meth.transform(&env, &mut pass);
+        assert!(env.into_errors().is_empty())
     }
 
     #[test]
     fn test_fn_args_multiply_bound() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateFunParamsPass;
 
         let x = mk_param("x".to_string());
         let mut fun = mk_fun(vec![x.clone(), x]);
 
-        fun.transform(&cfg, &mut pass);
+        fun.transform(&env, &mut pass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ))
     }
 
     #[test]
     fn test_meth_args_multiply_bound() {
-        let cfg = Config::default();
+        let env = Env::default();
 
         let mut pass = ValidateFunParamsPass;
 
         let x = mk_param("x".to_string());
         let mut meth = mk_method("foo".to_string(), vec![x.clone(), x]);
 
-        meth.transform(&cfg, &mut pass);
+        meth.transform(&env, &mut pass);
         assert!(matches!(
-            cfg.into_errors().as_slice(),
+            env.into_errors().as_slice(),
             &[NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
         ))
     }

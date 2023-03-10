@@ -32,6 +32,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         return "s.TestService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -44,6 +48,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         @staticmethod
         def __get_thrift_name__() -> str:
             return "s.TestService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -60,6 +68,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 s.thrift_types._fbthrift_TestService_test_args(),
                 s.thrift_types._fbthrift_TestService_test_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="s.TestService",
                 rpc_options=rpc_options,
             )
             if _fbthrift_resp.ex is not None:
@@ -69,6 +78,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         @staticmethod
         def __get_thrift_name__() -> str:
             return "s.TestService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

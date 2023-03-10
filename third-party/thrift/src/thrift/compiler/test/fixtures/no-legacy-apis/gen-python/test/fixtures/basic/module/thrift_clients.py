@@ -31,6 +31,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "module.MyService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return "test.dev/fixtures/no-legacy-apis/MyService"
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -43,6 +47,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/no-legacy-apis/MyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -61,6 +69,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/no-legacy-apis/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -75,6 +84,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/no-legacy-apis/MyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

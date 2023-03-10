@@ -111,6 +111,7 @@ cdef class AsyncClient:
         string function_name,
         args,
         response_cls,
+        *,
         FunctionQualifier qualifier = FunctionQualifier.Unspecified,
         InteractionMethodPosition interaction_position = InteractionMethodPosition.None,
         string interaction_name = "".encode('ascii'),

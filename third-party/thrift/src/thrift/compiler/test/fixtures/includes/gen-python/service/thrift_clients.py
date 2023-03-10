@@ -33,6 +33,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "service.MyService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -45,6 +49,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "service.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -65,6 +73,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     i=i,),
                 service.thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="service.MyService",
                 rpc_options=rpc_options,
             )
     
@@ -83,6 +92,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     i=i,),
                 service.thrift_types._fbthrift_MyService_has_arg_docs_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="service.MyService",
                 rpc_options=rpc_options,
             )
     
@@ -90,6 +100,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "service.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

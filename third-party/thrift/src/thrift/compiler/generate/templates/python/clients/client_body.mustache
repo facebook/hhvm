@@ -23,6 +23,11 @@ def __get_thrift_name__() -> str:
     return "{{program:name}}.{{service:name}}"
 
 @staticmethod
+def __get_thrift_uri__() -> _typing.Optional[str]:
+    return {{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
+        }}{{^service:thrift_uri}}None{{/service:thrift_uri}}
+
+@staticmethod
 def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
     return {
         {{#service:annotations}}{{> common/annotation}}{{/service:annotations}}
@@ -47,6 +52,11 @@ class Async({{#service:extends}}{{!
     @staticmethod
     def __get_thrift_name__() -> str:
         return "{{program:name}}.{{service:name}}"
+
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return {{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
+            }}{{^service:thrift_uri}}None{{/service:thrift_uri}}
 
     {{^service:interaction?}}
     @staticmethod
@@ -90,6 +100,8 @@ class Async({{#service:extends}}{{!
             interaction_position=_fbthrift_InteractionMethodPosition.Member,
             interaction_name="{{service:name}}",
             {{/service:interaction?}}
+            uriOrName={{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
+                }}{{^service:thrift_uri}}"{{program:name}}.{{service:name}}"{{/service:thrift_uri}},
             rpc_options=rpc_options,
         )
         {{#function:returns_stream?}}
@@ -137,6 +149,11 @@ class Sync({{#service:extends}}{{!
     @staticmethod
     def __get_thrift_name__() -> str:
         return "{{program:name}}.{{service:name}}"
+
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return {{#service:thrift_uri}}"{{service:thrift_uri}}"{{/service:thrift_uri}}{{!
+            }}{{^service:thrift_uri}}None{{/service:thrift_uri}}
 
     {{^service:interaction?}}
     @staticmethod

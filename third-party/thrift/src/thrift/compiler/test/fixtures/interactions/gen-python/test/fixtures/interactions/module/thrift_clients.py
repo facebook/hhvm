@@ -30,6 +30,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "module.MyService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -42,6 +46,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -58,6 +66,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="module.MyService",
                 rpc_options=rpc_options,
             )
     
@@ -78,6 +87,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="MyInteraction",
                 created_interaction = _fbthrift_interaction,
+                uriOrName="module.MyService",
                 rpc_options=rpc_options,
             )
             return _fbthrift_interaction
@@ -97,6 +107,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="MyInteractionFast",
                 created_interaction = _fbthrift_interaction,
+                uriOrName="module.MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -122,6 +133,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="SerialInteraction",
                 created_interaction = _fbthrift_interaction,
+                uriOrName="module.MyService",
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -154,6 +166,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             return "module.MyService"
     
         @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService()
     
@@ -176,6 +192,10 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         return "module.MyInteraction"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -188,6 +208,10 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -206,6 +230,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
+                uriOrName="module.MyInteraction",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -231,6 +256,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 qualifier = _fbthrift_FunctionQualifier.OneWay,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
+                uriOrName="module.MyInteraction",
                 rpc_options=rpc_options,
             )
     
@@ -247,6 +273,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
+                uriOrName="module.MyInteraction",
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -258,6 +285,10 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             return "module.MyInteraction"
     
         @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
     
@@ -265,6 +296,10 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyInteractionFast"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
     
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -279,6 +314,10 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -297,6 +336,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
+                uriOrName="module.MyInteractionFast",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -320,6 +360,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 qualifier = _fbthrift_FunctionQualifier.OneWay,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
+                uriOrName="module.MyInteractionFast",
                 rpc_options=rpc_options,
             )
     
@@ -336,6 +377,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
+                uriOrName="module.MyInteractionFast",
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -347,6 +389,10 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             return "module.MyInteractionFast"
     
         @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
     
@@ -354,6 +400,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.SerialInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
     
     @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
@@ -368,6 +418,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -386,6 +440,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="SerialInteraction",
+                uriOrName="module.SerialInteraction",
                 rpc_options=rpc_options,
             )
     
@@ -393,6 +448,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

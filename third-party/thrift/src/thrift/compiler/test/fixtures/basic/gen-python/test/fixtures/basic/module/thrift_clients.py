@@ -31,6 +31,10 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
         return "module.FooService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return "test.dev/fixtures/basic/FooService"
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -43,6 +47,10 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.FooService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/FooService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -59,6 +67,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/FooService",
                 rpc_options=rpc_options,
             )
     
@@ -66,6 +75,10 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.FooService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/FooService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -91,6 +104,10 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
         return "module.FB303Service"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return "test.dev/fixtures/basic/FB303Service"
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -103,6 +120,10 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.FB303Service"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/FB303Service"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -121,6 +142,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                     int_parameter=int_parameter,),
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/FB303Service",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -135,6 +157,10 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.FB303Service"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/FB303Service"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -169,6 +195,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         return "module.MyService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return "test.dev/fixtures/basic/MyService"
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -181,6 +211,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/MyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -197,6 +231,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
     
@@ -211,6 +246,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -234,6 +270,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     sink=sink,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
     
@@ -252,6 +289,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     data=data,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
     
@@ -268,6 +306,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -291,6 +330,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -314,6 +354,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Idempotent,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
     
@@ -332,6 +373,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     data=data,),
                 None,
                 qualifier = _fbthrift_FunctionQualifier.OneWay,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
     
@@ -346,6 +388,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -367,6 +410,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
             )
     
@@ -374,6 +418,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.MyService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/MyService"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -560,6 +608,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
         return "module.DbMixedStackArguments"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return "test.dev/fixtures/basic/DbMixedStackArguments"
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -572,6 +624,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.DbMixedStackArguments"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/DbMixedStackArguments"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -590,6 +646,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/DbMixedStackArguments",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -613,6 +670,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="test.dev/fixtures/basic/DbMixedStackArguments",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -627,6 +685,10 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.DbMixedStackArguments"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return "test.dev/fixtures/basic/DbMixedStackArguments"
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

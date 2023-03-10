@@ -31,6 +31,10 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         return "module.Raiser"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -43,6 +47,10 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.Raiser"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -59,6 +67,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_doBland_args(),
                 module.thrift_types._fbthrift_Raiser_doBland_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="module.Raiser",
                 rpc_options=rpc_options,
             )
     
@@ -73,6 +82,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_doRaise_args(),
                 module.thrift_types._fbthrift_Raiser_doRaise_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="module.Raiser",
                 rpc_options=rpc_options,
             )
             if _fbthrift_resp.b is not None:
@@ -93,6 +103,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_get200_args(),
                 module.thrift_types._fbthrift_Raiser_get200_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="module.Raiser",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -114,6 +125,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_get500_args(),
                 module.thrift_types._fbthrift_Raiser_get500_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="module.Raiser",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -134,6 +146,10 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.Raiser"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

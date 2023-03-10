@@ -30,6 +30,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         return "module.TestService"
     
     @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
     def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
         return {
         }
@@ -42,6 +46,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.TestService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
@@ -60,6 +68,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                     int1=int1,),
                 python_module_root.my.namespacing.test.module.module.thrift_types._fbthrift_TestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                uriOrName="module.TestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -74,6 +83,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
         @staticmethod
         def __get_thrift_name__() -> str:
             return "module.TestService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
     
         @staticmethod
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:

@@ -1,5 +1,5 @@
 File "stack_overflow_array.php", line 25, characters 3-13:
-  dict<int, (bool | dict<string, dict<(int | _), dict<(string | _ | _ | _ | _), (_ | _ | _ | _ | _ | _ | dict<nothing, nothing>)>>>)>
+  dict<int, (bool | dict<string, dict<int, dict<(string | _ | _ | _), (_ | _ | _ | (nonnull & (_ | _)) | dict<nothing, nothing>)>>>)>
 File "stack_overflow_array.php", line 15, characters 3-13:
 This is not an object of type `KeyedContainer`, this is a bool (Typing[4324])
   File "stack_overflow_array.php", line 12, characters 17-21:

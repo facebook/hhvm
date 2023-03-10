@@ -4180,39 +4180,22 @@ and expr_
     let fty = set_readonly_this fty in
     make_result env p e fty
   | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
-    let (_, e1_pos, _) = e1 in
-    let (_, e2_pos, _) = e2 in
     let (env, te1, ty1) =
       raw_expr ~lhs_of_null_coalesce:true env e1 ~allow_awaitable:true
     in
+    let parent_lenv = env.lenv in
+    let lenv1 = env.lenv in
     let (env, te2, ty2) = expr ?expected env e2 ~allow_awaitable:true in
-    let (env, ty1') = Env.fresh_type env e1_pos in
-    let (env, e1) =
-      SubType.sub_type env ty1 (MakeType.nullable_locl Reason.Rnone ty1')
-      @@ Some (Typing_error.Reasons_callback.unify_error_at e1_pos)
+    let lenv2 = env.lenv in
+    let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
+    (* There are two cases: either the left argument was null in which case we
+       evaluate the second argument which gets as ty2, or that ty1 wasn't null.
+       The following intersection adds the nonnull information. *)
+    let (env, ty1) =
+      Inter.intersect env ~r:Reason.Rnone ty1 (MakeType.nonnull Reason.Rnone)
     in
-    (* Essentially mimic a call to
-     *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
-     * That way we let the constraint solver take care of the union logic.
-     *)
-    let (env, ty_result) = Env.fresh_type env e2_pos in
-    let (env, e2) =
-      SubType.sub_type env ty1' ty_result
-      @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-    in
-    let (env, e3) =
-      SubType.sub_type env ty2 ty_result
-      @@ Some (Typing_error.Reasons_callback.unify_error_at p)
-    in
-    let ty_err_opt =
-      Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]
-    in
-    Option.iter ~f:Errors.add_typing_error ty_err_opt;
-    make_result
-      env
-      p
-      (Aast.Binop (Ast_defs.QuestionQuestion, te1, te2))
-      ty_result
+    let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
+    make_result env p (Aast.Binop (Ast_defs.QuestionQuestion, te1, te2)) ty
   | Binop (Ast_defs.Eq op_opt, e1, e2) ->
     let make_result env p te ty =
       let (env, te, ty) = make_result env p te ty in

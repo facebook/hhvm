@@ -321,26 +321,30 @@ class RPCClientConformanceTest : public testing::Test {
         conforming_(conforming),
         handler_(std::make_shared<ConformanceVerificationServer>(
             *testCase_.rpc_ref())),
-        server_(handler_),
+        server_(
+            handler_,
+            connectViaServer ? get_server_ip_addr_() : "::1",
+            0,
+            apache::thrift::ScopedServerInterfaceThread::ServerConfigCb(
+                [&](apache::thrift::ThriftServer& server) {
+                  if (connectViaServer) {
+                    std::ignore = update_server_props_(server);
+                  }
+                })),
         connectViaServer_(connectViaServer) {
     auto port = folly::to<std::string>(server_.getPort());
-    auto& server = server_.getThriftServer();
     if (testCase_.rpc_ref()->serverInstruction()->streamCreditTimeout_ref()) {
-      server.setStreamExpireTime(
+      server_.getThriftServer().setStreamExpireTime(
           std::chrono::milliseconds{*testCase_.rpc_ref()
                                          ->serverInstruction()
                                          ->streamCreditTimeout_ref()
                                          ->streamExpireTime()});
     }
     if (connectViaServer_) {
-      auto& thriftServer = dynamic_cast<apache::thrift::ThriftServer&>(server);
-      std::ignore = update_server_props_(thriftServer);
       createClient(clientCmd, server_.getAddress().getAddressStr(), port);
     } else {
-      clientProcess_ = folly::Subprocess(std::vector<std::string>{
-          std::string(clientCmd),
-          "--port",
-          folly::to<std::string>(server_.getPort())});
+      clientProcess_ = folly::Subprocess(
+          std::vector<std::string>{std::string(clientCmd), "--port", port});
     }
   }
 

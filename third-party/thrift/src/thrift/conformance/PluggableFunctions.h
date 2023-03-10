@@ -48,4 +48,6 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     int, update_server_props_, apache::thrift::ThriftServer&);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(std::string, get_server_ip_addr_);
 } // namespace apache::thrift::conformance

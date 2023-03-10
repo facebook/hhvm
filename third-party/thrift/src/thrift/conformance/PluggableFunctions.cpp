@@ -57,4 +57,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   throw std::invalid_argument("Unimplemented Method update_server_props_");
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(std::string, get_server_ip_addr_) {
+  throw std::invalid_argument("Unimplemented Method get_server_ip_addr_");
+}
 } // namespace apache::thrift::conformance

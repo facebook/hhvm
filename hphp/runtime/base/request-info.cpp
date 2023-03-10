@@ -125,7 +125,9 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
       t->m_reqInjectionData.setHostOOMFlag();
     }
   );
-  Logger::Error("Invoking request-level OOM killer");
+  Logger::FError("Invoking OOM killer on requests using more than {} bytes, "
+                 "current RSS = {}MB",
+                 OOMKillThreshold(), Process::GetMemUsageMb());
   static auto OOMKillerInvokeCounter = ServiceData::createTimeSeries(
     "hhvm_oom_killer_invoke", {ServiceData::StatsType::COUNT}
   );

@@ -1,3 +1,0 @@
---inputs=hphp/test/slow/autoload/autoload-fail-c.inc --inputs=hphp/test/slow/autoload/autoload-fail-d.inc -d hhvm.php7.all=0
---inputs=hphp/test/slow/autoload/autoload-fail-1.inc
---inputs=hphp/test/slow/autoload/autoload-fail-2.inc

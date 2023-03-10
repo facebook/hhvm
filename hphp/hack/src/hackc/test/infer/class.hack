@@ -17,8 +17,8 @@
 // CHECK: define C$static.$init_static() : void {
 // CHECK: #b0:
 // CHECK:   n0 = $builtins.alloc_words(0)
-// CHECK:   store &C$static::static_singleton <- n0: *C$static
-// CHECK:   store &C$static::MY_CONSTANT <- $builtins.hack_int(7): *HackMixed
+// CHECK:   store &const::C$static::static_singleton <- n0: *C$static
+// CHECK:   store &const::C$static::MY_CONSTANT <- $builtins.hack_int(7): *HackMixed
 // CHECK:   ret 0
 // CHECK: }
 
@@ -166,7 +166,7 @@ class C {
   // CHECK: #b0:
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n0: *C$static = load &C$static::static_singleton
+  // CHECK:   n0: *C$static = load &const::C$static::static_singleton
   // CHECK:   n1 = $builtins.lazy_initialize(n0)
   // CHECK:   store &$0 <- n0: *HackMixed
   // CHECK:   n2 = __sil_allocate(<C>)
@@ -226,7 +226,7 @@ class C {
   // CHECK: #b0:
   // CHECK:   jmp b1
   // CHECK: #b1:
-  // CHECK:   n0: *C$static = load &C$static::static_singleton
+  // CHECK:   n0: *C$static = load &const::C$static::static_singleton
   // CHECK:   n1 = $builtins.lazy_initialize(n0)
   // CHECK:   store &$0 <- n0: *HackMixed
   // CHECK:   n2 = __sil_allocate(<C>)
@@ -322,7 +322,7 @@ class C {
   // CHECK: define C.test_const($this: *C) : *void {
   // CHECK: local $x: *void
   // CHECK: #b0:
-  // CHECK:   n0: *HackMixed = load &C$static::MY_CONSTANT
+  // CHECK:   n0: *HackMixed = load &const::C$static::MY_CONSTANT
   // CHECK:   store &$x <- n0: *HackMixed
   // CHECK:   ret null
   // CHECK: }
@@ -373,8 +373,8 @@ function dynamic_const(C $c): void {
   echo $c::MY_CONSTANT;
 }
 
-// TEST-CHECK-BAL: global C$static::MY_CONSTANT
-// CHECK: global C$static::MY_CONSTANT : *HackMixed
+// TEST-CHECK-BAL: global const::C$static::MY_CONSTANT
+// CHECK: global const::C$static::MY_CONSTANT : *HackMixed
 
-// TEST-CHECK-BAL: global C$static::static_singleton
-// CHECK: global C$static::static_singleton : *C$static
+// TEST-CHECK-BAL: global const::C$static::static_singleton
+// CHECK: global const::C$static::static_singleton : *C$static

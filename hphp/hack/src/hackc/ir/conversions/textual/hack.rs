@@ -8,6 +8,7 @@ use hash::HashSet;
 use strum_macros::EnumIter;
 use textual_macros::TextualDecl;
 
+use crate::mangle::FunctionName;
 use crate::textual;
 use crate::textual::Sid;
 use crate::textual::TextualFile;
@@ -34,7 +35,8 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// the names should match the HHBC name except when they are compound bytecodes
 /// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found
 /// in hphp/doc/bytecode.specification.
-#[derive(Copy, Clone, Debug, TextualDecl, Eq, PartialEq, Hash, EnumIter)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
+#[derive(TextualDecl, EnumIter)]
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
     Add,
@@ -197,7 +199,8 @@ impl Default for Hhbc {
     }
 }
 
-#[derive(Copy, Clone, TextualDecl, Eq, PartialEq, Hash, EnumIter)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Debug)]
+#[derive(TextualDecl, EnumIter)]
 pub(crate) enum Builtin {
     /// Allocate an array with the given number of words (a word is a
     /// pointer-sized value).
@@ -274,9 +277,9 @@ pub(crate) fn call_builtin(
     target: Builtin,
     params: impl textual::VarArgs,
 ) -> Result<Sid> {
-    fb.call(target.as_str(), params)
+    fb.call(&FunctionName::Builtin(target), params)
 }
 
 pub(crate) fn expr_builtin(target: Builtin, params: impl textual::VarArgs) -> textual::Expr {
-    textual::Expr::call(target.as_str(), params)
+    textual::Expr::call(FunctionName::Builtin(target), params)
 }

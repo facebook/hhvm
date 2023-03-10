@@ -85,9 +85,15 @@ pub fn textual_decl_derive(input: proc_macro::TokenStream) -> proc_macro::TokenS
                             if owned { quote!(#ty) } else { ty }
                         };
 
+                        let fn_name = if name == "Hhbc" {
+                            quote!(crate::mangle::FunctionName::Builtin(Builtin::Hhbc(Hhbc::#variant_name)))
+                        } else {
+                            quote!(crate::mangle::FunctionName::Builtin(#name::#variant_name))
+                        };
+
                         let decl = quote! {
                             if subset.contains(&#name::#variant_name) {
-                                txf.declare_function(#builtin_name, &[#(#params),*], &#ret)?;
+                                txf.declare_function(&#fn_name, &[#(#params),*], &#ret)?;
                             }
                         };
                         decls.push(decl);
@@ -274,7 +280,10 @@ impl DeclTy {
             DeclTy::String(_) => (quote!(textual::Ty::String), true),
             DeclTy::Type(name) => {
                 let name = format!("{name}");
-                (quote!(textual::Ty::Type(#name.to_owned())), true)
+                (
+                    quote!(textual::Ty::Type(crate::mangle::TypeName::UnmangledRef(#name))),
+                    true,
+                )
             }
             DeclTy::Void(_) => (quote!(textual::Ty::Void), true),
         }

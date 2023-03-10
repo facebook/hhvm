@@ -8,7 +8,7 @@
 // CHECK:   jmp b1, b2
 // CHECK: #b1:
 // CHECK:   prune $builtins.hack_is_true(n1)
-// CHECK:   n2: *HackMixed = load &D$static::STRING
+// CHECK:   n2: *HackMixed = load &const::D$static::STRING
 // CHECK:   n3 = $builtins.hack_new_dict($builtins.hack_string("var"), $builtins.hack_string("id"), $builtins.hack_string("type"), n2)
 // CHECK:   ret n3
 // CHECK: #b2:

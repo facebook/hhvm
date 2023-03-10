@@ -44,8 +44,6 @@ use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
 use crate::func::FuncInfo;
 use crate::hack;
-use crate::mangle::Mangle as _;
-use crate::mangle::MangleWithClass as _;
 
 /// Lower individual Instrs in the Func to simpler forms.
 pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: Arc<FuncInfo<'_>>) {
@@ -255,14 +253,14 @@ impl LowerInstrs<'_> {
     ) -> Vec<ValueId> {
         let name = match *self.func_info {
             FuncInfo::Method(ref mi) => {
-                mi.name
-                    .mangle_with_class(mi.class.name, mi.is_static, &builder.strings)
+                crate::mangle::FunctionName::method(mi.class.name, mi.is_static, mi.name)
             }
-            FuncInfo::Function(ref fi) => fi.name.mangle(&builder.strings),
+            FuncInfo::Function(ref fi) => crate::mangle::FunctionName::Function(fi.name),
         };
 
         let mut ops = Vec::new();
 
+        let name = format!("{}", name.display(&builder.strings));
         let name = GlobalId::new(builder.strings.intern_str(format!(
             "memocache::{}",
             crate::util::escaped_ident(name.into())

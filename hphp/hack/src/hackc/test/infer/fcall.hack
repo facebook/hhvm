@@ -83,7 +83,7 @@ function fcall_func(): void {
 // TEST-CHECK-BAL: define $root.fcall_static
 // CHECK: define $root.fcall_static($this: *void) : *void {
 // CHECK: #b0:
-// CHECK:   n0: *C$static = load &C$static::static_singleton
+// CHECK:   n0: *C$static = load &const::C$static::static_singleton
 // CHECK:   n1 = $builtins.lazy_initialize(n0)
 // CHECK:   n2 = C$static.f(n0, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
 // CHECK:   ret null

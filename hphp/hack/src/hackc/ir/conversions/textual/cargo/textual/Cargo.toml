@@ -12,7 +12,6 @@ path = "../../lib.rs"
 anyhow = "1.0.65"
 ascii = "1.0"
 escaper = { version = "0.0.0", path = "../../../../../../utils/escaper" }
-ffi = { version = "0.0.0", path = "../../../../../../utils/ffi" }
 hash = { version = "0.0.0", path = "../../../../../../utils/hash" }
 ir = { version = "0.0.0", path = "../../../.." }
 itertools = "0.10.3"

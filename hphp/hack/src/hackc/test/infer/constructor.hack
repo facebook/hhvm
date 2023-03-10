@@ -10,7 +10,7 @@ class A {
 // CHECK: #b0:
 // CHECK:   jmp b1
 // CHECK: #b1:
-// CHECK:   n0: *A$static = load &A$static::static_singleton
+// CHECK:   n0: *A$static = load &const::A$static::static_singleton
 // CHECK:   n1 = $builtins.lazy_initialize(n0)
 // CHECK:   store &$0 <- n0: *HackMixed
 // CHECK:   n2 = __sil_allocate(<A>)

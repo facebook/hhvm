@@ -5110,7 +5110,6 @@ dependencies = [
  "anyhow",
  "ascii",
  "escaper",
- "ffi",
  "hash",
  "ir",
  "itertools 0.10.5",

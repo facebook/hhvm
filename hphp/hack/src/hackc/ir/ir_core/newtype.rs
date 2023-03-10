@@ -199,7 +199,7 @@ pub enum FullInstrId {
 pub type ValueIdMap<V> = std::collections::HashMap<ValueId, V, newtype::BuildIdHasher<u32>>;
 pub type ValueIdSet = std::collections::HashSet<ValueId, newtype::BuildIdHasher<u32>>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct GlobalId {
     pub id: UnitBytesId,
 }

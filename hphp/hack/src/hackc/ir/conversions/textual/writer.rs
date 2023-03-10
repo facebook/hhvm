@@ -13,6 +13,7 @@ use strum::IntoEnumIterator;
 
 use crate::decls;
 use crate::hack;
+use crate::mangle::FunctionName;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::TextualFile;
@@ -45,9 +46,12 @@ pub fn textual_writer(
         crate::func::write_function(&mut txf, &mut state, func)?;
     }
 
-    let all_builtins: HashMap<&str, hack::Builtin> = hack::Builtin::iter()
-        .map(|b| (b.as_str(), b))
-        .chain(hack::Hhbc::iter().map(|b| (b.as_str(), hack::Builtin::Hhbc(b))))
+    use hack::Builtin;
+    let all_builtins: HashMap<FunctionName, hack::Builtin> = hack::Builtin::iter()
+        .map(|b| (FunctionName::Builtin(b), b))
+        .chain(
+            hack::Hhbc::iter().map(|b| (FunctionName::Builtin(Builtin::Hhbc(b)), Builtin::Hhbc(b))),
+        )
         .collect();
 
     let builtins = txf.write_epilogue(&all_builtins)?;

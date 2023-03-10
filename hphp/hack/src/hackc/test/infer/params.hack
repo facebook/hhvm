@@ -11,7 +11,7 @@ class InternalGeneric<T> {}
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("Internal"))
 // CHECK:   jmp b1
 // CHECK: #b1:
-// CHECK:   n1: *Internal$static = load &Internal$static::static_singleton
+// CHECK:   n1: *Internal$static = load &const::Internal$static::static_singleton
 // CHECK:   n2 = $builtins.lazy_initialize(n1)
 // CHECK:   store &$0 <- n1: *HackMixed
 // CHECK:   n3 = __sil_allocate(<Internal>)
@@ -73,7 +73,7 @@ function internalClassParam(int $a, Internal $b) : Internal {
 // CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string("External"))
 // CHECK:   jmp b1
 // CHECK: #b1:
-// CHECK:   n1: *External$static = load &External$static::static_singleton
+// CHECK:   n1: *External$static = load &const::External$static::static_singleton
 // CHECK:   n2 = $builtins.lazy_initialize(n1)
 // CHECK:   store &$0 <- n1: *HackMixed
 // CHECK:   n3 = __sil_allocate(<External>)

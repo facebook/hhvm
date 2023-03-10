@@ -24,6 +24,10 @@ use newtype::newtype_int;
 use strum::EnumProperty;
 use strum_macros::EnumProperty;
 
+use crate::mangle::FunctionName;
+use crate::mangle::GlobalName;
+use crate::mangle::TypeName;
+
 pub(crate) const INDENT: &str = "  ";
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
@@ -31,10 +35,10 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) struct TextualFile<'a> {
     w: &'a mut dyn std::io::Write,
     strings: Arc<StringInterner>,
-    pub(crate) internal_functions: HashSet<String>,
-    pub(crate) called_functions: HashSet<String>,
-    pub(crate) internal_globals: HashMap<String, Ty>,
-    pub(crate) referenced_globals: HashSet<String>,
+    pub(crate) internal_functions: HashSet<FunctionName>,
+    pub(crate) called_functions: HashSet<FunctionName>,
+    pub(crate) internal_globals: HashMap<GlobalName, Ty>,
+    pub(crate) referenced_globals: HashSet<GlobalName>,
 }
 
 impl<'a> TextualFile<'a> {
@@ -54,8 +58,13 @@ impl<'a> TextualFile<'a> {
         Ok(())
     }
 
-    pub(crate) fn declare_function(&mut self, name: &str, tys: &[Ty], ret_ty: &Ty) -> Result {
-        write!(self.w, "declare {name}(")?;
+    pub(crate) fn declare_function(
+        &mut self,
+        name: &FunctionName,
+        tys: &[Ty],
+        ret_ty: &Ty,
+    ) -> Result {
+        write!(self.w, "declare {}(", name.display(&self.strings))?;
 
         // TODO: For now textual can't handle a mix of types with a trailing
         // ellipsis.
@@ -64,36 +73,41 @@ impl<'a> TextualFile<'a> {
         } else {
             let mut sep = "";
             for ty in tys {
-                write!(self.w, "{sep}{}", FmtTy(ty))?;
+                write!(self.w, "{sep}{}", ty.display(&self.strings))?;
                 sep = ", ";
             }
         }
 
-        writeln!(self.w, "): {}", FmtTy(ret_ty))?;
+        writeln!(self.w, "): {}", ret_ty.display(&self.strings))?;
         Ok(())
     }
 
-    pub(crate) fn define_global(&mut self, name: String, ty: Ty) {
+    pub(crate) fn define_global(&mut self, name: GlobalName, ty: Ty) {
         self.internal_globals.insert(name, ty);
     }
 
-    fn declare_unknown_function(&mut self, name: &str) -> Result {
-        writeln!(self.w, "declare {name}(...): *HackMixed")?;
+    fn declare_unknown_function(&mut self, name: &FunctionName) -> Result {
+        writeln!(
+            self.w,
+            "declare {name}(...): *HackMixed",
+            name = name.display(&self.strings)
+        )?;
         Ok(())
     }
 
-    fn declare_unknown_global(&mut self, name: &str) -> Result {
+    fn declare_unknown_global(&mut self, name: &GlobalName) -> Result {
         writeln!(
             self.w,
-            "global {name} : {}",
-            FmtTy(&Ty::SpecialPtr(SpecialTy::Mixed))
+            "global {name} : {ty}",
+            name = name.display(&self.strings),
+            ty = Ty::SpecialPtr(SpecialTy::Mixed).display(&self.strings)
         )?;
         Ok(())
     }
 
     pub(crate) fn define_function<R>(
         &mut self,
-        name: &str,
+        name: &FunctionName,
         loc: &SrcLoc,
         params: &[(&str, &Ty)],
         ret_ty: &Ty,
@@ -101,18 +115,18 @@ impl<'a> TextualFile<'a> {
         body: impl FnOnce(&mut FuncBuilder<'_, '_>) -> Result<R>,
     ) -> Result<R> {
         if !self.internal_functions.contains(name) {
-            self.internal_functions.insert(name.to_owned());
+            self.internal_functions.insert(name.clone());
         }
 
         self.write_full_loc(loc)?;
 
-        write!(self.w, "define {name}(")?;
+        write!(self.w, "define {}(", name.display(&self.strings))?;
         let mut sep = "";
         for (name, ty) in params {
-            write!(self.w, "{sep}{name}: {ty}", ty = FmtTy(ty))?;
+            write!(self.w, "{sep}{name}: {ty}", ty = ty.display(&self.strings))?;
             sep = ", ";
         }
-        writeln!(self.w, ") : {} {{", FmtTy(ret_ty))?;
+        writeln!(self.w, ") : {} {{", ret_ty.display(&self.strings))?;
 
         if !locals.is_empty() {
             let mut sep = "";
@@ -122,7 +136,7 @@ impl<'a> TextualFile<'a> {
                     self.w,
                     "{sep}{name}: {ty}",
                     name = FmtLid(&self.strings, *lid),
-                    ty = FmtTy(ty)
+                    ty = ty.display(&self.strings)
                 )?;
                 sep = ", ";
             }
@@ -167,19 +181,19 @@ impl<'a> TextualFile<'a> {
 
     pub(crate) fn define_type<'s>(
         &mut self,
-        name: &str,
+        name: &TypeName,
         src_loc: &SrcLoc,
-        extends: impl Iterator<Item = &'s str>,
+        extends: impl Iterator<Item = &'s TypeName>,
         fields: impl Iterator<Item = Field<'s>>,
         metadata: impl Iterator<Item = (&'s str, &'s Expr)>,
     ) -> Result {
         self.write_full_loc(src_loc)?;
 
-        write!(self.w, "type {name}")?;
+        write!(self.w, "type {}", name.display(&self.strings))?;
 
         let mut sep = " extends";
         for base in extends {
-            write!(self.w, "{sep} {base}")?;
+            write!(self.w, "{sep} {}", base.display(&self.strings))?;
             sep = ",";
         }
 
@@ -202,7 +216,7 @@ impl<'a> TextualFile<'a> {
             )?;
 
             for attr in &f.attributes {
-                write!(self.w, ".{name} ", name = attr.name())?;
+                write!(self.w, ".{} ", attr.name().display(&self.strings))?;
                 match attr {
                     FieldAttribute::Unparameterized { .. } => {}
                     FieldAttribute::Parameterized {
@@ -220,7 +234,7 @@ impl<'a> TextualFile<'a> {
                 }
             }
 
-            write!(self.w, "{ty}", ty = FmtTy(&f.ty))?;
+            write!(self.w, "{ty}", ty = f.ty.display(&self.strings))?;
             sep = ";\n";
         }
 
@@ -246,7 +260,7 @@ impl<'a> TextualFile<'a> {
 
     pub(crate) fn write_epilogue<T: Eq + std::hash::Hash + Copy>(
         &mut self,
-        builtins: &HashMap<&str, T>,
+        builtins: &HashMap<FunctionName, T>,
     ) -> Result<HashSet<T>> {
         if !self.internal_globals.is_empty() {
             self.write_comment("----- GLOBALS -----")?;
@@ -254,21 +268,26 @@ impl<'a> TextualFile<'a> {
             for (name, ty) in self
                 .internal_globals
                 .iter()
-                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2))
+                .sorted_by(|(n1, _), (n2, _)| n1.cmp(n2, &self.strings))
             {
-                writeln!(self.w, "global {name} : {}", FmtTy(ty))?;
+                writeln!(
+                    self.w,
+                    "global {name} : {ty}",
+                    name = name.display(&self.strings),
+                    ty = ty.display(&self.strings)
+                )?;
             }
             self.debug_separator()?;
         }
 
-        let (builtins, mut non_builtin_fns): (HashSet<T>, Vec<String>) = (&self.called_functions
-            - &self.internal_functions)
-            .into_iter()
-            .partition_map(|f| match builtins.get(&f as &str) {
-                Some(b) => itertools::Either::Left(b),
-                None => itertools::Either::Right(f),
-            });
-        non_builtin_fns.sort();
+        let (builtins, mut non_builtin_fns): (HashSet<T>, Vec<FunctionName>) =
+            (&self.called_functions - &self.internal_functions)
+                .into_iter()
+                .partition_map(|f| match builtins.get(&f as &FunctionName) {
+                    Some(b) => itertools::Either::Left(b),
+                    None => itertools::Either::Right(f),
+                });
+        non_builtin_fns.sort_by(|a, b| a.cmp(b, &self.strings));
 
         let referenced_globals =
             &self.referenced_globals - &self.internal_globals.keys().cloned().collect();
@@ -289,12 +308,14 @@ impl<'a> TextualFile<'a> {
 
     fn write_expr(&mut self, expr: &Expr) -> Result {
         match *expr {
-            Expr::Alloc(ref ty) => write!(self.w, "__sil_allocate(<{}>)", FmtTy(ty))?,
+            Expr::Alloc(ref ty) => {
+                write!(self.w, "__sil_allocate(<{}>)", ty.display(&self.strings))?
+            }
             Expr::Call(ref target, ref params) => {
                 if !self.called_functions.contains(target) {
                     self.called_functions.insert(target.to_owned());
                 }
-                write!(self.w, "{}(", target)?;
+                write!(self.w, "{}(", target.display(&self.strings))?;
                 let mut sep = "";
                 for param in params.iter() {
                     self.w.write_all(sep.as_bytes())?;
@@ -410,8 +431,8 @@ pub(crate) enum SpecialTy {
 }
 
 impl SpecialTy {
-    fn user_type(&self) -> &str {
-        self.get_str("UserType").unwrap()
+    fn user_type(&self) -> TypeName {
+        TypeName::UnmangledRef(self.get_str("UserType").unwrap())
     }
 }
 
@@ -424,24 +445,28 @@ pub(crate) enum Ty {
     Ptr(Box<Ty>),
     SpecialPtr(SpecialTy),
     String,
-    Type(String),
+    Type(TypeName),
     Void,
     VoidPtr,
 }
 
 impl Ty {
+    pub(crate) fn display<'r>(&'r self, strings: &'r StringInterner) -> impl fmt::Display + 'r {
+        FmtTy(strings, self)
+    }
+
     pub(crate) fn deref(&self) -> Ty {
         match self {
             Ty::Ptr(box sub) => sub.clone(),
             Ty::VoidPtr => Ty::Void,
-            Ty::SpecialPtr(special) => Ty::Type(special.user_type().to_owned()),
+            Ty::SpecialPtr(special) => Ty::Type(special.user_type()),
             Ty::Float
             | Ty::Int
             | Ty::Noreturn
             | Ty::String
             | Ty::Type(_)
             | Ty::Void
-            | Ty::Ellipsis => panic!("Unable to deref {}", FmtTy(self)),
+            | Ty::Ellipsis => panic!("Unable to deref {self:?}"),
         }
     }
 
@@ -449,7 +474,7 @@ impl Ty {
         Ty::SpecialPtr(SpecialTy::Mixed)
     }
 
-    pub(crate) fn named_type_ptr(name: String) -> Ty {
+    pub(crate) fn named_type_ptr(name: TypeName) -> Ty {
         Ty::Ptr(Box::new(Ty::Type(name)))
     }
 }
@@ -466,19 +491,20 @@ impl<'a> From<&'a Ty> for std::borrow::Cow<'a, Ty> {
     }
 }
 
-struct FmtTy<'a>(&'a Ty);
+struct FmtTy<'a>(&'a StringInterner, &'a Ty);
 
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
+        let FmtTy(strings, ty) = *self;
+        match ty {
             Ty::Ellipsis => write!(f, "..."),
             Ty::Float => write!(f, "float"),
             Ty::Int => write!(f, "int"),
             Ty::Noreturn => f.write_str("noreturn"),
-            Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
-            Ty::SpecialPtr(special) => write!(f, "*{}", special.user_type()),
+            Ty::Ptr(sub) => write!(f, "*{}", sub.display(strings)),
+            Ty::SpecialPtr(special) => write!(f, "*{}", special.user_type().display(strings)),
             Ty::String => write!(f, "*string"),
-            Ty::Type(s) => write!(f, "{s}"),
+            Ty::Type(s) => s.display(strings).fmt(f),
             Ty::Void => f.write_str("void"),
             Ty::VoidPtr => f.write_str("*void"),
         }
@@ -487,13 +513,13 @@ impl fmt::Display for FmtTy<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Var {
-    Global(String),
+    Global(GlobalName),
     Local(LocalId),
 }
 
 impl Var {
-    pub(crate) fn global(s: impl Into<String>) -> Self {
-        Var::Global(s.into())
+    pub(crate) fn global(s: GlobalName) -> Self {
+        Var::Global(s)
     }
 }
 
@@ -509,7 +535,7 @@ impl fmt::Display for FmtVar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let FmtVar(strings, var) = *self;
         match *var {
-            Var::Global(ref s) => s.fmt(f),
+            Var::Global(ref s) => s.display(strings).fmt(f),
             Var::Local(lid) => FmtLid(strings, lid).fmt(f),
         }
     }
@@ -549,7 +575,7 @@ pub(crate) enum Expr {
     /// __sil_allocate(\<ty\>)
     Alloc(Ty),
     /// foo(1, 2, 3)
-    Call(String, Box<[Expr]>),
+    Call(FunctionName, Box<[Expr]>),
     /// 0, null, etc
     Const(Const),
     /// *Variable
@@ -563,8 +589,8 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
-    pub(crate) fn call(target: impl ToString, params: impl VarArgs) -> Expr {
-        Expr::Call(target.to_string(), params.into_exprs().into_boxed_slice())
+    pub(crate) fn call(target: FunctionName, params: impl VarArgs) -> Expr {
+        Expr::Call(target, params.into_exprs().into_boxed_slice())
     }
 
     pub(crate) fn deref(v: impl Into<Expr>) -> Expr {
@@ -839,7 +865,7 @@ impl FuncBuilder<'_, '_> {
     /// Call the target as a static call (without virtual dispatch).
     pub(crate) fn call_static(
         &mut self,
-        target: &str,
+        target: &FunctionName,
         this: Expr,
         params: impl VarArgs,
     ) -> Result<Sid> {
@@ -847,7 +873,12 @@ impl FuncBuilder<'_, '_> {
             self.txf.called_functions.insert(target.to_owned());
         }
         let dst = self.alloc_sid();
-        write!(self.txf.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst),)?;
+        write!(
+            self.txf.w,
+            "{INDENT}{dst} = {target}(",
+            dst = FmtSid(dst),
+            target = target.display(&self.txf.strings)
+        )?;
         self.txf.write_expr(&this)?;
         let params = params.into_exprs();
         for param in params {
@@ -861,7 +892,7 @@ impl FuncBuilder<'_, '_> {
     /// Call the target as a virtual call.
     pub(crate) fn call_virtual(
         &mut self,
-        target: &str,
+        target: &FunctionName,
         this: Expr,
         params: impl VarArgs,
     ) -> Result<Sid> {
@@ -871,7 +902,7 @@ impl FuncBuilder<'_, '_> {
         let dst = self.alloc_sid();
         write!(self.txf.w, "{INDENT}{dst} = ", dst = FmtSid(dst),)?;
         self.txf.write_expr(&this)?;
-        write!(self.txf.w, ".{target}(")?;
+        write!(self.txf.w, ".{}(", target.display(&self.txf.strings))?;
         let params = params.into_exprs();
         let mut sep = "";
         for param in params {
@@ -883,12 +914,17 @@ impl FuncBuilder<'_, '_> {
         Ok(dst)
     }
 
-    pub(crate) fn call(&mut self, target: &str, params: impl VarArgs) -> Result<Sid> {
+    pub(crate) fn call(&mut self, target: &FunctionName, params: impl VarArgs) -> Result<Sid> {
         if !self.txf.called_functions.contains(target) {
             self.txf.called_functions.insert(target.to_owned());
         }
         let dst = self.alloc_sid();
-        write!(self.txf.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst))?;
+        write!(
+            self.txf.w,
+            "{INDENT}{dst} = {target}(",
+            dst = FmtSid(dst),
+            target = target.display(&self.txf.strings)
+        )?;
         let mut sep = "";
         let params = params.into_exprs();
         for param in params {
@@ -921,7 +957,7 @@ impl FuncBuilder<'_, '_> {
             self.txf.w,
             "{INDENT}{dst}: {ty} = load ",
             dst = FmtSid(dst),
-            ty = FmtTy(ty),
+            ty = ty.display(&self.txf.strings),
         )?;
         self.txf.write_expr(&src)?;
         writeln!(self.txf.w)?;
@@ -966,7 +1002,7 @@ impl FuncBuilder<'_, '_> {
         self.txf.write_expr(&dst)?;
         self.txf.w.write_all(b" <- ")?;
         self.txf.write_expr(&src)?;
-        writeln!(self.txf.w, ": {ty}", ty = FmtTy(src_ty))?;
+        writeln!(self.txf.w, ": {ty}", ty = src_ty.display(&self.txf.strings))?;
         Ok(())
     }
 
@@ -1006,17 +1042,17 @@ impl Visibility {
 
 pub(crate) enum FieldAttribute {
     Unparameterized {
-        name: String,
+        name: TypeName,
     },
     #[allow(dead_code)]
     Parameterized {
-        name: String,
+        name: TypeName,
         parameters: Vec<String>,
     },
 }
 
 impl FieldAttribute {
-    fn name(&self) -> &str {
+    fn name(&self) -> &TypeName {
         match self {
             Self::Unparameterized { name } | Self::Parameterized { name, .. } => name,
         }

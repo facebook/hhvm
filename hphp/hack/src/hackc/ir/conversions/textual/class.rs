@@ -19,6 +19,7 @@ use ir::StringInterner;
 use itertools::Itertools;
 use log::trace;
 use naming_special_names_rust::special_idents;
+use naming_special_names_rust::typehints;
 
 use super::func;
 use super::hack;
@@ -26,9 +27,11 @@ use super::textual;
 use crate::func::FuncInfo;
 use crate::func::MethodInfo;
 use crate::lower;
+use crate::mangle::FunctionName;
+use crate::mangle::GlobalName;
+use crate::mangle::Intrinsic;
 use crate::mangle::Mangle;
-use crate::mangle::MangleClass as _;
-use crate::mangle::MangleWithClass;
+use crate::mangle::TypeName;
 use crate::state::UnitState;
 use crate::textual::FieldAttribute;
 use crate::textual::TextualFile;
@@ -99,9 +102,7 @@ impl ClassState<'_, '_, '_> {
 
         // Class constants are not inherited so we just turn them into globals.
         for constant in &self.class.constants {
-            let name = constant
-                .name
-                .mangle_with_class_state(self, IsStatic::Static);
+            let name = GlobalName::StaticConst(self.class.name, constant.name);
             let ty = if let Some(et) = self.class.enum_type.as_ref() {
                 convert_enum_ty(et, self.strings())
             } else {
@@ -167,14 +168,14 @@ impl ClassState<'_, '_, '_> {
 
         let extends = extends
             .into_iter()
-            .map(|id| id.mangle_class(is_static, self.strings()))
+            .map(|id| TypeName::class(id, is_static))
             .collect_vec();
 
-        let cname = self.class.name.mangle_class(is_static, self.strings());
+        let cname = TypeName::class(self.class.name, is_static);
         self.txf.define_type(
             &cname,
             &self.class.src_loc,
-            extends.iter().map(String::as_str),
+            extends.iter(),
             fields.into_iter(),
             metadata.iter().map(|(k, v)| (*k, v)),
         )?;
@@ -225,9 +226,7 @@ impl ClassState<'_, '_, '_> {
             // We don't do anything with class attributes. They don't affect
             // normal program flow - but can be seen by reflection so it's
             // questionable if we need them for analysis.
-            let name = attribute
-                .name
-                .mangle_class(IsStatic::NonStatic, &self.unit_state.strings);
+            let name = TypeName::Class(attribute.name);
             if attribute.arguments.is_empty() {
                 tx_attributes.push(FieldAttribute::Unparameterized { name });
             } else {
@@ -269,13 +268,11 @@ impl ClassState<'_, '_, '_> {
     /// returns the memoized static singleton.
     fn write_init_static(&mut self) -> Result {
         let singleton_name = static_singleton_name(self.class.name, &self.unit_state.strings);
-        self.txf.define_global(
-            singleton_name.clone(),
-            static_ty(self.class.name, &self.unit_state.strings),
-        );
+        self.txf
+            .define_global(singleton_name.clone(), static_ty(self.class.name));
 
         self.txf.define_function(
-            &init_static_name(self.class.name, &self.unit_state.strings),
+            &init_static_name(self.class.name),
             &self.class.src_loc,
             &[],
             &textual::Ty::Void,
@@ -285,20 +282,12 @@ impl ClassState<'_, '_, '_> {
                 let p = hack::call_builtin(fb, hack::Builtin::AllocWords, [sz])?;
 
                 let singleton_expr = textual::Expr::deref(textual::Var::global(singleton_name));
-                fb.store(
-                    singleton_expr,
-                    p,
-                    &static_ty(self.class.name, &self.unit_state.strings),
-                )?;
+                fb.store(singleton_expr, p, &static_ty(self.class.name))?;
 
                 // constants
                 for constant in &self.class.constants {
                     if let Some(value) = constant.value.as_ref() {
-                        let name = constant.name.mangle_with_class(
-                            self.class.name,
-                            IsStatic::Static,
-                            &self.unit_state.strings,
-                        );
+                        let name = GlobalName::StaticConst(self.class.name, constant.name);
                         let var = textual::Var::global(name);
                         let value = typed_value::typed_value_expr(value, &self.unit_state.strings);
                         fb.store(textual::Expr::deref(var), value, &textual::Ty::mixed())?;
@@ -317,15 +306,10 @@ impl ClassState<'_, '_, '_> {
     ///
     /// The factory method is used only when the class of an object to allocate is not known statically. Otherwise, we directly use Textual's typed allocation builtin.
     fn write_factory<'s>(&mut self) -> Result {
-        let strings = &self.unit_state.strings;
+        let name = FunctionName::Intrinsic(Intrinsic::Factory(self.class.name));
+        let static_ty = static_ty(self.class.name);
+        let ty = non_static_ty(self.class.name);
 
-        let name = ir::MethodId::factory(strings).mangle_with_class(
-            self.class.name,
-            IsStatic::Static,
-            strings,
-        );
-        let static_ty = static_ty(self.class.name, strings);
-        let ty = non_static_ty(self.class.name, strings);
         let params = vec![(special_idents::THIS, &static_ty)];
 
         self.txf
@@ -348,13 +332,12 @@ impl ClassState<'_, '_, '_> {
             false => IsStatic::NonStatic,
         };
 
-        let this_ty = class_ty(self.class.name, is_static, &self.unit_state.strings);
+        let this_ty = class_ty(self.class.name, is_static);
         let func = {
             let method_info = MethodInfo {
                 name: method.name,
                 class: &self.class,
                 is_static,
-                strings: Arc::clone(&self.unit_state.strings),
                 flags: method.flags,
             };
             let func = lower::lower_func(
@@ -370,7 +353,6 @@ impl ClassState<'_, '_, '_> {
             name: method.name,
             class: &self.class,
             is_static,
-            strings: Arc::clone(&self.unit_state.strings),
             flags: method.flags,
         };
 
@@ -386,24 +368,6 @@ impl ClassState<'_, '_, '_> {
     }
 }
 
-trait MangleWithClassState {
-    fn mangle_with_class_state(
-        &self,
-        state: &ClassState<'_, '_, '_>,
-        is_static: IsStatic,
-    ) -> String;
-}
-
-impl<T: MangleWithClass> MangleWithClassState for T {
-    fn mangle_with_class_state(
-        &self,
-        state: &ClassState<'_, '_, '_>,
-        is_static: IsStatic,
-    ) -> String {
-        self.mangle_with_class(state.class.name, is_static, &state.unit_state.strings)
-    }
-}
-
 fn convert_enum_ty(ti: &ir::TypeInfo, strings: &StringInterner) -> textual::Ty {
     // Enum types are unenforced - and yet the constants ARE real type. So scan
     // the text of the type and do the best we can.
@@ -413,13 +377,13 @@ fn convert_enum_ty(ti: &ir::TypeInfo, strings: &StringInterner) -> textual::Ty {
     //
     if ti
         .user_type
-        .map_or(false, |id| strings.eq_str(id, "HH\\int"))
+        .map_or(false, |id| strings.eq_str(id, &typehints::HH_INT[1..]))
     {
         return textual::Ty::SpecialPtr(textual::SpecialTy::Int);
     }
     if ti
         .user_type
-        .map_or(false, |id| strings.eq_str(id, "HH\\string"))
+        .map_or(false, |id| strings.eq_str(id, &typehints::HH_STRING[1..]))
     {
         return textual::Ty::SpecialPtr(textual::SpecialTy::String);
     }
@@ -430,38 +394,33 @@ fn convert_enum_ty(ti: &ir::TypeInfo, strings: &StringInterner) -> textual::Ty {
 }
 
 /// For a given class return the Ty for its non-static (instance) type.
-pub(crate) fn non_static_ty(class: ir::ClassId, strings: &StringInterner) -> textual::Ty {
-    let cname = class.mangle_class(IsStatic::NonStatic, strings);
+pub(crate) fn non_static_ty(class: ir::ClassId) -> textual::Ty {
+    let cname = TypeName::Class(class);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
 /// For a given class return the Ty for its static type.
-pub(crate) fn static_ty(class: ir::ClassId, strings: &StringInterner) -> textual::Ty {
-    let cname = class.mangle_class(IsStatic::Static, strings);
+pub(crate) fn static_ty(class: ir::ClassId) -> textual::Ty {
+    let cname = TypeName::StaticClass(class);
     textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
-pub(crate) fn class_ty(
-    class: ir::ClassId,
-    is_static: IsStatic,
-    strings: &StringInterner,
-) -> textual::Ty {
+pub(crate) fn class_ty(class: ir::ClassId, is_static: IsStatic) -> textual::Ty {
     match is_static {
-        IsStatic::Static => static_ty(class, strings),
-        IsStatic::NonStatic => non_static_ty(class, strings),
+        IsStatic::Static => static_ty(class),
+        IsStatic::NonStatic => non_static_ty(class),
     }
 }
 
 /// For a given class return the Ty for its non-static type.
-fn init_static_name(class: ir::ClassId, strings: &StringInterner) -> String {
-    let method = ir::MethodName::new(ffi::Slice::new(b"$init_static"));
-    method.mangle_with_class(class, IsStatic::Static, strings)
+fn init_static_name(class: ir::ClassId) -> FunctionName {
+    FunctionName::Intrinsic(Intrinsic::InitStatic(class))
 }
 
 /// The name of the global singleton for a static class.
-fn static_singleton_name(class: ir::ClassId, strings: &StringInterner) -> String {
+fn static_singleton_name(class: ir::ClassId, strings: &StringInterner) -> GlobalName {
     let name = ir::ConstId::new(strings.intern_str("static_singleton"));
-    name.mangle_with_class(class, IsStatic::Static, strings)
+    GlobalName::StaticConst(class, name)
 }
 
 fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
@@ -486,9 +445,9 @@ pub(crate) fn load_static_class(
     // Blindly load the static singleton, assuming it's already been initialized.
     let singleton_name = static_singleton_name(class, strings);
     fb.txf
-        .define_global(singleton_name.clone(), static_ty(class, strings));
+        .define_global(singleton_name.clone(), static_ty(class));
     let singleton_expr = textual::Expr::deref(textual::Var::global(singleton_name));
-    let value = fb.load(&static_ty(class, strings), singleton_expr)?;
+    let value = fb.load(&static_ty(class), singleton_expr)?;
     hack::call_builtin(fb, hack::Builtin::SilLazyInitialize, [value])?;
     Ok(value)
 }

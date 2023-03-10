@@ -25,6 +25,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_struct.h>
 #include <thrift/compiler/generate/mstch_objects.h>
@@ -610,7 +611,27 @@ class rust_mstch_program : public mstch_program {
         if (lhs_annotation != rhs_annotation) {
           return lhs_annotation < rhs_annotation;
         }
-        return lhs->get_full_name() < rhs->get_full_name();
+
+        std::function<std::string(const t_type*)> get_resolved_name =
+            [&](const t_type* t) {
+              t = t->get_true_type();
+              if (auto c = dynamic_cast<const t_list*>(t)) {
+                return fmt::format(
+                    "list<{}>", get_resolved_name(c->get_elem_type()));
+              }
+              if (auto c = dynamic_cast<const t_set*>(t)) {
+                return fmt::format(
+                    "set<{}>", get_resolved_name(c->get_elem_type()));
+              }
+              if (auto c = dynamic_cast<const t_map*>(t)) {
+                return fmt::format(
+                    "map<{},{}>",
+                    get_resolved_name(c->get_key_type()),
+                    get_resolved_name(c->get_val_type()));
+              }
+              return t->get_full_name();
+            };
+        return get_resolved_name(lhs) < get_resolved_name(rhs);
       }
     };
     std::set<const t_type*, rust_type_less> nonstandard_types;

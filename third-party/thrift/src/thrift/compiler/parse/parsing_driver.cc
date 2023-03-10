@@ -508,6 +508,7 @@ t_type_ref parsing_driver::new_type_ref(
 }
 
 t_type_ref parsing_driver::new_type_ref(
+    source_range range,
     std::unique_ptr<t_templated_type> node,
     std::unique_ptr<t_annotations> annotations) {
   if (mode != parsing_mode::PROGRAM) {
@@ -517,6 +518,7 @@ t_type_ref parsing_driver::new_type_ref(
   assert(node != nullptr);
   const t_type* type = node.get();
   set_annotations(node.get(), std::move(annotations));
+  node->set_src_range(range);
   program->add_type_instantiation(std::move(node));
   return *type;
 }
@@ -815,23 +817,32 @@ std::unique_ptr<t_service> parsing_driver::on_service(
 }
 
 t_type_ref parsing_driver::on_list_type(
-    t_type_ref element_type, std::unique_ptr<t_annotations> annotations) {
+    source_range range,
+    t_type_ref element_type,
+    std::unique_ptr<t_annotations> annotations) {
   return new_type_ref(
+      range,
       std::make_unique<t_list>(std::move(element_type)),
       std::move(annotations));
 }
 
 t_type_ref parsing_driver::on_set_type(
-    t_type_ref key_type, std::unique_ptr<t_annotations> annotations) {
+    source_range range,
+    t_type_ref key_type,
+    std::unique_ptr<t_annotations> annotations) {
   return new_type_ref(
-      std::make_unique<t_set>(std::move(key_type)), std::move(annotations));
+      range,
+      std::make_unique<t_set>(std::move(key_type)),
+      std::move(annotations));
 }
 
 t_type_ref parsing_driver::on_map_type(
+    source_range range,
     t_type_ref key_type,
     t_type_ref value_type,
     std::unique_ptr<t_annotations> annotations) {
   return new_type_ref(
+      range,
       std::make_unique<t_map>(std::move(key_type), std::move(value_type)),
       std::move(annotations));
 }

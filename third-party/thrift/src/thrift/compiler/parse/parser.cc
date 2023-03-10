@@ -435,6 +435,7 @@ class parser {
       return {std::move(type), std::move(throws)};
     };
     do {
+      auto range = track_range();
       auto type = t_type_ref();
       switch (token_.kind) {
         case tok::kw_void:
@@ -446,7 +447,7 @@ class parser {
           expect_and_consume('<');
           auto response = parse_type_throws();
           expect_and_consume('>');
-          type = actions_.on_stream_return_type(std::move(response));
+          type = actions_.on_stream_return_type(range, std::move(response));
           break;
         }
         case tok::kw_sink: {
@@ -457,7 +458,7 @@ class parser {
           auto final_response = parse_type_throws();
           expect_and_consume('>');
           type = actions_.on_sink_return_type(
-              std::move(sink), std::move(final_response));
+              range, std::move(sink), std::move(final_response));
           break;
         }
         default:
@@ -644,14 +645,15 @@ class parser {
         auto element_type = parse_field_type();
         expect_and_consume('>');
         return actions_.on_list_type(
-            std::move(element_type), parse_annotations());
+            range, std::move(element_type), parse_annotations());
       }
       case tok::kw_set: {
         consume_token();
         expect_and_consume('<');
         auto key_type = parse_field_type();
         expect_and_consume('>');
-        return actions_.on_set_type(std::move(key_type), parse_annotations());
+        return actions_.on_set_type(
+            range, std::move(key_type), parse_annotations());
       }
       case tok::kw_map: {
         consume_token();
@@ -661,7 +663,10 @@ class parser {
         auto value_type = parse_field_type();
         expect_and_consume('>');
         return actions_.on_map_type(
-            std::move(key_type), std::move(value_type), parse_annotations());
+            range,
+            std::move(key_type),
+            std::move(value_type),
+            parse_annotations());
       }
       default:
         report_expected("type");

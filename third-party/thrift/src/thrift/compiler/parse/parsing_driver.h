@@ -216,31 +216,37 @@ class parsing_driver : public parser_actions {
     return function;
   }
 
-  t_type_ref on_stream_return_type(type_throws_spec spec) override {
+  t_type_ref on_stream_return_type(
+      source_range range, type_throws_spec spec) override {
     auto stream_response =
         std::make_unique<t_stream_response>(std::move(spec.type));
     stream_response->set_exceptions(std::move(spec.throws));
-    return new_type_ref(std::move(stream_response), {});
+    return new_type_ref(range, std::move(stream_response), {});
   }
 
   t_type_ref on_sink_return_type(
+      source_range range,
       type_throws_spec sink_spec,
       type_throws_spec final_response_spec) override {
     auto sink = std::make_unique<t_sink>(
         std::move(sink_spec.type), std::move(final_response_spec.type));
     sink->set_sink_exceptions(std::move(sink_spec.throws));
     sink->set_final_response_exceptions(std::move(final_response_spec.throws));
-    return new_type_ref(std::move(sink), {});
+    return new_type_ref(range, std::move(sink), {});
   }
 
   t_type_ref on_list_type(
+      source_range range,
       t_type_ref element_type,
       std::unique_ptr<t_annotations> annotations) override;
 
   t_type_ref on_set_type(
-      t_type_ref key_type, std::unique_ptr<t_annotations> annotations) override;
+      source_range range,
+      t_type_ref key_type,
+      std::unique_ptr<t_annotations> annotations) override;
 
   t_type_ref on_map_type(
+      source_range range,
       t_type_ref key_type,
       t_type_ref value_type,
       std::unique_ptr<t_annotations> annotations) override;
@@ -402,6 +408,7 @@ class parsing_driver : public parser_actions {
 
   // Creates a reference to a newly instantiated templated type.
   t_type_ref new_type_ref(
+      source_range range,
       std::unique_ptr<t_templated_type> type,
       std::unique_ptr<t_annotations> annotations);
   // Creates a reference to a named type.

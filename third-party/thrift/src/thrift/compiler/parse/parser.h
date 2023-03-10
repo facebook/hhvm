@@ -130,15 +130,23 @@ class parser_actions {
       std::unique_ptr<t_throws> throws,
       std::unique_ptr<t_annotations> annotations) = 0;
 
-  virtual t_type_ref on_stream_return_type(type_throws_spec spec) = 0;
+  virtual t_type_ref on_stream_return_type(
+      source_range range, type_throws_spec spec) = 0;
   virtual t_type_ref on_sink_return_type(
-      type_throws_spec sink_spec, type_throws_spec final_response_spec) = 0;
+      source_range range,
+      type_throws_spec sink_spec,
+      type_throws_spec final_response_spec) = 0;
 
   virtual t_type_ref on_list_type(
-      t_type_ref element_type, std::unique_ptr<t_annotations> annotations) = 0;
+      source_range range,
+      t_type_ref element_type,
+      std::unique_ptr<t_annotations> annotations) = 0;
   virtual t_type_ref on_set_type(
-      t_type_ref key_type, std::unique_ptr<t_annotations> annotations) = 0;
+      source_range range,
+      t_type_ref key_type,
+      std::unique_ptr<t_annotations> annotations) = 0;
   virtual t_type_ref on_map_type(
+      source_range range,
       t_type_ref key_type,
       t_type_ref value_type,
       std::unique_ptr<t_annotations> annotations) = 0;

@@ -46,6 +46,12 @@ struct Baz {
   1: string name;
 }
 
+@python.Adapter{
+  name = "thrift.python.test.adapters.noop.Wrapper",
+  typeHint = "thrift.python.test.adapters.noop.Wrapped[]",
+}
+typedef bool WrappedBool
+
 struct Foo {
   @AsDatetime{signature = "DatetimeField"}
   1: i32 created_at;
@@ -67,6 +73,12 @@ struct Foo {
   }
   9: list<list<map<AdaptedInt, AdaptedInt>>> adapted_list_nested;
   10: list<list<AdaptedInt>> int_list_list;
+  11: WrappedBool wrapped_bool = true;
+  @python.Adapter{
+    name = "thrift.python.test.adapters.noop.Wrapper",
+    typeHint = "thrift.python.test.adapters.noop.Wrapped[]",
+  }
+  12: WrappedBool double_wrapped_bool = true;
 }
 
 union Bar {

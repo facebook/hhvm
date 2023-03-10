@@ -180,7 +180,10 @@ cdef class StructInfo:
                 continue
             if callable(default_value):
                 default_value = default_value()
-            default_value = self.type_infos[idx].to_internal_data(default_value)
+            type_info = self.type_infos[idx]
+            if isinstance(type_info, AdaptedTypeInfo):
+                type_info = (<AdaptedTypeInfo>type_info)._orig_type_info
+            default_value = type_info.to_internal_data(default_value)
             info_ptr.addFieldValue(idx, default_value)
 
 
@@ -447,6 +450,7 @@ cdef class Struct(StructOrUnion):
                 raise TypeError(f"__init__() got an unexpected keyword argument '{name}'")
             if value is None:
                 continue
+            # field adapter
             adapter_info = info.fields[index][5]
             if adapter_info:
                 adapter_class, transitive_annotation = adapter_info

@@ -184,3 +184,8 @@ class AdapterTest(unittest.TestCase):
     def test_adapted_variable(self) -> None:
         self.assertEqual(NINETEEN_EIGHTY_FOUR, datetime(1984, 1, 1))
         self.assertEqual(_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR, 441792000)
+
+    def test_adapted_field_with_default_value(self) -> None:
+        foo = Foo()
+        self.assertIs(True, foo.wrapped_bool.value)
+        self.assertIs(True, foo.double_wrapped_bool.value.value)

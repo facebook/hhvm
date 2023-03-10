@@ -190,11 +190,11 @@ fn gen_transform_body(
 ) -> TokenStream {
     quote! {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.#pass_method_td(#elem, env) {
+        if let Break(..) = pass.#pass_method_td(env, #elem) {
             return;
         }
         #recurse;
-        in_pass.#pass_method_bu(#elem, env);
+        in_pass.#pass_method_bu(env, #elem);
     }
 }
 

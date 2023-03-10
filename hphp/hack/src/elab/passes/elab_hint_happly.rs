@@ -50,42 +50,42 @@ impl Pass for ElabHintHapplyPass {
     // We can't write this - how can we make the contexts modular?
     // type Ctx = impl CanonicalHapplyCtx;
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, _: &Env, elem: &mut Typedef) -> ControlFlow<()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down(&mut self, _: &mut Gconst, _: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_top_down(&mut self, _: &Env, _: &mut Gconst) -> ControlFlow<()> {
         self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.set_tparams(&elem.fun.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down(&mut self, _: &mut ModuleDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_top_down(&mut self, _: &Env, _: &mut ModuleDef) -> ControlFlow<()> {
         self.reset_tparams();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, _: &Env, elem: &mut Method_) -> ControlFlow<()> {
         self.extend_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam_top_down(&mut self, elem: &mut Tparam, _: &Env) -> ControlFlow<()> {
+    fn on_ty_tparam_top_down(&mut self, _: &Env, elem: &mut Tparam) -> ControlFlow<()> {
         self.extend_tparams(&elem.parameters);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         match &mut *elem.1 {
             Hint_::Happly(id, hints) => match canonical_happly(id, hints, self.tparams()) {
                 ControlFlow::Continue((hint_opt, err_opt)) => {

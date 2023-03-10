@@ -32,7 +32,7 @@ pub struct ValidateControlContextPass {
 }
 
 impl Pass for ValidateControlContextPass {
-    fn on_ty_stmt_bottom_up(&mut self, elem: &mut Stmt, env: &Env) -> ControlFlow<()> {
+    fn on_ty_stmt_bottom_up(&mut self, env: &Env, elem: &mut Stmt) -> ControlFlow<()> {
         match (&elem.1, self.control_context) {
             (Stmt_::Break, ControlContext::TopLevel) => {
                 env.emit_error(NastCheckError::ToplevelBreak(elem.0.clone()))
@@ -51,7 +51,7 @@ impl Pass for ValidateControlContextPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_stmt__top_down(&mut self, elem: &mut Stmt_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_stmt__top_down(&mut self, _: &Env, elem: &mut Stmt_) -> ControlFlow<()> {
         match elem {
             Stmt_::Do(..) | Stmt_::While(..) | Stmt_::For(..) | Stmt_::Foreach(..) => {
                 self.control_context = ControlContext::Loop
@@ -62,12 +62,12 @@ impl Pass for ValidateControlContextPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_finally_block_top_down(&mut self, _: &mut FinallyBlock, _: &Env) -> ControlFlow<()> {
+    fn on_ty_finally_block_top_down(&mut self, _: &Env, _: &mut FinallyBlock) -> ControlFlow<()> {
         self.in_finally_block = true;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__top_down(&mut self, elem: &mut Expr_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__top_down(&mut self, _: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
             Expr_::Efun(..) | Expr_::Lfun(..) => self.control_context = ControlContext::TopLevel,
             _ => (),

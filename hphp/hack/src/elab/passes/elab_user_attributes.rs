@@ -19,8 +19,8 @@ pub struct ElabUserAttributesPass;
 impl Pass for ElabUserAttributesPass {
     fn on_ty_user_attributes_top_down(
         &mut self,
-        elem: &mut UserAttributes,
         env: &Env,
+        elem: &mut UserAttributes,
     ) -> ControlFlow<()> {
         let mut seen: HashMap<String, Pos> = HashMap::default();
         let UserAttributes(uas) = elem;

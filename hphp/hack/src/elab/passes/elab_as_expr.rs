@@ -18,7 +18,7 @@ use crate::Pass;
 pub struct ElabAsExprPass;
 
 impl Pass for ElabAsExprPass {
-    fn on_ty_as_expr_bottom_up(&mut self, elem: &mut AsExpr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_as_expr_bottom_up(&mut self, env: &Env, elem: &mut AsExpr) -> ControlFlow<()> {
         match elem {
             AsExpr::AsV(e) | AsExpr::AwaitAsV(_, e) => elab_value(env, e),
             AsExpr::AsKv(ek, ev) | AsExpr::AwaitAsKv(_, ek, ev) => {

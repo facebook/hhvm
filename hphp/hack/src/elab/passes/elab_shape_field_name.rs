@@ -26,12 +26,12 @@ impl ElabShapeFieldNamePass {
 }
 
 impl Pass for ElabShapeFieldNamePass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.in_class(elem);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
             Expr_::Shape(fields) => fields
                 .iter_mut()
@@ -43,8 +43,8 @@ impl Pass for ElabShapeFieldNamePass {
 
     fn on_ty_shape_field_info_bottom_up(
         &mut self,
-        elem: &mut ShapeFieldInfo,
         env: &Env,
+        elem: &mut ShapeFieldInfo,
     ) -> ControlFlow<()> {
         canonical_shape_name(env, &mut elem.name, &self.current_class);
         ControlFlow::Continue(())

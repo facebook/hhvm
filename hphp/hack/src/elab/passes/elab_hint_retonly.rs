@@ -20,7 +20,7 @@ pub struct ElabHintRetonlyPass {
 }
 
 impl Pass for ElabHintRetonlyPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         match elem {
             Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tvoid)) if !self.allow_retonly => {
                 env.emit_error(NamingError::ReturnOnlyTypehint {
@@ -42,7 +42,7 @@ impl Pass for ElabHintRetonlyPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, _: &Env, elem: &mut Hint_) -> ControlFlow<()> {
         match elem {
             Hint_::Happly(..) | Hint_::Habstr(..) => self.allow_retonly = true,
             _ => (),
@@ -50,22 +50,22 @@ impl Pass for ElabHintRetonlyPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_targ_top_down(&mut self, _: &mut nast::Targ, _: &Env) -> ControlFlow<()> {
+    fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut nast::Targ) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
 
-    fn on_fld_hint_fun_return_ty_top_down(&mut self, _: &mut Hint, _: &Env) -> ControlFlow<()> {
+    fn on_fld_hint_fun_return_ty_top_down(&mut self, _: &Env, _: &mut Hint) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
 
-    fn on_fld_fun__ret_top_down(&mut self, _: &mut nast::TypeHint, _: &Env) -> ControlFlow<()> {
+    fn on_fld_fun__ret_top_down(&mut self, _: &Env, _: &mut nast::TypeHint) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }
 
-    fn on_fld_method__ret_top_down(&mut self, _: &mut nast::TypeHint, _: &Env) -> ControlFlow<()> {
+    fn on_fld_method__ret_top_down(&mut self, _: &Env, _: &mut nast::TypeHint) -> ControlFlow<()> {
         self.allow_retonly = true;
         ControlFlow::Continue(())
     }

@@ -15,7 +15,7 @@ use crate::Pass;
 pub struct ValidateModulePass;
 
 impl Pass for ValidateModulePass {
-    fn on_ty_module_def_bottom_up(&mut self, module: &mut ModuleDef, env: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_bottom_up(&mut self, env: &Env, module: &mut ModuleDef) -> ControlFlow<()> {
         if !env.allow_module_declarations() {
             env.emit_error(NamingError::ModuleDeclarationOutsideAllowedFiles(
                 module.span.clone(),

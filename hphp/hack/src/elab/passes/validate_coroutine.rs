@@ -55,7 +55,7 @@ impl ValidateCoroutinePass {
 }
 
 impl Pass for ValidateCoroutinePass {
-    fn on_ty_stmt_bottom_up(&mut self, elem: &mut Stmt, env: &Env) -> ControlFlow<()> {
+    fn on_ty_stmt_bottom_up(&mut self, env: &Env, elem: &mut Stmt) -> ControlFlow<()> {
         match &elem.1 {
             Stmt_::Using(box UsingStmt {
                 has_await, exprs, ..
@@ -87,7 +87,7 @@ impl Pass for ValidateCoroutinePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_top_down(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         match elem.2 {
             Expr_::Await(..) if self.is_sync() => {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
@@ -100,13 +100,13 @@ impl Pass for ValidateCoroutinePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, _: &Env, elem: &mut Method_) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
         ControlFlow::Continue(())

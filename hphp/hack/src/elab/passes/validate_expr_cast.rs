@@ -20,7 +20,7 @@ use crate::Pass;
 pub struct ValidateExprCastPass;
 
 impl Pass for ValidateExprCastPass {
-    fn on_ty_expr__bottom_up(&mut self, expr: &mut Expr_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__bottom_up(&mut self, env: &Env, expr: &mut Expr_) -> ControlFlow<()> {
         match &*expr {
             Expr_::Cast(box (Hint(_, box Hint_::Hprim(Tint | Tbool | Tfloat | Tstring)), _)) => {
                 ControlFlow::Continue(())

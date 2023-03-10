@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ElabHktPass;
 
 impl Pass for ElabHktPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         if !env.hkt_enabled() {
             let Hint(pos, hint_) = elem;
             if let Hint_::Habstr(tp_name, tp_params) = &mut **hint_ {
@@ -33,7 +33,7 @@ impl Pass for ElabHktPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_tparam_top_down(&mut self, elem: &mut Tparam, env: &Env) -> ControlFlow<()> {
+    fn on_ty_tparam_top_down(&mut self, env: &Env, elem: &mut Tparam) -> ControlFlow<()> {
         if !env.hkt_enabled() {
             if !elem.parameters.is_empty() {
                 let Id(pos, tp_name) = &elem.name;

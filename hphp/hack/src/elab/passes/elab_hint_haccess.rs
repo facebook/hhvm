@@ -62,7 +62,7 @@ impl ElabHintHaccessPass {
 }
 
 impl Pass for ElabHintHaccessPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         if !self.in_haccess() {
             return ControlFlow::Continue(());
         }
@@ -111,26 +111,26 @@ impl Pass for ElabHintHaccessPass {
         }
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, _: &Env, elem: &mut Hint_) -> ControlFlow<()> {
         self.set_in_haccess(matches!(elem, Hint_::Haccess(..)));
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.set_in_class(elem);
         ControlFlow::Continue(())
     }
 
     fn on_ty_where_constraint_hint_top_down(
         &mut self,
-        _: &mut WhereConstraintHint,
         _: &Env,
+        _: &mut WhereConstraintHint,
     ) -> ControlFlow<()> {
         self.set_in_where_clause(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_contexts_top_down(&mut self, _: &mut Contexts, _: &Env) -> ControlFlow<()> {
+    fn on_ty_contexts_top_down(&mut self, _: &Env, _: &mut Contexts) -> ControlFlow<()> {
         self.set_in_context(true);
         ControlFlow::Continue(())
     }

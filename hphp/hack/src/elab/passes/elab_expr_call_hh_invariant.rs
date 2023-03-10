@@ -28,7 +28,7 @@ pub struct ElabExprCallHhInvariantPass;
 impl Pass for ElabExprCallHhInvariantPass {
     // We are elaborating a `Call` `Expr` into a `Stmt` so the transformation
     // is defined on `Stmt`
-    fn on_ty_stmt__bottom_up(&mut self, elem: &mut Stmt_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_stmt__bottom_up(&mut self, env: &Env, elem: &mut Stmt_) -> ControlFlow<()> {
         match check_call(env, elem) {
             Check::Ignore => ControlFlow::Continue(()),
             Check::Invalidate => {

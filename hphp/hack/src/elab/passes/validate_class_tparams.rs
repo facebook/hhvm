@@ -21,21 +21,21 @@ pub struct ValidateClassTparamsPass {
 }
 
 impl Pass for ValidateClassTparamsPass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.class_tparams = Some(elem.tparams.iter().map(|tp| tp.name.clone()).collect());
         ControlFlow::Continue(())
     }
 
     fn on_ty_class_typeconst_def_top_down(
         &mut self,
-        _: &mut ClassTypeconstDef,
         _: &Env,
+        _: &mut ClassTypeconstDef,
     ) -> ControlFlow<()> {
         self.in_typeconst_def = true;
         ControlFlow::Break(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         if self.in_typeconst_def {
             match &*elem.1 {
                 Hint_::Habstr(tp_name, _) => {

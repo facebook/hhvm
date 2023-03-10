@@ -19,7 +19,7 @@ impl Pass for ElabExprImportPass {
     // Wrap all occurrence of `Import` in an `Invalid` marker
     // TODO[mjt] Oddly there is no error reporting about the occurrence of these
     // expressions and no invariant is assumed. I would expect one of these
-    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, _: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_top_down(&mut self, _: &Env, elem: &mut Expr) -> ControlFlow<()> {
         let Expr(_, _, expr_) = elem;
         match expr_ {
             Expr_::Import(_) => {

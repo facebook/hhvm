@@ -218,7 +218,7 @@ impl ValidateHintHabstrPass {
 // TODO[mjt] we're doing quite a bit of work here to support higher-kinded
 // types which are pretty bit-rotted. We should make a call on removing
 impl Pass for ValidateHintHabstrPass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
         // [Class_]es exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
@@ -229,7 +229,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, env: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, env: &Env, elem: &mut Typedef) -> ControlFlow<()> {
         // [Typedef]s exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
@@ -237,7 +237,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun__top_down(&mut self, elem: &mut Fun_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun__top_down(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         // [Fun_]s exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
@@ -249,7 +249,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         // Validate method level tparams given the already in-scope
         // class level tparams
         self.check_tparams(env, &elem.tparams, false);
@@ -262,8 +262,8 @@ impl Pass for ValidateHintHabstrPass {
 
     fn on_ty_where_constraint_hint_top_down(
         &mut self,
-        _: &mut WhereConstraintHint,
         _: &Env,
+        _: &mut WhereConstraintHint,
     ) -> ControlFlow<()> {
         // We want to check hints inside function / method where constraints
         // so we need to record this in the context
@@ -271,7 +271,7 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         // NB this relies on [Happly] -> [Habstr] elaboration happening
         // in a preceeding top-down pass
         if self.in_method_or_fun() && self.in_where_constraint() {

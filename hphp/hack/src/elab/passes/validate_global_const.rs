@@ -20,7 +20,7 @@ use crate::Pass;
 pub struct ValidateGlobalConstPass;
 
 impl Pass for ValidateGlobalConstPass {
-    fn on_ty_gconst_bottom_up(&mut self, gconst: &mut Gconst, env: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_bottom_up(&mut self, env: &Env, gconst: &mut Gconst) -> ControlFlow<()> {
         error_if_no_typehint(env, gconst);
         error_if_pseudo_constant(env, gconst);
         ControlFlow::Continue(())

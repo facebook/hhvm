@@ -41,12 +41,12 @@ impl ValidateIllegalNamePass {
 }
 
 impl Pass for ValidateIllegalNamePass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.classish_kind = Some(elem.kind);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__bottom_up(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__bottom_up(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
         elem.typeconsts
             .iter()
             .for_each(|tc| check_illegal_member_variable_class(env, &tc.name));
@@ -56,12 +56,12 @@ impl Pass for ValidateIllegalNamePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_bottom_up(&mut self, elem: &mut FunDef, env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_bottom_up(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         let lower_name = elem.name.name().to_ascii_lowercase();
         let lower_norm = lower_name
             .strip_prefix('/')
@@ -76,19 +76,19 @@ impl Pass for ValidateIllegalNamePass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, _: &Env, elem: &mut Method_) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__bottom_up(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         if elem.name.name() == sn::members::__DESTRUCT {
             env.emit_error(NastCheckError::IllegalDestructor(elem.name.pos().clone()))
         }
         ControlFlow::Continue(())
     }
 
-    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
             Expr_::Id(box id)
                 if id.name() == sn::pseudo_consts::G__CLASS__ && self.classish_kind.is_none() =>

@@ -18,11 +18,11 @@ use crate::Pass;
 pub struct ValidateFunParamsPass;
 
 impl Pass for ValidateFunParamsPass {
-    fn on_ty_fun__top_down(&mut self, elem: &mut Fun_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun__top_down(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         self.validate_fun_params(env, &elem.params)
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         self.validate_fun_params(env, &elem.params)
     }
 }

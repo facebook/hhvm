@@ -30,7 +30,7 @@ pub struct ElabClassVarsPass;
 
 impl Pass for ElabClassVarsPass {
     // TODO[mjt] split out elaboration of `XhpAttr`s?
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
         let const_user_attr_opt = elem
             .user_attributes
             .iter()

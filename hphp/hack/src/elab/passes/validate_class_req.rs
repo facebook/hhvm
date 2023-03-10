@@ -19,7 +19,7 @@ use crate::Pass;
 pub struct ValidateClassReqPass;
 
 impl Pass for ValidateClassReqPass {
-    fn on_ty_class__top_down(&mut self, cls: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, env: &Env, cls: &mut Class_) -> ControlFlow<()> {
         let is_trait = cls.kind == ClassishKind::Ctrait;
         let is_interface = cls.kind == ClassishKind::Cinterface;
         let find_req = |kind| cls.reqs.iter().find(|&&ClassReq(_, k)| k == kind);

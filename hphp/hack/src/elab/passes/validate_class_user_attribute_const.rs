@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ValidateClassUserAttributeConstPass;
 
 impl Pass for ValidateClassUserAttributeConstPass {
-    fn on_ty_class__bottom_up(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__bottom_up(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
         if !env.const_attribute() {
             // Disallow `__Const` attribute unless typechecker option is enabled
             check_const(env, elem.name.pos(), &elem.user_attributes);

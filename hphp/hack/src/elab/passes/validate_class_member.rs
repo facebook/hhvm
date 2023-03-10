@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ValidateClassMemberPass;
 
 impl Pass for ValidateClassMemberPass {
-    fn on_ty_class__bottom_up(&mut self, class: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__bottom_up(&mut self, env: &Env, class: &mut Class_) -> ControlFlow<()> {
         let typeconst_names = class.typeconsts.iter().map(|tc| &tc.name);
         let const_names = class.consts.iter().map(|c| &c.id);
         error_if_repeated_name(env, typeconst_names.chain(const_names));

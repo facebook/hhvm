@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ValidateClassConsistentConstructPass;
 
 impl Pass for ValidateClassConsistentConstructPass {
-    fn on_ty_class__top_down(&mut self, class: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, env: &Env, class: &mut Class_) -> ControlFlow<()> {
         if env.consistent_ctor_level <= 0 {
             return ControlFlow::Continue(());
         }

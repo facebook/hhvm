@@ -18,7 +18,7 @@ use crate::Pass;
 pub struct ElabExprTuplePass;
 
 impl Pass for ElabExprTuplePass {
-    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_top_down(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         if let Expr(_annot, pos, Expr_::Tuple(es)) = elem {
             if es.is_empty() {
                 // Loc. of the empty tuple.

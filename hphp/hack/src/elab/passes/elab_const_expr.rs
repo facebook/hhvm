@@ -75,7 +75,7 @@ impl Pass for ElabConstExprPass {
     // pattern matching. We prefer to do this since we can stop the transformation
     // early in these cases. For cases where we need to pattern match on the
     // expression more deeply, we use the bottom-up pass
-    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_top_down(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         if !self.enforce_const_expr() {
             ControlFlow::Continue(())
         } else {
@@ -218,7 +218,7 @@ impl Pass for ElabConstExprPass {
 
     // Handle non-constant expressions which require pattern matching on some
     // element of the expression which is not yet transformed in the top-down pass
-    fn on_ty_expr_bottom_up(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_bottom_up(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         if !self.enforce_const_expr() {
             ControlFlow::Continue(())
         } else {
@@ -254,7 +254,7 @@ impl Pass for ElabConstExprPass {
         }
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.set_in_enum_class(match elem.kind {
             ClassishKind::CenumClass(_) => true,
             ClassishKind::Cclass(..)
@@ -268,8 +268,8 @@ impl Pass for ElabConstExprPass {
 
     fn on_ty_class_const_kind_top_down(
         &mut self,
-        elem: &mut ClassConstKind,
         _: &Env,
+        elem: &mut ClassConstKind,
     ) -> ControlFlow<()> {
         self.set_enforce_const_expr(
             !self.in_enum_class() && matches!(elem, ClassConstKind::CCConcrete(_)),
@@ -277,23 +277,23 @@ impl Pass for ElabConstExprPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, _: &Env, elem: &mut Typedef) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_top_down(&mut self, _: &Env, elem: &mut Gconst) -> ControlFlow<()> {
         self.mode = elem.mode;
         self.set_enforce_const_expr(true);
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_top_down(&mut self, _: &Env, elem: &mut ModuleDef) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }

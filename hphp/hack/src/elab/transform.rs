@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c49600cd6493f257a304fa347af98581>>
+// @generated SignedSource<<76b37dd07aa17518fc48f2833ca8925b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -180,11 +180,11 @@ const _: () = {
 impl Transform for Program {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_program_top_down(self, env) {
+        if let Break(..) = pass.on_ty_program_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_program_bottom_up(self, env);
+        in_pass.on_ty_program_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -195,11 +195,11 @@ impl Transform for Program {
 impl Transform for Stmt {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_stmt_top_down(self, env) {
+        if let Break(..) = pass.on_ty_stmt_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_stmt_bottom_up(self, env);
+        in_pass.on_ty_stmt_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -215,11 +215,11 @@ impl Transform for Stmt {
 impl Transform for Stmt_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_stmt__top_down(self, env) {
+        if let Break(..) = pass.on_ty_stmt__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_stmt__bottom_up(self, env);
+        in_pass.on_ty_stmt__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -251,11 +251,11 @@ const _: () = {
 impl Transform for UsingStmt {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_using_stmt_top_down(self, env) {
+        if let Break(..) = pass.on_ty_using_stmt_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_using_stmt_bottom_up(self, env);
+        in_pass.on_ty_using_stmt_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -282,11 +282,11 @@ impl Transform for UsingStmt {
 impl Transform for AsExpr {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_as_expr_top_down(self, env) {
+        if let Break(..) = pass.on_ty_as_expr_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_as_expr_bottom_up(self, env);
+        in_pass.on_ty_as_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -318,11 +318,11 @@ impl Transform for AsExpr {
 impl Transform for Block {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_block_top_down(self, env) {
+        if let Break(..) = pass.on_ty_block_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_block_bottom_up(self, env);
+        in_pass.on_ty_block_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -333,11 +333,11 @@ impl Transform for Block {
 impl Transform for FinallyBlock {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_finally_block_top_down(self, env) {
+        if let Break(..) = pass.on_ty_finally_block_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_finally_block_bottom_up(self, env);
+        in_pass.on_ty_finally_block_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -348,11 +348,11 @@ impl Transform for FinallyBlock {
 impl Transform for ClassId {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_id_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_id_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_id_bottom_up(self, env);
+        in_pass.on_ty_class_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -371,11 +371,11 @@ impl Transform for ClassId {
 impl Transform for ClassId_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_id__top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_id__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_id__bottom_up(self, env);
+        in_pass.on_ty_class_id__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -390,11 +390,11 @@ impl Transform for ClassId_ {
 impl Transform for Expr {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_expr_top_down(self, env) {
+        if let Break(..) = pass.on_ty_expr_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_expr_bottom_up(self, env);
+        in_pass.on_ty_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -413,11 +413,11 @@ impl Transform for Expr {
 impl Transform for CollectionTarg {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_collection_targ_top_down(self, env) {
+        if let Break(..) = pass.on_ty_collection_targ_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_collection_targ_bottom_up(self, env);
+        in_pass.on_ty_collection_targ_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -434,11 +434,11 @@ impl Transform for CollectionTarg {
 impl Transform for FunctionPtrId {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_function_ptr_id_top_down(self, env) {
+        if let Break(..) = pass.on_ty_function_ptr_id_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_function_ptr_id_bottom_up(self, env);
+        in_pass.on_ty_function_ptr_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -455,11 +455,11 @@ impl Transform for FunctionPtrId {
 impl Transform for ExpressionTree {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_expression_tree_top_down(self, env) {
+        if let Break(..) = pass.on_ty_expression_tree_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_expression_tree_bottom_up(self, env);
+        in_pass.on_ty_expression_tree_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -491,11 +491,11 @@ impl Transform for ExpressionTree {
 impl Transform for Expr_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_expr__top_down(self, env) {
+        if let Break(..) = pass.on_ty_expr__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_expr__bottom_up(self, env);
+        in_pass.on_ty_expr__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -556,11 +556,11 @@ impl Transform for Expr_ {
 impl Transform for HoleSource {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_hole_source_top_down(self, env) {
+        if let Break(..) = pass.on_ty_hole_source_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_hole_source_bottom_up(self, env);
+        in_pass.on_ty_hole_source_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -574,11 +574,11 @@ impl Transform for HoleSource {
 impl Transform for ClassGetExpr {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_get_expr_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_get_expr_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_get_expr_bottom_up(self, env);
+        in_pass.on_ty_class_get_expr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -590,11 +590,11 @@ impl Transform for ClassGetExpr {
 impl Transform for Case {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_case_top_down(self, env) {
+        if let Break(..) = pass.on_ty_case_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_case_bottom_up(self, env);
+        in_pass.on_ty_case_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -610,11 +610,11 @@ impl Transform for Case {
 impl Transform for DefaultCase {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_default_case_top_down(self, env) {
+        if let Break(..) = pass.on_ty_default_case_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_default_case_bottom_up(self, env);
+        in_pass.on_ty_default_case_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -630,11 +630,11 @@ impl Transform for DefaultCase {
 impl Transform for Catch {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_catch_top_down(self, env) {
+        if let Break(..) = pass.on_ty_catch_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_catch_bottom_up(self, env);
+        in_pass.on_ty_catch_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -653,11 +653,11 @@ impl Transform for Catch {
 impl Transform for Field {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_field_top_down(self, env) {
+        if let Break(..) = pass.on_ty_field_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_field_bottom_up(self, env);
+        in_pass.on_ty_field_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -673,11 +673,11 @@ impl Transform for Field {
 impl Transform for Afield {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_afield_top_down(self, env) {
+        if let Break(..) = pass.on_ty_afield_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_afield_bottom_up(self, env);
+        in_pass.on_ty_afield_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -694,11 +694,11 @@ impl Transform for Afield {
 impl Transform for XhpSimple {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_xhp_simple_top_down(self, env) {
+        if let Break(..) = pass.on_ty_xhp_simple_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_xhp_simple_bottom_up(self, env);
+        in_pass.on_ty_xhp_simple_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -718,11 +718,11 @@ impl Transform for XhpSimple {
 impl Transform for XhpAttribute {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_xhp_attribute_top_down(self, env) {
+        if let Break(..) = pass.on_ty_xhp_attribute_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_xhp_attribute_bottom_up(self, env);
+        in_pass.on_ty_xhp_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -734,11 +734,11 @@ impl Transform for XhpAttribute {
 impl Transform for FunParam {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_fun_param_top_down(self, env) {
+        if let Break(..) = pass.on_ty_fun_param_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_fun_param_bottom_up(self, env);
+        in_pass.on_ty_fun_param_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -774,11 +774,11 @@ impl Transform for FunParam {
 impl Transform for Fun_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_fun__top_down(self, env) {
+        if let Break(..) = pass.on_ty_fun__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_fun__bottom_up(self, env);
+        in_pass.on_ty_fun__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -803,11 +803,11 @@ impl Transform for Fun_ {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_fun__ret_top_down(__binding_4, env) {
+                        if let Break(..) = pass.on_fld_fun__ret_top_down(env, __binding_4) {
                             return;
                         }
                         __binding_4.transform(env, pass);
-                        in_pass.on_fld_fun__ret_bottom_up(__binding_4, env);
+                        in_pass.on_fld_fun__ret_bottom_up(env, __binding_4);
                     }
                 }
                 {
@@ -842,11 +842,11 @@ impl Transform for Fun_ {
 impl Transform for Efun {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_efun_top_down(self, env) {
+        if let Break(..) = pass.on_ty_efun_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_efun_bottom_up(self, env);
+        in_pass.on_ty_efun_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -869,11 +869,11 @@ impl Transform for Efun {
 impl Transform for FuncBody {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_func_body_top_down(self, env) {
+        if let Break(..) = pass.on_ty_func_body_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_func_body_bottom_up(self, env);
+        in_pass.on_ty_func_body_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -886,11 +886,11 @@ impl Transform for FuncBody {
 impl Transform for TypeHint {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_type_hint_top_down(self, env) {
+        if let Break(..) = pass.on_ty_type_hint_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_type_hint_bottom_up(self, env);
+        in_pass.on_ty_type_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -906,11 +906,11 @@ impl Transform for TypeHint {
 impl Transform for Targ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_targ_top_down(self, env) {
+        if let Break(..) = pass.on_ty_targ_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_targ_bottom_up(self, env);
+        in_pass.on_ty_targ_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -926,11 +926,11 @@ impl Transform for Targ {
 impl Transform for UserAttribute {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_user_attribute_top_down(self, env) {
+        if let Break(..) = pass.on_ty_user_attribute_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_user_attribute_bottom_up(self, env);
+        in_pass.on_ty_user_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -949,11 +949,11 @@ impl Transform for UserAttribute {
 impl Transform for FileAttribute {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_file_attribute_top_down(self, env) {
+        if let Break(..) = pass.on_ty_file_attribute_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_file_attribute_bottom_up(self, env);
+        in_pass.on_ty_file_attribute_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -972,11 +972,11 @@ impl Transform for FileAttribute {
 impl Transform for Tparam {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_tparam_top_down(self, env) {
+        if let Break(..) = pass.on_ty_tparam_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_tparam_bottom_up(self, env);
+        in_pass.on_ty_tparam_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1010,11 +1010,11 @@ const _: () = {
 impl Transform for Class_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class__top_down(self, env) {
+        if let Break(..) = pass.on_ty_class__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class__bottom_up(self, env);
+        in_pass.on_ty_class__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1067,33 +1067,33 @@ impl Transform for Class_ {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__tparams_top_down(__binding_8, env) {
+                        if let Break(..) = pass.on_fld_class__tparams_top_down(env, __binding_8) {
                             return;
                         }
                         __binding_8.transform(env, pass);
-                        in_pass.on_fld_class__tparams_bottom_up(__binding_8, env);
+                        in_pass.on_fld_class__tparams_bottom_up(env, __binding_8);
                     }
                 }
                 {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__extends_top_down(__binding_9, env) {
+                        if let Break(..) = pass.on_fld_class__extends_top_down(env, __binding_9) {
                             return;
                         }
                         __binding_9.transform(env, pass);
-                        in_pass.on_fld_class__extends_bottom_up(__binding_9, env);
+                        in_pass.on_fld_class__extends_bottom_up(env, __binding_9);
                     }
                 }
                 {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__uses_top_down(__binding_10, env) {
+                        if let Break(..) = pass.on_fld_class__uses_top_down(env, __binding_10) {
                             return;
                         }
                         __binding_10.transform(env, pass);
-                        in_pass.on_fld_class__uses_bottom_up(__binding_10, env);
+                        in_pass.on_fld_class__uses_bottom_up(env, __binding_10);
                     }
                 }
                 {
@@ -1101,35 +1101,35 @@ impl Transform for Class_ {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
                         if let Break(..) =
-                            pass.on_fld_class__xhp_attr_uses_top_down(__binding_11, env)
+                            pass.on_fld_class__xhp_attr_uses_top_down(env, __binding_11)
                         {
                             return;
                         }
                         __binding_11.transform(env, pass);
-                        in_pass.on_fld_class__xhp_attr_uses_bottom_up(__binding_11, env);
+                        in_pass.on_fld_class__xhp_attr_uses_bottom_up(env, __binding_11);
                     }
                 }
                 {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__reqs_top_down(__binding_13, env) {
+                        if let Break(..) = pass.on_fld_class__reqs_top_down(env, __binding_13) {
                             return;
                         }
                         __binding_13.transform(env, pass);
-                        in_pass.on_fld_class__reqs_bottom_up(__binding_13, env);
+                        in_pass.on_fld_class__reqs_bottom_up(env, __binding_13);
                     }
                 }
                 {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__implements_top_down(__binding_14, env)
+                        if let Break(..) = pass.on_fld_class__implements_top_down(env, __binding_14)
                         {
                             return;
                         }
                         __binding_14.transform(env, pass);
-                        in_pass.on_fld_class__implements_bottom_up(__binding_14, env);
+                        in_pass.on_fld_class__implements_bottom_up(env, __binding_14);
                     }
                 }
                 {
@@ -1139,11 +1139,11 @@ impl Transform for Class_ {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__consts_top_down(__binding_16, env) {
+                        if let Break(..) = pass.on_fld_class__consts_top_down(env, __binding_16) {
                             return;
                         }
                         __binding_16.transform(env, pass);
-                        in_pass.on_fld_class__consts_bottom_up(__binding_16, env);
+                        in_pass.on_fld_class__consts_bottom_up(env, __binding_16);
                     }
                 }
                 {
@@ -1162,12 +1162,12 @@ impl Transform for Class_ {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class__xhp_attrs_top_down(__binding_21, env)
+                        if let Break(..) = pass.on_fld_class__xhp_attrs_top_down(env, __binding_21)
                         {
                             return;
                         }
                         __binding_21.transform(env, pass);
-                        in_pass.on_fld_class__xhp_attrs_bottom_up(__binding_21, env);
+                        in_pass.on_fld_class__xhp_attrs_bottom_up(env, __binding_21);
                     }
                 }
                 {
@@ -1178,12 +1178,12 @@ impl Transform for Class_ {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
                         if let Break(..) =
-                            pass.on_fld_class__user_attributes_top_down(__binding_23, env)
+                            pass.on_fld_class__user_attributes_top_down(env, __binding_23)
                         {
                             return;
                         }
                         __binding_23.transform(env, pass);
-                        in_pass.on_fld_class__user_attributes_bottom_up(__binding_23, env);
+                        in_pass.on_fld_class__user_attributes_bottom_up(env, __binding_23);
                     }
                 }
                 {
@@ -1212,11 +1212,11 @@ impl Transform for Class_ {
 impl Transform for ClassReq {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_req_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_req_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_req_bottom_up(self, env);
+        in_pass.on_ty_class_req_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1235,11 +1235,11 @@ const _: () = {
 impl Transform for XhpAttr {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_xhp_attr_top_down(self, env) {
+        if let Break(..) = pass.on_ty_xhp_attr_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_xhp_attr_bottom_up(self, env);
+        in_pass.on_ty_xhp_attr_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1266,11 +1266,11 @@ impl Transform for XhpAttr {
 impl Transform for ClassConstKind {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_const_kind_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_const_kind_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_const_kind_bottom_up(self, env);
+        in_pass.on_ty_class_const_kind_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1282,11 +1282,11 @@ impl Transform for ClassConstKind {
 impl Transform for ClassConst {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_const_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_const_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_const_bottom_up(self, env);
+        in_pass.on_ty_class_const_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1318,11 +1318,11 @@ impl Transform for ClassConst {
 impl Transform for ClassAbstractTypeconst {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_abstract_typeconst_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_abstract_typeconst_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_abstract_typeconst_bottom_up(self, env);
+        in_pass.on_ty_class_abstract_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1345,11 +1345,11 @@ impl Transform for ClassAbstractTypeconst {
 impl Transform for ClassConcreteTypeconst {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_concrete_typeconst_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_concrete_typeconst_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_concrete_typeconst_bottom_up(self, env);
+        in_pass.on_ty_class_concrete_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1362,11 +1362,11 @@ impl Transform for ClassConcreteTypeconst {
 impl Transform for ClassTypeconst {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_typeconst_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_typeconst_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_typeconst_bottom_up(self, env);
+        in_pass.on_ty_class_typeconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1378,11 +1378,11 @@ impl Transform for ClassTypeconst {
 impl Transform for ClassTypeconstDef {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_typeconst_def_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_typeconst_def_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_typeconst_def_bottom_up(self, env);
+        in_pass.on_ty_class_typeconst_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1414,11 +1414,11 @@ impl Transform for ClassTypeconstDef {
 impl Transform for XhpAttrInfo {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_xhp_attr_info_top_down(self, env) {
+        if let Break(..) = pass.on_ty_xhp_attr_info_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_xhp_attr_info_bottom_up(self, env);
+        in_pass.on_ty_xhp_attr_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1432,11 +1432,11 @@ impl Transform for XhpAttrInfo {
 impl Transform for ClassVar {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_class_var_top_down(self, env) {
+        if let Break(..) = pass.on_ty_class_var_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_class_var_bottom_up(self, env);
+        in_pass.on_ty_class_var_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1470,11 +1470,11 @@ impl Transform for ClassVar {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_class_var_type__top_down(__binding_5, env) {
+                        if let Break(..) = pass.on_fld_class_var_type__top_down(env, __binding_5) {
                             return;
                         }
                         __binding_5.transform(env, pass);
-                        in_pass.on_fld_class_var_type__bottom_up(__binding_5, env);
+                        in_pass.on_fld_class_var_type__bottom_up(env, __binding_5);
                     }
                 }
                 {
@@ -1500,11 +1500,11 @@ impl Transform for ClassVar {
 impl Transform for Method_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_method__top_down(self, env) {
+        if let Break(..) = pass.on_ty_method__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_method__bottom_up(self, env);
+        in_pass.on_ty_method__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1570,11 +1570,11 @@ impl Transform for Method_ {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_method__ret_top_down(__binding_17, env) {
+                        if let Break(..) = pass.on_fld_method__ret_top_down(env, __binding_17) {
                             return;
                         }
                         __binding_17.transform(env, pass);
-                        in_pass.on_fld_method__ret_bottom_up(__binding_17, env);
+                        in_pass.on_fld_method__ret_bottom_up(env, __binding_17);
                     }
                 }
                 {
@@ -1588,11 +1588,11 @@ impl Transform for Method_ {
 impl Transform for Typedef {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_typedef_top_down(self, env) {
+        if let Break(..) = pass.on_ty_typedef_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_typedef_bottom_up(self, env);
+        in_pass.on_ty_typedef_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1660,11 +1660,11 @@ impl Transform for Typedef {
 impl Transform for Gconst {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_gconst_top_down(self, env) {
+        if let Break(..) = pass.on_ty_gconst_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_gconst_bottom_up(self, env);
+        in_pass.on_ty_gconst_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1690,11 +1690,11 @@ impl Transform for Gconst {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_gconst_value_top_down(__binding_4, env) {
+                        if let Break(..) = pass.on_fld_gconst_value_top_down(env, __binding_4) {
                             return;
                         }
                         __binding_4.transform(env, pass);
-                        in_pass.on_fld_gconst_value_bottom_up(__binding_4, env);
+                        in_pass.on_fld_gconst_value_bottom_up(env, __binding_4);
                     }
                 }
                 {
@@ -1708,11 +1708,11 @@ impl Transform for Gconst {
 impl Transform for FunDef {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_fun_def_top_down(self, env) {
+        if let Break(..) = pass.on_ty_fun_def_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_fun_def_bottom_up(self, env);
+        in_pass.on_ty_fun_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1748,11 +1748,11 @@ impl Transform for FunDef {
 impl Transform for ModuleDef {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_module_def_top_down(self, env) {
+        if let Break(..) = pass.on_ty_module_def_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_module_def_bottom_up(self, env);
+        in_pass.on_ty_module_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1791,11 +1791,11 @@ const _: () = {
 impl Transform for Def {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_def_top_down(self, env) {
+        if let Break(..) = pass.on_ty_def_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_def_bottom_up(self, env);
+        in_pass.on_ty_def_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1822,11 +1822,11 @@ const _: () = {
 impl Transform for XhpChild {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_xhp_child_top_down(self, env) {
+        if let Break(..) = pass.on_ty_xhp_child_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_xhp_child_bottom_up(self, env);
+        in_pass.on_ty_xhp_child_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1853,11 +1853,11 @@ const _: () = {
 impl Transform for Hint {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_hint_top_down(self, env) {
+        if let Break(..) = pass.on_ty_hint_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_hint_bottom_up(self, env);
+        in_pass.on_ty_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1873,11 +1873,11 @@ impl Transform for Hint {
 impl Transform for UserAttributes {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_user_attributes_top_down(self, env) {
+        if let Break(..) = pass.on_ty_user_attributes_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_user_attributes_bottom_up(self, env);
+        in_pass.on_ty_user_attributes_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1888,11 +1888,11 @@ impl Transform for UserAttributes {
 impl Transform for Contexts {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_contexts_top_down(self, env) {
+        if let Break(..) = pass.on_ty_contexts_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_contexts_bottom_up(self, env);
+        in_pass.on_ty_contexts_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1911,11 +1911,11 @@ const _: () = {
 impl Transform for HintFun {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_hint_fun_top_down(self, env) {
+        if let Break(..) = pass.on_ty_hint_fun_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_hint_fun_bottom_up(self, env);
+        in_pass.on_ty_hint_fun_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -1943,12 +1943,12 @@ impl Transform for HintFun {
                     {
                         let pass = &mut pass.clone();
                         let mut in_pass = pass.clone();
-                        if let Break(..) = pass.on_fld_hint_fun_return_ty_top_down(__binding_5, env)
+                        if let Break(..) = pass.on_fld_hint_fun_return_ty_top_down(env, __binding_5)
                         {
                             return;
                         }
                         __binding_5.transform(env, pass);
-                        in_pass.on_fld_hint_fun_return_ty_bottom_up(__binding_5, env);
+                        in_pass.on_fld_hint_fun_return_ty_bottom_up(env, __binding_5);
                     }
                 }
             }
@@ -1958,11 +1958,11 @@ impl Transform for HintFun {
 impl Transform for Hint_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_hint__top_down(self, env) {
+        if let Break(..) = pass.on_ty_hint__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_hint__bottom_up(self, env);
+        in_pass.on_ty_hint__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2020,11 +2020,11 @@ impl Transform for Hint_ {
 impl Transform for Refinement {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_refinement_top_down(self, env) {
+        if let Break(..) = pass.on_ty_refinement_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_refinement_bottom_up(self, env);
+        in_pass.on_ty_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2046,11 +2046,11 @@ impl Transform for Refinement {
 impl Transform for TypeRefinement {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_type_refinement_top_down(self, env) {
+        if let Break(..) = pass.on_ty_type_refinement_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_type_refinement_bottom_up(self, env);
+        in_pass.on_ty_type_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2062,11 +2062,11 @@ impl Transform for TypeRefinement {
 impl Transform for TypeRefinementBounds {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_type_refinement_bounds_top_down(self, env) {
+        if let Break(..) = pass.on_ty_type_refinement_bounds_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_type_refinement_bounds_bottom_up(self, env);
+        in_pass.on_ty_type_refinement_bounds_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2085,11 +2085,11 @@ impl Transform for TypeRefinementBounds {
 impl Transform for CtxRefinement {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_ctx_refinement_top_down(self, env) {
+        if let Break(..) = pass.on_ty_ctx_refinement_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_ctx_refinement_bottom_up(self, env);
+        in_pass.on_ty_ctx_refinement_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2101,11 +2101,11 @@ impl Transform for CtxRefinement {
 impl Transform for CtxRefinementBounds {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_ctx_refinement_bounds_top_down(self, env) {
+        if let Break(..) = pass.on_ty_ctx_refinement_bounds_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_ctx_refinement_bounds_bottom_up(self, env);
+        in_pass.on_ty_ctx_refinement_bounds_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2124,11 +2124,11 @@ impl Transform for CtxRefinementBounds {
 impl Transform for ShapeFieldInfo {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_shape_field_info_top_down(self, env) {
+        if let Break(..) = pass.on_ty_shape_field_info_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_shape_field_info_bottom_up(self, env);
+        in_pass.on_ty_shape_field_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2148,11 +2148,11 @@ impl Transform for ShapeFieldInfo {
 impl Transform for NastShapeInfo {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_nast_shape_info_top_down(self, env) {
+        if let Break(..) = pass.on_ty_nast_shape_info_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_nast_shape_info_bottom_up(self, env);
+        in_pass.on_ty_nast_shape_info_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2177,11 +2177,11 @@ const _: () = {
 impl Transform for Enum_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_enum__top_down(self, env) {
+        if let Break(..) = pass.on_ty_enum__top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_enum__bottom_up(self, env);
+        in_pass.on_ty_enum__bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2204,11 +2204,11 @@ impl Transform for Enum_ {
 impl Transform for WhereConstraintHint {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_where_constraint_hint_top_down(self, env) {
+        if let Break(..) = pass.on_ty_where_constraint_hint_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_where_constraint_hint_bottom_up(self, env);
+        in_pass.on_ty_where_constraint_hint_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {
@@ -2227,11 +2227,11 @@ impl Transform for WhereConstraintHint {
 impl Transform for Id {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
-        if let Break(..) = pass.on_ty_id_top_down(self, env) {
+        if let Break(..) = pass.on_ty_id_top_down(env, self) {
             return;
         }
         self.traverse(env, pass);
-        in_pass.on_ty_id_bottom_up(self, env);
+        in_pass.on_ty_id_bottom_up(env, self);
     }
     fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         match self {

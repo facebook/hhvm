@@ -24,7 +24,7 @@ use crate::Pass;
 pub struct ElabDynamicClassNamePass;
 
 impl Pass for ElabDynamicClassNamePass {
-    fn on_ty_expr_bottom_up(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_bottom_up(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         let invalid = |expr_: &mut Expr_| {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
             let inner_expr = elab_utils::expr::from_expr__with_pos_(elem.1.clone(), inner_expr_);

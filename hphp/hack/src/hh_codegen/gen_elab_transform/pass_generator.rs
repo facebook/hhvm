@@ -83,8 +83,8 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         #[inline(always)]
         fn #name_td(
             &mut self,
-            elem: &mut #ty #ty_generics,
             env: &Env,
+            elem: &mut #ty #ty_generics,
         ) -> ControlFlow<()> {
             #body_td
         }
@@ -92,8 +92,8 @@ fn gen_pass_methods(s: synstructure::Structure<'_>, body_type: Body) -> TokenStr
         #[inline(always)]
         fn #name_bu(
             &mut self,
-            elem: &mut #ty #ty_generics,
             env: &Env,
+            elem: &mut #ty #ty_generics,
         ) -> ControlFlow<()> {
             #body_bu
         }
@@ -113,8 +113,8 @@ impl Body {
         match self {
             Body::Default => quote!(Continue(())),
             Body::Passes => quote! {
-                self.fst.#name(elem, env)?;
-                self.snd.#name(elem, env)
+                self.fst.#name(env, elem)?;
+                self.snd.#name(env, elem)
             },
         }
     }
@@ -161,8 +161,8 @@ fn gen_fld_method(
         #[inline(always)]
         fn #name_td(
             &mut self,
-            elem: &mut #field_ty,
             env: &Env,
+            elem: &mut #field_ty,
         ) -> ControlFlow<()> {
             #body_td
         }
@@ -170,8 +170,8 @@ fn gen_fld_method(
         #[inline(always)]
         fn #name_bu(
             &mut self,
-            elem: &mut #field_ty,
             env: &Env,
+            elem: &mut #field_ty,
         ) -> ControlFlow<()> {
             #body_bu
         }
@@ -198,8 +198,8 @@ fn gen_ctor_method(
         #[inline(always)]
         fn #name_td(
             &mut self,
-            elem: &mut #variant_ty,
             env: &Env,
+            elem: &mut #variant_ty,
         ) -> ControlFlow<()> {
             #body_td
         }
@@ -207,8 +207,8 @@ fn gen_ctor_method(
         #[inline(always)]
         fn #name_bu(
             &mut self,
-            elem: &mut #variant_ty,
             env: &Env,
+            elem: &mut #variant_ty,
         ) -> ControlFlow<()> {
             #body_bu
         }

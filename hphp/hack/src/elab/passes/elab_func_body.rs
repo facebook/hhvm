@@ -28,34 +28,34 @@ impl Default for ElabFuncBodyPass {
 }
 
 impl Pass for ElabFuncBodyPass {
-    fn on_ty_func_body_top_down(&mut self, elem: &mut FuncBody, _: &Env) -> ControlFlow<()> {
+    fn on_ty_func_body_top_down(&mut self, _: &Env, elem: &mut FuncBody) -> ControlFlow<()> {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
         }
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_typedef_top_down(&mut self, elem: &mut Typedef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_typedef_top_down(&mut self, _: &Env, elem: &mut Typedef) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_gconst_top_down(&mut self, elem: &mut Gconst, _: &Env) -> ControlFlow<()> {
+    fn on_ty_gconst_top_down(&mut self, _: &Env, elem: &mut Gconst) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, elem: &mut FunDef, _cf: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }
 
-    fn on_ty_module_def_top_down(&mut self, elem: &mut ModuleDef, _: &Env) -> ControlFlow<()> {
+    fn on_ty_module_def_top_down(&mut self, _: &Env, elem: &mut ModuleDef) -> ControlFlow<()> {
         self.mode = elem.mode;
         ControlFlow::Continue(())
     }

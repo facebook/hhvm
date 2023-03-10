@@ -20,11 +20,11 @@ use crate::Pass;
 pub struct ValidateFunParamInoutPass;
 
 impl Pass for ValidateFunParamInoutPass {
-    fn on_ty_fun_def_bottom_up(&mut self, elem: &mut FunDef, env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun_def_bottom_up(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         check_params(env, &elem.name, &elem.fun.user_attributes, &elem.fun.params);
         ControlFlow::Continue(())
     }
-    fn on_ty_method__bottom_up(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         check_params(env, &elem.name, &elem.user_attributes, &elem.params);
         ControlFlow::Continue(())
     }

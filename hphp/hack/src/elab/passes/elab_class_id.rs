@@ -46,7 +46,7 @@ impl Pass for ElabClassIdPass {
      TODO[mjt] Lowering gives us a very specific representation but we don't
      enforce this invariant at all here
     */
-    fn on_ty_class_id_top_down(&mut self, elem: &mut ClassId, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class_id_top_down(&mut self, env: &Env, elem: &mut ClassId) -> ControlFlow<()> {
         let ClassId(_annot, pos, class_id_) = elem;
         if let ClassId_::CIexpr(Expr(_, expr_pos, expr_)) = class_id_ as &mut ClassId_ {
             // [mjt] For some reason the legacy code modifies the position of
@@ -112,7 +112,7 @@ impl Pass for ElabClassIdPass {
         }
     }
 
-    fn on_ty_class__top_down(&mut self, _: &mut nast::Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, _: &mut nast::Class_) -> ControlFlow<()> {
         self.in_class = true;
         ControlFlow::Continue(())
     }
@@ -121,8 +121,8 @@ impl Pass for ElabClassIdPass {
     references to `self` are invalid */
     fn on_fld_class__user_attributes_top_down(
         &mut self,
-        _: &mut nast::UserAttributes,
         _: &Env,
+        _: &mut nast::UserAttributes,
     ) -> ControlFlow<()> {
         self.in_class = true;
         ControlFlow::Continue(())

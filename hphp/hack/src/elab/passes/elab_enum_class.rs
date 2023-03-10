@@ -21,7 +21,7 @@ use crate::Pass;
 pub struct ElabEnumClassPass;
 
 impl Pass for ElabEnumClassPass {
-    fn on_ty_class__top_down(&mut self, elem: &mut Class_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         if let Some(enum_) = &elem.enum_ {
             let Id(pos, _) = &elem.name;
             let enum_hint = Hint(
@@ -53,7 +53,7 @@ impl Pass for ElabEnumClassPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, env: &Env, elem: &mut Hint_) -> ControlFlow<()> {
         if !(env.is_hhi() || env.is_systemlib()) {
             match elem {
                 Hint_::Happly(Id(pos, ty_name), _)

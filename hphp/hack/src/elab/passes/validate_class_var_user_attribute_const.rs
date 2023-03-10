@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ValidateClassVarUserAttributeConstPass;
 
 impl Pass for ValidateClassVarUserAttributeConstPass {
-    fn on_ty_class_var_bottom_up(&mut self, elem: &mut ClassVar, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class_var_bottom_up(&mut self, env: &Env, elem: &mut ClassVar) -> ControlFlow<()> {
         if !env.const_static_props() && elem.is_static {
             check_const(env, elem.id.pos(), &elem.user_attributes)
         }

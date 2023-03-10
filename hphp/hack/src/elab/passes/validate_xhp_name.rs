@@ -16,7 +16,7 @@ use crate::Pass;
 pub struct ValidateXhpNamePass;
 
 impl Pass for ValidateXhpNamePass {
-    fn on_ty_hint__top_down(&mut self, hint_: &mut Hint_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, env: &Env, hint_: &mut Hint_) -> ControlFlow<()> {
         match hint_ {
             // "some common Xhp screw ups"
             Hint_::Happly(Id(pos, name), _) if ["Xhp", ":Xhp", "XHP"].contains(&name.as_str()) => {

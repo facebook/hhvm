@@ -26,7 +26,7 @@ use crate::Pass;
 pub struct ElabExprCallHhMethCallerPass;
 
 impl Pass for ElabExprCallHhMethCallerPass {
-    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         let invalid = |expr_: &mut Expr_| {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
             let inner_expr = elab_utils::expr::from_expr_(inner_expr_);

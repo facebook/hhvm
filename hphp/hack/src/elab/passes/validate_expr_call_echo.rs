@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ValidateExprCallEchoPass;
 
 impl Pass for ValidateExprCallEchoPass {
-    fn on_ty_expr__bottom_up(&mut self, elem: &mut Expr_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
             Expr_::Call(box (
                 Expr(_, _, Expr_::Id(box Id(_, fn_name))),

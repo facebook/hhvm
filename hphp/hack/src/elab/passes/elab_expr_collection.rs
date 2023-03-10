@@ -41,7 +41,7 @@ impl Pass for ElabExprCollectionPass {
     /// errors in the explicit type arguments and the expressions
     /// within the collection literal.
 
-    fn on_ty_expr_top_down(&mut self, elem: &mut Expr, env: &Env) -> ControlFlow<()> {
+    fn on_ty_expr_top_down(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         let Expr(_annot, _pos, expr_) = elem;
 
         if let Expr_::Collection(c) = expr_ {

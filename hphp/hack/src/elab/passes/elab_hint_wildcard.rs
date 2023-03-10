@@ -30,7 +30,7 @@ impl ElabHintWildcardPass {
 }
 
 impl Pass for ElabHintWildcardPass {
-    fn on_ty_hint_top_down(&mut self, elem: &mut Hint, env: &Env) -> ControlFlow<()> {
+    fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         let Hint(pos, box hint_) = elem;
         //   Swap for `Herr`
         let in_hint_ = std::mem::replace(hint_, Hint_::Herr);
@@ -71,7 +71,7 @@ impl Pass for ElabHintWildcardPass {
     // Wildcard hints are _always_ disallowed in contexts
     // TODO: we define this on `context` in OCaml - we need a newtype
     // to do the same here
-    fn on_ty_contexts_top_down(&mut self, elem: &mut Contexts, env: &Env) -> ControlFlow<()> {
+    fn on_ty_contexts_top_down(&mut self, env: &Env, elem: &mut Contexts) -> ControlFlow<()> {
         let Contexts(_, hints) = elem;
         hints
             .iter_mut()
@@ -86,8 +86,8 @@ impl Pass for ElabHintWildcardPass {
 
     fn on_ty_expr__top_down(
         &mut self,
-        elem: &mut oxidized::nast::Expr_,
         _: &Env,
+        elem: &mut oxidized::nast::Expr_,
     ) -> ControlFlow<()> {
         match elem {
             Expr_::Cast(..) => self.incr_depth(),
@@ -98,13 +98,13 @@ impl Pass for ElabHintWildcardPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_targ_top_down(&mut self, _: &mut oxidized::nast::Targ, _: &Env) -> ControlFlow<()> {
+    fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut oxidized::nast::Targ) -> ControlFlow<()> {
         self.allow_wildcard = true;
         self.incr_depth();
         ControlFlow::Continue(())
     }
 
-    fn on_ty_hint__top_down(&mut self, elem: &mut Hint_, _: &Env) -> ControlFlow<()> {
+    fn on_ty_hint__top_down(&mut self, _: &Env, elem: &mut Hint_) -> ControlFlow<()> {
         match elem {
             Hint_::Hunion(_)
             | Hint_::Hintersection(_)
@@ -122,8 +122,8 @@ impl Pass for ElabHintWildcardPass {
 
     fn on_ty_shape_field_info_top_down(
         &mut self,
-        _: &mut oxidized::nast::ShapeFieldInfo,
         _: &Env,
+        _: &mut oxidized::nast::ShapeFieldInfo,
     ) -> ControlFlow<()> {
         self.incr_depth();
         ControlFlow::Continue(())

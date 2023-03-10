@@ -20,7 +20,7 @@ use crate::Pass;
 pub struct ValidateClassMethodsPass;
 
 impl Pass for ValidateClassMethodsPass {
-    fn on_ty_class__bottom_up(&mut self, class: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__bottom_up(&mut self, env: &Env, class: &mut Class_) -> ControlFlow<()> {
         let mut seen = HashSet::<&str>::new();
         for method in class.methods.iter() {
             let Id(pos, name) = &method.name;
@@ -35,7 +35,7 @@ impl Pass for ValidateClassMethodsPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__bottom_up(&mut self, method: &mut Method_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__bottom_up(&mut self, env: &Env, method: &mut Method_) -> ControlFlow<()> {
         if method.abstract_
             && method.user_attributes.iter().any(|attr| {
                 let Id(_, ua) = &attr.name;

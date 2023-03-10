@@ -20,8 +20,8 @@ pub struct ValidateClassVarUserAttributeLsbPass {
 impl Pass for ValidateClassVarUserAttributeLsbPass {
     fn on_ty_class__bottom_up(
         &mut self,
-        elem: &mut oxidized::nast::Class_,
         _: &Env,
+        elem: &mut oxidized::nast::Class_,
     ) -> ControlFlow<()> {
         self.final_class = if elem.final_ {
             Some(elem.name.clone())
@@ -31,7 +31,7 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_class_var_bottom_up(&mut self, elem: &mut ClassVar, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class_var_bottom_up(&mut self, env: &Env, elem: &mut ClassVar) -> ControlFlow<()> {
         if let Some(ua) = elem
             .user_attributes
             .0

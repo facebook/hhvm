@@ -17,7 +17,7 @@ use crate::Pass;
 pub struct ValidateInterfacePass;
 
 impl Pass for ValidateInterfacePass {
-    fn on_ty_class__bottom_up(&mut self, elem: &mut Class_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_class__bottom_up(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
         if elem.kind.is_cinterface() {
             // Raise an error for each `use` clause
             elem.uses.iter().for_each(|Hint(pos, _)| {

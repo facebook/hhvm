@@ -22,7 +22,7 @@ use crate::Pass;
 pub struct ValidaetUserAttributeDynamicallyCallable;
 
 impl Pass for ValidaetUserAttributeDynamicallyCallable {
-    fn on_ty_fun__top_down(&mut self, elem: &mut Fun_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_fun__top_down(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
         dynamically_callable_attr_pos(&elem.user_attributes)
             .into_iter()
             .for_each(|pos| {
@@ -34,7 +34,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_method__top_down(&mut self, elem: &mut Method_, env: &Env) -> ControlFlow<()> {
+    fn on_ty_method__top_down(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         dynamically_callable_attr_pos(&elem.user_attributes)
             .into_iter()
             .for_each(|pos| {

@@ -1260,6 +1260,57 @@ let check_abstract_member_in_concrete_class
                    []);
              })
 
+let eager_resolve_member_via_req_class
+    env parent_class_elt class_ member_kind member_name =
+  let member_element_opt = get_member member_kind class_ member_name in
+  let req_class_constraints = Cls.all_ancestor_req_class_requirements class_ in
+  if List.is_empty req_class_constraints then
+    (* fast path: if class_ does not have require class constraints then eager resolution cannot apply *)
+    member_element_opt
+  else
+    Option.map member_element_opt ~f:(fun member_element ->
+        (* eager resolution should happen only if one of the matched elements is defined in an interface
+         * so check the kind of the classish where the elements are defined
+         *)
+        let origin_is_interface el =
+          match Env.get_class env el.ce_origin with
+          | None -> false
+          | Some el -> Ast_defs.is_c_interface (Cls.kind el)
+        in
+        let parent_element_origin_is_interface =
+          origin_is_interface parent_class_elt
+        in
+        let element_origin_is_interface = origin_is_interface member_element in
+        if
+          Ast_defs.is_c_trait (Cls.kind class_)
+          && (parent_element_origin_is_interface || element_origin_is_interface)
+        then
+          if String.equal member_element.ce_origin (Cls.name class_) then
+            member_element
+          else
+            (* Since at least one of the elements is not defined in a trait, and the base trait has a
+             * require class constraint, perform eager fetch of the element via the required class.
+             *)
+            let member_element_in_req_class =
+              List.find_map
+                (Cls.all_ancestor_req_class_requirements class_)
+                ~f:(fun (_, req_ty) ->
+                  let (_, (_, cn), _) = TUtils.unwrap_class_type req_ty in
+                  Decl_provider.get_class (Env.get_ctx env) cn >>= fun cnc ->
+                  get_member member_kind cnc member_name)
+            in
+            match member_element_in_req_class with
+            | Some member_element_in_req_class ->
+              {
+                member_element_in_req_class with
+                ce_flags =
+                  Typing_defs_flags.ClassElt.set_synthesized
+                    member_element_in_req_class.ce_flags;
+              }
+            | None -> member_element
+        else
+          member_element)
+
 let check_class_against_parent_class_elt
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t)
     (class_pos, class_)
@@ -1278,37 +1329,21 @@ let check_class_against_parent_class_elt
     (member_kind, member_name, parent_class_elt.ce_origin);
 
   let member_element_opt =
-    let member_element = get_member member_kind class_ member_name in
-    if Ast_defs.is_c_trait (Cls.kind class_) then
-      (* If a trait does not define the element itself, but will inherit the element from a
-       * require class constraint then eagerly compare the element from the required class
-       * against the parent class elements.
-       *)
-      Option.map member_element ~f:(fun member_element ->
-          if String.equal member_element.ce_origin (Cls.name class_) then
-            member_element
-          else
-            let member_element_in_req_class =
-              List.find_map
-                (Cls.all_ancestor_req_class_requirements class_)
-                ~f:(fun (_, req_ty) ->
-                  let (_, (_, cn), _) = TUtils.unwrap_class_type req_ty in
-                  Decl_provider.get_class (Env.get_ctx env) cn >>= fun cnc ->
-                  get_member member_kind cnc member_name)
-            in
-            match member_element_in_req_class with
-            | Some member_element_in_req_class ->
-              {
-                member_element_in_req_class with
-                ce_flags =
-                  Typing_defs_flags.ClassElt.set_synthesized
-                    member_element_in_req_class.ce_flags;
-              }
-            | None -> member_element)
-    else
-      member_element
+    (* If a trait does not define the element itself, but will inherit the element from a
+     * require class constraint then eagerly compare the element from the required class
+     * against the parent class elements.  This is useful to eagerly solve conflicts between
+     * interfaces implemented by the trait.
+     * However, the eager resolution should not be applied to solve conflicts due to multiple
+     * definitions in traits used by the trait, as HHVM does not perform the eager resolution
+     * and fatals when flattening the trait methods.
+     *)
+    eager_resolve_member_via_req_class
+      env
+      parent_class_elt
+      class_
+      member_kind
+      member_name
   in
-
   match member_element_opt with
   | Some class_elt ->
     if String.equal parent_class_elt.ce_origin class_elt.ce_origin then (

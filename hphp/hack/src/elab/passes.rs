@@ -49,6 +49,7 @@ pub mod validate_hint_habstr;
 pub mod validate_illegal_name;
 pub mod validate_interface;
 pub mod validate_module;
+pub mod validate_php_lambda;
 pub mod validate_shape_name;
 pub mod validate_user_attribute_dynamically_callable;
 pub mod validate_xhp_name;

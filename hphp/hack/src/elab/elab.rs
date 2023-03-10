@@ -242,6 +242,8 @@ fn elaborate<T: Transform>(
         passes::validate_shape_name::ValidateShapeNamePass::default(),
 
         passes::validate_function_pointer::ValidateFunctionPointerPass::default(),
+
+        passes::validate_php_lambda::ValidatePhpLambdaPass::default(),
     ];
 
     node.transform(&env, &mut passes);

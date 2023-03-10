@@ -259,6 +259,10 @@ impl<Ex, En> Expr<Ex, En> {
         Self(ex, pos, e)
     }
 
+    pub fn pos(&self) -> &Pos {
+        &self.1
+    }
+
     pub fn lvar_name(&self) -> Option<&str> {
         match &self.2 {
             Expr_::Lvar(lid) => Some(&(lid.1).1),
@@ -275,9 +279,6 @@ impl<Ex, En> Expr<Ex, En> {
 }
 
 impl<En> Expr<(), En> {
-    pub fn pos(&self) -> &Pos {
-        &self.1
-    }
     pub fn mk_lvar(p: &Pos, n: &str) -> Self {
         Self::new(
             (),

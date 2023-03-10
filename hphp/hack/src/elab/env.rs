@@ -25,6 +25,7 @@ bitflags! {
         const CONST_ATTRIBUTE = 1 << 5;
         const CONST_STATIC_PROPS = 1 << 6;
         const ALLOW_MODULE_DECLARATIONS = 1 << 7;
+        const ERROR_PHP_LAMBDAS = 1 << 9;
     }
 }
 
@@ -41,6 +42,7 @@ impl Flags {
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
         flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
         flags.set(Self::CONST_STATIC_PROPS, tco.tco_const_static_props);
+        flags.set(Self::ERROR_PHP_LAMBDAS, tco.tco_error_php_lambdas);
 
         flags.set(Self::IS_HHI, pso.is_hhi);
         flags.set(
@@ -87,6 +89,10 @@ impl Env {
 
     pub fn soft_as_like(&self) -> bool {
         self.flags.contains(Flags::SOFT_AS_LIKE)
+    }
+
+    pub fn error_php_lambdas(&self) -> bool {
+        self.flags.contains(Flags::ERROR_PHP_LAMBDAS)
     }
 
     pub fn allow_module_declarations(&self) -> bool {

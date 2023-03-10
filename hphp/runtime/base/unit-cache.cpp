@@ -393,6 +393,8 @@ Optional<String> loadFileContents(const char* path,
       return f->read();
     }
     return {};
+  } else if (RO::EvalRecordReplay && RO::EvalReplay) {
+    return g_context->m_replayer.file(path);
   }
 
   auto const fd = open(path, O_RDONLY);

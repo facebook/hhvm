@@ -35,6 +35,7 @@ namespace HPHP {
 struct Recorder {
   void onSessionInit();
   void onSessionExit();
+  static void setEntryPoint(std::string entryPoint);
 
   template<typename F, F f>
   static auto wrapNativeFunc(const String& name) {
@@ -55,6 +56,7 @@ struct Recorder {
   template<typename T> static Variant toVariant(T value);
 
   bool m_enabled{false};
+  std::string m_entryPoint;
   NativeCalls m_nativeCalls;
 
   template<typename F, F f>

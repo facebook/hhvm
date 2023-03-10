@@ -16,6 +16,7 @@
 #pragma once
 
 #include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -86,13 +87,16 @@ struct Extension;
  */
 
 #define HHVM_REGISTER_NATIVE_FUNC(nativeFuncs, name, f) do { \
-  if (RuntimeOption::EvalRecordReplay) { \
-    using F = std::conditional_t< \
-      std::is_member_function_pointer_v<decltype(f)>, \
-      decltype(f), \
-      std::add_pointer_t<decltype(f)> \
-    >; \
+  using F = std::conditional_t< \
+    std::is_member_function_pointer_v<decltype(f)>, \
+    decltype(f), \
+    std::add_pointer_t<decltype(f)> \
+  >; \
+  if (RO::EvalRecordReplay && RO::EvalRecordSampleRate > 0) { \
     const auto wrap{Recorder::wrapNativeFunc<F, f>(name)}; \
+    Native::registerNativeFunc(nativeFuncs, name, wrap); \
+  } else if (RO::EvalRecordReplay && RO::EvalReplay) { \
+    const auto wrap{Replayer::wrapNativeFunc<F, f>(name)}; \
     Native::registerNativeFunc(nativeFuncs, name, wrap); \
   } else { \
     Native::registerNativeFunc(nativeFuncs, name, f); \

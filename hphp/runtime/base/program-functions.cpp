@@ -2103,6 +2103,13 @@ static int execute_program_impl(int argc, char** argv) {
     if (new_argc > 0) {
       file = new_argv[0];
     }
+    if (RO::EvalRecordReplay) {
+      if (RO::EvalRecordSampleRate > 0) {
+        Recorder::setEntryPoint(file);
+      } else if (RO::EvalReplay) {
+        file = g_context->m_replayer.init(file);
+      }
+    }
 
     if (po.mode == "debug") {
       StackTraceNoHeap::AddExtraLogging("IsDebugger", "True");

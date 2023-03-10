@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -57,12 +56,16 @@ void Recorder::onSessionExit() {
   if (UNLIKELY(m_enabled)) {
     const auto dir{FileUtil::expandUser(RuntimeOption::EvalRecordDir) + '/'};
     FileUtil::mkdir(dir);
-    const auto file{dir + std::to_string(folly::Random::rand64()) + ".json"};
-    VariableSerializer vs{VariableSerializer::Type::JSON};
+    const auto file{dir + std::to_string(folly::Random::rand64()) + ".hhvm"};
+    VariableSerializer vs{VariableSerializer::Type::Serialize};
     std::ofstream{file} << vs.serializeValue(toVariant(), false).data();
     m_enabled = false;
     m_nativeCalls.clear();
   }
+}
+
+void Recorder::setEntryPoint(std::string entryPoint) {
+  getRecorder().m_entryPoint = entryPoint;
 }
 
 Recorder::NativeFuncNames& Recorder::getNativeFuncNames() {
@@ -83,11 +86,12 @@ Variant Recorder::toVariant() const {
   for (auto i{g_context->getEnvs().begin()}; i; ++i) {
     env.set(i.first().getStringData(), i.second().getStringData()->data());
   }
+  header.set(StringData::Make("entryPoint"),
+    RuntimeOption::ServerMode ? g_context->getRequestUrl() : m_entryPoint);
   header.set(StringData::Make("env"), env.toVariant());
   header.set(StringData::Make("hostname"), Process::GetHostName());
   header.set(StringData::Make("repo_schema_id"), repoSchemaId().toString());
   header.set(StringData::Make("request_id"), Logger::GetRequestId());
-  header.set(StringData::Make("request_url"), g_context->getRequestUrl());
   header.set(StringData::Make("server"), RuntimeOption::ServerMode);
   header.set(StringData::Make("thread_id"), Process::GetThreadId());
   header.set(StringData::Make("thread_pid"), Process::GetThreadPid());

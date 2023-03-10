@@ -3164,10 +3164,7 @@ and lvalues env el =
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
 and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
-  let condition = condition ~lhs_of_null_coalesce:false in
-  let (env, tc, tyc) =
-    raw_expr ~lhs_of_null_coalesce:false env c ~allow_awaitable:false
-  in
+  let (env, tc, tyc) = raw_expr env c ~allow_awaitable:false in
   let parent_lenv = env.lenv in
   let (env, _lset) = condition env true tc in
   let (env, te1, ty1) =
@@ -9360,9 +9357,7 @@ and call_untyped_unpack env f_pos unpacked_element =
  * Build an environment for the true or false branch of
  * conditional statements.
  *)
-and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
-    =
-  let condition = condition ?lhs_of_null_coalesce in
+and condition env tparamet ((ty, p, e) as te : Tast.expr) =
   match e with
   | Aast.Hole (e, _, _, _) -> condition env tparamet e
   | Aast.True when not tparamet ->

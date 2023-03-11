@@ -149,3 +149,21 @@ function check_param_types(int $a, float $b, string $c): void {
 function check_is_class(mixed $a): bool {
   return $a is C;
 }
+
+// TEST-CHECK-BAL: define $root.check_global
+// CHECK: define $root.check_global($this: *void) : *void {
+// CHECK: local $global_server: *void
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &global::_SERVER
+// CHECK:   store &$global_server <- n0: *HackMixed
+// CHECK:   n1: *HackMixed = load &$global_server
+// CHECK:   n2 = $root.sink(null, n1)
+// CHECK:   ret null
+// CHECK: }
+
+// TEST-CHECK-1: global global::_SERVER
+// CHECK: global global::_SERVER : *HackMixed
+function check_global(): void {
+  $global_server = HH\global_get('_SERVER');
+  sink($global_server);
+}

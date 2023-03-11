@@ -72,6 +72,20 @@ struct LowerInstrs<'a> {
 }
 
 impl LowerInstrs<'_> {
+    fn c_get_g(&self, builder: &mut FuncBuilder<'_>, vid: ValueId, _loc: LocId) -> Option<Instr> {
+        // A lot of times the name for the global comes from a static
+        // string name - see if we can dig it up and turn this into a
+        // Textual::LoadGlobal.
+        vid.constant()
+            .and_then(|cid| match builder.func.constant(cid) {
+                Constant::String(s) => {
+                    let id = ir::GlobalId::new(*s);
+                    Some(Instr::Special(Special::Textual(Textual::LoadGlobal(id))))
+                }
+                _ => None,
+            })
+    }
+
     fn handle_hhbc_with_builtin(&self, hhbc: &Hhbc) -> Option<hack::Hhbc> {
         let builtin = match hhbc {
             Hhbc::Add(..) => hack::Hhbc::Add,
@@ -442,6 +456,13 @@ impl TransformInstr for LowerInstrs<'_> {
                 let op = BareThisOp::NoNotice;
                 let this = builder.emit(Instr::Hhbc(Hhbc::BareThis(op, loc)));
                 builder.hhbc_builtin(builtin, &[this], loc)
+            }
+            Instr::Hhbc(Hhbc::CGetG(name, loc)) => {
+                if let Some(instr) = self.c_get_g(builder, name, loc) {
+                    instr
+                } else {
+                    return Instr::Hhbc(Hhbc::CGetG(name, loc));
+                }
             }
             Instr::Hhbc(Hhbc::ClsCns(cls, const_id, loc)) => {
                 let builtin = hack::Hhbc::ClsCns;

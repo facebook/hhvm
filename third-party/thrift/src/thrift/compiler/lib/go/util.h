@@ -49,6 +49,8 @@ bool is_go_reserved_word(const std::string& value);
 
 bool is_type_nilable(const t_type* type);
 
+std::string get_go_func_name(const t_function* func);
+
 } // namespace go
 } // namespace compiler
 } // namespace thrift

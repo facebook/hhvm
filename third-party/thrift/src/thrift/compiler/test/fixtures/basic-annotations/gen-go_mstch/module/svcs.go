@@ -1598,37 +1598,37 @@ func (x *respMyServiceLobDataById) Read(p thrift.Protocol) error {
 
     return nil
 }
-type reqMyServiceDoNothing struct {
+type reqMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceDoNothing{}
+var _ thrift.Struct = &reqMyServiceGoDoNothing{}
 
-func newReqMyServiceDoNothing() *reqMyServiceDoNothing {
-    return (&reqMyServiceDoNothing{})
+func newReqMyServiceGoDoNothing() *reqMyServiceGoDoNothing {
+    return (&reqMyServiceGoDoNothing{})
 }
 
-func (x *reqMyServiceDoNothing) String() string {
+func (x *reqMyServiceGoDoNothing) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
 
-// Deprecated: Use reqMyServiceDoNothing.Set* methods instead or set the fields directly.
-type reqMyServiceDoNothingBuilder struct {
-    obj *reqMyServiceDoNothing
+// Deprecated: Use reqMyServiceGoDoNothing.Set* methods instead or set the fields directly.
+type reqMyServiceGoDoNothingBuilder struct {
+    obj *reqMyServiceGoDoNothing
 }
 
-func newReqMyServiceDoNothingBuilder() *reqMyServiceDoNothingBuilder {
-    return &reqMyServiceDoNothingBuilder{
-        obj: newReqMyServiceDoNothing(),
+func newReqMyServiceGoDoNothingBuilder() *reqMyServiceGoDoNothingBuilder {
+    return &reqMyServiceGoDoNothingBuilder{
+        obj: newReqMyServiceGoDoNothing(),
     }
 }
 
-func (x *reqMyServiceDoNothingBuilder) Emit() *reqMyServiceDoNothing {
-    var objCopy reqMyServiceDoNothing = *x.obj
+func (x *reqMyServiceGoDoNothingBuilder) Emit() *reqMyServiceGoDoNothing {
+    var objCopy reqMyServiceGoDoNothing = *x.obj
     return &objCopy
 }
-func (x *reqMyServiceDoNothing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("reqMyServiceDoNothing"); err != nil {
+func (x *reqMyServiceGoDoNothing) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqMyServiceGoDoNothing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1642,7 +1642,7 @@ func (x *reqMyServiceDoNothing) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqMyServiceDoNothing) Read(p thrift.Protocol) error {
+func (x *reqMyServiceGoDoNothing) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1675,37 +1675,37 @@ func (x *reqMyServiceDoNothing) Read(p thrift.Protocol) error {
 
     return nil
 }
-type respMyServiceDoNothing struct {
+type respMyServiceGoDoNothing struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceDoNothing{}
+var _ thrift.Struct = &respMyServiceGoDoNothing{}
 
-func newRespMyServiceDoNothing() *respMyServiceDoNothing {
-    return (&respMyServiceDoNothing{})
+func newRespMyServiceGoDoNothing() *respMyServiceGoDoNothing {
+    return (&respMyServiceGoDoNothing{})
 }
 
-func (x *respMyServiceDoNothing) String() string {
+func (x *respMyServiceGoDoNothing) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
 
-// Deprecated: Use respMyServiceDoNothing.Set* methods instead or set the fields directly.
-type respMyServiceDoNothingBuilder struct {
-    obj *respMyServiceDoNothing
+// Deprecated: Use respMyServiceGoDoNothing.Set* methods instead or set the fields directly.
+type respMyServiceGoDoNothingBuilder struct {
+    obj *respMyServiceGoDoNothing
 }
 
-func newRespMyServiceDoNothingBuilder() *respMyServiceDoNothingBuilder {
-    return &respMyServiceDoNothingBuilder{
-        obj: newRespMyServiceDoNothing(),
+func newRespMyServiceGoDoNothingBuilder() *respMyServiceGoDoNothingBuilder {
+    return &respMyServiceGoDoNothingBuilder{
+        obj: newRespMyServiceGoDoNothing(),
     }
 }
 
-func (x *respMyServiceDoNothingBuilder) Emit() *respMyServiceDoNothing {
-    var objCopy respMyServiceDoNothing = *x.obj
+func (x *respMyServiceGoDoNothingBuilder) Emit() *respMyServiceGoDoNothing {
+    var objCopy respMyServiceGoDoNothing = *x.obj
     return &objCopy
 }
-func (x *respMyServiceDoNothing) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("respMyServiceDoNothing"); err != nil {
+func (x *respMyServiceGoDoNothing) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respMyServiceGoDoNothing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
 
@@ -1719,7 +1719,7 @@ func (x *respMyServiceDoNothing) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respMyServiceDoNothing) Read(p thrift.Protocol) error {
+func (x *respMyServiceGoDoNothing) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }

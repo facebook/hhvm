@@ -482,7 +482,7 @@ class mstch_go_service : public mstch_service {
         continue;
       }
       auto svcGoName = go::munge_ident(service_->name());
-      auto funcGoName = go::munge_ident(func->name());
+      auto funcGoName = go::get_go_func_name(func);
 
       auto req_struct_name =
           go::munge_ident("req" + svcGoName + funcGoName, false);
@@ -528,14 +528,7 @@ class mstch_go_function : public mstch_function {
             {"function:go_supported?", &mstch_go_function::is_go_supported},
         });
   }
-  mstch::node go_name() {
-    auto name_override = function_->find_annotation_or_null("go.name");
-    if (name_override != nullptr) {
-      return *name_override;
-    } else {
-      return go::munge_ident(function_->name());
-    }
-  }
+  mstch::node go_name() { return go::get_go_func_name(function_); }
 
   mstch::node is_go_supported() { return go::is_func_go_supported(function_); }
 

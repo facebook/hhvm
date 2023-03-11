@@ -290,6 +290,13 @@ bool is_type_nilable(const t_type* type) {
       type->is_binary();
 }
 
+std::string get_go_func_name(const t_function* func) {
+  if (func->has_annotation("go.name")) {
+    return func->get_annotation("go.name");
+  }
+  return munge_ident(func->name());
+}
+
 } // namespace go
 } // namespace compiler
 } // namespace thrift

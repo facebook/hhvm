@@ -45,9 +45,6 @@ namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
-const HAMSandwich HAMSandwich::None{ LegacyMark::Bottom };
-const HAMSandwich HAMSandwich::Unmarked{ LegacyMark::Unmarked };
-
 #define X(y, ...) const Type T##y{B##y};
 HHBBC_TYPE_PREDEFINED(X)
 #undef X
@@ -78,8 +75,7 @@ constexpr trep kNonSupportBits = BCell & ~kSupportBits;
 // HHBBC consumes a LOT of memory, and much of it is used by Types.
 // We keep the type representation compact; don't expand it accidentally.
 static_assert(CheckSize<DCls, 8>(), "");
-static_assert(CheckSize<HAMSandwich, 1>(), "");
-static_assert(CheckSize<Type, 24>(), "");
+static_assert(CheckSize<Type, 16>(), "");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -95,6 +91,56 @@ template <typename T, typename... Args>
 void construct_inner(T& dest, Args&&... args) {
   construct(dest);
   dest.emplace(std::forward<Args>(args)...);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+LegacyMark legacyMarkFromSArr(SArray a) {
+  if (a->isKeysetType()) return LegacyMark::Bottom;
+  return a->isLegacyArray() ? LegacyMark::Marked : LegacyMark::Unmarked;
+}
+
+LegacyMark unionOf(LegacyMark a, LegacyMark b) {
+  if (a == b)                  return a;
+  if (a == LegacyMark::Bottom) return b;
+  if (b == LegacyMark::Bottom) return a;
+  return LegacyMark::Unknown;
+}
+
+LegacyMark intersectionOf(LegacyMark a, LegacyMark b) {
+  if (a == b) return a;
+  if (a == LegacyMark::Bottom) return LegacyMark::Bottom;
+  if (b == LegacyMark::Bottom) return LegacyMark::Bottom;
+  if (a == LegacyMark::Unknown) return b;
+  if (b == LegacyMark::Unknown) return a;
+  return LegacyMark::Unknown;
+}
+
+bool legacyMarkSubtypeOf(LegacyMark a, LegacyMark b) {
+  if (a == b) return true;
+  if (a == LegacyMark::Bottom) return true;
+  return b == LegacyMark::Unknown;
+}
+
+bool legacyMarkCouldBe(LegacyMark a, LegacyMark b) {
+  if (a == b) return true;
+  if (a == LegacyMark::Bottom || b == LegacyMark::Bottom) return false;
+  return a == LegacyMark::Unknown || b == LegacyMark::Unknown;
+}
+
+bool legacyMarkIsBottom(LegacyMark m, trep b) {
+  return couldBe(b, Type::kLegacyMarkBits)
+    ? (m == LegacyMark::Bottom) : false;
+}
+
+LegacyMark project(LegacyMark m, trep b) {
+  return couldBe(b, Type::kLegacyMarkBits) ? m : LegacyMark::Bottom;
+}
+
+LegacyMark legacyMark(LegacyMark m, trep b) {
+  if (!couldBe(b, Type::kLegacyMarkBits)) return LegacyMark::Unmarked;
+  assertx(m != LegacyMark::Bottom);
+  return m;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -276,19 +322,19 @@ Optional<DArrLikeMapN> toDArrLikeMapN(SArray ar) {
 
 // Convert a static array to a Type containing either DArrLikePacked
 // or DArrLikeMap, whatever is appropriate.
-Type toDArrLike(SArray ar, trep bits, HAMSandwich ham) {
+Type toDArrLike(SArray ar, trep bits, LegacyMark mark) {
   assertx(!ar->empty());
   assertx(bits & BSArrLikeN);
 
   if (auto p = toDArrLikePacked(ar)) {
-    return packed_impl(bits, ham, std::move(p->elems));
+    return packed_impl(bits, mark, std::move(p->elems));
   }
 
   auto d = toDArrLikeMap(ar);
   assertx(d);
   return map_impl(
     bits,
-    ham,
+    mark,
     std::move(d->map),
     std::move(d->optKey),
     std::move(d->optVal)
@@ -723,8 +769,8 @@ struct DualDispatchIntersectionImpl {
   static constexpr bool disjoint = false;
   using result_type = Type;
 
-  DualDispatchIntersectionImpl(trep b, HAMSandwich h)
-    : isect{b}, ham{h} {}
+  DualDispatchIntersectionImpl(trep b, LegacyMark m)
+    : isect{b}, mark{m} {}
 
   // For any specific array type which is entirely static, remove it.
   static trep remove_single_static_bits(trep b) {
@@ -810,8 +856,8 @@ struct DualDispatchIntersectionImpl {
 
   template <typename F>
   Optional<Type> intersect_packed(trep& bits,
-                                         std::vector<Type> elems,
-                                         F next) const {
+                                  std::vector<Type> elems,
+                                  F next) const {
     auto const valBits = allowedValBits(bits, true);
 
     size_t i = 0;
@@ -855,7 +901,7 @@ struct DualDispatchIntersectionImpl {
       ++i;
     }
 
-    return packed_impl(bits, ham, std::move(elems));
+    return packed_impl(bits, mark, std::move(elems));
   }
 
   Optional<Type> handle_packedn(trep& bits, Type val) const {
@@ -874,7 +920,7 @@ struct DualDispatchIntersectionImpl {
       }
       if (is_specialized_int(val)) {
         if (ival_of(val) == 0) {
-          return packed_impl(bits, ham, std::vector<Type>{std::move(val)});
+          return packed_impl(bits, mark, std::vector<Type>{std::move(val)});
         }
         return TBottom;
       }
@@ -902,7 +948,7 @@ struct DualDispatchIntersectionImpl {
       return std::nullopt;
     }
 
-    return packedn_impl(bits, ham, std::move(val));
+    return packedn_impl(bits, mark, std::move(val));
   }
 
   Optional<Type> handle_mapn(trep& bits, Type key, Type val) const {
@@ -983,7 +1029,7 @@ struct DualDispatchIntersectionImpl {
       return std::nullopt;
     }
 
-    return mapn_impl(bits, ham, std::move(key), std::move(val));
+    return mapn_impl(bits, mark, std::move(key), std::move(val));
   }
 
   Optional<Type> handle_map(trep& bits,
@@ -1089,7 +1135,7 @@ struct DualDispatchIntersectionImpl {
 
     return map_impl(
       bits,
-      ham,
+      mark,
       std::move(elems),
       std::move(optKey),
       std::move(optVal)
@@ -1356,15 +1402,15 @@ struct DualDispatchIntersectionImpl {
 
 private:
   trep isect;
-  HAMSandwich ham;
+  LegacyMark mark;
 };
 
 struct DualDispatchUnionImpl {
   static constexpr bool disjoint = false;
   using result_type = Type;
 
-  DualDispatchUnionImpl(trep combined, HAMSandwich h)
-    : combined{combined}, ham{h} {}
+  DualDispatchUnionImpl(trep combined, LegacyMark m)
+    : combined{combined}, mark{m} {}
 
   static MapElem union_map_elem(MapElem e1, MapElem e2) {
     return MapElem {
@@ -1378,18 +1424,18 @@ struct DualDispatchUnionImpl {
   Type operator()(const DArrLikePacked& a, const DArrLikePacked& b) const {
     if (a.elems.size() != b.elems.size()) {
       return packedn_impl(
-        combined, ham, union_of(packed_values(a), packed_values(b))
+        combined, mark, union_of(packed_values(a), packed_values(b))
       );
     }
     auto ret = a.elems;
     for (auto i = size_t{0}; i < a.elems.size(); ++i) {
       ret[i] |= b.elems[i];
     }
-    return packed_impl(combined, ham, std::move(ret));
+    return packed_impl(combined, mark, std::move(ret));
   }
 
   Type operator()(const DArrLikePackedN& a, const DArrLikePackedN& b) const {
-    return packedn_impl(combined, ham, union_of(a.type, b.type));
+    return packedn_impl(combined, mark, union_of(a.type, b.type));
   }
 
   Type operator()(const DArrLikePacked& a, const DArrLikePackedN& b) const {
@@ -1415,7 +1461,7 @@ struct DualDispatchUnionImpl {
       auto mkvb = map_key_values(b);
       return mapn_impl(
         combined,
-        ham,
+        mark,
         union_of(std::move(mkva.first), std::move(mkvb.first)),
         union_of(std::move(mkva.second), std::move(mkvb.second))
       );
@@ -1439,7 +1485,7 @@ struct DualDispatchUnionImpl {
 
     return map_impl(
       combined,
-      ham,
+      mark,
       std::move(map),
       std::move(optKey),
       std::move(optVal)
@@ -1466,7 +1512,7 @@ struct DualDispatchUnionImpl {
   Type operator()(const DArrLikeMapN& a, const DArrLikeMapN& b) const {
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(a.key, b.key),
       union_of(a.val, b.val)
     );
@@ -1506,7 +1552,7 @@ struct DualDispatchUnionImpl {
     auto mkv = map_key_values(b);
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(std::move(mkv.first), packed_key(a)),
       union_of(std::move(mkv.second), packed_values(a))
     );
@@ -1515,7 +1561,7 @@ struct DualDispatchUnionImpl {
   Type operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(packed_key(a), b.key),
       union_of(packed_values(a), b.val)
     );
@@ -1525,7 +1571,7 @@ struct DualDispatchUnionImpl {
     auto mkv = map_key_values(b);
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(TInt, std::move(mkv.first)),
       union_of(a.type, std::move(mkv.second))
     );
@@ -1534,7 +1580,7 @@ struct DualDispatchUnionImpl {
   Type operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(TInt, b.key),
       union_of(a.type, b.val)
     );
@@ -1544,7 +1590,7 @@ struct DualDispatchUnionImpl {
     auto mkv = map_key_values(a);
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(std::move(mkv.first), b.key),
       union_of(std::move(mkv.second), b.val)
     );
@@ -1558,8 +1604,8 @@ struct DualDispatchUnionImpl {
       return (*this)(a, DArrLikeMapN{ TInt, b.type });
     }
     auto val = Type{allowedValBits(a.bits, true).first};
-    if (!val.strictSubtypeOf(BInitCell)) return Type { combined, ham };
-    return packedn_impl(combined, ham, union_of(std::move(val), b.type));
+    if (!val.strictSubtypeOf(BInitCell)) return Type { combined, mark };
+    return packedn_impl(combined, mark, union_of(std::move(val), b.type));
   }
   Type operator()(const DArrLikeNone& a, const DArrLikeMapN& b) const {
     // Special case: Map includes all possible array structures, so we
@@ -1568,11 +1614,11 @@ struct DualDispatchUnionImpl {
     auto key = Type{allowedKeyBits(a.bits).first};
     auto val = Type{allowedValBits(a.bits, false).first};
     if (!key.strictSubtypeOf(BArrKey) && !val.strictSubtypeOf(BInitCell)) {
-      return Type { combined, ham };
+      return Type { combined, mark };
     }
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(std::move(key), b.key),
       union_of(std::move(val), b.val)
     );
@@ -1589,10 +1635,10 @@ struct DualDispatchUnionImpl {
       return (*this)(a, DArrLikeMapN{ packed_key(b), packed_values(b) });
     }
     auto val = Type{allowedValBits(a.bits, true).first};
-    if (!val.strictSubtypeOf(BInitCell)) return Type { combined, ham };
+    if (!val.strictSubtypeOf(BInitCell)) return Type { combined, mark };
     return packedn_impl(
       combined,
-      ham,
+      mark,
       union_of(std::move(val), packed_values(b))
     );
   }
@@ -1600,12 +1646,12 @@ struct DualDispatchUnionImpl {
     auto key = Type{allowedKeyBits(a.bits).first};
     auto val = Type{allowedValBits(a.bits, false).first};
     if (!key.strictSubtypeOf(BArrKey) && !val.strictSubtypeOf(BInitCell)) {
-      return Type { combined, ham };
+      return Type { combined, mark };
     }
     auto mkv = map_key_values(b);
     return mapn_impl(
       combined,
-      ham,
+      mark,
       union_of(std::move(key), std::move(mkv.first)),
       union_of(std::move(val), std::move(mkv.second))
     );
@@ -1613,7 +1659,7 @@ struct DualDispatchUnionImpl {
 
 private:
   trep combined;
-  HAMSandwich ham;
+  LegacyMark mark;
 };
 
 /*
@@ -1855,11 +1901,10 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 
 template<typename AInit, bool force_static, bool allow_counted>
 Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
-                                        trep bits,
-                                        HAMSandwich ham) {
-  assertx(ham.checkInvariants(bits));
-  auto const legacyMark = ham.legacyMark(bits);
-  if (legacyMark == LegacyMark::Unknown) return std::nullopt;
+                                 trep bits,
+                                 LegacyMark mark) {
+  mark = legacyMark(mark, bits);
+  if (mark == LegacyMark::Unknown) return std::nullopt;
 
   AInit ai{elems.size()};
   for (auto const& t : elems) {
@@ -1869,7 +1914,7 @@ Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
   }
   auto var = ai.toVariant();
 
-  if (legacyMark == LegacyMark::Marked) {
+  if (mark == LegacyMark::Marked) {
     var.asArrRef().setLegacyArray(true);
   }
 
@@ -1878,9 +1923,8 @@ Optional<TypedValue> fromTypeVec(const std::vector<Type>& elems,
 }
 
 template<bool allow_counted>
-bool checkTypeVec(const std::vector<Type>& elems, trep bits, HAMSandwich ham) {
-  assertx(ham.checkInvariants(bits));
-  if (ham.legacyMark(bits) == LegacyMark::Unknown) return false;
+bool checkTypeVec(const std::vector<Type>& elems, trep bits, LegacyMark mark) {
+  if (legacyMark(mark, bits) == LegacyMark::Unknown) return false;
   for (auto const& t : elems) {
     if (allow_counted ? !is_scalar_counted(t) : !is_scalar(t)) return false;
   }
@@ -1905,10 +1949,9 @@ void add(KeysetInit& ai, const Variant& key, const Variant& value) {
 template<typename AInit, bool force_static, bool allow_counted>
 Optional<TypedValue> fromTypeMap(const MapElems& elems,
                                  trep bits,
-                                 HAMSandwich ham) {
-  assertx(ham.checkInvariants(bits));
-  auto const legacyMark = ham.legacyMark(bits);
-  if (legacyMark == LegacyMark::Unknown) return std::nullopt;
+                                 LegacyMark mark) {
+  mark = legacyMark(mark, bits);
+  if (mark == LegacyMark::Unknown) return std::nullopt;
 
   auto val = eval_cell_value([&] () -> TypedValue {
     AInit ai{elems.size()};
@@ -1923,7 +1966,7 @@ Optional<TypedValue> fromTypeMap(const MapElems& elems,
     }
     auto var = ai.toVariant();
 
-    if (legacyMark == LegacyMark::Marked) {
+    if (mark == LegacyMark::Marked) {
       var.asArrRef().setLegacyArray(true);
     }
 
@@ -1935,9 +1978,8 @@ Optional<TypedValue> fromTypeMap(const MapElems& elems,
 }
 
 template<bool allow_counted>
-bool checkTypeMap(const MapElems& elems, trep bits, HAMSandwich ham) {
-  assertx(ham.checkInvariants(bits));
-  if (ham.legacyMark(bits) == LegacyMark::Unknown) return false;
+bool checkTypeMap(const MapElems& elems, trep bits, LegacyMark mark) {
+  if (legacyMark(mark, bits) == LegacyMark::Unknown) return false;
   for (auto const& elem : elems) {
     if (!allow_counted && elem.second.keyStaticness == TriBool::No) {
       return false;
@@ -1984,87 +2026,6 @@ MapElem MapElem::KeyFromType(const Type& key, Type val) {
       ? TriBool::Yes
       : (!key.couldBe(BUnc) ? TriBool::No : TriBool::Maybe)
   };
-}
-
-//////////////////////////////////////////////////////////////////////
-
-HAMSandwich HAMSandwich::FromSArr(SArray a) {
-  auto const mark = [&] {
-    if (a->isKeysetType()) return LegacyMark::Bottom;
-    return a->isLegacyArray() ? LegacyMark::Marked : LegacyMark::Unmarked;
-  }();
-  return HAMSandwich { mark };
-}
-
-HAMSandwich HAMSandwich::operator|(HAMSandwich o) const {
-  auto const mark = [&] {
-    if (m_mark == o.m_mark) return m_mark;
-    if (m_mark == LegacyMark::Bottom)   return o.m_mark;
-    if (o.m_mark == LegacyMark::Bottom) return m_mark;
-    return LegacyMark::Unknown;
-  }();
-  return HAMSandwich { mark };
-}
-
-HAMSandwich HAMSandwich::operator&(HAMSandwich o) const {
-  auto const mark = [&] {
-    if (m_mark == o.m_mark) return m_mark;
-    if (m_mark == LegacyMark::Bottom) return LegacyMark::Bottom;
-    if (o.m_mark == LegacyMark::Bottom) return LegacyMark::Bottom;
-    if (m_mark == LegacyMark::Unknown) return o.m_mark;
-    if (o.m_mark == LegacyMark::Unknown) return m_mark;
-    return LegacyMark::Unknown;
-  }();
-  return HAMSandwich { mark };
-}
-
-bool HAMSandwich::operator==(HAMSandwich o) const {
-  return m_mark == o.m_mark;
-}
-
-bool HAMSandwich::couldBe(HAMSandwich o) const {
-  if (m_mark == o.m_mark) return true;
-  if (m_mark == LegacyMark::Bottom ||
-      o.m_mark == LegacyMark::Bottom) return false;
-  return
-    m_mark == LegacyMark::Unknown ||
-    o.m_mark == LegacyMark::Unknown;
-}
-
-bool HAMSandwich::subtypeOf(HAMSandwich o) const {
-  if (m_mark == o.m_mark) return true;
-  if (m_mark == LegacyMark::Bottom) return true;
-  return o.m_mark == LegacyMark::Unknown;
-}
-
-HAMSandwich HAMSandwich::project(trep b) const {
-  using HPHP::HHBBC::couldBe;
-  return HAMSandwich { couldBe(b, kMarkBits) ? m_mark : LegacyMark::Bottom };
-}
-
-bool HAMSandwich::checkInvariants(trep b) const {
-  using HPHP::HHBBC::couldBe;
-
-  if (!debug) return true;
-
-  if (couldBe(b, kMarkBits)) {
-    assertx(m_mark != LegacyMark::Bottom);
-  } else {
-    assertx(m_mark == LegacyMark::Bottom);
-  }
-
-  return true;
-}
-
-bool HAMSandwich::isBottom(trep b) const {
-  return HPHP::HHBBC::couldBe(b, kMarkBits)
-    ? (m_mark == LegacyMark::Bottom) : false;
-}
-
-LegacyMark HAMSandwich::legacyMark(trep b) const {
-  if (!HPHP::HHBBC::couldBe(b, kMarkBits)) return LegacyMark::Unmarked;
-  assertx(m_mark != LegacyMark::Bottom);
-  return m_mark;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2349,7 +2310,7 @@ Type::dispatchArrLikeNone(const Type& o, Function f) const {
 template<bool contextSensitive>
 bool Type::equivImpl(const Type& o) const {
   if (bits() != o.bits()) return false;
-  if (m_ham != o.m_ham) return false;
+  if (m_legacyMark != o.m_legacyMark) return false;
   if (hasData() != o.hasData()) return false;
   if (!hasData()) return true;
 
@@ -2521,7 +2482,10 @@ bool Type::subtypeOfImpl(const Type& o) const {
   auto const isect = bits() & o.bits();
   if (isect != bits()) return false;
 
-  if (!m_ham.project(isect).subtypeOf(o.m_ham.project(isect))) return false;
+  if (!legacyMarkSubtypeOf(project(m_legacyMark, isect),
+                           project(o.m_legacyMark, isect))) {
+    return false;
+  }
 
   // If the (non-empty) intersection cannot contain data, or if the
   // other type has no data, the bits are sufficient.
@@ -2628,7 +2592,10 @@ bool Type::couldBe(const Type& o) const {
   auto const isect = bits() & o.bits();
   if (!isect) return false;
 
-  if (!m_ham.project(isect).couldBe(o.m_ham.project(isect))) return false;
+  if (!legacyMarkCouldBe(project(m_legacyMark, isect),
+                         project(o.m_legacyMark, isect))) {
+    return false;
+  }
 
   // If the intersection has any non-supported bits, we can simply
   // ignore all specializations. Regardless if the specializations
@@ -2714,7 +2681,11 @@ bool Type::checkInvariants() const {
   assertx(subtypeOf(BCell) || bits() == BTop);
   assertx(IMPLIES(bits() == BTop, !hasData()));
 
-  assertx(m_ham.checkInvariants(bits()));
+  if (HPHP::HHBBC::couldBe(bits(), kLegacyMarkBits)) {
+    assertx(m_legacyMark != LegacyMark::Bottom);
+  } else {
+    assertx(m_legacyMark == LegacyMark::Bottom);
+  }
 
   assertx(IMPLIES(hasData(), couldBe(kSupportBits)));
   assertx(IMPLIES(subtypeOf(kNonSupportBits), !hasData()));
@@ -2850,12 +2821,12 @@ bool Type::checkInvariants() const {
         always_assert(false);
     }
 
-    // If the array is non-empty, the HAMSandwich information should
+    // If the array is non-empty, the LegacyMark information should
     // match the static array precisely. This isn't the case if it
     // could be empty since the empty portion could have had different
-    // HAMSandwich information.
+    // LegaycMark information.
     if (!couldBe(BArrLikeE)) {
-      assertx(HAMSandwich::FromSArr(m_data.aval) == m_ham);
+      assertx(legacyMarkFromSArr(m_data.aval) == m_legacyMark);
     }
 
     break;
@@ -3001,7 +2972,7 @@ bool Type::checkInvariants() const {
 Type wait_handle(const Index& index, Type inner) {
   assertx(inner.subtypeOf(BInitCell));
   auto const wh = index.wait_handle_class();
-  auto t = Type { BObj, HAMSandwich::None };
+  auto t = Type { BObj, LegacyMark::Bottom };
 
   auto dcls = wh.couldBeOverriddenByRegular()
     ? DCls::MakeSub(wh, false)
@@ -3034,7 +3005,7 @@ Type wait_handle_inner(const Type& t) {
 // dropping any awaited type knowledge).
 Type demote_wait_handle(Type wh) {
   assertx(is_specialized_wait_handle(wh));
-  auto t = Type { wh.bits(), wh.m_ham };
+  auto t = Type { wh.bits(), wh.m_legacyMark };
   construct(t.m_data.dobj, std::move(wh.m_data.dwh->cls));
   t.m_dataTag = DataTag::Obj;
   assertx(!is_specialized_wait_handle(t));
@@ -3044,7 +3015,7 @@ Type demote_wait_handle(Type wh) {
 
 Type sval(SString val) {
   assertx(val->isStatic());
-  auto r        = Type { BSStr, HAMSandwich::None };
+  auto r        = Type { BSStr, LegacyMark::Bottom };
   r.m_data.sval = val;
   r.m_dataTag   = DataTag::Str;
   assertx(r.checkInvariants());
@@ -3053,7 +3024,7 @@ Type sval(SString val) {
 
 Type sval_nonstatic(SString val) {
   assertx(val->isStatic());
-  auto r        = Type { BStr, HAMSandwich::None };
+  auto r        = Type { BStr, LegacyMark::Bottom };
   r.m_data.sval = val;
   r.m_dataTag   = DataTag::Str;
   assertx(r.checkInvariants());
@@ -3062,7 +3033,7 @@ Type sval_nonstatic(SString val) {
 
 Type sval_counted(SString val) {
   assertx(val->isStatic());
-  auto r        = Type { BCStr, HAMSandwich::None };
+  auto r        = Type { BCStr, LegacyMark::Bottom };
   r.m_data.sval = val;
   r.m_dataTag   = DataTag::Str;
   assertx(r.checkInvariants());
@@ -3074,7 +3045,7 @@ Type sempty_nonstatic() { return sval_nonstatic(staticEmptyString()); }
 Type sempty_counted()   { return sval_counted(staticEmptyString()); }
 
 Type ival(int64_t val) {
-  auto r        = Type { BInt, HAMSandwich::None };
+  auto r        = Type { BInt, LegacyMark::Bottom };
   r.m_data.ival = val;
   r.m_dataTag   = DataTag::Int;
   assertx(r.checkInvariants());
@@ -3082,7 +3053,7 @@ Type ival(int64_t val) {
 }
 
 Type dval(double val) {
-  auto r        = Type { BDbl, HAMSandwich::None };
+  auto r        = Type { BDbl, LegacyMark::Bottom };
   r.m_data.dval = val;
   r.m_dataTag   = DataTag::Dbl;
   assertx(r.checkInvariants());
@@ -3090,7 +3061,7 @@ Type dval(double val) {
 }
 
 Type lazyclsval(SString val) {
-  auto r        = Type { BLazyCls, HAMSandwich::None };
+  auto r        = Type { BLazyCls, LegacyMark::Bottom };
   r.m_data.lazyclsval = val;
   r.m_dataTag   = DataTag::LazyCls;
   assertx(r.checkInvariants());
@@ -3100,9 +3071,9 @@ Type lazyclsval(SString val) {
 Type vec_val(SArray val) {
   assertx(val->isStatic());
   assertx(val->isVecType());
-  auto const ham = HAMSandwich::FromSArr(val);
-  if (val->empty()) return Type { BSVecE, ham };
-  auto t = Type { BSVecN, ham };
+  auto const mark = legacyMarkFromSArr(val);
+  if (val->empty()) return Type { BSVecE, mark };
+  auto t = Type { BSVecN, mark };
   t.m_data.aval = val;
   t.m_dataTag = DataTag::ArrLikeVal;
   assertx(t.checkInvariants());
@@ -3111,11 +3082,11 @@ Type vec_val(SArray val) {
 
 Type vec_empty() { return vec_val(staticEmptyVec()); }
 Type some_vec_empty() {
-  return Type { BVecE, HAMSandwich::FromSArr(staticEmptyVec()) };
+  return Type { BVecE, legacyMarkFromSArr(staticEmptyVec()) };
 }
 
-Type packedn_impl(trep bits, HAMSandwich ham, Type elem) {
-  auto t = Type { bits, ham };
+Type packedn_impl(trep bits, LegacyMark mark, Type elem) {
+  auto t = Type { bits, mark };
   auto const valBits = allowedValBits(bits, true);
   assertx(elem.subtypeOf(valBits.first));
   if (subtypeAmong(bits, BVecN, BArrLikeN)) {
@@ -3127,9 +3098,9 @@ Type packedn_impl(trep bits, HAMSandwich ham, Type elem) {
   return t;
 }
 
-Type packed_impl(trep bits, HAMSandwich ham, std::vector<Type> elems) {
+Type packed_impl(trep bits, LegacyMark mark, std::vector<Type> elems) {
   assertx(!elems.empty());
-  auto t = Type { bits, ham };
+  auto t = Type { bits, mark };
   construct_inner(t.m_data.packed, std::move(elems));
   t.m_dataTag = DataTag::ArrLikePacked;
   assertx(t.checkInvariants());
@@ -3137,17 +3108,17 @@ Type packed_impl(trep bits, HAMSandwich ham, std::vector<Type> elems) {
 }
 
 Type vec_n(Type ty) {
-  return packedn_impl(BVecN, HAMSandwich::Unmarked, std::move(ty));
+  return packedn_impl(BVecN, LegacyMark::Unmarked, std::move(ty));
 }
 
 Type svec_n(Type ty) {
-  return packedn_impl(BSVecN, HAMSandwich::Unmarked, std::move(ty));
+  return packedn_impl(BSVecN, LegacyMark::Unmarked, std::move(ty));
 }
 
 Type vec(std::vector<Type> elems) {
   return packed_impl(
     BVecN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(elems)
   );
 }
@@ -3155,7 +3126,7 @@ Type vec(std::vector<Type> elems) {
 Type svec(std::vector<Type> elems) {
   return packed_impl(
     BSVecN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(elems)
   );
 }
@@ -3163,9 +3134,9 @@ Type svec(std::vector<Type> elems) {
 Type dict_val(SArray val) {
   assertx(val->isStatic());
   assertx(val->isDictType());
-  auto const ham = HAMSandwich::FromSArr(val);
-  if (val->empty()) return Type { BSDictE, ham };
-  auto t = Type { BSDictN, ham };
+  auto const mark = legacyMarkFromSArr(val);
+  if (val->empty()) return Type { BSDictE, mark };
+  auto t = Type { BSDictN, mark };
   t.m_data.aval = val;
   t.m_dataTag   = DataTag::ArrLikeVal;
   assertx(t.checkInvariants());
@@ -3175,13 +3146,13 @@ Type dict_val(SArray val) {
 Type dict_empty() { return dict_val(staticEmptyDictArray()); }
 
 Type some_dict_empty() {
-  return Type { BDictE, HAMSandwich::FromSArr(staticEmptyDictArray()) };
+  return Type { BDictE, legacyMarkFromSArr(staticEmptyDictArray()) };
 }
 
 Type dict_map(MapElems m, Type optKey, Type optVal) {
   return map_impl(
     BDictN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(m),
     std::move(optKey),
     std::move(optVal)
@@ -3191,7 +3162,7 @@ Type dict_map(MapElems m, Type optKey, Type optVal) {
 Type sdict_map(MapElems m, Type optKey, Type optVal) {
   return map_impl(
     BSDictN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(m),
     std::move(optKey),
     std::move(optVal)
@@ -3201,7 +3172,7 @@ Type sdict_map(MapElems m, Type optKey, Type optVal) {
 Type dict_n(Type k, Type v) {
   return mapn_impl(
     BDictN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(k),
     std::move(v)
   );
@@ -3210,7 +3181,7 @@ Type dict_n(Type k, Type v) {
 Type sdict_n(Type k, Type v) {
   return mapn_impl(
     BSDictN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(k),
     std::move(v)
   );
@@ -3219,7 +3190,7 @@ Type sdict_n(Type k, Type v) {
 Type dict_packed(std::vector<Type> v) {
   return packed_impl(
     BDictN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(v)
   );
 }
@@ -3227,39 +3198,39 @@ Type dict_packed(std::vector<Type> v) {
 Type sdict_packed(std::vector<Type> v) {
   return packed_impl(
     BSDictN,
-    HAMSandwich::Unmarked,
+    LegacyMark::Unmarked,
     std::move(v)
   );
 }
 
 Type dict_packedn(Type t) {
-  return packedn_impl(BDictN, HAMSandwich::Unmarked, std::move(t));
+  return packedn_impl(BDictN, LegacyMark::Unmarked, std::move(t));
 }
 
 Type sdict_packedn(Type t) {
-  return packedn_impl(BSDictN, HAMSandwich::Unmarked, std::move(t));
+  return packedn_impl(BSDictN, LegacyMark::Unmarked, std::move(t));
 }
 
 Type keyset_val(SArray val) {
   assertx(val->isStatic());
   assertx(val->isKeysetType());
   if (val->empty()) return keyset_empty();
-  auto r        = Type { BSKeysetN, HAMSandwich::None };
+  auto r        = Type { BSKeysetN, LegacyMark::Bottom };
   r.m_data.aval = val;
   r.m_dataTag   = DataTag::ArrLikeVal;
   assertx(r.checkInvariants());
   return r;
 }
 
-Type keyset_empty()         { return Type { BSKeysetE, HAMSandwich::None }; }
-Type some_keyset_empty()    { return Type { BKeysetE, HAMSandwich::None }; }
+Type keyset_empty()         { return Type { BSKeysetE, LegacyMark::Bottom }; }
+Type some_keyset_empty()    { return Type { BKeysetE, LegacyMark::Bottom }; }
 
 Type keyset_n(Type kv) {
   assertx(kv.subtypeOf(BArrKey));
   auto v = kv;
   return mapn_impl(
     BKeysetN,
-    HAMSandwich::None,
+    LegacyMark::Bottom,
     std::move(kv),
     std::move(v)
   );
@@ -3270,7 +3241,7 @@ Type skeyset_n(Type kv) {
   auto v = kv;
   return mapn_impl(
     BSKeysetN,
-    HAMSandwich::None,
+    LegacyMark::Bottom,
     std::move(kv),
     std::move(v)
   );
@@ -3279,7 +3250,7 @@ Type skeyset_n(Type kv) {
 Type keyset_map(MapElems m) {
   return map_impl(
     BKeysetN,
-    HAMSandwich::None,
+    LegacyMark::Bottom,
     std::move(m),
     TBottom,
     TBottom
@@ -3292,7 +3263,7 @@ Type subObj(res::Class val) {
   } else {
     return TBottom;
   }
-  auto t = Type { BObj, HAMSandwich::None };
+  auto t = Type { BObj, LegacyMark::Bottom };
   construct(
     t.m_data.dobj,
     val.couldBeOverriddenByRegular()
@@ -3306,7 +3277,7 @@ Type subObj(res::Class val) {
 
 Type objExact(res::Class val) {
   if (!val.mightBeRegular()) return TBottom;
-  auto t = Type { BObj, HAMSandwich::None };
+  auto t = Type { BObj, LegacyMark::Bottom };
   construct(
     t.m_data.dobj,
     val.resolved()
@@ -3327,7 +3298,7 @@ Type subCls(res::Class val, bool nonReg) {
     }
     nonReg = false;
   }
-  auto r        = Type { BCls, HAMSandwich::None };
+  auto r        = Type { BCls, LegacyMark::Bottom };
   construct(
     r.m_data.dcls,
     (nonReg ? val.couldBeOverridden() : val.couldBeOverriddenByRegular())
@@ -3344,7 +3315,7 @@ Type clsExact(res::Class val, bool nonReg) {
     if (!val.mightBeRegular()) return TBottom;
     nonReg = false;
   }
-  auto r        = Type { BCls, HAMSandwich::None };
+  auto r        = Type { BCls, LegacyMark::Bottom };
   construct(
     r.m_data.dcls,
     val.resolved()
@@ -3360,7 +3331,7 @@ Type isectObjInternal(DCls::IsectSet isect) {
   // NB: No canonicalization done here. This is only used internally
   // and we assume the IsectSet is already canonicalized.
   assertx(isect.size() > 1);
-  auto t = Type { BObj, HAMSandwich::None };
+  auto t = Type { BObj, LegacyMark::Bottom };
   construct(t.m_data.dobj, DCls::MakeIsect(std::move(isect), false));
   t.m_dataTag = DataTag::Obj;
   assertx(t.checkInvariants());
@@ -3371,14 +3342,14 @@ Type isectClsInternal(DCls::IsectSet isect, bool nonReg) {
   // NB: No canonicalization done here. This is only used internally
   // and we assume the IsectSet is already canonicalized.
   assertx(isect.size() > 1);
-  auto t = Type { BCls, HAMSandwich::None };
+  auto t = Type { BCls, LegacyMark::Bottom };
   construct(t.m_data.dcls, DCls::MakeIsect(std::move(isect), nonReg));
   t.m_dataTag = DataTag::Cls;
   assertx(t.checkInvariants());
   return t;
 }
 
-Type map_impl(trep bits, HAMSandwich ham, MapElems m,
+Type map_impl(trep bits, LegacyMark mark, MapElems m,
               Type optKey, Type optVal) {
   assertx(!m.empty());
   assertx(optKey.is(BBottom) == optVal.is(BBottom));
@@ -3400,7 +3371,7 @@ Type map_impl(trep bits, HAMSandwich ham, MapElems m,
     if (optKey.is(BBottom)) {
       std::vector<Type> elems;
       for (auto& p : m) elems.emplace_back(p.second.val);
-      return packed_impl(bits, ham, std::move(elems));
+      return packed_impl(bits, mark, std::move(elems));
     }
 
     // There are optional elements. We cannot represent optionals in
@@ -3413,7 +3384,7 @@ Type map_impl(trep bits, HAMSandwich ham, MapElems m,
     // and that key is next in packed order, we can use PackedN.
     if (auto const k = tvCounted(optKey)) {
       if (isIntType(k->m_type) && k->m_data.num == idx) {
-        return packedn_impl(bits, ham, std::move(vals));
+        return packedn_impl(bits, mark, std::move(vals));
       }
     }
 
@@ -3422,13 +3393,13 @@ Type map_impl(trep bits, HAMSandwich ham, MapElems m,
     // non-packed types).
     return mapn_impl(
       bits,
-      ham,
+      mark,
       union_of(idx == 1 ? ival(0) : TInt, optKey),
       std::move(vals)
     );
   }
 
-  auto r = Type { bits, ham };
+  auto r = Type { bits, mark };
   construct_inner(
     r.m_data.map,
     std::move(m),
@@ -3440,7 +3411,7 @@ Type map_impl(trep bits, HAMSandwich ham, MapElems m,
   return r;
 }
 
-Type mapn_impl(trep bits, HAMSandwich ham, Type k, Type v) {
+Type mapn_impl(trep bits, LegacyMark mark, Type k, Type v) {
   assertx(k.subtypeOf(BArrKey));
 
   auto const keyBits = allowedKeyBits(bits);
@@ -3453,10 +3424,10 @@ Type mapn_impl(trep bits, HAMSandwich ham, Type k, Type v) {
   if (auto val = tvCounted(k)) {
     MapElems m;
     m.emplace_back(*val, MapElem::KeyFromType(k, std::move(v)));
-    return map_impl(bits, ham, std::move(m), TBottom, TBottom);
+    return map_impl(bits, mark, std::move(m), TBottom, TBottom);
   }
 
-  auto r = Type { bits, ham };
+  auto r = Type { bits, mark };
   if (!k.strictSubtypeOf(keyBits.first) && !v.strictSubtypeOf(valBits.first)) {
     return r;
   }
@@ -3627,7 +3598,7 @@ Type objcls(const Type& t) {
   if (!is_specialized_obj(t)) return TCls;
   auto const& d = dobj_of(t);
   assertx(!d.containsNonRegular());
-  auto r = Type { BCls, HAMSandwich::None };
+  auto r = Type { BCls, LegacyMark::Bottom };
   construct(r.m_data.dcls, d);
   r.m_dataTag = DataTag::Cls;
   return setctx(std::move(r), d.isCtx());
@@ -3812,10 +3783,10 @@ R tvImpl(const Type& t) {
   using H = tvHelper<R, force_static, allow_counted>;
 
   auto const emptyArray = [&] (auto unmarked, auto marked) {
-    auto const legacyMark = t.m_ham.legacyMark(t.bits());
-    if (legacyMark == LegacyMark::Unknown) return R{};
+    auto const mark = legacyMark(t.m_legacyMark, t.bits());
+    if (mark == LegacyMark::Unknown) return R{};
 
-    auto const ad = legacyMark == LegacyMark::Unmarked ? unmarked() : marked();
+    auto const ad = mark == LegacyMark::Unmarked ? unmarked() : marked();
     assertx(ad->empty());
     return H::makePersistentArray(ad);
   };
@@ -3876,12 +3847,12 @@ R tvImpl(const Type& t) {
       if (t.subtypeOf(BDictN) && (allow_counted || !t.subtypeOf(BCDictN))) {
         return H::template fromMap<DictInit>(t.m_data.map->map,
                                              t.bits(),
-                                             t.m_ham);
+                                             t.m_legacyMark);
       } else if (t.subtypeOf(BKeysetN) &&
                  (allow_counted || !t.subtypeOf(BCKeysetN))) {
         return H::template fromMap<KeysetInit>(t.m_data.map->map,
                                                t.bits(),
-                                               t.m_ham);
+                                               t.m_legacyMark);
       }
       break;
     case DataTag::ArrLikePacked:
@@ -3889,17 +3860,17 @@ R tvImpl(const Type& t) {
           (allow_counted || !t.subtypeOf(BCVecN))) {
         return H::template fromVec<VecInit>(t.m_data.packed->elems,
                                             t.bits(),
-                                            t.m_ham);
+                                            t.m_legacyMark);
       } else if (t.subtypeOf(BDictN) &&
                  (allow_counted || !t.subtypeOf(BCDictN))) {
         return H::template fromVec<DictInit>(t.m_data.packed->elems,
                                              t.bits(),
-                                             t.m_ham);
+                                             t.m_legacyMark);
       } else if (t.subtypeOf(BKeysetN) &&
                  (allow_counted || !t.subtypeOf(BCKeysetN))) {
         return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems,
                                                      t.bits(),
-                                                     t.m_ham);
+                                                     t.m_legacyMark);
       }
       break;
     case DataTag::ArrLikePackedN:
@@ -4287,13 +4258,16 @@ Type intersection_of(Type a, Type b) {
   auto isect = a.bits() & b.bits();
   if (!isect) return TBottom;
 
-  auto ham = a.m_ham.project(isect) & b.m_ham.project(isect);
-  if (ham.isBottom(isect)) return TBottom;
+  auto mark = intersectionOf(
+    project(a.m_legacyMark, isect),
+    project(b.m_legacyMark, isect)
+  );
+  if (legacyMarkIsBottom(mark, isect)) return TBottom;
 
   // Return intersected type without a specialization.
   auto const nodata = [&] {
     assertx(isect);
-    return Type { isect, ham };
+    return Type { isect, mark };
   };
   // If the intersection cannot support a specialization, there's no
   // need to check them.
@@ -4304,7 +4278,7 @@ Type intersection_of(Type a, Type b) {
   // type. Update the bits to match the intersection.
   auto const reuse = [&] (Type& dst) {
     dst.m_bits = isect;
-    dst.m_ham = ham;
+    dst.m_legacyMark = mark;
     assertx(dst.checkInvariants());
     return std::move(dst);
   };
@@ -4481,8 +4455,8 @@ Type intersection_of(Type a, Type b) {
       // ArrLikeVal doesn't require any intersection
       if (t.couldBe(BArrLikeE) && !couldBe(isect, BArrLikeE)) {
         // If the intersection stripped empty bits off leaving just a
-        // ArrLikeVal, we need to restore the precise HAMSandwich.
-        ham = HAMSandwich::FromSArr(t.m_data.aval);
+        // ArrLikeVal, we need to restore the precise LegacyMark.
+        mark = legacyMarkFromSArr(t.m_data.aval);
       }
       return reuse(t);
     }
@@ -4494,7 +4468,7 @@ Type intersection_of(Type a, Type b) {
     }
     // Otherwise we can't reuse t and must perform the intersection.
     return Type{isect}.dispatchArrLikeNone(
-      t, DualDispatchIntersection{ isect, ham }
+      t, DualDispatchIntersection{ isect, mark }
     );
   };
 
@@ -4513,19 +4487,19 @@ Type intersection_of(Type a, Type b) {
         }
         return a.dualDispatchDataFn(
           b,
-          DualDispatchIntersection{ isect, ham }
+          DualDispatchIntersection{ isect, mark }
         );
       }();
       if (!i.is(BBottom)) return i;
       isect &= ~BArrLikeN;
-      ham = ham.project(isect);
+      mark = project(mark, isect);
       return isect ? nodata() : TBottom;
     }
     if (couldBe(isect, BArrLikeN)) {
       auto const i = adjustArrSpec(a);
       if (!i.is(BBottom)) return i;
       isect &= ~BArrLikeN;
-      ham = ham.project(isect);
+      mark = project(mark, isect);
       return isect ? nodata() : TBottom;
     }
   } else if (is_specialized_array_like(b)) {
@@ -4533,7 +4507,7 @@ Type intersection_of(Type a, Type b) {
       auto const i = adjustArrSpec(b);
       if (!i.is(BBottom)) return i;
       isect &= ~BArrLikeN;
-      ham = ham.project(isect);
+      mark = project(mark, isect);
       return isect ? nodata() : TBottom;
     }
   }
@@ -4591,14 +4565,14 @@ Type intersection_of(Type a, Type b) {
 
 Type union_of(Type a, Type b) {
   auto const combined = a.bits() | b.bits();
-  auto const ham = a.m_ham | b.m_ham;
+  auto const mark = unionOf(a.m_legacyMark, b.m_legacyMark);
 
-  auto const nodata = [&] { return Type { combined, ham }; };
+  auto const nodata = [&] { return Type { combined, mark }; };
   if (!a.hasData() && !b.hasData()) return nodata();
 
   auto const reuse = [&] (Type& dst) {
     dst.m_bits = combined;
-    dst.m_ham = ham;
+    dst.m_legacyMark = mark;
     assertx(dst.checkInvariants());
     return std::move(dst);
   };
@@ -4770,17 +4744,17 @@ Type union_of(Type a, Type b) {
     if (is_specialized_array_like(b)) {
       if (a.dualDispatchDataFn(b, DualDispatchSubtype<true>{})) return reuse(b);
       if (b.dualDispatchDataFn(a, DualDispatchSubtype<true>{})) return reuse(a);
-      return a.dualDispatchDataFn(b, DualDispatchUnion{ combined, ham });
+      return a.dualDispatchDataFn(b, DualDispatchUnion{ combined, mark });
     }
     if (!subtypeOf(combined, BArrLikeN | kNonSupportBits)) return nodata();
     if (!b.couldBe(BArrLikeN)) return reuse(a);
     if (b.dispatchArrLikeNone(a, DualDispatchSubtype<true>{})) return reuse(a);
-    return b.dispatchArrLikeNone(a, DualDispatchUnion{ combined, ham });
+    return b.dispatchArrLikeNone(a, DualDispatchUnion{ combined, mark });
   } else if (is_specialized_array_like(b)) {
     if (!subtypeOf(combined, BArrLikeN | kNonSupportBits)) return nodata();
     if (!a.couldBe(BArrLikeN)) return reuse(b);
     if (a.dispatchArrLikeNone(b, DualDispatchSubtype<true>{})) return reuse(b);
-    return a.dispatchArrLikeNone(b, DualDispatchUnion{ combined, ham });
+    return a.dispatchArrLikeNone(b, DualDispatchUnion{ combined, mark });
   }
 
   if (is_specialized_string(a)) {
@@ -4918,7 +4892,7 @@ void widen_type_impl(Type& t, uint32_t depth) {
   // of the type to a fixed degree.
   auto const checkDepth = [&] {
     if (depth >= kTypeWidenMaxDepth) {
-      t = Type { t.bits(), t.m_ham };
+      t = Type { t.bits(), t.m_legacyMark };
       return true;
     }
     return false;
@@ -5018,7 +4992,7 @@ Type loosen_array_staticness(Type t) {
   check(BKeysetN);
 
   if (t.m_dataTag == DataTag::ArrLikeVal) {
-    return toDArrLike(t.m_data.aval, bits, t.m_ham);
+    return toDArrLike(t.m_data.aval, bits, t.m_legacyMark);
   }
   t.m_bits = bits;
   assertx(t.checkInvariants());
@@ -5030,7 +5004,7 @@ Type loosen_staticness(Type t) {
     // ArrLikeVal always needs static ArrLikeN support, so we if we
     // want to loosen the trep, we need to convert to the equivalent
     // DArrLike instead.
-    return loosen_staticness(toDArrLike(t.m_data.aval, t.bits(), t.m_ham));
+    return loosen_staticness(toDArrLike(t.m_data.aval, t.bits(), t.m_legacyMark));
   }
 
   auto bits = t.bits();
@@ -5081,7 +5055,7 @@ Type loosen_staticness(Type t) {
       auto loosened = loosen_staticness(std::move(packed.type));
       if (t.subtypeAmong(BVecN, BArrLikeN) &&
           !loosened.strictSubtypeOf(BInitCell)) {
-        return Type { bits, t.m_ham };
+        return Type { bits, t.m_legacyMark };
       }
       packed.type = std::move(loosened);
       break;
@@ -5112,7 +5086,7 @@ Type loosen_staticness(Type t) {
       auto const valBits = allowedValBits(bits, false);
       if (!loosenedKey.strictSubtypeOf(keyBits.first) &&
           !loosenedVal.strictSubtypeOf(valBits.first)) {
-        return Type { bits, t.m_ham };
+        return Type { bits, t.m_legacyMark };
       }
       map.key = std::move(loosenedKey);
       map.val = std::move(loosenedVal);
@@ -5134,7 +5108,7 @@ Type loosen_vec_or_dict(Type t) {
 
 Type loosen_string_values(Type t) {
   return t.m_dataTag == DataTag::Str
-    ? Type { t.bits(), t.m_ham } : t;
+    ? Type { t.bits(), t.m_legacyMark } : t;
 }
 
 Type loosen_array_values(Type a) {
@@ -5144,7 +5118,7 @@ Type loosen_array_values(Type a) {
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
-      return Type { a.bits(), a.m_ham };
+      return Type { a.bits(), a.m_legacyMark };
     case DataTag::None:
     case DataTag::Str:
     case DataTag::LazyCls:
@@ -5170,7 +5144,7 @@ Type loosen_values(Type a) {
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
-      return Type { a.bits(), a.m_ham };
+      return Type { a.bits(), a.m_legacyMark };
     case DataTag::None:
     case DataTag::Obj:
     case DataTag::WaitHandle:
@@ -5249,7 +5223,7 @@ Type loosen_likeness_recursively(Type t) {
     auto loosened = loosen_likeness_recursively(packed.type);
     if (t.subtypeAmong(BVecN, BArrLikeN) &&
         !loosened.strictSubtypeOf(allowedValBits(t.bits(), true).first)) {
-      return Type { t.bits(), t.m_ham };
+      return Type { t.bits(), t.m_legacyMark };
     }
     packed.type = std::move(loosened);
     break;
@@ -5270,7 +5244,7 @@ Type loosen_likeness_recursively(Type t) {
     auto loosened = loosen_likeness_recursively(map.val);
     if (!map.key.strictSubtypeOf(allowedKeyBits(t.bits()).first) &&
         !loosened.strictSubtypeOf(allowedValBits(t.bits(), false).first)) {
-      return Type { t.bits(), t.m_ham };
+      return Type { t.bits(), t.m_legacyMark };
     }
     map.val = std::move(loosened);
     break;
@@ -5299,7 +5273,7 @@ Type loosen_to_datatype(Type t) {
   return loosen_staticness(
     loosen_emptiness(
       loosen_likeness(
-        Type { t.bits(), t.m_ham }
+        Type { t.bits(), t.m_legacyMark }
       )
     )
   );
@@ -5335,7 +5309,7 @@ Type remove_uninit(Type t) {
 
 Type remove_data(Type t, trep support) {
   auto const bits = t.bits() & ~support;
-  return Type { bits, t.m_ham.project(bits) };
+  return Type { bits, project(t.m_legacyMark, bits) };
 }
 
 Type remove_int(Type t) {
@@ -5406,7 +5380,7 @@ Type remove_keyset(Type t) {
     assertx(t.checkInvariants());
     return t;
   }
-  auto removed = Type{t.bits() & ~BKeyset, t.m_ham};
+  auto removed = Type{t.bits() & ~BKeyset, t.m_legacyMark};
   // Otherwise use intersection_of to remove the Keyset while trying
   // to preserve the specialization
   return intersection_of(std::move(t), std::move(removed));
@@ -5445,11 +5419,11 @@ Type remove_bits(Type t, trep bits) {
       !t.couldBe(BArrLikeE) &&
       couldBe(old, BArrLikeE)) {
     // If removing the bits removes BArrLikeE with a ArrLikeVal
-    // specialization, we need to restore the exact HAMSandwich
+    // specialization, we need to restore the exact LegacyMark
     // corresponding to the static array.
-    t.m_ham = HAMSandwich::FromSArr(t.m_data.aval);
+    t.m_legacyMark = legacyMarkFromSArr(t.m_data.aval);
   } else {
-    t.m_ham = t.m_ham.project(t.bits());
+    t.m_legacyMark = project(t.m_legacyMark, t.bits());
   }
   assertx(t.checkInvariants());
   return t;
@@ -5459,26 +5433,26 @@ std::pair<Type, Type> split_obj(Type t) {
   assertx(t.subtypeOf(BCell));
   auto const b = t.bits();
   if (is_specialized_obj(t)) {
-    auto const ham = t.m_ham;
+    auto const mark = t.m_legacyMark;
     t.m_bits &= BObj;
-    t.m_ham = HAMSandwich::None;
-    return std::make_pair(std::move(t), Type { b & ~BObj, ham });
+    t.m_legacyMark = LegacyMark::Bottom;
+    return std::make_pair(std::move(t), Type { b & ~BObj, mark });
   }
   t.m_bits &= ~BObj;
-  return std::make_pair(Type { b & BObj, HAMSandwich::None }, std::move(t));
+  return std::make_pair(Type { b & BObj, LegacyMark::Bottom }, std::move(t));
 }
 
 std::pair<Type, Type> split_cls(Type t) {
   assertx(t.subtypeOf(BCell));
   auto const b = t.bits();
   if (is_specialized_cls(t)) {
-    auto const ham = t.m_ham;
+    auto const mark = t.m_legacyMark;
     t.m_bits &= BCls;
-    t.m_ham = HAMSandwich::None;
-    return std::make_pair(std::move(t), Type { b & ~BCls, ham });
+    t.m_legacyMark = LegacyMark::Bottom;
+    return std::make_pair(std::move(t), Type { b & ~BCls, mark });
   }
   t.m_bits &= ~BCls;
-  return std::make_pair(Type { b & BCls, HAMSandwich::None }, std::move(t));
+  return std::make_pair(Type { b & BCls, LegacyMark::Bottom }, std::move(t));
 }
 
 std::pair<Type, Type> split_array_like(Type t) {
@@ -5488,39 +5462,39 @@ std::pair<Type, Type> split_array_like(Type t) {
     t.m_bits &= BArrLike;
     return std::make_pair(
       std::move(t),
-      Type { b & ~BArrLike, HAMSandwich::None }
+      Type { b & ~BArrLike, LegacyMark::Bottom }
     );
   }
-  auto const ham = t.m_ham;
+  auto const mark = t.m_legacyMark;
   t.m_bits &= ~BArrLike;
-  t.m_ham = HAMSandwich::None;
-  return std::make_pair(Type { b & BArrLike, ham }, std::move(t));
+  t.m_legacyMark = LegacyMark::Bottom;
+  return std::make_pair(Type { b & BArrLike, mark }, std::move(t));
 }
 
 std::pair<Type, Type> split_string(Type t) {
   assertx(t.subtypeOf(BCell));
   auto const b = t.bits();
   if (is_specialized_string(t)) {
-    auto const ham = t.m_ham;
+    auto const mark = t.m_legacyMark;
     t.m_bits &= BStr;
-    t.m_ham = HAMSandwich::None;
-    return std::make_pair(std::move(t), Type { b & ~BStr, ham });
+    t.m_legacyMark = LegacyMark::Bottom;
+    return std::make_pair(std::move(t), Type { b & ~BStr, mark });
   }
   t.m_bits &= ~BStr;
-  return std::make_pair(Type { b & BStr, HAMSandwich::None }, std::move(t));
+  return std::make_pair(Type { b & BStr, LegacyMark::Bottom }, std::move(t));
 }
 
 std::pair<Type, Type> split_lazycls(Type t) {
   assertx(t.subtypeOf(BCell));
   auto const b = t.bits();
   if (is_specialized_lazycls(t)) {
-    auto const ham = t.m_ham;
+    auto const mark = t.m_legacyMark;
     t.m_bits &= BLazyCls;
-    t.m_ham = HAMSandwich::None;
-    return std::make_pair(std::move(t), Type { b & ~BLazyCls, ham });
+    t.m_legacyMark = LegacyMark::Bottom;
+    return std::make_pair(std::move(t), Type { b & ~BLazyCls, mark });
   }
   t.m_bits &= ~BLazyCls;
-  return std::make_pair(Type { b & BLazyCls, HAMSandwich::None }, std::move(t));
+  return std::make_pair(Type { b & BLazyCls, LegacyMark::Bottom }, std::move(t));
 }
 
 Type assert_emptiness(Type t) {
@@ -5609,9 +5583,9 @@ Type assert_nonemptiness(Type t) {
   auto const old = t.bits();
   t.m_bits &= ~(BNull | BFalse | BArrLikeE);
   if (t.m_dataTag == DataTag::ArrLikeVal && couldBe(old, BArrLikeE)) {
-    t.m_ham = HAMSandwich::FromSArr(t.m_data.aval);
+    t.m_legacyMark = legacyMarkFromSArr(t.m_data.aval);
   } else {
-    t.m_ham = t.m_ham.project(t.bits());
+    t.m_legacyMark = project(t.m_legacyMark, t.bits());
   }
   assertx(t.checkInvariants());
   return t;
@@ -6292,7 +6266,7 @@ bool arr_packed_set(Type& pack,
             }
             pack = packedn_impl(
               pack.bits(),
-              pack.m_ham,
+              pack.m_legacyMark,
               union_of(packed_values(*packed), val)
             );
             return false;
@@ -6320,14 +6294,14 @@ bool arr_packed_set(Type& pack,
       }
       elems.emplace_back(*k, MapElem::KeyFromType(key, val));
       pack =
-        map_impl(pack.bits(), pack.m_ham, std::move(elems), TBottom, TBottom);
+        map_impl(pack.bits(), pack.m_legacyMark, std::move(elems), TBottom, TBottom);
       return false;
     }
   }
 
   pack = mapn_impl(
     pack.bits(),
-    pack.m_ham,
+    pack.m_legacyMark,
     union_of(packed_key(*packed), key),
     union_of(packed_values(*packed), val)
   );
@@ -6344,7 +6318,7 @@ bool arr_packedn_set(Type& pack,
   auto const keepPacked = [&] (bool mightThrow) {
     auto t = union_of(pack.m_data.packedn->type, val);
     if (pack.subtypeOf(BVec) && !t.strictSubtypeOf(BInitCell)) {
-      pack = Type { pack.bits(), pack.m_ham };
+      pack = Type { pack.bits(), pack.m_legacyMark };
     } else {
       pack.m_data.packedn.mutate()->type = std::move(t);
     }
@@ -6374,7 +6348,7 @@ bool arr_packedn_set(Type& pack,
 
   pack = mapn_impl(
     pack.bits(),
-    pack.m_ham,
+    pack.m_legacyMark,
     union_of(TInt, key),
     union_of(pack.m_data.packedn->type, val)
   );
@@ -6438,7 +6412,7 @@ bool arr_map_set(Type& map,
 
         map = map_impl(
           map.bits(),
-          map.m_ham,
+          map.m_legacyMark,
           std::move(elems),
           std::move(restKey),
           std::move(restVal)
@@ -6452,7 +6426,7 @@ bool arr_map_set(Type& map,
     auto mkv = map_key_values(*mutated);
     map = mapn_impl(
       map.bits(),
-      map.m_ham,
+      map.m_legacyMark,
       union_of(key, std::move(mkv.first)),
       union_of(val, std::move(mkv.second))
     );
@@ -6570,7 +6544,7 @@ std::pair<Type,bool> array_like_set_impl(Type arr,
     // Can't set into an empty Vec (only newelem)
     if (arr.subtypeOf(BVec)) return { TBottom, true };
     // mapn_impl will use the appropriate map or packed representation
-    return { mapn_impl(bits, arr.m_ham, key, val), false };
+    return { mapn_impl(bits, arr.m_legacyMark, key, val), false };
   }
 
   switch (arr.m_dataTag) {
@@ -6590,7 +6564,7 @@ std::pair<Type,bool> array_like_set_impl(Type arr,
     }
     case DataTag::ArrLikeVal:
       return array_like_set_impl(
-        toDArrLike(arr.m_data.aval, arr.bits(), arr.m_ham),
+        toDArrLike(arr.m_data.aval, arr.bits(), arr.m_legacyMark),
         key, val
       );
     case DataTag::ArrLikePacked: {
@@ -6624,7 +6598,7 @@ std::pair<Type,bool> array_like_set_impl(Type arr,
           !newVal.strictSubtypeOf(
             arr.subtypeOf(BKeyset) ? BArrKey : BInitCell)
          ) {
-        return { Type { bits, arr.m_ham }, false };
+        return { Type { bits, arr.m_legacyMark }, false };
       }
       m->key = std::move(newKey);
       m->val = std::move(newVal);
@@ -6815,7 +6789,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
 
   if (!arr.couldBe(BArrLikeN)) {
     return {
-      packed_impl(bits, arr.m_ham, { val }),
+      packed_impl(bits, arr.m_legacyMark, { val }),
       false // Appends cannot throw on an empty array
     };
   }
@@ -6838,7 +6812,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
     }
     case DataTag::ArrLikeVal:
       return array_like_newelem_impl(
-        toDArrLike(arr.m_data.aval, arr.bits(), arr.m_ham),
+        toDArrLike(arr.m_data.aval, arr.bits(), arr.m_legacyMark),
         val
       );
     case DataTag::ArrLikePacked:
@@ -6848,7 +6822,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
       if (arr.couldBe(BArrLikeE)) {
         return {
           packedn_impl(
-            bits, arr.m_ham,
+            bits, arr.m_legacyMark,
             union_of(packed_values(*arr.m_data.packed), val)
           ),
           false
@@ -6863,7 +6837,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
       if (arr.subtypeOf(BVec)) {
         auto t = union_of(arr.m_data.packedn.mutate()->type, val);
         if (!t.strictSubtypeOf(BInitCell)) {
-          return { Type { bits, arr.m_ham }, false };
+          return { Type { bits, arr.m_legacyMark }, false };
         }
         arr.m_bits = bits;
         arr.m_data.packedn.mutate()->type = std::move(t);
@@ -6885,7 +6859,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
         return {
           mapn_impl(
             bits,
-            arr.m_ham,
+            arr.m_legacyMark,
             union_of(std::move(mkv.first), TInt),
             union_of(std::move(mkv.second), val)
           ),
@@ -6907,7 +6881,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
       auto newVal = union_of(std::move(m->val), val);
       if (!newKey.strictSubtypeOf(BArrKey) &&
           !newVal.strictSubtypeOf(BInitCell)) {
-        return { Type { bits, arr.m_ham }, true };
+        return { Type { bits, arr.m_legacyMark }, true };
       }
       m->key = std::move(newKey);
       m->val = std::move(newVal);
@@ -7163,7 +7137,7 @@ Type adjust_type_for_prop(const Index& index,
 
 Type set_trep_for_testing(Type t, trep bits) {
   t.m_bits = bits;
-  t.m_ham = HAMSandwich::TopForBits(bits);
+  t.m_legacyMark = Type::topLegacyMarkForBits(bits);
   assertx(t.checkInvariants());
   return t;
 }
@@ -7185,7 +7159,7 @@ Type make_obj_for_testing(trep bits, res::Class cls,
       return TBottom;
     }
   }
-  auto t = Type { bits, HAMSandwich::TopForBits(bits) };
+  auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   auto const useSub = [&] {
     if (!canonicalize) return isSub;
     if (!isSub) return !cls.resolved();
@@ -7219,7 +7193,7 @@ Type make_cls_for_testing(trep bits, res::Class cls,
       nonReg = false;
     }
   }
-  auto t = Type { bits, HAMSandwich::TopForBits(bits) };
+  auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   auto const useSub = [&] {
     if (!canonicalize) return isSub;
     if (!isSub) return !cls.resolved();
@@ -7236,7 +7210,7 @@ Type make_cls_for_testing(trep bits, res::Class cls,
 }
 
 Type make_arrval_for_testing(trep bits, SArray a) {
-  auto t = Type { bits, HAMSandwich::FromSArr(a) };
+  auto t = Type { bits, legacyMarkFromSArr(a) };
   t.m_data.aval = a;
   t.m_dataTag = DataTag::ArrLikeVal;
   assertx(t.checkInvariants());
@@ -7246,16 +7220,16 @@ Type make_arrval_for_testing(trep bits, SArray a) {
 Type make_arrpacked_for_testing(trep bits,
                                 std::vector<Type> elems,
                                 Optional<LegacyMark> mark) {
-  auto t = Type { bits, HAMSandwich::TopForBits(bits) };
+  auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   construct_inner(t.m_data.packed, std::move(elems));
   t.m_dataTag = DataTag::ArrLikePacked;
-  if (mark) t.m_ham.setLegacyMarkForTesting(*mark);
+  if (mark) t.m_legacyMark = *mark;
   assertx(t.checkInvariants());
   return t;
 }
 
 Type make_arrpackedn_for_testing(trep bits, Type elem) {
-  auto t = Type { bits, HAMSandwich::TopForBits(bits) };
+  auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   construct_inner(t.m_data.packedn, std::move(elem));
   t.m_dataTag = DataTag::ArrLikePackedN;
   assertx(t.checkInvariants());
@@ -7267,7 +7241,7 @@ Type make_arrmap_for_testing(trep bits,
                              Type optKey,
                              Type optVal,
                              Optional<LegacyMark> mark) {
-  auto t = Type { bits, HAMSandwich::TopForBits(bits) };
+  auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   construct_inner(
     t.m_data.map,
     std::move(m),
@@ -7275,13 +7249,13 @@ Type make_arrmap_for_testing(trep bits,
     std::move(optVal)
   );
   t.m_dataTag = DataTag::ArrLikeMap;
-  if (mark) t.m_ham.setLegacyMarkForTesting(*mark);
+  if (mark) t.m_legacyMark = *mark;
   assertx(t.checkInvariants());
   return t;
 }
 
 Type make_arrmapn_for_testing(trep bits, Type key, Type val) {
-  auto t = Type { bits, HAMSandwich::TopForBits(bits) };
+  auto t = Type { bits, Type::topLegacyMarkForBits(bits) };
   construct_inner(t.m_data.mapn, std::move(key), std::move(val));
   t.m_dataTag = DataTag::ArrLikeMapN;
   assertx(t.checkInvariants());
@@ -7289,7 +7263,7 @@ Type make_arrmapn_for_testing(trep bits, Type key, Type val) {
 }
 
 Type set_mark_for_testing(Type t, LegacyMark mark) {
-  t.m_ham.setLegacyMarkForTesting(mark);
+  t.m_legacyMark = mark;
   assertx(t.checkInvariants());
   return t;
 }
@@ -7297,7 +7271,7 @@ Type set_mark_for_testing(Type t, LegacyMark mark) {
 Type loosen_mark_for_testing(Type t) {
   if (t.m_dataTag == DataTag::ArrLikeVal) return t;
 
-  t.m_ham = HAMSandwich::TopForBits(t.bits());
+  t.m_legacyMark = Type::topLegacyMarkForBits(t.bits());
 
   switch (t.m_dataTag) {
     case DataTag::None:

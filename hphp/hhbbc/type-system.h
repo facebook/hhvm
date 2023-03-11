@@ -500,72 +500,6 @@ enum class LegacyMark : uint8_t {
   Unknown   // either
 };
 
-// Bag of state for tracking HAM related metadata (array provenance
-// and legacy marking).
-struct HAMSandwich {
-  // No state. Used for types which don't have any HAM relevance
-  // (ints, keysets, etc).
-  static const HAMSandwich None;
-  // Unmarked legacy mark, but no array-provenance. Used for types
-  // which don't care about array-provenance (vec, dict, etc).
-  static const HAMSandwich Unmarked;
-
-  // Create the appropriate HAMSandwich for the given static array.
-  static HAMSandwich FromSArr(SArray);
-
-  // Create the most general HAMSandwich allowed for the given type.
-  static HAMSandwich TopForBits(trep b) {
-    using HPHP::HHBBC::couldBe;
-    return HAMSandwich {
-      couldBe(b, kMarkBits) ? LegacyMark::Unknown : LegacyMark::Bottom
-    };
-  }
-
-  // Return a new HAMSandwich refined based on the given type. For
-  // example, if the given type no longer contains Vec or Dict, we
-  // need to drop any marking information.
-  HAMSandwich project(trep) const;
-
-  // Return the legacy mark information in this HAMSandwich. If the
-  // given type does not require legacy mark information, Unmarked is
-  // always returned.
-  LegacyMark legacyMark(trep) const;
-
-  // Return true if this is the "bottom" HAMSandwich type. That is,
-  // the result of intersecting together incompatible ones.
-  bool isBottom(trep b) const;
-
-  // Check if the intersection between this and another HAMSandwich is
-  // non-empty.
-  bool couldBe(HAMSandwich) const;
-  // Check if this HAMSandwich is completely contained with another.
-  bool subtypeOf(HAMSandwich) const;
-
-  bool operator==(HAMSandwich) const;
-  bool operator!=(HAMSandwich o) const { return !(*this == o); }
-
-  // Union together or intersect two HAMSandwiches.
-  HAMSandwich operator|(HAMSandwich) const;
-  HAMSandwich& operator|=(HAMSandwich o) { return *this = *this | o; }
-
-  HAMSandwich operator&(HAMSandwich) const;
-  HAMSandwich& operator&=(HAMSandwich o) { return *this = *this & o; }
-
-  // Testing:
-
-  void setLegacyMarkForTesting(LegacyMark m) { m_mark = m; }
-
-  bool checkInvariants(trep) const;
-
-private:
-  // Legacy marks are only tracked for Vec and Dict.
-  static constexpr trep kMarkBits = BVec | BDict;
-
-  explicit HAMSandwich(LegacyMark mark) : m_mark{mark} {}
-
-  LegacyMark m_mark;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 enum class Emptiness {
@@ -586,14 +520,16 @@ enum class Promotion {
 
 struct Type {
   Type() : Type{BBottom} {}
-  explicit Type(trep t) : Type{t, HAMSandwich::TopForBits(t)} {}
-  Type(trep t, HAMSandwich h) : m_bits{t}, m_dataTag{DataTag::None}, m_ham{h} {
+  explicit Type(trep t) : Type{t, topLegacyMarkForBits(t)} {}
+  Type(trep t, LegacyMark m)
+    : m_bits{t}
+    , m_dataTag{DataTag::None}
+    , m_legacyMark{m} {
     assertx(checkInvariants());
   }
 
   Type(const Type& o) noexcept
     : m_raw{o.m_raw}
-    , m_ham{o.m_ham}
   {
     SCOPE_EXIT { assertx(checkInvariants()); };
     if (LIKELY(m_dataTag == DataTag::None)) return;
@@ -602,7 +538,6 @@ struct Type {
 
   Type(Type&& o) noexcept
     : m_raw{o.m_raw}
-    , m_ham{o.m_ham}
   {
     SCOPE_EXIT { assertx(o.checkInvariants()); };
     if (LIKELY(m_dataTag == DataTag::None)) return;
@@ -691,6 +626,14 @@ struct Type {
     bool hasValue;
   };
 
+  static LegacyMark topLegacyMarkForBits(trep b) {
+    return HPHP::HHBBC::couldBe(b, kLegacyMarkBits)
+      ? LegacyMark::Unknown : LegacyMark::Bottom;
+  }
+
+  // Legacy marks are only tracked for Vec and Dict.
+  static constexpr trep kLegacyMarkBits = BVec | BDict;
+
 private:
   friend Optional<int64_t> arr_size(const Type& t);
   friend ArrayCat categorize_array(const Type& t);
@@ -721,10 +664,10 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class, bool);
   friend Type clsExact(res::Class, bool);
-  friend Type packed_impl(trep, HAMSandwich, std::vector<Type>);
-  friend Type packedn_impl(trep, HAMSandwich, Type);
-  friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
-  friend Type mapn_impl(trep, HAMSandwich, Type, Type);
+  friend Type packed_impl(trep, LegacyMark, std::vector<Type>);
+  friend Type packedn_impl(trep, LegacyMark, Type);
+  friend Type map_impl(trep, LegacyMark, MapElems, Type, Type);
+  friend Type mapn_impl(trep, LegacyMark, Type, Type);
   friend const DCls& dobj_of(const Type&);
   friend Type demote_wait_handle(Type);
   friend const DCls& dcls_of(const Type&);
@@ -872,10 +815,10 @@ private:
     struct {
       uint64_t m_bits : kTRepBitsStored;
       DataTag m_dataTag;
+      LegacyMark m_legacyMark;
     };
     uint64_t m_raw;
   };
-  HAMSandwich m_ham;
   Data m_data;
 };
 

@@ -1586,5 +1586,23 @@ TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
   EXPECT_EQ(modifiedObj, *valueObject.objectValue_ref());
 }
 
+TEST(Patch, ManuallyConstruct) {
+  protocol::Object s;
+  s[FieldId{1}].emplace_string() = "hi";
+
+  protocol::Object patch;
+  auto& patchPrior =
+      patch[static_cast<FieldId>(op::PatchOp::PatchPrior)].emplace_object();
+  auto& stringPatch = patchPrior[FieldId{1}].emplace_object();
+  stringPatch[static_cast<FieldId>(op::PatchOp::Add)] =
+      asValueStruct<type::binary_t>("(");
+  stringPatch[static_cast<FieldId>(op::PatchOp::Put)] =
+      asValueStruct<type::binary_t>(")");
+
+  protocol::applyPatch(patch, s);
+
+  EXPECT_EQ(s[FieldId{1}].as_string(), "(hi)");
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

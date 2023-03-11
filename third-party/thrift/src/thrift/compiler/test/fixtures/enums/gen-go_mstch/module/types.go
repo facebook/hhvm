@@ -828,7 +828,7 @@ func (x *SomeStruct) Read(p thrift.Protocol) error {
 }
 
 type MyStruct struct {
-    Me23 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`
+    Me2_3 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`
     Me3N3 MyEnum3 `thrift:"me3_n3,2" json:"me3_n3" db:"me3_n3"`
     Me1T1 MyEnum1 `thrift:"me1_t1,4" json:"me1_t1" db:"me1_t1"`
     Me1T2 MyEnum1 `thrift:"me1_t2,6" json:"me1_t2" db:"me1_t2"`
@@ -838,7 +838,7 @@ var _ thrift.Struct = &MyStruct{}
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
-        SetMe23(
+        SetMe2_3(
             MyEnum2(3),
         ).
         SetMe3N3(
@@ -852,8 +852,8 @@ func NewMyStruct() *MyStruct {
         )
 }
 
-func (x *MyStruct) GetMe23() MyEnum2 {
-    return x.Me23
+func (x *MyStruct) GetMe2_3() MyEnum2 {
+    return x.Me2_3
 }
 
 func (x *MyStruct) GetMe3N3() MyEnum3 {
@@ -868,8 +868,8 @@ func (x *MyStruct) GetMe1T2() MyEnum1 {
     return x.Me1T2
 }
 
-func (x *MyStruct) SetMe23(value MyEnum2) *MyStruct {
-    x.Me23 = value
+func (x *MyStruct) SetMe2_3(value MyEnum2) *MyStruct {
+    x.Me2_3 = value
     return x
 }
 
@@ -892,12 +892,12 @@ func (x *MyStruct) SetMe1T2(value MyEnum1) *MyStruct {
 
 
 
-func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Me23
+func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Me2_3
     if err := p.WriteFieldBegin("me2_3", thrift.I32, 1); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMe23()
+    item := x.GetMe2_3()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -956,14 +956,14 @@ func (x *MyStruct) writeField6(p thrift.Protocol) error {  // Me1T2
     return nil
 }
 
-func (x *MyStruct) readField1(p thrift.Protocol) error {  // Me23
+func (x *MyStruct) readField1(p thrift.Protocol) error {  // Me2_3
     enumResult, err := p.ReadI32()
 if err != nil {
     return err
 }
 result := MyEnum2(enumResult)
 
-    x.SetMe23(result)
+    x.SetMe2_3(result)
     return nil
 }
 
@@ -1016,8 +1016,8 @@ func NewMyStructBuilder() *MyStructBuilder {
     }
 }
 
-func (x *MyStructBuilder) Me23(value MyEnum2) *MyStructBuilder {
-    x.obj.Me23 = value
+func (x *MyStructBuilder) Me2_3(value MyEnum2) *MyStructBuilder {
+    x.obj.Me2_3 = value
     return x
 }
 

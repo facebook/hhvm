@@ -371,7 +371,7 @@ type MyStruct struct {
     Major int64 `thrift:"major,2" json:"major" db:"major"`
     Package string `thrift:"package,1" json:"package" db:"package"`
     AnnotationWithQuote string `thrift:"annotation_with_quote,3" tag:"somevalue"`
-    Class string `thrift:"class_,4" json:"class_" db:"class_"`
+    Class_ string `thrift:"class_,4" json:"class_" db:"class_"`
     AnnotationWithTrailingComma string `thrift:"annotation_with_trailing_comma,5" json:"annotation_with_trailing_comma" db:"annotation_with_trailing_comma"`
     EmptyAnnotations string `thrift:"empty_annotations,6" json:"empty_annotations" db:"empty_annotations"`
     MyEnum MyEnum `thrift:"my_enum,7" json:"my_enum" db:"my_enum"`
@@ -401,8 +401,8 @@ func (x *MyStruct) GetAnnotationWithQuote() string {
     return x.AnnotationWithQuote
 }
 
-func (x *MyStruct) GetClass() string {
-    return x.Class
+func (x *MyStruct) GetClass_() string {
+    return x.Class_
 }
 
 func (x *MyStruct) GetAnnotationWithTrailingComma() string {
@@ -444,8 +444,8 @@ func (x *MyStruct) SetAnnotationWithQuote(value string) *MyStruct {
     return x
 }
 
-func (x *MyStruct) SetClass(value string) *MyStruct {
-    x.Class = value
+func (x *MyStruct) SetClass_(value string) *MyStruct {
+    x.Class_ = value
     return x
 }
 
@@ -543,12 +543,12 @@ func (x *MyStruct) writeField3(p thrift.Protocol) error {  // AnnotationWithQuot
     return nil
 }
 
-func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Class
+func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Class_
     if err := p.WriteFieldBegin("class_", thrift.STRING, 4); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClass()
+    item := x.GetClass_()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -704,13 +704,13 @@ if err != nil {
     return nil
 }
 
-func (x *MyStruct) readField4(p thrift.Protocol) error {  // Class
+func (x *MyStruct) readField4(p thrift.Protocol) error {  // Class_
     result, err := p.ReadString()
 if err != nil {
     return err
 }
 
-    x.SetClass(result)
+    x.SetClass_(result)
     return nil
 }
 
@@ -825,8 +825,8 @@ func (x *MyStructBuilder) AnnotationWithQuote(value string) *MyStructBuilder {
     return x
 }
 
-func (x *MyStructBuilder) Class(value string) *MyStructBuilder {
-    x.obj.Class = value
+func (x *MyStructBuilder) Class_(value string) *MyStructBuilder {
+    x.obj.Class_ = value
     return x
 }
 

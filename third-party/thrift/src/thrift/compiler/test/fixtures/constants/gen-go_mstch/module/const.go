@@ -67,15 +67,15 @@ var InternList []*Internship = []*Internship{
     SetEmployer(Company_FACEBOOK).
     SetCompensation(1000),
 }
-var Pod0 Struct1 = *NewStruct1()
-var PodS0 Struct1 = *NewStruct1()
-var Pod1 Struct1 = *NewStruct1().
+var Pod_0 Struct1 = *NewStruct1()
+var PodS_0 Struct1 = *NewStruct1()
+var Pod_1 Struct1 = *NewStruct1().
     SetA(10).
     SetB("foo")
-var PodS1 Struct1 = *NewStruct1().
+var PodS_1 Struct1 = *NewStruct1().
     SetA(10).
     SetB("foo")
-var Pod2 Struct2 = *NewStruct2().
+var Pod_2 Struct2 = *NewStruct2().
     SetA(98).
     SetB("gaz").
     SetC(
@@ -105,7 +105,7 @@ var PodTrailingCommas Struct2 = *NewStruct2().
     33,
 },
     )
-var PodS2 Struct2 = *NewStruct2().
+var PodS_2 Struct2 = *NewStruct2().
     SetA(98).
     SetB("gaz").
     SetC(
@@ -120,7 +120,7 @@ var PodS2 Struct2 = *NewStruct2().
     33,
 },
     )
-var Pod3 Struct3 = *NewStruct3().
+var Pod_3 Struct3 = *NewStruct3().
     SetA("abc").
     SetB(456).
     SetC(
@@ -138,7 +138,7 @@ var Pod3 Struct3 = *NewStruct3().
 },
     ),
     )
-var PodS3 Struct3 = *NewStruct3().
+var PodS_3 Struct3 = *NewStruct3().
     SetA("abc").
     SetB(456).
     SetC(
@@ -156,36 +156,36 @@ var PodS3 Struct3 = *NewStruct3().
 },
     ),
     )
-var Pod4 Struct4 = *NewStruct4().
+var Pod_4 Struct4 = *NewStruct4().
     SetA(1234).
     SetB(0.333).
     SetC(25)
-var U11 Union1 = *NewUnion1().
+var U_1_1 Union1 = *NewUnion1().
     SetI(97)
-var U12 Union1 = *NewUnion1().
+var U_1_2 Union1 = *NewUnion1().
     SetD(5.6)
-var U13 Union1 = *NewUnion1()
-var U21 Union2 = *NewUnion2().
+var U_1_3 Union1 = *NewUnion1()
+var U_2_1 Union2 = *NewUnion2().
     SetI(51)
-var U22 Union2 = *NewUnion2().
+var U_2_2 Union2 = *NewUnion2().
     SetD(6.7)
-var U23 Union2 = *NewUnion2().
+var U_2_3 Union2 = *NewUnion2().
     SetS(
         *NewStruct1().
     SetA(8).
     SetB("abacabb"),
     )
-var U24 Union2 = *NewUnion2().
+var U_2_4 Union2 = *NewUnion2().
     SetU(
         *NewUnion1().
     SetI(43),
     )
-var U25 Union2 = *NewUnion2().
+var U_2_5 Union2 = *NewUnion2().
     SetU(
         *NewUnion1().
     SetD(9.8),
     )
-var U26 Union2 = *NewUnion2().
+var U_2_6 Union2 = *NewUnion2().
     SetU(
         *NewUnion1(),
     )

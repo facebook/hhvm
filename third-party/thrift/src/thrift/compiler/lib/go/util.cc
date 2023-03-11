@@ -16,6 +16,7 @@
 
 #include <cctype>
 #include <set>
+#include <string>
 #include <boost/algorithm/string.hpp>
 #include <thrift/compiler/lib/go/util.h>
 
@@ -67,6 +68,15 @@ static const std::set<std::string> go_reserved_words = []() {
   return set;
 }();
 
+// common_initialisms from https://github.com/golang/lint/blob/master/lint.go
+static const std::set<std::string> common_initialisms = {
+    "ACL",  "API",  "ASCII", "CPU",  "CSS",  "DNS",  "EOF", "GUID",
+    "HTML", "HTTP", "HTTPS", "ID",   "IP",   "JSON", "LHS", "QPS",
+    "RAM",  "RHS",  "RPC",   "SLA",  "SMTP", "SQL",  "SSH", "TCP",
+    "TLS",  "TTL",  "UDP",   "UI",   "UID",  "URI",  "URL", "UTF8",
+    "UUID", "VM",   "XML",   "XMPP", "XSRF", "XSS",
+};
+
 std::string get_go_package_name(
     const t_program* program, std::string name_override) {
   if (!name_override.empty()) {
@@ -107,73 +117,76 @@ std::string get_go_package_base_name(
 
 // Convert snake_case to UpperCamelCase and captialize common initialisms.
 std::string munge_ident(const std::string& ident, bool exported, bool compat) {
-  // common_initialisms from https://github.com/golang/lint/blob/master/lint.go
-  static const std::set<std::string> common_initialisms = {
-      "ACL",  "API",  "ASCII", "CPU",  "CSS",  "DNS",  "EOF", "GUID",
-      "HTML", "HTTP", "HTTPS", "ID",   "IP",   "JSON", "LHS", "QPS",
-      "RAM",  "RHS",  "RPC",   "SLA",  "SMTP", "SQL",  "SSH", "TCP",
-      "TLS",  "TTL",  "UDP",   "UI",   "UID",  "URI",  "URL", "UTF8",
-      "UUID", "VM",   "XML",   "XMPP", "XSRF", "XSS",
-  };
-
-  bool allUpper = std::all_of(ident.begin(), ident.end(), [](unsigned char c) {
-    return !std::isalpha(c) || std::isupper(c);
-  });
-  if (allUpper) {
-    return ident;
-  }
+  assert(!ident.empty());
 
   std::ostringstream out;
   size_t word_start = 0;
-  size_t word_len = 1;
-  size_t i = 0;
 
-  while (i + 1 <= ident.size()) {
+  for (size_t i = 0; i < ident.size(); i++) {
+    char cur_char = ident.at(i);
     bool eow = false;
     if (i + 1 == ident.size()) {
       eow = true;
-    } else if (ident.at(i + 1) == '_') {
-      eow = true;
-      i++;
-    } else if (islower(ident.at(i)) && !islower(ident.at(i + 1)) && !compat) {
-      eow = true;
+    } else {
+      char next_char = ident.at(i + 1);
+      if ((next_char == '_') ||
+          (islower(cur_char) && isupper(next_char) && !compat)) {
+        eow = true;
+      } else if (cur_char == '_') {
+        word_start = i + 1;
+        if (!islower(next_char)) {
+          // Keep underscores, unless followed by a lowercase word.
+          out << cur_char;
+        }
+      }
     }
-    i++;
 
     if (!eow) {
-      word_len++;
       continue;
     }
 
-    auto word = ident.substr(word_start, word_len);
-
-    // check for initialism
+    size_t word_len = i - word_start + 1;
+    std::string word = ident.substr(word_start, word_len);
     std::string upper = boost::algorithm::to_upper_copy(word);
     bool is_initialism = (common_initialisms.count(upper) > 0);
+    bool is_first_word = (word_start == 0);
+    size_t next_underscore_pos = ident.find('_', word_start);
+    bool is_legacy_substr_bug =
+        (next_underscore_pos != std::string::npos &&
+         next_underscore_pos > word_len);
 
-    // Compatibility workarounds for the legacy generator (i.e. bugs):
-    //  * word_start != 0
-    //    * Legacy generator does not change initialisms at the beginning of the
-    //    string to uppercase.
-    //  * word_len != ident.size()
-    //    * Legacy generator does not change whole-string initialisms to
-    //    uppercase.
-    if (is_initialism && compat && word_len != ident.size() &&
-        word_start != 0) {
-      word = upper;
-      if (word_start == 0 && !exported) {
-        boost::algorithm::to_lower(word);
+    if (is_initialism) {
+      // Compat: legacy generator does not change whole-string
+      // initialisms to uppercase.
+      // Compat: legacy generator does not change initialisms
+      // at the beginning of the string to uppercase.
+      // Compat: legacy generator does not change initialisms
+      // to uppercase if it hits a substring bug.
+      if (!(compat && word_len == ident.size()) && !(compat && is_first_word) &&
+          !(compat && is_legacy_substr_bug)) {
+        boost::algorithm::to_upper(word);
       }
-    } else if (exported || word_start > 0) {
-      word.at(0) = toupper(word.at(0));
-    } else {
-      word.at(0) = tolower(word.at(0));
     }
+
+    if (is_first_word) {
+      if (exported) {
+        word.at(0) = toupper(word.at(0));
+      } else {
+        if (is_initialism) {
+          // Make the entire initialism lowercase
+          boost::algorithm::to_lower(word);
+        } else {
+          word.at(0) = tolower(word.at(0));
+        }
+      }
+    } else {
+      word.at(0) = toupper(word.at(0));
+    }
+
     out << word;
 
     // reset the word
-    word_len = 1;
-    word_start = i;
+    word_start = i + 1;
   }
 
   auto result = out.str();

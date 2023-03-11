@@ -147,7 +147,7 @@ func StandardProtocolPtr(v StandardProtocol) *StandardProtocol {
 
 type TypeUri struct {
     Uri *Uri `thrift:"uri,1" json:"uri" db:"uri"`
-    TypeHashPrefixSha2256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256" db:"typeHashPrefixSha2_256"`
+    TypeHashPrefixSha2_256 ByteString `thrift:"typeHashPrefixSha2_256,2" json:"typeHashPrefixSha2_256" db:"typeHashPrefixSha2_256"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeUri{}
@@ -163,8 +163,8 @@ func (x *TypeUri) GetUri() *Uri {
     return x.Uri
 }
 
-func (x *TypeUri) GetTypeHashPrefixSha2256() ByteString {
-    return x.TypeHashPrefixSha2256
+func (x *TypeUri) GetTypeHashPrefixSha2_256() ByteString {
+    return x.TypeHashPrefixSha2_256
 }
 
 func (x *TypeUri) SetUri(value Uri) *TypeUri {
@@ -172,8 +172,8 @@ func (x *TypeUri) SetUri(value Uri) *TypeUri {
     return x
 }
 
-func (x *TypeUri) SetTypeHashPrefixSha2256(value ByteString) *TypeUri {
-    x.TypeHashPrefixSha2256 = value
+func (x *TypeUri) SetTypeHashPrefixSha2_256(value ByteString) *TypeUri {
+    x.TypeHashPrefixSha2_256 = value
     return x
 }
 
@@ -181,8 +181,8 @@ func (x *TypeUri) IsSetUri() bool {
     return x.Uri != nil
 }
 
-func (x *TypeUri) IsSetTypeHashPrefixSha2256() bool {
-    return x.TypeHashPrefixSha2256 != nil
+func (x *TypeUri) IsSetTypeHashPrefixSha2_256() bool {
+    return x.TypeHashPrefixSha2_256 != nil
 }
 
 func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
@@ -205,8 +205,8 @@ func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
     return nil
 }
 
-func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2256
-    if !x.IsSetTypeHashPrefixSha2256() {
+func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_256
+    if !x.IsSetTypeHashPrefixSha2_256() {
         return nil
     }
 
@@ -214,7 +214,7 @@ func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha22
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeHashPrefixSha2256()
+    item := x.GetTypeHashPrefixSha2_256()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -235,13 +235,13 @@ if err != nil {
     return nil
 }
 
-func (x *TypeUri) readField2(p thrift.Protocol) error {  // TypeHashPrefixSha2256
+func (x *TypeUri) readField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_256
     result, err := p.ReadBinary()
 if err != nil {
     return err
 }
 
-    x.SetTypeHashPrefixSha2256(result)
+    x.SetTypeHashPrefixSha2_256(result)
     return nil
 }
 
@@ -266,8 +266,8 @@ func (x *TypeUriBuilder) Uri(value *Uri) *TypeUriBuilder {
     return x
 }
 
-func (x *TypeUriBuilder) TypeHashPrefixSha2256(value ByteString) *TypeUriBuilder {
-    x.obj.TypeHashPrefixSha2256 = value
+func (x *TypeUriBuilder) TypeHashPrefixSha2_256(value ByteString) *TypeUriBuilder {
+    x.obj.TypeHashPrefixSha2_256 = value
     return x
 }
 

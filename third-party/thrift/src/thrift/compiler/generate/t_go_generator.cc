@@ -525,6 +525,9 @@ std::string t_go_generator::camelcase(const std::string& value) const {
       if (islower(value2[i + 1])) {
         value2.replace(i, 2, 1, toupper(value2[i + 1]));
       }
+      // NOTE: the substr call below has a bug - instead of giving it a desired
+      // length of substring, we are giving it an index of the next underscore.
+      // This breaks common initialism logic which follows. Too late to fix now.
       std::string word = value2.substr(i, value2.find('_', i));
       std::transform(word.begin(), word.end(), word.begin(), ::toupper);
       if (commonInitialisms.find(word) != commonInitialisms.end()) {

@@ -130,17 +130,6 @@ const TESTS = vec[
 
 <<__EntryPoint>>
 function main() {
-  HH\autoload_set_paths(
-    dict[
-      'class' => dict[
-        'h2' => 'recursive-1.inc',
-        'i2_recursive' => 'recursive-2.inc',
-        'i2_notrecursive' => 'recursive-3.inc',
-      ],
-    ],
-    __DIR__.'/',
-  );
-
   $count = __hhvm_intrinsics\apc_fetch_no_check("count");
   if ($count === false) {
     $count = 0;

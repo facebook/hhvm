@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_1616() {
-var_dump(get_class_constants('C'));
+var_dump(get_class_constants('C1616'));
 }

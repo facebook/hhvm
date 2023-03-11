@@ -411,11 +411,7 @@ class HTTPHeaders {
     codes()[length_] = code;
     names()[length_] = name;
     std::string* p = values() + length_++;
-    new (p) std::string(std::forward<T>(value));
-    if (!p->empty() && isLWS(p->back())) {
-      auto sp = folly::rtrimWhitespace(*p);
-      p->resize(sp.size());
-    }
+    new (p) std::string(folly::trimWhitespace(std::forward<T>(value)));
   }
 };
 

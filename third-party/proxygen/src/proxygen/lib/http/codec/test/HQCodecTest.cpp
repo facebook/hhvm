@@ -603,6 +603,33 @@ TEST_F(HQCodecTest, BasicConnect) {
   EXPECT_EQ(authority, headers.getSingleOrEmpty(proxygen::HTTP_HEADER_HOST));
 }
 
+TEST_F(HQCodecTest, TrimLwsInHeaderValue) {
+  HTTPMessage req = getGetRequest("/test");
+  req.getHeaders().add(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE,
+                       " application/x-fb");
+  // adding header with lws will strip here
+  req.getHeaders().add(HTTPHeaderCode::HTTP_HEADER_USER_AGENT, "\n\t \r");
+  auto streamId = upstreamCodec_->createStream();
+  upstreamCodec_->generateHeader(queue_, streamId, req, true /* eom */);
+
+  parse();
+  EXPECT_EQ(callbacks_.messageBegin, 1);
+  EXPECT_EQ(callbacks_.headersComplete, 1);
+  EXPECT_EQ(callbacks_.messageComplete, 0);
+  EXPECT_EQ(callbacks_.streamErrors, 0);
+  EXPECT_EQ(callbacks_.sessionErrors, 0);
+
+  auto& parsedHeaders = callbacks_.msg->getHeaders();
+  EXPECT_TRUE(parsedHeaders.exists(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE));
+  EXPECT_TRUE(parsedHeaders.exists(HTTPHeaderCode::HTTP_HEADER_USER_AGENT));
+  EXPECT_TRUE(
+      parsedHeaders.getSingleOrEmpty(HTTPHeaderCode::HTTP_HEADER_USER_AGENT)
+          .empty());
+  EXPECT_EQ(
+      parsedHeaders.getSingleOrEmpty(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE),
+      "application/x-fb");
+}
+
 TEST_F(HQCodecTest, OnlyDataAfterConnect) {
   std::string authority = "myhost:1234";
   HTTPMessage request;

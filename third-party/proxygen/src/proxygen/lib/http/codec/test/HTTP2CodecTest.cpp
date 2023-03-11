@@ -862,6 +862,76 @@ TEST_F(HTTP2CodecTest, BadHeadersReply) {
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
+TEST_F(HTTP2CodecTest, StripLwsHeaderValue) {
+  static std::string lwsString("\r\n\t ");
+  // first request
+  HTTPMessage req = getGetRequest("/test");
+  req.getHeaders().add(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE,
+                       " application/x-fb");
+  // test header value just whitespace
+  req.getHeaders().add(HTTPHeaderCode::HTTP_HEADER_USER_AGENT, lwsString);
+  auto id = upstreamCodec_.createStream();
+  upstreamCodec_.generateHeader(output_, id, req, /*eom=*/true);
+
+  auto parseAndCheckExpectations = [&]() {
+    parse();
+    EXPECT_EQ(callbacks_.messageBegin, 1);
+    EXPECT_EQ(callbacks_.headersComplete, 1);
+    EXPECT_EQ(callbacks_.messageComplete, 1);
+    EXPECT_EQ(callbacks_.streamErrors, 0);
+    EXPECT_EQ(callbacks_.sessionErrors, 0);
+    ASSERT_TRUE(callbacks_.msg);
+  };
+
+  parseAndCheckExpectations();
+  auto parsedHeaders = callbacks_.msg->extractHeaders();
+  EXPECT_TRUE(parsedHeaders.exists(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE));
+  EXPECT_TRUE(parsedHeaders.exists(HTTPHeaderCode::HTTP_HEADER_USER_AGENT));
+  EXPECT_TRUE(
+      parsedHeaders.getSingleOrEmpty(HTTPHeaderCode::HTTP_HEADER_USER_AGENT)
+          .empty());
+  EXPECT_EQ(
+      parsedHeaders.getSingleOrEmpty(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE),
+      "application/x-fb");
+  callbacks_.reset();
+
+  // second request
+  HPACKCodec headerCodec(TransportDirection::UPSTREAM);
+  static std::string kContentTypeValue("\tapplication/x-fb");
+  static const std::string v1("GET");
+  static const std::string v2("/");
+  static const std::string v3("http");
+  static const std::string v4("foo.com");
+  std::vector<proxygen::compress::Header> reqHeaders = {
+      Header::makeHeaderForTest(headers::kMethod, v1),
+      Header::makeHeaderForTest(headers::kPath, v2),
+      Header::makeHeaderForTest(headers::kScheme, v3),
+      Header::makeHeaderForTest(headers::kAuthority, v4),
+      Header(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE, kContentTypeValue),
+      Header(HTTPHeaderCode::HTTP_HEADER_USER_AGENT, lwsString)};
+
+  auto encodedHeaders = headerCodec.encode(reqHeaders);
+  id = upstreamCodec_.createStream();
+  writeHeaders(output_,
+               std::move(encodedHeaders),
+               id,
+               folly::none,
+               http2::kNoPadding,
+               true,
+               true);
+
+  parseAndCheckExpectations();
+  parsedHeaders = callbacks_.msg->extractHeaders();
+  EXPECT_TRUE(parsedHeaders.exists(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE));
+  EXPECT_TRUE(parsedHeaders.exists(HTTPHeaderCode::HTTP_HEADER_USER_AGENT));
+  EXPECT_TRUE(
+      parsedHeaders.getSingleOrEmpty(HTTPHeaderCode::HTTP_HEADER_USER_AGENT)
+          .empty());
+  EXPECT_EQ(
+      parsedHeaders.getSingleOrEmpty(HTTPHeaderCode::HTTP_HEADER_CONTENT_TYPE),
+      "application/x-fb");
+}
+
 TEST_F(HTTP2CodecTest, Cookies) {
   HTTPMessage req = getGetRequest("/guacamole");
   req.getHeaders().add("Cookie", "chocolate-chip=1");

@@ -104,10 +104,14 @@ TEST(CodecUtil, validateHeaderName) {
 TEST(CodecUtil, validateHeaderValue) {
   EXPECT_TRUE(CodecUtil::validateHeaderValue(input("abc"), CodecUtil::STRICT));
   string allTheChars;
+  allTheChars.reserve(127 - 32);
   for (uint8_t i = 32; i < 127; i++) {
     allTheChars += folly::to<char>(i);
   }
   EXPECT_TRUE(CodecUtil::validateHeaderValue(input(allTheChars.c_str()),
+                                             CodecUtil::STRICT));
+  // test without leading whitespace
+  EXPECT_TRUE(CodecUtil::validateHeaderValue(input(allTheChars.c_str() + 1),
                                              CodecUtil::STRICT));
 
   // valid lws
@@ -152,6 +156,15 @@ TEST(CodecUtil, validateHeaderValue) {
       CodecUtil::validateHeaderValue(input("foo\r"), CodecUtil::COMPLIANT));
   EXPECT_FALSE(
       CodecUtil::validateHeaderValue(input("foo\r\n"), CodecUtil::COMPLIANT));
+
+  // leading white space stripped (copied EXPECT_TRUE cases from above and
+  // added ws to beginning)
+  EXPECT_TRUE(
+      CodecUtil::validateHeaderValue(input("\tabc\t"), CodecUtil::STRICT));
+  EXPECT_TRUE(CodecUtil::validateHeaderValue(input(" abc\r\n\tdef"),
+                                             CodecUtil::STRICT));
+  EXPECT_TRUE(CodecUtil::validateHeaderValue(input("\tabc\"\\\r\\\n\""),
+                                             CodecUtil::COMPLIANT));
 }
 
 TEST(CodecUtil, hasGzipAndDeflate) {

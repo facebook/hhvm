@@ -184,6 +184,10 @@ let client_check_start () = ()
 
 let client_check _ _ = ()
 
+let client_lsp_shellout
+    ~root:_ ~command_line:_ ~result_count:_ ~result_extra_telemetry:_ =
+  ()
+
 let client_lsp_method_handled
     ~root:_
     ~method_:_

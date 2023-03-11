@@ -7,6 +7,7 @@
  *)
 
 type t =
+  | Current_executable
   | Hg
   | For_use_in_testing_only of string
   | Gstack
@@ -23,6 +24,7 @@ type t =
   | Watchman_diag
 
 let to_string = function
+  | Current_executable -> Sys.executable_name
   | Hg -> "hg"
   | For_use_in_testing_only path -> path
   | Gstack -> "gstack"

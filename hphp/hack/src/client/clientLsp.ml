@@ -144,6 +144,10 @@ module Lost_env = struct
         than one discovered by hh check. *)
     hh_server_status_diagnostic: PublishDiagnostics.params option;
         (** Diagnostic messages warning about server not fully running (not used for standalone). *)
+    current_hh_check:
+      (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t
+      option;
+        (** If a shell-out to "hh check --json" is currently underway *)
     lock_file: string;
   }
 
@@ -341,6 +345,8 @@ type event =
   | Client_message of incoming_metadata * lsp_message
       (** Client_message stores raw json, and the parsed form of it *)
   | Client_ide_notification of ClientIdeMessage.notification
+  | Shell_out_hh_check of
+      (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
   | Tick  (** once per second, on idle *)
 
 let event_to_string (event : event) : string =
@@ -357,10 +363,12 @@ let event_to_string (event : event) : string =
       "Client_ide_notification(%s)"
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
+  | Shell_out_hh_check _ -> "Shell_out_hh_check"
 
 let is_tick (event : event) : bool =
   match event with
   | Tick -> true
+  | Shell_out_hh_check _
   | Server_hello
   | Server_message _
   | Client_message _
@@ -778,7 +786,7 @@ from either client or server, we block until that message is completely
 received. Note: if server is None (meaning we haven't yet established
 connection with server) then we'll just block waiting for client. *)
 let get_next_event
-    (state : state)
+    (state : state ref)
     (client : Jsonrpc.t)
     (ide_service : ClientIdeService.t ref option) : event Lwt.t =
   let can_use_client =
@@ -827,7 +835,7 @@ let get_next_event
     | `Recoverable_exception edata ->
       raise (Client_recoverable_connection_exception edata)
   in
-  match state with
+  match !state with
   | Main_loop { Main_env.conn; _ }
   | In_init { In_init_env.conn; _ } ->
     let%lwt message_source = get_message_source conn client ide_service in
@@ -840,6 +848,11 @@ let get_next_event
       Lwt.return message
     | `From_ide_service message -> Lwt.return message
     | `No_source -> Lwt.return Tick)
+  | Lost_server ({ Lost_env.current_hh_check = Some promise; _ } as lenv)
+    when not (Lwt.is_sleeping promise) ->
+    state := Lost_server { lenv with Lost_env.current_hh_check = None };
+    let%lwt result = promise in
+    Lwt.return (Shell_out_hh_check result)
   | Pre_init
   | Lost_server _
   | Post_shutdown ->
@@ -1107,6 +1120,82 @@ let hack_symbol_definition_to_lsp_identifier_location
       location;
       title = Some (Utils.strip_ns symbol.SymbolDefinition.full_name);
     }
+
+(** This function parses a single '{message:[reason1,...]}' that we got out of "hh check --json"
+into a single LSP (uri, diagnostic). It throws exceptions upon malformed input. *)
+let json_message_to_lsp_diagnostic_exn (message : Hh_json.json option) :
+    Lsp.documentUri * Lsp.PublishDiagnostics.diagnostic =
+  let open Hh_json_helpers in
+  let reasons =
+    Jget.array_exn message "message"
+    |> List.map ~f:(fun reason ->
+           let descr = Jget.string_exn reason "descr" in
+           let path = Jget.string_exn reason "path" in
+           let line = Jget.int_exn reason "line" in
+           let start = Jget.int_exn reason "start" in
+           let end_ = Jget.int_exn reason "end" in
+           let code = Jget.int_exn reason "code" in
+           let location =
+             Lsp.Location.
+               {
+                 uri = path_to_lsp_uri path ~default_path:path;
+                 range =
+                   {
+                     start = { line = line - 1; character = start - 1 };
+                     end_ = { line = line - 1; character = end_ - 1 };
+                   };
+               }
+           in
+           (code, location, descr))
+  in
+  let ((code, Lsp.Location.{ uri; range }, message), related) =
+    (List.hd_exn reasons, List.tl_exn reasons)
+  in
+  let relatedInformation =
+    List.map related ~f:(fun (_code, relatedLocation, relatedMessage) ->
+        Lsp.PublishDiagnostics.{ relatedLocation; relatedMessage })
+  in
+  let diagnostics =
+    Lsp.PublishDiagnostics.
+      {
+        range;
+        severity = Some PublishDiagnostics.Error;
+        code = PublishDiagnostics.IntCode code;
+        source = Some "Hack";
+        message;
+        relatedInformation;
+        relatedLocations = relatedInformation (* legacy FB extension *);
+      }
+  in
+  (uri, diagnostics)
+
+(** This function parses the entire json we got from "hh check --json"
+into (start_time, end_time, {uri->diagnostic list}).
+It throws exceptions upon malformed input. *)
+let json_output_to_lsp_diagnostics_exn (json : Hh_json.json) :
+    float * float * Lsp.PublishDiagnostics.diagnostic list UriMap.t =
+  let open Hh_json_helpers in
+  let json = Some json in
+  let last_recheck = Jget.obj_exn json "last_recheck" in
+  let duration = Jget.float_exn last_recheck "time" in
+  let per_batch = Jget.array_exn last_recheck "per_batch" in
+  let last_batch = List.last_exn per_batch in
+  let start_time = Jget.float_exn last_batch "start_time" in
+  let end_time = start_time +. duration in
+  let errors_list =
+    Jget.array_exn json "errors"
+    |> List.map ~f:json_message_to_lsp_diagnostic_exn
+  in
+  let errors =
+    List.fold errors_list ~init:UriMap.empty ~f:(fun acc (uri, diagnostic) ->
+        UriMap.update
+          uri
+          (function
+            | None -> Some [diagnostic]
+            | Some existing -> Some (diagnostic :: existing))
+          acc)
+  in
+  (start_time, end_time, errors)
 
 let hack_errors_to_lsp_diagnostic
     (filename : string) (errors : Errors.finalized_error list) :
@@ -1471,6 +1560,7 @@ and do_lost_server
           editor_open_files;
           uris_with_unsaved_changes;
           uris_with_standalone_diagnostics = UriMap.empty;
+          current_hh_check = None;
           lock_file;
           hh_server_status_diagnostic = None;
         }
@@ -1488,6 +1578,7 @@ and do_lost_server
            editor_open_files;
            uris_with_unsaved_changes;
            uris_with_standalone_diagnostics = UriMap.empty;
+           current_hh_check = None;
            lock_file;
            hh_server_status_diagnostic = None;
          })
@@ -3567,6 +3658,164 @@ let publish_errors_if_standalone
     in
     new_state
 
+let kickoff_hh_check_if_standalone (state : state) : state =
+  match state with
+  | Lost_server ({ Lost_env.current_hh_check = None; _ } as lenv) ->
+    Hh_logger.log "hh check: starting...";
+    let current_hh_check =
+      Some
+        (Lwt_utils.exec_checked
+           Exec_command.Current_executable
+           [|
+             "check";
+             "--json";
+             "--prefer-stdout";
+             "--autostart-server";
+             "false";
+             "--from";
+             "lsp_check";
+           |])
+    in
+    Lost_server { lenv with Lost_env.current_hh_check }
+  | _ -> state
+
+(** Once a scrape is finished, this function updates diagnostics as necessary.
+Principles: (1) don't touch open files, since they are governed solely by clientIdeDaemon;
+(2) only update an existing diagnostic if the scrape's start_time is newer than it,
+since these will have come recently from clientIdeDaemon, to which we grant primacy. *)
+let handle_shell_out_hh_check
+    ~(state : state ref)
+    (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
+    : result_telemetry option Lwt.t =
+  let log_count = ref 0 in
+  let max_log_count = 10 in
+  (* we won't log more than this, to avoid verbose logs *)
+  let publish uri diagnostics =
+    let params =
+      Lsp.PublishDiagnostics.{ uri; diagnostics; isStatusFB = false }
+    in
+    let notification = PublishDiagnosticsNotification params in
+    notify_jsonrpc ~powered_by:Hh_server notification;
+    if !log_count < max_log_count then begin
+      incr log_count;
+      Hh_logger.log
+        "hh check: published %s [%d errors]"
+        (Lsp.string_of_uri uri)
+        (List.length diagnostics)
+    end else if !log_count = max_log_count then
+      Hh_logger.log "hh check: published... [omitted]"
+    else
+      ();
+    ()
+  in
+  let open Result.Monad_infix in
+  let str_result =
+    match result with
+    | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ }
+    | Error
+        {
+          Lwt_utils.Process_failure.process_status = Unix.WEXITED 2;
+          stdout;
+          start_time;
+          end_time;
+          _;
+        } ->
+      (* "hh check" ends with exit code 2 if it completed and discovered type errors *)
+      Ok (end_time -. start_time, stdout)
+    | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
+      Error (end_time -. start_time, Lwt_utils.Process_failure.to_string e)
+  in
+  let errors_result =
+    str_result >>= fun (hh_duration, str) ->
+    try
+      let json = Hh_json.json_of_string str in
+      Ok (hh_duration, json_output_to_lsp_diagnostics_exn json)
+    with
+    | exn ->
+      Error
+        ( hh_duration,
+          Exn.to_string exn ^ "\n\n" ^ String_utils.truncate 2048 str )
+  in
+  let telemetry =
+    match (errors_result, !state) with
+    | (Error (hh_duration, e), _) ->
+      Hh_logger.log "hh check: failed - %s" e;
+      Some
+        {
+          result_count = 0;
+          result_extra_telemetry =
+            Some
+              (Telemetry.create ()
+              |> Telemetry.string_ ~key:"failure" ~value:e
+              |> Telemetry.float_ ~key:"hh_duration" ~value:hh_duration);
+        }
+    | ( Ok (hh_duration, (start_time, end_time, scraped_diagnostics)),
+        Lost_server
+          ({ Lost_env.uris_with_standalone_diagnostics; editor_open_files; _ }
+          as lenv) ) ->
+      let result_count = UriMap.cardinal scraped_diagnostics in
+      let check_duration = end_time -. start_time in
+      Hh_logger.log
+        "hh check: processing results about %d files..."
+        result_count;
+      (* 1. iterate existing diagnostics: if file is closed and its diagnostics came before start_time, erase or replace it *)
+      let uris_with_standalone_diagnostics =
+        uris_with_standalone_diagnostics
+        |> UriMap.filter_map (fun uri existing_time ->
+               if
+                 UriMap.mem uri editor_open_files
+                 || Float.(existing_time > start_time)
+               then begin
+                 Some existing_time
+               end else if UriMap.mem uri scraped_diagnostics then begin
+                 publish uri (UriMap.find uri scraped_diagnostics);
+                 Some end_time
+               end else begin
+                 publish uri [];
+                 None
+               end)
+      in
+      (* 2. iterate scraped diagnostics: if file is closed and has no diagnostics, add the scraped one *)
+      let uris_with_standalone_diagnostics =
+        UriMap.fold
+          (fun uri scraped_diagnostics uris ->
+            if UriMap.mem uri editor_open_files || UriMap.mem uri uris then
+              uris
+            else begin
+              publish uri scraped_diagnostics;
+              UriMap.add uri end_time uris
+            end)
+          scraped_diagnostics
+          uris_with_standalone_diagnostics
+      in
+      state :=
+        Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics };
+      Some
+        {
+          result_count;
+          result_extra_telemetry =
+            Some
+              (Telemetry.create ()
+              |> Telemetry.float_ ~key:"hh_duration" ~value:hh_duration
+              |> Telemetry.float_ ~key:"check_duration" ~value:check_duration);
+        }
+    | (Ok _, _) ->
+      (* the hh check presumably finished after we received shutdown *)
+      Hh_logger.log
+        "hh check: finished, but in state %s"
+        (state_to_string !state);
+      Some
+        {
+          result_count = 0;
+          result_extra_telemetry =
+            Some
+              (Telemetry.create ()
+              |> Telemetry.string_ ~key:"state" ~value:(state_to_string !state)
+              );
+        }
+  in
+  Lwt.return telemetry
+
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
     {
@@ -3734,21 +3983,15 @@ let log_response_if_necessary
     (event : event)
     (result_telemetry_opt : result_telemetry option)
     (unblocked_time : float) : unit =
+  let (result_count, result_extra_telemetry) =
+    match result_telemetry_opt with
+    | None -> (None, None)
+    | Some { result_count; result_extra_telemetry } ->
+      (Some result_count, result_extra_telemetry)
+  in
   match event with
   | Client_message ({ timestamp; tracking_id }, message) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
-    let t = Unix.gettimeofday () in
-    log_debug
-      "lsp-message [%s] queue time [%0.3f] execution time [%0.3f]"
-      method_
-      (unblocked_time -. timestamp)
-      (t -. unblocked_time);
-    let (result_count, result_extra_telemetry) =
-      match result_telemetry_opt with
-      | None -> (None, None)
-      | Some { result_count; result_extra_telemetry } ->
-        (Some result_count, result_extra_telemetry)
-    in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
       ~method_
@@ -3762,6 +4005,18 @@ let log_response_if_necessary
         (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
+  | Shell_out_hh_check result ->
+    let command_line =
+      match result with
+      | Ok Lwt_utils.Process_success.{ command_line; _ }
+      | Error Lwt_utils.Process_failure.{ command_line; _ } ->
+        command_line
+    in
+    HackEventLogger.client_lsp_shellout
+      ~root:(get_root_opt ())
+      ~command_line
+      ~result_count
+      ~result_extra_telemetry
   | _ -> ()
 
 type error_source =
@@ -4222,10 +4477,12 @@ let handle_client_message
                 editor_open_files = UriMap.empty;
                 uris_with_unsaved_changes = UriSet.empty;
                 uris_with_standalone_diagnostics = UriMap.empty;
+                current_hh_check = None;
                 lock_file = ServerFiles.lock_file (get_root_exn ());
                 hh_server_status_diagnostic = None;
               }
           in
+          let new_state = kickoff_hh_check_if_standalone new_state in
           Lwt.return new_state
         | Serverless_with_rpc
         | Serverless_not ->
@@ -4313,6 +4570,7 @@ let handle_client_message
           ~ref_unblocked_time
           ClientIdeMessage.(Disk_files_changed changes)
       in
+      state := kickoff_hh_check_if_standalone !state;
       Lwt.return_none
     (* Text document completion: "AutoComplete!" *)
     | (_, Some ide_service, RequestMessage (id, CompletionRequest params)) ->
@@ -5141,7 +5399,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
         | None -> Lwt.return_unit
       in
       deferred_action := None;
-      let%lwt event = get_next_event !state client ide_service in
+      let%lwt event = get_next_event state client ide_service in
       if not (is_tick event) then
         log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;
@@ -5185,6 +5443,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           handle_client_ide_notification ~notification
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
+        | Shell_out_hh_check result -> handle_shell_out_hh_check ~state result
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

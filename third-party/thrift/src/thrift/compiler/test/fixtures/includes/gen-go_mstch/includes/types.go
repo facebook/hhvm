@@ -19,7 +19,17 @@ var _ = thrift.ZERO
 
 type IncludedInt64 = int64
 
+func NewIncludedInt64() IncludedInt64 {
+  return 0
+}
+
+
 type TransitiveFoo = transitive.Foo
+
+func NewTransitiveFoo() *TransitiveFoo {
+  return transitive.NewFoo()
+}
+
 
 type Included struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`

@@ -19,9 +19,9 @@
 This template define the default value for a given type.
 
 }}{{#type:typedef?}}{{!
-  }}{{#type:typedef_type}}{{!
-    }}{{> common/zero_value}}{{!
-  }}{{/type:typedef_type}}{{!
+  }}{{#type:typedef}}{{!
+    }}{{typedef:go_qualified_new_func}}(){{!
+  }}{{/type:typedef}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
   }}{{#type:string?}}""{{/type:string?}}{{!
@@ -31,15 +31,15 @@ This template define the default value for a given type.
   }}{{#type:i16?}}0{{/type:i16?}}{{!
   }}{{#type:i32?}}0{{/type:i32?}}{{!
   }}{{#type:i64?}}0{{/type:i64?}}{{!
-  }}{{#type:double?}}0{{/type:double?}}{{!
-  }}{{#type:float?}}0{{/type:float?}}{{!
+  }}{{#type:double?}}0.0{{/type:double?}}{{!
+  }}{{#type:float?}}0.0{{/type:float?}}{{!
   }}{{#type:enum?}}0{{/type:enum?}}{{!
   }}{{#type:list?}}nil{{/type:list?}}{{!
   }}{{#type:set?}}nil{{/type:set?}}{{!
   }}{{#type:map?}}nil{{/type:map?}}{{!
   }}{{#type:struct?}}{{!
     }}{{#type:struct}}{{!
-      }}{{struct:go_qualified_name}}{}{{!
+      }}{{struct:go_qualified_new_func}}(){{!
     }}{{/type:struct}}{{!
   }}{{/type:struct?}}{{!
 }}{{/type:typedef?}}

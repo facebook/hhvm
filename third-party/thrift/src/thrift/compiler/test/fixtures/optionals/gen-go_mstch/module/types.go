@@ -17,6 +17,11 @@ var _ = thrift.ZERO
 
 type PersonID = int64
 
+func NewPersonID() PersonID {
+  return 0
+}
+
+
 type Animal int32
 
 const (

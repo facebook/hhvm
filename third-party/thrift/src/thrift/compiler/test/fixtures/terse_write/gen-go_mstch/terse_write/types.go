@@ -23,6 +23,11 @@ var _ = thrift.ZERO
 
 type MyInteger = int32
 
+func NewMyInteger() MyInteger {
+  return 0
+}
+
+
 type MyEnum int32
 
 const (

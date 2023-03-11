@@ -17,6 +17,11 @@ var _ = thrift.ZERO
 
 type ContainerTypedef = map[int16]string
 
+func NewContainerTypedef() ContainerTypedef {
+  return nil
+}
+
+
 type ComplexUnion struct {
     IntValue *int64 `thrift:"intValue,1" json:"intValue" db:"intValue"`
     StringValue *string `thrift:"stringValue,5" json:"stringValue" db:"stringValue"`

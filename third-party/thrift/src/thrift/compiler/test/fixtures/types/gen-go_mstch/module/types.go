@@ -23,9 +23,24 @@ var _ = thrift.ZERO
 
 type TBinary = []byte
 
+func NewTBinary() TBinary {
+  return []byte("")
+}
+
+
 type IntTypedef = int32
 
+func NewIntTypedef() IntTypedef {
+  return 0
+}
+
+
 type UintTypedef = IntTypedef
+
+func NewUintTypedef() UintTypedef {
+  return NewIntTypedef()
+}
+
 
 type HasBitwiseOps int32
 

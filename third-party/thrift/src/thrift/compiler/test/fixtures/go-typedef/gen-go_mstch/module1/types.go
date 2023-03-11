@@ -19,17 +19,52 @@ var _ = thrift.ZERO
 
 type Plate = string
 
+func NewPlate() Plate {
+  return ""
+}
+
+
 type State string
+
+func NewState() State {
+  return ""
+}
+
 
 type Year = int32
 
+func NewYear() Year {
+  return 0
+}
+
+
 type Drivers = []string
+
+func NewDrivers() Drivers {
+  return nil
+}
+
 
 type Accessory = module0.Accessory
 
+func NewAccessory() *Accessory {
+  return module0.NewAccessory()
+}
+
+
 type CarPartName = module0.PartName
 
+func NewCarPartName() *CarPartName {
+  return module0.NewPartName()
+}
+
+
 type Car = Automobile
+
+func NewCar() *Car {
+  return NewAutomobile()
+}
+
 
 type Automobile struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`

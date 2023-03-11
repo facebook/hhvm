@@ -21,4 +21,14 @@ var _ = thrift.ZERO
 
 type IncludesIncluded = includes.Included
 
+func NewIncludesIncluded() *IncludesIncluded {
+  return includes.NewIncluded()
+}
+
+
 type IncludesTransitiveFoo = includes.TransitiveFoo
+
+func NewIncludesTransitiveFoo() *IncludesTransitiveFoo {
+  return includes.NewTransitiveFoo()
+}
+

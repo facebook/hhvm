@@ -17,11 +17,31 @@ var _ = thrift.ZERO
 
 type MyCompany = Company
 
+func NewMyCompany() MyCompany {
+  return 0
+}
+
+
 type MyStringIdentifier = string
+
+func NewMyStringIdentifier() MyStringIdentifier {
+  return ""
+}
+
 
 type MyIntIdentifier = int32
 
+func NewMyIntIdentifier() MyIntIdentifier {
+  return 0
+}
+
+
 type MyMapIdentifier = map[string]string
+
+func NewMyMapIdentifier() MyMapIdentifier {
+  return nil
+}
+
 
 type EmptyEnum int32
 

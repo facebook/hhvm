@@ -19,6 +19,11 @@ var _ = thrift.ZERO
 
 type MyId = int16
 
+func NewMyId() MyId {
+  return 0
+}
+
+
 type MyEnum int32
 
 const (

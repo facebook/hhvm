@@ -21,9 +21,24 @@ var _ = thrift.ZERO
 
 type ByteString = []byte
 
+func NewByteString() ByteString {
+  return []byte("")
+}
+
+
 type ByteBuffer = []byte
 
+func NewByteBuffer() ByteBuffer {
+  return []byte("")
+}
+
+
 type Uri = string
+
+func NewUri() Uri {
+  return ""
+}
+
 
 type Void int32
 

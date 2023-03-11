@@ -22,3 +22,9 @@
 type {{typedef:go_name}} {{!
 }}{{^typedef:go_newtype?}}= {{/typedef:go_newtype?}}{{!
 }}{{#typedef:type}}{{> common/type}}{{/typedef:type}}
+
+{{#typedef:type}}
+func {{typedef:go_qualified_new_func}}() {{#type:struct?}}*{{/type:struct?}}{{typedef:go_name}} {
+  return {{> common/zero_value}}
+}
+{{/typedef:type}}

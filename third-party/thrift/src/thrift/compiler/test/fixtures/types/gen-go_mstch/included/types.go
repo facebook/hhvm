@@ -17,4 +17,14 @@ var _ = thrift.ZERO
 
 type SomeMap = map[int32]string
 
+func NewSomeMap() SomeMap {
+  return nil
+}
+
+
 type SomeListOfTypeMap = []SomeMap
+
+func NewSomeListOfTypeMap() SomeListOfTypeMap {
+  return nil
+}
+

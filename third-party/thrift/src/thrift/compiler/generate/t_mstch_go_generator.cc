@@ -571,6 +571,8 @@ class mstch_go_typedef : public mstch_typedef {
             {"typedef:go_name", &mstch_go_typedef::go_name},
             {"typedef:go_newtype?", &mstch_go_typedef::go_newtype},
             {"typedef:go_qualified_name", &mstch_go_typedef::go_qualified_name},
+            {"typedef:go_qualified_new_func",
+             &mstch_go_typedef::go_qualified_new_func},
         });
   }
   mstch::node go_name() {
@@ -582,17 +584,25 @@ class mstch_go_typedef : public mstch_typedef {
   mstch::node go_newtype() { return typedef_->has_annotation("go.newtype"); }
   mstch::node go_qualified_name() {
     auto prefix = go_package_alias_prefix(typedef_->program(), data_);
-    std::string name;
-    if (typedef_->has_annotation("go.name")) {
-      name = typedef_->get_annotation("go.name");
-    } else {
-      name = go::munge_ident(typedef_->name());
-    }
+    auto name = go_name_();
     return prefix + name;
+  }
+  mstch::node go_qualified_new_func() {
+    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto name = go_name_();
+    return prefix + "New" + name;
   }
 
  private:
   go_codegen_data& data_;
+
+  std::string go_name_() {
+    if (typedef_->has_annotation("go.name")) {
+      return typedef_->get_annotation("go.name");
+    } else {
+      return go::munge_ident(typedef_->name());
+    }
+  }
 };
 
 void t_mstch_go_generator::generate_program() {

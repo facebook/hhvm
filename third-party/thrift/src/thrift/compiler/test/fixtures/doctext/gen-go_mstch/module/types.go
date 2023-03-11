@@ -17,7 +17,17 @@ var _ = thrift.ZERO
 
 type Lanyard = string
 
+func NewLanyard() Lanyard {
+  return ""
+}
+
+
 type Number = int32
+
+func NewNumber() Number {
+  return 0
+}
+
 
 type B int32
 

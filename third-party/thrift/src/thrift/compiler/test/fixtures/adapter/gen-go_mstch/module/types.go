@@ -29,57 +29,192 @@ var _ = thrift.ZERO
 
 type SetWithAdapter = []string
 
+func NewSetWithAdapter() SetWithAdapter {
+  return nil
+}
+
+
 type StringWithAdapter = string
+
+func NewStringWithAdapter() StringWithAdapter {
+  return ""
+}
+
 
 type ListWithElemAdapter = []StringWithAdapter
 
+func NewListWithElemAdapter() ListWithElemAdapter {
+  return nil
+}
+
+
 type ListWithElemAdapterWithAdapter = ListWithElemAdapter
+
+func NewListWithElemAdapterWithAdapter() ListWithElemAdapterWithAdapter {
+  return NewListWithElemAdapter()
+}
+
 
 type MyI64 = int64
 
+func NewMyI64() MyI64 {
+  return 0
+}
+
+
 type DoubleTypedefI64 = MyI64
+
+func NewDoubleTypedefI64() DoubleTypedefI64 {
+  return NewMyI64()
+}
+
 
 type MyI32 = int32
 
+func NewMyI32() MyI32 {
+  return 0
+}
+
+
 type FooWithAdapter = Foo
+
+func NewFooWithAdapter() *FooWithAdapter {
+  return NewFoo()
+}
+
 
 type StructWithAdapter = Bar
 
+func NewStructWithAdapter() *StructWithAdapter {
+  return NewBar()
+}
+
+
 type UnionWithAdapter = Baz
+
+func NewUnionWithAdapter() *UnionWithAdapter {
+  return NewBaz()
+}
+
 
 type AdaptedA = A
 
+func NewAdaptedA() *AdaptedA {
+  return NewA()
+}
+
+
 type DurationMs = int64
+
+func NewDurationMs() DurationMs {
+  return 0
+}
+
 
 type AdaptedBool = bool
 
+func NewAdaptedBool() AdaptedBool {
+  return false
+}
+
+
 type AdaptedByte = byte
+
+func NewAdaptedByte() AdaptedByte {
+  return 0
+}
+
 
 type AdaptedShort = int16
 
+func NewAdaptedShort() AdaptedShort {
+  return 0
+}
+
+
 type AdaptedInteger = int32
+
+func NewAdaptedInteger() AdaptedInteger {
+  return 0
+}
+
 
 type AdaptedLong = int64
 
+func NewAdaptedLong() AdaptedLong {
+  return 0
+}
+
+
 type AdaptedDouble = float64
+
+func NewAdaptedDouble() AdaptedDouble {
+  return 0.0
+}
+
 
 type AdaptedString = string
 
+func NewAdaptedString() AdaptedString {
+  return ""
+}
+
+
 type DoubleTypedefBool = AdaptedBool
+
+func NewDoubleTypedefBool() DoubleTypedefBool {
+  return NewAdaptedBool()
+}
+
 
 type CustomProtocolType = []byte
 
+func NewCustomProtocolType() CustomProtocolType {
+  return []byte("")
+}
+
+
 type IndirectionString = string
+
+func NewIndirectionString() IndirectionString {
+  return ""
+}
+
 
 type AdaptedEnum = ThriftAdaptedEnum
 
+func NewAdaptedEnum() AdaptedEnum {
+  return 0
+}
+
+
 type AdaptedTypedef = AdaptedStruct
+
+func NewAdaptedTypedef() *AdaptedTypedef {
+  return NewAdaptedStruct()
+}
+
 
 type TypedefOfDirect = DirectlyAdaptedStruct
 
+func NewTypedefOfDirect() *TypedefOfDirect {
+  return NewDirectlyAdaptedStruct()
+}
+
+
 type AdaptedCircularAdaptee = CircularAdaptee
 
+func NewAdaptedCircularAdaptee() *AdaptedCircularAdaptee {
+  return NewCircularAdaptee()
+}
+
+
 type CountingInt = int64
+
+func NewCountingInt() CountingInt {
+  return 0
+}
+
 
 type Color int32
 

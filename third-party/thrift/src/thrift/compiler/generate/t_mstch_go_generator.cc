@@ -247,9 +247,9 @@ class mstch_go_const : public mstch_const {
   // const definition (e.g for structs, maps, or lists which cannot be const in
   // go)
   mstch::node go_is_var() {
-    auto type = const_->get_type()->get_true_type();
-    return type->is_list() || type->is_map() || type->is_set() ||
-        type->is_struct();
+    auto real_type = const_->get_type()->get_true_type();
+    return real_type->is_list() || real_type->is_map() || real_type->is_set() ||
+        go::is_type_go_struct(real_type);
   }
   mstch::node go_qualified_name() {
     auto prefix = go_package_alias_prefix(const_->program(), data_);
@@ -330,7 +330,8 @@ class mstch_go_field : public mstch_field {
     //  * Optional fields must be pointers
     //     * Except (!!!) when the underlying type itself is nilable (map/slice)
     auto real_type = field_->type()->get_true_type();
-    return (real_type->is_struct() || is_inside_union_() || is_optional_()) &&
+    return (go::is_type_go_struct(real_type) || is_inside_union_() ||
+            is_optional_()) &&
         !go::is_type_nilable(real_type);
   }
   mstch::node is_nilable() {
@@ -340,8 +341,8 @@ class mstch_go_field : public mstch_field {
     //  * Optional fields can be set to 'nil' (see 'is_pointer' above)
     //  * Fields represented by nilable Go types can be set to 'nil' (map/slice)
     auto real_type = field_->type()->get_true_type();
-    return real_type->is_struct() || is_inside_union_() || is_optional_() ||
-        go::is_type_nilable(real_type);
+    return go::is_type_go_struct(real_type) || is_inside_union_() ||
+        is_optional_() || go::is_type_nilable(real_type);
   }
   mstch::node should_dereference() {
     // Whether this field should be dereferenced when encoding/decoding.
@@ -349,7 +350,7 @@ class mstch_go_field : public mstch_field {
     // processed by the encoder/decoder logic.
     auto real_type = field_->type()->get_true_type();
     return (is_inside_union_() || is_optional_()) &&
-        !go::is_type_nilable(real_type) && !real_type->is_struct();
+        !go::is_type_nilable(real_type) && !go::is_type_go_struct(real_type);
   }
   mstch::node key_str() {
     // Legacy schemas may have negative tags - replace minus with an underscore.

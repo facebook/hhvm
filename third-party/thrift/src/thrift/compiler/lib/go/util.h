@@ -48,6 +48,7 @@ bool is_func_go_supported(const t_function* func);
 bool is_go_reserved_word(const std::string& value);
 
 bool is_type_nilable(const t_type* type);
+bool is_type_go_struct(const t_type* type);
 
 std::string get_go_func_name(const t_function* func);
 

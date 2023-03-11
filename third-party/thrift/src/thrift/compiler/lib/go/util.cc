@@ -290,6 +290,12 @@ bool is_type_nilable(const t_type* type) {
       type->is_binary();
 }
 
+bool is_type_go_struct(const t_type* type) {
+  // Whether the given Thrift type is represented by a Go struct in generated
+  // Go code.
+  return type->is_struct() || type->is_union() || type->is_exception();
+}
+
 std::string get_go_func_name(const t_function* func) {
   if (func->has_annotation("go.name")) {
     return func->get_annotation("go.name");

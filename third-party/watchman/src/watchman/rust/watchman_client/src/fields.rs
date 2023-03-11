@@ -118,7 +118,7 @@ define_field!(
     /// change in this file or its metadata.
     ObservedClockField,
     ClockSpec,
-    "cclock"
+    "oclock"
 );
 
 define_field!(

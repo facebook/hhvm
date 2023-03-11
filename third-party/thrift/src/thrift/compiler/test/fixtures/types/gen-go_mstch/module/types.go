@@ -27,6 +27,25 @@ func NewTBinary() TBinary {
   return []byte("")
 }
 
+func WriteTBinary(item TBinary, p thrift.Protocol) error {
+  if err := p.WriteBinary(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadTBinary(p thrift.Protocol) (TBinary, error) {
+  var decodeResult TBinary
+  decodeErr := func() error {
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type IntTypedef = int32
 
@@ -34,6 +53,25 @@ func NewIntTypedef() IntTypedef {
   return 0
 }
 
+func WriteIntTypedef(item IntTypedef, p thrift.Protocol) error {
+  if err := p.WriteI32(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadIntTypedef(p thrift.Protocol) (IntTypedef, error) {
+  var decodeResult IntTypedef
+  decodeErr := func() error {
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type UintTypedef = IntTypedef
 
@@ -41,6 +79,26 @@ func NewUintTypedef() UintTypedef {
   return NewIntTypedef()
 }
 
+func WriteUintTypedef(item UintTypedef, p thrift.Protocol) error {
+  err := WriteIntTypedef(item, p)
+if err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadUintTypedef(p thrift.Protocol) (UintTypedef, error) {
+  var decodeResult UintTypedef
+  decodeErr := func() error {
+    result, err := ReadIntTypedef(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type HasBitwiseOps int32
 
@@ -783,26 +841,9 @@ func (x *ContainerStruct) writeField8(p thrift.Protocol) error {  // FieldH
     }
 
     item := x.GetFieldH()
-    if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI32(item); err != nil {
+    err := included.WriteSomeMap(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -1018,38 +1059,10 @@ result := mapResult
 }
 
 func (x *ContainerStruct) readField8(p thrift.Protocol) error {  // FieldH
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int32]string, size)
-for i := 0; i < size; i++ {
-    var key int32
-    {
-        result, err := p.ReadI32()
+    result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetFieldH(result)
     return nil
@@ -3707,7 +3720,8 @@ func (x *AnnotatedTypes) writeField1(p thrift.Protocol) error {  // BinaryField
     }
 
     item := x.GetBinaryField()
-    if err := p.WriteBinary(item); err != nil {
+    err := WriteTBinary(item, p)
+if err != nil {
     return err
 }
 
@@ -3727,37 +3741,9 @@ func (x *AnnotatedTypes) writeField2(p thrift.Protocol) error {  // ListField
     }
 
     item := x.GetListField()
-    if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI32(item); err != nil {
+    err := included.WriteSomeListOfTypeMap(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -3767,7 +3753,7 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *AnnotatedTypes) readField1(p thrift.Protocol) error {  // BinaryField
-    result, err := p.ReadBinary()
+    result, err := ReadTBinary(p)
 if err != nil {
     return err
 }
@@ -3777,56 +3763,10 @@ if err != nil {
 }
 
 func (x *AnnotatedTypes) readField2(p thrift.Protocol) error {  // ListField
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]included.SomeMap, 0, size)
-for i := 0; i < size; i++ {
-    var elem included.SomeMap
-    {
-        _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int32]string, size)
-for i := 0; i < size; i++ {
-    var key int32
-    {
-        result, err := p.ReadI32()
+    result, err := included.ReadSomeListOfTypeMap(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
 
     x.SetListField(result)
     return nil
@@ -6823,7 +6763,8 @@ func (x *TypedefStruct) writeField2(p thrift.Protocol) error {  // IntTypedefFie
     }
 
     item := x.GetIntTypedefField()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteIntTypedef(item, p)
+if err != nil {
     return err
 }
 
@@ -6839,7 +6780,8 @@ func (x *TypedefStruct) writeField3(p thrift.Protocol) error {  // UintTypedefFi
     }
 
     item := x.GetUintTypedefField()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteUintTypedef(item, p)
+if err != nil {
     return err
 }
 
@@ -6860,7 +6802,7 @@ if err != nil {
 }
 
 func (x *TypedefStruct) readField2(p thrift.Protocol) error {  // IntTypedefField
-    result, err := p.ReadI32()
+    result, err := ReadIntTypedef(p)
 if err != nil {
     return err
 }
@@ -6870,7 +6812,7 @@ if err != nil {
 }
 
 func (x *TypedefStruct) readField3(p thrift.Protocol) error {  // UintTypedefField
-    result, err := p.ReadI32()
+    result, err := ReadUintTypedef(p)
 if err != nil {
     return err
 }

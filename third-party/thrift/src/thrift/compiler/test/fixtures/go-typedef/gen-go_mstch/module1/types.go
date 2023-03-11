@@ -23,6 +23,25 @@ func NewPlate() Plate {
   return ""
 }
 
+func WritePlate(item Plate, p thrift.Protocol) error {
+  if err := p.WriteString(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadPlate(p thrift.Protocol) (Plate, error) {
+  var decodeResult Plate
+  decodeErr := func() error {
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type State string
 
@@ -30,6 +49,25 @@ func NewState() State {
   return ""
 }
 
+func WriteState(item State, p thrift.Protocol) error {
+  if err := p.WriteString(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadState(p thrift.Protocol) (State, error) {
+  var decodeResult State
+  decodeErr := func() error {
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Year = int32
 
@@ -37,6 +75,25 @@ func NewYear() Year {
   return 0
 }
 
+func WriteYear(item Year, p thrift.Protocol) error {
+  if err := p.WriteI32(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadYear(p thrift.Protocol) (Year, error) {
+  var decodeResult Year
+  decodeErr := func() error {
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Drivers = []string
 
@@ -44,6 +101,54 @@ func NewDrivers() Drivers {
   return nil
 }
 
+func WriteDrivers(item Drivers, p thrift.Protocol) error {
+  if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+  return nil
+}
+
+func ReadDrivers(p thrift.Protocol) (Drivers, error) {
+  var decodeResult Drivers
+  decodeErr := func() error {
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]string, 0, size)
+for i := 0; i < size; i++ {
+    var elem string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Accessory = module0.Accessory
 
@@ -51,6 +156,26 @@ func NewAccessory() *Accessory {
   return module0.NewAccessory()
 }
 
+func WriteAccessory(item *Accessory, p thrift.Protocol) error {
+  if err := item.Write(p); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadAccessory(p thrift.Protocol) (Accessory, error) {
+  var decodeResult Accessory
+  decodeErr := func() error {
+    result := *module0.NewAccessory()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type CarPartName = module0.PartName
 
@@ -58,6 +183,26 @@ func NewCarPartName() *CarPartName {
   return module0.NewPartName()
 }
 
+func WriteCarPartName(item *CarPartName, p thrift.Protocol) error {
+  if err := item.Write(p); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadCarPartName(p thrift.Protocol) (CarPartName, error) {
+  var decodeResult CarPartName
+  decodeErr := func() error {
+    result := *module0.NewPartName()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Car = Automobile
 
@@ -65,6 +210,26 @@ func NewCar() *Car {
   return NewAutomobile()
 }
 
+func WriteCar(item *Car, p thrift.Protocol) error {
+  if err := item.Write(p); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadCar(p thrift.Protocol) (Car, error) {
+  var decodeResult Car
+  decodeErr := func() error {
+    result := *NewAutomobile()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Automobile struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
@@ -180,7 +345,8 @@ func (x *Automobile) writeField1(p thrift.Protocol) error {  // Plate
     }
 
     item := x.GetPlate()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -200,7 +366,8 @@ func (x *Automobile) writeField2(p thrift.Protocol) error {  // PreviousPlate
     }
 
     item := *x.GetPreviousPlate()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -220,7 +387,8 @@ func (x *Automobile) writeField3(p thrift.Protocol) error {  // FirstPlate
     }
 
     item := *x.GetFirstPlate()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -236,7 +404,8 @@ func (x *Automobile) writeField4(p thrift.Protocol) error {  // Year
     }
 
     item := x.GetYear()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteYear(item, p)
+if err != nil {
     return err
 }
 
@@ -256,19 +425,9 @@ func (x *Automobile) writeField5(p thrift.Protocol) error {  // Drivers
     }
 
     item := x.GetDrivers()
-    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing list begin: ", err)
-}
-for _, v := range item {
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
+    err := WriteDrivers(item, p)
+if err != nil {
     return err
-}
-    }
-}
-if err := p.WriteListEnd(); err != nil {
-    return thrift.PrependError("error writing list end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -293,7 +452,8 @@ func (x *Automobile) writeField6(p thrift.Protocol) error {  // Accessories
 for _, v := range item {
     {
         item := v
-        if err := item.Write(p); err != nil {
+        err := WriteAccessory(item, p)
+if err != nil {
     return err
 }
     }
@@ -331,7 +491,8 @@ for k, v := range item {
 
     {
         item := v
-        if err := item.Write(p); err != nil {
+        err := WriteCarPartName(item, p)
+if err != nil {
     return err
 }
     }
@@ -347,7 +508,7 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *Automobile) readField1(p thrift.Protocol) error {  // Plate
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }
@@ -357,7 +518,7 @@ if err != nil {
 }
 
 func (x *Automobile) readField2(p thrift.Protocol) error {  // PreviousPlate
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }
@@ -367,7 +528,7 @@ if err != nil {
 }
 
 func (x *Automobile) readField3(p thrift.Protocol) error {  // FirstPlate
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }
@@ -377,7 +538,7 @@ if err != nil {
 }
 
 func (x *Automobile) readField4(p thrift.Protocol) error {  // Year
-    result, err := p.ReadI32()
+    result, err := ReadYear(p)
 if err != nil {
     return err
 }
@@ -387,28 +548,10 @@ if err != nil {
 }
 
 func (x *Automobile) readField5(p thrift.Protocol) error {  // Drivers
-    _ /* elemType */, size, err := p.ReadListBegin()
-if err != nil {
-    return thrift.PrependError("error reading list begin: ", err)
-}
-
-listResult := make([]string, 0, size)
-for i := 0; i < size; i++ {
-    var elem string
-    {
-        result, err := p.ReadString()
+    result, err := ReadDrivers(p)
 if err != nil {
     return err
 }
-        elem = result
-    }
-    listResult = append(listResult, elem)
-}
-
-if err := p.ReadListEnd(); err != nil {
-    return thrift.PrependError("error reading list end: ", err)
-}
-result := listResult
 
     x.SetDrivers(result)
     return nil
@@ -424,8 +567,7 @@ listResult := make([]*Accessory, 0, size)
 for i := 0; i < size; i++ {
     var elem Accessory
     {
-        result := *module0.NewAccessory()
-err := result.Read(p)
+        result, err := ReadAccessory(p)
 if err != nil {
     return err
 }
@@ -462,8 +604,7 @@ if err != nil {
 
     var value *CarPartName
     {
-        result := *module0.NewPartName()
-err := result.Read(p)
+        result, err := ReadCarPartName(p)
 if err != nil {
     return err
 }
@@ -1075,7 +1216,8 @@ func (x *Pair) writeField2(p thrift.Protocol) error {  // Car
     }
 
     item := x.GetCar()
-    if err := item.Write(p); err != nil {
+    err := WriteCar(item, p)
+if err != nil {
     return err
 }
 
@@ -1097,8 +1239,7 @@ if err != nil {
 }
 
 func (x *Pair) readField2(p thrift.Protocol) error {  // Car
-    result := *NewAutomobile()
-err := result.Read(p)
+    result, err := ReadCar(p)
 if err != nil {
     return err
 }
@@ -1286,7 +1427,8 @@ func (x *Collection) writeField2(p thrift.Protocol) error {  // Cars
 for _, v := range item {
     {
         item := v
-        if err := item.Write(p); err != nil {
+        err := WriteCar(item, p)
+if err != nil {
     return err
 }
     }
@@ -1340,8 +1482,7 @@ listResult := make([]*Car, 0, size)
 for i := 0; i < size; i++ {
     var elem Car
     {
-        result := *NewAutomobile()
-err := result.Read(p)
+        result, err := ReadCar(p)
 if err != nil {
     return err
 }

@@ -28,3 +28,22 @@ func {{typedef:go_qualified_new_func}}() {{#type:struct?}}*{{/type:struct?}}{{ty
   return {{> common/zero_value}}
 }
 {{/typedef:type}}
+
+{{#typedef:type}}
+func {{typedef:go_qualified_write_func}}(item {{#type:struct?}}*{{/type:struct?}}{{typedef:go_name}}, p thrift.Protocol) error {
+  {{> codec/encode}}
+  return nil
+}
+{{/typedef:type}}
+
+func {{typedef:go_qualified_read_func}}(p thrift.Protocol) ({{typedef:go_name}}, error) {
+  var decodeResult {{typedef:go_name}}
+  decodeErr := func() error {
+    {{#typedef:type}}
+    {{> codec/decode}}
+    {{/typedef:type}}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}

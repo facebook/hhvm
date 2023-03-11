@@ -182,26 +182,9 @@ func (x *reqSomeServiceBounceMap) writeField1(p thrift.Protocol) error {  // M
     }
 
     item := x.GetM()
-    if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI32(item); err != nil {
+    err := included.WriteSomeMap(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -211,38 +194,10 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *reqSomeServiceBounceMap) readField1(p thrift.Protocol) error {  // M
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int32]string, size)
-for i := 0; i < size; i++ {
-    var key int32
-    {
-        result, err := p.ReadI32()
+    result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetM(result)
     return nil
@@ -362,26 +317,9 @@ func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Va
     }
 
     item := x.GetValue()
-    if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI32(item); err != nil {
+    err := included.WriteSomeMap(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -391,38 +329,10 @@ if err := p.WriteMapEnd(); err != nil {
 }
 
 func (x *respSomeServiceBounceMap) readField0(p thrift.Protocol) error {  // Value
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int32]string, size)
-for i := 0; i < size; i++ {
-    var key int32
-    {
-        result, err := p.ReadI32()
+    result, err := included.ReadSomeMap(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetValue(result)
     return nil
@@ -711,7 +621,8 @@ func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  
 for k, v := range item {
     {
         item := k
-        if err := p.WriteBinary(item); err != nil {
+        err := WriteTBinary(item, p)
+if err != nil {
     return err
 }
     }
@@ -743,7 +654,7 @@ mapResult := make(map[TBinary]int64, size)
 for i := 0; i < size; i++ {
     var key TBinary
     {
-        result, err := p.ReadBinary()
+        result, err := ReadTBinary(p)
 if err != nil {
     return err
 }

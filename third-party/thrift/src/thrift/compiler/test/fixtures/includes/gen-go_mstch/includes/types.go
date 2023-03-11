@@ -23,6 +23,25 @@ func NewIncludedInt64() IncludedInt64 {
   return 0
 }
 
+func WriteIncludedInt64(item IncludedInt64, p thrift.Protocol) error {
+  if err := p.WriteI64(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadIncludedInt64(p thrift.Protocol) (IncludedInt64, error) {
+  var decodeResult IncludedInt64
+  decodeErr := func() error {
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type TransitiveFoo = transitive.Foo
 
@@ -30,6 +49,26 @@ func NewTransitiveFoo() *TransitiveFoo {
   return transitive.NewFoo()
 }
 
+func WriteTransitiveFoo(item *TransitiveFoo, p thrift.Protocol) error {
+  if err := item.Write(p); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadTransitiveFoo(p thrift.Protocol) (TransitiveFoo, error) {
+  var decodeResult TransitiveFoo
+  decodeErr := func() error {
+    result := *transitive.NewFoo()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Included struct {
     MyIntField int64 `thrift:"MyIntField,1" json:"MyIntField" db:"MyIntField"`

@@ -20,9 +20,16 @@
 
 }}
 {{#type:typedef?}}
+{{#type:typedef}}
+{{#typedef:placeholder?}}
 {{#type:typedef_type}}
 {{> codec/decode}}
 {{/type:typedef_type}}
+{{/typedef:placeholder?}}
+{{^typedef:placeholder?}}
+{{> codec/decode_typedef}}
+{{/typedef:placeholder?}}
+{{/type:typedef}}
 {{/type:typedef?}}
 {{^type:typedef?}}
 {{#type:struct?}}

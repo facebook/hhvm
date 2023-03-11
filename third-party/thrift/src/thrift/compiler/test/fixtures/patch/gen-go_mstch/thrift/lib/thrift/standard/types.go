@@ -25,6 +25,25 @@ func NewByteString() ByteString {
   return []byte("")
 }
 
+func WriteByteString(item ByteString, p thrift.Protocol) error {
+  if err := p.WriteBinary(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadByteString(p thrift.Protocol) (ByteString, error) {
+  var decodeResult ByteString
+  decodeErr := func() error {
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type ByteBuffer = []byte
 
@@ -32,6 +51,25 @@ func NewByteBuffer() ByteBuffer {
   return []byte("")
 }
 
+func WriteByteBuffer(item ByteBuffer, p thrift.Protocol) error {
+  if err := p.WriteBinary(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadByteBuffer(p thrift.Protocol) (ByteBuffer, error) {
+  var decodeResult ByteBuffer
+  decodeErr := func() error {
+    result, err := p.ReadBinary()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Uri = string
 
@@ -39,6 +77,25 @@ func NewUri() Uri {
   return ""
 }
 
+func WriteUri(item Uri, p thrift.Protocol) error {
+  if err := p.WriteString(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadUri(p thrift.Protocol) (Uri, error) {
+  var decodeResult Uri
+  decodeErr := func() error {
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Void int32
 
@@ -210,7 +267,8 @@ func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
     }
 
     item := *x.GetUri()
-    if err := p.WriteString(item); err != nil {
+    err := WriteUri(item, p)
+if err != nil {
     return err
 }
 
@@ -230,7 +288,8 @@ func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_
     }
 
     item := x.GetTypeHashPrefixSha2_256()
-    if err := p.WriteBinary(item); err != nil {
+    err := WriteByteString(item, p)
+if err != nil {
     return err
 }
 
@@ -241,7 +300,7 @@ func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_
 }
 
 func (x *TypeUri) readField1(p thrift.Protocol) error {  // Uri
-    result, err := p.ReadString()
+    result, err := ReadUri(p)
 if err != nil {
     return err
 }
@@ -251,7 +310,7 @@ if err != nil {
 }
 
 func (x *TypeUri) readField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_256
-    result, err := p.ReadBinary()
+    result, err := ReadByteString(p)
 if err != nil {
     return err
 }

@@ -195,7 +195,8 @@ func (x *reqServiceFunc) writeField1(p thrift.Protocol) error {  // Arg1
     }
 
     item := x.GetArg1()
-    if err := p.WriteString(item); err != nil {
+    err := WriteStringWithAdapter(item, p)
+if err != nil {
     return err
 }
 
@@ -242,7 +243,7 @@ func (x *reqServiceFunc) writeField3(p thrift.Protocol) error {  // Arg3
 }
 
 func (x *reqServiceFunc) readField1(p thrift.Protocol) error {  // Arg1
-    result, err := p.ReadString()
+    result, err := ReadStringWithAdapter(p)
 if err != nil {
     return err
 }
@@ -405,7 +406,8 @@ func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Value
     }
 
     item := x.GetValue()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteMyI32(item, p)
+if err != nil {
     return err
 }
 
@@ -416,7 +418,7 @@ func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Value
 }
 
 func (x *respServiceFunc) readField0(p thrift.Protocol) error {  // Value
-    result, err := p.ReadI32()
+    result, err := ReadMyI32(p)
 if err != nil {
     return err
 }

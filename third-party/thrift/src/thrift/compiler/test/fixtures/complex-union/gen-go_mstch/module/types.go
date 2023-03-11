@@ -21,6 +21,71 @@ func NewContainerTypedef() ContainerTypedef {
   return nil
 }
 
+func WriteContainerTypedef(item ContainerTypedef, p thrift.Protocol) error {
+  if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing map begin: ", err)
+}
+for k, v := range item {
+    {
+        item := k
+        if err := p.WriteI16(item); err != nil {
+    return err
+}
+    }
+
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteMapEnd(); err != nil {
+    return thrift.PrependError("error writing map end: ", err)
+}
+  return nil
+}
+
+func ReadContainerTypedef(p thrift.Protocol) (ContainerTypedef, error) {
+  var decodeResult ContainerTypedef
+  decodeErr := func() error {
+    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+if err != nil {
+    return thrift.PrependError("error reading map begin: ", err)
+}
+
+mapResult := make(map[int16]string, size)
+for i := 0; i < size; i++ {
+    var key int16
+    {
+        result, err := p.ReadI16()
+if err != nil {
+    return err
+}
+        key = result
+    }
+
+    var value string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        value = result
+    }
+
+    mapResult[key] = value
+}
+
+if err := p.ReadMapEnd(); err != nil {
+    return thrift.PrependError("error reading map end: ", err)
+}
+result := mapResult
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type ComplexUnion struct {
     IntValue *int64 `thrift:"intValue,1" json:"intValue" db:"intValue"`
@@ -236,26 +301,9 @@ func (x *ComplexUnion) writeField9(p thrift.Protocol) error {  // TypedefValue
     }
 
     item := x.GetTypedefValue()
-    if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI16(item); err != nil {
+    err := WriteContainerTypedef(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -361,38 +409,10 @@ result := listResult
 }
 
 func (x *ComplexUnion) readField9(p thrift.Protocol) error {  // TypedefValue
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int16]string, size)
-for i := 0; i < size; i++ {
-    var key int16
-    {
-        result, err := p.ReadI16()
+    result, err := ReadContainerTypedef(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetTypedefValue(result)
     return nil
@@ -1087,26 +1107,9 @@ func (x *Val) writeField9(p thrift.Protocol) error {  // TypedefValue
     }
 
     item := x.GetTypedefValue()
-    if err := p.WriteMapBegin(thrift.I16, thrift.STRING, len(item)); err != nil {
-    return thrift.PrependError("error writing map begin: ", err)
-}
-for k, v := range item {
-    {
-        item := k
-        if err := p.WriteI16(item); err != nil {
+    err := WriteContainerTypedef(item, p)
+if err != nil {
     return err
-}
-    }
-
-    {
-        item := v
-        if err := p.WriteString(item); err != nil {
-    return err
-}
-    }
-}
-if err := p.WriteMapEnd(); err != nil {
-    return thrift.PrependError("error writing map end: ", err)
 }
 
     if err := p.WriteFieldEnd(); err != nil {
@@ -1136,38 +1139,10 @@ if err != nil {
 }
 
 func (x *Val) readField9(p thrift.Protocol) error {  // TypedefValue
-    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
-if err != nil {
-    return thrift.PrependError("error reading map begin: ", err)
-}
-
-mapResult := make(map[int16]string, size)
-for i := 0; i < size; i++ {
-    var key int16
-    {
-        result, err := p.ReadI16()
+    result, err := ReadContainerTypedef(p)
 if err != nil {
     return err
 }
-        key = result
-    }
-
-    var value string
-    {
-        result, err := p.ReadString()
-if err != nil {
-    return err
-}
-        value = result
-    }
-
-    mapResult[key] = value
-}
-
-if err := p.ReadMapEnd(); err != nil {
-    return thrift.PrependError("error reading map end: ", err)
-}
-result := mapResult
 
     x.SetTypedefValue(result)
     return nil

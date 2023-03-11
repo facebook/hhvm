@@ -121,7 +121,8 @@ func (x *MyStruct) writeField3(p thrift.Protocol) error {  // MyIncludedInt
     }
 
     item := x.GetMyIncludedInt()
-    if err := p.WriteI64(item); err != nil {
+    err := includes.WriteIncludedInt64(item, p)
+if err != nil {
     return err
 }
 
@@ -154,7 +155,7 @@ if err != nil {
 }
 
 func (x *MyStruct) readField3(p thrift.Protocol) error {  // MyIncludedInt
-    result, err := p.ReadI64()
+    result, err := includes.ReadIncludedInt64(p)
 if err != nil {
     return err
 }

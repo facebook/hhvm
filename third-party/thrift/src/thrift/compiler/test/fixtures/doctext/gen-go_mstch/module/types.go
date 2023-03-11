@@ -21,6 +21,25 @@ func NewLanyard() Lanyard {
   return ""
 }
 
+func WriteLanyard(item Lanyard, p thrift.Protocol) error {
+  if err := p.WriteString(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadLanyard(p thrift.Protocol) (Lanyard, error) {
+  var decodeResult Lanyard
+  decodeErr := func() error {
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Number = int32
 
@@ -28,6 +47,25 @@ func NewNumber() Number {
   return 0
 }
 
+func WriteNumber(item Number, p thrift.Protocol) error {
+  if err := p.WriteI32(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadNumber(p thrift.Protocol) (Number, error) {
+  var decodeResult Number
+  decodeErr := func() error {
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type B int32
 

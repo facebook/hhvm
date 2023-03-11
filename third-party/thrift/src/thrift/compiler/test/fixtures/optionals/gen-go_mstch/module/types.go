@@ -21,6 +21,25 @@ func NewPersonID() PersonID {
   return 0
 }
 
+func WritePersonID(item PersonID, p thrift.Protocol) error {
+  if err := p.WriteI64(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadPersonID(p thrift.Protocol) (PersonID, error) {
+  var decodeResult PersonID
+  decodeErr := func() error {
+    result, err := p.ReadI64()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type Animal int32
 
@@ -904,7 +923,8 @@ func (x *Person) writeField1(p thrift.Protocol) error {  // Id
     }
 
     item := x.GetId()
-    if err := p.WriteI64(item); err != nil {
+    err := WritePersonID(item, p)
+if err != nil {
     return err
 }
 
@@ -1006,7 +1026,8 @@ func (x *Person) writeField6(p thrift.Protocol) error {  // Friends
 for _, v := range item {
     {
         item := v
-        if err := p.WriteI64(item); err != nil {
+        err := WritePersonID(item, p)
+if err != nil {
     return err
 }
     }
@@ -1031,7 +1052,8 @@ func (x *Person) writeField7(p thrift.Protocol) error {  // BestFriend
     }
 
     item := *x.GetBestFriend()
-    if err := p.WriteI64(item); err != nil {
+    err := WritePersonID(item, p)
+if err != nil {
     return err
 }
 
@@ -1131,7 +1153,7 @@ if err := p.WriteListEnd(); err != nil {
 }
 
 func (x *Person) readField1(p thrift.Protocol) error {  // Id
-    result, err := p.ReadI64()
+    result, err := ReadPersonID(p)
 if err != nil {
     return err
 }
@@ -1191,7 +1213,7 @@ setResult := make([]PersonID, 0, size)
 for i := 0; i < size; i++ {
     var elem PersonID
     {
-        result, err := p.ReadI64()
+        result, err := ReadPersonID(p)
 if err != nil {
     return err
 }
@@ -1210,7 +1232,7 @@ result := setResult
 }
 
 func (x *Person) readField7(p thrift.Protocol) error {  // BestFriend
-    result, err := p.ReadI64()
+    result, err := ReadPersonID(p)
 if err != nil {
     return err
 }

@@ -2300,7 +2300,8 @@ func (x *BinaryPatch) writeField1(p thrift.Protocol) error {  // Assign
     }
 
     item := x.GetAssign()
-    if err := p.WriteBinary(item); err != nil {
+    err := standard.WriteByteBuffer(item, p)
+if err != nil {
     return err
 }
 
@@ -2336,7 +2337,8 @@ func (x *BinaryPatch) writeField8(p thrift.Protocol) error {  // Prepend
     }
 
     item := x.GetPrepend()
-    if err := p.WriteBinary(item); err != nil {
+    err := standard.WriteByteBuffer(item, p)
+if err != nil {
     return err
 }
 
@@ -2356,7 +2358,8 @@ func (x *BinaryPatch) writeField9(p thrift.Protocol) error {  // Append
     }
 
     item := x.GetAppend()
-    if err := p.WriteBinary(item); err != nil {
+    err := standard.WriteByteBuffer(item, p)
+if err != nil {
     return err
 }
 
@@ -2367,7 +2370,7 @@ func (x *BinaryPatch) writeField9(p thrift.Protocol) error {  // Append
 }
 
 func (x *BinaryPatch) readField1(p thrift.Protocol) error {  // Assign
-    result, err := p.ReadBinary()
+    result, err := standard.ReadByteBuffer(p)
 if err != nil {
     return err
 }
@@ -2387,7 +2390,7 @@ if err != nil {
 }
 
 func (x *BinaryPatch) readField8(p thrift.Protocol) error {  // Prepend
-    result, err := p.ReadBinary()
+    result, err := standard.ReadByteBuffer(p)
 if err != nil {
     return err
 }
@@ -2397,7 +2400,7 @@ if err != nil {
 }
 
 func (x *BinaryPatch) readField9(p thrift.Protocol) error {  // Append
-    result, err := p.ReadBinary()
+    result, err := standard.ReadByteBuffer(p)
 if err != nil {
     return err
 }

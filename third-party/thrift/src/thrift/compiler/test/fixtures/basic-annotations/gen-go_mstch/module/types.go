@@ -23,6 +23,25 @@ func NewMyId() MyId {
   return 0
 }
 
+func WriteMyId(item MyId, p thrift.Protocol) error {
+  if err := p.WriteI16(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadMyId(p thrift.Protocol) (MyId, error) {
+  var decodeResult MyId
+  decodeErr := func() error {
+    result, err := p.ReadI16()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type MyEnum int32
 
@@ -669,7 +688,8 @@ func (x *MyStruct) writeField10(p thrift.Protocol) error {  // MyID
     }
 
     item := x.GetMyID()
-    if err := p.WriteI16(item); err != nil {
+    err := WriteMyId(item, p)
+if err != nil {
     return err
 }
 
@@ -790,7 +810,7 @@ if err != nil {
 }
 
 func (x *MyStruct) readField10(p thrift.Protocol) error {  // MyID
-    result, err := p.ReadI16()
+    result, err := ReadMyId(p)
 if err != nil {
     return err
 }

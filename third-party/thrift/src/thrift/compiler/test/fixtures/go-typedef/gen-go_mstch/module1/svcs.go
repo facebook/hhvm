@@ -187,7 +187,8 @@ func (x *reqFinderByPlate) writeField1(p thrift.Protocol) error {  // Plate
     }
 
     item := x.GetPlate()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -198,7 +199,7 @@ func (x *reqFinderByPlate) writeField1(p thrift.Protocol) error {  // Plate
 }
 
 func (x *reqFinderByPlate) readField1(p thrift.Protocol) error {  // Plate
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }
@@ -452,7 +453,8 @@ func (x *reqFinderAliasByPlate) writeField1(p thrift.Protocol) error {  // Plate
     }
 
     item := x.GetPlate()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -463,7 +465,7 @@ func (x *reqFinderAliasByPlate) writeField1(p thrift.Protocol) error {  // Plate
 }
 
 func (x *reqFinderAliasByPlate) readField1(p thrift.Protocol) error {  // Plate
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }
@@ -589,7 +591,8 @@ func (x *respFinderAliasByPlate) writeField0(p thrift.Protocol) error {  // Valu
     }
 
     item := x.GetValue()
-    if err := item.Write(p); err != nil {
+    err := WriteCar(item, p)
+if err != nil {
     return err
 }
 
@@ -600,8 +603,7 @@ func (x *respFinderAliasByPlate) writeField0(p thrift.Protocol) error {  // Valu
 }
 
 func (x *respFinderAliasByPlate) readField0(p thrift.Protocol) error {  // Value
-    result := *NewAutomobile()
-err := result.Read(p)
+    result, err := ReadCar(p)
 if err != nil {
     return err
 }
@@ -717,7 +719,8 @@ func (x *reqFinderPreviousPlate) writeField1(p thrift.Protocol) error {  // Plat
     }
 
     item := x.GetPlate()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -728,7 +731,7 @@ func (x *reqFinderPreviousPlate) writeField1(p thrift.Protocol) error {  // Plat
 }
 
 func (x *reqFinderPreviousPlate) readField1(p thrift.Protocol) error {  // Plate
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }
@@ -844,7 +847,8 @@ func (x *respFinderPreviousPlate) writeField0(p thrift.Protocol) error {  // Val
     }
 
     item := x.GetValue()
-    if err := p.WriteString(item); err != nil {
+    err := WritePlate(item, p)
+if err != nil {
     return err
 }
 
@@ -855,7 +859,7 @@ func (x *respFinderPreviousPlate) writeField0(p thrift.Protocol) error {  // Val
 }
 
 func (x *respFinderPreviousPlate) readField0(p thrift.Protocol) error {  // Value
-    result, err := p.ReadString()
+    result, err := ReadPlate(p)
 if err != nil {
     return err
 }

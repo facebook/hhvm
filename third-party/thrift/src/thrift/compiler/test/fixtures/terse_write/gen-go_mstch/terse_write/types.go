@@ -27,6 +27,25 @@ func NewMyInteger() MyInteger {
   return 0
 }
 
+func WriteMyInteger(item MyInteger, p thrift.Protocol) error {
+  if err := p.WriteI32(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadMyInteger(p thrift.Protocol) (MyInteger, error) {
+  var decodeResult MyInteger
+  decodeErr := func() error {
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
 
 type MyEnum int32
 
@@ -5170,7 +5189,8 @@ func (x *AdaptedFields) writeField1(p thrift.Protocol) error {  // Field1
     }
 
     item := x.GetField1()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteMyInteger(item, p)
+if err != nil {
     return err
 }
 
@@ -5202,7 +5222,8 @@ func (x *AdaptedFields) writeField3(p thrift.Protocol) error {  // Field3
     }
 
     item := x.GetField3()
-    if err := p.WriteI32(item); err != nil {
+    err := WriteMyInteger(item, p)
+if err != nil {
     return err
 }
 
@@ -5213,7 +5234,7 @@ func (x *AdaptedFields) writeField3(p thrift.Protocol) error {  // Field3
 }
 
 func (x *AdaptedFields) readField1(p thrift.Protocol) error {  // Field1
-    result, err := p.ReadI32()
+    result, err := ReadMyInteger(p)
 if err != nil {
     return err
 }
@@ -5233,7 +5254,7 @@ if err != nil {
 }
 
 func (x *AdaptedFields) readField3(p thrift.Protocol) error {  // Field3
-    result, err := p.ReadI32()
+    result, err := ReadMyInteger(p)
 if err != nil {
     return err
 }

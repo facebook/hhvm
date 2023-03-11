@@ -573,6 +573,11 @@ class mstch_go_typedef : public mstch_typedef {
             {"typedef:go_qualified_name", &mstch_go_typedef::go_qualified_name},
             {"typedef:go_qualified_new_func",
              &mstch_go_typedef::go_qualified_new_func},
+            {"typedef:go_qualified_write_func",
+             &mstch_go_typedef::go_qualified_write_func},
+            {"typedef:go_qualified_read_func",
+             &mstch_go_typedef::go_qualified_read_func},
+            {"typedef:placeholder?", &mstch_go_typedef::is_placeholder},
         });
   }
   mstch::node go_name() {
@@ -591,6 +596,30 @@ class mstch_go_typedef : public mstch_typedef {
     auto prefix = go_package_alias_prefix(typedef_->program(), data_);
     auto name = go_name_();
     return prefix + "New" + name;
+  }
+  mstch::node go_qualified_write_func() {
+    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto name = go_name_();
+    return prefix + "Write" + name;
+  }
+  mstch::node go_qualified_read_func() {
+    auto prefix = go_package_alias_prefix(typedef_->program(), data_);
+    auto name = go_name_();
+    return prefix + "Read" + name;
+  }
+  mstch::node is_placeholder() {
+    // Special handling for the following two scenarios:
+    //   1. t_placeholder_typedef is not an actual typedef, but a
+    //   dummy hack/workaround in Thrift compiler AST.
+    //   2. Type resolution is a bit wonky in the AST - occasionally there are
+    //   multiple identical typedefs in a typedef chain (parent/child).
+    //
+    // In either case, we want to skip a few steps down the chain to the
+    // "actual" types if order to generate code properly.
+    auto parentName = typedef_->get_scoped_name();
+    auto childName = typedef_->get_type()->get_scoped_name();
+    return typedef_->typedef_kind() != t_typedef::kind::defined ||
+        parentName == childName;
   }
 
  private:

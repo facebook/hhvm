@@ -20,16 +20,27 @@
 
 }}
 {{#type:typedef?}}
+{{#type:typedef}}
+{{#typedef:placeholder?}}
 {{#type:typedef_type}}
 {{> codec/encode}}
 {{/type:typedef_type}}
+{{/typedef:placeholder?}}
+{{^typedef:placeholder?}}
+{{> codec/encode_typedef}}
+{{/typedef:placeholder?}}
+{{/type:typedef}}
 {{/type:typedef?}}
 {{^type:typedef?}}
 {{#type:struct?}}
+{{#type:struct}}
 {{> codec/encode_struct}}
+{{/type:struct}}
 {{/type:struct?}}
 {{#type:enum?}}
+{{#type:enum}}
 {{> codec/encode_enum}}
+{{/type:enum}}
 {{/type:enum?}}
 {{#type:base?}}
 {{> codec/encode_base}}

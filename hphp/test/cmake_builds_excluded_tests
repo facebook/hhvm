@@ -14,6 +14,7 @@ server/http/tests/codeCoverageTest.php
 server/http/tests/error_page_clear_implicit_context.php
 server/http/tests/get_headers_secure_dv_array.php
 server/http/tests/globalDocumentTest.php
+server/http/tests/hhvmconfig-update.php
 server/http/tests/method.php
 server/http/tests/reify-multifile.php
 server/http/tests/rename-multifile.php

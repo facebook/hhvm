@@ -123,7 +123,12 @@ class TestWebRoot implements IDisposable {
 
     for ($v = $this->curVersion + 1; $v <= $vers; $v++) {
       foreach ($this->fileVersions[$v] as $file => $contents) {
-        $this->putFile($file, "<?hh\n\n".$contents);
+        $header = "";
+        $phplen = strlen(".php");
+        if (strlen($file) >= $phplen && substr($file, -$phplen) === ".php") {
+          $header = "<?hh\n\n";
+        }
+        $this->putFile($file, $header.$contents);
       }
     }
 

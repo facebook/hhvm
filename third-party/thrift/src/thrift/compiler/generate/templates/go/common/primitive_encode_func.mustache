@@ -19,37 +19,12 @@
   This file defines the encoding/write function for a given primitive type.
   These functiomns come from Protocol interface in thrift/lib/go/thrift/protocol.go
 
-}}{{#type:typedef?}}{{!
-  }}{{#type:typedef_type}}{{!
-    }}{{> common/primitive_encode_func}}{{!
-  }}{{/type:typedef_type}}{{!
-}}{{/type:typedef?}}{{!
-}}{{^type:typedef?}}{{!
-  }}{{#type:string?}}{{!
-    }}WriteString{{!
-  }}{{/type:string?}}{{!
-  }}{{#type:binary?}}{{!
-    }}WriteBinary{{!
-  }}{{/type:binary?}}{{!
-  }}{{#type:bool?}}{{!
-    }}WriteBool{{!
-  }}{{/type:bool?}}{{!
-  }}{{#type:byte?}}{{!
-    }}WriteByte{{!
-  }}{{/type:byte?}}{{!
-  }}{{#type:i16?}}{{!
-    }}WriteI16{{!
-  }}{{/type:i16?}}{{!
-  }}{{#type:i32?}}{{!
-    }}WriteI32{{!
-  }}{{/type:i32?}}{{!
-  }}{{#type:i64?}}{{!
-    }}WriteI64{{!
-  }}{{/type:i64?}}{{!
-  }}{{#type:double?}}{{!
-    }}WriteDouble{{!
-  }}{{/type:double?}}{{!
-  }}{{#type:float?}}{{!
-    }}WriteFloat{{!
-  }}{{/type:float?}}{{!
-}}{{/type:typedef?}}
+}}{{#type:string?}}WriteString{{/type:string?}}{{!
+}}{{#type:binary?}}WriteBinary{{/type:binary?}}{{!
+}}{{#type:bool?}}WriteBool{{/type:bool?}}{{!
+}}{{#type:byte?}}WriteByte{{/type:byte?}}{{!
+}}{{#type:i16?}}WriteI16{{/type:i16?}}{{!
+}}{{#type:i32?}}WriteI32{{/type:i32?}}{{!
+}}{{#type:i64?}}WriteI64{{/type:i64?}}{{!
+}}{{#type:double?}}WriteDouble{{/type:double?}}{{!
+}}{{#type:float?}}WriteFloat{{/type:float?}}

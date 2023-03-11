@@ -28,7 +28,7 @@
 }}) {{!
 }}{{#function:return_type}}{{!
 }}{{^type:void?}}{{!
-  }}({{> svc/func_arg_type}}, error){{!
+  }}({{#type:struct?}}*{{/type:struct?}}{{> common/type}}, error){{!
 }}{{/type:void?}}{{!
 }}{{#type:void?}}{{!
   }}error{{!

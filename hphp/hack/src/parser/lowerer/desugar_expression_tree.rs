@@ -268,8 +268,6 @@ fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, span: Pos) -> ast:
         annotation: (),
         readonly_ret: None,
         ret: ast::TypeHint((), None),
-        tparams: vec![],
-        where_constraints: vec![],
         params,
         body,
         fun_kind: ast::FunKind::FSync,
@@ -1259,16 +1257,14 @@ fn rewrite_expr(
                     ret: _,
                     annotation: (),
                     params: _,
-                    tparams: _,
                     user_attributes: _,
                     // The function should not use any of these newer features.
                     readonly_this: None,
                     readonly_ret: None,
-                    where_constraints,
                     ctxs: None,
                     unsafe_ctxs: None,
                     external: false,
-                } if where_constraints.is_empty() => {}
+                } => {}
                 _ => {
                     errors.push((
                             pos.clone(),

@@ -764,16 +764,10 @@ end = struct
     List.iter tparams ~f:(add_tparam_attr_deps ctx env)
 
   and add_fun_attr_deps ctx env fd =
-    let Aast.
-          {
-            f_user_attributes = attrs;
-            f_params = params;
-            f_tparams = tparams;
-            _;
-          } =
+    let Aast.{ f_user_attributes = attrs; f_params = params; _ } =
       fd.Aast.fd_fun
     in
-    add_arg_attr_deps ctx env (attrs, params, tparams)
+    add_arg_attr_deps ctx env (attrs, params, fd.Aast.fd_tparams)
 
   and add_method_attr_deps
       ctx
@@ -1322,7 +1316,7 @@ end = struct
     (* -- Global functions -------------------------------------------------- *)
 
     let pp_fun ppf (name, fd) =
-      let Aast.{ f_user_attributes; f_tparams; f_params; f_ret; f_ctxs; _ } =
+      let Aast.{ f_user_attributes; f_params; f_ret; f_ctxs; _ } =
         fd.Aast.fd_fun
       in
       Fmt.(
@@ -1333,7 +1327,7 @@ end = struct
           f_user_attributes
           (strip_ns name)
           pp_tparams
-          f_tparams
+          fd.Aast.fd_tparams
           pp_fun_params
           f_params
           (option pp_contexts)

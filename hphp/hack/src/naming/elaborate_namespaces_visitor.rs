@@ -279,7 +279,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     fn visit_fun_def(&mut self, env: &mut Env, fd: &mut FunDef) -> Result<(), ()> {
         let env = &mut env.clone();
         env.namespace = RcOc::clone(&fd.namespace);
-        env.extend_tparams(&fd.fun.tparams);
+        env.extend_tparams(&fd.tparams);
         fd.recurse(env, self.object())
     }
 

@@ -186,7 +186,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
     (* Difference between fun_def and fun_ is that fun_ is also lambdas *)
     method! on_fun_def env f =
       let env = { env with namespace = f.fd_namespace } in
-      let env = extend_tparams env f.fd_fun.f_tparams in
+      let env = extend_tparams env f.fd_tparams in
       super#on_fun_def env f
 
     method! on_fun_ env f =

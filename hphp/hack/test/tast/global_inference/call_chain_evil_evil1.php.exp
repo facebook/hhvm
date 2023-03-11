@@ -76,8 +76,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((string), None); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((string), None);
         f_params =
         [{ param_annotation = (A); param_type_hint = ((A), (Some ([3:12-13], (Happly (([3:12-13], "\\A"), []))))); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$a"; 
@@ -110,4 +109,4 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

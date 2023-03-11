@@ -7,10 +7,6 @@
       fd_fun =
       { f_span = [3:1-6:28]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([6:21-25], (Hprim Tvoid))));
-        f_tparams =
-        [{ tp_variance = Invariant; tp_name = ([4:19-20], "T/[ctx $f]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([5:23-24], "T/[ctx $nf]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints = [];
         f_params =
         [{ param_annotation = ();
            param_type_hint =
@@ -44,5 +40,9 @@
         f_unsafe_ctxs = (Some ([6:2-19], [([6:3-9], (Hfun_context "$f")); ([6:11-18], (Hfun_context "$nf"))])); 
         f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
         f_user_attributes = []; f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([4:19-20], "T/[ctx $f]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([5:23-24], "T/[ctx $nf]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      fd_where_constraints = [] })
   ]

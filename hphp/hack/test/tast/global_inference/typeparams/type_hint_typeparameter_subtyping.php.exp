@@ -28,8 +28,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-11], "\\g");
        fd_fun =
        { f_span = [4:1-26]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([4:19-23], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([4:19-23], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (D<nothing, string>); param_type_hint = ((D<nothing, string>), (Some ([4:12-13], (Happly (([4:12-13], "\\D"), []))))); 
             param_is_variadic = false; param_pos = [4:14-16]; param_name = "$x"; 
@@ -39,4 +38,4 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

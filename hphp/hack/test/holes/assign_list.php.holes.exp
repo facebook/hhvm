@@ -10,8 +10,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-26], "\\__return_3_tuple");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = (((int, int, int)), (Some ([3:37-52], (Htuple [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))])))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = (((int, int, int)), (Some ([3:37-52], (Htuple [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))]))));
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:27-31], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:32-34]; param_name = "$x"; 
@@ -22,7 +21,7 @@ Errors:
         f_body = { fb_ast = [([4:3-25], (Return (Some (((int, int, int)), [4:10-24], (Tuple [((int), [4:16-17], (Int "1")); ((int), [4:19-20], (Int "1")); ((int), [4:22-23], (Int "1"))])))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -31,8 +30,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-26], "\\__return_2_tuple");
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = (((int, int)), (Some ([7:37-47], (Htuple [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))])))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = (((int, int)), (Some ([7:37-47], (Htuple [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))]))));
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([7:27-31], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [7:32-34]; param_name = "$x"; 
@@ -42,7 +40,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([8:3-22], (Return (Some (((int, int)), [8:10-21], (Tuple [((int), [8:16-17], (Int "1")); ((int), [8:19-20], (Int "1"))])))))] };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -51,8 +49,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([11:10-24], "\\assign_list_ok");
        fd_fun =
        { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:35-39], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:35-39], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([11:25-29], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [11:30-32]; param_name = "$x"; 
@@ -74,7 +71,7 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -83,8 +80,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([15:10-25], "\\assign_list_bad");
        fd_fun =
        { f_span = [15:1-18:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([15:36-40], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([15:36-40], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([15:26-30], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [15:31-33]; param_name = "$x"; 
@@ -110,4 +106,4 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

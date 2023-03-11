@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<267364c98eae7a9df2a67d622f9cadd6>>
+// @generated SignedSource<<0de0f4c89fad1c3920be417538eabf27>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1158,7 +1158,9 @@ impl<P: Params> NodeMut<P> for FunDef<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.fun.accept(c, v)?;
         self.internal.accept(c, v)?;
-        self.module.accept(c, v)
+        self.module.accept(c, v)?;
+        self.tparams.accept(c, v)?;
+        self.where_constraints.accept(c, v)
     }
 }
 impl<P: Params> NodeMut<P> for FunKind {
@@ -1225,8 +1227,6 @@ impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::En> {
         v.visit_en(c, &mut self.annotation)?;
         self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
-        self.tparams.accept(c, v)?;
-        self.where_constraints.accept(c, v)?;
         self.params.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.unsafe_ctxs.accept(c, v)?;

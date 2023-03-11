@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-28],
@@ -25,9 +24,8 @@
                              { ef_fun =
                                { f_span = [4:14-26]; f_readonly_this = None; 
                                  f_annotation = (); f_readonly_ret = None; 
-                                 f_ret = ((), None); f_tparams = []; 
-                                 f_where_constraints = []; f_params = []; 
-                                 f_ctxs = None; f_unsafe_ctxs = None;
+                                 f_ret = ((), None); f_params = []; f_ctxs = None; 
+                                 f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
                                    [([4:14-26],
@@ -87,8 +85,7 @@
                              (Lfun (
                                 { f_span = [4:14-26]; f_readonly_this = None; 
                                   f_annotation = (); f_readonly_ret = None; 
-                                  f_ret = ((), None); f_tparams = []; 
-                                  f_where_constraints = [];
+                                  f_ret = ((), None);
                                   f_params =
                                   [{ param_annotation = (); param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
                                      param_is_variadic = false; param_pos = [4:3-13]; 
@@ -212,5 +209,5 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

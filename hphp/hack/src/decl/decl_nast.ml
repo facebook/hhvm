@@ -41,10 +41,6 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
       f.f_fun_kind
       (hint_of_type_hint f.f_ret)
   in
-  let tparams = List.map f.f_tparams ~f:(FunUtils.type_param env) in
-  let where_constraints =
-    List.map f.f_where_constraints ~f:(FunUtils.where_constraint env)
-  in
   let fe_deprecated =
     Naming_attributes_params.deprecated
       ~kind:"function"
@@ -65,8 +61,8 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
       ( Reason.Rwitness_from_decl fe_pos,
         Tfun
           {
-            ft_tparams = tparams;
-            ft_where_constraints = where_constraints;
+            ft_tparams = [];
+            ft_where_constraints = [];
             ft_params = params;
             ft_implicit_params = { capability };
             ft_ret = { et_type = ret_ty; et_enforced = Unenforced };

@@ -574,7 +574,7 @@ fn make_closure(
         visibility: Visibility::Public,
         name: Id(p.clone(), members::__INVOKE.into()),
         tparams: fun_tparams,
-        where_constraints: fd.where_constraints.clone(),
+        where_constraints: vec![],
         params: fd.params.clone(),
         ctxs: fd.ctxs.clone(),
         unsafe_ctxs: None, // TODO(T70095684)
@@ -777,8 +777,6 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         readonly_this: None, // TODO: readonly_this in closure_convert
         readonly_ret: None,  // TODO: readonly_ret in closure convert
         ret: TypeHint((), None),
-        tparams: vec![],
-        where_constraints: vec![],
         params: vec![
             make_fn_param(pos(), &obj_var.1, false, false),
             make_fn_param(pos(), &meth_var.1, false, false),
@@ -927,7 +925,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                     self.alloc,
                     fd.fun.ctxs.as_ref(),
                     &fd.fun.params,
-                    &fd.fun.tparams,
+                    &fd.tparams,
                     &[],
                 );
                 let si = ScopeSummary::Function(FunctionSummary {
@@ -936,7 +934,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                     mode: fd.mode,
                     name: &fd.name,
                     span: &fd.fun.span,
-                    tparams: &fd.fun.tparams,
+                    tparams: &fd.tparams,
                 });
                 self.with_subscope(scope, si, variables, |self_, scope| {
                     fd.fun.body.recurse(scope, self_)?;
@@ -1351,8 +1349,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         });
         let variables =
             Self::compute_variables_from_fun(&fd.params, &fd.body.fb_ast, explicit_capture)?;
-        let coeffects =
-            Coeffects::from_ast(self.alloc, fd.ctxs.as_ref(), &fd.params, &fd.tparams, &[]);
+        let coeffects = Coeffects::from_ast(self.alloc, fd.ctxs.as_ref(), &fd.params, &[], &[]);
         let si = ScopeSummary::Lambda(LambdaSummary {
             coeffects,
             explicit_capture: use_vars_opt.as_deref(),
@@ -1557,8 +1554,6 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             readonly_this: None, // TODO(readonly): readonly_this in closure_convert
             readonly_ret: None,
             ret: TypeHint((), None),
-            tparams: vec![],
-            where_constraints: vec![],
             params: vec![
                 make_fn_param(pos(), &obj_var.1, false, false),
                 variadic_param,
@@ -1589,6 +1584,8 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             internal: false,
             // TODO: meth_caller should have the visibility of the module it is defined in
             module: None,
+            tparams: vec![],
+            where_constraints: vec![],
         };
         self.state_mut()
             .named_hoisted_functions

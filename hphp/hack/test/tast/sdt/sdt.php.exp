@@ -49,11 +49,10 @@
        fd_fun =
        { f_span = [7:1-22]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([7:15-19], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-11], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [10:1-15]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = Cenum; c_name = ([10:6-7], "\\E"); 

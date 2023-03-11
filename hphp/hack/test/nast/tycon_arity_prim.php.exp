@@ -18,8 +18,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-26], "\\tycon_arity_bool");
       fd_fun =
       { f_span = [3:1-50]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([3:43-47], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((), (Some ([3:43-47], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([3:27-37], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:38-40]; param_name = "$x"; 
@@ -29,7 +28,7 @@ Errors:
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -38,8 +37,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-25], "\\tycon_arity_int");
        fd_fun =
        { f_span = [5:1-48]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([5:41-45], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([5:41-45], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([5:26-34], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [5:35-37]; param_name = "$x"; 
@@ -49,7 +47,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -58,8 +56,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-27], "\\tycon_arity_float");
        fd_fun =
        { f_span = [7:1-53]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([7:46-50], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([7:46-50], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([7:28-40], (Hprim Tfloat)))); 
             param_is_variadic = false; param_pos = [7:41-43]; param_name = "$x"; 
@@ -69,7 +66,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -78,8 +75,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-25], "\\tycon_arity_num");
        fd_fun =
        { f_span = [9:1-47]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([9:40-44], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([9:40-44], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([9:26-34], (Hprim Tnum)))); 
             param_is_variadic = false; param_pos = [9:35-37]; param_name = "$x"; 
@@ -89,7 +85,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -98,8 +94,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([11:10-28], "\\tycon_arity_string");
        fd_fun =
        { f_span = [11:1-56]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([11:49-53], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([11:49-53], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([11:29-43], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [11:44-46]; param_name = "$x"; 
@@ -109,7 +104,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -118,8 +113,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([13:10-30], "\\tycon_arity_arraykey");
        fd_fun =
        { f_span = [13:1-62]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([13:55-59], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([13:55-59], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([13:31-49], (Hprim Tarraykey)))); 
             param_is_variadic = false; param_pos = [13:50-52]; param_name = "$x"; 
@@ -129,7 +123,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -138,8 +132,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([15:10-30], "\\tycon_arity_resource");
        fd_fun =
        { f_span = [15:1-62]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([15:55-59], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([15:55-59], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([15:31-49], (Hprim Tresource)))); 
             param_is_variadic = false; param_pos = [15:50-52]; param_name = "$x"; 
@@ -149,7 +142,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -158,8 +151,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([17:10-27], "\\tycon_arity_mixed");
        fd_fun =
        { f_span = [17:1-53]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([17:46-50], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([17:46-50], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([17:28-40], Hmixed))); 
             param_is_variadic = false; param_pos = [17:41-43]; param_name = "$x"; 
@@ -169,7 +161,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -178,8 +170,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([19:10-29], "\\tycon_arity_nonnull");
        fd_fun =
        { f_span = [19:1-57]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([19:50-54], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([19:50-54], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([19:30-44], Hnonnull))); 
             param_is_variadic = false; param_pos = [19:45-47]; param_name = "$x"; 
@@ -189,7 +180,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -198,8 +189,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-29], "\\tycon_arity_nothing");
        fd_fun =
        { f_span = [21:1-57]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([21:50-54], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([21:50-54], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([21:30-44], Hnothing))); 
             param_is_variadic = false; param_pos = [21:45-47]; param_name = "$x"; 
@@ -209,7 +199,7 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -219,9 +209,8 @@ Errors:
        fd_fun =
        { f_span = [23:1-44]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([23:30-41], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

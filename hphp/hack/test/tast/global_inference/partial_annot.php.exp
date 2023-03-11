@@ -8,8 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\foo");
       fd_fun =
       { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((?string), None); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((?string), None);
         f_params =
         [{ param_annotation = (A<string>); param_type_hint = ((A<string>), (Some ([4:14-15], (Happly (([4:14-15], "\\A"), []))))); 
            param_is_variadic = false; param_pos = [4:16-18]; param_name = "$x"; 
@@ -30,7 +29,7 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })[(Class
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })[(Class
     { c_span = [3:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
       c_name = ([3:7-8], "\\A");

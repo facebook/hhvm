@@ -7,7 +7,7 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:25-29], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\defaults"), [])))]));
+        f_params = []; f_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\defaults"), [])))]));
         f_unsafe_ctxs = (Some ([3:13-23], [([3:14-22], (Happly (([3:14-22], "\\HH\\Contexts\\Unsafe\\defaults"), [])))]));
         f_body =
         { fb_ast =
@@ -18,8 +18,7 @@
                    (((function(mixed $i)[(HH\Capabilities\Rx & HH\Capabilities\WriteProperty)]: void)), [4:8-23],
                     (Lfun (
                        { f_span = [4:8-23]; f_readonly_this = None; f_annotation = (); 
-                         f_readonly_ret = None; f_ret = ((void), None); 
-                         f_tparams = []; f_where_constraints = [];
+                         f_readonly_ret = None; f_ret = ((void), None);
                          f_params =
                          [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
                             param_is_variadic = false; param_pos = [4:9-11]; 
@@ -38,4 +37,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

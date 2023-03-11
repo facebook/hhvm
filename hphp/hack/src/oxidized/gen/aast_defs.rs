@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<34194c3c8f124cfb66f1c462441b3477>>
+// @generated SignedSource<<39fcc2765d5a92c0d77f866eb374f3c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1275,8 +1275,6 @@ pub struct Fun_<Ex, En> {
     pub readonly_ret: Option<ast_defs::ReadonlyKind>,
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub ret: TypeHint<Ex>,
-    pub tparams: Vec<Tparam<Ex, En>>,
-    pub where_constraints: Vec<WhereConstraintHint>,
     pub params: Vec<FunParam<Ex, En>>,
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,
@@ -2016,6 +2014,8 @@ pub struct FunDef<Ex, En> {
     pub fun: Fun_<Ex, En>,
     pub internal: bool,
     pub module: Option<Sid>,
+    pub tparams: Vec<Tparam<Ex, En>>,
+    pub where_constraints: Vec<WhereConstraintHint>,
 }
 
 #[derive(

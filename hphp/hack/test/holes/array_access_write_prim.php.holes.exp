@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-33], "\\array_access_write_prim");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:45-49], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:45-49], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:34-38], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:39-42]; param_name = "$xs"; 
@@ -27,4 +26,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

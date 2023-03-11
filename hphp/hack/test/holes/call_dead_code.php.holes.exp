@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-30]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:23-27], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:23-27], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
@@ -17,7 +16,7 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -27,8 +26,7 @@
        fd_fun =
        { f_span = [5:1-15:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([5:28-32], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([6:3-10], (Expr ((int), [6:3-9], (Binop ((Eq None), ((int), [6:3-5], (Lvar ([6:3-5], $x))), ((int), [6:8-9], (Int "1")))))));
@@ -50,7 +48,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -60,8 +58,7 @@
        fd_fun =
        { f_span = [17:1-27:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([17:33-37], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([18:3-10], (Expr ((int), [18:3-9], (Binop ((Eq None), ((int), [18:3-5], (Lvar ([18:3-5], $x))), ((int), [18:8-9], (Int "1")))))));
@@ -86,4 +83,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

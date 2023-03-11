@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-35], "\\assign_array_append_union");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:79-83], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:79-83], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = ((int | string)); param_type_hint = (((int | string)), (Some ([3:36-48], (Hunion [([3:37-40], (Hprim Tint)); ([3:41-47], (Hprim Tstring))]))));
            param_is_variadic = false; param_pos = [3:49-51]; param_name = "$x"; 
@@ -31,4 +30,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

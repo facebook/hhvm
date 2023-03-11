@@ -8,8 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-34], "\\array_access_read_object");
       fd_fun =
       { f_span = [4:1-8:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([4:57-61], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([4:57-61], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (classname<_>); param_type_hint = ((classname<_>), (Some ([4:35-47], (Happly (([4:35-44], "\\HH\\classname"), [([4:45-46], Herr)]))))); 
            param_is_variadic = false; param_pos = [4:48-53]; param_name = "$yolo"; 
@@ -33,4 +32,4 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

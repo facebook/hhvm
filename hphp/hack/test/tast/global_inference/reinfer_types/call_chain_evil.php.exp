@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f1");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((string), (Some ([3:24-31], Hdynamic))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((string), (Some ([3:24-31], Hdynamic)));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:13-18], Hmixed))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$x"; 
@@ -17,7 +16,7 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((string), [4:10-12], (Lvar ([4:10-12], $x))))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })[(Fun
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })[(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -25,8 +24,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f2");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((string), (Some ([3:26-31], Hmixed))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((string), (Some ([3:26-31], Hmixed)));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:13-20], Hdynamic))); 
            param_is_variadic = false; param_pos = [3:21-23]; param_name = "$x"; 
@@ -42,7 +40,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })[(Fun
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })[(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -50,8 +48,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-12], "\\f3");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((string), (Some ([3:24-29], Hmixed))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((string), (Some ([3:24-29], Hmixed)));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:13-18], Hmixed))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$x"; 
@@ -74,7 +71,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })[(Fun
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })[(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -83,8 +80,7 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), (Some ([3:15-22], Hdynamic))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-25],
@@ -105,4 +101,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

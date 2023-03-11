@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-11], "\\f");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = (((dynamic | string)), (Some ([3:24-30], (Hprim Tstring)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = (((dynamic | string)), (Some ([3:24-30], (Hprim Tstring))));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:12-18], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$s"; 
@@ -17,4 +16,4 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((string), [4:10-12], (Lvar ([4:10-12], $s))))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-11], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -8,8 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-22], "\\takes_string");
       fd_fun =
       { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
@@ -19,7 +18,7 @@ Errors:
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -28,8 +27,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-11], "\\f");
        fd_fun =
        { f_span = [5:1-9:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 
             param_is_variadic = true; param_pos = [5:22-27]; param_name = "$args"; 
@@ -52,7 +50,7 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [11:1-13:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

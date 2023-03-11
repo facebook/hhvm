@@ -9,8 +9,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), (Some ([3:20-23], (Hprim Tint)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((int), (Some ([3:20-23], (Hprim Tint))));
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
@@ -28,7 +27,7 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -37,8 +36,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([10:10-13], "\\bar");
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((int), (Some ([10:20-23], (Hprim Tint)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((int), (Some ([10:20-23], (Hprim Tint))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 
@@ -49,4 +47,4 @@ Errors:
          f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((int), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

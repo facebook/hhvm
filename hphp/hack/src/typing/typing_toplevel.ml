@@ -90,14 +90,15 @@ let fun_def ctx fd :
       (Provider_context.get_tcopt (Env.get_ctx env))
     && Env.get_support_dynamic_type env
   in
-  List.iter ~f:Errors.add_typing_error @@ Typing_type_wellformedness.fun_ env f;
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.fun_def env fd;
   Typing_env.make_depend_on_current_module env;
   let (env, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
       ~ignore_errors:false
-      f.f_tparams
-      f.f_where_constraints
+      fd.fd_tparams
+      fd.fd_where_constraints
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   let env = Env.set_fn_kind env f.f_fun_kind in
@@ -185,7 +186,7 @@ let fun_def ctx fd :
         Typing_error.(primary @@ Primary.Expecting_return_type_hint pos)
     | Some _ -> ()
   end;
-  let (env, tparams) = List.map_env env f.f_tparams ~f:Typing.type_param in
+  let (env, tparams) = List.map_env env fd.fd_tparams ~f:Typing.type_param in
   let (env, e1) = Typing_solver.close_tyvars_and_solve env in
   let (env, e2) = Typing_solver.solve_all_unsolved_tyvars env in
   let ret_hint = hint_of_type_hint f.f_ret in
@@ -196,8 +197,6 @@ let fun_def ctx fd :
       Aast.f_span = f.f_span;
       Aast.f_readonly_ret = f.f_readonly_ret;
       Aast.f_ret = (return_ty.et_type, ret_hint);
-      Aast.f_tparams = tparams;
-      Aast.f_where_constraints = f.f_where_constraints;
       Aast.f_params = typed_params;
       Aast.f_ctxs = f.f_ctxs;
       Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
@@ -217,6 +216,8 @@ let fun_def ctx fd :
       Aast.fd_namespace = fd.fd_namespace;
       Aast.fd_internal = fd.fd_internal;
       Aast.fd_module = fd.fd_module;
+      Aast.fd_tparams = tparams;
+      Aast.fd_where_constraints = fd.fd_where_constraints;
     }
   in
   let (env, fundefs) =

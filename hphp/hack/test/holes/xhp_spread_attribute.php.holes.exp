@@ -210,8 +210,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([25:12-32], "\\XhpSpread\\xhp_spread_attribute");
        fd_fun =
        { f_span = [25:3-28:4]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([25:52-56], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([25:52-56], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (XhpSpread\:element2); param_type_hint = ((XhpSpread\:element2), (Some ([25:33-42], (Happly (([25:33-42], "\\XhpSpread\\:element2"), []))))); 
             param_is_variadic = false; param_pos = [25:43-49]; param_name = "$props"; 
@@ -234,4 +233,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

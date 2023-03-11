@@ -236,8 +236,8 @@ let check_fun env (fd : ETast.fun_def) =
   let f = fd.fd_fun in
   let gamma = gamma_from_params env f.f_params in
   if
-    (not (List.is_empty f.f_tparams))
-    || not (List.is_empty f.f_where_constraints)
+    (not (List.is_empty fd.fd_tparams))
+    || not (List.is_empty fd.fd_where_constraints)
   then
     raise Not_implemented
   else

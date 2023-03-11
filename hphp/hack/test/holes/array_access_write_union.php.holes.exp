@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-41], "\\array_access_write_union_vector");
       fd_fun =
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:72-76], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:72-76], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = ((bool | Vector<string>));
            param_type_hint =
@@ -31,7 +30,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -40,8 +39,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-38], "\\array_access_write_union_vec");
        fd_fun =
        { f_span = [9:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([9:66-70], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([9:66-70], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = ((bool | vec<string>));
             param_type_hint = (((bool | vec<string>)), (Some ([9:39-59], (Hunion [([9:40-44], (Hprim Tbool)); ([9:47-58], (Happly (([9:47-50], "\\HH\\vec"), [([9:51-57], (Hprim Tstring))])))]))));
@@ -66,4 +64,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

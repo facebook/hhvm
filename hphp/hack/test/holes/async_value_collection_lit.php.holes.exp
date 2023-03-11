@@ -7,11 +7,10 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((Awaitable<?int>), (Some ([3:36-51], (Happly (([3:36-45], "\\HH\\Awaitable"), [([3:46-50], (Hoption ([3:47-50], (Hprim Tint))))]))))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-12], (Return (Some ((int), [4:10-11], (Int "1")))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -20,8 +19,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-20], "\\take_a_set");
        fd_fun =
        { f_span = [7:1-42]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:35-39], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:35-39], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([7:21-29], (Happly (([7:21-24], "\\HH\\Set"), [([7:25-28], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:30-32]; param_name = "$x"; 
@@ -31,7 +29,7 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -41,8 +39,7 @@
        fd_fun =
        { f_span = [9:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([9:46-61], (Happly (([9:46-55], "\\HH\\Awaitable"), [([9:56-60], (Hprim Tvoid))]))))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([10:3-33],
@@ -62,4 +59,4 @@
            };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

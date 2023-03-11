@@ -34,9 +34,9 @@
        fd_fun =
        { f_span = [6:1-29]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([6:22-26], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = (Some ([6:16-20], [([6:17-19], (Happly (([6:17-19], "\\X"), [])))]));
+         f_params = []; f_ctxs = (Some ([6:16-20], [([6:17-19], (Happly (([6:17-19], "\\X"), [])))])); 
          f_unsafe_ctxs = (Some ([6:16-20], [([6:17-19], (Happly (([6:17-19], "\\X"), [])))])); 
          f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
          f_user_attributes = []; f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

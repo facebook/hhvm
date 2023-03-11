@@ -7,7 +7,6 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:42-52], (Happly (([3:42-52], "\\HH\\supportdyn"), [([3:42-52], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
-        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = ();
            param_type_hint = ((), (Some ([3:26-36], (Happly (([3:26-36], "\\HH\\supportdyn"), [([3:26-36], (Hshape { nsi_allows_unknown_fields = true; nsi_field_map = [] }))])))));
@@ -18,5 +17,5 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((), [4:10-12], (Lvar ([4:10-12], $x))))))] }; 
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-25], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

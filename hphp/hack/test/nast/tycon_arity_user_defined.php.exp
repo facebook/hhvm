@@ -24,8 +24,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-35], "\\tycon_arity_user_defined0");
        fd_fun =
        { f_span = [8:1-59]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([8:52-56], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([8:52-56], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([8:36-46], (Happly (([8:36-46], "\\StayClassy"), []))))); 
             param_is_variadic = false; param_pos = [8:47-49]; param_name = "$x"; 
@@ -35,7 +34,7 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -44,8 +43,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([10:10-35], "\\tycon_arity_user_defined1");
        fd_fun =
        { f_span = [10:1-64]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([10:57-61], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([10:57-61], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([10:36-51], (Happly (([10:36-46], "\\StayClassy"), [([10:47-50], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [10:52-54]; param_name = "$x"; 
@@ -55,7 +53,7 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -64,8 +62,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([12:10-35], "\\tycon_arity_user_defined2");
        fd_fun =
        { f_span = [12:1-69]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([12:62-66], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([12:62-66], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([12:36-56], (Happly (([12:36-46], "\\StayClassy"), [([12:47-50], (Hprim Tint)); ([12:51-55], (Hprim Tbool))])))));
             param_is_variadic = false; param_pos = [12:57-59]; param_name = "$x"; 
@@ -75,7 +72,7 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -84,8 +81,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([14:10-35], "\\tycon_arity_user_defined3");
        fd_fun =
        { f_span = [14:1-76]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([14:69-73], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([14:69-73], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = ();
             param_type_hint = ((), (Some ([14:36-63], (Happly (([14:36-46], "\\StayClassy"), [([14:47-50], (Hprim Tint)); ([14:51-55], (Hprim Tbool)); ([14:56-62], (Hprim Tstring))])))));
@@ -96,5 +92,5 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

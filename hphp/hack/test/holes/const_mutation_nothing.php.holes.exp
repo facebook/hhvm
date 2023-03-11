@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-29], "\\const_mutation_pair");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:53-57], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:53-57], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (Pair<string, int>);
            param_type_hint = ((Pair<string, int>), (Some ([3:30-46], (Happly (([3:30-34], "\\HH\\Pair"), [([3:35-41], (Hprim Tstring)); ([3:42-45], (Hprim Tint))]))))); 
@@ -30,7 +29,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -39,8 +38,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-39], "\\const_mutation_keyedcontainer");
        fd_fun =
        { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([8:73-77], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:73-77], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (KeyedContainer<string, int>);
             param_type_hint = ((KeyedContainer<string, int>), (Some ([8:40-66], (Happly (([8:40-54], "\\HH\\KeyedContainer"), [([8:55-61], (Hprim Tstring)); ([8:62-65], (Hprim Tint))])))));
@@ -64,7 +62,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -73,8 +71,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([13:10-33], "\\const_mutation_anyarray");
        fd_fun =
        { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([13:61-65], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([13:61-65], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (AnyArray<string, int>);
             param_type_hint = ((AnyArray<string, int>), (Some ([13:34-54], (Happly (([13:34-42], "\\HH\\AnyArray"), [([13:43-49], (Hprim Tstring)); ([13:50-53], (Hprim Tint))])))));
@@ -97,4 +94,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

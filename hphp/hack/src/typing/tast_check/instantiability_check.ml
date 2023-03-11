@@ -169,8 +169,9 @@ let handler =
       List.iter c.c_vars ~f:check_class_vars;
       check_tparams env c.c_tparams
 
+    method! at_fun_def env fd = check_tparams env fd.fd_tparams
+
     method! at_fun_ env f =
-      check_tparams env f.f_tparams;
       List.iter f.f_params ~f:(check_param env);
       Option.iter (hint_of_type_hint f.f_ret) ~f:(check_hint env)
 

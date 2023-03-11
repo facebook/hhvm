@@ -103,8 +103,6 @@ mod tests {
                 (),
                 Some(Hint(Pos::default(), Box::new(Hint_::Hprim(Tprim::Tvoid)))),
             ),
-            tparams: Default::default(),
-            where_constraints: Default::default(),
             params: Default::default(),
             ctxs: Default::default(),
             unsafe_ctxs: Default::default(),
@@ -216,8 +214,6 @@ mod tests {
             annotation: Default::default(),
             readonly_ret: Default::default(),
             ret: TypeHint((), None),
-            tparams: Default::default(),
-            where_constraints: Default::default(),
             params: vec![FunParam {
                 annotation: (),
                 type_hint: TypeHint(

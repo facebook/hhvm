@@ -134,7 +134,7 @@ impl<'a> Fun<'a> {
 
     pub fn get_tparams(&self) -> &[ast::Tparam] {
         match self {
-            Self::Borrowed(x) => &x.fun.tparams,
+            Self::Borrowed(x) => &x.tparams,
             Self::Counted(x) => &x.tparams,
         }
     }
@@ -312,7 +312,7 @@ impl Fun_ {
         Self {
             name: fd.name.clone(),
             span: f.span.clone(),
-            tparams: f.tparams.clone(),
+            tparams: fd.tparams.clone(),
             user_attributes: f.user_attributes.clone().into(),
             mode: fd.mode,
             fun_kind: f.fun_kind,

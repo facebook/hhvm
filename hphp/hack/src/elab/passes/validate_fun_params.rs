@@ -70,8 +70,6 @@ mod tests {
             annotation: (),
             readonly_ret: None,
             ret: TypeHint((), None),
-            tparams: vec![],
-            where_constraints: vec![],
             params,
             ctxs: None,
             unsafe_ctxs: None,

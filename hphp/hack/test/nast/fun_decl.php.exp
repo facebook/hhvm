@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([12:10-13], "\\foo");
       fd_fun =
       { f_span = [12:1-28]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((), (Some ([12:23-27], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((), (Some ([12:23-27], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([12:14-17], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [12:18-20]; param_name = "$v"; 
@@ -20,5 +19,5 @@
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
         };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

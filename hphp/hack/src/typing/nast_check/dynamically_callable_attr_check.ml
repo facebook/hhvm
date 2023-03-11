@@ -61,13 +61,13 @@ let handler =
         check_reified_callable p
       | _ -> ()
 
-    method! at_fun_ _ f =
-      let attrs = f.f_user_attributes in
+    method! at_fun_def _ fd =
+      let attrs = fd.fd_fun.f_user_attributes in
       match
         Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attrs
       with
       | Some p ->
-        if has_reified_generics f.f_tparams then
+        if has_reified_generics fd.fd_tparams then
           Errors.add_nast_check_error
           @@ Nast_check_error.Dynamically_callable_reified p;
         ()

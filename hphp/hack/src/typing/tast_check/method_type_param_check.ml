@@ -26,5 +26,5 @@ let handler =
 
     method! at_method_ _ m = check_tparams m.m_tparams
 
-    method! at_fun_ _ f = check_tparams f.f_tparams
+    method! at_fun_def _ fd = check_tparams fd.fd_tparams
   end

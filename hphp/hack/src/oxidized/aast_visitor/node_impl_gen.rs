@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06b9c7964af7fab749ab8b4196d4312f>>
+// @generated SignedSource<<7aa6047c73df4b604fef5c24ce948ce0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1158,7 +1158,9 @@ impl<P: Params> Node<P> for FunDef<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.fun.accept(c, v)?;
         self.internal.accept(c, v)?;
-        self.module.accept(c, v)
+        self.module.accept(c, v)?;
+        self.tparams.accept(c, v)?;
+        self.where_constraints.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for FunKind {
@@ -1225,8 +1227,6 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::En> {
         v.visit_en(c, &self.annotation)?;
         self.readonly_ret.accept(c, v)?;
         self.ret.accept(c, v)?;
-        self.tparams.accept(c, v)?;
-        self.where_constraints.accept(c, v)?;
         self.params.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.unsafe_ctxs.accept(c, v)?;

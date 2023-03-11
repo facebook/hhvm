@@ -7,8 +7,7 @@
              (Efun
                 { ef_fun =
                   { f_span = [4:1-52]; f_readonly_this = None; f_annotation = (); 
-                    f_readonly_ret = None; f_ret = ((), (Some ([4:45-49], (Hprim Tvoid)))); 
-                    f_tparams = []; f_where_constraints = [];
+                    f_readonly_ret = None; f_ret = ((), (Some ([4:45-49], (Hprim Tvoid))));
                     f_params =
                     [{ param_annotation = (); param_type_hint = ((), (Some ([4:35-39], (Hlike ([4:36-39], (Hprim Tint)))))); 
                        param_is_variadic = false; param_pos = [4:40-42]; 

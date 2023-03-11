@@ -10,8 +10,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-14], "\\test");
       fd_fun =
       { f_span = [3:1-15:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), (Some ([3:35-38], (Hprim Tint)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((int), (Some ([3:35-38], (Hprim Tint))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:15-18], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:19-21]; param_name = "$i"; 
@@ -38,8 +37,7 @@ Errors:
                      (Lfun (
                         { f_span = [5:8-12:4]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((int), (Some ([5:12-15], (Hprim Tint)))); 
-                          f_tparams = []; f_where_constraints = []; f_params = []; 
-                          f_ctxs = None; f_unsafe_ctxs = None;
+                          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                           f_body =
                           { fb_ast =
                             [([10:5-23],
@@ -62,4 +60,4 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

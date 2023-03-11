@@ -7,11 +7,10 @@
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((Traversable<num>), (Some ([3:25-41], (Happly (([3:25-36], "\\HH\\Traversable"), [([3:37-40], (Hprim Tnum))]))))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-19], (Return (Some ((keyset<int>), [4:10-18], (ValCollection (([4:10-16], Keyset), None, []))))))] }; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-19], (Return (Some ((keyset<int>), [4:10-18], (ValCollection (([4:10-16], Keyset), None, []))))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [7:1-11]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
@@ -36,8 +35,8 @@
        { f_span = [9:1-11:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None;
          f_ret = ((KeyedTraversable<C, mixed>), (Some ([9:31-57], (Happly (([9:31-47], "\\HH\\KeyedTraversable"), [([9:48-49], (Happly (([9:48-49], "\\C"), []))); ([9:51-56], Hmixed)])))));
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None; f_body = { fb_ast = [([10:3-17], (Return (Some ((dict<nothing, mixed>), [10:10-16], (KeyValCollection (([10:10-14], Dict), None, []))))))] }; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body = { fb_ast = [([10:3-17], (Return (Some ((dict<nothing, mixed>), [10:10-16], (KeyValCollection (([10:10-14], Dict), None, []))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

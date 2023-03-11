@@ -23,8 +23,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-37], "\\expected_class_intersection");
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:77-81], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:77-81], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (classname<C>);
             param_type_hint =
@@ -46,4 +45,4 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

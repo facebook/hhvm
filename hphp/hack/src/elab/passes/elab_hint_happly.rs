@@ -61,7 +61,7 @@ impl Pass for ElabHintHapplyPass {
     }
 
     fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
-        self.set_tparams(&elem.fun.tparams);
+        self.set_tparams(&elem.tparams);
         ControlFlow::Continue(())
     }
 

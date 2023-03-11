@@ -9,8 +9,7 @@ Errors:
       fd_fun =
       { f_span = [12:1-15:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([12:18-22], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([13:3-52],
@@ -38,7 +37,7 @@ Errors:
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
         };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -47,8 +46,8 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([17:10-25], "\\my_php_function");
        fd_fun =
        { f_span = [17:1-30]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), None); f_tparams = []; 
-         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None; 
-         f_body = { fb_ast = [([Pos.none], Noop)] }; f_fun_kind = FSync; 
-         f_user_attributes = []; f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+         f_readonly_ret = None; f_ret = ((void), None); f_params = []; 
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

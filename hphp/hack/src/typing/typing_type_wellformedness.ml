@@ -274,23 +274,25 @@ let where_constrs env = List.concat_map ~f:(where_constr env)
 let requirements env = List.concat_map ~f:(fun (h, _kind) -> hint env h)
 
 let fun_ tenv f =
-  FunUtils.check_params f.f_params;
   let env = { typedef_tparams = []; tenv } in
+  FunUtils.check_params f.f_params;
+  type_hint env f.f_ret @ fun_params env f.f_params
+
+let fun_def tenv fd =
   (* Add type parameters to typing environment and localize the bounds
      and where constraints *)
   let (tenv, ty_err_opt) =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      env.tenv
+      tenv
       ~ignore_errors:true
-      f.f_tparams
-      f.f_where_constraints
+      fd.fd_tparams
+      fd.fd_where_constraints
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  let env = { env with tenv } in
-  type_hint env f.f_ret
-  @ tparams env f.f_tparams
-  @ fun_params env f.f_params
-  @ where_constrs env f.f_where_constraints
+  let env = { typedef_tparams = []; tenv } in
+  tparams env fd.fd_tparams
+  @ fun_ tenv fd.fd_fun
+  @ where_constrs env fd.fd_where_constraints
 
 let enum_opt env =
   let f { e_base; e_constraint; _ } =
@@ -634,6 +636,8 @@ let _toplevel_def tenv = function
       fd_name = _;
       fd_internal = _;
       fd_module = _;
+      fd_tparams = _;
+      fd_where_constraints = _;
     } =
       f
     in

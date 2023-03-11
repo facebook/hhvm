@@ -8,8 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((int), None); f_tparams = []; 
-        f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((int), None);
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:14-17], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x"; 
@@ -20,4 +19,4 @@ Errors:
         f_body = { fb_ast = [([4:3-17], (Return (Some ((int), [4:10-16], (Binop (Star, ((int), [4:10-12], (Lvar ([4:10-12], $x))), ((int), [4:15-16], (Int "2"))))))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

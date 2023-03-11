@@ -38,12 +38,10 @@ let mutate_tparams tparams =
   in
   List.fold ~init:([], SMap.empty) ~f:eliminate_tparam tparams
 
-let mutate_fun fun_ =
-  let (f_tparams, tparam_mapping) = mutate_tparams fun_.A.f_tparams in
+let mutate_fun_def fd =
+  let fun_ = fd.A.fd_fun in
+  let (fd_tparams, tparam_mapping) = mutate_tparams fd.A.fd_tparams in
   let f_params = List.map ~f:(mutate_param tparam_mapping) fun_.A.f_params in
   let f_ret = mutate_type_hint tparam_mapping fun_.A.f_ret in
-  A.{ fun_ with f_tparams; f_params; f_ret }
-
-let mutate_fun_def fd =
-  let fd_fun = mutate_fun fd.A.fd_fun in
-  A.{ fd with fd_fun }
+  let fd_fun = A.{ fun_ with f_params; f_ret } in
+  A.{ fd with fd_fun; fd_tparams }

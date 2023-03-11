@@ -7,9 +7,6 @@
       fd_fun =
       { f_span = [3:1-56]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:49-53], (Hprim Tvoid))));
-        f_tparams =
-        [{ tp_variance = Invariant; tp_name = ([3:26-27], "T"); tp_parameters = []; tp_constraints = [(Constraint_as, ([3:31-34], (Hprim Tnum)))]; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints = [];
         f_params =
         [{ param_annotation = (T); param_type_hint = ((T), (Some ([3:36-37], (Habstr ("T", []))))); 
            param_is_variadic = false; param_pos = [3:38-40]; param_name = "$x"; 
@@ -23,7 +20,10 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([3:26-27], "T"); tp_parameters = []; tp_constraints = [(Constraint_as, ([3:31-34], (Hprim Tnum)))]; tp_reified = Erased; tp_user_attributes = [] }];
+      fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -32,8 +32,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-22], "\\call_generic");
        fd_fun =
        { f_span = [5:1-8:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:43-47], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:43-47], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([5:23-26], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [5:27-29]; param_name = "$x"; 
@@ -57,7 +56,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -66,8 +65,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([10:10-27], "\\call_generic_cast");
        fd_fun =
        { f_span = [10:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([10:48-52], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([10:48-52], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([10:28-31], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [10:32-34]; param_name = "$x"; 
@@ -95,4 +93,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

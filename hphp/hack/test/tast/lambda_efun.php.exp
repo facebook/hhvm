@@ -9,8 +9,7 @@ Errors:
       fd_fun =
       { f_span = [12:1-25:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([13:3-10], (Expr ((int), [13:3-9], (Binop ((Eq None), ((int), [13:3-5], (Lvar ([13:3-5], $y))), ((int), [13:8-9], (Int "2")))))));
@@ -21,8 +20,7 @@ Errors:
                     (((function(int $z): int)), [15:8-22],
                      (Lfun (
                         { f_span = [15:8-22]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None); 
-                          f_tparams = []; f_where_constraints = [];
+                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None);
                           f_params =
                           [{ param_annotation = (int); param_type_hint = ((int), None); 
                              param_is_variadic = false; param_pos = [15:8-10]; 
@@ -51,7 +49,7 @@ Errors:
                         { ef_fun =
                           { f_span = [18:8-20:4]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((int), None); f_tparams = []; f_where_constraints = [];
+                            f_ret = ((int), None);
                             f_params =
                             [{ param_annotation = (int); param_type_hint = ((int), None); 
                                param_is_variadic = false; param_pos = [18:17-19]; 
@@ -78,8 +76,7 @@ Errors:
                     (((function(int $a, int $b): int)), [23:8-28],
                      (Lfun (
                         { f_span = [23:8-28]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None); 
-                          f_tparams = []; f_where_constraints = [];
+                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None);
                           f_params =
                           [{ param_annotation = (int); param_type_hint = ((int), None); 
                              param_is_variadic = false; param_pos = [23:9-11]; 
@@ -114,4 +111,4 @@ Errors:
         (Some ([2:1-10:4],
                "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */"))
         };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

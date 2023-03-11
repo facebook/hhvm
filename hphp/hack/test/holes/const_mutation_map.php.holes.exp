@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-31], "\\const_mutation_immmap");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:57-61], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:57-61], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (ImmMap<string, int>);
            param_type_hint = ((ImmMap<string, int>), (Some ([3:32-50], (Happly (([3:32-38], "\\HH\\ImmMap"), [([3:39-45], (Hprim Tstring)); ([3:46-49], (Hprim Tint))]))))); 
@@ -30,7 +29,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -39,8 +38,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-33], "\\const_mutation_constmap");
        fd_fun =
        { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([8:61-65], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:61-65], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ConstMap<string, int>);
             param_type_hint = ((ConstMap<string, int>), (Some ([8:34-54], (Happly (([8:34-42], "\\ConstMap"), [([8:43-49], (Hprim Tstring)); ([8:50-53], (Hprim Tint))])))));
@@ -63,4 +61,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

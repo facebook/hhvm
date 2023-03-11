@@ -49,12 +49,6 @@
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((TR), (Some ([10:54-56], (Habstr ("TR", [])))));
-         f_tparams =
-         [{ tp_variance = Invariant; tp_name = ([10:17-18], "T"); tp_parameters = []; 
-            tp_constraints = [(Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))]; 
-            tp_reified = Erased; tp_user_attributes = [] };
-           { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))];
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([10:44-45], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [10:46-51]; param_name = "$left"; 
@@ -75,7 +69,13 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([10:17-18], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       fd_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -93,12 +93,6 @@
                       hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
                       hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([16:4-8], (Hprim Tvoid)); 
                       hf_is_readonly_return = None }))));
-         f_tparams =
-         [{ tp_variance = Invariant; tp_name = ([14:17-18], "T"); tp_parameters = []; 
-            tp_constraints = [(Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))]; 
-            tp_reified = Erased; tp_user_attributes = [] };
-           { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))];
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([14:44-45], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [14:46-51]; param_name = "$left"; 
@@ -114,7 +108,7 @@
                        (Lfun (
                           { f_span = [17:10-38]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((void), None); f_tparams = []; f_where_constraints = [];
+                            f_ret = ((void), None);
                             f_params =
                             [{ param_annotation = (TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr ("TR", []))))); 
                                param_is_variadic = false; param_pos = [17:14-16]; 
@@ -141,7 +135,13 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([14:17-18], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       fd_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -150,8 +150,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-18], "\\my_error");
        fd_fun =
        { f_span = [20:1-27:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([20:62-66], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([20:62-66], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:19-35], (Happly (([20:19-35], "\\WithTypeConstant"), []))))); 
             param_is_variadic = false; param_pos = [20:36-38]; param_name = "$x"; 
@@ -192,4 +191,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -805,8 +805,6 @@ and ('ex, 'en) fun_ = {
   f_readonly_ret: Ast_defs.readonly_kind option; [@transform.opaque]
       (** Whether the return value is readonly *)
   f_ret: 'ex type_hint; [@transform.explicit]
-  f_tparams: ('ex, 'en) tparam list;
-  f_where_constraints: where_constraint_hint list;
   f_params: ('ex, 'en) fun_param list;
   f_ctxs: contexts option;
   f_unsafe_ctxs: contexts option;
@@ -1071,6 +1069,8 @@ and ('ex, 'en) fun_def = {
   fd_fun: ('ex, 'en) fun_;
   fd_internal: bool;
   fd_module: sid option;
+  fd_tparams: ('ex, 'en) tparam list;
+  fd_where_constraints: where_constraint_hint list;
 }
 
 and ('ex, 'en) module_def = {

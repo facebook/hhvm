@@ -1738,8 +1738,6 @@ fn p_lambda_expression<'a>(
         annotation: (),
         readonly_ret,
         ret: ast::TypeHint((), ret),
-        tparams: vec![],
-        where_constraints: vec![],
         body: ast::FuncBody { fb_ast: body },
         fun_kind: mk_fun_kind(suspension_kind, yield_),
         params,
@@ -2164,8 +2162,6 @@ fn p_prefixed_code_expr<'a>(
             annotation: (),
             readonly_ret: None,
             ret: ast::TypeHint((), None),
-            tparams: vec![],
-            where_constraints: vec![],
             body: ast::FuncBody { fb_ast: body },
             fun_kind: mk_fun_kind(SuspensionKind::SKSync, yield_),
             params: vec![],
@@ -2351,8 +2347,6 @@ fn p_anonymous_function<'a>(
         annotation: (),
         readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
         ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
-        tparams: vec![],
-        where_constraints: vec![],
         body: ast::FuncBody { fb_ast: body },
         fun_kind: mk_fun_kind(suspension_kind, yield_),
         params,
@@ -2385,8 +2379,6 @@ fn p_awaitable_creation_expr<'a>(
         readonly_this: None, // set in process_readonly_expr
         readonly_ret: None,  // TODO: awaitable creation expression
         ret: ast::TypeHint((), None),
-        tparams: vec![],
-        where_constraints: vec![],
         body: ast::FuncBody {
             fb_ast: if blk.is_empty() {
                 let pos = p_pos(&c.compound_statement, env);
@@ -5615,8 +5607,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 ret,
                 readonly_ret: hdr.readonly_return,
-                tparams: hdr.type_parameters,
-                where_constraints: hdr.constrs,
                 params: hdr.parameters,
                 ctxs: hdr.contexts,
                 unsafe_ctxs: hdr.unsafe_contexts,
@@ -5635,6 +5625,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 fun,
                 internal: hdr.internal,
                 module: None,
+                tparams: hdr.type_parameters,
+                where_constraints: hdr.constrs,
             })])
         }
         ClassishDeclaration(c) if contains_class_body(c) => {

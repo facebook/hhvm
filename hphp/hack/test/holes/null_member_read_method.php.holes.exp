@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-38], "\\null_member_read_method_null");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:51-55], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:51-55], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (null); param_type_hint = ((null), (Some ([3:39-43], (Hprim Tnull)))); 
            param_is_variadic = false; param_pos = [3:44-47]; param_name = "$xs"; 
@@ -28,7 +27,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -37,8 +36,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-42], "\\null_member_read_method_nullable");
        fd_fun =
        { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([8:58-62], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:58-62], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:43-50], (Hoption ([8:44-50], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [8:51-54]; param_name = "$xs"; 
@@ -60,7 +58,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -69,8 +67,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([13:10-39], "\\null_member_read_method_mixed");
        fd_fun =
        { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([13:53-57], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([13:53-57], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:40-45], Hmixed))); 
             param_is_variadic = false; param_pos = [13:46-49]; param_name = "$xs"; 
@@ -92,4 +89,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -16,8 +16,6 @@ Errors:
       fd_fun =
       { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:44-48], (Hprim Tvoid))));
-        f_tparams = [{ tp_variance = Invariant; tp_name = ([3:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
-        f_where_constraints = [];
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:15-20], Hmixed))); 
            param_is_variadic = false; param_pos = [3:21-23]; param_name = "$m"; 
@@ -58,4 +56,6 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None;
+      fd_tparams = [{ tp_variance = Invariant; tp_name = ([3:12-13], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }]; 
+      fd_where_constraints = [] })

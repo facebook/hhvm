@@ -36,8 +36,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\f");
        fd_fun =
        { f_span = [7:1-36]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:29-33], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:29-33], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (keyset<int>); param_type_hint = ((keyset<int>), (Some ([7:12-23], (Happly (([7:12-18], "\\HH\\keyset"), [([7:19-22], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$f"; 
@@ -47,7 +46,7 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -56,8 +55,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-21], "\\call_keyset");
        fd_fun =
        { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([10:3-17], (Happly (([10:3-9], "\\HH\\keyset"), [([10:10-16], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [10:18-20]; param_name = "$f"; 
@@ -88,7 +86,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -97,8 +95,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([21:10-26], "\\call_keyset_cast");
        fd_fun =
        { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (keyset<string>); param_type_hint = ((keyset<string>), (Some ([22:3-17], (Happly (([22:3-9], "\\HH\\keyset"), [([22:10-16], (Hprim Tstring))])))));
             param_is_variadic = false; param_pos = [22:18-20]; param_name = "$f"; 
@@ -147,4 +144,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

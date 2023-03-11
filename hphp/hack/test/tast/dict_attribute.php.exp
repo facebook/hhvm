@@ -347,8 +347,7 @@
        fd_mode = Mstrict; fd_name = ([20:10-12], "\\ff");
        fd_fun =
        { f_span = [19:1-20:60]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [20:48-50]; param_name = "$i"; 
@@ -376,7 +375,7 @@
             }
            ];
          f_external = false; f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [22:1-30:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

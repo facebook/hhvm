@@ -5684,7 +5684,6 @@ and closure_make
   let env =
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
-  let (env, tparams) = List.map_env env f.f_tparams ~f:type_param in
   let () =
     if sdt_dynamic_check_required then
       Fn.ignore
@@ -5705,8 +5704,6 @@ and closure_make
       Aast.f_span = f.f_span;
       Aast.f_ret = (hret.et_type, hint_of_type_hint f.f_ret);
       Aast.f_readonly_ret = f.f_readonly_ret;
-      Aast.f_tparams = tparams;
-      Aast.f_where_constraints = f.f_where_constraints;
       Aast.f_fun_kind = f.f_fun_kind;
       Aast.f_user_attributes = user_attributes;
       Aast.f_body = { Aast.fb_ast = tb };
@@ -9523,7 +9520,7 @@ and file_attributes env file_attrs =
           Aast.fa_namespace = fa.fa_namespace;
         } ))
 
-and type_param env t =
+and type_param env (t : Nast.tparam) =
   let (env, user_attributes) =
     attributes_check_def env SN.AttributeKinds.typeparam t.tp_user_attributes
   in

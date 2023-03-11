@@ -37,8 +37,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-11], "\\o");
        fd_fun =
        { f_span = [7:1-51]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:44-48], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:44-48], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (KeyedTraversable<int, int>);
             param_type_hint = ((KeyedTraversable<int, int>), (Some ([7:12-38], (Happly (([7:12-28], "\\HH\\KeyedTraversable"), [([7:29-32], (Hprim Tint)); ([7:34-37], (Hprim Tint))])))));
@@ -49,7 +48,7 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -58,8 +57,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-32], "\\call_keyed_traversable");
        fd_fun =
        { f_span = [9:1-24:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (KeyedTraversable<string, int>);
             param_type_hint = ((KeyedTraversable<string, int>), (Some ([10:3-32], (Happly (([10:3-19], "\\HH\\KeyedTraversable"), [([10:20-26], (Hprim Tstring)); ([10:28-31], (Hprim Tint))])))));
@@ -130,7 +128,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -139,8 +137,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([26:10-37], "\\call_keyed_traversable_cast");
        fd_fun =
        { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (KeyedTraversable<string, int>);
             param_type_hint = ((KeyedTraversable<string, int>), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))])))));
@@ -227,4 +224,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<76b37dd07aa17518fc48f2833ca8925b>>
+// @generated SignedSource<<a51e59411579a3e0c77c7bad8f31a752>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -785,15 +785,13 @@ impl Transform for Fun_ {
             Fun_ {
                 annotation: ref mut __binding_2,
                 ret: ref mut __binding_4,
-                tparams: ref mut __binding_5,
-                where_constraints: ref mut __binding_6,
-                params: ref mut __binding_7,
-                ctxs: ref mut __binding_8,
-                unsafe_ctxs: ref mut __binding_9,
-                body: ref mut __binding_10,
-                user_attributes: ref mut __binding_12,
-                external: ref mut __binding_13,
-                doc_comment: ref mut __binding_14,
+                params: ref mut __binding_5,
+                ctxs: ref mut __binding_6,
+                unsafe_ctxs: ref mut __binding_7,
+                body: ref mut __binding_8,
+                user_attributes: ref mut __binding_10,
+                external: ref mut __binding_11,
+                doc_comment: ref mut __binding_12,
                 ..
             } => {
                 {
@@ -823,18 +821,12 @@ impl Transform for Fun_ {
                     __binding_8.transform(env, pass)
                 }
                 {
-                    __binding_9.transform(env, pass)
-                }
-                {
                     __binding_10.transform(env, pass)
                 }
                 {
-                    __binding_12.transform(env, pass)
+                    __binding_11.transform(env, pass)
                 }
-                {
-                    __binding_13.transform(env, pass)
-                }
-                { __binding_14.transform(env, pass) }
+                { __binding_12.transform(env, pass) }
             }
         }
     }
@@ -1723,6 +1715,8 @@ impl Transform for FunDef {
                 fun: ref mut __binding_4,
                 internal: ref mut __binding_5,
                 module: ref mut __binding_6,
+                tparams: ref mut __binding_7,
+                where_constraints: ref mut __binding_8,
                 ..
             } => {
                 {
@@ -1740,7 +1734,13 @@ impl Transform for FunDef {
                 {
                     __binding_5.transform(env, pass)
                 }
-                { __binding_6.transform(env, pass) }
+                {
+                    __binding_6.transform(env, pass)
+                }
+                {
+                    __binding_7.transform(env, pass)
+                }
+                { __binding_8.transform(env, pass) }
             }
         }
     }

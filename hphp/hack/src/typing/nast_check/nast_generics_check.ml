@@ -176,10 +176,10 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_fun_ _ fun_ =
-      let seen = check_tparams ~nested:false SMap.empty fun_.f_tparams in
+    method! at_fun_def _ fd =
+      let seen = check_tparams ~nested:false SMap.empty fd.fd_tparams in
       (* Due to ~nested:false above, the function tparams are still marked as in scope *)
-      check_where_constraints seen fun_.f_where_constraints
+      check_where_constraints seen fd.fd_where_constraints
 
     method! at_class_ _ = check_class
 

@@ -25,8 +25,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-14], "\\test");
        fd_fun =
        { f_span = [5:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([5:26-30], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (shape('x' => int, ?'y' => int)); param_type_hint = ((shape('x' => int, ?'y' => int)), (Some ([5:15-20], (Happly (([5:15-20], "\\Point"), [])))));
             param_is_variadic = false; param_pos = [5:21-23]; param_name = "$p"; 
@@ -74,4 +73,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

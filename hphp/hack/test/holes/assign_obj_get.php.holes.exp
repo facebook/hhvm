@@ -27,8 +27,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-27], "\\assign_object_get");
        fd_fun =
        { f_span = [7:1-10:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:36-40], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:36-40], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([7:28-29], (Happly (([7:28-29], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [7:30-32]; param_name = "$x"; 
@@ -47,4 +46,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

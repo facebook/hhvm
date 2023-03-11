@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [3:1-11:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((bool), (Some ([3:30-34], (Hprim Tbool)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-10], (Expr ((int), [4:3-9], (Binop ((Eq None), ((int), [4:3-5], (Lvar ([4:3-5], $x))), ((int), [4:8-9], (Int "3")))))));
@@ -19,4 +18,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

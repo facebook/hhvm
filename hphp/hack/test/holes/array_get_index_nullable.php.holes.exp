@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-34], "\\array_get_index_nullable");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:52-56], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:52-56], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (?vec<int>); param_type_hint = ((?vec<int>), (Some ([3:35-44], (Hoption ([3:36-44], (Happly (([3:36-39], "\\HH\\vec"), [([3:40-43], (Hprim Tint))])))))));
            param_is_variadic = false; param_pos = [3:45-48]; param_name = "$xs"; 
@@ -24,4 +23,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

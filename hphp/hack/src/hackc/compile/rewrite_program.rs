@@ -171,8 +171,6 @@ fn extract_debugger_main(
         readonly_this: None, // TODO(readonly): readonly_this in closure_convert
         readonly_ret: None,  // TODO(readonly): readonly_ret in closure_convert
         ret: TypeHint((), None),
-        tparams: vec![],
-        where_constraints: vec![],
         params,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)
@@ -194,6 +192,8 @@ fn extract_debugger_main(
         // TODO(T116039119): Populate value with presence of internal attribute
         internal: false,
         module: None,
+        tparams: vec![],
+        where_constraints: vec![],
     };
     let mut new_defs = vec![Def::mk_fun(fd)];
     new_defs.append(&mut defs);

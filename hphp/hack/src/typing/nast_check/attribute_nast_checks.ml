@@ -133,17 +133,13 @@ let handler =
         | param :: _ ->
           Errors.add_nast_check_error
           @@ Nast_check_error.Entrypoint_arguments param.param_pos);
-        (match variadic_param with
+        match variadic_param with
         | Some p ->
           Errors.add_nast_check_error
           @@ Nast_check_error.Entrypoint_arguments p.param_pos
-        | None -> ());
-        match f.f_tparams with
-        | [] -> ()
-        | tparam :: _ ->
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Entrypoint_generics (fst tparam.tp_name)
+        | None -> ()
       end;
+
       (* Ban variadic arguments on memoized functions. *)
       (if has_attribute "__Memoize" f.f_user_attributes then
         match variadic_param with
@@ -180,6 +176,15 @@ let handler =
         params
 
     method! at_fun_def _env fd =
+      (* Ban arguments on functions with the __EntryPoint attribute. *)
+      if has_attribute "__EntryPoint" fd.fd_fun.f_user_attributes then begin
+        match fd.fd_tparams with
+        | [] -> ()
+        | tparam :: _ ->
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Entrypoint_generics (fst tparam.tp_name)
+      end;
+
       check_soft_internal_without_internal
         fd.fd_internal
         fd.fd_fun.f_user_attributes

@@ -11,7 +11,7 @@ use naming_special_names_rust as sn;
 use oxidized::naming_error::NamingError;
 use oxidized::naming_error::UnsupportedFeature;
 use oxidized::nast::Class_;
-use oxidized::nast::Fun_;
+use oxidized::nast::FunDef;
 use oxidized::nast::Hint;
 use oxidized::nast::Hint_;
 use oxidized::nast::Method_;
@@ -237,8 +237,8 @@ impl Pass for ValidateHintHabstrPass {
         ControlFlow::Continue(())
     }
 
-    fn on_ty_fun__top_down(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
-        // [Fun_]s exist at the top level so there shouldn't be anything
+    fn on_ty_fun_def_top_down(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
+        // FunDefs exist at the top level so there shouldn't be anything
         // in scope but we clear anyway
         self.clear_tparams();
         self.check_tparams(env, &elem.tparams, false);

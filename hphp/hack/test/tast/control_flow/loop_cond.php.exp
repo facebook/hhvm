@@ -21,11 +21,11 @@
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((?A), (Some ([5:23-25], (Hoption ([5:24-25], (Happly (([5:24-25], "\\A"), []))))))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, ((function(): void))))))))] };
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_body = { fb_ast = [([6:3-18], (Return (Some ((A), [6:10-17], (New (((A), [6:14-15], (CI ([6:14-15], "\\A"))), [], [], None, ((function(): void))))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -35,8 +35,7 @@
        fd_fun =
        { f_span = [9:1-14:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([9:20-24], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([10:3-16],
@@ -56,7 +55,7 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -66,8 +65,7 @@
        fd_fun =
        { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([16:18-22], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([17:3-18:4],
@@ -82,4 +80,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

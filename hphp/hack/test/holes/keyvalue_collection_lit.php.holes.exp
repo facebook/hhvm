@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [3:2-6:3]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((dict<int, int>), (Some ([3:37-50], (Happly (([3:37-41], "\\HH\\dict"), [([3:42-45], (Hprim Tint)); ([3:46-49], (Hprim Tint))]))))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:4-38],
@@ -22,4 +21,4 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

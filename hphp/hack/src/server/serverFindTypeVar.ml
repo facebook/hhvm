@@ -59,7 +59,7 @@ let find_tparam_def
     ('a, 'b) Aast.tparam option =
   let def_at_pos = List.find program ~f:(cls_or_fun_at_pos pos) in
   match def_at_pos with
-  | Some (Fun fd) -> tparam_with_name fd.fd_fun.f_tparams name
+  | Some (Fun fd) -> tparam_with_name fd.fd_tparams name
   | Some (Class c) ->
     let class_tparam = tparam_with_name c.c_tparams name in
     (match class_tparam with

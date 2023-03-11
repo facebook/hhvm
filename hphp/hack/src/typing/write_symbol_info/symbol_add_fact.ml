@@ -476,9 +476,7 @@ let func_defn ctx source_text fd decl_id progress =
   let elem = fd.fd_fun in
   let prog = namespace_decl_opt fd.fd_namespace progress in
   let tparams =
-    List.map
-      elem.f_tparams
-      ~f:(Build_json.build_type_param_json ctx source_text)
+    List.map fd.fd_tparams ~f:(Build_json.build_type_param_json ctx source_text)
   in
   let (mf, prog) = module_field fd.fd_module fd.fd_internal prog in
   let (signature, prog) =

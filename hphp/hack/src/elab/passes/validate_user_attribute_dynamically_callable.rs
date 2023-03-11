@@ -6,7 +6,7 @@ use std::ops::ControlFlow;
 
 use naming_special_names_rust as sn;
 use oxidized::naming_error::NamingError;
-use oxidized::nast::Fun_;
+use oxidized::nast::FunDef;
 use oxidized::nast::Method_;
 use oxidized::nast::Pos;
 use oxidized::nast::ReifyKind;
@@ -22,8 +22,8 @@ use crate::Pass;
 pub struct ValidaetUserAttributeDynamicallyCallable;
 
 impl Pass for ValidaetUserAttributeDynamicallyCallable {
-    fn on_ty_fun__top_down(&mut self, env: &Env, elem: &mut Fun_) -> ControlFlow<()> {
-        dynamically_callable_attr_pos(&elem.user_attributes)
+    fn on_ty_fun_def_top_down(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
+        dynamically_callable_attr_pos(&elem.fun.user_attributes)
             .into_iter()
             .for_each(|pos| {
                 if has_reified_generics(&elem.tparams) {

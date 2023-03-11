@@ -16,11 +16,11 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([17:10-18], "\\func_foo");
        fd_fun =
        { f_span = [17:1-23]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_ret = ((), None); f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -29,11 +29,11 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-13], "\\foo");
        fd_fun =
        { f_span = [18:1-18]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_ret = ((), None); f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -42,11 +42,11 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([22:12-20], "\\My\\Full\\func_foo");
        fd_fun =
        { f_span = [22:3-25]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_readonly_ret = None; f_ret = ((), None); f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -55,7 +55,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([26:12-17], "\\HH\\Lib\\Vec\\range");
        fd_fun =
        { f_span = [26:3-28]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), None); f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), None);
          f_params =
          [{ param_annotation = (); param_type_hint = ((), None); param_is_variadic = false; 
             param_pos = [26:18-20]; param_name = "$_"; param_expr = None; 
@@ -69,5 +69,5 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

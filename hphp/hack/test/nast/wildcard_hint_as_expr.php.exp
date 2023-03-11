@@ -42,8 +42,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-31], "\\wildcard_hint_is_expr");
        fd_fun =
        { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((), (Some ([8:43-47], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((), (Some ([8:43-47], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([8:32-37], (Happly (([8:32-37], "\\AAAAA"), []))))); 
             param_is_variadic = false; param_pos = [8:38-40]; param_name = "$x"; 
@@ -62,5 +61,5 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

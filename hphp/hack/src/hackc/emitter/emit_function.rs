@@ -41,7 +41,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
     let mut user_attrs: Vec<Attribute<'arena>> = emit_attribute::from_asts(e, &f.user_attributes)?;
-    user_attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
+    user_attrs.extend(emit_attribute::add_reified_attribute(alloc, &fd.tparams));
     let memoized = user_attrs
         .iter()
         .any(|a| ua::is_memoized(a.name.unsafe_as_str()));
@@ -93,7 +93,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     }
 
-    let mut coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
+    let mut coeffects = Coeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &fd.tparams, vec![]);
     if is_meth_caller {
         coeffects = coeffects.with_caller(alloc)
     }
@@ -146,7 +146,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
                 ret: f.ret.1.as_ref(),
                 ast_params: &f.params,
                 call_context,
-                immediate_tparams: &f.tparams,
+                immediate_tparams: &fd.tparams,
                 class_tparam_names: &[],
             },
         )?

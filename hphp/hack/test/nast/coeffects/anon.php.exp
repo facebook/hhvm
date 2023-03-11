@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [2:1-8:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([2:33-37], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([3:3-63],
@@ -21,7 +20,6 @@
                          { f_span = [3:18-62]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
                            f_ret = ((), (Some ([3:38-41], (Hprim Tint)))); 
-                           f_tparams = []; f_where_constraints = []; 
                            f_params = []; f_ctxs = (Some ([3:28-36], [([3:29-35], (Happly (([3:29-35], "\\HH\\Contexts\\output"), [])))]));
                            f_unsafe_ctxs = (Some ([3:28-36], [([3:29-35], (Happly (([3:29-35], "\\HH\\Contexts\\Unsafe\\output"), [])))]));
                            f_body = { fb_ast = [([3:51-60], (Return (Some ((), [3:58-59], (Int "0")))))] }; 
@@ -39,8 +37,7 @@
                         { ef_fun =
                           { f_span = [6:18-63]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((), None); f_tparams = []; f_where_constraints = []; 
-                            f_params = []; f_ctxs = (Some ([6:28-37], [([6:29-36], (Happly (([6:29-36], "\\HH\\Contexts\\non_det"), [])))]));
+                            f_ret = ((), None); f_params = []; f_ctxs = (Some ([6:28-37], [([6:29-36], (Happly (([6:29-36], "\\HH\\Contexts\\non_det"), [])))]));
                             f_unsafe_ctxs = (Some ([6:28-37], [([6:29-36], (Happly (([6:29-36], "\\HH\\Contexts\\Unsafe\\non_det"), [])))]));
                             f_body = { fb_ast = [([6:51-61], (Return (Some ((), [6:58-60], (Lvar ([6:58-60], $x))))))] }; 
                             f_fun_kind = FSync; f_user_attributes = []; 
@@ -57,7 +54,6 @@
                           { f_span = [7:11-56]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
                             f_ret = ((), (Some ([7:27-30], (Hprim Tint)))); 
-                            f_tparams = []; f_where_constraints = []; 
                             f_params = []; f_ctxs = (Some ([7:21-25], [([7:22-24], (Happly (([7:22-24], "\\HH\\Contexts\\rx"), [])))]));
                             f_unsafe_ctxs = (Some ([7:21-25], [([7:22-24], (Happly (([7:22-24], "\\HH\\Contexts\\Unsafe\\rx"), [])))]));
                             f_body = { fb_ast = [([7:44-54], (Return (Some ((), [7:51-53], (Lvar ([7:51-53], $x))))))] }; 
@@ -69,5 +65,5 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

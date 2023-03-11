@@ -11,8 +11,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((mixed), (Some ([3:18-23], Hmixed))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-37], (Expr ((nothing), [4:3-36], (Method_caller (([4:15-28], "\\NoSuchClass"), ([4:30-35], "foo"))))))] }; 
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-37], (Expr ((nothing), [4:3-36], (Method_caller (([4:15-28], "\\NoSuchClass"), ([4:30-35], "foo"))))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

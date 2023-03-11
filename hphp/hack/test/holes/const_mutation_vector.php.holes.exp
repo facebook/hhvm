@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-34], "\\const_mutation_immvector");
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:56-60], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:56-60], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (ImmVector<int>); param_type_hint = ((ImmVector<int>), (Some ([3:35-49], (Happly (([3:35-44], "\\HH\\ImmVector"), [([3:45-48], (Hprim Tint))])))));
            param_is_variadic = false; param_pos = [3:50-52]; param_name = "$x"; 
@@ -28,7 +27,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -37,8 +36,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([8:10-36], "\\const_mutation_constvector");
        fd_fun =
        { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([8:60-64], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([8:60-64], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (ConstVector<int>); param_type_hint = ((ConstVector<int>), (Some ([8:37-53], (Happly (([8:37-48], "\\ConstVector"), [([8:49-52], (Hprim Tint))])))));
             param_is_variadic = false; param_pos = [8:54-56]; param_name = "$x"; 
@@ -60,4 +58,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

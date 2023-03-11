@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:16-19], "\\foo");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:29-45], (Happly (([3:29-38], "\\HH\\Awaitable"), [([3:39-44], Hmixed)]))))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((Awaitable<int>), (Some ([3:29-45], (Happly (([3:29-38], "\\HH\\Awaitable"), [([3:39-44], Hmixed)])))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:20-23], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:24-26]; param_name = "$x"; 
@@ -17,7 +16,7 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((int), [4:10-12], (Lvar ([4:10-12], $x))))))] }; 
         f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Class
      { c_span = [7:1-11:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
        c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 

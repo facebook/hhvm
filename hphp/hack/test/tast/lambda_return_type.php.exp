@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:3-22],
@@ -16,8 +15,7 @@
                (((function(string $s): string)), [5:3-21],
                 (Lfun (
                    { f_span = [5:3-21]; f_readonly_this = None; f_annotation = (); 
-                     f_readonly_ret = None; f_ret = ((string), None); 
-                     f_tparams = []; f_where_constraints = [];
+                     f_readonly_ret = None; f_ret = ((string), None);
                      f_params =
                      [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:4-10], (Hprim Tstring)))); 
                         param_is_variadic = false; param_pos = [5:11-13]; 
@@ -33,7 +31,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -43,8 +41,7 @@
        fd_fun =
        { f_span = [8:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((Awaitable<void>), (Some ([8:21-36], (Happly (([8:21-30], "\\HH\\Awaitable"), [([8:31-35], (Hprim Tvoid))]))))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([10:3-12:5],
@@ -57,8 +54,7 @@
                          (Lfun (
                             { f_span = [10:9-12:4]; f_readonly_this = None; 
                               f_annotation = (); f_readonly_ret = None; 
-                              f_ret = ((Awaitable<int>), None); f_tparams = []; 
-                              f_where_constraints = []; f_params = []; 
+                              f_ret = ((Awaitable<int>), None); f_params = []; 
                               f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([11:5-15], (Return (Some ((int), [11:12-14], (Int "42")))))] }; 
                               f_fun_kind = FAsync; f_user_attributes = []; 
                               f_external = false; f_doc_comment = None },
@@ -68,4 +64,4 @@
            };
          f_fun_kind = FAsync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

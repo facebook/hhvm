@@ -26,12 +26,6 @@
        fd_fun =
        { f_span = [7:1-10:18]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((), (Some ([7:61-65], (Hprim Tvoid))));
-         f_tparams =
-         [{ tp_variance = Invariant; tp_name = ([7:38-40], "T1"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
-           { tp_variance = Invariant; tp_name = ([7:42-44], "T2"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints =
-         [(([9:3-5], (Habstr ("T1", []))), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))));
-           (([10:3-5], (Habstr ("T2", []))), Constraint_as, ([10:9-15], (Haccess (([10:9-11], (Habstr ("T1", []))), [([10:13-15], "TA")]))))];
          f_params =
          [{ param_annotation = (); param_type_hint = ((), (Some ([7:46-48], (Habstr ("T1", []))))); 
             param_is_variadic = false; param_pos = [7:49-51]; param_name = "$x"; 
@@ -45,5 +39,12 @@
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([7:38-40], "T1"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([7:42-44], "T2"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       fd_where_constraints =
+       [(([9:3-5], (Habstr ("T1", []))), Constraint_as, ([9:9-10], (Happly (([9:9-10], "\\C"), []))));
+         (([10:3-5], (Habstr ("T2", []))), Constraint_as, ([10:9-15], (Haccess (([10:9-11], (Habstr ("T1", []))), [([10:13-15], "TA")]))))]
+       })
   ]

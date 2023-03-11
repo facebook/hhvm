@@ -6,8 +6,7 @@
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-29], "\\array_append_keyset");
       fd_fun =
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:40-44], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:40-44], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:30-34], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:35-37]; param_name = "$x"; 
@@ -29,7 +28,7 @@
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -38,8 +37,7 @@
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-40], "\\array_append_keyset_string_opt");
        fd_fun =
        { f_span = [9:1-13:2]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([9:54-58], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([9:54-58], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([9:41-48], (Hoption ([9:42-48], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [9:49-51]; param_name = "$x"; 
@@ -62,4 +60,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

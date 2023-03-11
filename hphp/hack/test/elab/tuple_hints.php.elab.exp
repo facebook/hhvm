@@ -130,8 +130,6 @@ Program(
                             ),
                         ),
                     ),
-                    tparams: [],
-                    where_constraints: [],
                     params: [
                         FunParam {
                             annotation: (),
@@ -195,6 +193,8 @@ Program(
                 },
                 internal: false,
                 module: None,
+                tparams: [],
+                where_constraints: [],
             },
         ),
     ],

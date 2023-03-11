@@ -18,8 +18,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-16:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:15-19], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-        f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-20],
@@ -50,7 +49,7 @@ Errors:
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -60,12 +59,6 @@ Errors:
        fd_fun =
        { f_span = [18:1-20:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((T), (Some ([18:78-79], (Habstr ("T", [])))));
-         f_tparams =
-         [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = []; 
-            tp_constraints = [(Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))]; 
-            tp_reified = Erased; tp_user_attributes = [] }
-           ];
-         f_where_constraints = [];
          f_params =
          [{ param_annotation = (HH\Lib\Regex\Pattern<T>);
             param_type_hint = ((HH\Lib\Regex\Pattern<T>), (Some ([18:43-66], (Happly (([18:43-63], "\\HH\\Lib\\Regex\\Pattern"), [([18:64-65], (Habstr ("T", [])))]))))); 
@@ -84,7 +77,13 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([18:18-19], "T"); tp_parameters = []; 
+          tp_constraints = [(Constraint_as, ([18:23-41], (Happly (([18:23-41], "\\HH\\Lib\\Regex\\Match"), []))))]; 
+          tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -94,8 +93,7 @@ Errors:
        fd_fun =
        { f_span = [24:1-42:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([24:25-29], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([25:3-34],
@@ -191,7 +189,7 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -201,8 +199,7 @@ Errors:
        fd_fun =
        { f_span = [46:1-59:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([46:31-35], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([47:3-21], (Expr ((nothing), [47:3-20], (Binop ((Eq None), ((nothing), [47:3-8], (Lvar ([47:3-8], $bad0))), ((nothing), [47:13-20], (String "Hello")))))));
@@ -240,7 +237,7 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -250,8 +247,7 @@ Errors:
        fd_fun =
        { f_span = [61:1-65:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([61:35-39], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([64:3-77],
@@ -265,4 +261,4 @@ Errors:
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

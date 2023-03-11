@@ -37,10 +37,10 @@ module Env = struct
     in
     Naming_phase_env.{ t with elab_happly_hint }
 
-  let in_fun_def t Aast.{ fd_fun; _ } =
+  let in_fun_def t Aast.{ fd_tparams; _ } =
     let elab_happly_hint =
       Naming_phase_env.Elab_happly_hint.
-        { tparams = add_tparams fd_fun.Aast.f_tparams SSet.empty }
+        { tparams = add_tparams fd_tparams SSet.empty }
     in
     Naming_phase_env.{ t with elab_happly_hint }
 

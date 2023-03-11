@@ -7,12 +7,6 @@
       fd_fun =
       { f_span = [2:1-4:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((dynamic), (Some ([2:54-61], Hdynamic)));
-        f_tparams =
-        [{ tp_variance = Invariant; tp_name = ([2:14-15], "T"); tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([2:19-33], (Hoption ([2:20-33], (Happly (([2:20-29], "\\HH\\Container"), [([2:30-32], (Habstr ("Tv", [])))]))))))]; 
-           tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([2:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints = [];
         f_params =
         [{ param_annotation = (T); param_type_hint = ((T), (Some ([2:45-46], (Habstr ("T", []))))); 
            param_is_variadic = false; param_pos = [2:47-51]; param_name = "$arr"; 
@@ -22,7 +16,13 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([3:3-16], (Return (Some ((bool), [3:10-15], False))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None;
+      fd_tparams =
+      [{ tp_variance = Invariant; tp_name = ([2:14-15], "T"); tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([2:19-33], (Hoption ([2:20-33], (Happly (([2:20-29], "\\HH\\Container"), [([2:30-32], (Habstr ("Tv", [])))]))))))]; 
+         tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([2:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -32,11 +32,10 @@
        fd_fun =
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([5:17-24], Hdynamic))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (([6:10-18], Vec), None, []))))))] }; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (([6:10-18], Vec), None, []))))))] };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -46,12 +45,6 @@
        fd_fun =
        { f_span = [8:1-10:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((Tv), (Some ([8:48-50], (Habstr ("Tv", [])))));
-         f_tparams =
-         [{ tp_variance = Invariant; tp_name = ([8:14-15], "T"); tp_parameters = [];
-            tp_constraints = [(Constraint_as, ([8:19-33], (Hoption ([8:20-33], (Happly (([8:20-29], "\\HH\\Container"), [([8:30-32], (Habstr ("Tv", [])))]))))))]; 
-            tp_reified = Erased; tp_user_attributes = [] };
-           { tp_variance = Invariant; tp_name = ([8:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints = [];
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([8:39-40], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [8:41-45]; param_name = "$arr"; 
@@ -68,7 +61,13 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None });
+       fd_internal = false; fd_module = None;
+       fd_tparams =
+       [{ tp_variance = Invariant; tp_name = ([8:14-15], "T"); tp_parameters = [];
+          tp_constraints = [(Constraint_as, ([8:19-33], (Hoption ([8:20-33], (Happly (([8:20-29], "\\HH\\Container"), [([8:30-32], (Habstr ("Tv", [])))]))))))]; 
+          tp_reified = Erased; tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([8:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+       fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -78,8 +77,7 @@
        fd_fun =
        { f_span = [12:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([12:29-33], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
-         f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([13:3-16],
@@ -106,4 +104,4 @@
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

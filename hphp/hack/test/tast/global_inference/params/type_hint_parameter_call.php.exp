@@ -8,8 +8,7 @@ Errors:
       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-13], "\\foo");
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
-        f_readonly_ret = None; f_ret = ((void), (Some ([3:19-23], (Hprim Tvoid)))); 
-        f_tparams = []; f_where_constraints = [];
+        f_readonly_ret = None; f_ret = ((void), (Some ([3:19-23], (Hprim Tvoid))));
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
@@ -21,7 +20,7 @@ Errors:
         { fb_ast = [([4:5-13], (Expr ((void), [4:5-12], (Call ((((function(int $_): void)), [4:5-8], (Id ([4:5-8], "\\bar"))), [], [(Pnormal, ((int), [4:9-11], (Lvar ([4:9-11], $x))))], None)))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None });
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });
   (Fun
      { fd_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -30,8 +29,7 @@ Errors:
        fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([7:10-13], "\\bar");
        fd_fun =
        { f_span = [7:1-30]; f_readonly_this = None; f_annotation = (); 
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:23-27], (Hprim Tvoid)))); 
-         f_tparams = []; f_where_constraints = [];
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:23-27], (Hprim Tvoid))));
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([7:14-17], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [7:18-20]; param_name = "$_"; 
@@ -41,4 +39,4 @@ Errors:
          f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
-       fd_internal = false; fd_module = None })
+       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

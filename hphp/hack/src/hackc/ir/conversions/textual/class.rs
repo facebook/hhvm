@@ -209,6 +209,7 @@ impl ClassState<'_, '_, '_> {
         } else {
             textual::Visibility::Public
         };
+        flags.clear(ir::Attr::AttrForbidDynamicProps);
         flags.clear(ir::Attr::AttrPrivate);
         flags.clear(ir::Attr::AttrProtected);
         flags.clear(ir::Attr::AttrPublic);
@@ -218,8 +219,10 @@ impl ClassState<'_, '_, '_> {
         let comments = Vec::new();
 
         if !flags.is_empty() {
-            trace!("CLASS FLAGS: {:?}", flags);
-            textual_todo! { self.txf.write_comment(&format!("TODO: class flags: {flags:?}"))? };
+            textual_todo! {
+                message = ("CLASS FLAGS: {:?}", flags),
+                self.txf.write_comment(&format!("TODO: class flags: {flags:?}"))?
+            };
         }
 
         for attribute in attributes {

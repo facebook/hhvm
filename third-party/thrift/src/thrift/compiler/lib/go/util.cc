@@ -201,29 +201,11 @@ std::string munge_ident(const std::string& ident, bool exported, bool compat) {
     result += '_';
   }
 
-  return result;
-}
-
-std::string munge_arg(const std::string& ident) {
-  // we should never get an empty identifier
-  assert(!ident.empty());
-
-  // fast path / reserved name check if all lower
-  bool all_lower = std::all_of(ident.begin(), ident.end(), [](unsigned char c) {
-    return std::islower(c);
-  });
-
-  if (all_lower) {
-    // append an _ if identifier make conflict with a reserved go word
-    // (keywords, types, predelcared identifiers)
-    if (is_go_reserved_word(ident)) {
-      return ident + "_";
-    } else {
-      return ident;
-    }
+  if (is_go_reserved_word(result)) {
+    result += '_';
   }
 
-  return munge_ident(ident, false);
+  return result;
 }
 
 std::string quote(const std::string& data) {

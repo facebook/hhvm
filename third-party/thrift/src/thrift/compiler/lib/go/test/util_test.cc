@@ -58,4 +58,8 @@ TEST_F(GoUtilTest, test_munge_ident) {
   EXPECT_EQ(
       go::munge_ident("cluster_id_to_name", true, true), "ClusterIdToName");
   EXPECT_EQ(go::munge_ident("service_id", true, true), "ServiceID");
+
+  // Reserved idents
+  EXPECT_EQ(go::munge_ident("type", false, true), "type_");
+  EXPECT_EQ(go::munge_ident("go", false, true), "go_");
 }

@@ -37,7 +37,6 @@ std::string get_go_package_base_name(
 
 std::string munge_ident(
     const std::string& ident, bool exported = true, bool compat = true);
-std::string munge_arg(const std::string& ident);
 std::string quote(const std::string& data);
 
 std::string snakecase(const std::string& name);

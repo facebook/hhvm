@@ -320,7 +320,9 @@ class mstch_go_field : public mstch_field {
     }
     return name;
   }
-  mstch::node go_arg_name() { return go::munge_arg(field_->name()); }
+  mstch::node go_arg_name() {
+    return go::munge_ident(field_->name(), /*exported*/ false);
+  }
   mstch::node is_pointer() {
     // Whether this field is a pointer '*' in Go:
     //  * Struct type fields must be pointers
@@ -684,7 +686,8 @@ void t_mstch_go_generator::set_go_package_aliases() {
     auto package_base_name =
         go::get_go_package_base_name(include, data_.package_override);
     auto unique_package_name = go::make_unique_name(
-        data_.go_package_name_collisions, go::munge_arg(package_base_name));
+        data_.go_package_name_collisions,
+        go::munge_ident(package_base_name, /*exported*/ false));
 
     data_.go_package_map.emplace(package, unique_package_name);
   }

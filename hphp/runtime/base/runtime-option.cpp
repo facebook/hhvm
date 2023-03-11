@@ -556,7 +556,7 @@ AUTOLOADFLAGS();
   filterNamespaces();
   calcCacheKey();
   if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
-  m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
+  m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -574,7 +574,7 @@ AUTOLOADFLAGS()
   filterNamespaces();
   m_path.clear();
   calcCacheKey();
-  m_packageInfo = PackageInfo::defaults();
+  m_flags.m_packageInfo = PackageInfo::defaults();
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {

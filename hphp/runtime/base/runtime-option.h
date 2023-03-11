@@ -127,6 +127,7 @@ struct RepoOptionsFlags {
   N(StringVector,   IndexedMethodAttributes,                      {}) \
   /**/
 
+  const PackageInfo& packageInfo() const { return m_packageInfo; }
   const SHA1& cacheKeySha1() const { return m_sha1; }
 
   ParserEnv getParserEnvironment() const;
@@ -159,6 +160,7 @@ struct RepoOptionsFlags {
     #undef P
     #undef H
     #undef E
+    sd(m_packageInfo);
     sd(m_sha1);
   }
 
@@ -182,6 +184,8 @@ private:
   #undef P
   #undef H
   #undef E
+
+  PackageInfo m_packageInfo;
 
   SHA1 m_sha1;
 
@@ -211,7 +215,7 @@ struct RepoOptions {
   RepoOptions(RepoOptions&&) = default;
 
   const RepoOptionsFlags& flags() const { return m_flags; }
-  const PackageInfo& packageInfo() const { return m_packageInfo; }
+  const PackageInfo& packageInfo() const { return flags().packageInfo(); }
   const std::string& path() const { return m_path; }
   const RepoOptionStats& stat() const { return m_stat; }
 
@@ -243,8 +247,6 @@ private:
   RepoOptionStats m_stat;
 
   std::filesystem::path m_repo;
-
-  PackageInfo m_packageInfo;
 
   static bool s_init;
   static RepoOptions s_defaults;

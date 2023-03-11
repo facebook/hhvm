@@ -159,7 +159,15 @@ func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
     return (&reqSomeServiceBounceMap{})
 }
 
+func (x *reqSomeServiceBounceMap) GetMNonCompat() included.SomeMap {
+    return x.M
+}
+
 func (x *reqSomeServiceBounceMap) GetM() included.SomeMap {
+    if !x.IsSetM() {
+      return included.NewSomeMap()
+    }
+
     return x.M
 }
 
@@ -181,7 +189,7 @@ func (x *reqSomeServiceBounceMap) writeField1(p thrift.Protocol) error {  // M
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetM()
+    item := x.GetMNonCompat()
     err := included.WriteSomeMap(item, p)
 if err != nil {
     return err
@@ -294,7 +302,15 @@ func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{})
 }
 
+func (x *respSomeServiceBounceMap) GetValueNonCompat() included.SomeMap {
+    return x.Value
+}
+
 func (x *respSomeServiceBounceMap) GetValue() included.SomeMap {
+    if !x.IsSetValue() {
+      return included.NewSomeMap()
+    }
+
     return x.Value
 }
 
@@ -316,7 +332,7 @@ func (x *respSomeServiceBounceMap) writeField0(p thrift.Protocol) error {  // Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     err := included.WriteSomeMap(item, p)
 if err != nil {
     return err
@@ -429,7 +445,15 @@ func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{})
 }
 
+func (x *reqSomeServiceBinaryKeyedMap) GetRNonCompat() []int64 {
+    return x.R
+}
+
 func (x *reqSomeServiceBinaryKeyedMap) GetR() []int64 {
+    if !x.IsSetR() {
+      return nil
+    }
+
     return x.R
 }
 
@@ -451,7 +475,7 @@ func (x *reqSomeServiceBinaryKeyedMap) writeField1(p thrift.Protocol) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetR()
+    item := x.GetRNonCompat()
     if err := p.WriteListBegin(thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -592,7 +616,15 @@ func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{})
 }
 
+func (x *respSomeServiceBinaryKeyedMap) GetValueNonCompat() map[TBinary]int64 {
+    return x.Value
+}
+
 func (x *respSomeServiceBinaryKeyedMap) GetValue() map[TBinary]int64 {
+    if !x.IsSetValue() {
+      return nil
+    }
+
     return x.Value
 }
 
@@ -614,7 +646,7 @@ func (x *respSomeServiceBinaryKeyedMap) writeField0(p thrift.Protocol) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteMapBegin(thrift.BINARY, thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }

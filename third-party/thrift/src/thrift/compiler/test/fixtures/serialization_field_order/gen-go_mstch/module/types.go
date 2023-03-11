@@ -29,12 +29,24 @@ func NewFoo() *Foo {
     return (&Foo{})
 }
 
+func (x *Foo) GetField1NonCompat() int32 {
+    return x.Field1
+}
+
 func (x *Foo) GetField1() int32 {
     return x.Field1
 }
 
+func (x *Foo) GetField2NonCompat() int32 {
+    return x.Field2
+}
+
 func (x *Foo) GetField2() int32 {
     return x.Field2
+}
+
+func (x *Foo) GetField3NonCompat() int32 {
+    return x.Field3
 }
 
 func (x *Foo) GetField3() int32 {
@@ -64,7 +76,7 @@ func (x *Foo) writeField3(p thrift.Protocol) error {  // Field1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField1()
+    item := x.GetField1NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -80,7 +92,7 @@ func (x *Foo) writeField1(p thrift.Protocol) error {  // Field2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField2()
+    item := x.GetField2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -96,7 +108,7 @@ func (x *Foo) writeField2(p thrift.Protocol) error {  // Field3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField3()
+    item := x.GetField3NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -257,12 +269,24 @@ func NewFoo2() *Foo2 {
     return (&Foo2{})
 }
 
+func (x *Foo2) GetField1NonCompat() int32 {
+    return x.Field1
+}
+
 func (x *Foo2) GetField1() int32 {
     return x.Field1
 }
 
+func (x *Foo2) GetField2NonCompat() int32 {
+    return x.Field2
+}
+
 func (x *Foo2) GetField2() int32 {
     return x.Field2
+}
+
+func (x *Foo2) GetField3NonCompat() int32 {
+    return x.Field3
 }
 
 func (x *Foo2) GetField3() int32 {
@@ -292,7 +316,7 @@ func (x *Foo2) writeField3(p thrift.Protocol) error {  // Field1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField1()
+    item := x.GetField1NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -308,7 +332,7 @@ func (x *Foo2) writeField1(p thrift.Protocol) error {  // Field2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField2()
+    item := x.GetField2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -324,7 +348,7 @@ func (x *Foo2) writeField2(p thrift.Protocol) error {  // Field3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField3()
+    item := x.GetField3NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }

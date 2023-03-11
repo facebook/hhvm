@@ -156,15 +156,31 @@ func newReqServiceFunc() *reqServiceFunc {
 // Deprecated: Use newReqServiceFunc().Arg3 instead.
 var reqServiceFunc_Arg3_DEFAULT = newReqServiceFunc().Arg3
 
+func (x *reqServiceFunc) GetArg1NonCompat() StringWithAdapter {
+    return x.Arg1
+}
+
 func (x *reqServiceFunc) GetArg1() StringWithAdapter {
     return x.Arg1
+}
+
+func (x *reqServiceFunc) GetArg2NonCompat() string {
+    return x.Arg2
 }
 
 func (x *reqServiceFunc) GetArg2() string {
     return x.Arg2
 }
 
+func (x *reqServiceFunc) GetArg3NonCompat() *Foo {
+    return x.Arg3
+}
+
 func (x *reqServiceFunc) GetArg3() *Foo {
+    if !x.IsSetArg3() {
+      return NewFoo()
+    }
+
     return x.Arg3
 }
 
@@ -194,7 +210,7 @@ func (x *reqServiceFunc) writeField1(p thrift.Protocol) error {  // Arg1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg1()
+    item := x.GetArg1NonCompat()
     err := WriteStringWithAdapter(item, p)
 if err != nil {
     return err
@@ -211,7 +227,7 @@ func (x *reqServiceFunc) writeField2(p thrift.Protocol) error {  // Arg2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg2()
+    item := x.GetArg2NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -231,7 +247,7 @@ func (x *reqServiceFunc) writeField3(p thrift.Protocol) error {  // Arg3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg3()
+    item := x.GetArg3NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -390,6 +406,10 @@ func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{})
 }
 
+func (x *respServiceFunc) GetValueNonCompat() MyI32 {
+    return x.Value
+}
+
 func (x *respServiceFunc) GetValue() MyI32 {
     return x.Value
 }
@@ -405,7 +425,7 @@ func (x *respServiceFunc) writeField0(p thrift.Protocol) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     err := WriteMyI32(item, p)
 if err != nil {
     return err
@@ -818,7 +838,15 @@ func newRespAdapterServiceCount() *respAdapterServiceCount {
 // Deprecated: Use newRespAdapterServiceCount().Value instead.
 var respAdapterServiceCount_Value_DEFAULT = newRespAdapterServiceCount().Value
 
+func (x *respAdapterServiceCount) GetValueNonCompat() *CountingStruct {
+    return x.Value
+}
+
 func (x *respAdapterServiceCount) GetValue() *CountingStruct {
+    if !x.IsSetValue() {
+      return NewCountingStruct()
+    }
+
     return x.Value
 }
 
@@ -840,7 +868,7 @@ func (x *respAdapterServiceCount) writeField0(p thrift.Protocol) error {  // Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -956,7 +984,15 @@ func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
 // Deprecated: Use newReqAdapterServiceAdaptedTypes().Arg_ instead.
 var reqAdapterServiceAdaptedTypes_Arg__DEFAULT = newReqAdapterServiceAdaptedTypes().Arg_
 
+func (x *reqAdapterServiceAdaptedTypes) GetArg_NonCompat() *HeapAllocated {
+    return x.Arg_
+}
+
 func (x *reqAdapterServiceAdaptedTypes) GetArg_() *HeapAllocated {
+    if !x.IsSetArg_() {
+      return NewHeapAllocated()
+    }
+
     return x.Arg_
 }
 
@@ -978,7 +1014,7 @@ func (x *reqAdapterServiceAdaptedTypes) writeField1(p thrift.Protocol) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetArg_()
+    item := x.GetArg_NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1094,7 +1130,15 @@ func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
 // Deprecated: Use newRespAdapterServiceAdaptedTypes().Value instead.
 var respAdapterServiceAdaptedTypes_Value_DEFAULT = newRespAdapterServiceAdaptedTypes().Value
 
+func (x *respAdapterServiceAdaptedTypes) GetValueNonCompat() *HeapAllocated {
+    return x.Value
+}
+
 func (x *respAdapterServiceAdaptedTypes) GetValue() *HeapAllocated {
+    if !x.IsSetValue() {
+      return NewHeapAllocated()
+    }
+
     return x.Value
 }
 
@@ -1116,7 +1160,7 @@ func (x *respAdapterServiceAdaptedTypes) writeField0(p thrift.Protocol) error { 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }

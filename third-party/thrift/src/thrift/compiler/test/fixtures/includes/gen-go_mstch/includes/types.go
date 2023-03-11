@@ -88,11 +88,23 @@ func NewIncluded() *Included {
 // Deprecated: Use NewIncluded().MyTransitiveField instead.
 var Included_MyTransitiveField_DEFAULT = NewIncluded().MyTransitiveField
 
+func (x *Included) GetMyIntFieldNonCompat() int64 {
+    return x.MyIntField
+}
+
 func (x *Included) GetMyIntField() int64 {
     return x.MyIntField
 }
 
+func (x *Included) GetMyTransitiveFieldNonCompat() *transitive.Foo {
+    return x.MyTransitiveField
+}
+
 func (x *Included) GetMyTransitiveField() *transitive.Foo {
+    if !x.IsSetMyTransitiveField() {
+      return transitive.NewFoo()
+    }
+
     return x.MyTransitiveField
 }
 
@@ -116,7 +128,7 @@ func (x *Included) writeField1(p thrift.Protocol) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntField()
+    item := x.GetMyIntFieldNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -136,7 +148,7 @@ func (x *Included) writeField2(p thrift.Protocol) error {  // MyTransitiveField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyTransitiveField()
+    item := x.GetMyTransitiveFieldNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }

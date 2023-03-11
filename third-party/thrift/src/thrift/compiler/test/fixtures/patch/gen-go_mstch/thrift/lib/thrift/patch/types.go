@@ -289,12 +289,28 @@ func NewBoolPatch() *BoolPatch {
 // Deprecated: Use NewBoolPatch().Assign instead.
 var BoolPatch_Assign_DEFAULT = NewBoolPatch().Assign
 
-func (x *BoolPatch) GetAssign() *bool {
+func (x *BoolPatch) GetAssignNonCompat() *bool {
     return x.Assign
+}
+
+func (x *BoolPatch) GetAssign() bool {
+    if !x.IsSetAssign() {
+      return false
+    }
+
+    return *x.Assign
+}
+
+func (x *BoolPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *BoolPatch) GetClear() bool {
     return x.Clear
+}
+
+func (x *BoolPatch) GetInvertNonCompat() bool {
+    return x.Invert
 }
 
 func (x *BoolPatch) GetInvert() bool {
@@ -331,7 +347,7 @@ func (x *BoolPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -347,7 +363,7 @@ func (x *BoolPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -363,7 +379,7 @@ func (x *BoolPatch) writeField9(p thrift.Protocol) error {  // Invert
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInvert()
+    item := x.GetInvertNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -527,12 +543,28 @@ func NewBytePatch() *BytePatch {
 // Deprecated: Use NewBytePatch().Assign instead.
 var BytePatch_Assign_DEFAULT = NewBytePatch().Assign
 
-func (x *BytePatch) GetAssign() *byte {
+func (x *BytePatch) GetAssignNonCompat() *byte {
     return x.Assign
+}
+
+func (x *BytePatch) GetAssign() byte {
+    if !x.IsSetAssign() {
+      return 0
+    }
+
+    return *x.Assign
+}
+
+func (x *BytePatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *BytePatch) GetClear() bool {
     return x.Clear
+}
+
+func (x *BytePatch) GetAddNonCompat() byte {
+    return x.Add
 }
 
 func (x *BytePatch) GetAdd() byte {
@@ -569,7 +601,7 @@ func (x *BytePatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteByte(item); err != nil {
     return err
 }
@@ -585,7 +617,7 @@ func (x *BytePatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -601,7 +633,7 @@ func (x *BytePatch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteByte(item); err != nil {
     return err
 }
@@ -765,12 +797,28 @@ func NewI16Patch() *I16Patch {
 // Deprecated: Use NewI16Patch().Assign instead.
 var I16Patch_Assign_DEFAULT = NewI16Patch().Assign
 
-func (x *I16Patch) GetAssign() *int16 {
+func (x *I16Patch) GetAssignNonCompat() *int16 {
     return x.Assign
+}
+
+func (x *I16Patch) GetAssign() int16 {
+    if !x.IsSetAssign() {
+      return 0
+    }
+
+    return *x.Assign
+}
+
+func (x *I16Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *I16Patch) GetClear() bool {
     return x.Clear
+}
+
+func (x *I16Patch) GetAddNonCompat() int16 {
+    return x.Add
 }
 
 func (x *I16Patch) GetAdd() int16 {
@@ -807,7 +855,7 @@ func (x *I16Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -823,7 +871,7 @@ func (x *I16Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -839,7 +887,7 @@ func (x *I16Patch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1003,12 +1051,28 @@ func NewI32Patch() *I32Patch {
 // Deprecated: Use NewI32Patch().Assign instead.
 var I32Patch_Assign_DEFAULT = NewI32Patch().Assign
 
-func (x *I32Patch) GetAssign() *int32 {
+func (x *I32Patch) GetAssignNonCompat() *int32 {
     return x.Assign
+}
+
+func (x *I32Patch) GetAssign() int32 {
+    if !x.IsSetAssign() {
+      return 0
+    }
+
+    return *x.Assign
+}
+
+func (x *I32Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *I32Patch) GetClear() bool {
     return x.Clear
+}
+
+func (x *I32Patch) GetAddNonCompat() int32 {
+    return x.Add
 }
 
 func (x *I32Patch) GetAdd() int32 {
@@ -1045,7 +1109,7 @@ func (x *I32Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1061,7 +1125,7 @@ func (x *I32Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1077,7 +1141,7 @@ func (x *I32Patch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1241,12 +1305,28 @@ func NewI64Patch() *I64Patch {
 // Deprecated: Use NewI64Patch().Assign instead.
 var I64Patch_Assign_DEFAULT = NewI64Patch().Assign
 
-func (x *I64Patch) GetAssign() *int64 {
+func (x *I64Patch) GetAssignNonCompat() *int64 {
     return x.Assign
+}
+
+func (x *I64Patch) GetAssign() int64 {
+    if !x.IsSetAssign() {
+      return 0
+    }
+
+    return *x.Assign
+}
+
+func (x *I64Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *I64Patch) GetClear() bool {
     return x.Clear
+}
+
+func (x *I64Patch) GetAddNonCompat() int64 {
+    return x.Add
 }
 
 func (x *I64Patch) GetAdd() int64 {
@@ -1283,7 +1363,7 @@ func (x *I64Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1299,7 +1379,7 @@ func (x *I64Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1315,7 +1395,7 @@ func (x *I64Patch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1479,12 +1559,28 @@ func NewFloatPatch() *FloatPatch {
 // Deprecated: Use NewFloatPatch().Assign instead.
 var FloatPatch_Assign_DEFAULT = NewFloatPatch().Assign
 
-func (x *FloatPatch) GetAssign() *float32 {
+func (x *FloatPatch) GetAssignNonCompat() *float32 {
     return x.Assign
+}
+
+func (x *FloatPatch) GetAssign() float32 {
+    if !x.IsSetAssign() {
+      return 0.0
+    }
+
+    return *x.Assign
+}
+
+func (x *FloatPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *FloatPatch) GetClear() bool {
     return x.Clear
+}
+
+func (x *FloatPatch) GetAddNonCompat() float32 {
+    return x.Add
 }
 
 func (x *FloatPatch) GetAdd() float32 {
@@ -1521,7 +1617,7 @@ func (x *FloatPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -1537,7 +1633,7 @@ func (x *FloatPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1553,7 +1649,7 @@ func (x *FloatPatch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -1717,12 +1813,28 @@ func NewDoublePatch() *DoublePatch {
 // Deprecated: Use NewDoublePatch().Assign instead.
 var DoublePatch_Assign_DEFAULT = NewDoublePatch().Assign
 
-func (x *DoublePatch) GetAssign() *float64 {
+func (x *DoublePatch) GetAssignNonCompat() *float64 {
     return x.Assign
+}
+
+func (x *DoublePatch) GetAssign() float64 {
+    if !x.IsSetAssign() {
+      return 0.0
+    }
+
+    return *x.Assign
+}
+
+func (x *DoublePatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *DoublePatch) GetClear() bool {
     return x.Clear
+}
+
+func (x *DoublePatch) GetAddNonCompat() float64 {
+    return x.Add
 }
 
 func (x *DoublePatch) GetAdd() float64 {
@@ -1759,7 +1871,7 @@ func (x *DoublePatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -1775,7 +1887,7 @@ func (x *DoublePatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1791,7 +1903,7 @@ func (x *DoublePatch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -1956,16 +2068,36 @@ func NewStringPatch() *StringPatch {
 // Deprecated: Use NewStringPatch().Assign instead.
 var StringPatch_Assign_DEFAULT = NewStringPatch().Assign
 
-func (x *StringPatch) GetAssign() *string {
+func (x *StringPatch) GetAssignNonCompat() *string {
     return x.Assign
+}
+
+func (x *StringPatch) GetAssign() string {
+    if !x.IsSetAssign() {
+      return ""
+    }
+
+    return *x.Assign
+}
+
+func (x *StringPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *StringPatch) GetClear() bool {
     return x.Clear
 }
 
+func (x *StringPatch) GetPrependNonCompat() string {
+    return x.Prepend
+}
+
 func (x *StringPatch) GetPrepend() string {
     return x.Prepend
+}
+
+func (x *StringPatch) GetAppendNonCompat() string {
+    return x.Append
 }
 
 func (x *StringPatch) GetAppend() string {
@@ -2008,7 +2140,7 @@ func (x *StringPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2024,7 +2156,7 @@ func (x *StringPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2040,7 +2172,7 @@ func (x *StringPatch) writeField8(p thrift.Protocol) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrepend()
+    item := x.GetPrependNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2056,7 +2188,7 @@ func (x *StringPatch) writeField9(p thrift.Protocol) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppend()
+    item := x.GetAppendNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2241,19 +2373,47 @@ func NewBinaryPatch() *BinaryPatch {
     return (&BinaryPatch{})
 }
 
-func (x *BinaryPatch) GetAssign() standard.ByteBuffer {
+func (x *BinaryPatch) GetAssignNonCompat() standard.ByteBuffer {
     return x.Assign
+}
+
+func (x *BinaryPatch) GetAssign() standard.ByteBuffer {
+    if !x.IsSetAssign() {
+      return standard.NewByteBuffer()
+    }
+
+    return x.Assign
+}
+
+func (x *BinaryPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *BinaryPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *BinaryPatch) GetPrepend() standard.ByteBuffer {
+func (x *BinaryPatch) GetPrependNonCompat() standard.ByteBuffer {
     return x.Prepend
 }
 
+func (x *BinaryPatch) GetPrepend() standard.ByteBuffer {
+    if !x.IsSetPrepend() {
+      return standard.NewByteBuffer()
+    }
+
+    return x.Prepend
+}
+
+func (x *BinaryPatch) GetAppendNonCompat() standard.ByteBuffer {
+    return x.Append
+}
+
 func (x *BinaryPatch) GetAppend() standard.ByteBuffer {
+    if !x.IsSetAppend() {
+      return standard.NewByteBuffer()
+    }
+
     return x.Append
 }
 
@@ -2299,7 +2459,7 @@ func (x *BinaryPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     err := standard.WriteByteBuffer(item, p)
 if err != nil {
     return err
@@ -2316,7 +2476,7 @@ func (x *BinaryPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2336,7 +2496,7 @@ func (x *BinaryPatch) writeField8(p thrift.Protocol) error {  // Prepend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrepend()
+    item := x.GetPrependNonCompat()
     err := standard.WriteByteBuffer(item, p)
 if err != nil {
     return err
@@ -2357,7 +2517,7 @@ func (x *BinaryPatch) writeField9(p thrift.Protocol) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppend()
+    item := x.GetAppendNonCompat()
     err := standard.WriteByteBuffer(item, p)
 if err != nil {
     return err

@@ -25,6 +25,10 @@ func NewFoo() *Foo {
     return (&Foo{})
 }
 
+func (x *Foo) GetMyIntNonCompat() int64 {
+    return x.MyInt
+}
+
 func (x *Foo) GetMyInt() int64 {
     return x.MyInt
 }
@@ -40,7 +44,7 @@ func (x *Foo) writeField1(p thrift.Protocol) error {  // MyInt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyInt()
+    item := x.GetMyIntNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }

@@ -568,6 +568,10 @@ func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{})
 }
 
+func (x *respRaiserGet200) GetValueNonCompat() string {
+    return x.Value
+}
+
 func (x *respRaiserGet200) GetValue() string {
     return x.Value
 }
@@ -583,7 +587,7 @@ func (x *respRaiserGet200) writeField0(p thrift.Protocol) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -772,6 +776,10 @@ func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{})
 }
 
+func (x *respRaiserGet500) GetValueNonCompat() string {
+    return x.Value
+}
+
 func (x *respRaiserGet500) GetValue() string {
     return x.Value
 }
@@ -787,7 +795,7 @@ func (x *respRaiserGet500) writeField0(p thrift.Protocol) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

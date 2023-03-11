@@ -29,6 +29,10 @@ func NewInjectMetadataFields() *InjectMetadataFields {
     return (&InjectMetadataFields{})
 }
 
+func (x *InjectMetadataFields) GetTypeNonCompat() string {
+    return x.Type
+}
+
 func (x *InjectMetadataFields) GetType() string {
     return x.Type
 }
@@ -44,7 +48,7 @@ func (x *InjectMetadataFields) writeField1(p thrift.Protocol) error {  // Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetType()
+    item := x.GetTypeNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

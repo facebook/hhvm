@@ -142,7 +142,15 @@ func newReqMyServiceQuery() *reqMyServiceQuery {
 // Deprecated: Use newReqMyServiceQuery().U instead.
 var reqMyServiceQuery_U_DEFAULT = newReqMyServiceQuery().U
 
+func (x *reqMyServiceQuery) GetUNonCompat() *MyUnion {
+    return x.U
+}
+
 func (x *reqMyServiceQuery) GetU() *MyUnion {
+    if !x.IsSetU() {
+      return NewMyUnion()
+    }
+
     return x.U
 }
 
@@ -164,7 +172,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Protocol) error {  // U
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetU()
+    item := x.GetUNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -280,7 +288,15 @@ func newRespMyServiceQuery() *respMyServiceQuery {
 // Deprecated: Use newRespMyServiceQuery().Value instead.
 var respMyServiceQuery_Value_DEFAULT = newRespMyServiceQuery().Value
 
+func (x *respMyServiceQuery) GetValueNonCompat() *MyStruct {
+    return x.Value
+}
+
 func (x *respMyServiceQuery) GetValue() *MyStruct {
+    if !x.IsSetValue() {
+      return NewMyStruct()
+    }
+
     return x.Value
 }
 
@@ -302,7 +318,7 @@ func (x *respMyServiceQuery) writeField0(p thrift.Protocol) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }

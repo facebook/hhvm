@@ -28,8 +28,16 @@ func NewAdapter() *Adapter {
     return (&Adapter{})
 }
 
+func (x *Adapter) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *Adapter) GetName() string {
     return x.Name
+}
+
+func (x *Adapter) GetTypeHintNonCompat() string {
+    return x.TypeHint
 }
 
 func (x *Adapter) GetTypeHint() string {
@@ -53,7 +61,7 @@ func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -69,7 +77,7 @@ func (x *Adapter) writeField2(p thrift.Protocol) error {  // TypeHint
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeHint()
+    item := x.GetTypeHintNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

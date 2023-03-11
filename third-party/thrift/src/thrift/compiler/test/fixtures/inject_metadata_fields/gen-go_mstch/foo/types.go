@@ -35,16 +35,36 @@ var Fields_InjectedStructuredAnnotationField_DEFAULT = NewFields().InjectedStruc
 // Deprecated: Use NewFields().InjectedUnstructuredAnnotationField instead.
 var Fields_InjectedUnstructuredAnnotationField_DEFAULT = NewFields().InjectedUnstructuredAnnotationField
 
+func (x *Fields) GetInjectedFieldNonCompat() string {
+    return x.InjectedField
+}
+
 func (x *Fields) GetInjectedField() string {
     return x.InjectedField
 }
 
-func (x *Fields) GetInjectedStructuredAnnotationField() *string {
+func (x *Fields) GetInjectedStructuredAnnotationFieldNonCompat() *string {
     return x.InjectedStructuredAnnotationField
 }
 
-func (x *Fields) GetInjectedUnstructuredAnnotationField() *string {
+func (x *Fields) GetInjectedStructuredAnnotationField() string {
+    if !x.IsSetInjectedStructuredAnnotationField() {
+      return ""
+    }
+
+    return *x.InjectedStructuredAnnotationField
+}
+
+func (x *Fields) GetInjectedUnstructuredAnnotationFieldNonCompat() *string {
     return x.InjectedUnstructuredAnnotationField
+}
+
+func (x *Fields) GetInjectedUnstructuredAnnotationField() string {
+    if !x.IsSetInjectedUnstructuredAnnotationField() {
+      return ""
+    }
+
+    return *x.InjectedUnstructuredAnnotationField
 }
 
 func (x *Fields) SetInjectedField(value string) *Fields {
@@ -76,7 +96,7 @@ func (x *Fields) writeField100(p thrift.Protocol) error {  // InjectedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInjectedField()
+    item := x.GetInjectedFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -96,7 +116,7 @@ func (x *Fields) writeField101(p thrift.Protocol) error {  // InjectedStructured
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetInjectedStructuredAnnotationField()
+    item := *x.GetInjectedStructuredAnnotationFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -116,7 +136,7 @@ func (x *Fields) writeField102(p thrift.Protocol) error {  // InjectedUnstructur
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetInjectedUnstructuredAnnotationField()
+    item := *x.GetInjectedUnstructuredAnnotationFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

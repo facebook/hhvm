@@ -148,36 +148,80 @@ func NewMyStruct() *MyStruct {
 // Deprecated: Use NewMyStruct().MyDataField instead.
 var MyStruct_MyDataField_DEFAULT = NewMyStruct().MyDataField
 
+func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
+    return x.MyIntField
+}
+
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
+}
+
+func (x *MyStruct) GetMyStringFieldNonCompat() string {
+    return x.MyStringField
 }
 
 func (x *MyStruct) GetMyStringField() string {
     return x.MyStringField
 }
 
-func (x *MyStruct) GetMyDataField() *MyDataItem {
+func (x *MyStruct) GetMyDataFieldNonCompat() *MyDataItem {
     return x.MyDataField
+}
+
+func (x *MyStruct) GetMyDataField() *MyDataItem {
+    if !x.IsSetMyDataField() {
+      return NewMyDataItem()
+    }
+
+    return x.MyDataField
+}
+
+func (x *MyStruct) GetMyEnumNonCompat() MyEnum {
+    return x.MyEnum
 }
 
 func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
 }
 
+func (x *MyStruct) GetOnewayNonCompat() bool {
+    return x.Oneway
+}
+
 func (x *MyStruct) GetOneway() bool {
     return x.Oneway
+}
+
+func (x *MyStruct) GetReadonlyNonCompat() bool {
+    return x.Readonly
 }
 
 func (x *MyStruct) GetReadonly() bool {
     return x.Readonly
 }
 
+func (x *MyStruct) GetIdempotentNonCompat() bool {
+    return x.Idempotent
+}
+
 func (x *MyStruct) GetIdempotent() bool {
     return x.Idempotent
 }
 
-func (x *MyStruct) GetFloatSet() []float32 {
+func (x *MyStruct) GetFloatSetNonCompat() []float32 {
     return x.FloatSet
+}
+
+func (x *MyStruct) GetFloatSet() []float32 {
+    if !x.IsSetFloatSet() {
+      return nil
+    }
+
+    return x.FloatSet
+}
+
+func (x *MyStruct) GetNoHackCodegenFieldNonCompat() string {
+    return x.NoHackCodegenField
 }
 
 func (x *MyStruct) GetNoHackCodegenField() string {
@@ -249,7 +293,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntField()
+    item := x.GetMyIntFieldNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -265,7 +309,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MyStringField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyStringField()
+    item := x.GetMyStringFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -285,7 +329,7 @@ func (x *MyStruct) writeField3(p thrift.Protocol) error {  // MyDataField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyDataField()
+    item := x.GetMyDataFieldNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -301,7 +345,7 @@ func (x *MyStruct) writeField4(p thrift.Protocol) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyEnum()
+    item := x.GetMyEnumNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -317,7 +361,7 @@ func (x *MyStruct) writeField5(p thrift.Protocol) error {  // Oneway
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOneway()
+    item := x.GetOnewayNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -333,7 +377,7 @@ func (x *MyStruct) writeField6(p thrift.Protocol) error {  // Readonly
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReadonly()
+    item := x.GetReadonlyNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -349,7 +393,7 @@ func (x *MyStruct) writeField7(p thrift.Protocol) error {  // Idempotent
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdempotent()
+    item := x.GetIdempotentNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -369,7 +413,7 @@ func (x *MyStruct) writeField8(p thrift.Protocol) error {  // FloatSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatSet()
+    item := x.GetFloatSetNonCompat()
     if err := p.WriteSetBegin(thrift.FLOAT, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -396,7 +440,7 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // NoHackCodegenField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNoHackCodegenField()
+    item := x.GetNoHackCodegenFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -803,19 +847,51 @@ var MyUnion_MyStruct_DEFAULT = NewMyUnion().MyStruct
 // Deprecated: Use NewMyUnion().MyDataItem instead.
 var MyUnion_MyDataItem_DEFAULT = NewMyUnion().MyDataItem
 
-func (x *MyUnion) GetMyEnum() *MyEnum {
+func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
     return x.MyEnum
 }
 
-func (x *MyUnion) GetMyStruct() *MyStruct {
+func (x *MyUnion) GetMyEnum() MyEnum {
+    if !x.IsSetMyEnum() {
+      return 0
+    }
+
+    return *x.MyEnum
+}
+
+func (x *MyUnion) GetMyStructNonCompat() *MyStruct {
     return x.MyStruct
 }
 
-func (x *MyUnion) GetMyDataItem() *MyDataItem {
+func (x *MyUnion) GetMyStruct() *MyStruct {
+    if !x.IsSetMyStruct() {
+      return NewMyStruct()
+    }
+
+    return x.MyStruct
+}
+
+func (x *MyUnion) GetMyDataItemNonCompat() *MyDataItem {
     return x.MyDataItem
 }
 
+func (x *MyUnion) GetMyDataItem() *MyDataItem {
+    if !x.IsSetMyDataItem() {
+      return NewMyDataItem()
+    }
+
+    return x.MyDataItem
+}
+
+func (x *MyUnion) GetFloatSetNonCompat() []float32 {
+    return x.FloatSet
+}
+
 func (x *MyUnion) GetFloatSet() []float32 {
+    if !x.IsSetFloatSet() {
+      return nil
+    }
+
     return x.FloatSet
 }
 
@@ -864,7 +940,7 @@ func (x *MyUnion) writeField1(p thrift.Protocol) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyEnum()
+    item := *x.GetMyEnumNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -884,7 +960,7 @@ func (x *MyUnion) writeField2(p thrift.Protocol) error {  // MyStruct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyStruct()
+    item := x.GetMyStructNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -904,7 +980,7 @@ func (x *MyUnion) writeField3(p thrift.Protocol) error {  // MyDataItem
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyDataItem()
+    item := x.GetMyDataItemNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -924,7 +1000,7 @@ func (x *MyUnion) writeField4(p thrift.Protocol) error {  // FloatSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatSet()
+    item := x.GetFloatSetNonCompat()
     if err := p.WriteSetBegin(thrift.FLOAT, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -1138,6 +1214,10 @@ func NewReservedKeyword() *ReservedKeyword {
     return (&ReservedKeyword{})
 }
 
+func (x *ReservedKeyword) GetReservedFieldNonCompat() int32 {
+    return x.ReservedField
+}
+
 func (x *ReservedKeyword) GetReservedField() int32 {
     return x.ReservedField
 }
@@ -1153,7 +1233,7 @@ func (x *ReservedKeyword) writeField1(p thrift.Protocol) error {  // ReservedFie
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReservedField()
+    item := x.GetReservedFieldNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1269,8 +1349,16 @@ func NewUnionToBeRenamed() *UnionToBeRenamed {
 // Deprecated: Use NewUnionToBeRenamed().ReservedField instead.
 var UnionToBeRenamed_ReservedField_DEFAULT = NewUnionToBeRenamed().ReservedField
 
-func (x *UnionToBeRenamed) GetReservedField() *int32 {
+func (x *UnionToBeRenamed) GetReservedFieldNonCompat() *int32 {
     return x.ReservedField
+}
+
+func (x *UnionToBeRenamed) GetReservedField() int32 {
+    if !x.IsSetReservedField() {
+      return 0
+    }
+
+    return *x.ReservedField
 }
 
 func (x *UnionToBeRenamed) SetReservedField(value int32) *UnionToBeRenamed {
@@ -1291,7 +1379,7 @@ func (x *UnionToBeRenamed) writeField1(p thrift.Protocol) error {  // ReservedFi
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetReservedField()
+    item := *x.GetReservedFieldNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }

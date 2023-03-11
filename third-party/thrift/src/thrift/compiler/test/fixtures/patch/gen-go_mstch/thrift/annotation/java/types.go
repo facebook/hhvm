@@ -28,8 +28,16 @@ func NewAdapter() *Adapter {
     return (&Adapter{})
 }
 
+func (x *Adapter) GetAdapterClassNameNonCompat() string {
+    return x.AdapterClassName
+}
+
 func (x *Adapter) GetAdapterClassName() string {
     return x.AdapterClassName
+}
+
+func (x *Adapter) GetTypeClassNameNonCompat() string {
+    return x.TypeClassName
 }
 
 func (x *Adapter) GetTypeClassName() string {
@@ -53,7 +61,7 @@ func (x *Adapter) writeField1(p thrift.Protocol) error {  // AdapterClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdapterClassName()
+    item := x.GetAdapterClassNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -69,7 +77,7 @@ func (x *Adapter) writeField2(p thrift.Protocol) error {  // TypeClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeClassName()
+    item := x.GetTypeClassNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -206,8 +214,16 @@ func NewWrapper() *Wrapper {
     return (&Wrapper{})
 }
 
+func (x *Wrapper) GetWrapperClassNameNonCompat() string {
+    return x.WrapperClassName
+}
+
 func (x *Wrapper) GetWrapperClassName() string {
     return x.WrapperClassName
+}
+
+func (x *Wrapper) GetTypeClassNameNonCompat() string {
+    return x.TypeClassName
 }
 
 func (x *Wrapper) GetTypeClassName() string {
@@ -231,7 +247,7 @@ func (x *Wrapper) writeField1(p thrift.Protocol) error {  // WrapperClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetWrapperClassName()
+    item := x.GetWrapperClassNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -247,7 +263,7 @@ func (x *Wrapper) writeField2(p thrift.Protocol) error {  // TypeClassName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeClassName()
+    item := x.GetTypeClassNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

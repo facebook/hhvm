@@ -27,6 +27,10 @@ func NewAdapter() *Adapter {
     return (&Adapter{})
 }
 
+func (x *Adapter) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *Adapter) GetName() string {
     return x.Name
 }
@@ -42,7 +46,7 @@ func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

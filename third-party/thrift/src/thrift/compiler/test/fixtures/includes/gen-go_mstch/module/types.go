@@ -39,12 +39,32 @@ var MyStruct_MyIncludedField_DEFAULT = NewMyStruct().MyIncludedField
 // Deprecated: Use NewMyStruct().MyOtherIncludedField instead.
 var MyStruct_MyOtherIncludedField_DEFAULT = NewMyStruct().MyOtherIncludedField
 
-func (x *MyStruct) GetMyIncludedField() *includes.Included {
+func (x *MyStruct) GetMyIncludedFieldNonCompat() *includes.Included {
     return x.MyIncludedField
 }
 
-func (x *MyStruct) GetMyOtherIncludedField() *includes.Included {
+func (x *MyStruct) GetMyIncludedField() *includes.Included {
+    if !x.IsSetMyIncludedField() {
+      return includes.NewIncluded()
+    }
+
+    return x.MyIncludedField
+}
+
+func (x *MyStruct) GetMyOtherIncludedFieldNonCompat() *includes.Included {
     return x.MyOtherIncludedField
+}
+
+func (x *MyStruct) GetMyOtherIncludedField() *includes.Included {
+    if !x.IsSetMyOtherIncludedField() {
+      return includes.NewIncluded()
+    }
+
+    return x.MyOtherIncludedField
+}
+
+func (x *MyStruct) GetMyIncludedIntNonCompat() includes.IncludedInt64 {
+    return x.MyIncludedInt
 }
 
 func (x *MyStruct) GetMyIncludedInt() includes.IncludedInt64 {
@@ -84,7 +104,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIncludedField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIncludedField()
+    item := x.GetMyIncludedFieldNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -104,7 +124,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MyOtherIncludedFie
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyOtherIncludedField()
+    item := x.GetMyOtherIncludedFieldNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -120,7 +140,7 @@ func (x *MyStruct) writeField3(p thrift.Protocol) error {  // MyIncludedInt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIncludedInt()
+    item := x.GetMyIncludedIntNonCompat()
     err := includes.WriteIncludedInt64(item, p)
 if err != nil {
     return err

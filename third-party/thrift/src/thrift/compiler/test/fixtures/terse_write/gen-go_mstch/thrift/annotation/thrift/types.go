@@ -261,6 +261,10 @@ func NewDeprecated() *Deprecated {
     return (&Deprecated{})
 }
 
+func (x *Deprecated) GetMessageNonCompat() string {
+    return x.Message
+}
+
 func (x *Deprecated) GetMessage() string {
     return x.Message
 }
@@ -276,7 +280,7 @@ func (x *Deprecated) writeField1(p thrift.Protocol) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessage()
+    item := x.GetMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -390,11 +394,27 @@ func NewReserveIds() *ReserveIds {
     return (&ReserveIds{})
 }
 
-func (x *ReserveIds) GetIds() []int32 {
+func (x *ReserveIds) GetIdsNonCompat() []int32 {
     return x.Ids
 }
 
+func (x *ReserveIds) GetIds() []int32 {
+    if !x.IsSetIds() {
+      return nil
+    }
+
+    return x.Ids
+}
+
+func (x *ReserveIds) GetIdRangesNonCompat() map[int32]int32 {
+    return x.IdRanges
+}
+
 func (x *ReserveIds) GetIdRanges() map[int32]int32 {
+    if !x.IsSetIdRanges() {
+      return nil
+    }
+
     return x.IdRanges
 }
 
@@ -425,7 +445,7 @@ func (x *ReserveIds) writeField1(p thrift.Protocol) error {  // Ids
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIds()
+    item := x.GetIdsNonCompat()
     if err := p.WriteListBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -456,7 +476,7 @@ func (x *ReserveIds) writeField2(p thrift.Protocol) error {  // IdRanges
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIdRanges()
+    item := x.GetIdRangesNonCompat()
     if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -656,6 +676,10 @@ func NewLegacy() *Legacy {
     return (&Legacy{})
 }
 
+func (x *Legacy) GetMessageNonCompat() string {
+    return x.Message
+}
+
 func (x *Legacy) GetMessage() string {
     return x.Message
 }
@@ -671,7 +695,7 @@ func (x *Legacy) writeField1(p thrift.Protocol) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessage()
+    item := x.GetMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -785,6 +809,10 @@ func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
         SetFieldName(false)
 }
 
+func (x *RequiresBackwardCompatibility) GetFieldNameNonCompat() bool {
+    return x.FieldName
+}
+
 func (x *RequiresBackwardCompatibility) GetFieldName() bool {
     return x.FieldName
 }
@@ -800,7 +828,7 @@ func (x *RequiresBackwardCompatibility) writeField1(p thrift.Protocol) error {  
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFieldName()
+    item := x.GetFieldNameNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1850,6 +1878,10 @@ func NewGenDefaultEnumValue() *GenDefaultEnumValue {
         SetName("Unspecified")
 }
 
+func (x *GenDefaultEnumValue) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *GenDefaultEnumValue) GetName() string {
     return x.Name
 }
@@ -1865,7 +1897,7 @@ func (x *GenDefaultEnumValue) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1978,6 +2010,10 @@ func NewGenEnumSet() *GenEnumSet {
     return (&GenEnumSet{})
 }
 
+func (x *GenEnumSet) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *GenEnumSet) GetName() string {
     return x.Name
 }
@@ -1993,7 +2029,7 @@ func (x *GenEnumSet) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2418,6 +2454,10 @@ func NewExceptionMessage() *ExceptionMessage {
     return (&ExceptionMessage{})
 }
 
+func (x *ExceptionMessage) GetFieldNonCompat() string {
+    return x.Field
+}
+
 func (x *ExceptionMessage) GetField() string {
     return x.Field
 }
@@ -2433,7 +2473,7 @@ func (x *ExceptionMessage) writeField1(p thrift.Protocol) error {  // Field
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetField()
+    item := x.GetFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2546,6 +2586,10 @@ func NewGenerateRuntimeSchema() *GenerateRuntimeSchema {
     return (&GenerateRuntimeSchema{})
 }
 
+func (x *GenerateRuntimeSchema) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *GenerateRuntimeSchema) GetName() string {
     return x.Name
 }
@@ -2561,7 +2605,7 @@ func (x *GenerateRuntimeSchema) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

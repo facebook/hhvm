@@ -166,11 +166,27 @@ var reqMyServiceQuery_S_DEFAULT = newReqMyServiceQuery().S
 // Deprecated: Use newReqMyServiceQuery().I instead.
 var reqMyServiceQuery_I_DEFAULT = newReqMyServiceQuery().I
 
-func (x *reqMyServiceQuery) GetS() *module.MyStruct {
+func (x *reqMyServiceQuery) GetSNonCompat() *module.MyStruct {
     return x.S
 }
 
+func (x *reqMyServiceQuery) GetS() *module.MyStruct {
+    if !x.IsSetS() {
+      return module.NewMyStruct()
+    }
+
+    return x.S
+}
+
+func (x *reqMyServiceQuery) GetINonCompat() *includes.Included {
+    return x.I
+}
+
 func (x *reqMyServiceQuery) GetI() *includes.Included {
+    if !x.IsSetI() {
+      return includes.NewIncluded()
+    }
+
     return x.I
 }
 
@@ -201,7 +217,7 @@ func (x *reqMyServiceQuery) writeField1(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetS()
+    item := x.GetSNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -221,7 +237,7 @@ func (x *reqMyServiceQuery) writeField2(p thrift.Protocol) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI()
+    item := x.GetINonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -442,11 +458,27 @@ var reqMyServiceHasArgDocs_S_DEFAULT = newReqMyServiceHasArgDocs().S
 // Deprecated: Use newReqMyServiceHasArgDocs().I instead.
 var reqMyServiceHasArgDocs_I_DEFAULT = newReqMyServiceHasArgDocs().I
 
-func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
+func (x *reqMyServiceHasArgDocs) GetSNonCompat() *module.MyStruct {
     return x.S
 }
 
+func (x *reqMyServiceHasArgDocs) GetS() *module.MyStruct {
+    if !x.IsSetS() {
+      return module.NewMyStruct()
+    }
+
+    return x.S
+}
+
+func (x *reqMyServiceHasArgDocs) GetINonCompat() *includes.Included {
+    return x.I
+}
+
 func (x *reqMyServiceHasArgDocs) GetI() *includes.Included {
+    if !x.IsSetI() {
+      return includes.NewIncluded()
+    }
+
     return x.I
 }
 
@@ -477,7 +509,7 @@ func (x *reqMyServiceHasArgDocs) writeField1(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetS()
+    item := x.GetSNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -497,7 +529,7 @@ func (x *reqMyServiceHasArgDocs) writeField2(p thrift.Protocol) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI()
+    item := x.GetINonCompat()
     if err := item.Write(p); err != nil {
     return err
 }

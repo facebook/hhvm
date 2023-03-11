@@ -523,19 +523,39 @@ func NewSomeStruct() *SomeStruct {
         )
 }
 
+func (x *SomeStruct) GetReasonableNonCompat() Metasyntactic {
+    return x.Reasonable
+}
+
 func (x *SomeStruct) GetReasonable() Metasyntactic {
     return x.Reasonable
+}
+
+func (x *SomeStruct) GetFineNonCompat() Metasyntactic {
+    return x.Fine
 }
 
 func (x *SomeStruct) GetFine() Metasyntactic {
     return x.Fine
 }
 
+func (x *SomeStruct) GetQuestionableNonCompat() Metasyntactic {
+    return x.Questionable
+}
+
 func (x *SomeStruct) GetQuestionable() Metasyntactic {
     return x.Questionable
 }
 
+func (x *SomeStruct) GetTagsNonCompat() []int32 {
+    return x.Tags
+}
+
 func (x *SomeStruct) GetTags() []int32 {
+    if !x.IsSetTags() {
+      return nil
+    }
+
     return x.Tags
 }
 
@@ -571,7 +591,7 @@ func (x *SomeStruct) writeField1(p thrift.Protocol) error {  // Reasonable
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReasonable()
+    item := x.GetReasonableNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -587,7 +607,7 @@ func (x *SomeStruct) writeField2(p thrift.Protocol) error {  // Fine
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFine()
+    item := x.GetFineNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -603,7 +623,7 @@ func (x *SomeStruct) writeField3(p thrift.Protocol) error {  // Questionable
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetQuestionable()
+    item := x.GetQuestionableNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -623,7 +643,7 @@ func (x *SomeStruct) writeField4(p thrift.Protocol) error {  // Tags
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTags()
+    item := x.GetTagsNonCompat()
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -852,16 +872,32 @@ func NewMyStruct() *MyStruct {
         )
 }
 
+func (x *MyStruct) GetMe2_3NonCompat() MyEnum2 {
+    return x.Me2_3
+}
+
 func (x *MyStruct) GetMe2_3() MyEnum2 {
     return x.Me2_3
+}
+
+func (x *MyStruct) GetMe3N3NonCompat() MyEnum3 {
+    return x.Me3N3
 }
 
 func (x *MyStruct) GetMe3N3() MyEnum3 {
     return x.Me3N3
 }
 
+func (x *MyStruct) GetMe1T1NonCompat() MyEnum1 {
+    return x.Me1T1
+}
+
 func (x *MyStruct) GetMe1T1() MyEnum1 {
     return x.Me1T1
+}
+
+func (x *MyStruct) GetMe1T2NonCompat() MyEnum1 {
+    return x.Me1T2
 }
 
 func (x *MyStruct) GetMe1T2() MyEnum1 {
@@ -897,7 +933,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Me2_3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMe2_3()
+    item := x.GetMe2_3NonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -913,7 +949,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // Me3N3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMe3N3()
+    item := x.GetMe3N3NonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -929,7 +965,7 @@ func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Me1T1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMe1T1()
+    item := x.GetMe1T1NonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -945,7 +981,7 @@ func (x *MyStruct) writeField6(p thrift.Protocol) error {  // Me1T2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMe1T2()
+    item := x.GetMe1T2NonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }

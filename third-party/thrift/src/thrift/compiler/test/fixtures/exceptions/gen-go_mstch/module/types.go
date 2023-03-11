@@ -27,6 +27,10 @@ func NewFiery() *Fiery {
     return (&Fiery{})
 }
 
+func (x *Fiery) GetMessageNonCompat() string {
+    return x.Message
+}
+
 func (x *Fiery) GetMessage() string {
     return x.Message
 }
@@ -42,7 +46,7 @@ func (x *Fiery) writeField1(p thrift.Protocol) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessage()
+    item := x.GetMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -162,8 +166,16 @@ func NewSerious() *Serious {
 // Deprecated: Use NewSerious().Sonnet instead.
 var Serious_Sonnet_DEFAULT = NewSerious().Sonnet
 
-func (x *Serious) GetSonnet() *string {
+func (x *Serious) GetSonnetNonCompat() *string {
     return x.Sonnet
+}
+
+func (x *Serious) GetSonnet() string {
+    if !x.IsSetSonnet() {
+      return ""
+    }
+
+    return *x.Sonnet
 }
 
 func (x *Serious) SetSonnet(value string) *Serious {
@@ -184,7 +196,7 @@ func (x *Serious) writeField1(p thrift.Protocol) error {  // Sonnet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSonnet()
+    item := *x.GetSonnetNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -302,8 +314,16 @@ func NewComplexFieldNames() *ComplexFieldNames {
     return (&ComplexFieldNames{})
 }
 
+func (x *ComplexFieldNames) GetErrorMessageNonCompat() string {
+    return x.ErrorMessage
+}
+
 func (x *ComplexFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
+}
+
+func (x *ComplexFieldNames) GetInternalErrorMessageNonCompat() string {
+    return x.InternalErrorMessage
 }
 
 func (x *ComplexFieldNames) GetInternalErrorMessage() string {
@@ -327,7 +347,7 @@ func (x *ComplexFieldNames) writeField1(p thrift.Protocol) error {  // ErrorMess
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorMessage()
+    item := x.GetErrorMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -343,7 +363,7 @@ func (x *ComplexFieldNames) writeField2(p thrift.Protocol) error {  // InternalE
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInternalErrorMessage()
+    item := x.GetInternalErrorMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -484,8 +504,16 @@ func NewCustomFieldNames() *CustomFieldNames {
     return (&CustomFieldNames{})
 }
 
+func (x *CustomFieldNames) GetErrorMessageNonCompat() string {
+    return x.ErrorMessage
+}
+
 func (x *CustomFieldNames) GetErrorMessage() string {
     return x.ErrorMessage
+}
+
+func (x *CustomFieldNames) GetInternalErrorMessageNonCompat() string {
+    return x.InternalErrorMessage
 }
 
 func (x *CustomFieldNames) GetInternalErrorMessage() string {
@@ -509,7 +537,7 @@ func (x *CustomFieldNames) writeField1(p thrift.Protocol) error {  // ErrorMessa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorMessage()
+    item := x.GetErrorMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -525,7 +553,7 @@ func (x *CustomFieldNames) writeField2(p thrift.Protocol) error {  // InternalEr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInternalErrorMessage()
+    item := x.GetInternalErrorMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -666,8 +694,16 @@ func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
     return (&ExceptionWithPrimitiveField{})
 }
 
+func (x *ExceptionWithPrimitiveField) GetMessageNonCompat() string {
+    return x.Message
+}
+
 func (x *ExceptionWithPrimitiveField) GetMessage() string {
     return x.Message
+}
+
+func (x *ExceptionWithPrimitiveField) GetErrorCodeNonCompat() int32 {
+    return x.ErrorCode
 }
 
 func (x *ExceptionWithPrimitiveField) GetErrorCode() int32 {
@@ -691,7 +727,7 @@ func (x *ExceptionWithPrimitiveField) writeField1(p thrift.Protocol) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessage()
+    item := x.GetMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -707,7 +743,7 @@ func (x *ExceptionWithPrimitiveField) writeField2(p thrift.Protocol) error {  //
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorCode()
+    item := x.GetErrorCodeNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -848,8 +884,16 @@ func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
     return (&ExceptionWithStructuredAnnotation{})
 }
 
+func (x *ExceptionWithStructuredAnnotation) GetMessageFieldNonCompat() string {
+    return x.MessageField
+}
+
 func (x *ExceptionWithStructuredAnnotation) GetMessageField() string {
     return x.MessageField
+}
+
+func (x *ExceptionWithStructuredAnnotation) GetErrorCodeNonCompat() int32 {
+    return x.ErrorCode
 }
 
 func (x *ExceptionWithStructuredAnnotation) GetErrorCode() int32 {
@@ -873,7 +917,7 @@ func (x *ExceptionWithStructuredAnnotation) writeField1(p thrift.Protocol) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessageField()
+    item := x.GetMessageFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -889,7 +933,7 @@ func (x *ExceptionWithStructuredAnnotation) writeField2(p thrift.Protocol) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetErrorCode()
+    item := x.GetErrorCodeNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }

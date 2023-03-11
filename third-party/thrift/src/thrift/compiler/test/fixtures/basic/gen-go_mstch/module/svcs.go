@@ -493,6 +493,10 @@ func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
     return (&reqFB303ServiceSimpleRPC{})
 }
 
+func (x *reqFB303ServiceSimpleRPC) GetIntParameterNonCompat() int32 {
+    return x.IntParameter
+}
+
 func (x *reqFB303ServiceSimpleRPC) GetIntParameter() int32 {
     return x.IntParameter
 }
@@ -508,7 +512,7 @@ func (x *reqFB303ServiceSimpleRPC) writeField1(p thrift.Protocol) error {  // In
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetIntParameter()
+    item := x.GetIntParameterNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -623,7 +627,15 @@ func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
 // Deprecated: Use newRespFB303ServiceSimpleRPC().Value instead.
 var respFB303ServiceSimpleRPC_Value_DEFAULT = newRespFB303ServiceSimpleRPC().Value
 
+func (x *respFB303ServiceSimpleRPC) GetValueNonCompat() *ReservedKeyword {
+    return x.Value
+}
+
 func (x *respFB303ServiceSimpleRPC) GetValue() *ReservedKeyword {
+    if !x.IsSetValue() {
+      return NewReservedKeyword()
+    }
+
     return x.Value
 }
 
@@ -645,7 +657,7 @@ func (x *respFB303ServiceSimpleRPC) writeField0(p thrift.Protocol) error {  // V
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1336,6 +1348,10 @@ func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
 }
 
+func (x *respMyServiceGetRandomData) GetValueNonCompat() string {
+    return x.Value
+}
+
 func (x *respMyServiceGetRandomData) GetValue() string {
     return x.Value
 }
@@ -1351,7 +1367,7 @@ func (x *respMyServiceGetRandomData) writeField0(p thrift.Protocol) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1463,6 +1479,10 @@ func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{})
 }
 
+func (x *reqMyServiceSink) GetSinkNonCompat() int64 {
+    return x.Sink
+}
+
 func (x *reqMyServiceSink) GetSink() int64 {
     return x.Sink
 }
@@ -1478,7 +1498,7 @@ func (x *reqMyServiceSink) writeField1(p thrift.Protocol) error {  // Sink
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetSink()
+    item := x.GetSinkNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1668,8 +1688,16 @@ func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{})
 }
 
+func (x *reqMyServicePutDataById) GetIdNonCompat() int64 {
+    return x.Id
+}
+
 func (x *reqMyServicePutDataById) GetId() int64 {
     return x.Id
+}
+
+func (x *reqMyServicePutDataById) GetDataNonCompat() string {
+    return x.Data
 }
 
 func (x *reqMyServicePutDataById) GetData() string {
@@ -1693,7 +1721,7 @@ func (x *reqMyServicePutDataById) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1709,7 +1737,7 @@ func (x *reqMyServicePutDataById) writeField2(p thrift.Protocol) error {  // Dat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData()
+    item := x.GetDataNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1921,6 +1949,10 @@ func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{})
 }
 
+func (x *reqMyServiceHasDataById) GetIdNonCompat() int64 {
+    return x.Id
+}
+
 func (x *reqMyServiceHasDataById) GetId() int64 {
     return x.Id
 }
@@ -1936,7 +1968,7 @@ func (x *reqMyServiceHasDataById) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2048,6 +2080,10 @@ func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
 }
 
+func (x *respMyServiceHasDataById) GetValueNonCompat() bool {
+    return x.Value
+}
+
 func (x *respMyServiceHasDataById) GetValue() bool {
     return x.Value
 }
@@ -2063,7 +2099,7 @@ func (x *respMyServiceHasDataById) writeField0(p thrift.Protocol) error {  // Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -2175,6 +2211,10 @@ func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{})
 }
 
+func (x *reqMyServiceGetDataById) GetIdNonCompat() int64 {
+    return x.Id
+}
+
 func (x *reqMyServiceGetDataById) GetId() int64 {
     return x.Id
 }
@@ -2190,7 +2230,7 @@ func (x *reqMyServiceGetDataById) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2302,6 +2342,10 @@ func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{})
 }
 
+func (x *respMyServiceGetDataById) GetValueNonCompat() string {
+    return x.Value
+}
+
 func (x *respMyServiceGetDataById) GetValue() string {
     return x.Value
 }
@@ -2317,7 +2361,7 @@ func (x *respMyServiceGetDataById) writeField0(p thrift.Protocol) error {  // Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2429,6 +2473,10 @@ func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{})
 }
 
+func (x *reqMyServiceDeleteDataById) GetIdNonCompat() int64 {
+    return x.Id
+}
+
 func (x *reqMyServiceDeleteDataById) GetId() int64 {
     return x.Id
 }
@@ -2444,7 +2492,7 @@ func (x *reqMyServiceDeleteDataById) writeField1(p thrift.Protocol) error {  // 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2634,8 +2682,16 @@ func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{})
 }
 
+func (x *reqMyServiceLobDataById) GetIdNonCompat() int64 {
+    return x.Id
+}
+
 func (x *reqMyServiceLobDataById) GetId() int64 {
     return x.Id
+}
+
+func (x *reqMyServiceLobDataById) GetDataNonCompat() string {
+    return x.Data
 }
 
 func (x *reqMyServiceLobDataById) GetData() string {
@@ -2659,7 +2715,7 @@ func (x *reqMyServiceLobDataById) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -2675,7 +2731,7 @@ func (x *reqMyServiceLobDataById) writeField2(p thrift.Protocol) error {  // Dat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData()
+    item := x.GetDataNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -2964,7 +3020,15 @@ func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{})
 }
 
+func (x *respMyServiceInvalidReturnForHack) GetValueNonCompat() []float32 {
+    return x.Value
+}
+
 func (x *respMyServiceInvalidReturnForHack) GetValue() []float32 {
+    if !x.IsSetValue() {
+      return nil
+    }
+
     return x.Value
 }
 
@@ -2986,7 +3050,7 @@ func (x *respMyServiceInvalidReturnForHack) writeField0(p thrift.Protocol) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteSetBegin(thrift.FLOAT, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -3948,6 +4012,10 @@ func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetData
     return (&reqDbMixedStackArgumentsGetDataByKey0{})
 }
 
+func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKeyNonCompat() string {
+    return x.Key
+}
+
 func (x *reqDbMixedStackArgumentsGetDataByKey0) GetKey() string {
     return x.Key
 }
@@ -3963,7 +4031,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) writeField1(p thrift.Protocol) e
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetKey()
+    item := x.GetKeyNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -4075,7 +4143,15 @@ func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDa
     return (&respDbMixedStackArgumentsGetDataByKey0{})
 }
 
+func (x *respDbMixedStackArgumentsGetDataByKey0) GetValueNonCompat() []byte {
+    return x.Value
+}
+
 func (x *respDbMixedStackArgumentsGetDataByKey0) GetValue() []byte {
+    if !x.IsSetValue() {
+      return []byte("")
+    }
+
     return x.Value
 }
 
@@ -4097,7 +4173,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey0) writeField0(p thrift.Protocol) 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -4209,6 +4285,10 @@ func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetData
     return (&reqDbMixedStackArgumentsGetDataByKey1{})
 }
 
+func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKeyNonCompat() string {
+    return x.Key
+}
+
 func (x *reqDbMixedStackArgumentsGetDataByKey1) GetKey() string {
     return x.Key
 }
@@ -4224,7 +4304,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) writeField1(p thrift.Protocol) e
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetKey()
+    item := x.GetKeyNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -4336,7 +4416,15 @@ func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDa
     return (&respDbMixedStackArgumentsGetDataByKey1{})
 }
 
+func (x *respDbMixedStackArgumentsGetDataByKey1) GetValueNonCompat() []byte {
+    return x.Value
+}
+
 func (x *respDbMixedStackArgumentsGetDataByKey1) GetValue() []byte {
+    if !x.IsSetValue() {
+      return []byte("")
+    }
+
     return x.Value
 }
 
@@ -4358,7 +4446,7 @@ func (x *respDbMixedStackArgumentsGetDataByKey1) writeField0(p thrift.Protocol) 
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }

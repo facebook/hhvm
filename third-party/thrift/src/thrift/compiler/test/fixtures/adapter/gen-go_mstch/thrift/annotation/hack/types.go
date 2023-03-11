@@ -27,6 +27,10 @@ func NewFieldWrapper() *FieldWrapper {
     return (&FieldWrapper{})
 }
 
+func (x *FieldWrapper) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *FieldWrapper) GetName() string {
     return x.Name
 }
@@ -42,7 +46,7 @@ func (x *FieldWrapper) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -158,12 +162,24 @@ func NewWrapper() *Wrapper {
         SetExtraNamespace("thrift_adapted_types")
 }
 
+func (x *Wrapper) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *Wrapper) GetName() string {
     return x.Name
 }
 
+func (x *Wrapper) GetUnderlyingNameNonCompat() string {
+    return x.UnderlyingName
+}
+
 func (x *Wrapper) GetUnderlyingName() string {
     return x.UnderlyingName
+}
+
+func (x *Wrapper) GetExtraNamespaceNonCompat() string {
+    return x.ExtraNamespace
 }
 
 func (x *Wrapper) GetExtraNamespace() string {
@@ -193,7 +209,7 @@ func (x *Wrapper) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -209,7 +225,7 @@ func (x *Wrapper) writeField2(p thrift.Protocol) error {  // UnderlyingName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnderlyingName()
+    item := x.GetUnderlyingNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -225,7 +241,7 @@ func (x *Wrapper) writeField3(p thrift.Protocol) error {  // ExtraNamespace
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetExtraNamespace()
+    item := x.GetExtraNamespaceNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -384,6 +400,10 @@ func NewAdapter() *Adapter {
     return (&Adapter{})
 }
 
+func (x *Adapter) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *Adapter) GetName() string {
     return x.Name
 }
@@ -399,7 +419,7 @@ func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -512,6 +532,10 @@ func NewSkipCodegen() *SkipCodegen {
     return (&SkipCodegen{})
 }
 
+func (x *SkipCodegen) GetReasonNonCompat() string {
+    return x.Reason
+}
+
 func (x *SkipCodegen) GetReason() string {
     return x.Reason
 }
@@ -527,7 +551,7 @@ func (x *SkipCodegen) writeField1(p thrift.Protocol) error {  // Reason
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReason()
+    item := x.GetReasonNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -641,8 +665,16 @@ func NewName() *Name {
     return (&Name{})
 }
 
+func (x *Name) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *Name) GetName() string {
     return x.Name
+}
+
+func (x *Name) GetReasonNonCompat() string {
+    return x.Reason
 }
 
 func (x *Name) GetReason() string {
@@ -666,7 +698,7 @@ func (x *Name) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -682,7 +714,7 @@ func (x *Name) writeField2(p thrift.Protocol) error {  // Reason
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetReason()
+    item := x.GetReasonNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -818,7 +850,15 @@ func NewUnionEnumAttributes() *UnionEnumAttributes {
     return (&UnionEnumAttributes{})
 }
 
+func (x *UnionEnumAttributes) GetAttributesNonCompat() []string {
+    return x.Attributes
+}
+
 func (x *UnionEnumAttributes) GetAttributes() []string {
+    if !x.IsSetAttributes() {
+      return nil
+    }
+
     return x.Attributes
 }
 
@@ -840,7 +880,7 @@ func (x *UnionEnumAttributes) writeField1(p thrift.Protocol) error {  // Attribu
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAttributes()
+    item := x.GetAttributesNonCompat()
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -982,6 +1022,10 @@ func NewStructTrait() *StructTrait {
     return (&StructTrait{})
 }
 
+func (x *StructTrait) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *StructTrait) GetName() string {
     return x.Name
 }
@@ -997,7 +1041,7 @@ func (x *StructTrait) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1110,7 +1154,15 @@ func NewAttributes() *Attributes {
     return (&Attributes{})
 }
 
+func (x *Attributes) GetAttributesNonCompat() []string {
+    return x.Attributes
+}
+
 func (x *Attributes) GetAttributes() []string {
+    if !x.IsSetAttributes() {
+      return nil
+    }
+
     return x.Attributes
 }
 
@@ -1132,7 +1184,7 @@ func (x *Attributes) writeField1(p thrift.Protocol) error {  // Attributes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAttributes()
+    item := x.GetAttributesNonCompat()
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }

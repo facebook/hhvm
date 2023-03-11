@@ -43,6 +43,9 @@ struct go_codegen_data {
   // whether to generate code compatible with the old Go generator
   // (to make the migration easier)
   bool compat = true;
+  // whether to generate "legacy" getters which do not properly support optional
+  // fields (to make the migration easier)
+  bool compat_getters = true;
 
   // Key: package name according to Thrift.
   // Value: package name to use in generated code.
@@ -132,6 +135,8 @@ class mstch_go_program : public mstch_program {
             {"program:docs?", &mstch_go_program::go_has_docs},
             {"program:docs", &mstch_go_program::go_doc_comment},
             {"program:compat?", &mstch_go_program::go_gen_compat},
+            {"program:compat_getters?",
+             &mstch_go_program::go_gen_compat_getters},
             {"program:thrift_imports", &mstch_go_program::thrift_imports},
             {"program:has_thrift_imports",
              &mstch_go_program::has_thrift_imports},
@@ -152,6 +157,7 @@ class mstch_go_program : public mstch_program {
   mstch::node go_has_docs() { return program_->has_doc(); }
   mstch::node go_doc_comment() { return doc_comment(program_); }
   mstch::node go_gen_compat() { return data_.compat; }
+  mstch::node go_gen_compat_getters() { return data_.compat_getters; }
   mstch::node thrift_imports() {
     mstch::array a;
     for (const auto* program : program_->get_included_programs()) {
@@ -307,6 +313,8 @@ class mstch_go_field : public mstch_field {
             {"field:pointer?", &mstch_go_field::is_pointer},
             {"field:nilable?", &mstch_go_field::is_nilable},
             {"field:dereference?", &mstch_go_field::should_dereference},
+            {"field:compat_getter_dereference?",
+             &mstch_go_field::should_compat_getter_dereference},
             {"field:key_str", &mstch_go_field::key_str},
             {"field:go_tag?", &mstch_go_field::has_go_tag},
             {"field:go_tag", &mstch_go_field::go_tag},
@@ -333,6 +341,14 @@ class mstch_go_field : public mstch_field {
     return (go::is_type_go_struct(real_type) || is_inside_union_() ||
             is_optional_()) &&
         !go::is_type_nilable(real_type);
+  }
+  mstch::node should_compat_getter_dereference() {
+    // Dereference all pointers, except structs and eceptions.
+    auto real_type = field_->type()->get_true_type();
+    bool is_pointer = (go::is_type_go_struct(real_type) || is_inside_union_() ||
+                       is_optional_()) &&
+        !go::is_type_nilable(real_type);
+    return is_pointer && !go::is_type_go_struct(real_type);
   }
   mstch::node is_nilable() {
     // Whether this field can be set to 'nil' in Go:

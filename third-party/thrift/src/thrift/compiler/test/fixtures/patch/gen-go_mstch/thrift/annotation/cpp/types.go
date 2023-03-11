@@ -159,6 +159,10 @@ func NewRef() *Ref {
     return (&Ref{})
 }
 
+func (x *Ref) GetTypeNonCompat() RefType {
+    return x.Type
+}
+
 func (x *Ref) GetType() RefType {
     return x.Type
 }
@@ -174,7 +178,7 @@ func (x *Ref) writeField1(p thrift.Protocol) error {  // Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetType()
+    item := x.GetTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -289,6 +293,10 @@ func NewLazy() *Lazy {
         SetRef(false)
 }
 
+func (x *Lazy) GetRefNonCompat() bool {
+    return x.Ref
+}
+
 func (x *Lazy) GetRef() bool {
     return x.Ref
 }
@@ -304,7 +312,7 @@ func (x *Lazy) writeField1(p thrift.Protocol) error {  // Ref
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRef()
+    item := x.GetRefNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -499,20 +507,40 @@ func NewAdapter() *Adapter {
     return (&Adapter{})
 }
 
+func (x *Adapter) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *Adapter) GetName() string {
     return x.Name
+}
+
+func (x *Adapter) GetAdaptedTypeNonCompat() string {
+    return x.AdaptedType
 }
 
 func (x *Adapter) GetAdaptedType() string {
     return x.AdaptedType
 }
 
+func (x *Adapter) GetUnderlyingNameNonCompat() string {
+    return x.UnderlyingName
+}
+
 func (x *Adapter) GetUnderlyingName() string {
     return x.UnderlyingName
 }
 
+func (x *Adapter) GetExtraNamespaceNonCompat() string {
+    return x.ExtraNamespace
+}
+
 func (x *Adapter) GetExtraNamespace() string {
     return x.ExtraNamespace
+}
+
+func (x *Adapter) GetMoveOnlyNonCompat() bool {
+    return x.MoveOnly
 }
 
 func (x *Adapter) GetMoveOnly() bool {
@@ -554,7 +582,7 @@ func (x *Adapter) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -570,7 +598,7 @@ func (x *Adapter) writeField2(p thrift.Protocol) error {  // AdaptedType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdaptedType()
+    item := x.GetAdaptedTypeNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -586,7 +614,7 @@ func (x *Adapter) writeField3(p thrift.Protocol) error {  // UnderlyingName
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnderlyingName()
+    item := x.GetUnderlyingNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -602,7 +630,7 @@ func (x *Adapter) writeField4(p thrift.Protocol) error {  // ExtraNamespace
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetExtraNamespace()
+    item := x.GetExtraNamespaceNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -618,7 +646,7 @@ func (x *Adapter) writeField5(p thrift.Protocol) error {  // MoveOnly
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMoveOnly()
+    item := x.GetMoveOnlyNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -824,6 +852,10 @@ func NewPackIsset() *PackIsset {
         SetAtomic(true)
 }
 
+func (x *PackIsset) GetAtomicNonCompat() bool {
+    return x.Atomic
+}
+
 func (x *PackIsset) GetAtomic() bool {
     return x.Atomic
 }
@@ -839,7 +871,7 @@ func (x *PackIsset) writeField1(p thrift.Protocol) error {  // Atomic
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAtomic()
+    item := x.GetAtomicNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1265,8 +1297,16 @@ func NewFieldInterceptor() *FieldInterceptor {
     return (&FieldInterceptor{})
 }
 
+func (x *FieldInterceptor) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *FieldInterceptor) GetName() string {
     return x.Name
+}
+
+func (x *FieldInterceptor) GetNoinlineNonCompat() bool {
+    return x.Noinline
 }
 
 func (x *FieldInterceptor) GetNoinline() bool {
@@ -1290,7 +1330,7 @@ func (x *FieldInterceptor) writeField1(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1306,7 +1346,7 @@ func (x *FieldInterceptor) writeField2(p thrift.Protocol) error {  // Noinline
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNoinline()
+    item := x.GetNoinlineNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1520,6 +1560,10 @@ func NewEnumType() *EnumType {
     return (&EnumType{})
 }
 
+func (x *EnumType) GetTypeNonCompat() EnumUnderlyingType {
+    return x.Type
+}
+
 func (x *EnumType) GetType() EnumUnderlyingType {
     return x.Type
 }
@@ -1535,7 +1579,7 @@ func (x *EnumType) writeField1(p thrift.Protocol) error {  // Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetType()
+    item := x.GetTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }

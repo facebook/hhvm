@@ -231,11 +231,27 @@ func NewTypeUri() *TypeUri {
 // Deprecated: Use NewTypeUri().Uri instead.
 var TypeUri_Uri_DEFAULT = NewTypeUri().Uri
 
-func (x *TypeUri) GetUri() *Uri {
+func (x *TypeUri) GetUriNonCompat() *Uri {
     return x.Uri
 }
 
+func (x *TypeUri) GetUri() Uri {
+    if !x.IsSetUri() {
+      return NewUri()
+    }
+
+    return *x.Uri
+}
+
+func (x *TypeUri) GetTypeHashPrefixSha2_256NonCompat() ByteString {
+    return x.TypeHashPrefixSha2_256
+}
+
 func (x *TypeUri) GetTypeHashPrefixSha2_256() ByteString {
+    if !x.IsSetTypeHashPrefixSha2_256() {
+      return NewByteString()
+    }
+
     return x.TypeHashPrefixSha2_256
 }
 
@@ -266,7 +282,7 @@ func (x *TypeUri) writeField1(p thrift.Protocol) error {  // Uri
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetUri()
+    item := *x.GetUriNonCompat()
     err := WriteUri(item, p)
 if err != nil {
     return err
@@ -287,7 +303,7 @@ func (x *TypeUri) writeField2(p thrift.Protocol) error {  // TypeHashPrefixSha2_
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypeHashPrefixSha2_256()
+    item := x.GetTypeHashPrefixSha2_256NonCompat()
     err := WriteByteString(item, p)
 if err != nil {
     return err
@@ -491,72 +507,208 @@ var TypeName_SetType_DEFAULT = NewTypeName().SetType
 // Deprecated: Use NewTypeName().MapType instead.
 var TypeName_MapType_DEFAULT = NewTypeName().MapType
 
-func (x *TypeName) GetBoolType() *Void {
+func (x *TypeName) GetBoolTypeNonCompat() *Void {
     return x.BoolType
 }
 
-func (x *TypeName) GetByteType() *Void {
+func (x *TypeName) GetBoolType() Void {
+    if !x.IsSetBoolType() {
+      return 0
+    }
+
+    return *x.BoolType
+}
+
+func (x *TypeName) GetByteTypeNonCompat() *Void {
     return x.ByteType
 }
 
-func (x *TypeName) GetI16Type() *Void {
+func (x *TypeName) GetByteType() Void {
+    if !x.IsSetByteType() {
+      return 0
+    }
+
+    return *x.ByteType
+}
+
+func (x *TypeName) GetI16TypeNonCompat() *Void {
     return x.I16Type
 }
 
-func (x *TypeName) GetI32Type() *Void {
+func (x *TypeName) GetI16Type() Void {
+    if !x.IsSetI16Type() {
+      return 0
+    }
+
+    return *x.I16Type
+}
+
+func (x *TypeName) GetI32TypeNonCompat() *Void {
     return x.I32Type
 }
 
-func (x *TypeName) GetI64Type() *Void {
+func (x *TypeName) GetI32Type() Void {
+    if !x.IsSetI32Type() {
+      return 0
+    }
+
+    return *x.I32Type
+}
+
+func (x *TypeName) GetI64TypeNonCompat() *Void {
     return x.I64Type
 }
 
-func (x *TypeName) GetFloatType() *Void {
+func (x *TypeName) GetI64Type() Void {
+    if !x.IsSetI64Type() {
+      return 0
+    }
+
+    return *x.I64Type
+}
+
+func (x *TypeName) GetFloatTypeNonCompat() *Void {
     return x.FloatType
 }
 
-func (x *TypeName) GetDoubleType() *Void {
+func (x *TypeName) GetFloatType() Void {
+    if !x.IsSetFloatType() {
+      return 0
+    }
+
+    return *x.FloatType
+}
+
+func (x *TypeName) GetDoubleTypeNonCompat() *Void {
     return x.DoubleType
 }
 
-func (x *TypeName) GetStringType() *Void {
+func (x *TypeName) GetDoubleType() Void {
+    if !x.IsSetDoubleType() {
+      return 0
+    }
+
+    return *x.DoubleType
+}
+
+func (x *TypeName) GetStringTypeNonCompat() *Void {
     return x.StringType
 }
 
-func (x *TypeName) GetBinaryType() *Void {
+func (x *TypeName) GetStringType() Void {
+    if !x.IsSetStringType() {
+      return 0
+    }
+
+    return *x.StringType
+}
+
+func (x *TypeName) GetBinaryTypeNonCompat() *Void {
     return x.BinaryType
 }
 
-func (x *TypeName) GetEnumType() *TypeUri {
+func (x *TypeName) GetBinaryType() Void {
+    if !x.IsSetBinaryType() {
+      return 0
+    }
+
+    return *x.BinaryType
+}
+
+func (x *TypeName) GetEnumTypeNonCompat() *TypeUri {
     return x.EnumType
 }
 
-func (x *TypeName) GetTypedefType() *TypeUri {
+func (x *TypeName) GetEnumType() *TypeUri {
+    if !x.IsSetEnumType() {
+      return NewTypeUri()
+    }
+
+    return x.EnumType
+}
+
+func (x *TypeName) GetTypedefTypeNonCompat() *TypeUri {
     return x.TypedefType
 }
 
-func (x *TypeName) GetStructType() *TypeUri {
+func (x *TypeName) GetTypedefType() *TypeUri {
+    if !x.IsSetTypedefType() {
+      return NewTypeUri()
+    }
+
+    return x.TypedefType
+}
+
+func (x *TypeName) GetStructTypeNonCompat() *TypeUri {
     return x.StructType
 }
 
-func (x *TypeName) GetUnionType() *TypeUri {
+func (x *TypeName) GetStructType() *TypeUri {
+    if !x.IsSetStructType() {
+      return NewTypeUri()
+    }
+
+    return x.StructType
+}
+
+func (x *TypeName) GetUnionTypeNonCompat() *TypeUri {
     return x.UnionType
 }
 
-func (x *TypeName) GetExceptionType() *TypeUri {
+func (x *TypeName) GetUnionType() *TypeUri {
+    if !x.IsSetUnionType() {
+      return NewTypeUri()
+    }
+
+    return x.UnionType
+}
+
+func (x *TypeName) GetExceptionTypeNonCompat() *TypeUri {
     return x.ExceptionType
 }
 
-func (x *TypeName) GetListType() *Void {
+func (x *TypeName) GetExceptionType() *TypeUri {
+    if !x.IsSetExceptionType() {
+      return NewTypeUri()
+    }
+
+    return x.ExceptionType
+}
+
+func (x *TypeName) GetListTypeNonCompat() *Void {
     return x.ListType
 }
 
-func (x *TypeName) GetSetType() *Void {
+func (x *TypeName) GetListType() Void {
+    if !x.IsSetListType() {
+      return 0
+    }
+
+    return *x.ListType
+}
+
+func (x *TypeName) GetSetTypeNonCompat() *Void {
     return x.SetType
 }
 
-func (x *TypeName) GetMapType() *Void {
+func (x *TypeName) GetSetType() Void {
+    if !x.IsSetSetType() {
+      return 0
+    }
+
+    return *x.SetType
+}
+
+func (x *TypeName) GetMapTypeNonCompat() *Void {
     return x.MapType
+}
+
+func (x *TypeName) GetMapType() Void {
+    if !x.IsSetMapType() {
+      return 0
+    }
+
+    return *x.MapType
 }
 
 func (x *TypeName) SetBoolType(value Void) *TypeName {
@@ -721,7 +873,7 @@ func (x *TypeName) writeField1(p thrift.Protocol) error {  // BoolType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBoolType()
+    item := *x.GetBoolTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -741,7 +893,7 @@ func (x *TypeName) writeField2(p thrift.Protocol) error {  // ByteType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetByteType()
+    item := *x.GetByteTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -761,7 +913,7 @@ func (x *TypeName) writeField3(p thrift.Protocol) error {  // I16Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI16Type()
+    item := *x.GetI16TypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -781,7 +933,7 @@ func (x *TypeName) writeField4(p thrift.Protocol) error {  // I32Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI32Type()
+    item := *x.GetI32TypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -801,7 +953,7 @@ func (x *TypeName) writeField5(p thrift.Protocol) error {  // I64Type
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI64Type()
+    item := *x.GetI64TypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -821,7 +973,7 @@ func (x *TypeName) writeField6(p thrift.Protocol) error {  // FloatType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFloatType()
+    item := *x.GetFloatTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -841,7 +993,7 @@ func (x *TypeName) writeField7(p thrift.Protocol) error {  // DoubleType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDoubleType()
+    item := *x.GetDoubleTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -861,7 +1013,7 @@ func (x *TypeName) writeField8(p thrift.Protocol) error {  // StringType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringType()
+    item := *x.GetStringTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -881,7 +1033,7 @@ func (x *TypeName) writeField9(p thrift.Protocol) error {  // BinaryType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBinaryType()
+    item := *x.GetBinaryTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -901,7 +1053,7 @@ func (x *TypeName) writeField10(p thrift.Protocol) error {  // EnumType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnumType()
+    item := x.GetEnumTypeNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -921,7 +1073,7 @@ func (x *TypeName) writeField17(p thrift.Protocol) error {  // TypedefType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetTypedefType()
+    item := x.GetTypedefTypeNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -941,7 +1093,7 @@ func (x *TypeName) writeField11(p thrift.Protocol) error {  // StructType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructType()
+    item := x.GetStructTypeNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -961,7 +1113,7 @@ func (x *TypeName) writeField12(p thrift.Protocol) error {  // UnionType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionType()
+    item := x.GetUnionTypeNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -981,7 +1133,7 @@ func (x *TypeName) writeField13(p thrift.Protocol) error {  // ExceptionType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetExceptionType()
+    item := x.GetExceptionTypeNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1001,7 +1153,7 @@ func (x *TypeName) writeField14(p thrift.Protocol) error {  // ListType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetListType()
+    item := *x.GetListTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1021,7 +1173,7 @@ func (x *TypeName) writeField15(p thrift.Protocol) error {  // SetType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetSetType()
+    item := *x.GetSetTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1041,7 +1193,7 @@ func (x *TypeName) writeField16(p thrift.Protocol) error {  // MapType
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMapType()
+    item := *x.GetMapTypeNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }

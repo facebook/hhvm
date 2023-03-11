@@ -26,8 +26,16 @@ func NewAccessory() *Accessory {
     return (&Accessory{})
 }
 
+func (x *Accessory) GetInventoryIdNonCompat() int32 {
+    return x.InventoryId
+}
+
 func (x *Accessory) GetInventoryId() int32 {
     return x.InventoryId
+}
+
+func (x *Accessory) GetNameNonCompat() string {
+    return x.Name
 }
 
 func (x *Accessory) GetName() string {
@@ -51,7 +59,7 @@ func (x *Accessory) writeField1(p thrift.Protocol) error {  // InventoryId
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInventoryId()
+    item := x.GetInventoryIdNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -67,7 +75,7 @@ func (x *Accessory) writeField2(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -204,8 +212,16 @@ func NewPartName() *PartName {
     return (&PartName{})
 }
 
+func (x *PartName) GetInventoryIdNonCompat() int32 {
+    return x.InventoryId
+}
+
 func (x *PartName) GetInventoryId() int32 {
     return x.InventoryId
+}
+
+func (x *PartName) GetNameNonCompat() string {
+    return x.Name
 }
 
 func (x *PartName) GetName() string {
@@ -229,7 +245,7 @@ func (x *PartName) writeField1(p thrift.Protocol) error {  // InventoryId
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInventoryId()
+    item := x.GetInventoryIdNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -245,7 +261,7 @@ func (x *PartName) writeField2(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

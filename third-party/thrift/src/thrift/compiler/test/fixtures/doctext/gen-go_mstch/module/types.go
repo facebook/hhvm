@@ -127,6 +127,10 @@ func NewA() *A {
     return (&A{})
 }
 
+func (x *A) GetUselessFieldNonCompat() int32 {
+    return x.UselessField
+}
+
 func (x *A) GetUselessField() int32 {
     return x.UselessField
 }
@@ -142,7 +146,7 @@ func (x *A) writeField1(p thrift.Protocol) error {  // UselessField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUselessField()
+    item := x.GetUselessFieldNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -262,12 +266,28 @@ var U_I_DEFAULT = NewU().I
 // Deprecated: Use NewU().S instead.
 var U_S_DEFAULT = NewU().S
 
-func (x *U) GetI() *int32 {
+func (x *U) GetINonCompat() *int32 {
     return x.I
 }
 
-func (x *U) GetS() *string {
+func (x *U) GetI() int32 {
+    if !x.IsSetI() {
+      return 0
+    }
+
+    return *x.I
+}
+
+func (x *U) GetSNonCompat() *string {
     return x.S
+}
+
+func (x *U) GetS() string {
+    if !x.IsSetS() {
+      return ""
+    }
+
+    return *x.S
 }
 
 func (x *U) SetI(value int32) *U {
@@ -297,7 +317,7 @@ func (x *U) writeField1(p thrift.Protocol) error {  // I
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI()
+    item := *x.GetINonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -317,7 +337,7 @@ func (x *U) writeField2(p thrift.Protocol) error {  // S
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetS()
+    item := *x.GetSNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -453,6 +473,10 @@ func NewBang() *Bang {
     return (&Bang{})
 }
 
+func (x *Bang) GetMessageNonCompat() string {
+    return x.Message
+}
+
 func (x *Bang) GetMessage() string {
     return x.Message
 }
@@ -468,7 +492,7 @@ func (x *Bang) writeField1(p thrift.Protocol) error {  // Message
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMessage()
+    item := x.GetMessageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

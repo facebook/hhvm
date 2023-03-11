@@ -82,8 +82,16 @@ func NewMyData() *MyData {
     return (&MyData{})
 }
 
+func (x *MyData) GetData1NonCompat() string {
+    return x.Data1
+}
+
 func (x *MyData) GetData1() string {
     return x.Data1
+}
+
+func (x *MyData) GetData2NonCompat() int32 {
+    return x.Data2
 }
 
 func (x *MyData) GetData2() int32 {
@@ -107,7 +115,7 @@ func (x *MyData) writeField1(p thrift.Protocol) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1()
+    item := x.GetData1NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -123,7 +131,7 @@ func (x *MyData) writeField2(p thrift.Protocol) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2()
+    item := x.GetData2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -262,8 +270,16 @@ func NewMyDataWithCustomDefault() *MyDataWithCustomDefault {
         SetData2(2)
 }
 
+func (x *MyDataWithCustomDefault) GetData1NonCompat() string {
+    return x.Data1
+}
+
 func (x *MyDataWithCustomDefault) GetData1() string {
     return x.Data1
+}
+
+func (x *MyDataWithCustomDefault) GetData2NonCompat() int32 {
+    return x.Data2
 }
 
 func (x *MyDataWithCustomDefault) GetData2() int32 {
@@ -287,7 +303,7 @@ func (x *MyDataWithCustomDefault) writeField1(p thrift.Protocol) error {  // Dat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1()
+    item := x.GetData1NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -303,7 +319,7 @@ func (x *MyDataWithCustomDefault) writeField2(p thrift.Protocol) error {  // Dat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2()
+    item := x.GetData2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -439,7 +455,15 @@ func NewInnerUnion() *InnerUnion {
     return (&InnerUnion{})
 }
 
+func (x *InnerUnion) GetInnerOptionNonCompat() []byte {
+    return x.InnerOption
+}
+
 func (x *InnerUnion) GetInnerOption() []byte {
+    if !x.IsSetInnerOption() {
+      return []byte("")
+    }
+
     return x.InnerOption
 }
 
@@ -461,7 +485,7 @@ func (x *InnerUnion) writeField1(p thrift.Protocol) error {  // InnerOption
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInnerOption()
+    item := x.GetInnerOptionNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -585,15 +609,39 @@ var MyUnion_Option2_DEFAULT = NewMyUnion().Option2
 // Deprecated: Use NewMyUnion().Option3 instead.
 var MyUnion_Option3_DEFAULT = NewMyUnion().Option3
 
-func (x *MyUnion) GetOption1() *string {
+func (x *MyUnion) GetOption1NonCompat() *string {
     return x.Option1
 }
 
-func (x *MyUnion) GetOption2() *int32 {
+func (x *MyUnion) GetOption1() string {
+    if !x.IsSetOption1() {
+      return ""
+    }
+
+    return *x.Option1
+}
+
+func (x *MyUnion) GetOption2NonCompat() *int32 {
     return x.Option2
 }
 
+func (x *MyUnion) GetOption2() int32 {
+    if !x.IsSetOption2() {
+      return 0
+    }
+
+    return *x.Option2
+}
+
+func (x *MyUnion) GetOption3NonCompat() *InnerUnion {
+    return x.Option3
+}
+
 func (x *MyUnion) GetOption3() *InnerUnion {
+    if !x.IsSetOption3() {
+      return NewInnerUnion()
+    }
+
     return x.Option3
 }
 
@@ -633,7 +681,7 @@ func (x *MyUnion) writeField1(p thrift.Protocol) error {  // Option1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOption1()
+    item := *x.GetOption1NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -653,7 +701,7 @@ func (x *MyUnion) writeField2(p thrift.Protocol) error {  // Option2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOption2()
+    item := *x.GetOption2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -673,7 +721,7 @@ func (x *MyUnion) writeField3(p thrift.Protocol) error {  // Option3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption3()
+    item := x.GetOption3NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -919,135 +967,359 @@ var MyStruct_StructWithCustomDefault_DEFAULT = NewMyStruct().StructWithCustomDef
 // Deprecated: Use NewMyStruct().StructWithFieldCustomDefault instead.
 var MyStruct_StructWithFieldCustomDefault_DEFAULT = NewMyStruct().StructWithFieldCustomDefault
 
+func (x *MyStruct) GetBoolValNonCompat() bool {
+    return x.BoolVal
+}
+
 func (x *MyStruct) GetBoolVal() bool {
     return x.BoolVal
+}
+
+func (x *MyStruct) GetByteValNonCompat() byte {
+    return x.ByteVal
 }
 
 func (x *MyStruct) GetByteVal() byte {
     return x.ByteVal
 }
 
+func (x *MyStruct) GetI16ValNonCompat() int16 {
+    return x.I16Val
+}
+
 func (x *MyStruct) GetI16Val() int16 {
     return x.I16Val
+}
+
+func (x *MyStruct) GetI32ValNonCompat() int32 {
+    return x.I32Val
 }
 
 func (x *MyStruct) GetI32Val() int32 {
     return x.I32Val
 }
 
+func (x *MyStruct) GetI64ValNonCompat() int64 {
+    return x.I64Val
+}
+
 func (x *MyStruct) GetI64Val() int64 {
     return x.I64Val
+}
+
+func (x *MyStruct) GetFloatValNonCompat() float32 {
+    return x.FloatVal
 }
 
 func (x *MyStruct) GetFloatVal() float32 {
     return x.FloatVal
 }
 
+func (x *MyStruct) GetDoubleValNonCompat() float64 {
+    return x.DoubleVal
+}
+
 func (x *MyStruct) GetDoubleVal() float64 {
     return x.DoubleVal
+}
+
+func (x *MyStruct) GetStringValNonCompat() string {
+    return x.StringVal
 }
 
 func (x *MyStruct) GetStringVal() string {
     return x.StringVal
 }
 
-func (x *MyStruct) GetBinaryVal() []byte {
+func (x *MyStruct) GetBinaryValNonCompat() []byte {
     return x.BinaryVal
+}
+
+func (x *MyStruct) GetBinaryVal() []byte {
+    if !x.IsSetBinaryVal() {
+      return []byte("")
+    }
+
+    return x.BinaryVal
+}
+
+func (x *MyStruct) GetEnumValNonCompat() MyEnum {
+    return x.EnumVal
 }
 
 func (x *MyStruct) GetEnumVal() MyEnum {
     return x.EnumVal
 }
 
-func (x *MyStruct) GetStructVal() *MyData {
+func (x *MyStruct) GetStructValNonCompat() *MyData {
     return x.StructVal
 }
 
-func (x *MyStruct) GetUnionVal() *MyUnion {
+func (x *MyStruct) GetStructVal() *MyData {
+    if !x.IsSetStructVal() {
+      return NewMyData()
+    }
+
+    return x.StructVal
+}
+
+func (x *MyStruct) GetUnionValNonCompat() *MyUnion {
     return x.UnionVal
 }
 
-func (x *MyStruct) GetLateStructVal() *LateDefStruct {
+func (x *MyStruct) GetUnionVal() *MyUnion {
+    if !x.IsSetUnionVal() {
+      return NewMyUnion()
+    }
+
+    return x.UnionVal
+}
+
+func (x *MyStruct) GetLateStructValNonCompat() *LateDefStruct {
     return x.LateStructVal
 }
 
-func (x *MyStruct) GetOptBoolVal() *bool {
+func (x *MyStruct) GetLateStructVal() *LateDefStruct {
+    if !x.IsSetLateStructVal() {
+      return NewLateDefStruct()
+    }
+
+    return x.LateStructVal
+}
+
+func (x *MyStruct) GetOptBoolValNonCompat() *bool {
     return x.OptBoolVal
 }
 
-func (x *MyStruct) GetOptByteVal() *byte {
+func (x *MyStruct) GetOptBoolVal() bool {
+    if !x.IsSetOptBoolVal() {
+      return false
+    }
+
+    return *x.OptBoolVal
+}
+
+func (x *MyStruct) GetOptByteValNonCompat() *byte {
     return x.OptByteVal
 }
 
-func (x *MyStruct) GetOptI16Val() *int16 {
+func (x *MyStruct) GetOptByteVal() byte {
+    if !x.IsSetOptByteVal() {
+      return 0
+    }
+
+    return *x.OptByteVal
+}
+
+func (x *MyStruct) GetOptI16ValNonCompat() *int16 {
     return x.OptI16Val
 }
 
-func (x *MyStruct) GetOptI32Val() *int32 {
+func (x *MyStruct) GetOptI16Val() int16 {
+    if !x.IsSetOptI16Val() {
+      return 0
+    }
+
+    return *x.OptI16Val
+}
+
+func (x *MyStruct) GetOptI32ValNonCompat() *int32 {
     return x.OptI32Val
 }
 
-func (x *MyStruct) GetOptI64Val() *int64 {
+func (x *MyStruct) GetOptI32Val() int32 {
+    if !x.IsSetOptI32Val() {
+      return 0
+    }
+
+    return *x.OptI32Val
+}
+
+func (x *MyStruct) GetOptI64ValNonCompat() *int64 {
     return x.OptI64Val
 }
 
-func (x *MyStruct) GetOptFloatVal() *float32 {
+func (x *MyStruct) GetOptI64Val() int64 {
+    if !x.IsSetOptI64Val() {
+      return 0
+    }
+
+    return *x.OptI64Val
+}
+
+func (x *MyStruct) GetOptFloatValNonCompat() *float32 {
     return x.OptFloatVal
 }
 
-func (x *MyStruct) GetOptDoubleVal() *float64 {
+func (x *MyStruct) GetOptFloatVal() float32 {
+    if !x.IsSetOptFloatVal() {
+      return 0.0
+    }
+
+    return *x.OptFloatVal
+}
+
+func (x *MyStruct) GetOptDoubleValNonCompat() *float64 {
     return x.OptDoubleVal
 }
 
-func (x *MyStruct) GetOptStringVal() *string {
+func (x *MyStruct) GetOptDoubleVal() float64 {
+    if !x.IsSetOptDoubleVal() {
+      return 0.0
+    }
+
+    return *x.OptDoubleVal
+}
+
+func (x *MyStruct) GetOptStringValNonCompat() *string {
     return x.OptStringVal
 }
 
-func (x *MyStruct) GetOptBinaryVal() []byte {
+func (x *MyStruct) GetOptStringVal() string {
+    if !x.IsSetOptStringVal() {
+      return ""
+    }
+
+    return *x.OptStringVal
+}
+
+func (x *MyStruct) GetOptBinaryValNonCompat() []byte {
     return x.OptBinaryVal
 }
 
-func (x *MyStruct) GetOptEnumVal() *MyEnum {
+func (x *MyStruct) GetOptBinaryVal() []byte {
+    if !x.IsSetOptBinaryVal() {
+      return []byte("")
+    }
+
+    return x.OptBinaryVal
+}
+
+func (x *MyStruct) GetOptEnumValNonCompat() *MyEnum {
     return x.OptEnumVal
 }
 
-func (x *MyStruct) GetOptStructVal() *MyData {
+func (x *MyStruct) GetOptEnumVal() MyEnum {
+    if !x.IsSetOptEnumVal() {
+      return 0
+    }
+
+    return *x.OptEnumVal
+}
+
+func (x *MyStruct) GetOptStructValNonCompat() *MyData {
     return x.OptStructVal
 }
 
-func (x *MyStruct) GetOptLateStructVal() *LateDefStruct {
+func (x *MyStruct) GetOptStructVal() *MyData {
+    if !x.IsSetOptStructVal() {
+      return NewMyData()
+    }
+
+    return x.OptStructVal
+}
+
+func (x *MyStruct) GetOptLateStructValNonCompat() *LateDefStruct {
     return x.OptLateStructVal
 }
 
-func (x *MyStruct) GetOptListVal() []int16 {
+func (x *MyStruct) GetOptLateStructVal() *LateDefStruct {
+    if !x.IsSetOptLateStructVal() {
+      return NewLateDefStruct()
+    }
+
+    return x.OptLateStructVal
+}
+
+func (x *MyStruct) GetOptListValNonCompat() []int16 {
     return x.OptListVal
 }
 
-func (x *MyStruct) GetOptSetVal() []string {
+func (x *MyStruct) GetOptListVal() []int16 {
+    if !x.IsSetOptListVal() {
+      return nil
+    }
+
+    return x.OptListVal
+}
+
+func (x *MyStruct) GetOptSetValNonCompat() []string {
     return x.OptSetVal
 }
 
-func (x *MyStruct) GetOptMapVal() map[string]string {
+func (x *MyStruct) GetOptSetVal() []string {
+    if !x.IsSetOptSetVal() {
+      return nil
+    }
+
+    return x.OptSetVal
+}
+
+func (x *MyStruct) GetOptMapValNonCompat() map[string]string {
     return x.OptMapVal
 }
 
-func (x *MyStruct) GetListMap() []map[string]int32 {
+func (x *MyStruct) GetOptMapVal() map[string]string {
+    if !x.IsSetOptMapVal() {
+      return nil
+    }
+
+    return x.OptMapVal
+}
+
+func (x *MyStruct) GetListMapNonCompat() []map[string]int32 {
     return x.ListMap
 }
 
-func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
+func (x *MyStruct) GetListMap() []map[string]int32 {
+    if !x.IsSetListMap() {
+      return nil
+    }
+
+    return x.ListMap
+}
+
+func (x *MyStruct) GetMapMapNonCompat() map[string]map[string]int32 {
     return x.MapMap
+}
+
+func (x *MyStruct) GetMapMap() map[string]map[string]int32 {
+    if !x.IsSetMapMap() {
+      return nil
+    }
+
+    return x.MapMap
+}
+
+func (x *MyStruct) GetI32WithCustomDefaultNonCompat() int32 {
+    return x.I32WithCustomDefault
 }
 
 func (x *MyStruct) GetI32WithCustomDefault() int32 {
     return x.I32WithCustomDefault
 }
 
-func (x *MyStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
+func (x *MyStruct) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefault {
     return x.StructWithCustomDefault
 }
 
+func (x *MyStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
+    if !x.IsSetStructWithCustomDefault() {
+      return NewMyDataWithCustomDefault()
+    }
+
+    return x.StructWithCustomDefault
+}
+
+func (x *MyStruct) GetStructWithFieldCustomDefaultNonCompat() *MyData {
+    return x.StructWithFieldCustomDefault
+}
+
 func (x *MyStruct) GetStructWithFieldCustomDefault() *MyData {
+    if !x.IsSetStructWithFieldCustomDefault() {
+      return NewMyData()
+    }
+
     return x.StructWithFieldCustomDefault
 }
 
@@ -1323,7 +1595,7 @@ func (x *MyStruct) writeField_1(p thrift.Protocol) error {  // BoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBoolVal()
+    item := x.GetBoolValNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1339,7 +1611,7 @@ func (x *MyStruct) writeField_2(p thrift.Protocol) error {  // ByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetByteVal()
+    item := x.GetByteValNonCompat()
     if err := p.WriteByte(item); err != nil {
     return err
 }
@@ -1355,7 +1627,7 @@ func (x *MyStruct) writeField_3(p thrift.Protocol) error {  // I16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI16Val()
+    item := x.GetI16ValNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1371,7 +1643,7 @@ func (x *MyStruct) writeField_4(p thrift.Protocol) error {  // I32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32Val()
+    item := x.GetI32ValNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1387,7 +1659,7 @@ func (x *MyStruct) writeField_5(p thrift.Protocol) error {  // I64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI64Val()
+    item := x.GetI64ValNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1403,7 +1675,7 @@ func (x *MyStruct) writeField_6(p thrift.Protocol) error {  // FloatVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatVal()
+    item := x.GetFloatValNonCompat()
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -1419,7 +1691,7 @@ func (x *MyStruct) writeField_7(p thrift.Protocol) error {  // DoubleVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDoubleVal()
+    item := x.GetDoubleValNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -1435,7 +1707,7 @@ func (x *MyStruct) writeField_8(p thrift.Protocol) error {  // StringVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringVal()
+    item := x.GetStringValNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1455,7 +1727,7 @@ func (x *MyStruct) writeField_9(p thrift.Protocol) error {  // BinaryVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryVal()
+    item := x.GetBinaryValNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -1471,7 +1743,7 @@ func (x *MyStruct) writeField_10(p thrift.Protocol) error {  // EnumVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnumVal()
+    item := x.GetEnumValNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1491,7 +1763,7 @@ func (x *MyStruct) writeField_11(p thrift.Protocol) error {  // StructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructVal()
+    item := x.GetStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1511,7 +1783,7 @@ func (x *MyStruct) writeField_12(p thrift.Protocol) error {  // UnionVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionVal()
+    item := x.GetUnionValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1531,7 +1803,7 @@ func (x *MyStruct) writeField_13(p thrift.Protocol) error {  // LateStructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLateStructVal()
+    item := x.GetLateStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1551,7 +1823,7 @@ func (x *MyStruct) writeField_14(p thrift.Protocol) error {  // OptBoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptBoolVal()
+    item := *x.GetOptBoolValNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -1571,7 +1843,7 @@ func (x *MyStruct) writeField_15(p thrift.Protocol) error {  // OptByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptByteVal()
+    item := *x.GetOptByteValNonCompat()
     if err := p.WriteByte(item); err != nil {
     return err
 }
@@ -1591,7 +1863,7 @@ func (x *MyStruct) writeField_16(p thrift.Protocol) error {  // OptI16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI16Val()
+    item := *x.GetOptI16ValNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -1611,7 +1883,7 @@ func (x *MyStruct) writeField_17(p thrift.Protocol) error {  // OptI32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI32Val()
+    item := *x.GetOptI32ValNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -1631,7 +1903,7 @@ func (x *MyStruct) writeField_18(p thrift.Protocol) error {  // OptI64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI64Val()
+    item := *x.GetOptI64ValNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1651,7 +1923,7 @@ func (x *MyStruct) writeField_19(p thrift.Protocol) error {  // OptFloatVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptFloatVal()
+    item := *x.GetOptFloatValNonCompat()
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -1671,7 +1943,7 @@ func (x *MyStruct) writeField_20(p thrift.Protocol) error {  // OptDoubleVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptDoubleVal()
+    item := *x.GetOptDoubleValNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -1691,7 +1963,7 @@ func (x *MyStruct) writeField_21(p thrift.Protocol) error {  // OptStringVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptStringVal()
+    item := *x.GetOptStringValNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -1711,7 +1983,7 @@ func (x *MyStruct) writeField_22(p thrift.Protocol) error {  // OptBinaryVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBinaryVal()
+    item := x.GetOptBinaryValNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -1731,7 +2003,7 @@ func (x *MyStruct) writeField_23(p thrift.Protocol) error {  // OptEnumVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptEnumVal()
+    item := *x.GetOptEnumValNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1751,7 +2023,7 @@ func (x *MyStruct) writeField_24(p thrift.Protocol) error {  // OptStructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStructVal()
+    item := x.GetOptStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1771,7 +2043,7 @@ func (x *MyStruct) writeField_25(p thrift.Protocol) error {  // OptLateStructVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptLateStructVal()
+    item := x.GetOptLateStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1791,7 +2063,7 @@ func (x *MyStruct) writeField_26(p thrift.Protocol) error {  // OptListVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptListVal()
+    item := x.GetOptListValNonCompat()
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1822,7 +2094,7 @@ func (x *MyStruct) writeField_27(p thrift.Protocol) error {  // OptSetVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSetVal()
+    item := x.GetOptSetValNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -1853,7 +2125,7 @@ func (x *MyStruct) writeField_28(p thrift.Protocol) error {  // OptMapVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptMapVal()
+    item := x.GetOptMapValNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1891,7 +2163,7 @@ func (x *MyStruct) writeField_29(p thrift.Protocol) error {  // ListMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListMap()
+    item := x.GetListMapNonCompat()
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -1940,7 +2212,7 @@ func (x *MyStruct) writeField_30(p thrift.Protocol) error {  // MapMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapMap()
+    item := x.GetMapMapNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1992,7 +2264,7 @@ func (x *MyStruct) writeField_31(p thrift.Protocol) error {  // I32WithCustomDef
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32WithCustomDefault()
+    item := x.GetI32WithCustomDefaultNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -2012,7 +2284,7 @@ func (x *MyStruct) writeField_32(p thrift.Protocol) error {  // StructWithCustom
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefault()
+    item := x.GetStructWithCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -2032,7 +2304,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // StructWithFieldCus
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithFieldCustomDefault()
+    item := x.GetStructWithFieldCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3134,7 +3406,15 @@ func NewRecursive() *Recursive {
     return (&Recursive{})
 }
 
+func (x *Recursive) GetNodesNonCompat() map[string]*Recursive {
+    return x.Nodes
+}
+
 func (x *Recursive) GetNodes() map[string]*Recursive {
+    if !x.IsSetNodes() {
+      return nil
+    }
+
     return x.Nodes
 }
 
@@ -3156,7 +3436,7 @@ func (x *Recursive) writeField_1(p thrift.Protocol) error {  // Nodes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNodes()
+    item := x.GetNodesNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -3319,7 +3599,15 @@ func NewBar() *Bar {
 // Deprecated: Use NewBar().Loop instead.
 var Bar_Loop_DEFAULT = NewBar().Loop
 
+func (x *Bar) GetLoopNonCompat() *Loop {
+    return x.Loop
+}
+
 func (x *Bar) GetLoop() *Loop {
+    if !x.IsSetLoop() {
+      return NewLoop()
+    }
+
     return x.Loop
 }
 
@@ -3341,7 +3629,7 @@ func (x *Bar) writeField_1(p thrift.Protocol) error {  // Loop
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLoop()
+    item := x.GetLoopNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3458,7 +3746,15 @@ func NewLoop() *Loop {
 // Deprecated: Use NewLoop().Bar instead.
 var Loop_Bar_DEFAULT = NewLoop().Bar
 
+func (x *Loop) GetBarNonCompat() *Bar {
+    return x.Bar
+}
+
 func (x *Loop) GetBar() *Bar {
+    if !x.IsSetBar() {
+      return NewBar()
+    }
+
     return x.Bar
 }
 
@@ -3480,7 +3776,7 @@ func (x *Loop) writeField_1(p thrift.Protocol) error {  // Bar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBar()
+    item := x.GetBarNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3601,12 +3897,28 @@ var MyDataEnsureStruct_Data1_DEFAULT = NewMyDataEnsureStruct().Data1
 // Deprecated: Use NewMyDataEnsureStruct().Data2 instead.
 var MyDataEnsureStruct_Data2_DEFAULT = NewMyDataEnsureStruct().Data2
 
-func (x *MyDataEnsureStruct) GetData1() *string {
+func (x *MyDataEnsureStruct) GetData1NonCompat() *string {
     return x.Data1
 }
 
-func (x *MyDataEnsureStruct) GetData2() *int32 {
+func (x *MyDataEnsureStruct) GetData1() string {
+    if !x.IsSetData1() {
+      return ""
+    }
+
+    return *x.Data1
+}
+
+func (x *MyDataEnsureStruct) GetData2NonCompat() *int32 {
     return x.Data2
+}
+
+func (x *MyDataEnsureStruct) GetData2() int32 {
+    if !x.IsSetData2() {
+      return 0
+    }
+
+    return *x.Data2
 }
 
 func (x *MyDataEnsureStruct) SetData1(value string) *MyDataEnsureStruct {
@@ -3636,7 +3948,7 @@ func (x *MyDataEnsureStruct) writeField1(p thrift.Protocol) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData1()
+    item := *x.GetData1NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -3656,7 +3968,7 @@ func (x *MyDataEnsureStruct) writeField2(p thrift.Protocol) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData2()
+    item := *x.GetData2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -3799,11 +4111,27 @@ var MyDataFieldPatch_Data1_DEFAULT = NewMyDataFieldPatch().Data1
 // Deprecated: Use NewMyDataFieldPatch().Data2 instead.
 var MyDataFieldPatch_Data2_DEFAULT = NewMyDataFieldPatch().Data2
 
-func (x *MyDataFieldPatch) GetData1() *patch.StringPatch {
+func (x *MyDataFieldPatch) GetData1NonCompat() *patch.StringPatch {
     return x.Data1
 }
 
+func (x *MyDataFieldPatch) GetData1() *patch.StringPatch {
+    if !x.IsSetData1() {
+      return patch.NewStringPatch()
+    }
+
+    return x.Data1
+}
+
+func (x *MyDataFieldPatch) GetData2NonCompat() *patch.I32Patch {
+    return x.Data2
+}
+
 func (x *MyDataFieldPatch) GetData2() *patch.I32Patch {
+    if !x.IsSetData2() {
+      return patch.NewI32Patch()
+    }
+
     return x.Data2
 }
 
@@ -3834,7 +4162,7 @@ func (x *MyDataFieldPatch) writeField1(p thrift.Protocol) error {  // Data1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1()
+    item := x.GetData1NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -3854,7 +4182,7 @@ func (x *MyDataFieldPatch) writeField2(p thrift.Protocol) error {  // Data2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2()
+    item := x.GetData2NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4008,23 +4336,59 @@ var MyDataPatch_Ensure_DEFAULT = NewMyDataPatch().Ensure
 // Deprecated: Use NewMyDataPatch().Patch instead.
 var MyDataPatch_Patch_DEFAULT = NewMyDataPatch().Patch
 
-func (x *MyDataPatch) GetAssign() *MyData {
+func (x *MyDataPatch) GetAssignNonCompat() *MyData {
     return x.Assign
+}
+
+func (x *MyDataPatch) GetAssign() *MyData {
+    if !x.IsSetAssign() {
+      return NewMyData()
+    }
+
+    return x.Assign
+}
+
+func (x *MyDataPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyDataPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyDataPatch) GetPatchPrior() *MyDataFieldPatch {
+func (x *MyDataPatch) GetPatchPriorNonCompat() *MyDataFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyDataPatch) GetEnsure() *MyDataEnsureStruct {
+func (x *MyDataPatch) GetPatchPrior() *MyDataFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewMyDataFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyDataPatch) GetEnsureNonCompat() *MyDataEnsureStruct {
     return x.Ensure
 }
 
+func (x *MyDataPatch) GetEnsure() *MyDataEnsureStruct {
+    if !x.IsSetEnsure() {
+      return NewMyDataEnsureStruct()
+    }
+
+    return x.Ensure
+}
+
+func (x *MyDataPatch) GetPatchNonCompat() *MyDataFieldPatch {
+    return x.Patch
+}
+
 func (x *MyDataPatch) GetPatch() *MyDataFieldPatch {
+    if !x.IsSetPatch() {
+      return NewMyDataFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -4079,7 +4443,7 @@ func (x *MyDataPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4095,7 +4459,7 @@ func (x *MyDataPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -4115,7 +4479,7 @@ func (x *MyDataPatch) writeField3(p thrift.Protocol) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4135,7 +4499,7 @@ func (x *MyDataPatch) writeField5(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4155,7 +4519,7 @@ func (x *MyDataPatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4371,12 +4735,28 @@ var MyDataWithCustomDefaultEnsureStruct_Data1_DEFAULT = NewMyDataWithCustomDefau
 // Deprecated: Use NewMyDataWithCustomDefaultEnsureStruct().Data2 instead.
 var MyDataWithCustomDefaultEnsureStruct_Data2_DEFAULT = NewMyDataWithCustomDefaultEnsureStruct().Data2
 
-func (x *MyDataWithCustomDefaultEnsureStruct) GetData1() *string {
+func (x *MyDataWithCustomDefaultEnsureStruct) GetData1NonCompat() *string {
     return x.Data1
 }
 
-func (x *MyDataWithCustomDefaultEnsureStruct) GetData2() *int32 {
+func (x *MyDataWithCustomDefaultEnsureStruct) GetData1() string {
+    if !x.IsSetData1() {
+      return ""
+    }
+
+    return *x.Data1
+}
+
+func (x *MyDataWithCustomDefaultEnsureStruct) GetData2NonCompat() *int32 {
     return x.Data2
+}
+
+func (x *MyDataWithCustomDefaultEnsureStruct) GetData2() int32 {
+    if !x.IsSetData2() {
+      return 0
+    }
+
+    return *x.Data2
 }
 
 func (x *MyDataWithCustomDefaultEnsureStruct) SetData1(value string) *MyDataWithCustomDefaultEnsureStruct {
@@ -4406,7 +4786,7 @@ func (x *MyDataWithCustomDefaultEnsureStruct) writeField1(p thrift.Protocol) err
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData1()
+    item := *x.GetData1NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -4426,7 +4806,7 @@ func (x *MyDataWithCustomDefaultEnsureStruct) writeField2(p thrift.Protocol) err
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetData2()
+    item := *x.GetData2NonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -4569,11 +4949,27 @@ var MyDataWithCustomDefaultFieldPatch_Data1_DEFAULT = NewMyDataWithCustomDefault
 // Deprecated: Use NewMyDataWithCustomDefaultFieldPatch().Data2 instead.
 var MyDataWithCustomDefaultFieldPatch_Data2_DEFAULT = NewMyDataWithCustomDefaultFieldPatch().Data2
 
-func (x *MyDataWithCustomDefaultFieldPatch) GetData1() *patch.StringPatch {
+func (x *MyDataWithCustomDefaultFieldPatch) GetData1NonCompat() *patch.StringPatch {
     return x.Data1
 }
 
+func (x *MyDataWithCustomDefaultFieldPatch) GetData1() *patch.StringPatch {
+    if !x.IsSetData1() {
+      return patch.NewStringPatch()
+    }
+
+    return x.Data1
+}
+
+func (x *MyDataWithCustomDefaultFieldPatch) GetData2NonCompat() *patch.I32Patch {
+    return x.Data2
+}
+
 func (x *MyDataWithCustomDefaultFieldPatch) GetData2() *patch.I32Patch {
+    if !x.IsSetData2() {
+      return patch.NewI32Patch()
+    }
+
     return x.Data2
 }
 
@@ -4604,7 +5000,7 @@ func (x *MyDataWithCustomDefaultFieldPatch) writeField1(p thrift.Protocol) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData1()
+    item := x.GetData1NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4624,7 +5020,7 @@ func (x *MyDataWithCustomDefaultFieldPatch) writeField2(p thrift.Protocol) error
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetData2()
+    item := x.GetData2NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4778,23 +5174,59 @@ var MyDataWithCustomDefaultPatch_Ensure_DEFAULT = NewMyDataWithCustomDefaultPatc
 // Deprecated: Use NewMyDataWithCustomDefaultPatch().Patch instead.
 var MyDataWithCustomDefaultPatch_Patch_DEFAULT = NewMyDataWithCustomDefaultPatch().Patch
 
-func (x *MyDataWithCustomDefaultPatch) GetAssign() *MyDataWithCustomDefault {
+func (x *MyDataWithCustomDefaultPatch) GetAssignNonCompat() *MyDataWithCustomDefault {
     return x.Assign
+}
+
+func (x *MyDataWithCustomDefaultPatch) GetAssign() *MyDataWithCustomDefault {
+    if !x.IsSetAssign() {
+      return NewMyDataWithCustomDefault()
+    }
+
+    return x.Assign
+}
+
+func (x *MyDataWithCustomDefaultPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyDataWithCustomDefaultPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetPatchPrior() *MyDataWithCustomDefaultFieldPatch {
+func (x *MyDataWithCustomDefaultPatch) GetPatchPriorNonCompat() *MyDataWithCustomDefaultFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyDataWithCustomDefaultPatch) GetEnsure() *MyDataWithCustomDefaultEnsureStruct {
+func (x *MyDataWithCustomDefaultPatch) GetPatchPrior() *MyDataWithCustomDefaultFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewMyDataWithCustomDefaultFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyDataWithCustomDefaultPatch) GetEnsureNonCompat() *MyDataWithCustomDefaultEnsureStruct {
     return x.Ensure
 }
 
+func (x *MyDataWithCustomDefaultPatch) GetEnsure() *MyDataWithCustomDefaultEnsureStruct {
+    if !x.IsSetEnsure() {
+      return NewMyDataWithCustomDefaultEnsureStruct()
+    }
+
+    return x.Ensure
+}
+
+func (x *MyDataWithCustomDefaultPatch) GetPatchNonCompat() *MyDataWithCustomDefaultFieldPatch {
+    return x.Patch
+}
+
 func (x *MyDataWithCustomDefaultPatch) GetPatch() *MyDataWithCustomDefaultFieldPatch {
+    if !x.IsSetPatch() {
+      return NewMyDataWithCustomDefaultFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -4849,7 +5281,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField1(p thrift.Protocol) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4865,7 +5297,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField2(p thrift.Protocol) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -4885,7 +5317,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField3(p thrift.Protocol) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4905,7 +5337,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField5(p thrift.Protocol) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -4925,7 +5357,7 @@ func (x *MyDataWithCustomDefaultPatch) writeField6(p thrift.Protocol) error {  /
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5137,7 +5569,15 @@ func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
 // Deprecated: Use NewInnerUnionFieldPatch().InnerOption instead.
 var InnerUnionFieldPatch_InnerOption_DEFAULT = NewInnerUnionFieldPatch().InnerOption
 
+func (x *InnerUnionFieldPatch) GetInnerOptionNonCompat() *patch.BinaryPatch {
+    return x.InnerOption
+}
+
 func (x *InnerUnionFieldPatch) GetInnerOption() *patch.BinaryPatch {
+    if !x.IsSetInnerOption() {
+      return patch.NewBinaryPatch()
+    }
+
     return x.InnerOption
 }
 
@@ -5159,7 +5599,7 @@ func (x *InnerUnionFieldPatch) writeField1(p thrift.Protocol) error {  // InnerO
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInnerOption()
+    item := x.GetInnerOptionNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5289,23 +5729,59 @@ var InnerUnionPatch_Ensure_DEFAULT = NewInnerUnionPatch().Ensure
 // Deprecated: Use NewInnerUnionPatch().Patch instead.
 var InnerUnionPatch_Patch_DEFAULT = NewInnerUnionPatch().Patch
 
-func (x *InnerUnionPatch) GetAssign() *InnerUnion {
+func (x *InnerUnionPatch) GetAssignNonCompat() *InnerUnion {
     return x.Assign
+}
+
+func (x *InnerUnionPatch) GetAssign() *InnerUnion {
+    if !x.IsSetAssign() {
+      return NewInnerUnion()
+    }
+
+    return x.Assign
+}
+
+func (x *InnerUnionPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *InnerUnionPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *InnerUnionPatch) GetPatchPrior() *InnerUnionFieldPatch {
+func (x *InnerUnionPatch) GetPatchPriorNonCompat() *InnerUnionFieldPatch {
     return x.PatchPrior
 }
 
-func (x *InnerUnionPatch) GetEnsure() *InnerUnion {
+func (x *InnerUnionPatch) GetPatchPrior() *InnerUnionFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewInnerUnionFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *InnerUnionPatch) GetEnsureNonCompat() *InnerUnion {
     return x.Ensure
 }
 
+func (x *InnerUnionPatch) GetEnsure() *InnerUnion {
+    if !x.IsSetEnsure() {
+      return NewInnerUnion()
+    }
+
+    return x.Ensure
+}
+
+func (x *InnerUnionPatch) GetPatchNonCompat() *InnerUnionFieldPatch {
+    return x.Patch
+}
+
 func (x *InnerUnionPatch) GetPatch() *InnerUnionFieldPatch {
+    if !x.IsSetPatch() {
+      return NewInnerUnionFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -5360,7 +5836,7 @@ func (x *InnerUnionPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5376,7 +5852,7 @@ func (x *InnerUnionPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -5396,7 +5872,7 @@ func (x *InnerUnionPatch) writeField3(p thrift.Protocol) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5416,7 +5892,7 @@ func (x *InnerUnionPatch) writeField4(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5436,7 +5912,7 @@ func (x *InnerUnionPatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5656,15 +6132,39 @@ var MyUnionFieldPatch_Option2_DEFAULT = NewMyUnionFieldPatch().Option2
 // Deprecated: Use NewMyUnionFieldPatch().Option3 instead.
 var MyUnionFieldPatch_Option3_DEFAULT = NewMyUnionFieldPatch().Option3
 
-func (x *MyUnionFieldPatch) GetOption1() *patch.StringPatch {
+func (x *MyUnionFieldPatch) GetOption1NonCompat() *patch.StringPatch {
     return x.Option1
 }
 
-func (x *MyUnionFieldPatch) GetOption2() *patch.I32Patch {
+func (x *MyUnionFieldPatch) GetOption1() *patch.StringPatch {
+    if !x.IsSetOption1() {
+      return patch.NewStringPatch()
+    }
+
+    return x.Option1
+}
+
+func (x *MyUnionFieldPatch) GetOption2NonCompat() *patch.I32Patch {
     return x.Option2
 }
 
+func (x *MyUnionFieldPatch) GetOption2() *patch.I32Patch {
+    if !x.IsSetOption2() {
+      return patch.NewI32Patch()
+    }
+
+    return x.Option2
+}
+
+func (x *MyUnionFieldPatch) GetOption3NonCompat() *InnerUnionPatch {
+    return x.Option3
+}
+
 func (x *MyUnionFieldPatch) GetOption3() *InnerUnionPatch {
+    if !x.IsSetOption3() {
+      return NewInnerUnionPatch()
+    }
+
     return x.Option3
 }
 
@@ -5704,7 +6204,7 @@ func (x *MyUnionFieldPatch) writeField1(p thrift.Protocol) error {  // Option1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption1()
+    item := x.GetOption1NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5724,7 +6224,7 @@ func (x *MyUnionFieldPatch) writeField2(p thrift.Protocol) error {  // Option2
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption2()
+    item := x.GetOption2NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5744,7 +6244,7 @@ func (x *MyUnionFieldPatch) writeField3(p thrift.Protocol) error {  // Option3
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOption3()
+    item := x.GetOption3NonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -5922,23 +6422,59 @@ var MyUnionPatch_Ensure_DEFAULT = NewMyUnionPatch().Ensure
 // Deprecated: Use NewMyUnionPatch().Patch instead.
 var MyUnionPatch_Patch_DEFAULT = NewMyUnionPatch().Patch
 
-func (x *MyUnionPatch) GetAssign() *MyUnion {
+func (x *MyUnionPatch) GetAssignNonCompat() *MyUnion {
     return x.Assign
+}
+
+func (x *MyUnionPatch) GetAssign() *MyUnion {
+    if !x.IsSetAssign() {
+      return NewMyUnion()
+    }
+
+    return x.Assign
+}
+
+func (x *MyUnionPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyUnionPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyUnionPatch) GetPatchPrior() *MyUnionFieldPatch {
+func (x *MyUnionPatch) GetPatchPriorNonCompat() *MyUnionFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyUnionPatch) GetEnsure() *MyUnion {
+func (x *MyUnionPatch) GetPatchPrior() *MyUnionFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewMyUnionFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyUnionPatch) GetEnsureNonCompat() *MyUnion {
     return x.Ensure
 }
 
+func (x *MyUnionPatch) GetEnsure() *MyUnion {
+    if !x.IsSetEnsure() {
+      return NewMyUnion()
+    }
+
+    return x.Ensure
+}
+
+func (x *MyUnionPatch) GetPatchNonCompat() *MyUnionFieldPatch {
+    return x.Patch
+}
+
 func (x *MyUnionPatch) GetPatch() *MyUnionFieldPatch {
+    if !x.IsSetPatch() {
+      return NewMyUnionFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -5993,7 +6529,7 @@ func (x *MyUnionPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6009,7 +6545,7 @@ func (x *MyUnionPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -6029,7 +6565,7 @@ func (x *MyUnionPatch) writeField3(p thrift.Protocol) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6049,7 +6585,7 @@ func (x *MyUnionPatch) writeField4(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6069,7 +6605,7 @@ func (x *MyUnionPatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6388,135 +6924,399 @@ var MyStructEnsureStruct_BoolVal_DEFAULT = NewMyStructEnsureStruct().BoolVal
 // Deprecated: Use NewMyStructEnsureStruct().StructWithFieldCustomDefault instead.
 var MyStructEnsureStruct_StructWithFieldCustomDefault_DEFAULT = NewMyStructEnsureStruct().StructWithFieldCustomDefault
 
-func (x *MyStructEnsureStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
+func (x *MyStructEnsureStruct) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefault {
     return x.StructWithCustomDefault
 }
 
-func (x *MyStructEnsureStruct) GetI32WithCustomDefault() *int32 {
+func (x *MyStructEnsureStruct) GetStructWithCustomDefault() *MyDataWithCustomDefault {
+    if !x.IsSetStructWithCustomDefault() {
+      return NewMyDataWithCustomDefault()
+    }
+
+    return x.StructWithCustomDefault
+}
+
+func (x *MyStructEnsureStruct) GetI32WithCustomDefaultNonCompat() *int32 {
     return x.I32WithCustomDefault
 }
 
-func (x *MyStructEnsureStruct) GetMapMap() map[string]map[string]int32 {
+func (x *MyStructEnsureStruct) GetI32WithCustomDefault() int32 {
+    if !x.IsSetI32WithCustomDefault() {
+      return 0
+    }
+
+    return *x.I32WithCustomDefault
+}
+
+func (x *MyStructEnsureStruct) GetMapMapNonCompat() map[string]map[string]int32 {
     return x.MapMap
 }
 
-func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
+func (x *MyStructEnsureStruct) GetMapMap() map[string]map[string]int32 {
+    if !x.IsSetMapMap() {
+      return nil
+    }
+
+    return x.MapMap
+}
+
+func (x *MyStructEnsureStruct) GetListMapNonCompat() []map[string]int32 {
     return x.ListMap
 }
 
-func (x *MyStructEnsureStruct) GetOptMapVal() map[string]string {
+func (x *MyStructEnsureStruct) GetListMap() []map[string]int32 {
+    if !x.IsSetListMap() {
+      return nil
+    }
+
+    return x.ListMap
+}
+
+func (x *MyStructEnsureStruct) GetOptMapValNonCompat() map[string]string {
     return x.OptMapVal
 }
 
-func (x *MyStructEnsureStruct) GetOptSetVal() []string {
+func (x *MyStructEnsureStruct) GetOptMapVal() map[string]string {
+    if !x.IsSetOptMapVal() {
+      return nil
+    }
+
+    return x.OptMapVal
+}
+
+func (x *MyStructEnsureStruct) GetOptSetValNonCompat() []string {
     return x.OptSetVal
 }
 
-func (x *MyStructEnsureStruct) GetOptListVal() []int16 {
+func (x *MyStructEnsureStruct) GetOptSetVal() []string {
+    if !x.IsSetOptSetVal() {
+      return nil
+    }
+
+    return x.OptSetVal
+}
+
+func (x *MyStructEnsureStruct) GetOptListValNonCompat() []int16 {
     return x.OptListVal
 }
 
-func (x *MyStructEnsureStruct) GetOptLateStructVal() *LateDefStruct {
+func (x *MyStructEnsureStruct) GetOptListVal() []int16 {
+    if !x.IsSetOptListVal() {
+      return nil
+    }
+
+    return x.OptListVal
+}
+
+func (x *MyStructEnsureStruct) GetOptLateStructValNonCompat() *LateDefStruct {
     return x.OptLateStructVal
 }
 
-func (x *MyStructEnsureStruct) GetOptStructVal() *MyData {
+func (x *MyStructEnsureStruct) GetOptLateStructVal() *LateDefStruct {
+    if !x.IsSetOptLateStructVal() {
+      return NewLateDefStruct()
+    }
+
+    return x.OptLateStructVal
+}
+
+func (x *MyStructEnsureStruct) GetOptStructValNonCompat() *MyData {
     return x.OptStructVal
 }
 
-func (x *MyStructEnsureStruct) GetOptEnumVal() *MyEnum {
+func (x *MyStructEnsureStruct) GetOptStructVal() *MyData {
+    if !x.IsSetOptStructVal() {
+      return NewMyData()
+    }
+
+    return x.OptStructVal
+}
+
+func (x *MyStructEnsureStruct) GetOptEnumValNonCompat() *MyEnum {
     return x.OptEnumVal
 }
 
-func (x *MyStructEnsureStruct) GetOptBinaryVal() []byte {
+func (x *MyStructEnsureStruct) GetOptEnumVal() MyEnum {
+    if !x.IsSetOptEnumVal() {
+      return 0
+    }
+
+    return *x.OptEnumVal
+}
+
+func (x *MyStructEnsureStruct) GetOptBinaryValNonCompat() []byte {
     return x.OptBinaryVal
 }
 
-func (x *MyStructEnsureStruct) GetOptStringVal() *string {
+func (x *MyStructEnsureStruct) GetOptBinaryVal() []byte {
+    if !x.IsSetOptBinaryVal() {
+      return []byte("")
+    }
+
+    return x.OptBinaryVal
+}
+
+func (x *MyStructEnsureStruct) GetOptStringValNonCompat() *string {
     return x.OptStringVal
 }
 
-func (x *MyStructEnsureStruct) GetOptDoubleVal() *float64 {
+func (x *MyStructEnsureStruct) GetOptStringVal() string {
+    if !x.IsSetOptStringVal() {
+      return ""
+    }
+
+    return *x.OptStringVal
+}
+
+func (x *MyStructEnsureStruct) GetOptDoubleValNonCompat() *float64 {
     return x.OptDoubleVal
 }
 
-func (x *MyStructEnsureStruct) GetOptFloatVal() *float32 {
+func (x *MyStructEnsureStruct) GetOptDoubleVal() float64 {
+    if !x.IsSetOptDoubleVal() {
+      return 0.0
+    }
+
+    return *x.OptDoubleVal
+}
+
+func (x *MyStructEnsureStruct) GetOptFloatValNonCompat() *float32 {
     return x.OptFloatVal
 }
 
-func (x *MyStructEnsureStruct) GetOptI64Val() *int64 {
+func (x *MyStructEnsureStruct) GetOptFloatVal() float32 {
+    if !x.IsSetOptFloatVal() {
+      return 0.0
+    }
+
+    return *x.OptFloatVal
+}
+
+func (x *MyStructEnsureStruct) GetOptI64ValNonCompat() *int64 {
     return x.OptI64Val
 }
 
-func (x *MyStructEnsureStruct) GetOptI32Val() *int32 {
+func (x *MyStructEnsureStruct) GetOptI64Val() int64 {
+    if !x.IsSetOptI64Val() {
+      return 0
+    }
+
+    return *x.OptI64Val
+}
+
+func (x *MyStructEnsureStruct) GetOptI32ValNonCompat() *int32 {
     return x.OptI32Val
 }
 
-func (x *MyStructEnsureStruct) GetOptI16Val() *int16 {
+func (x *MyStructEnsureStruct) GetOptI32Val() int32 {
+    if !x.IsSetOptI32Val() {
+      return 0
+    }
+
+    return *x.OptI32Val
+}
+
+func (x *MyStructEnsureStruct) GetOptI16ValNonCompat() *int16 {
     return x.OptI16Val
 }
 
-func (x *MyStructEnsureStruct) GetOptByteVal() *byte {
+func (x *MyStructEnsureStruct) GetOptI16Val() int16 {
+    if !x.IsSetOptI16Val() {
+      return 0
+    }
+
+    return *x.OptI16Val
+}
+
+func (x *MyStructEnsureStruct) GetOptByteValNonCompat() *byte {
     return x.OptByteVal
 }
 
-func (x *MyStructEnsureStruct) GetOptBoolVal() *bool {
+func (x *MyStructEnsureStruct) GetOptByteVal() byte {
+    if !x.IsSetOptByteVal() {
+      return 0
+    }
+
+    return *x.OptByteVal
+}
+
+func (x *MyStructEnsureStruct) GetOptBoolValNonCompat() *bool {
     return x.OptBoolVal
 }
 
-func (x *MyStructEnsureStruct) GetLateStructVal() *LateDefStruct {
+func (x *MyStructEnsureStruct) GetOptBoolVal() bool {
+    if !x.IsSetOptBoolVal() {
+      return false
+    }
+
+    return *x.OptBoolVal
+}
+
+func (x *MyStructEnsureStruct) GetLateStructValNonCompat() *LateDefStruct {
     return x.LateStructVal
 }
 
-func (x *MyStructEnsureStruct) GetUnionVal() *MyUnion {
+func (x *MyStructEnsureStruct) GetLateStructVal() *LateDefStruct {
+    if !x.IsSetLateStructVal() {
+      return NewLateDefStruct()
+    }
+
+    return x.LateStructVal
+}
+
+func (x *MyStructEnsureStruct) GetUnionValNonCompat() *MyUnion {
     return x.UnionVal
 }
 
-func (x *MyStructEnsureStruct) GetStructVal() *MyData {
+func (x *MyStructEnsureStruct) GetUnionVal() *MyUnion {
+    if !x.IsSetUnionVal() {
+      return NewMyUnion()
+    }
+
+    return x.UnionVal
+}
+
+func (x *MyStructEnsureStruct) GetStructValNonCompat() *MyData {
     return x.StructVal
 }
 
-func (x *MyStructEnsureStruct) GetEnumVal() *MyEnum {
+func (x *MyStructEnsureStruct) GetStructVal() *MyData {
+    if !x.IsSetStructVal() {
+      return NewMyData()
+    }
+
+    return x.StructVal
+}
+
+func (x *MyStructEnsureStruct) GetEnumValNonCompat() *MyEnum {
     return x.EnumVal
 }
 
-func (x *MyStructEnsureStruct) GetBinaryVal() []byte {
+func (x *MyStructEnsureStruct) GetEnumVal() MyEnum {
+    if !x.IsSetEnumVal() {
+      return 0
+    }
+
+    return *x.EnumVal
+}
+
+func (x *MyStructEnsureStruct) GetBinaryValNonCompat() []byte {
     return x.BinaryVal
 }
 
-func (x *MyStructEnsureStruct) GetStringVal() *string {
+func (x *MyStructEnsureStruct) GetBinaryVal() []byte {
+    if !x.IsSetBinaryVal() {
+      return []byte("")
+    }
+
+    return x.BinaryVal
+}
+
+func (x *MyStructEnsureStruct) GetStringValNonCompat() *string {
     return x.StringVal
 }
 
-func (x *MyStructEnsureStruct) GetDoubleVal() *float64 {
+func (x *MyStructEnsureStruct) GetStringVal() string {
+    if !x.IsSetStringVal() {
+      return ""
+    }
+
+    return *x.StringVal
+}
+
+func (x *MyStructEnsureStruct) GetDoubleValNonCompat() *float64 {
     return x.DoubleVal
 }
 
-func (x *MyStructEnsureStruct) GetFloatVal() *float32 {
+func (x *MyStructEnsureStruct) GetDoubleVal() float64 {
+    if !x.IsSetDoubleVal() {
+      return 0.0
+    }
+
+    return *x.DoubleVal
+}
+
+func (x *MyStructEnsureStruct) GetFloatValNonCompat() *float32 {
     return x.FloatVal
 }
 
-func (x *MyStructEnsureStruct) GetI64Val() *int64 {
+func (x *MyStructEnsureStruct) GetFloatVal() float32 {
+    if !x.IsSetFloatVal() {
+      return 0.0
+    }
+
+    return *x.FloatVal
+}
+
+func (x *MyStructEnsureStruct) GetI64ValNonCompat() *int64 {
     return x.I64Val
 }
 
-func (x *MyStructEnsureStruct) GetI32Val() *int32 {
+func (x *MyStructEnsureStruct) GetI64Val() int64 {
+    if !x.IsSetI64Val() {
+      return 0
+    }
+
+    return *x.I64Val
+}
+
+func (x *MyStructEnsureStruct) GetI32ValNonCompat() *int32 {
     return x.I32Val
 }
 
-func (x *MyStructEnsureStruct) GetI16Val() *int16 {
+func (x *MyStructEnsureStruct) GetI32Val() int32 {
+    if !x.IsSetI32Val() {
+      return 0
+    }
+
+    return *x.I32Val
+}
+
+func (x *MyStructEnsureStruct) GetI16ValNonCompat() *int16 {
     return x.I16Val
 }
 
-func (x *MyStructEnsureStruct) GetByteVal() *byte {
+func (x *MyStructEnsureStruct) GetI16Val() int16 {
+    if !x.IsSetI16Val() {
+      return 0
+    }
+
+    return *x.I16Val
+}
+
+func (x *MyStructEnsureStruct) GetByteValNonCompat() *byte {
     return x.ByteVal
 }
 
-func (x *MyStructEnsureStruct) GetBoolVal() *bool {
+func (x *MyStructEnsureStruct) GetByteVal() byte {
+    if !x.IsSetByteVal() {
+      return 0
+    }
+
+    return *x.ByteVal
+}
+
+func (x *MyStructEnsureStruct) GetBoolValNonCompat() *bool {
     return x.BoolVal
 }
 
+func (x *MyStructEnsureStruct) GetBoolVal() bool {
+    if !x.IsSetBoolVal() {
+      return false
+    }
+
+    return *x.BoolVal
+}
+
+func (x *MyStructEnsureStruct) GetStructWithFieldCustomDefaultNonCompat() *MyData {
+    return x.StructWithFieldCustomDefault
+}
+
 func (x *MyStructEnsureStruct) GetStructWithFieldCustomDefault() *MyData {
+    if !x.IsSetStructWithFieldCustomDefault() {
+      return NewMyData()
+    }
+
     return x.StructWithFieldCustomDefault
 }
 
@@ -6826,7 +7626,7 @@ func (x *MyStructEnsureStruct) writeField_32(p thrift.Protocol) error {  // Stru
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefault()
+    item := x.GetStructWithCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -6846,7 +7646,7 @@ func (x *MyStructEnsureStruct) writeField_31(p thrift.Protocol) error {  // I32W
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI32WithCustomDefault()
+    item := *x.GetI32WithCustomDefaultNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -6866,7 +7666,7 @@ func (x *MyStructEnsureStruct) writeField_30(p thrift.Protocol) error {  // MapM
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapMap()
+    item := x.GetMapMapNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -6922,7 +7722,7 @@ func (x *MyStructEnsureStruct) writeField_29(p thrift.Protocol) error {  // List
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListMap()
+    item := x.GetListMapNonCompat()
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -6971,7 +7771,7 @@ func (x *MyStructEnsureStruct) writeField_28(p thrift.Protocol) error {  // OptM
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptMapVal()
+    item := x.GetOptMapValNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -7009,7 +7809,7 @@ func (x *MyStructEnsureStruct) writeField_27(p thrift.Protocol) error {  // OptS
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSetVal()
+    item := x.GetOptSetValNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -7040,7 +7840,7 @@ func (x *MyStructEnsureStruct) writeField_26(p thrift.Protocol) error {  // OptL
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptListVal()
+    item := x.GetOptListValNonCompat()
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -7071,7 +7871,7 @@ func (x *MyStructEnsureStruct) writeField_25(p thrift.Protocol) error {  // OptL
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptLateStructVal()
+    item := x.GetOptLateStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7091,7 +7891,7 @@ func (x *MyStructEnsureStruct) writeField_24(p thrift.Protocol) error {  // OptS
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStructVal()
+    item := x.GetOptStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7111,7 +7911,7 @@ func (x *MyStructEnsureStruct) writeField_23(p thrift.Protocol) error {  // OptE
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptEnumVal()
+    item := *x.GetOptEnumValNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -7131,7 +7931,7 @@ func (x *MyStructEnsureStruct) writeField_22(p thrift.Protocol) error {  // OptB
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBinaryVal()
+    item := x.GetOptBinaryValNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -7151,7 +7951,7 @@ func (x *MyStructEnsureStruct) writeField_21(p thrift.Protocol) error {  // OptS
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptStringVal()
+    item := *x.GetOptStringValNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -7171,7 +7971,7 @@ func (x *MyStructEnsureStruct) writeField_20(p thrift.Protocol) error {  // OptD
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptDoubleVal()
+    item := *x.GetOptDoubleValNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -7191,7 +7991,7 @@ func (x *MyStructEnsureStruct) writeField_19(p thrift.Protocol) error {  // OptF
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptFloatVal()
+    item := *x.GetOptFloatValNonCompat()
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -7211,7 +8011,7 @@ func (x *MyStructEnsureStruct) writeField_18(p thrift.Protocol) error {  // OptI
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI64Val()
+    item := *x.GetOptI64ValNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -7231,7 +8031,7 @@ func (x *MyStructEnsureStruct) writeField_17(p thrift.Protocol) error {  // OptI
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI32Val()
+    item := *x.GetOptI32ValNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7251,7 +8051,7 @@ func (x *MyStructEnsureStruct) writeField_16(p thrift.Protocol) error {  // OptI
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptI16Val()
+    item := *x.GetOptI16ValNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -7271,7 +8071,7 @@ func (x *MyStructEnsureStruct) writeField_15(p thrift.Protocol) error {  // OptB
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptByteVal()
+    item := *x.GetOptByteValNonCompat()
     if err := p.WriteByte(item); err != nil {
     return err
 }
@@ -7291,7 +8091,7 @@ func (x *MyStructEnsureStruct) writeField_14(p thrift.Protocol) error {  // OptB
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetOptBoolVal()
+    item := *x.GetOptBoolValNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -7311,7 +8111,7 @@ func (x *MyStructEnsureStruct) writeField_13(p thrift.Protocol) error {  // Late
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLateStructVal()
+    item := x.GetLateStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7331,7 +8131,7 @@ func (x *MyStructEnsureStruct) writeField_12(p thrift.Protocol) error {  // Unio
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionVal()
+    item := x.GetUnionValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7351,7 +8151,7 @@ func (x *MyStructEnsureStruct) writeField_11(p thrift.Protocol) error {  // Stru
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructVal()
+    item := x.GetStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -7371,7 +8171,7 @@ func (x *MyStructEnsureStruct) writeField_10(p thrift.Protocol) error {  // Enum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetEnumVal()
+    item := *x.GetEnumValNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -7391,7 +8191,7 @@ func (x *MyStructEnsureStruct) writeField_9(p thrift.Protocol) error {  // Binar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryVal()
+    item := x.GetBinaryValNonCompat()
     if err := p.WriteBinary(item); err != nil {
     return err
 }
@@ -7411,7 +8211,7 @@ func (x *MyStructEnsureStruct) writeField_8(p thrift.Protocol) error {  // Strin
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetStringVal()
+    item := *x.GetStringValNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -7431,7 +8231,7 @@ func (x *MyStructEnsureStruct) writeField_7(p thrift.Protocol) error {  // Doubl
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDoubleVal()
+    item := *x.GetDoubleValNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -7451,7 +8251,7 @@ func (x *MyStructEnsureStruct) writeField_6(p thrift.Protocol) error {  // Float
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetFloatVal()
+    item := *x.GetFloatValNonCompat()
     if err := p.WriteFloat(item); err != nil {
     return err
 }
@@ -7471,7 +8271,7 @@ func (x *MyStructEnsureStruct) writeField_5(p thrift.Protocol) error {  // I64Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI64Val()
+    item := *x.GetI64ValNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -7491,7 +8291,7 @@ func (x *MyStructEnsureStruct) writeField_4(p thrift.Protocol) error {  // I32Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI32Val()
+    item := *x.GetI32ValNonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -7511,7 +8311,7 @@ func (x *MyStructEnsureStruct) writeField_3(p thrift.Protocol) error {  // I16Va
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetI16Val()
+    item := *x.GetI16ValNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -7531,7 +8331,7 @@ func (x *MyStructEnsureStruct) writeField_2(p thrift.Protocol) error {  // ByteV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetByteVal()
+    item := *x.GetByteValNonCompat()
     if err := p.WriteByte(item); err != nil {
     return err
 }
@@ -7551,7 +8351,7 @@ func (x *MyStructEnsureStruct) writeField_1(p thrift.Protocol) error {  // BoolV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBoolVal()
+    item := *x.GetBoolValNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -7571,7 +8371,7 @@ func (x *MyStructEnsureStruct) writeField1(p thrift.Protocol) error {  // Struct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithFieldCustomDefault()
+    item := x.GetStructWithFieldCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -8599,8 +9399,20 @@ func NewMyStructField10Patch() *MyStructField10Patch {
 // Deprecated: Use NewMyStructField10Patch().Assign instead.
 var MyStructField10Patch_Assign_DEFAULT = NewMyStructField10Patch().Assign
 
-func (x *MyStructField10Patch) GetAssign() *MyEnum {
+func (x *MyStructField10Patch) GetAssignNonCompat() *MyEnum {
     return x.Assign
+}
+
+func (x *MyStructField10Patch) GetAssign() MyEnum {
+    if !x.IsSetAssign() {
+      return 0
+    }
+
+    return *x.Assign
+}
+
+func (x *MyStructField10Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField10Patch) GetClear() bool {
@@ -8631,7 +9443,7 @@ func (x *MyStructField10Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -8647,7 +9459,7 @@ func (x *MyStructField10Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -8788,8 +9600,20 @@ func NewMyStructField23Patch() *MyStructField23Patch {
 // Deprecated: Use NewMyStructField23Patch().Assign instead.
 var MyStructField23Patch_Assign_DEFAULT = NewMyStructField23Patch().Assign
 
-func (x *MyStructField23Patch) GetAssign() *MyEnum {
+func (x *MyStructField23Patch) GetAssignNonCompat() *MyEnum {
     return x.Assign
+}
+
+func (x *MyStructField23Patch) GetAssign() MyEnum {
+    if !x.IsSetAssign() {
+      return 0
+    }
+
+    return *x.Assign
+}
+
+func (x *MyStructField23Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField23Patch) GetClear() bool {
@@ -8820,7 +9644,7 @@ func (x *MyStructField23Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAssign()
+    item := *x.GetAssignNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -8836,7 +9660,7 @@ func (x *MyStructField23Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -8978,27 +9802,71 @@ func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{})
 }
 
-func (x *MyStructField26Patch) GetAssign() []int16 {
+func (x *MyStructField26Patch) GetAssignNonCompat() []int16 {
     return x.Assign
+}
+
+func (x *MyStructField26Patch) GetAssign() []int16 {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField26Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField26Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField26Patch) GetPatch() map[int32]*patch.I16Patch {
+func (x *MyStructField26Patch) GetPatchNonCompat() map[int32]*patch.I16Patch {
     return x.Patch
 }
 
-func (x *MyStructField26Patch) GetRemove() []int16 {
+func (x *MyStructField26Patch) GetPatch() map[int32]*patch.I16Patch {
+    if !x.IsSetPatch() {
+      return nil
+    }
+
+    return x.Patch
+}
+
+func (x *MyStructField26Patch) GetRemoveNonCompat() []int16 {
     return x.Remove
 }
 
-func (x *MyStructField26Patch) GetPrepend() []int16 {
+func (x *MyStructField26Patch) GetRemove() []int16 {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField26Patch) GetPrependNonCompat() []int16 {
     return x.Prepend
 }
 
+func (x *MyStructField26Patch) GetPrepend() []int16 {
+    if !x.IsSetPrepend() {
+      return nil
+    }
+
+    return x.Prepend
+}
+
+func (x *MyStructField26Patch) GetAppendNonCompat() []int16 {
+    return x.Append
+}
+
 func (x *MyStructField26Patch) GetAppend() []int16 {
+    if !x.IsSetAppend() {
+      return nil
+    }
+
     return x.Append
 }
 
@@ -9062,7 +9930,7 @@ func (x *MyStructField26Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -9089,7 +9957,7 @@ func (x *MyStructField26Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -9109,7 +9977,7 @@ func (x *MyStructField26Patch) writeField3(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -9147,7 +10015,7 @@ func (x *MyStructField26Patch) writeField7(p thrift.Protocol) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -9178,7 +10046,7 @@ func (x *MyStructField26Patch) writeField8(p thrift.Protocol) error {  // Prepen
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrepend()
+    item := x.GetPrependNonCompat()
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -9209,7 +10077,7 @@ func (x *MyStructField26Patch) writeField9(p thrift.Protocol) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppend()
+    item := x.GetAppendNonCompat()
     if err := p.WriteListBegin(thrift.I16, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -9552,19 +10420,47 @@ func NewMyStructField27Patch() *MyStructField27Patch {
     return (&MyStructField27Patch{})
 }
 
-func (x *MyStructField27Patch) GetAssign() []string {
+func (x *MyStructField27Patch) GetAssignNonCompat() []string {
     return x.Assign
+}
+
+func (x *MyStructField27Patch) GetAssign() []string {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField27Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField27Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField27Patch) GetRemove() []string {
+func (x *MyStructField27Patch) GetRemoveNonCompat() []string {
     return x.Remove
 }
 
+func (x *MyStructField27Patch) GetRemove() []string {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField27Patch) GetAddNonCompat() []string {
+    return x.Add
+}
+
 func (x *MyStructField27Patch) GetAdd() []string {
+    if !x.IsSetAdd() {
+      return nil
+    }
+
     return x.Add
 }
 
@@ -9610,7 +10506,7 @@ func (x *MyStructField27Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -9637,7 +10533,7 @@ func (x *MyStructField27Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -9657,7 +10553,7 @@ func (x *MyStructField27Patch) writeField7(p thrift.Protocol) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -9688,7 +10584,7 @@ func (x *MyStructField27Patch) writeField8(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -9941,31 +10837,83 @@ func NewMyStructField28Patch() *MyStructField28Patch {
     return (&MyStructField28Patch{})
 }
 
-func (x *MyStructField28Patch) GetAssign() map[string]string {
+func (x *MyStructField28Patch) GetAssignNonCompat() map[string]string {
     return x.Assign
+}
+
+func (x *MyStructField28Patch) GetAssign() map[string]string {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField28Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField28Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField28Patch) GetPatchPrior() map[string]*patch.StringPatch {
+func (x *MyStructField28Patch) GetPatchPriorNonCompat() map[string]*patch.StringPatch {
     return x.PatchPrior
 }
 
-func (x *MyStructField28Patch) GetAdd() map[string]string {
+func (x *MyStructField28Patch) GetPatchPrior() map[string]*patch.StringPatch {
+    if !x.IsSetPatchPrior() {
+      return nil
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyStructField28Patch) GetAddNonCompat() map[string]string {
     return x.Add
 }
 
-func (x *MyStructField28Patch) GetPatch() map[string]*patch.StringPatch {
+func (x *MyStructField28Patch) GetAdd() map[string]string {
+    if !x.IsSetAdd() {
+      return nil
+    }
+
+    return x.Add
+}
+
+func (x *MyStructField28Patch) GetPatchNonCompat() map[string]*patch.StringPatch {
     return x.Patch
 }
 
-func (x *MyStructField28Patch) GetRemove() []string {
+func (x *MyStructField28Patch) GetPatch() map[string]*patch.StringPatch {
+    if !x.IsSetPatch() {
+      return nil
+    }
+
+    return x.Patch
+}
+
+func (x *MyStructField28Patch) GetRemoveNonCompat() []string {
     return x.Remove
 }
 
+func (x *MyStructField28Patch) GetRemove() []string {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField28Patch) GetPutNonCompat() map[string]string {
+    return x.Put
+}
+
 func (x *MyStructField28Patch) GetPut() map[string]string {
+    if !x.IsSetPut() {
+      return nil
+    }
+
     return x.Put
 }
 
@@ -10038,7 +10986,7 @@ func (x *MyStructField28Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -10072,7 +11020,7 @@ func (x *MyStructField28Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -10092,7 +11040,7 @@ func (x *MyStructField28Patch) writeField3(p thrift.Protocol) error {  // PatchP
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -10130,7 +11078,7 @@ func (x *MyStructField28Patch) writeField5(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -10168,7 +11116,7 @@ func (x *MyStructField28Patch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -10206,7 +11154,7 @@ func (x *MyStructField28Patch) writeField7(p thrift.Protocol) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -10237,7 +11185,7 @@ func (x *MyStructField28Patch) writeField9(p thrift.Protocol) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPut()
+    item := x.GetPutNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -10671,27 +11619,71 @@ func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{})
 }
 
-func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
+func (x *MyStructField29Patch) GetAssignNonCompat() []map[string]int32 {
     return x.Assign
+}
+
+func (x *MyStructField29Patch) GetAssign() []map[string]int32 {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField29Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField29Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField29Patch) GetPatch() map[int32]*MyStructField29Patch1 {
+func (x *MyStructField29Patch) GetPatchNonCompat() map[int32]*MyStructField29Patch1 {
     return x.Patch
 }
 
-func (x *MyStructField29Patch) GetRemove() []map[string]int32 {
+func (x *MyStructField29Patch) GetPatch() map[int32]*MyStructField29Patch1 {
+    if !x.IsSetPatch() {
+      return nil
+    }
+
+    return x.Patch
+}
+
+func (x *MyStructField29Patch) GetRemoveNonCompat() []map[string]int32 {
     return x.Remove
 }
 
-func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
+func (x *MyStructField29Patch) GetRemove() []map[string]int32 {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField29Patch) GetPrependNonCompat() []map[string]int32 {
     return x.Prepend
 }
 
+func (x *MyStructField29Patch) GetPrepend() []map[string]int32 {
+    if !x.IsSetPrepend() {
+      return nil
+    }
+
+    return x.Prepend
+}
+
+func (x *MyStructField29Patch) GetAppendNonCompat() []map[string]int32 {
+    return x.Append
+}
+
 func (x *MyStructField29Patch) GetAppend() []map[string]int32 {
+    if !x.IsSetAppend() {
+      return nil
+    }
+
     return x.Append
 }
 
@@ -10755,7 +11747,7 @@ func (x *MyStructField29Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -10800,7 +11792,7 @@ func (x *MyStructField29Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -10820,7 +11812,7 @@ func (x *MyStructField29Patch) writeField3(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := p.WriteMapBegin(thrift.I32, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -10858,7 +11850,7 @@ func (x *MyStructField29Patch) writeField7(p thrift.Protocol) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -10907,7 +11899,7 @@ func (x *MyStructField29Patch) writeField8(p thrift.Protocol) error {  // Prepen
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPrepend()
+    item := x.GetPrependNonCompat()
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -10956,7 +11948,7 @@ func (x *MyStructField29Patch) writeField9(p thrift.Protocol) error {  // Append
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAppend()
+    item := x.GetAppendNonCompat()
     if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -11432,31 +12424,83 @@ func NewMyStructField29Patch1() *MyStructField29Patch1 {
     return (&MyStructField29Patch1{})
 }
 
-func (x *MyStructField29Patch1) GetAssign() map[string]int32 {
+func (x *MyStructField29Patch1) GetAssignNonCompat() map[string]int32 {
     return x.Assign
+}
+
+func (x *MyStructField29Patch1) GetAssign() map[string]int32 {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField29Patch1) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField29Patch1) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField29Patch1) GetPatchPrior() map[string]*patch.I32Patch {
+func (x *MyStructField29Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Patch {
     return x.PatchPrior
 }
 
-func (x *MyStructField29Patch1) GetAdd() map[string]int32 {
+func (x *MyStructField29Patch1) GetPatchPrior() map[string]*patch.I32Patch {
+    if !x.IsSetPatchPrior() {
+      return nil
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyStructField29Patch1) GetAddNonCompat() map[string]int32 {
     return x.Add
 }
 
-func (x *MyStructField29Patch1) GetPatch() map[string]*patch.I32Patch {
+func (x *MyStructField29Patch1) GetAdd() map[string]int32 {
+    if !x.IsSetAdd() {
+      return nil
+    }
+
+    return x.Add
+}
+
+func (x *MyStructField29Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
     return x.Patch
 }
 
-func (x *MyStructField29Patch1) GetRemove() []string {
+func (x *MyStructField29Patch1) GetPatch() map[string]*patch.I32Patch {
+    if !x.IsSetPatch() {
+      return nil
+    }
+
+    return x.Patch
+}
+
+func (x *MyStructField29Patch1) GetRemoveNonCompat() []string {
     return x.Remove
 }
 
+func (x *MyStructField29Patch1) GetRemove() []string {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField29Patch1) GetPutNonCompat() map[string]int32 {
+    return x.Put
+}
+
 func (x *MyStructField29Patch1) GetPut() map[string]int32 {
+    if !x.IsSetPut() {
+      return nil
+    }
+
     return x.Put
 }
 
@@ -11529,7 +12573,7 @@ func (x *MyStructField29Patch1) writeField1(p thrift.Protocol) error {  // Assig
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -11563,7 +12607,7 @@ func (x *MyStructField29Patch1) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -11583,7 +12627,7 @@ func (x *MyStructField29Patch1) writeField3(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -11621,7 +12665,7 @@ func (x *MyStructField29Patch1) writeField5(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -11659,7 +12703,7 @@ func (x *MyStructField29Patch1) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -11697,7 +12741,7 @@ func (x *MyStructField29Patch1) writeField7(p thrift.Protocol) error {  // Remov
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -11728,7 +12772,7 @@ func (x *MyStructField29Patch1) writeField9(p thrift.Protocol) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPut()
+    item := x.GetPutNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12163,31 +13207,83 @@ func NewMyStructField30Patch() *MyStructField30Patch {
     return (&MyStructField30Patch{})
 }
 
-func (x *MyStructField30Patch) GetAssign() map[string]map[string]int32 {
+func (x *MyStructField30Patch) GetAssignNonCompat() map[string]map[string]int32 {
     return x.Assign
+}
+
+func (x *MyStructField30Patch) GetAssign() map[string]map[string]int32 {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField30Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField30Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField30Patch) GetPatchPrior() map[string]*MyStructField30Patch1 {
+func (x *MyStructField30Patch) GetPatchPriorNonCompat() map[string]*MyStructField30Patch1 {
     return x.PatchPrior
 }
 
-func (x *MyStructField30Patch) GetAdd() map[string]map[string]int32 {
+func (x *MyStructField30Patch) GetPatchPrior() map[string]*MyStructField30Patch1 {
+    if !x.IsSetPatchPrior() {
+      return nil
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyStructField30Patch) GetAddNonCompat() map[string]map[string]int32 {
     return x.Add
 }
 
-func (x *MyStructField30Patch) GetPatch() map[string]*MyStructField30Patch1 {
+func (x *MyStructField30Patch) GetAdd() map[string]map[string]int32 {
+    if !x.IsSetAdd() {
+      return nil
+    }
+
+    return x.Add
+}
+
+func (x *MyStructField30Patch) GetPatchNonCompat() map[string]*MyStructField30Patch1 {
     return x.Patch
 }
 
-func (x *MyStructField30Patch) GetRemove() []string {
+func (x *MyStructField30Patch) GetPatch() map[string]*MyStructField30Patch1 {
+    if !x.IsSetPatch() {
+      return nil
+    }
+
+    return x.Patch
+}
+
+func (x *MyStructField30Patch) GetRemoveNonCompat() []string {
     return x.Remove
 }
 
+func (x *MyStructField30Patch) GetRemove() []string {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField30Patch) GetPutNonCompat() map[string]map[string]int32 {
+    return x.Put
+}
+
 func (x *MyStructField30Patch) GetPut() map[string]map[string]int32 {
+    if !x.IsSetPut() {
+      return nil
+    }
+
     return x.Put
 }
 
@@ -12260,7 +13356,7 @@ func (x *MyStructField30Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12312,7 +13408,7 @@ func (x *MyStructField30Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -12332,7 +13428,7 @@ func (x *MyStructField30Patch) writeField3(p thrift.Protocol) error {  // PatchP
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12370,7 +13466,7 @@ func (x *MyStructField30Patch) writeField5(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12426,7 +13522,7 @@ func (x *MyStructField30Patch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -12464,7 +13560,7 @@ func (x *MyStructField30Patch) writeField7(p thrift.Protocol) error {  // Remove
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -12495,7 +13591,7 @@ func (x *MyStructField30Patch) writeField9(p thrift.Protocol) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPut()
+    item := x.GetPutNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.MAP, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13032,31 +14128,83 @@ func NewMyStructField30Patch1() *MyStructField30Patch1 {
     return (&MyStructField30Patch1{})
 }
 
-func (x *MyStructField30Patch1) GetAssign() map[string]int32 {
+func (x *MyStructField30Patch1) GetAssignNonCompat() map[string]int32 {
     return x.Assign
+}
+
+func (x *MyStructField30Patch1) GetAssign() map[string]int32 {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructField30Patch1) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructField30Patch1) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField30Patch1) GetPatchPrior() map[string]*patch.I32Patch {
+func (x *MyStructField30Patch1) GetPatchPriorNonCompat() map[string]*patch.I32Patch {
     return x.PatchPrior
 }
 
-func (x *MyStructField30Patch1) GetAdd() map[string]int32 {
+func (x *MyStructField30Patch1) GetPatchPrior() map[string]*patch.I32Patch {
+    if !x.IsSetPatchPrior() {
+      return nil
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyStructField30Patch1) GetAddNonCompat() map[string]int32 {
     return x.Add
 }
 
-func (x *MyStructField30Patch1) GetPatch() map[string]*patch.I32Patch {
+func (x *MyStructField30Patch1) GetAdd() map[string]int32 {
+    if !x.IsSetAdd() {
+      return nil
+    }
+
+    return x.Add
+}
+
+func (x *MyStructField30Patch1) GetPatchNonCompat() map[string]*patch.I32Patch {
     return x.Patch
 }
 
-func (x *MyStructField30Patch1) GetRemove() []string {
+func (x *MyStructField30Patch1) GetPatch() map[string]*patch.I32Patch {
+    if !x.IsSetPatch() {
+      return nil
+    }
+
+    return x.Patch
+}
+
+func (x *MyStructField30Patch1) GetRemoveNonCompat() []string {
     return x.Remove
 }
 
+func (x *MyStructField30Patch1) GetRemove() []string {
+    if !x.IsSetRemove() {
+      return nil
+    }
+
+    return x.Remove
+}
+
+func (x *MyStructField30Patch1) GetPutNonCompat() map[string]int32 {
+    return x.Put
+}
+
 func (x *MyStructField30Patch1) GetPut() map[string]int32 {
+    if !x.IsSetPut() {
+      return nil
+    }
+
     return x.Put
 }
 
@@ -13129,7 +14277,7 @@ func (x *MyStructField30Patch1) writeField1(p thrift.Protocol) error {  // Assig
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13163,7 +14311,7 @@ func (x *MyStructField30Patch1) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -13183,7 +14331,7 @@ func (x *MyStructField30Patch1) writeField3(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13221,7 +14369,7 @@ func (x *MyStructField30Patch1) writeField5(p thrift.Protocol) error {  // Add
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAdd()
+    item := x.GetAddNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13259,7 +14407,7 @@ func (x *MyStructField30Patch1) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13297,7 +14445,7 @@ func (x *MyStructField30Patch1) writeField7(p thrift.Protocol) error {  // Remov
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRemove()
+    item := x.GetRemoveNonCompat()
     if err := p.WriteSetBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -13328,7 +14476,7 @@ func (x *MyStructField30Patch1) writeField9(p thrift.Protocol) error {  // Put
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPut()
+    item := x.GetPutNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -13888,135 +15036,399 @@ var MyStructFieldPatch_BoolVal_DEFAULT = NewMyStructFieldPatch().BoolVal
 // Deprecated: Use NewMyStructFieldPatch().StructWithFieldCustomDefault instead.
 var MyStructFieldPatch_StructWithFieldCustomDefault_DEFAULT = NewMyStructFieldPatch().StructWithFieldCustomDefault
 
-func (x *MyStructFieldPatch) GetStructWithCustomDefault() *MyDataWithCustomDefaultPatch {
+func (x *MyStructFieldPatch) GetStructWithCustomDefaultNonCompat() *MyDataWithCustomDefaultPatch {
     return x.StructWithCustomDefault
 }
 
-func (x *MyStructFieldPatch) GetI32WithCustomDefault() *patch.I32Patch {
+func (x *MyStructFieldPatch) GetStructWithCustomDefault() *MyDataWithCustomDefaultPatch {
+    if !x.IsSetStructWithCustomDefault() {
+      return NewMyDataWithCustomDefaultPatch()
+    }
+
+    return x.StructWithCustomDefault
+}
+
+func (x *MyStructFieldPatch) GetI32WithCustomDefaultNonCompat() *patch.I32Patch {
     return x.I32WithCustomDefault
 }
 
-func (x *MyStructFieldPatch) GetMapMap() *MyStructField30Patch {
+func (x *MyStructFieldPatch) GetI32WithCustomDefault() *patch.I32Patch {
+    if !x.IsSetI32WithCustomDefault() {
+      return patch.NewI32Patch()
+    }
+
+    return x.I32WithCustomDefault
+}
+
+func (x *MyStructFieldPatch) GetMapMapNonCompat() *MyStructField30Patch {
     return x.MapMap
 }
 
-func (x *MyStructFieldPatch) GetListMap() *MyStructField29Patch {
+func (x *MyStructFieldPatch) GetMapMap() *MyStructField30Patch {
+    if !x.IsSetMapMap() {
+      return NewMyStructField30Patch()
+    }
+
+    return x.MapMap
+}
+
+func (x *MyStructFieldPatch) GetListMapNonCompat() *MyStructField29Patch {
     return x.ListMap
 }
 
-func (x *MyStructFieldPatch) GetOptMapVal() *MyStructField28Patch {
+func (x *MyStructFieldPatch) GetListMap() *MyStructField29Patch {
+    if !x.IsSetListMap() {
+      return NewMyStructField29Patch()
+    }
+
+    return x.ListMap
+}
+
+func (x *MyStructFieldPatch) GetOptMapValNonCompat() *MyStructField28Patch {
     return x.OptMapVal
 }
 
-func (x *MyStructFieldPatch) GetOptSetVal() *MyStructField27Patch {
+func (x *MyStructFieldPatch) GetOptMapVal() *MyStructField28Patch {
+    if !x.IsSetOptMapVal() {
+      return NewMyStructField28Patch()
+    }
+
+    return x.OptMapVal
+}
+
+func (x *MyStructFieldPatch) GetOptSetValNonCompat() *MyStructField27Patch {
     return x.OptSetVal
 }
 
-func (x *MyStructFieldPatch) GetOptListVal() *MyStructField26Patch {
+func (x *MyStructFieldPatch) GetOptSetVal() *MyStructField27Patch {
+    if !x.IsSetOptSetVal() {
+      return NewMyStructField27Patch()
+    }
+
+    return x.OptSetVal
+}
+
+func (x *MyStructFieldPatch) GetOptListValNonCompat() *MyStructField26Patch {
     return x.OptListVal
 }
 
-func (x *MyStructFieldPatch) GetOptLateStructVal() *LateDefStructPatch {
+func (x *MyStructFieldPatch) GetOptListVal() *MyStructField26Patch {
+    if !x.IsSetOptListVal() {
+      return NewMyStructField26Patch()
+    }
+
+    return x.OptListVal
+}
+
+func (x *MyStructFieldPatch) GetOptLateStructValNonCompat() *LateDefStructPatch {
     return x.OptLateStructVal
 }
 
-func (x *MyStructFieldPatch) GetOptStructVal() *MyDataPatch {
+func (x *MyStructFieldPatch) GetOptLateStructVal() *LateDefStructPatch {
+    if !x.IsSetOptLateStructVal() {
+      return NewLateDefStructPatch()
+    }
+
+    return x.OptLateStructVal
+}
+
+func (x *MyStructFieldPatch) GetOptStructValNonCompat() *MyDataPatch {
     return x.OptStructVal
 }
 
-func (x *MyStructFieldPatch) GetOptEnumVal() *MyStructField23Patch {
+func (x *MyStructFieldPatch) GetOptStructVal() *MyDataPatch {
+    if !x.IsSetOptStructVal() {
+      return NewMyDataPatch()
+    }
+
+    return x.OptStructVal
+}
+
+func (x *MyStructFieldPatch) GetOptEnumValNonCompat() *MyStructField23Patch {
     return x.OptEnumVal
 }
 
-func (x *MyStructFieldPatch) GetOptBinaryVal() *patch.BinaryPatch {
+func (x *MyStructFieldPatch) GetOptEnumVal() *MyStructField23Patch {
+    if !x.IsSetOptEnumVal() {
+      return NewMyStructField23Patch()
+    }
+
+    return x.OptEnumVal
+}
+
+func (x *MyStructFieldPatch) GetOptBinaryValNonCompat() *patch.BinaryPatch {
     return x.OptBinaryVal
 }
 
-func (x *MyStructFieldPatch) GetOptStringVal() *patch.StringPatch {
+func (x *MyStructFieldPatch) GetOptBinaryVal() *patch.BinaryPatch {
+    if !x.IsSetOptBinaryVal() {
+      return patch.NewBinaryPatch()
+    }
+
+    return x.OptBinaryVal
+}
+
+func (x *MyStructFieldPatch) GetOptStringValNonCompat() *patch.StringPatch {
     return x.OptStringVal
 }
 
-func (x *MyStructFieldPatch) GetOptDoubleVal() *patch.DoublePatch {
+func (x *MyStructFieldPatch) GetOptStringVal() *patch.StringPatch {
+    if !x.IsSetOptStringVal() {
+      return patch.NewStringPatch()
+    }
+
+    return x.OptStringVal
+}
+
+func (x *MyStructFieldPatch) GetOptDoubleValNonCompat() *patch.DoublePatch {
     return x.OptDoubleVal
 }
 
-func (x *MyStructFieldPatch) GetOptFloatVal() *patch.FloatPatch {
+func (x *MyStructFieldPatch) GetOptDoubleVal() *patch.DoublePatch {
+    if !x.IsSetOptDoubleVal() {
+      return patch.NewDoublePatch()
+    }
+
+    return x.OptDoubleVal
+}
+
+func (x *MyStructFieldPatch) GetOptFloatValNonCompat() *patch.FloatPatch {
     return x.OptFloatVal
 }
 
-func (x *MyStructFieldPatch) GetOptI64Val() *patch.I64Patch {
+func (x *MyStructFieldPatch) GetOptFloatVal() *patch.FloatPatch {
+    if !x.IsSetOptFloatVal() {
+      return patch.NewFloatPatch()
+    }
+
+    return x.OptFloatVal
+}
+
+func (x *MyStructFieldPatch) GetOptI64ValNonCompat() *patch.I64Patch {
     return x.OptI64Val
 }
 
-func (x *MyStructFieldPatch) GetOptI32Val() *patch.I32Patch {
+func (x *MyStructFieldPatch) GetOptI64Val() *patch.I64Patch {
+    if !x.IsSetOptI64Val() {
+      return patch.NewI64Patch()
+    }
+
+    return x.OptI64Val
+}
+
+func (x *MyStructFieldPatch) GetOptI32ValNonCompat() *patch.I32Patch {
     return x.OptI32Val
 }
 
-func (x *MyStructFieldPatch) GetOptI16Val() *patch.I16Patch {
+func (x *MyStructFieldPatch) GetOptI32Val() *patch.I32Patch {
+    if !x.IsSetOptI32Val() {
+      return patch.NewI32Patch()
+    }
+
+    return x.OptI32Val
+}
+
+func (x *MyStructFieldPatch) GetOptI16ValNonCompat() *patch.I16Patch {
     return x.OptI16Val
 }
 
-func (x *MyStructFieldPatch) GetOptByteVal() *patch.BytePatch {
+func (x *MyStructFieldPatch) GetOptI16Val() *patch.I16Patch {
+    if !x.IsSetOptI16Val() {
+      return patch.NewI16Patch()
+    }
+
+    return x.OptI16Val
+}
+
+func (x *MyStructFieldPatch) GetOptByteValNonCompat() *patch.BytePatch {
     return x.OptByteVal
 }
 
-func (x *MyStructFieldPatch) GetOptBoolVal() *patch.BoolPatch {
+func (x *MyStructFieldPatch) GetOptByteVal() *patch.BytePatch {
+    if !x.IsSetOptByteVal() {
+      return patch.NewBytePatch()
+    }
+
+    return x.OptByteVal
+}
+
+func (x *MyStructFieldPatch) GetOptBoolValNonCompat() *patch.BoolPatch {
     return x.OptBoolVal
 }
 
-func (x *MyStructFieldPatch) GetLateStructVal() *LateDefStructPatch {
+func (x *MyStructFieldPatch) GetOptBoolVal() *patch.BoolPatch {
+    if !x.IsSetOptBoolVal() {
+      return patch.NewBoolPatch()
+    }
+
+    return x.OptBoolVal
+}
+
+func (x *MyStructFieldPatch) GetLateStructValNonCompat() *LateDefStructPatch {
     return x.LateStructVal
 }
 
-func (x *MyStructFieldPatch) GetUnionVal() *MyUnionPatch {
+func (x *MyStructFieldPatch) GetLateStructVal() *LateDefStructPatch {
+    if !x.IsSetLateStructVal() {
+      return NewLateDefStructPatch()
+    }
+
+    return x.LateStructVal
+}
+
+func (x *MyStructFieldPatch) GetUnionValNonCompat() *MyUnionPatch {
     return x.UnionVal
 }
 
-func (x *MyStructFieldPatch) GetStructVal() *MyDataPatch {
+func (x *MyStructFieldPatch) GetUnionVal() *MyUnionPatch {
+    if !x.IsSetUnionVal() {
+      return NewMyUnionPatch()
+    }
+
+    return x.UnionVal
+}
+
+func (x *MyStructFieldPatch) GetStructValNonCompat() *MyDataPatch {
     return x.StructVal
 }
 
-func (x *MyStructFieldPatch) GetEnumVal() *MyStructField10Patch {
+func (x *MyStructFieldPatch) GetStructVal() *MyDataPatch {
+    if !x.IsSetStructVal() {
+      return NewMyDataPatch()
+    }
+
+    return x.StructVal
+}
+
+func (x *MyStructFieldPatch) GetEnumValNonCompat() *MyStructField10Patch {
     return x.EnumVal
 }
 
-func (x *MyStructFieldPatch) GetBinaryVal() *patch.BinaryPatch {
+func (x *MyStructFieldPatch) GetEnumVal() *MyStructField10Patch {
+    if !x.IsSetEnumVal() {
+      return NewMyStructField10Patch()
+    }
+
+    return x.EnumVal
+}
+
+func (x *MyStructFieldPatch) GetBinaryValNonCompat() *patch.BinaryPatch {
     return x.BinaryVal
 }
 
-func (x *MyStructFieldPatch) GetStringVal() *patch.StringPatch {
+func (x *MyStructFieldPatch) GetBinaryVal() *patch.BinaryPatch {
+    if !x.IsSetBinaryVal() {
+      return patch.NewBinaryPatch()
+    }
+
+    return x.BinaryVal
+}
+
+func (x *MyStructFieldPatch) GetStringValNonCompat() *patch.StringPatch {
     return x.StringVal
 }
 
-func (x *MyStructFieldPatch) GetDoubleVal() *patch.DoublePatch {
+func (x *MyStructFieldPatch) GetStringVal() *patch.StringPatch {
+    if !x.IsSetStringVal() {
+      return patch.NewStringPatch()
+    }
+
+    return x.StringVal
+}
+
+func (x *MyStructFieldPatch) GetDoubleValNonCompat() *patch.DoublePatch {
     return x.DoubleVal
 }
 
-func (x *MyStructFieldPatch) GetFloatVal() *patch.FloatPatch {
+func (x *MyStructFieldPatch) GetDoubleVal() *patch.DoublePatch {
+    if !x.IsSetDoubleVal() {
+      return patch.NewDoublePatch()
+    }
+
+    return x.DoubleVal
+}
+
+func (x *MyStructFieldPatch) GetFloatValNonCompat() *patch.FloatPatch {
     return x.FloatVal
 }
 
-func (x *MyStructFieldPatch) GetI64Val() *patch.I64Patch {
+func (x *MyStructFieldPatch) GetFloatVal() *patch.FloatPatch {
+    if !x.IsSetFloatVal() {
+      return patch.NewFloatPatch()
+    }
+
+    return x.FloatVal
+}
+
+func (x *MyStructFieldPatch) GetI64ValNonCompat() *patch.I64Patch {
     return x.I64Val
 }
 
-func (x *MyStructFieldPatch) GetI32Val() *patch.I32Patch {
+func (x *MyStructFieldPatch) GetI64Val() *patch.I64Patch {
+    if !x.IsSetI64Val() {
+      return patch.NewI64Patch()
+    }
+
+    return x.I64Val
+}
+
+func (x *MyStructFieldPatch) GetI32ValNonCompat() *patch.I32Patch {
     return x.I32Val
 }
 
-func (x *MyStructFieldPatch) GetI16Val() *patch.I16Patch {
+func (x *MyStructFieldPatch) GetI32Val() *patch.I32Patch {
+    if !x.IsSetI32Val() {
+      return patch.NewI32Patch()
+    }
+
+    return x.I32Val
+}
+
+func (x *MyStructFieldPatch) GetI16ValNonCompat() *patch.I16Patch {
     return x.I16Val
 }
 
-func (x *MyStructFieldPatch) GetByteVal() *patch.BytePatch {
+func (x *MyStructFieldPatch) GetI16Val() *patch.I16Patch {
+    if !x.IsSetI16Val() {
+      return patch.NewI16Patch()
+    }
+
+    return x.I16Val
+}
+
+func (x *MyStructFieldPatch) GetByteValNonCompat() *patch.BytePatch {
     return x.ByteVal
 }
 
-func (x *MyStructFieldPatch) GetBoolVal() *patch.BoolPatch {
+func (x *MyStructFieldPatch) GetByteVal() *patch.BytePatch {
+    if !x.IsSetByteVal() {
+      return patch.NewBytePatch()
+    }
+
+    return x.ByteVal
+}
+
+func (x *MyStructFieldPatch) GetBoolValNonCompat() *patch.BoolPatch {
     return x.BoolVal
 }
 
+func (x *MyStructFieldPatch) GetBoolVal() *patch.BoolPatch {
+    if !x.IsSetBoolVal() {
+      return patch.NewBoolPatch()
+    }
+
+    return x.BoolVal
+}
+
+func (x *MyStructFieldPatch) GetStructWithFieldCustomDefaultNonCompat() *MyDataPatch {
+    return x.StructWithFieldCustomDefault
+}
+
 func (x *MyStructFieldPatch) GetStructWithFieldCustomDefault() *MyDataPatch {
+    if !x.IsSetStructWithFieldCustomDefault() {
+      return NewMyDataPatch()
+    }
+
     return x.StructWithFieldCustomDefault
 }
 
@@ -14326,7 +15738,7 @@ func (x *MyStructFieldPatch) writeField_32(p thrift.Protocol) error {  // Struct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithCustomDefault()
+    item := x.GetStructWithCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14346,7 +15758,7 @@ func (x *MyStructFieldPatch) writeField_31(p thrift.Protocol) error {  // I32Wit
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32WithCustomDefault()
+    item := x.GetI32WithCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14366,7 +15778,7 @@ func (x *MyStructFieldPatch) writeField_30(p thrift.Protocol) error {  // MapMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMapMap()
+    item := x.GetMapMapNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14386,7 +15798,7 @@ func (x *MyStructFieldPatch) writeField_29(p thrift.Protocol) error {  // ListMa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetListMap()
+    item := x.GetListMapNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14406,7 +15818,7 @@ func (x *MyStructFieldPatch) writeField_28(p thrift.Protocol) error {  // OptMap
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptMapVal()
+    item := x.GetOptMapValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14426,7 +15838,7 @@ func (x *MyStructFieldPatch) writeField_27(p thrift.Protocol) error {  // OptSet
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptSetVal()
+    item := x.GetOptSetValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14446,7 +15858,7 @@ func (x *MyStructFieldPatch) writeField_26(p thrift.Protocol) error {  // OptLis
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptListVal()
+    item := x.GetOptListValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14466,7 +15878,7 @@ func (x *MyStructFieldPatch) writeField_25(p thrift.Protocol) error {  // OptLat
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptLateStructVal()
+    item := x.GetOptLateStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14486,7 +15898,7 @@ func (x *MyStructFieldPatch) writeField_24(p thrift.Protocol) error {  // OptStr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStructVal()
+    item := x.GetOptStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14506,7 +15918,7 @@ func (x *MyStructFieldPatch) writeField_23(p thrift.Protocol) error {  // OptEnu
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptEnumVal()
+    item := x.GetOptEnumValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14526,7 +15938,7 @@ func (x *MyStructFieldPatch) writeField_22(p thrift.Protocol) error {  // OptBin
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBinaryVal()
+    item := x.GetOptBinaryValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14546,7 +15958,7 @@ func (x *MyStructFieldPatch) writeField_21(p thrift.Protocol) error {  // OptStr
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptStringVal()
+    item := x.GetOptStringValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14566,7 +15978,7 @@ func (x *MyStructFieldPatch) writeField_20(p thrift.Protocol) error {  // OptDou
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptDoubleVal()
+    item := x.GetOptDoubleValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14586,7 +15998,7 @@ func (x *MyStructFieldPatch) writeField_19(p thrift.Protocol) error {  // OptFlo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptFloatVal()
+    item := x.GetOptFloatValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14606,7 +16018,7 @@ func (x *MyStructFieldPatch) writeField_18(p thrift.Protocol) error {  // OptI64
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptI64Val()
+    item := x.GetOptI64ValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14626,7 +16038,7 @@ func (x *MyStructFieldPatch) writeField_17(p thrift.Protocol) error {  // OptI32
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptI32Val()
+    item := x.GetOptI32ValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14646,7 +16058,7 @@ func (x *MyStructFieldPatch) writeField_16(p thrift.Protocol) error {  // OptI16
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptI16Val()
+    item := x.GetOptI16ValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14666,7 +16078,7 @@ func (x *MyStructFieldPatch) writeField_15(p thrift.Protocol) error {  // OptByt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptByteVal()
+    item := x.GetOptByteValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14686,7 +16098,7 @@ func (x *MyStructFieldPatch) writeField_14(p thrift.Protocol) error {  // OptBoo
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetOptBoolVal()
+    item := x.GetOptBoolValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14706,7 +16118,7 @@ func (x *MyStructFieldPatch) writeField_13(p thrift.Protocol) error {  // LateSt
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLateStructVal()
+    item := x.GetLateStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14726,7 +16138,7 @@ func (x *MyStructFieldPatch) writeField_12(p thrift.Protocol) error {  // UnionV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetUnionVal()
+    item := x.GetUnionValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14746,7 +16158,7 @@ func (x *MyStructFieldPatch) writeField_11(p thrift.Protocol) error {  // Struct
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructVal()
+    item := x.GetStructValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14766,7 +16178,7 @@ func (x *MyStructFieldPatch) writeField_10(p thrift.Protocol) error {  // EnumVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnumVal()
+    item := x.GetEnumValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14786,7 +16198,7 @@ func (x *MyStructFieldPatch) writeField_9(p thrift.Protocol) error {  // BinaryV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBinaryVal()
+    item := x.GetBinaryValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14806,7 +16218,7 @@ func (x *MyStructFieldPatch) writeField_8(p thrift.Protocol) error {  // StringV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStringVal()
+    item := x.GetStringValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14826,7 +16238,7 @@ func (x *MyStructFieldPatch) writeField_7(p thrift.Protocol) error {  // DoubleV
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetDoubleVal()
+    item := x.GetDoubleValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14846,7 +16258,7 @@ func (x *MyStructFieldPatch) writeField_6(p thrift.Protocol) error {  // FloatVa
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFloatVal()
+    item := x.GetFloatValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14866,7 +16278,7 @@ func (x *MyStructFieldPatch) writeField_5(p thrift.Protocol) error {  // I64Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI64Val()
+    item := x.GetI64ValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14886,7 +16298,7 @@ func (x *MyStructFieldPatch) writeField_4(p thrift.Protocol) error {  // I32Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI32Val()
+    item := x.GetI32ValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14906,7 +16318,7 @@ func (x *MyStructFieldPatch) writeField_3(p thrift.Protocol) error {  // I16Val
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetI16Val()
+    item := x.GetI16ValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14926,7 +16338,7 @@ func (x *MyStructFieldPatch) writeField_2(p thrift.Protocol) error {  // ByteVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetByteVal()
+    item := x.GetByteValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14946,7 +16358,7 @@ func (x *MyStructFieldPatch) writeField_1(p thrift.Protocol) error {  // BoolVal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBoolVal()
+    item := x.GetBoolValNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -14966,7 +16378,7 @@ func (x *MyStructFieldPatch) writeField1(p thrift.Protocol) error {  // StructWi
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetStructWithFieldCustomDefault()
+    item := x.GetStructWithFieldCustomDefaultNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -15864,23 +17276,59 @@ var MyStructPatch_Ensure_DEFAULT = NewMyStructPatch().Ensure
 // Deprecated: Use NewMyStructPatch().Patch instead.
 var MyStructPatch_Patch_DEFAULT = NewMyStructPatch().Patch
 
-func (x *MyStructPatch) GetAssign() *MyStruct {
+func (x *MyStructPatch) GetAssignNonCompat() *MyStruct {
     return x.Assign
+}
+
+func (x *MyStructPatch) GetAssign() *MyStruct {
+    if !x.IsSetAssign() {
+      return NewMyStruct()
+    }
+
+    return x.Assign
+}
+
+func (x *MyStructPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *MyStructPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructPatch) GetPatchPrior() *MyStructFieldPatch {
+func (x *MyStructPatch) GetPatchPriorNonCompat() *MyStructFieldPatch {
     return x.PatchPrior
 }
 
-func (x *MyStructPatch) GetEnsure() *MyStructEnsureStruct {
+func (x *MyStructPatch) GetPatchPrior() *MyStructFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewMyStructFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *MyStructPatch) GetEnsureNonCompat() *MyStructEnsureStruct {
     return x.Ensure
 }
 
+func (x *MyStructPatch) GetEnsure() *MyStructEnsureStruct {
+    if !x.IsSetEnsure() {
+      return NewMyStructEnsureStruct()
+    }
+
+    return x.Ensure
+}
+
+func (x *MyStructPatch) GetPatchNonCompat() *MyStructFieldPatch {
+    return x.Patch
+}
+
 func (x *MyStructPatch) GetPatch() *MyStructFieldPatch {
+    if !x.IsSetPatch() {
+      return NewMyStructFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -15935,7 +17383,7 @@ func (x *MyStructPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -15951,7 +17399,7 @@ func (x *MyStructPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -15971,7 +17419,7 @@ func (x *MyStructPatch) writeField3(p thrift.Protocol) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -15991,7 +17439,7 @@ func (x *MyStructPatch) writeField5(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16011,7 +17459,7 @@ func (x *MyStructPatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16392,23 +17840,59 @@ var LateDefStructPatch_Ensure_DEFAULT = NewLateDefStructPatch().Ensure
 // Deprecated: Use NewLateDefStructPatch().Patch instead.
 var LateDefStructPatch_Patch_DEFAULT = NewLateDefStructPatch().Patch
 
-func (x *LateDefStructPatch) GetAssign() *LateDefStruct {
+func (x *LateDefStructPatch) GetAssignNonCompat() *LateDefStruct {
     return x.Assign
+}
+
+func (x *LateDefStructPatch) GetAssign() *LateDefStruct {
+    if !x.IsSetAssign() {
+      return NewLateDefStruct()
+    }
+
+    return x.Assign
+}
+
+func (x *LateDefStructPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *LateDefStructPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *LateDefStructPatch) GetPatchPrior() *LateDefStructFieldPatch {
+func (x *LateDefStructPatch) GetPatchPriorNonCompat() *LateDefStructFieldPatch {
     return x.PatchPrior
 }
 
-func (x *LateDefStructPatch) GetEnsure() *LateDefStructEnsureStruct {
+func (x *LateDefStructPatch) GetPatchPrior() *LateDefStructFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewLateDefStructFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *LateDefStructPatch) GetEnsureNonCompat() *LateDefStructEnsureStruct {
     return x.Ensure
 }
 
+func (x *LateDefStructPatch) GetEnsure() *LateDefStructEnsureStruct {
+    if !x.IsSetEnsure() {
+      return NewLateDefStructEnsureStruct()
+    }
+
+    return x.Ensure
+}
+
+func (x *LateDefStructPatch) GetPatchNonCompat() *LateDefStructFieldPatch {
+    return x.Patch
+}
+
 func (x *LateDefStructPatch) GetPatch() *LateDefStructFieldPatch {
+    if !x.IsSetPatch() {
+      return NewLateDefStructFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -16463,7 +17947,7 @@ func (x *LateDefStructPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16479,7 +17963,7 @@ func (x *LateDefStructPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -16499,7 +17983,7 @@ func (x *LateDefStructPatch) writeField3(p thrift.Protocol) error {  // PatchPri
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16519,7 +18003,7 @@ func (x *LateDefStructPatch) writeField5(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16539,7 +18023,7 @@ func (x *LateDefStructPatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -16748,7 +18232,15 @@ func NewRecursiveEnsureStruct() *RecursiveEnsureStruct {
     return (&RecursiveEnsureStruct{})
 }
 
+func (x *RecursiveEnsureStruct) GetNodesNonCompat() map[string]*Recursive {
+    return x.Nodes
+}
+
 func (x *RecursiveEnsureStruct) GetNodes() map[string]*Recursive {
+    if !x.IsSetNodes() {
+      return nil
+    }
+
     return x.Nodes
 }
 
@@ -16770,7 +18262,7 @@ func (x *RecursiveEnsureStruct) writeField_1(p thrift.Protocol) error {  // Node
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNodes()
+    item := x.GetNodesNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -16931,8 +18423,20 @@ func NewRecursiveField1Patch() *RecursiveField1Patch {
     return (&RecursiveField1Patch{})
 }
 
-func (x *RecursiveField1Patch) GetAssign() map[string]*Recursive {
+func (x *RecursiveField1Patch) GetAssignNonCompat() map[string]*Recursive {
     return x.Assign
+}
+
+func (x *RecursiveField1Patch) GetAssign() map[string]*Recursive {
+    if !x.IsSetAssign() {
+      return nil
+    }
+
+    return x.Assign
+}
+
+func (x *RecursiveField1Patch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *RecursiveField1Patch) GetClear() bool {
@@ -16963,7 +18467,7 @@ func (x *RecursiveField1Patch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := p.WriteMapBegin(thrift.STRING, thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -16997,7 +18501,7 @@ func (x *RecursiveField1Patch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -17165,7 +18669,15 @@ func NewRecursiveFieldPatch() *RecursiveFieldPatch {
 // Deprecated: Use NewRecursiveFieldPatch().Nodes instead.
 var RecursiveFieldPatch_Nodes_DEFAULT = NewRecursiveFieldPatch().Nodes
 
+func (x *RecursiveFieldPatch) GetNodesNonCompat() *RecursiveField1Patch {
+    return x.Nodes
+}
+
 func (x *RecursiveFieldPatch) GetNodes() *RecursiveField1Patch {
+    if !x.IsSetNodes() {
+      return NewRecursiveField1Patch()
+    }
+
     return x.Nodes
 }
 
@@ -17187,7 +18699,7 @@ func (x *RecursiveFieldPatch) writeField_1(p thrift.Protocol) error {  // Nodes
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetNodes()
+    item := x.GetNodesNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17317,23 +18829,59 @@ var RecursivePatch_Ensure_DEFAULT = NewRecursivePatch().Ensure
 // Deprecated: Use NewRecursivePatch().Patch instead.
 var RecursivePatch_Patch_DEFAULT = NewRecursivePatch().Patch
 
-func (x *RecursivePatch) GetAssign() *Recursive {
+func (x *RecursivePatch) GetAssignNonCompat() *Recursive {
     return x.Assign
+}
+
+func (x *RecursivePatch) GetAssign() *Recursive {
+    if !x.IsSetAssign() {
+      return NewRecursive()
+    }
+
+    return x.Assign
+}
+
+func (x *RecursivePatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *RecursivePatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *RecursivePatch) GetPatchPrior() *RecursiveFieldPatch {
+func (x *RecursivePatch) GetPatchPriorNonCompat() *RecursiveFieldPatch {
     return x.PatchPrior
 }
 
-func (x *RecursivePatch) GetEnsure() *RecursiveEnsureStruct {
+func (x *RecursivePatch) GetPatchPrior() *RecursiveFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewRecursiveFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *RecursivePatch) GetEnsureNonCompat() *RecursiveEnsureStruct {
     return x.Ensure
 }
 
+func (x *RecursivePatch) GetEnsure() *RecursiveEnsureStruct {
+    if !x.IsSetEnsure() {
+      return NewRecursiveEnsureStruct()
+    }
+
+    return x.Ensure
+}
+
+func (x *RecursivePatch) GetPatchNonCompat() *RecursiveFieldPatch {
+    return x.Patch
+}
+
 func (x *RecursivePatch) GetPatch() *RecursiveFieldPatch {
+    if !x.IsSetPatch() {
+      return NewRecursiveFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -17388,7 +18936,7 @@ func (x *RecursivePatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17404,7 +18952,7 @@ func (x *RecursivePatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -17424,7 +18972,7 @@ func (x *RecursivePatch) writeField3(p thrift.Protocol) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17444,7 +18992,7 @@ func (x *RecursivePatch) writeField5(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17464,7 +19012,7 @@ func (x *RecursivePatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17676,7 +19224,15 @@ func NewBarEnsureStruct() *BarEnsureStruct {
 // Deprecated: Use NewBarEnsureStruct().Loop instead.
 var BarEnsureStruct_Loop_DEFAULT = NewBarEnsureStruct().Loop
 
+func (x *BarEnsureStruct) GetLoopNonCompat() *Loop {
+    return x.Loop
+}
+
 func (x *BarEnsureStruct) GetLoop() *Loop {
+    if !x.IsSetLoop() {
+      return NewLoop()
+    }
+
     return x.Loop
 }
 
@@ -17698,7 +19254,7 @@ func (x *BarEnsureStruct) writeField_1(p thrift.Protocol) error {  // Loop
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLoop()
+    item := x.GetLoopNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17815,7 +19371,15 @@ func NewBarFieldPatch() *BarFieldPatch {
 // Deprecated: Use NewBarFieldPatch().Loop instead.
 var BarFieldPatch_Loop_DEFAULT = NewBarFieldPatch().Loop
 
+func (x *BarFieldPatch) GetLoopNonCompat() *LoopPatch {
+    return x.Loop
+}
+
 func (x *BarFieldPatch) GetLoop() *LoopPatch {
+    if !x.IsSetLoop() {
+      return NewLoopPatch()
+    }
+
     return x.Loop
 }
 
@@ -17837,7 +19401,7 @@ func (x *BarFieldPatch) writeField_1(p thrift.Protocol) error {  // Loop
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetLoop()
+    item := x.GetLoopNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -17967,23 +19531,59 @@ var BarPatch_Ensure_DEFAULT = NewBarPatch().Ensure
 // Deprecated: Use NewBarPatch().Patch instead.
 var BarPatch_Patch_DEFAULT = NewBarPatch().Patch
 
-func (x *BarPatch) GetAssign() *Bar {
+func (x *BarPatch) GetAssignNonCompat() *Bar {
     return x.Assign
+}
+
+func (x *BarPatch) GetAssign() *Bar {
+    if !x.IsSetAssign() {
+      return NewBar()
+    }
+
+    return x.Assign
+}
+
+func (x *BarPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *BarPatch) GetClear() bool {
     return x.Clear
 }
 
-func (x *BarPatch) GetPatchPrior() *BarFieldPatch {
+func (x *BarPatch) GetPatchPriorNonCompat() *BarFieldPatch {
     return x.PatchPrior
 }
 
-func (x *BarPatch) GetEnsure() *BarEnsureStruct {
+func (x *BarPatch) GetPatchPrior() *BarFieldPatch {
+    if !x.IsSetPatchPrior() {
+      return NewBarFieldPatch()
+    }
+
+    return x.PatchPrior
+}
+
+func (x *BarPatch) GetEnsureNonCompat() *BarEnsureStruct {
     return x.Ensure
 }
 
+func (x *BarPatch) GetEnsure() *BarEnsureStruct {
+    if !x.IsSetEnsure() {
+      return NewBarEnsureStruct()
+    }
+
+    return x.Ensure
+}
+
+func (x *BarPatch) GetPatchNonCompat() *BarFieldPatch {
+    return x.Patch
+}
+
 func (x *BarPatch) GetPatch() *BarFieldPatch {
+    if !x.IsSetPatch() {
+      return NewBarFieldPatch()
+    }
+
     return x.Patch
 }
 
@@ -18038,7 +19638,7 @@ func (x *BarPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18054,7 +19654,7 @@ func (x *BarPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -18074,7 +19674,7 @@ func (x *BarPatch) writeField3(p thrift.Protocol) error {  // PatchPrior
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatchPrior()
+    item := x.GetPatchPriorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18094,7 +19694,7 @@ func (x *BarPatch) writeField5(p thrift.Protocol) error {  // Ensure
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEnsure()
+    item := x.GetEnsureNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18114,7 +19714,7 @@ func (x *BarPatch) writeField6(p thrift.Protocol) error {  // Patch
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPatch()
+    item := x.GetPatchNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18326,7 +19926,15 @@ func NewLoopEnsureStruct() *LoopEnsureStruct {
 // Deprecated: Use NewLoopEnsureStruct().Bar instead.
 var LoopEnsureStruct_Bar_DEFAULT = NewLoopEnsureStruct().Bar
 
+func (x *LoopEnsureStruct) GetBarNonCompat() *Bar {
+    return x.Bar
+}
+
 func (x *LoopEnsureStruct) GetBar() *Bar {
+    if !x.IsSetBar() {
+      return NewBar()
+    }
+
     return x.Bar
 }
 
@@ -18348,7 +19956,7 @@ func (x *LoopEnsureStruct) writeField_1(p thrift.Protocol) error {  // Bar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBar()
+    item := x.GetBarNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18465,7 +20073,15 @@ func NewLoopFieldPatch() *LoopFieldPatch {
 // Deprecated: Use NewLoopFieldPatch().Bar instead.
 var LoopFieldPatch_Bar_DEFAULT = NewLoopFieldPatch().Bar
 
+func (x *LoopFieldPatch) GetBarNonCompat() *BarPatch {
+    return x.Bar
+}
+
 func (x *LoopFieldPatch) GetBar() *BarPatch {
+    if !x.IsSetBar() {
+      return NewBarPatch()
+    }
+
     return x.Bar
 }
 
@@ -18487,7 +20103,7 @@ func (x *LoopFieldPatch) writeField_1(p thrift.Protocol) error {  // Bar
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBar()
+    item := x.GetBarNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18605,8 +20221,20 @@ func NewLoopPatch() *LoopPatch {
 // Deprecated: Use NewLoopPatch().Assign instead.
 var LoopPatch_Assign_DEFAULT = NewLoopPatch().Assign
 
-func (x *LoopPatch) GetAssign() *Loop {
+func (x *LoopPatch) GetAssignNonCompat() *Loop {
     return x.Assign
+}
+
+func (x *LoopPatch) GetAssign() *Loop {
+    if !x.IsSetAssign() {
+      return NewLoop()
+    }
+
+    return x.Assign
+}
+
+func (x *LoopPatch) GetClearNonCompat() bool {
+    return x.Clear
 }
 
 func (x *LoopPatch) GetClear() bool {
@@ -18637,7 +20265,7 @@ func (x *LoopPatch) writeField1(p thrift.Protocol) error {  // Assign
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAssign()
+    item := x.GetAssignNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -18653,7 +20281,7 @@ func (x *LoopPatch) writeField2(p thrift.Protocol) error {  // Clear
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClear()
+    item := x.GetClearNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }

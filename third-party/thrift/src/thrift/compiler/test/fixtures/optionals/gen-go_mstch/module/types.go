@@ -114,16 +114,32 @@ func NewColor() *Color {
     return (&Color{})
 }
 
+func (x *Color) GetRedNonCompat() float64 {
+    return x.Red
+}
+
 func (x *Color) GetRed() float64 {
     return x.Red
+}
+
+func (x *Color) GetGreenNonCompat() float64 {
+    return x.Green
 }
 
 func (x *Color) GetGreen() float64 {
     return x.Green
 }
 
+func (x *Color) GetBlueNonCompat() float64 {
+    return x.Blue
+}
+
 func (x *Color) GetBlue() float64 {
     return x.Blue
+}
+
+func (x *Color) GetAlphaNonCompat() float64 {
+    return x.Alpha
 }
 
 func (x *Color) GetAlpha() float64 {
@@ -159,7 +175,7 @@ func (x *Color) writeField1(p thrift.Protocol) error {  // Red
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetRed()
+    item := x.GetRedNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -175,7 +191,7 @@ func (x *Color) writeField2(p thrift.Protocol) error {  // Green
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetGreen()
+    item := x.GetGreenNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -191,7 +207,7 @@ func (x *Color) writeField3(p thrift.Protocol) error {  // Blue
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetBlue()
+    item := x.GetBlueNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -207,7 +223,7 @@ func (x *Color) writeField4(p thrift.Protocol) error {  // Alpha
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAlpha()
+    item := x.GetAlphaNonCompat()
     if err := p.WriteDouble(item); err != nil {
     return err
 }
@@ -409,24 +425,64 @@ var Vehicle_Name_DEFAULT = NewVehicle().Name
 // Deprecated: Use NewVehicle().HasAC instead.
 var Vehicle_HasAC_DEFAULT = NewVehicle().HasAC
 
-func (x *Vehicle) GetColor() *Color {
+func (x *Vehicle) GetColorNonCompat() *Color {
     return x.Color
 }
 
-func (x *Vehicle) GetLicensePlate() *string {
+func (x *Vehicle) GetColor() *Color {
+    if !x.IsSetColor() {
+      return NewColor()
+    }
+
+    return x.Color
+}
+
+func (x *Vehicle) GetLicensePlateNonCompat() *string {
     return x.LicensePlate
 }
 
-func (x *Vehicle) GetDescription() *string {
+func (x *Vehicle) GetLicensePlate() string {
+    if !x.IsSetLicensePlate() {
+      return ""
+    }
+
+    return *x.LicensePlate
+}
+
+func (x *Vehicle) GetDescriptionNonCompat() *string {
     return x.Description
 }
 
-func (x *Vehicle) GetName() *string {
+func (x *Vehicle) GetDescription() string {
+    if !x.IsSetDescription() {
+      return ""
+    }
+
+    return *x.Description
+}
+
+func (x *Vehicle) GetNameNonCompat() *string {
     return x.Name
 }
 
-func (x *Vehicle) GetHasAC() *bool {
+func (x *Vehicle) GetName() string {
+    if !x.IsSetName() {
+      return ""
+    }
+
+    return *x.Name
+}
+
+func (x *Vehicle) GetHasACNonCompat() *bool {
     return x.HasAC
+}
+
+func (x *Vehicle) GetHasAC() bool {
+    if !x.IsSetHasAC() {
+      return false
+    }
+
+    return *x.HasAC
 }
 
 func (x *Vehicle) SetColor(value Color) *Vehicle {
@@ -483,7 +539,7 @@ func (x *Vehicle) writeField1(p thrift.Protocol) error {  // Color
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetColor()
+    item := x.GetColorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -503,7 +559,7 @@ func (x *Vehicle) writeField2(p thrift.Protocol) error {  // LicensePlate
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetLicensePlate()
+    item := *x.GetLicensePlateNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -523,7 +579,7 @@ func (x *Vehicle) writeField3(p thrift.Protocol) error {  // Description
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetDescription()
+    item := *x.GetDescriptionNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -543,7 +599,7 @@ func (x *Vehicle) writeField4(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetName()
+    item := *x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -563,7 +619,7 @@ func (x *Vehicle) writeField5(p thrift.Protocol) error {  // HasAC
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetHasAC()
+    item := *x.GetHasACNonCompat()
     if err := p.WriteBool(item); err != nil {
     return err
 }
@@ -793,43 +849,115 @@ var Person_BestFriend_DEFAULT = NewPerson().BestFriend
 // Deprecated: Use NewPerson().AfraidOfAnimal instead.
 var Person_AfraidOfAnimal_DEFAULT = NewPerson().AfraidOfAnimal
 
+func (x *Person) GetIdNonCompat() PersonID {
+    return x.Id
+}
+
 func (x *Person) GetId() PersonID {
     return x.Id
+}
+
+func (x *Person) GetNameNonCompat() string {
+    return x.Name
 }
 
 func (x *Person) GetName() string {
     return x.Name
 }
 
-func (x *Person) GetAge() *int16 {
+func (x *Person) GetAgeNonCompat() *int16 {
     return x.Age
 }
 
-func (x *Person) GetAddress() *string {
+func (x *Person) GetAge() int16 {
+    if !x.IsSetAge() {
+      return 0
+    }
+
+    return *x.Age
+}
+
+func (x *Person) GetAddressNonCompat() *string {
     return x.Address
 }
 
-func (x *Person) GetFavoriteColor() *Color {
+func (x *Person) GetAddress() string {
+    if !x.IsSetAddress() {
+      return ""
+    }
+
+    return *x.Address
+}
+
+func (x *Person) GetFavoriteColorNonCompat() *Color {
     return x.FavoriteColor
 }
 
-func (x *Person) GetFriends() []PersonID {
+func (x *Person) GetFavoriteColor() *Color {
+    if !x.IsSetFavoriteColor() {
+      return NewColor()
+    }
+
+    return x.FavoriteColor
+}
+
+func (x *Person) GetFriendsNonCompat() []PersonID {
     return x.Friends
 }
 
-func (x *Person) GetBestFriend() *PersonID {
+func (x *Person) GetFriends() []PersonID {
+    if !x.IsSetFriends() {
+      return nil
+    }
+
+    return x.Friends
+}
+
+func (x *Person) GetBestFriendNonCompat() *PersonID {
     return x.BestFriend
 }
 
-func (x *Person) GetPetNames() map[Animal]string {
+func (x *Person) GetBestFriend() PersonID {
+    if !x.IsSetBestFriend() {
+      return NewPersonID()
+    }
+
+    return *x.BestFriend
+}
+
+func (x *Person) GetPetNamesNonCompat() map[Animal]string {
     return x.PetNames
 }
 
-func (x *Person) GetAfraidOfAnimal() *Animal {
+func (x *Person) GetPetNames() map[Animal]string {
+    if !x.IsSetPetNames() {
+      return nil
+    }
+
+    return x.PetNames
+}
+
+func (x *Person) GetAfraidOfAnimalNonCompat() *Animal {
     return x.AfraidOfAnimal
 }
 
+func (x *Person) GetAfraidOfAnimal() Animal {
+    if !x.IsSetAfraidOfAnimal() {
+      return 0
+    }
+
+    return *x.AfraidOfAnimal
+}
+
+func (x *Person) GetVehiclesNonCompat() []*Vehicle {
+    return x.Vehicles
+}
+
 func (x *Person) GetVehicles() []*Vehicle {
+    if !x.IsSetVehicles() {
+      return nil
+    }
+
     return x.Vehicles
 }
 
@@ -922,7 +1050,7 @@ func (x *Person) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     err := WritePersonID(item, p)
 if err != nil {
     return err
@@ -939,7 +1067,7 @@ func (x *Person) writeField2(p thrift.Protocol) error {  // Name
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -959,7 +1087,7 @@ func (x *Person) writeField3(p thrift.Protocol) error {  // Age
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAge()
+    item := *x.GetAgeNonCompat()
     if err := p.WriteI16(item); err != nil {
     return err
 }
@@ -979,7 +1107,7 @@ func (x *Person) writeField4(p thrift.Protocol) error {  // Address
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAddress()
+    item := *x.GetAddressNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -999,7 +1127,7 @@ func (x *Person) writeField5(p thrift.Protocol) error {  // FavoriteColor
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFavoriteColor()
+    item := x.GetFavoriteColorNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -1019,7 +1147,7 @@ func (x *Person) writeField6(p thrift.Protocol) error {  // Friends
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetFriends()
+    item := x.GetFriendsNonCompat()
     if err := p.WriteSetBegin(thrift.I64, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -1051,7 +1179,7 @@ func (x *Person) writeField7(p thrift.Protocol) error {  // BestFriend
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetBestFriend()
+    item := *x.GetBestFriendNonCompat()
     err := WritePersonID(item, p)
 if err != nil {
     return err
@@ -1072,7 +1200,7 @@ func (x *Person) writeField8(p thrift.Protocol) error {  // PetNames
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPetNames()
+    item := x.GetPetNamesNonCompat()
     if err := p.WriteMapBegin(thrift.I32, thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing map begin: ", err)
 }
@@ -1110,7 +1238,7 @@ func (x *Person) writeField9(p thrift.Protocol) error {  // AfraidOfAnimal
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetAfraidOfAnimal()
+    item := *x.GetAfraidOfAnimalNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -1130,7 +1258,7 @@ func (x *Person) writeField10(p thrift.Protocol) error {  // Vehicles
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetVehicles()
+    item := x.GetVehiclesNonCompat()
     if err := p.WriteListBegin(thrift.STRUCT, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }

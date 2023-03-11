@@ -26,6 +26,10 @@ func NewFoo() *Foo {
         SetA(2)
 }
 
+func (x *Foo) GetANonCompat() int64 {
+    return x.A
+}
+
 func (x *Foo) GetA() int64 {
     return x.A
 }
@@ -41,7 +45,7 @@ func (x *Foo) writeField1(p thrift.Protocol) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetA()
+    item := x.GetANonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }

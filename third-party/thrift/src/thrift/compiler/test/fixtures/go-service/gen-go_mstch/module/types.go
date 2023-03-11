@@ -25,6 +25,10 @@ func NewGetEntityRequest() *GetEntityRequest {
     return (&GetEntityRequest{})
 }
 
+func (x *GetEntityRequest) GetIdNonCompat() string {
+    return x.Id
+}
+
 func (x *GetEntityRequest) GetId() string {
     return x.Id
 }
@@ -40,7 +44,7 @@ func (x *GetEntityRequest) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -153,6 +157,10 @@ func NewGetEntityResponse() *GetEntityResponse {
     return (&GetEntityResponse{})
 }
 
+func (x *GetEntityResponse) GetEntityNonCompat() string {
+    return x.Entity
+}
+
 func (x *GetEntityResponse) GetEntity() string {
     return x.Entity
 }
@@ -168,7 +176,7 @@ func (x *GetEntityResponse) writeField1(p thrift.Protocol) error {  // Entity
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEntity()
+    item := x.GetEntityNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

@@ -312,15 +312,31 @@ func newReqCThing() *reqCThing {
     return (&reqCThing{})
 }
 
+func (x *reqCThing) GetANonCompat() int32 {
+    return x.A
+}
+
 func (x *reqCThing) GetA() int32 {
     return x.A
+}
+
+func (x *reqCThing) GetBNonCompat() string {
+    return x.B
 }
 
 func (x *reqCThing) GetB() string {
     return x.B
 }
 
+func (x *reqCThing) GetCNonCompat() []int32 {
+    return x.C
+}
+
 func (x *reqCThing) GetC() []int32 {
+    if !x.IsSetC() {
+      return nil
+    }
+
     return x.C
 }
 
@@ -350,7 +366,7 @@ func (x *reqCThing) writeField1(p thrift.Protocol) error {  // A
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetA()
+    item := x.GetANonCompat()
     if err := p.WriteI32(item); err != nil {
     return err
 }
@@ -366,7 +382,7 @@ func (x *reqCThing) writeField2(p thrift.Protocol) error {  // B
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetB()
+    item := x.GetBNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -386,7 +402,7 @@ func (x *reqCThing) writeField3(p thrift.Protocol) error {  // C
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetC()
+    item := x.GetCNonCompat()
     if err := p.WriteSetBegin(thrift.I32, len(item)); err != nil {
     return thrift.PrependError("error writing set begin: ", err)
 }
@@ -573,6 +589,10 @@ func newRespCThing() *respCThing {
     return (&respCThing{})
 }
 
+func (x *respCThing) GetValueNonCompat() string {
+    return x.Value
+}
+
 func (x *respCThing) GetValue() string {
     return x.Value
 }
@@ -588,7 +608,7 @@ func (x *respCThing) writeField0(p thrift.Protocol) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

@@ -137,6 +137,10 @@ func newReqTestServiceInit() *reqTestServiceInit {
     return (&reqTestServiceInit{})
 }
 
+func (x *reqTestServiceInit) GetInt1NonCompat() int64 {
+    return x.Int1
+}
+
 func (x *reqTestServiceInit) GetInt1() int64 {
     return x.Int1
 }
@@ -152,7 +156,7 @@ func (x *reqTestServiceInit) writeField1(p thrift.Protocol) error {  // Int1
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetInt1()
+    item := x.GetInt1NonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -264,6 +268,10 @@ func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{})
 }
 
+func (x *respTestServiceInit) GetValueNonCompat() int64 {
+    return x.Value
+}
+
 func (x *respTestServiceInit) GetValue() int64 {
     return x.Value
 }
@@ -279,7 +287,7 @@ func (x *respTestServiceInit) writeField0(p thrift.Protocol) error {  // Value
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetValue()
+    item := x.GetValueNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }

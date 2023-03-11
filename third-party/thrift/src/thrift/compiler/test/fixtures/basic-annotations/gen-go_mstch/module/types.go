@@ -113,6 +113,10 @@ func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
     return (&MyStructNestedAnnotation{})
 }
 
+func (x *MyStructNestedAnnotation) GetNameNonCompat() string {
+    return x.Name
+}
+
 func (x *MyStructNestedAnnotation) GetName() string {
     return x.Name
 }
@@ -128,7 +132,7 @@ func (x *MyStructNestedAnnotation) writeField1(p thrift.Protocol) error {  // Na
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetName()
+    item := x.GetNameNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -413,40 +417,88 @@ func NewMyStruct() *MyStruct {
 // Deprecated: Use NewMyStruct().MyUnion instead.
 var MyStruct_MyUnion_DEFAULT = NewMyStruct().MyUnion
 
+func (x *MyStruct) GetMajorNonCompat() int64 {
+    return x.Major
+}
+
 func (x *MyStruct) GetMajor() int64 {
     return x.Major
+}
+
+func (x *MyStruct) GetPackageNonCompat() string {
+    return x.Package
 }
 
 func (x *MyStruct) GetPackage() string {
     return x.Package
 }
 
+func (x *MyStruct) GetAnnotationWithQuoteNonCompat() string {
+    return x.AnnotationWithQuote
+}
+
 func (x *MyStruct) GetAnnotationWithQuote() string {
     return x.AnnotationWithQuote
+}
+
+func (x *MyStruct) GetClass_NonCompat() string {
+    return x.Class_
 }
 
 func (x *MyStruct) GetClass_() string {
     return x.Class_
 }
 
+func (x *MyStruct) GetAnnotationWithTrailingCommaNonCompat() string {
+    return x.AnnotationWithTrailingComma
+}
+
 func (x *MyStruct) GetAnnotationWithTrailingComma() string {
     return x.AnnotationWithTrailingComma
+}
+
+func (x *MyStruct) GetEmptyAnnotationsNonCompat() string {
+    return x.EmptyAnnotations
 }
 
 func (x *MyStruct) GetEmptyAnnotations() string {
     return x.EmptyAnnotations
 }
 
+func (x *MyStruct) GetMyEnumNonCompat() MyEnum {
+    return x.MyEnum
+}
+
 func (x *MyStruct) GetMyEnum() MyEnum {
     return x.MyEnum
 }
 
-func (x *MyStruct) GetCppTypeAnnotation() []string {
+func (x *MyStruct) GetCppTypeAnnotationNonCompat() []string {
     return x.CppTypeAnnotation
 }
 
-func (x *MyStruct) GetMyUnion() *MyUnion {
+func (x *MyStruct) GetCppTypeAnnotation() []string {
+    if !x.IsSetCppTypeAnnotation() {
+      return nil
+    }
+
+    return x.CppTypeAnnotation
+}
+
+func (x *MyStruct) GetMyUnionNonCompat() *MyUnion {
     return x.MyUnion
+}
+
+func (x *MyStruct) GetMyUnion() *MyUnion {
+    if !x.IsSetMyUnion() {
+      return NewMyUnion()
+    }
+
+    return x.MyUnion
+}
+
+func (x *MyStruct) GetMyIDNonCompat() MyId {
+    return x.MyID
 }
 
 func (x *MyStruct) GetMyID() MyId {
@@ -524,7 +576,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // Major
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMajor()
+    item := x.GetMajorNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -540,7 +592,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // Package
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPackage()
+    item := x.GetPackageNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -556,7 +608,7 @@ func (x *MyStruct) writeField3(p thrift.Protocol) error {  // AnnotationWithQuot
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAnnotationWithQuote()
+    item := x.GetAnnotationWithQuoteNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -572,7 +624,7 @@ func (x *MyStruct) writeField4(p thrift.Protocol) error {  // Class_
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetClass_()
+    item := x.GetClass_NonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -588,7 +640,7 @@ func (x *MyStruct) writeField5(p thrift.Protocol) error {  // AnnotationWithTrai
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetAnnotationWithTrailingComma()
+    item := x.GetAnnotationWithTrailingCommaNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -604,7 +656,7 @@ func (x *MyStruct) writeField6(p thrift.Protocol) error {  // EmptyAnnotations
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetEmptyAnnotations()
+    item := x.GetEmptyAnnotationsNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -620,7 +672,7 @@ func (x *MyStruct) writeField7(p thrift.Protocol) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyEnum()
+    item := x.GetMyEnumNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -640,7 +692,7 @@ func (x *MyStruct) writeField8(p thrift.Protocol) error {  // CppTypeAnnotation
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetCppTypeAnnotation()
+    item := x.GetCppTypeAnnotationNonCompat()
     if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
 }
@@ -671,7 +723,7 @@ func (x *MyStruct) writeField9(p thrift.Protocol) error {  // MyUnion
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyUnion()
+    item := x.GetMyUnionNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }
@@ -687,7 +739,7 @@ func (x *MyStruct) writeField10(p thrift.Protocol) error {  // MyID
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyID()
+    item := x.GetMyIDNonCompat()
     err := WriteMyId(item, p)
 if err != nil {
     return err
@@ -1029,8 +1081,16 @@ func NewSecretStruct() *SecretStruct {
     return (&SecretStruct{})
 }
 
+func (x *SecretStruct) GetIdNonCompat() int64 {
+    return x.Id
+}
+
 func (x *SecretStruct) GetId() int64 {
     return x.Id
+}
+
+func (x *SecretStruct) GetPasswordNonCompat() string {
+    return x.Password
 }
 
 func (x *SecretStruct) GetPassword() string {
@@ -1054,7 +1114,7 @@ func (x *SecretStruct) writeField1(p thrift.Protocol) error {  // Id
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetId()
+    item := x.GetIdNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -1070,7 +1130,7 @@ func (x *SecretStruct) writeField2(p thrift.Protocol) error {  // Password
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetPassword()
+    item := x.GetPasswordNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }

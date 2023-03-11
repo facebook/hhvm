@@ -83,8 +83,16 @@ func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
 
+func (x *MyStruct) GetMyIntFieldNonCompat() int64 {
+    return x.MyIntField
+}
+
 func (x *MyStruct) GetMyIntField() int64 {
     return x.MyIntField
+}
+
+func (x *MyStruct) GetMyStringFieldNonCompat() string {
+    return x.MyStringField
 }
 
 func (x *MyStruct) GetMyStringField() string {
@@ -108,7 +116,7 @@ func (x *MyStruct) writeField1(p thrift.Protocol) error {  // MyIntField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyIntField()
+    item := x.GetMyIntFieldNonCompat()
     if err := p.WriteI64(item); err != nil {
     return err
 }
@@ -124,7 +132,7 @@ func (x *MyStruct) writeField2(p thrift.Protocol) error {  // MyStringField
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyStringField()
+    item := x.GetMyStringFieldNonCompat()
     if err := p.WriteString(item); err != nil {
     return err
 }
@@ -267,11 +275,27 @@ var MyUnion_MyEnum_DEFAULT = NewMyUnion().MyEnum
 // Deprecated: Use NewMyUnion().MyDataItem instead.
 var MyUnion_MyDataItem_DEFAULT = NewMyUnion().MyDataItem
 
-func (x *MyUnion) GetMyEnum() *MyEnum {
+func (x *MyUnion) GetMyEnumNonCompat() *MyEnum {
     return x.MyEnum
 }
 
+func (x *MyUnion) GetMyEnum() MyEnum {
+    if !x.IsSetMyEnum() {
+      return 0
+    }
+
+    return *x.MyEnum
+}
+
+func (x *MyUnion) GetMyDataItemNonCompat() *MyStruct {
+    return x.MyDataItem
+}
+
 func (x *MyUnion) GetMyDataItem() *MyStruct {
+    if !x.IsSetMyDataItem() {
+      return NewMyStruct()
+    }
+
     return x.MyDataItem
 }
 
@@ -302,7 +326,7 @@ func (x *MyUnion) writeField1(p thrift.Protocol) error {  // MyEnum
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := *x.GetMyEnum()
+    item := *x.GetMyEnumNonCompat()
     if err := p.WriteI32(int32(item)); err != nil {
     return err
 }
@@ -322,7 +346,7 @@ func (x *MyUnion) writeField2(p thrift.Protocol) error {  // MyDataItem
         return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
     }
 
-    item := x.GetMyDataItem()
+    item := x.GetMyDataItemNonCompat()
     if err := item.Write(p); err != nil {
     return err
 }

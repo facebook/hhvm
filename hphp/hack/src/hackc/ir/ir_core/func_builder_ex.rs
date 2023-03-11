@@ -159,6 +159,9 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
         // (I think) ExtendedHint is used to enable non-PHP type flags - which
         // is now standard so we can just ignore it.
         modifiers -= TypeConstraintFlags::ExtendedHint;
+        // We're just trying to do an 'is' check - we don't care if the context
+        // is a TypeConstant.
+        modifiers -= TypeConstraintFlags::TypeConstant;
 
         if modifiers == TypeConstraintFlags::NoFlags {
             fn is_type_op(op: IsTypeOp, vid: ValueId, loc: LocId) -> Instr {

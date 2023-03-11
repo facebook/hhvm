@@ -58,6 +58,35 @@ function check1(mixed $a): bool {
 }
 
 
+// TEST-CHECK-BAL: define $root.check2
+// CHECK: define $root.check2($this: *void) : *HackMixed {
+// CHECK: local $0: *void, $1: *void
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict()
+// CHECK:   n1 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(102), $builtins.hack_string("root_name"), $builtins.hack_string("D"), $builtins.hack_string("access_list"), $builtins.hhbc_new_vec($builtins.hack_string("TMyShape")))
+// CHECK:   n2 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(101), $builtins.hack_string("classname"), $builtins.hack_string(""))
+// CHECK:   store &$0 <- n0: *HackMixed
+// CHECK:   store &$1 <- n1: *HackMixed
+// CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n0, n1, $builtins.hack_int(1))
+// CHECK:   jmp b1, b2
+// CHECK: #b1:
+// CHECK:   prune $builtins.hack_is_true(n3)
+// CHECK:   n4: *HackMixed = load &$0
+// CHECK:   store &$1 <- null: *HackMixed
+// CHECK:   n5 = $builtins.hhbc_is_type_struct_c(n4, n2, $builtins.hack_int(1))
+// CHECK:   n6 = $builtins.hhbc_verify_type_pred(n4, n5)
+// CHECK:   ret n4
+// CHECK: #b2:
+// CHECK:   prune ! $builtins.hack_is_true(n3)
+// CHECK:   n7: *HackMixed = load &$0
+// CHECK:   n8: *HackMixed = load &$1
+// CHECK:   n9 = $builtins.hhbc_throw_as_type_struct_exception(n7, n8)
+// CHECK:   unreachable
+// CHECK: }
+function check2(): D::TMyShape {
+  return dict[] as D::TMyShape;
+}
+
 // TEST-CHECK-BAL: define $root.main
 // CHECK: define $root.main($this: *void) : *void {
 // CHECK: #b0:

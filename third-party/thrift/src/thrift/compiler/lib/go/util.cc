@@ -77,6 +77,12 @@ static const std::set<std::string> common_initialisms = {
     "UUID", "VM",   "XML",   "XMPP", "XSRF", "XSS",
 };
 
+// To avoid conflict with methods (e.g. Error(), String())
+static const std::set<std::string> reserved_field_names = {
+    "Error",
+    "String",
+};
+
 std::string get_go_package_name(
     const t_program* program, std::string name_override) {
   if (!name_override.empty()) {
@@ -301,6 +307,14 @@ std::string get_go_func_name(const t_function* func) {
     return func->get_annotation("go.name");
   }
   return munge_ident(func->name());
+}
+
+std::string get_field_name(const t_field* field) {
+  auto name = munge_ident(field->name());
+  if (reserved_field_names.count(name) > 0) {
+    name += "_";
+  }
+  return name;
 }
 
 } // namespace go

@@ -45,7 +45,7 @@ func (x *{{struct:go_name}}) Get{{field:go_name}}() {{#field:type}}{{#type:struc
   Set method.
 
 }}{{#struct:fields}}
-func (x *{{struct:go_name}}) Set{{field:go_name}}(value {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
+func (x *{{struct:go_name}}) {{field:go_setter_name}}(value {{#field:type}}{{> common/type}}{{/field:type}}) *{{struct:go_name}} {
     x.{{field:go_name}} = {{#field:pointer?}}&{{/field:pointer?}}value
     return x
 }
@@ -98,7 +98,7 @@ func (x *{{struct:go_name}}) readField{{field:key_str}}(p thrift.Protocol) error
     {{> codec/decode}}
     {{/field:type}}
 
-    x.Set{{field:go_name}}(result)
+    x.{{field:go_setter_name}}(result)
     return nil
 }
 

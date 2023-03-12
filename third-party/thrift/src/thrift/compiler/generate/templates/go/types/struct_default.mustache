@@ -23,7 +23,7 @@
 func {{struct:go_qualified_new_func}}() *{{struct:go_name}} {
     return (&{{struct:go_name}}{}){{!
       }}{{#struct:fields}}{{#field:value}}.
-        Set{{field:go_name}}({{!
+        {{field:go_setter_name}}({{!
         }}{{#field:type}}{{!
         }}{{^type:base?}}
             {{> const/value}},

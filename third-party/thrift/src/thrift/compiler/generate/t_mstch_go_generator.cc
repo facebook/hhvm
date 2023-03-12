@@ -55,17 +55,14 @@ struct go_codegen_data {
       {"context", 0},
       {"fmt", 0},
   };
+  // Records field names for every struct in the program.
+  // This is needed to resolve some edge case name collisions.
+  std::map<std::string, std::set<std::string>> struct_to_field_names = {};
   // Req/Resp structs are internal and must be unexported (i.e. lowercase)
   // This set will help us track these srtucts by name.
   std::set<std::string> req_resp_struct_names;
   // The current program being generated.
   const t_program* current_program;
-};
-
-// To avoid conflict with methods (e.g. Error(), String())
-static const std::set<std::string> reserved_field_names = {
-    "Error",
-    "String",
 };
 
 std::string doc_comment(const t_node* node) {
@@ -114,6 +111,7 @@ class t_mstch_go_generator : public t_mstch_generator {
  private:
   void set_mstch_factories();
   void set_go_package_aliases();
+  void set_struct_to_field_names();
   go_codegen_data data_;
 };
 
@@ -310,6 +308,7 @@ class mstch_go_field : public mstch_field {
         {
             {"field:go_name", &mstch_go_field::go_name},
             {"field:go_arg_name", &mstch_go_field::go_arg_name},
+            {"field:go_setter_name", &mstch_go_field::go_setter_name},
             {"field:pointer?", &mstch_go_field::is_pointer},
             {"field:nilable?", &mstch_go_field::is_nilable},
             {"field:dereference?", &mstch_go_field::should_dereference},
@@ -321,12 +320,22 @@ class mstch_go_field : public mstch_field {
         });
   }
 
-  mstch::node go_name() {
-    auto name = go::munge_ident(field_->name());
-    if (reserved_field_names.count(name) > 0) {
-      name += "_";
+  mstch::node go_name() { return go::get_field_name(field_); }
+  mstch::node go_setter_name() {
+    auto setter_name = "Set" + go::get_field_name(field_);
+    // Setters which collide with existing field names should be suffixed with
+    // an underscore.
+    if (field_context_ != nullptr && field_context_->strct != nullptr) {
+      auto stfn_iter =
+          data_.struct_to_field_names.find(field_context_->strct->name());
+      if (stfn_iter != data_.struct_to_field_names.end()) {
+        if (stfn_iter->second.count(setter_name) > 0) {
+          setter_name += "_";
+        }
+      }
     }
-    return name;
+
+    return setter_name;
   }
   mstch::node go_arg_name() {
     return go::munge_ident(field_->name(), /*exported*/ false);
@@ -650,6 +659,7 @@ void t_mstch_go_generator::generate_program() {
   out_dir_base_ = "gen-go_mstch";
   set_mstch_factories();
   set_go_package_aliases();
+  set_struct_to_field_names();
   data_.current_program = program_;
 
   if (auto thrift_lib_import = get_option("thrift_import")) {
@@ -700,6 +710,17 @@ void t_mstch_go_generator::set_go_package_aliases() {
         go::munge_ident(package_base_name, /*exported*/ false));
 
     data_.go_package_map.emplace(package, unique_package_name);
+  }
+}
+
+void t_mstch_go_generator::set_struct_to_field_names() {
+  auto program = get_program();
+  for (auto struct_ : program->structs()) {
+    std::set<std::string> field_names;
+    for (const t_field& field : struct_->fields()) {
+      field_names.insert(go::get_field_name(&field));
+    }
+    data_.struct_to_field_names[struct_->name()] = field_names;
   }
 }
 } // namespace

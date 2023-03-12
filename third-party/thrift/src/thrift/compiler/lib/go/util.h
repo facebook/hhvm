@@ -44,6 +44,8 @@ std::string snakecase(const std::string& name);
 std::string make_unique_name(
     std::map<std::string, int32_t>& name_collisions, const std::string& name);
 
+std::string get_field_name(const t_field* field);
+
 bool is_func_go_supported(const t_function* func);
 bool is_go_reserved_word(const std::string& value);
 

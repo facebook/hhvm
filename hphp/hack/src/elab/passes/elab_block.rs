@@ -2,16 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::collections::VecDeque;
-use std::ops::ControlFlow;
 
-use oxidized::nast::Block;
-use oxidized::nast::Stmt;
-use oxidized::nast::Stmt_;
-use oxidized::nast::UsingStmt;
+use nast::Block;
+use nast::Stmt;
+use nast::Stmt_;
+use nast::UsingStmt;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabBlockPass;
@@ -25,25 +24,24 @@ impl Pass for ElabBlockPass {
                 _ => elem.push(Stmt(pos, stmt_)),
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_using_stmt_top_down(&mut self, _: &Env, elem: &mut UsingStmt) -> ControlFlow<()> {
         elem.is_block_scoped = false;
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::nast::Block;
-    use oxidized::nast::Pos;
-    use oxidized::nast::Stmt;
-    use oxidized::nast::Stmt_;
+    use nast::Block;
+    use nast::Pos;
+    use nast::Stmt;
+    use nast::Stmt_;
 
     use super::*;
-    use crate::Transform;
 
     #[test]
     fn test() {

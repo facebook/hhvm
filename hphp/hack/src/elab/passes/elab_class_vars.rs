@@ -3,27 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::ClassVar;
+use nast::Class_;
+use nast::ClassishKind;
+use nast::Expr;
+use nast::Expr_;
+use nast::Hint;
+use nast::Hint_;
+use nast::Id;
+use nast::Tprim;
+use nast::TypeHint;
+use nast::UserAttribute;
+use nast::XhpAttr;
+use nast::XhpAttrInfo;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::ExperimentalFeature;
-use oxidized::nast::ClassVar;
-use oxidized::nast::Class_;
-use oxidized::nast::ClassishKind;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Id;
-use oxidized::nast::Tprim;
-use oxidized::nast::TypeHint;
-use oxidized::nast::UserAttribute;
-use oxidized::nast::XhpAttr;
-use oxidized::nast::XhpAttrInfo;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
 pub struct ElabClassVarsPass;
@@ -70,7 +64,7 @@ impl Pass for ElabClassVarsPass {
             elem.methods.iter_mut().for_each(|m| m.abstract_ = true)
         }
 
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -186,12 +180,12 @@ fn strip_like(hint_: &Hint_) -> &Hint_ {
 impl XhpHint {
     pub fn combine(self, other: Self) -> ControlFlow<Self, Self> {
         match (self, other) {
-            (Self::Both, _) => ControlFlow::Break(self),
-            (_, Self::Both) => ControlFlow::Break(other),
-            (Self::String, Self::Int) | (Self::Int, Self::String) => ControlFlow::Break(Self::Both),
-            (Self::Neither, _) => ControlFlow::Continue(other),
-            (_, Self::Neither) => ControlFlow::Continue(self),
-            (Self::Int, Self::Int) | (Self::String, Self::String) => ControlFlow::Continue(self),
+            (Self::Both, _) => Break(self),
+            (_, Self::Both) => Break(other),
+            (Self::String, Self::Int) | (Self::Int, Self::String) => Break(Self::Both),
+            (Self::Neither, _) => Continue(other),
+            (_, Self::Neither) => Continue(self),
+            (Self::Int, Self::Int) | (Self::String, Self::String) => Continue(self),
         }
     }
 
@@ -214,8 +208,8 @@ fn xhp_attr_hint(items: Vec<Expr>) -> Hint_ {
         .try_fold(XhpHint::Neither, |acc, Expr(_, _, expr_)| match expr_ {
             Expr_::Int(_) => acc.combine(XhpHint::Int),
             Expr_::String(_) | Expr_::String2(_) => acc.combine(XhpHint::String),
-            _ => ControlFlow::Continue(acc),
+            _ => Continue(acc),
         }) {
-        ControlFlow::Continue(xhp_hint) | ControlFlow::Break(xhp_hint) => xhp_hint.to_hint_(),
+        Continue(xhp_hint) | Break(xhp_hint) => xhp_hint.to_hint_(),
     }
 }

@@ -3,22 +3,18 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::ClassId;
+use nast::ClassId_;
+use nast::Class_;
+use nast::ClassishKind;
+use nast::Expr;
+use nast::Expr_;
+use nast::FunctionPtrId;
+use nast::Hint;
+use nast::Hint_;
+use nast::Id;
 
-use oxidized::ast::ClassishKind;
-use oxidized::ast::Id;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassId;
-use oxidized::nast::ClassId_;
-use oxidized::nast::Class_;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::FunctionPtrId;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateFunctionPointerPass {
@@ -42,7 +38,7 @@ impl Pass for ValidateFunctionPointerPass {
             }),
             is_trait: matches!(class.kind, ClassishKind::Ctrait),
         };
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_expr_bottom_up(&mut self, env: &Env, expr: &mut Expr) -> ControlFlow<()> {
@@ -80,6 +76,6 @@ impl Pass for ValidateFunctionPointerPass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

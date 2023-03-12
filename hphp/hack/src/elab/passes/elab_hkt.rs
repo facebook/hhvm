@@ -2,16 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Id;
-use oxidized::nast::Tparam;
+use nast::Hint;
+use nast::Hint_;
+use nast::Id;
+use nast::Tparam;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabHktPass;
@@ -30,7 +27,7 @@ impl Pass for ElabHktPass {
                 }
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_tparam_top_down(&mut self, env: &Env, elem: &mut Tparam) -> ControlFlow<()> {
@@ -44,22 +41,21 @@ impl Pass for ElabHktPass {
                 elem.parameters.clear()
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::nast::Pos;
-    use oxidized::nast::ReifyKind;
-    use oxidized::nast::UserAttributes;
-    use oxidized::nast::Variance;
+    use nast::Pos;
+    use nast::ReifyKind;
+    use nast::UserAttributes;
+    use nast::Variance;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     #[test]
     fn test_hint() {

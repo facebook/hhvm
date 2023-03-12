@@ -6,21 +6,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::mem::take;
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassId;
-use oxidized::nast::ClassId_;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Id;
-use oxidized::nast::ParamKind;
+use nast::ClassId;
+use nast::ClassId_;
+use nast::Expr;
+use nast::Expr_;
+use nast::Id;
+use nast::ParamKind;
 
-use crate::elab_utils;
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprCallHhMethCallerPass;
@@ -31,7 +27,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
             let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
             *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
-            ControlFlow::Break(())
+            Break(())
         };
 
         match elem {
@@ -60,7 +56,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
                                 Id(take(rcvr_pos), rcvr.to_string()),
                                 (take(meth_pos), meth.to_string()),
                             )));
-                            ControlFlow::Continue(())
+                            Continue(())
                         }
                         Expr_::ClassConst(box (ClassId(_, _, ClassId_::CI(id)), (_, mem)))
                             if mem == sn::members::M_CLASS =>
@@ -69,7 +65,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
                                 take(id),
                                 (take(meth_pos), meth.to_string()),
                             )));
-                            ControlFlow::Continue(())
+                            Continue(())
                         }
                         _ => {
                             env.emit_error(NamingError::IllegalMethCaller(fn_expr_pos.clone()));
@@ -91,7 +87,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
                     }
                 }
             }
-            _ => ControlFlow::Continue(()),
+            _ => Continue(()),
         }
     }
 }
@@ -99,11 +95,7 @@ impl Pass for ElabExprCallHhMethCallerPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     // -- Valid cases resulting in elaboration to `MethodCaller` ---------------
 

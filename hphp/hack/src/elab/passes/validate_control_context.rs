@@ -2,16 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use oxidized::nast::Expr_;
-use oxidized::nast::FinallyBlock;
-use oxidized::nast::Stmt;
-use oxidized::nast::Stmt_;
-use oxidized::nast_check_error::NastCheckError;
+use nast::Expr_;
+use nast::FinallyBlock;
+use nast::Stmt;
+use nast::Stmt_;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone)]
 enum ControlContext {
@@ -48,7 +45,7 @@ impl Pass for ValidateControlContextPass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_stmt__top_down(&mut self, _: &Env, elem: &mut Stmt_) -> ControlFlow<()> {
@@ -59,12 +56,12 @@ impl Pass for ValidateControlContextPass {
             Stmt_::Switch(..) => self.control_context = ControlContext::Switch,
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_finally_block_top_down(&mut self, _: &Env, _: &mut FinallyBlock) -> ControlFlow<()> {
         self.in_finally_block = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_expr__top_down(&mut self, _: &Env, elem: &mut Expr_) -> ControlFlow<()> {
@@ -72,6 +69,6 @@ impl Pass for ValidateControlContextPass {
             Expr_::Efun(..) | Expr_::Lfun(..) => self.control_context = ControlContext::TopLevel,
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

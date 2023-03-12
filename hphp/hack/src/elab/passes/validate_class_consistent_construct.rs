@@ -3,15 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Class_;
+use nast::ClassishKind;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Class_;
-use oxidized::nast::ClassishKind;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateClassConsistentConstructPass;
@@ -19,7 +14,7 @@ pub struct ValidateClassConsistentConstructPass;
 impl Pass for ValidateClassConsistentConstructPass {
     fn on_ty_class__top_down(&mut self, env: &Env, class: &mut Class_) -> ControlFlow<()> {
         if env.consistent_ctor_level <= 0 {
-            return ControlFlow::Continue(());
+            return Continue(());
         }
         let attr_pos_opt = class
             .user_attributes
@@ -45,6 +40,6 @@ impl Pass for ValidateClassConsistentConstructPass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

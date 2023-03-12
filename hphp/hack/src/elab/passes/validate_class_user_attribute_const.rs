@@ -2,16 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_phase_error::ExperimentalFeature;
-use oxidized::nast::Class_;
-use oxidized::nast::Pos;
-use oxidized::nast::UserAttributes;
+use nast::Class_;
+use nast::Pos;
+use nast::UserAttributes;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateClassUserAttributeConstPass;
@@ -25,7 +21,7 @@ impl Pass for ValidateClassUserAttributeConstPass {
                 .iter()
                 .for_each(|cv| check_const(env, elem.name.pos(), &cv.user_attributes));
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 

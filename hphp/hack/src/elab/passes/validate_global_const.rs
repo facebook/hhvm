@@ -3,18 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
-
 use file_info::Mode;
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Gconst;
-use oxidized::nast::Id;
+use nast::Expr;
+use nast::Expr_;
+use nast::Gconst;
+use nast::Id;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateGlobalConstPass;
@@ -23,7 +18,7 @@ impl Pass for ValidateGlobalConstPass {
     fn on_ty_gconst_bottom_up(&mut self, env: &Env, gconst: &mut Gconst) -> ControlFlow<()> {
         error_if_no_typehint(env, gconst);
         error_if_pseudo_constant(env, gconst);
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -60,17 +55,14 @@ fn error_if_pseudo_constant(env: &Env, gconst: &Gconst) {
 
 #[cfg(test)]
 mod tests {
+    use nast::Hint;
+    use nast::Pos;
     use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Hint;
-    use oxidized::nast::Pos;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::elab_utils;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     fn mk_gconst(
         name: String,

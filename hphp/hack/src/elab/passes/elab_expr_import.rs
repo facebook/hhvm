@@ -3,14 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Expr;
+use nast::Expr_;
+use nast::Pos;
 
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Pos;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprImportPass;
@@ -29,19 +26,18 @@ impl Pass for ElabExprImportPass {
                     inner_expr.1.clone(),
                     Expr_::Invalid(Box::new(Some(inner_expr))),
                 );
-                ControlFlow::Break(())
+                Break(())
             }
-            _ => ControlFlow::Continue(()),
+            _ => Continue(()),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use oxidized::nast::ImportFlavor;
+    use nast::ImportFlavor;
 
     use super::*;
-    use crate::Transform;
 
     // -- ValCollection --------------------------------------------------------
 

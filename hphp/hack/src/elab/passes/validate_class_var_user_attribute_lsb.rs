@@ -2,15 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassVar;
-use oxidized::nast::Id;
+use nast::ClassVar;
+use nast::Id;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateClassVarUserAttributeLsbPass {
@@ -18,17 +14,13 @@ pub struct ValidateClassVarUserAttributeLsbPass {
 }
 
 impl Pass for ValidateClassVarUserAttributeLsbPass {
-    fn on_ty_class__bottom_up(
-        &mut self,
-        _: &Env,
-        elem: &mut oxidized::nast::Class_,
-    ) -> ControlFlow<()> {
+    fn on_ty_class__bottom_up(&mut self, _: &Env, elem: &mut nast::Class_) -> ControlFlow<()> {
         self.final_class = if elem.final_ {
             Some(elem.name.clone())
         } else {
             None
         };
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class_var_bottom_up(&mut self, env: &Env, elem: &mut ClassVar) -> ControlFlow<()> {
@@ -53,6 +45,6 @@ impl Pass for ValidateClassVarUserAttributeLsbPass {
                 });
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

@@ -2,23 +2,18 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassId;
-use oxidized::nast::ClassId_;
-use oxidized::nast::Class_;
-use oxidized::nast::ClassishKind;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::FunDef;
-use oxidized::nast::Id;
-use oxidized::nast::Method_;
-use oxidized::nast_check_error::NastCheckError;
+use nast::ClassId;
+use nast::ClassId_;
+use nast::Class_;
+use nast::ClassishKind;
+use nast::Expr;
+use nast::Expr_;
+use nast::FunDef;
+use nast::Id;
+use nast::Method_;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateIllegalNamePass {
@@ -43,7 +38,7 @@ impl ValidateIllegalNamePass {
 impl Pass for ValidateIllegalNamePass {
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.classish_kind = Some(elem.kind);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class__bottom_up(&mut self, env: &Env, elem: &mut Class_) -> ControlFlow<()> {
@@ -53,12 +48,12 @@ impl Pass for ValidateIllegalNamePass {
         elem.consts
             .iter()
             .for_each(|cc| check_illegal_member_variable_class(env, &cc.id));
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_fun_def_bottom_up(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
@@ -73,19 +68,19 @@ impl Pass for ValidateIllegalNamePass {
                 name: elem.name.name().to_string(),
             })
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_method__top_down(&mut self, _: &Env, elem: &mut Method_) -> ControlFlow<()> {
         self.func_name = Some(elem.name.name().to_string());
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         if elem.name.name() == sn::members::__DESTRUCT {
             env.emit_error(NastCheckError::IllegalDestructor(elem.name.pos().clone()))
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
@@ -129,7 +124,7 @@ impl Pass for ValidateIllegalNamePass {
                 }),
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 

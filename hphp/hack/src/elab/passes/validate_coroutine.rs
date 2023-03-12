@@ -2,23 +2,20 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
 use bitflags::bitflags;
-use oxidized::nast::AsExpr;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::FunDef;
-use oxidized::nast::FunKind;
-use oxidized::nast::Method_;
-use oxidized::nast::Pos;
-use oxidized::nast::Stmt;
-use oxidized::nast::Stmt_;
-use oxidized::nast::UsingStmt;
-use oxidized::nast_check_error::NastCheckError;
+use nast::AsExpr;
+use nast::Expr;
+use nast::Expr_;
+use nast::FunDef;
+use nast::FunKind;
+use nast::Method_;
+use nast::Pos;
+use nast::Stmt;
+use nast::Stmt_;
+use nast::UsingStmt;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateCoroutinePass {
@@ -84,7 +81,7 @@ impl Pass for ValidateCoroutinePass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_expr_top_down(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
@@ -97,18 +94,18 @@ impl Pass for ValidateCoroutinePass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_method__top_down(&mut self, _: &Env, elem: &mut Method_) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.set_fun_kind(elem.fun.fun_kind);
         self.func_pos = Some(elem.name.pos().clone());
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

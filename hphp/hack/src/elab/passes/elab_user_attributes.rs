@@ -2,16 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
 use hash::HashMap;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Id;
-use oxidized::nast::Pos;
-use oxidized::nast::UserAttributes;
+use nast::Id;
+use nast::Pos;
+use nast::UserAttributes;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabUserAttributesPass;
@@ -38,16 +35,15 @@ impl Pass for ElabUserAttributesPass {
                 true
             }
         });
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use oxidized::nast::UserAttribute;
+    use nast::UserAttribute;
 
     use super::*;
-    use crate::Transform;
 
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]

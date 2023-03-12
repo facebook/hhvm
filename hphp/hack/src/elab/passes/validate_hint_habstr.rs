@@ -3,26 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
-
 use bitflags::bitflags;
 use hash::HashMap;
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::naming_error::UnsupportedFeature;
-use oxidized::nast::Class_;
-use oxidized::nast::FunDef;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Method_;
-use oxidized::nast::Pos;
-use oxidized::nast::ReifyKind;
-use oxidized::nast::Tparam;
-use oxidized::nast::Typedef;
-use oxidized::nast::WhereConstraintHint;
+use nast::Class_;
+use nast::FunDef;
+use nast::Hint;
+use nast::Hint_;
+use nast::Method_;
+use nast::Pos;
+use nast::ReifyKind;
+use nast::Tparam;
+use nast::Typedef;
+use nast::WhereConstraintHint;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone)]
 enum TparamKind {
@@ -226,7 +220,7 @@ impl Pass for ValidateHintHabstrPass {
         // Validate class level tparams and bring them into scope
         self.check_tparams(env, &elem.tparams, false);
 
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_typedef_top_down(&mut self, env: &Env, elem: &mut Typedef) -> ControlFlow<()> {
@@ -234,7 +228,7 @@ impl Pass for ValidateHintHabstrPass {
         // in scope but we clear anyway
         self.clear_tparams();
         self.check_tparams(env, &elem.tparams, false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_fun_def_top_down(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
@@ -246,7 +240,7 @@ impl Pass for ValidateHintHabstrPass {
         // and methods only (i.e. not class level constraints) so we record
         // this in the context
         self.set_in_method_or_fun(true);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_method__top_down(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
@@ -257,7 +251,7 @@ impl Pass for ValidateHintHabstrPass {
         // and methods only (i.e. not class level constraints) so we record
         // this in the context
         self.set_in_method_or_fun(true);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_where_constraint_hint_top_down(
@@ -268,7 +262,7 @@ impl Pass for ValidateHintHabstrPass {
         // We want to check hints inside function / method where constraints
         // so we need to record this in the context
         self.set_in_where_constraint(true);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
@@ -286,26 +280,24 @@ impl Pass for ValidateHintHabstrPass {
                 }
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
+    use nast::Abstraction;
+    use nast::Block;
+    use nast::ClassishKind;
+    use nast::FuncBody;
+    use nast::Id;
+    use nast::TypeHint;
+    use nast::Variance;
     use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Abstraction;
-    use oxidized::nast::Block;
-    use oxidized::nast::ClassishKind;
-    use oxidized::nast::FuncBody;
-    use oxidized::nast::Id;
-    use oxidized::nast::TypeHint;
-    use oxidized::nast::Variance;
 
     use super::*;
-    use crate::transform::Transform;
 
     fn mk_class(tparams: Vec<Tparam>, methods: Vec<Method_>) -> Class_ {
         Class_ {
@@ -351,7 +343,7 @@ mod tests {
             abstract_: Default::default(),
             static_: Default::default(),
             readonly_this: Default::default(),
-            visibility: oxidized::nast::Visibility::Public,
+            visibility: nast::Visibility::Public,
             name: Default::default(),
             tparams,
             where_constraints,
@@ -361,7 +353,7 @@ mod tests {
             body: FuncBody {
                 fb_ast: Block(Default::default()),
             },
-            fun_kind: oxidized::nast::FunKind::FSync,
+            fun_kind: nast::FunKind::FSync,
             user_attributes: Default::default(),
             readonly_ret: Default::default(),
             ret: TypeHint(Default::default(), None),

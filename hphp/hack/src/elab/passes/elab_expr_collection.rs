@@ -2,27 +2,23 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
+use nast::Afield;
+use nast::CollectionTarg;
+use nast::Expr;
+use nast::Expr_;
+use nast::Field;
+use nast::Hint;
+use nast::Hint_;
+use nast::Id;
+use nast::KvcKind;
+use nast::Lid;
+use nast::Pos;
+use nast::Targ;
+use nast::VcKind;
 use oxidized::local_id;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Afield;
-use oxidized::nast::CollectionTarg;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Field;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Id;
-use oxidized::nast::KvcKind;
-use oxidized::nast::Lid;
-use oxidized::nast::Pos;
-use oxidized::nast::Targ;
-use oxidized::nast::VcKind;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprCollectionPass;
@@ -59,7 +55,7 @@ impl Pass for ElabExprCollectionPass {
                         targ_opt,
                         exprs,
                     )));
-                    ControlFlow::Continue(())
+                    Continue(())
                 }
 
                 CollectionKind::KvcKind(kvc_kind) => {
@@ -73,7 +69,7 @@ impl Pass for ElabExprCollectionPass {
                         targs_opt,
                         fields,
                     )));
-                    ControlFlow::Continue(())
+                    Continue(())
                 }
 
                 CollectionKind::Pair => {
@@ -84,7 +80,7 @@ impl Pass for ElabExprCollectionPass {
                             let expr1 = expr_from_afield(env, afield1, cname);
                             let expr2 = expr_from_afield(env, afield2, cname);
                             *expr_ = Expr_::Pair(Box::new((targs_opt, expr1, expr2)));
-                            ControlFlow::Continue(())
+                            Continue(())
                         }
 
                         // We have fewer than two args, this cannot be a valid [Pair] so replace
@@ -98,7 +94,7 @@ impl Pass for ElabExprCollectionPass {
                                 inner_expr.1.clone(),
                                 Expr_::Invalid(Box::new(Some(inner_expr))),
                             );
-                            ControlFlow::Break(())
+                            Break(())
                         }
 
                         // We have more than two args, this cannot be a valid `Pair` so replace
@@ -112,7 +108,7 @@ impl Pass for ElabExprCollectionPass {
                                 inner_expr.1.clone(),
                                 Expr_::Invalid(Box::new(Some(inner_expr))),
                             );
-                            ControlFlow::Break(())
+                            Break(())
                         }
                     }
                 }
@@ -129,11 +125,11 @@ impl Pass for ElabExprCollectionPass {
                         expr_pos.clone(),
                         Expr_::Invalid(Box::new(Some(inner_expr))),
                     );
-                    ControlFlow::Break(())
+                    Break(())
                 }
             }
         } else {
-            ControlFlow::Continue(())
+            Continue(())
         }
     }
 }
@@ -273,10 +269,7 @@ fn vc_kind_opt(name: &str) -> Option<VcKind> {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-
     use super::*;
-    use crate::Transform;
 
     // -- ValCollection --------------------------------------------------------
 

@@ -3,13 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::ModuleDef;
 
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ModuleDef;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateModulePass;
@@ -21,23 +17,21 @@ impl Pass for ValidateModulePass {
                 module.span.clone(),
             ));
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Id;
-    use oxidized::nast::ModuleDef;
-    use oxidized::nast::Pos;
-    use oxidized::nast::UserAttributes;
+    use nast::Id;
+    use nast::ModuleDef;
+    use nast::Pos;
+    use nast::UserAttributes;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     fn mk_module(name: &str) -> ModuleDef {
         ModuleDef {

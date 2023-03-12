@@ -3,25 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashSet;
-use std::ops::ControlFlow;
+use hash::HashSet;
+use nast::Class_;
+use nast::Id;
+use nast::Method_;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Class_;
-use oxidized::nast::Id;
-use oxidized::nast::Method_;
-use oxidized::nast_check_error::NastCheckError;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateClassMethodsPass;
 
 impl Pass for ValidateClassMethodsPass {
     fn on_ty_class__bottom_up(&mut self, env: &Env, class: &mut Class_) -> ControlFlow<()> {
-        let mut seen = HashSet::<&str>::new();
+        let mut seen = HashSet::<&str>::default();
         for method in class.methods.iter() {
             let Id(pos, name) = &method.name;
             if seen.contains(name as &str) {
@@ -32,7 +26,7 @@ impl Pass for ValidateClassMethodsPass {
             }
             seen.insert(name);
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_method__bottom_up(&mut self, env: &Env, method: &mut Method_) -> ControlFlow<()> {
@@ -44,32 +38,30 @@ impl Pass for ValidateClassMethodsPass {
         {
             env.emit_error(NastCheckError::AbstractMethodMemoize(method.span.clone()))
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
+    use nast::Abstraction;
+    use nast::Block;
+    use nast::ClassishKind;
+    use nast::FunKind;
+    use nast::FuncBody;
+    use nast::Id;
+    use nast::Pos;
+    use nast::TypeHint;
+    use nast::UserAttribute;
+    use nast::UserAttributes;
+    use nast::Visibility;
     use ocamlrep::rc::RcOc;
-    use oxidized::ast_defs::Abstraction;
-    use oxidized::ast_defs::ClassishKind;
     use oxidized::namespace_env;
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Block;
-    use oxidized::nast::FunKind;
-    use oxidized::nast::FuncBody;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
-    use oxidized::nast::TypeHint;
-    use oxidized::nast::UserAttribute;
-    use oxidized::nast::UserAttributes;
-    use oxidized::nast::Visibility;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     fn mk_method(name: String, r#abstract: bool, attrs: Vec<UserAttribute>) -> Method_ {
         Method_ {

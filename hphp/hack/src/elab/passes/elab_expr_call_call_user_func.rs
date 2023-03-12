@@ -2,20 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Id;
-use oxidized::nast::ParamKind;
-use oxidized::nast::Pos;
-use oxidized::nast_check_error::NastCheckError;
+use nast::Expr;
+use nast::Expr_;
+use nast::Id;
+use nast::ParamKind;
+use nast::Pos;
 
-use crate::elab_utils;
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprCallCallUserFuncPass;
@@ -38,7 +32,7 @@ impl Pass for ElabExprCallCallUserFuncPass {
                 let inner_expr_ = std::mem::replace(elem, Expr_::Null);
                 let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
                 *elem = Expr_::Invalid(Box::new(Some(inner_expr)));
-                ControlFlow::Break(())
+                Break(())
             }
 
             Expr_::Call(box (fn_expr, _, fn_param_exprs, fn_variadic_param_opt))
@@ -58,9 +52,9 @@ impl Pass for ElabExprCallCallUserFuncPass {
                 *fn_expr = head_expr;
                 // TODO[mjt] why are we dropping the unpacked variadic arg here?
                 *fn_variadic_param_opt = None;
-                ControlFlow::Continue(())
+                Continue(())
             }
-            _ => ControlFlow::Continue(()),
+            _ => Continue(()),
         }
     }
 }
@@ -81,11 +75,7 @@ fn is_expr_call_user_func(env: &Env, expr: &Expr) -> bool {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     #[test]
     fn test_valid() {

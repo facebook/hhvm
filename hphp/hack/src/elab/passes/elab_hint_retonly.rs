@@ -2,17 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use oxidized::naming_error::NamingError;
+use nast::Hint;
+use nast::Hint_;
+use nast::Tprim;
 use oxidized::naming_error::ReturnOnlyHint;
-use oxidized::nast;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Tprim;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabHintRetonlyPass {
@@ -28,7 +24,7 @@ impl Pass for ElabHintRetonlyPass {
                     kind: ReturnOnlyHint::Hvoid,
                 });
                 *hint_ = Hint_::Herr;
-                ControlFlow::Break(())
+                Break(())
             }
             Hint(pos, box hint_ @ Hint_::Hprim(Tprim::Tnoreturn)) if !self.allow_retonly => {
                 env.emit_error(NamingError::ReturnOnlyTypehint {
@@ -36,9 +32,9 @@ impl Pass for ElabHintRetonlyPass {
                     kind: ReturnOnlyHint::Hnoreturn,
                 });
                 *hint_ = Hint_::Herr;
-                ControlFlow::Break(())
+                Break(())
             }
-            _ => ControlFlow::Continue(()),
+            _ => Continue(()),
         }
     }
 
@@ -47,47 +43,45 @@ impl Pass for ElabHintRetonlyPass {
             Hint_::Happly(..) | Hint_::Habstr(..) => self.allow_retonly = true,
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut nast::Targ) -> ControlFlow<()> {
         self.allow_retonly = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_hint_fun_return_ty_top_down(&mut self, _: &Env, _: &mut Hint) -> ControlFlow<()> {
         self.allow_retonly = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_fun__ret_top_down(&mut self, _: &Env, _: &mut nast::TypeHint) -> ControlFlow<()> {
         self.allow_retonly = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_method__ret_top_down(&mut self, _: &Env, _: &mut nast::TypeHint) -> ControlFlow<()> {
         self.allow_retonly = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Block;
-    use oxidized::nast::FunParam;
-    use oxidized::nast::Fun_;
-    use oxidized::nast::FuncBody;
-    use oxidized::nast::HintFun;
-    use oxidized::nast::Id;
-    use oxidized::nast::ParamKind;
-    use oxidized::nast::Pos;
-    use oxidized::nast::Targ;
-    use oxidized::nast::TypeHint;
+    use nast::Block;
+    use nast::FunParam;
+    use nast::Fun_;
+    use nast::FuncBody;
+    use nast::HintFun;
+    use nast::Id;
+    use nast::ParamKind;
+    use nast::Pos;
+    use nast::Targ;
+    use nast::TypeHint;
 
     use super::*;
-    use crate::Transform;
 
     #[test]
     fn test_fun_ret_valid() {
@@ -109,7 +103,7 @@ mod tests {
             body: FuncBody {
                 fb_ast: Block(vec![]),
             },
-            fun_kind: oxidized::nast::FunKind::FSync,
+            fun_kind: nast::FunKind::FSync,
             user_attributes: Default::default(),
             external: Default::default(),
             doc_comment: Default::default(),
@@ -234,7 +228,7 @@ mod tests {
             body: FuncBody {
                 fb_ast: Block(vec![]),
             },
-            fun_kind: oxidized::nast::FunKind::FSync,
+            fun_kind: nast::FunKind::FSync,
             user_attributes: Default::default(),
             external: Default::default(),
             doc_comment: Default::default(),

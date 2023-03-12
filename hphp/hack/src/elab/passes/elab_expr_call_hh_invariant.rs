@@ -2,25 +2,18 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::naming_phase_error::NamingPhaseError;
-use oxidized::nast::Block;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Id;
-use oxidized::nast::ParamKind;
-use oxidized::nast::Pos;
-use oxidized::nast::Stmt;
-use oxidized::nast::Stmt_;
-use oxidized::nast::Uop;
-use oxidized::nast_check_error::NastCheckError;
+use nast::Block;
+use nast::Expr;
+use nast::Expr_;
+use nast::Id;
+use nast::ParamKind;
+use nast::Pos;
+use nast::Stmt;
+use nast::Stmt_;
+use nast::Uop;
 
-use crate::elab_utils;
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprCallHhInvariantPass;
@@ -30,13 +23,13 @@ impl Pass for ElabExprCallHhInvariantPass {
     // is defined on `Stmt`
     fn on_ty_stmt__bottom_up(&mut self, env: &Env, elem: &mut Stmt_) -> ControlFlow<()> {
         match check_call(env, elem) {
-            Check::Ignore => ControlFlow::Continue(()),
+            Check::Ignore => Continue(()),
             Check::Invalidate => {
                 if let Stmt_::Expr(box expr) = elem {
                     let inner_expr = std::mem::replace(expr, elab_utils::expr::null());
                     *expr = elab_utils::expr::invalid(inner_expr);
                 }
-                ControlFlow::Break(())
+                Break(())
             }
             Check::Elaborate => {
                 let old_stmt_ = std::mem::replace(elem, Stmt_::Noop);
@@ -97,7 +90,7 @@ impl Pass for ElabExprCallHhInvariantPass {
                         }
                     }
                 }
-                ControlFlow::Continue(())
+                Continue(())
             }
         }
     }
@@ -142,8 +135,6 @@ fn check_call(env: &Env, stmt: &Stmt_) -> Check {
 mod tests {
 
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     #[test]
     fn test_valid() {

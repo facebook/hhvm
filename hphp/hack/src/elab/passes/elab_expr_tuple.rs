@@ -3,15 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Expr;
+use nast::Expr_;
 
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-
-use crate::elab_utils;
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 /// Replace empty tuples with invalid expressions and record errors.
 #[derive(Clone, Copy, Default)]
@@ -30,10 +25,10 @@ impl Pass for ElabExprTuplePass {
                 *elem = elab_utils::expr::invalid(expr);
                 // Record the error and break.
                 env.emit_error(NamingError::TooFewArguments(pos));
-                return ControlFlow::Break(());
+                return Break(());
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -41,8 +36,6 @@ impl Pass for ElabExprTuplePass {
 mod tests {
 
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     #[test]
     fn test_empty_tuple() {

@@ -2,17 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use oxidized::nast::ClassTypeconstDef;
-use oxidized::nast::Class_;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Id;
-use oxidized::nast_check_error::NastCheckError;
+use nast::ClassTypeconstDef;
+use nast::Class_;
+use nast::Hint;
+use nast::Hint_;
+use nast::Id;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateClassTparamsPass {
@@ -23,7 +20,7 @@ pub struct ValidateClassTparamsPass {
 impl Pass for ValidateClassTparamsPass {
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.class_tparams = Some(elem.tparams.iter().map(|tp| tp.name.clone()).collect());
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class_typeconst_def_top_down(
@@ -32,7 +29,7 @@ impl Pass for ValidateClassTparamsPass {
         _: &mut ClassTypeconstDef,
     ) -> ControlFlow<()> {
         self.in_typeconst_def = true;
-        ControlFlow::Break(())
+        Break(())
     }
 
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
@@ -55,6 +52,6 @@ impl Pass for ValidateClassTparamsPass {
                 _ => (),
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

@@ -2,17 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use oxidized::nast::Class_;
-use oxidized::nast::FunDef;
-use oxidized::nast::FuncBody;
-use oxidized::nast::Gconst;
-use oxidized::nast::ModuleDef;
-use oxidized::nast::Typedef;
+use nast::Class_;
+use nast::FunDef;
+use nast::FuncBody;
+use nast::Gconst;
+use nast::ModuleDef;
+use nast::Typedef;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy)]
 pub struct ElabFuncBodyPass {
@@ -32,52 +30,51 @@ impl Pass for ElabFuncBodyPass {
         if matches!(self.mode, file_info::Mode::Mhhi) {
             elem.fb_ast.clear()
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.mode = elem.mode;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_typedef_top_down(&mut self, _: &Env, elem: &mut Typedef) -> ControlFlow<()> {
         self.mode = elem.mode;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_gconst_top_down(&mut self, _: &Env, elem: &mut Gconst) -> ControlFlow<()> {
         self.mode = elem.mode;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         self.mode = elem.mode;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_module_def_top_down(&mut self, _: &Env, elem: &mut ModuleDef) -> ControlFlow<()> {
         self.mode = elem.mode;
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::nast::FuncBody;
-    use oxidized::nast::Pos;
-    use oxidized::nast::Stmt;
-    use oxidized::nast::Stmt_;
+    use nast::FuncBody;
+    use nast::Pos;
+    use nast::Stmt;
+    use nast::Stmt_;
 
     use super::*;
-    use crate::Transform;
 
     #[test]
     fn test_add() {
         let env = Env::default();
 
         let mut elem = FuncBody {
-            fb_ast: oxidized::nast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
+            fb_ast: nast::Block(vec![Stmt(Pos::NONE, Stmt_::Noop)]),
         };
 
         let mut pass = ElabFuncBodyPass::default();

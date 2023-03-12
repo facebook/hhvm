@@ -23,6 +23,26 @@ mod pass;
 mod passes;
 mod transform;
 
+/// Private convenience module for simplifying imports in pass implementations.
+mod prelude {
+    pub use std::ops::ControlFlow;
+    pub use std::ops::ControlFlow::Break;
+    pub use std::ops::ControlFlow::Continue;
+
+    pub use naming_special_names_rust as sn;
+    pub use oxidized::naming_error::NamingError;
+    pub use oxidized::naming_error::UnsupportedFeature;
+    pub use oxidized::naming_phase_error::ExperimentalFeature;
+    pub use oxidized::naming_phase_error::NamingPhaseError;
+    pub use oxidized::nast;
+    pub use oxidized::nast_check_error::NastCheckError;
+
+    pub(crate) use crate::elab_utils;
+    pub use crate::env::Env;
+    pub use crate::pass::Pass;
+    pub use crate::transform::Transform;
+}
+
 use env::Env;
 use env::ProgramSpecificOptions;
 use oxidized::naming_phase_error::NamingPhaseError;

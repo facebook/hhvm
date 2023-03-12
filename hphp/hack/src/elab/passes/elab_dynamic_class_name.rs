@@ -3,22 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::ClassGetExpr;
+use nast::ClassId;
+use nast::ClassId_;
+use nast::Expr;
+use nast::Expr_;
+use nast::FunctionPtrId;
+use nast::Id;
+use nast::PropOrMethod;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassGetExpr;
-use oxidized::nast::ClassId;
-use oxidized::nast::ClassId_;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::FunctionPtrId;
-use oxidized::nast::Id;
-use oxidized::nast::PropOrMethod;
-
-use crate::elab_utils;
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
 pub struct ElabDynamicClassNamePass;
@@ -29,19 +23,19 @@ impl Pass for ElabDynamicClassNamePass {
             let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
             let inner_expr = elab_utils::expr::from_expr__with_pos_(elem.1.clone(), inner_expr_);
             *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
-            ControlFlow::Break(())
+            Break(())
         };
 
         match &mut elem.2 {
             Expr_::New(box (class_id, _, _, _, _)) if is_dynamic(class_id) => {
                 env.emit_error(NamingError::DynamicNewInStrictMode(class_id.1.clone()));
                 class_id.2 = ClassId_::CI(Id(class_id.1.clone(), sn::classes::UNKNOWN.to_string()));
-                ControlFlow::Continue(())
+                Continue(())
             }
             Expr_::ClassGet(box (class_id, ClassGetExpr::CGstring(..), _))
                 if !is_dynamic(class_id) =>
             {
-                ControlFlow::Continue(())
+                Continue(())
             }
             Expr_::ClassGet(box (
                 class_id,
@@ -49,7 +43,7 @@ impl Pass for ElabDynamicClassNamePass {
                 PropOrMethod::IsMethod,
             )) if !is_dynamic(class_id) => {
                 env.emit_error(NamingError::DynamicMethodAccess(cg_expr.1.clone()));
-                ControlFlow::Continue(())
+                Continue(())
             }
             Expr_::ClassGet(box (
                 ClassId(_, _, ClassId_::CIexpr(ci_expr)),
@@ -79,7 +73,7 @@ impl Pass for ElabDynamicClassNamePass {
                 invalid(&mut elem.2)
             }
             Expr_::ClassConst(box (class_id, _)) if is_dynamic(class_id) => invalid(&mut elem.2),
-            _ => ControlFlow::Continue(()),
+            _ => Continue(()),
         }
     }
 }
@@ -100,11 +94,9 @@ fn is_dynamic(class_id: &ClassId) -> bool {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Pos;
+    use nast::Pos;
 
     use super::*;
-    use crate::Transform;
 
     fn mk_dynamic_class_id() -> ClassId {
         ClassId(

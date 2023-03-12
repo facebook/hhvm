@@ -2,17 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Class_;
-use oxidized::nast::Expr_;
-use oxidized::nast::ShapeFieldInfo;
-use oxidized::nast::ShapeFieldName;
+use nast::Class_;
+use nast::Expr_;
+use nast::ShapeFieldInfo;
+use nast::ShapeFieldName;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ElabShapeFieldNamePass {
@@ -28,7 +24,7 @@ impl ElabShapeFieldNamePass {
 impl Pass for ElabShapeFieldNamePass {
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.in_class(elem);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_expr__bottom_up(&mut self, env: &Env, elem: &mut Expr_) -> ControlFlow<()> {
@@ -38,7 +34,7 @@ impl Pass for ElabShapeFieldNamePass {
                 .for_each(|(nm, _)| canonical_shape_name(env, nm, &self.current_class)),
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_shape_field_info_bottom_up(
@@ -47,7 +43,7 @@ impl Pass for ElabShapeFieldNamePass {
         elem: &mut ShapeFieldInfo,
     ) -> ControlFlow<()> {
         canonical_shape_name(env, &mut elem.name, &self.current_class);
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -67,15 +63,12 @@ fn canonical_shape_name(env: &Env, nm: &mut ShapeFieldName, current_class: &Opti
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Hint;
-    use oxidized::nast::Hint_;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
+    use nast::Hint;
+    use nast::Hint_;
+    use nast::Id;
+    use nast::Pos;
 
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     // -- Valid cases ----------------------------------------------------------
 

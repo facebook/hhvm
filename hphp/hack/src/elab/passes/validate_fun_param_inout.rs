@@ -2,19 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::nast::FunDef;
-use oxidized::nast::FunParam;
-use oxidized::nast::Id;
-use oxidized::nast::Method_;
-use oxidized::nast::ParamKind;
-use oxidized::nast::UserAttributes;
-use oxidized::nast_check_error::NastCheckError;
+use nast::FunDef;
+use nast::FunParam;
+use nast::Id;
+use nast::Method_;
+use nast::ParamKind;
+use nast::UserAttributes;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
 pub struct ValidateFunParamInoutPass;
@@ -22,11 +18,11 @@ pub struct ValidateFunParamInoutPass;
 impl Pass for ValidateFunParamInoutPass {
     fn on_ty_fun_def_bottom_up(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         check_params(env, &elem.name, &elem.fun.user_attributes, &elem.fun.params);
-        ControlFlow::Continue(())
+        Continue(())
     }
     fn on_ty_method__bottom_up(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
         check_params(env, &elem.name, &elem.user_attributes, &elem.params);
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 

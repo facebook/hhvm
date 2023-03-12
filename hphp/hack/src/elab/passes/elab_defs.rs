@@ -4,15 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::VecDeque;
-use std::ops::ControlFlow;
 
-use oxidized::nast::Def;
-use oxidized::nast::Program;
-use oxidized::nast::Stmt;
-use oxidized::nast::Stmt_;
+use nast::Def;
+use nast::Program;
+use nast::Stmt;
+use nast::Stmt_;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabDefsPass;
@@ -51,22 +49,21 @@ impl Pass for ElabDefsPass {
                 }
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::nast::Def;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
-    use oxidized::nast::Program;
-    use oxidized::nast::Stmt;
-    use oxidized::nast::Stmt_;
+    use nast::Def;
+    use nast::Id;
+    use nast::Pos;
+    use nast::Program;
+    use nast::Stmt;
+    use nast::Stmt_;
 
     use super::*;
-    use crate::Transform;
 
     #[test]
     fn test() {

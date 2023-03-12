@@ -2,21 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::FunDef;
-use oxidized::nast::Method_;
-use oxidized::nast::Pos;
-use oxidized::nast::ReifyKind;
-use oxidized::nast::Tparam;
-use oxidized::nast::UserAttribute;
-use oxidized::nast::Visibility;
-use oxidized::nast_check_error::NastCheckError;
+use nast::FunDef;
+use nast::Method_;
+use nast::Pos;
+use nast::ReifyKind;
+use nast::Tparam;
+use nast::UserAttribute;
+use nast::Visibility;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
 pub struct ValidaetUserAttributeDynamicallyCallable;
@@ -31,7 +26,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
                 }
             });
 
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_method__top_down(&mut self, env: &Env, elem: &mut Method_) -> ControlFlow<()> {
@@ -54,7 +49,7 @@ impl Pass for ValidaetUserAttributeDynamicallyCallable {
                 }
             });
 
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 

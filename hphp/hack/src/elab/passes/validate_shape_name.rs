@@ -3,15 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Expr;
+use nast::Expr_;
+use nast::ShapeFieldName;
 
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::ShapeFieldName;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateShapeNamePass;
@@ -21,7 +17,7 @@ impl Pass for ValidateShapeNamePass {
         if let Expr(_, _, Expr_::Shape(flds)) = expr {
             error_if_duplicate_names(flds, env);
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -37,15 +33,12 @@ fn error_if_duplicate_names(flds: &[(ShapeFieldName, Expr)], env: &Env) {
 
 #[cfg(test)]
 mod tests {
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Expr;
-    use oxidized::nast::Pos;
+    use nast::Expr;
+    use nast::Pos;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::elab_utils;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     fn mk_shape_lit_int_field_name(name: &str) -> ShapeFieldName {
         ShapeFieldName::SFlitInt((Pos::NONE, name.to_string()))

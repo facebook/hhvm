@@ -2,16 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
+use nast::Expr_;
+use nast::Lid;
+use nast::Pos;
 use oxidized::local_id;
-use oxidized::nast::Expr_;
-use oxidized::nast::Lid;
-use oxidized::nast::Pos;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabExprLvarPass;
@@ -34,14 +31,14 @@ impl Pass for ElabExprLvarPass {
                     let pos = std::mem::replace(pos, Pos::NONE);
                     *elem = Expr_::Lplaceholder(Box::new(pos));
                 }
-                ControlFlow::Continue(())
+                Continue(())
             }
             Expr_::Pipe(pipe) => {
                 let (Lid(_, lcl_id), _, _) = pipe as &mut (Lid, _, _);
                 *lcl_id = local_id::make_unscoped(sn::special_idents::PLACEHOLDER);
-                ControlFlow::Continue(())
+                Continue(())
             }
-            _ => ControlFlow::Continue(()),
+            _ => Continue(()),
         }
     }
 }
@@ -50,7 +47,6 @@ impl Pass for ElabExprLvarPass {
 mod tests {
 
     use super::*;
-    use crate::Transform;
 
     #[test]
     fn test_lvar_this() {

@@ -2,16 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
 use itertools::FoldWhile;
 use itertools::Itertools;
-use oxidized::nast::Class_;
-use oxidized::nast::Hint;
-use oxidized::nast_check_error::NastCheckError;
+use nast::Class_;
+use nast::Hint;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateInterfacePass;
@@ -59,6 +56,6 @@ impl Pass for ValidateInterfacePass {
                 .filter(|m| !m.body.fb_ast.0.is_empty())
                 .for_each(|m| env.emit_error(NastCheckError::AbstractBody(m.name.pos().clone())));
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

@@ -3,12 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Expr_;
 
-use oxidized::nast::Expr_;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct GuardInvalidPass;
@@ -16,9 +13,9 @@ pub struct GuardInvalidPass;
 impl Pass for GuardInvalidPass {
     fn on_ty_expr__top_down(&mut self, _: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         if matches!(elem, Expr_::Invalid(..)) {
-            ControlFlow::Break(())
+            Break(())
         } else {
-            ControlFlow::Continue(())
+            Continue(())
         }
     }
 }
@@ -26,14 +23,12 @@ impl Pass for GuardInvalidPass {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::nast::Bop;
-    use oxidized::nast::Expr;
-    use oxidized::nast::Expr_;
-    use oxidized::nast::Pos;
+    use nast::Bop;
+    use nast::Expr;
+    use nast::Expr_;
+    use nast::Pos;
 
     use super::*;
-    use crate::Pass;
-    use crate::Transform;
 
     #[derive(Clone)]
     pub struct RewriteZero;
@@ -43,7 +38,7 @@ mod tests {
                 Expr_::Int(..) => *elem = Expr_::Int("0".to_string()),
                 _ => (),
             }
-            ControlFlow::Continue(())
+            Continue(())
         }
     }
 

@@ -3,16 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::FunParam;
+use nast::Fun_;
+use nast::Method_;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::FunParam;
-use oxidized::nast::Fun_;
-use oxidized::nast::Method_;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateFunParamsPass;
@@ -42,26 +37,24 @@ impl ValidateFunParamsPass {
                 seen.insert(name);
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Block;
-    use oxidized::nast::FunKind;
-    use oxidized::nast::FuncBody;
-    use oxidized::nast::Id;
-    use oxidized::nast::ParamKind;
-    use oxidized::nast::Pos;
-    use oxidized::nast::TypeHint;
-    use oxidized::nast::UserAttributes;
-    use oxidized::nast::Visibility;
+    use nast::Block;
+    use nast::FunKind;
+    use nast::FuncBody;
+    use nast::Id;
+    use nast::ParamKind;
+    use nast::Pos;
+    use nast::TypeHint;
+    use nast::UserAttributes;
+    use nast::Visibility;
 
     use super::*;
-    use crate::transform::Transform;
 
     fn mk_fun(params: Vec<FunParam>) -> Fun_ {
         Fun_ {

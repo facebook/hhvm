@@ -3,15 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Class_;
+use nast::Id;
+use nast::Sid;
 
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Class_;
-use oxidized::nast::Id;
-use oxidized::nast::Sid;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateClassMemberPass;
@@ -21,7 +17,7 @@ impl Pass for ValidateClassMemberPass {
         let typeconst_names = class.typeconsts.iter().map(|tc| &tc.name);
         let const_names = class.consts.iter().map(|c| &c.id);
         error_if_repeated_name(env, typeconst_names.chain(const_names));
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -42,26 +38,22 @@ fn error_if_repeated_name<'a>(env: &Env, names: impl Iterator<Item = &'a Sid>) {
 
 #[cfg(test)]
 mod tests {
+    use nast::Abstraction;
+    use nast::ClassConcreteTypeconst;
+    use nast::ClassConst;
+    use nast::ClassConstKind;
+    use nast::ClassTypeconst;
+    use nast::ClassTypeconstDef;
+    use nast::ClassishKind;
+    use nast::Id;
+    use nast::Pos;
+    use nast::UserAttributes;
     use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Abstraction;
-    use oxidized::nast::ClassConcreteTypeconst;
-    use oxidized::nast::ClassConst;
-    use oxidized::nast::ClassConstKind;
-    use oxidized::nast::ClassTypeconst;
-    use oxidized::nast::ClassTypeconstDef;
-    use oxidized::nast::ClassishKind;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
-    use oxidized::nast::UserAttributes;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
-    use crate::elab_utils;
-    use crate::env::Env;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     fn mk_class_const(name: String) -> ClassConst {
         ClassConst {

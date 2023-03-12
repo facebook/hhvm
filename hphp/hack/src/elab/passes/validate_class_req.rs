@@ -3,17 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::ClassReq;
+use nast::Class_;
+use nast::ClassishKind;
+use nast::Hint;
+use nast::RequireKind;
 
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassReq;
-use oxidized::nast::Class_;
-use oxidized::nast::ClassishKind;
-use oxidized::nast::Hint;
-use oxidized::nast::RequireKind;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateClassReqPass;
@@ -39,6 +35,6 @@ impl Pass for ValidateClassReqPass {
                 env.emit_error(NamingError::InvalidRequireExtends(pos.clone()));
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }

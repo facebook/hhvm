@@ -2,17 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Contexts;
-use oxidized::nast::Expr_;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
+use nast::Contexts;
+use nast::Expr_;
+use nast::Hint;
+use nast::Hint_;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabHintWildcardPass {
@@ -47,23 +43,23 @@ impl Pass for ElabHintWildcardPass {
                             tparam_name: sn::typehints::WILDCARD.to_string(),
                         });
                         //  We've already set the hint to `Herr` so just break
-                        ControlFlow::Break(())
+                        Break(())
                     } else {
                         // This is valid; restore the hint and continue
                         *hint_ = in_hint_;
-                        ControlFlow::Continue(())
+                        Continue(())
                     }
                 } else {
                     // Wildcard hints are disallowed here; add an error
                     env.emit_error(NamingError::WildcardHintDisallowed(pos.clone()));
                     //  We've already set the hint to `Herr` so just break
-                    ControlFlow::Break(())
+                    Break(())
                 }
             }
             _ => {
                 // This isn't a wildcard hint; restore the original hint and continue
                 *hint_ = in_hint_;
-                ControlFlow::Continue(())
+                Continue(())
             }
         }
     }
@@ -81,27 +77,23 @@ impl Pass for ElabHintWildcardPass {
                 env.emit_error(NamingError::InvalidWildcardContext(pos.clone()));
                 *hint_ = Hint_::Herr
             });
-        ControlFlow::Continue(())
+        Continue(())
     }
 
-    fn on_ty_expr__top_down(
-        &mut self,
-        _: &Env,
-        elem: &mut oxidized::nast::Expr_,
-    ) -> ControlFlow<()> {
+    fn on_ty_expr__top_down(&mut self, _: &Env, elem: &mut nast::Expr_) -> ControlFlow<()> {
         match elem {
             Expr_::Cast(..) => self.incr_depth(),
             Expr_::Is(..) | Expr_::As(..) => self.allow_wildcard = true,
             Expr_::Upcast(..) => self.allow_wildcard = false,
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
-    fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut oxidized::nast::Targ) -> ControlFlow<()> {
+    fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut nast::Targ) -> ControlFlow<()> {
         self.allow_wildcard = true;
         self.incr_depth();
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_hint__top_down(&mut self, _: &Env, elem: &mut Hint_) -> ControlFlow<()> {
@@ -117,16 +109,16 @@ impl Pass for ElabHintWildcardPass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_shape_field_info_top_down(
         &mut self,
         _: &Env,
-        _: &mut oxidized::nast::ShapeFieldInfo,
+        _: &mut nast::ShapeFieldInfo,
     ) -> ControlFlow<()> {
         self.incr_depth();
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -140,14 +132,11 @@ fn is_wildcard(hint: &Hint) -> bool {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
-    use oxidized::nast::Targ;
+    use nast::Id;
+    use nast::Pos;
+    use nast::Targ;
 
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     fn make_wildcard(hints: Vec<Hint>) -> Hint {
         Hint(

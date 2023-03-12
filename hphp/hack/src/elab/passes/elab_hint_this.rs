@@ -2,31 +2,27 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
 use bitflags::bitflags;
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::ClassHint;
-use oxidized::nast::ClassReq;
-use oxidized::nast::ClassVar;
-use oxidized::nast::Class_;
-use oxidized::nast::ClassishKind;
-use oxidized::nast::Expr_;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::RequireKind;
-use oxidized::nast::ShapeFieldInfo;
-use oxidized::nast::Targ;
-use oxidized::nast::Tparam;
-use oxidized::nast::TraitHint;
-use oxidized::nast::TypeHint;
-use oxidized::nast::Variance;
-use oxidized::nast::XhpAttr;
-use oxidized::nast::XhpAttrHint;
+use nast::ClassHint;
+use nast::ClassReq;
+use nast::ClassVar;
+use nast::Class_;
+use nast::ClassishKind;
+use nast::Expr_;
+use nast::Hint;
+use nast::Hint_;
+use nast::RequireKind;
+use nast::ShapeFieldInfo;
+use nast::Targ;
+use nast::Tparam;
+use nast::TraitHint;
+use nast::TypeHint;
+use nast::Variance;
+use nast::XhpAttr;
+use nast::XhpAttrHint;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
 pub struct ElabHintThisPass {
@@ -130,7 +126,7 @@ impl Pass for ElabHintThisPass {
                     in_extends: self.in_extends(),
                     in_req_extends: self.in_req_extends(),
                 });
-                return ControlFlow::Break(());
+                return Break(());
             }
             // Otherwise, just update our state to reflect whether we are
             // at the top-level `Hint` inside an `Haccess`
@@ -138,7 +134,7 @@ impl Pass for ElabHintThisPass {
             _ => self.set_is_top_level_haccess_root(false),
         }
 
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
@@ -150,12 +146,12 @@ impl Pass for ElabHintThisPass {
                 .all(|tp| matches!(tp.variance, Variance::Invariant));
         self.set_in_interface(in_interface);
         self.set_in_invariant_final(in_invariant_final);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__tparams_top_down(&mut self, _: &Env, _: &mut Vec<Tparam>) -> ControlFlow<()> {
         self.set_forbid_this(true);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__extends_top_down(
@@ -164,12 +160,12 @@ impl Pass for ElabHintThisPass {
         _: &mut Vec<ClassHint>,
     ) -> ControlFlow<()> {
         self.set_in_extends();
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__uses_top_down(&mut self, _: &Env, _: &mut Vec<TraitHint>) -> ControlFlow<()> {
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__xhp_attrs_top_down(
@@ -178,7 +174,7 @@ impl Pass for ElabHintThisPass {
         _: &mut Vec<XhpAttr>,
     ) -> ControlFlow<()> {
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__xhp_attr_uses_top_down(
@@ -187,19 +183,19 @@ impl Pass for ElabHintThisPass {
         _: &mut Vec<XhpAttrHint>,
     ) -> ControlFlow<()> {
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__reqs_top_down(&mut self, _: &Env, _: &mut Vec<ClassReq>) -> ControlFlow<()> {
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class_req_top_down(&mut self, _: &Env, elem: &mut ClassReq) -> ControlFlow<()> {
         if elem.1 == RequireKind::RequireExtends {
             self.set_in_req_extends()
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class__implements_top_down(
@@ -208,7 +204,7 @@ impl Pass for ElabHintThisPass {
         _: &mut Vec<ClassHint>,
     ) -> ControlFlow<()> {
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class_var_top_down(&mut self, _: &Env, elem: &mut ClassVar) -> ControlFlow<()> {
@@ -219,7 +215,7 @@ impl Pass for ElabHintThisPass {
                     .iter()
                     .any(|ua| ua.name.name() == sn::user_attributes::LSB),
         );
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_class_var_type__top_down(&mut self, _: &Env, _: &mut TypeHint) -> ControlFlow<()> {
@@ -229,13 +225,13 @@ impl Pass for ElabHintThisPass {
         };
         self.context = None;
         self.set_forbid_this(forbid_this);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_fun__ret_top_down(&mut self, _: &Env, _: &mut TypeHint) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_expr__top_down(&mut self, _: &Env, elem: &mut Expr_) -> ControlFlow<()> {
@@ -246,7 +242,7 @@ impl Pass for ElabHintThisPass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_shape_field_info_top_down(
@@ -256,19 +252,19 @@ impl Pass for ElabHintThisPass {
     ) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_fld_hint_fun_return_ty_top_down(&mut self, _: &Env, _: &mut Hint) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_targ_top_down(&mut self, _: &Env, _: &mut Targ) -> ControlFlow<()> {
         self.context = None;
         self.set_forbid_this(false);
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -276,17 +272,15 @@ impl Pass for ElabHintThisPass {
 mod tests {
 
     use file_info::Mode;
+    use nast::Id;
+    use nast::Pos;
+    use nast::UserAttribute;
+    use nast::UserAttributes;
     use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
-    use oxidized::nast::UserAttribute;
-    use oxidized::nast::UserAttributes;
     use oxidized::s_map::SMap;
 
     use super::*;
-    use crate::Transform;
 
     fn make_class(
         kind: ClassishKind,
@@ -354,7 +348,7 @@ mod tests {
             xhp_attr: Default::default(),
             abstract_: Default::default(),
             readonly: Default::default(),
-            visibility: oxidized::nast::Visibility::Public,
+            visibility: nast::Visibility::Public,
             type_,
             id: Id(Default::default(), name.to_string()),
             expr: Default::default(),
@@ -376,7 +370,7 @@ mod tests {
         let mut pass = ElabHintThisPass::default();
         // final class C extends B<this> {}
         let mut elem: Class_ = make_class(
-            ClassishKind::Cclass(oxidized::nast::Abstraction::Concrete),
+            ClassishKind::Cclass(nast::Abstraction::Concrete),
             "C",
             true,
             vec![],
@@ -412,7 +406,7 @@ mod tests {
         let mut pass = ElabHintThisPass::default();
         // final class C<T> extends B<this> {}
         let mut elem: Class_ = make_class(
-            ClassishKind::Cclass(oxidized::nast::Abstraction::Concrete),
+            ClassishKind::Cclass(nast::Abstraction::Concrete),
             "C",
             true,
             vec![Tparam {
@@ -420,7 +414,7 @@ mod tests {
                 name: Id(Pos::default(), "T".to_string()),
                 parameters: Default::default(),
                 constraints: Default::default(),
-                reified: oxidized::nast::ReifyKind::Erased,
+                reified: nast::ReifyKind::Erased,
                 user_attributes: Default::default(),
             }],
             vec![Hint(
@@ -455,7 +449,7 @@ mod tests {
         let mut pass = ElabHintThisPass::default();
         // final class C<+T> extends B<this> {}
         let mut elem: Class_ = make_class(
-            ClassishKind::Cclass(oxidized::nast::Abstraction::Concrete),
+            ClassishKind::Cclass(nast::Abstraction::Concrete),
             "C",
             true,
             vec![Tparam {
@@ -463,7 +457,7 @@ mod tests {
                 name: Id(Pos::default(), "T".to_string()),
                 parameters: Default::default(),
                 constraints: Default::default(),
-                reified: oxidized::nast::ReifyKind::Erased,
+                reified: nast::ReifyKind::Erased,
                 user_attributes: Default::default(),
             }],
             vec![Hint(
@@ -515,7 +509,7 @@ mod tests {
                 name: Id(Pos::default(), "T".to_string()),
                 parameters: Default::default(),
                 constraints: Default::default(),
-                reified: oxidized::nast::ReifyKind::Erased,
+                reified: nast::ReifyKind::Erased,
                 user_attributes: Default::default(),
             }],
             vec![],
@@ -568,7 +562,7 @@ mod tests {
                 name: Id(Pos::default(), "T".to_string()),
                 parameters: Default::default(),
                 constraints: Default::default(),
-                reified: oxidized::nast::ReifyKind::Erased,
+                reified: nast::ReifyKind::Erased,
                 user_attributes: Default::default(),
             }],
             vec![],

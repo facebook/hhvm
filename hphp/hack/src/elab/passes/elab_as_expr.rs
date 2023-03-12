@@ -2,17 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
+use nast::AsExpr;
+use nast::Expr;
+use nast::Expr_;
+use nast::Lid;
 use oxidized::local_id;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::AsExpr;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Lid;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
 pub struct ElabAsExprPass;
@@ -26,7 +23,7 @@ impl Pass for ElabAsExprPass {
                 elab_value(env, ev);
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -58,13 +55,10 @@ fn elab_key(env: &Env, expr: &mut Expr) {
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
+    use nast::Id;
+    use nast::Pos;
 
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     #[test]
     fn test_value_invalid() {

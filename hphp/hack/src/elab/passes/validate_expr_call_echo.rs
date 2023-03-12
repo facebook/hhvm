@@ -2,16 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Id;
+use nast::Expr;
+use nast::Expr_;
+use nast::Id;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateExprCallEchoPass;
@@ -29,7 +25,7 @@ impl Pass for ValidateExprCallEchoPass {
             }
             _ => (),
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
@@ -37,8 +33,6 @@ impl Pass for ValidateExprCallEchoPass {
 mod tests {
 
     use super::*;
-    use crate::elab_utils;
-    use crate::Transform;
 
     #[test]
     fn test_valid() {

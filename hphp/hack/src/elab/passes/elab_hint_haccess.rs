@@ -2,19 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
 use bitflags::bitflags;
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Class_;
-use oxidized::nast::Contexts;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::WhereConstraintHint;
+use nast::Class_;
+use nast::Contexts;
+use nast::Hint;
+use nast::Hint_;
+use nast::WhereConstraintHint;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ElabHintHaccessPass {
@@ -64,7 +60,7 @@ impl ElabHintHaccessPass {
 impl Pass for ElabHintHaccessPass {
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         if !self.in_haccess() {
-            return ControlFlow::Continue(());
+            return Continue(());
         }
         match &mut *elem.1 {
             Hint_::Happly(id, hints) if id.name() == sn::classes::SELF => {
@@ -72,11 +68,11 @@ impl Pass for ElabHintHaccessPass {
                     id.1 = name.to_string();
                     // TODO[mjt] we appear to be discarding type arguments on `Happly` here?
                     hints.clear();
-                    ControlFlow::Continue(())
+                    Continue(())
                 } else {
                     env.emit_error(NamingError::SelfOutsideClass(id.0.clone()));
                     *elem.1 = Hint_::Herr;
-                    ControlFlow::Break(())
+                    Break(())
                 }
             }
 
@@ -88,17 +84,15 @@ impl Pass for ElabHintHaccessPass {
                     id: Some(id.name().to_string()),
                 });
                 *elem.1 = Hint_::Herr;
-                ControlFlow::Break(())
+                Break(())
             }
 
-            Hint_::Hthis | Hint_::Happly(..) => ControlFlow::Continue(()),
+            Hint_::Hthis | Hint_::Happly(..) => Continue(()),
 
-            Hint_::Habstr(..) if self.in_where_clause() || self.in_context() => {
-                ControlFlow::Continue(())
-            }
+            Hint_::Habstr(..) if self.in_where_clause() || self.in_context() => Continue(()),
 
             // TODO[mjt] I don't understand what this case corresponds to
-            Hint_::Hvar(..) => ControlFlow::Continue(()),
+            Hint_::Hvar(..) => Continue(()),
 
             _ => {
                 env.emit_error(NamingError::InvalidTypeAccessRoot {
@@ -106,19 +100,19 @@ impl Pass for ElabHintHaccessPass {
                     id: None,
                 });
                 *elem.1 = Hint_::Herr;
-                ControlFlow::Break(())
+                Break(())
             }
         }
     }
 
     fn on_ty_hint__top_down(&mut self, _: &Env, elem: &mut Hint_) -> ControlFlow<()> {
         self.set_in_haccess(matches!(elem, Hint_::Haccess(..)));
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
         self.set_in_class(elem);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_where_constraint_hint_top_down(
@@ -127,25 +121,23 @@ impl Pass for ElabHintHaccessPass {
         _: &mut WhereConstraintHint,
     ) -> ControlFlow<()> {
         self.set_in_where_clause(true);
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_contexts_top_down(&mut self, _: &Env, _: &mut Contexts) -> ControlFlow<()> {
         self.set_in_context(true);
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::naming_phase_error::NamingPhaseError;
-    use oxidized::nast::ConstraintKind;
-    use oxidized::nast::Id;
-    use oxidized::nast::Pos;
+    use nast::ConstraintKind;
+    use nast::Id;
+    use nast::Pos;
 
     use super::*;
-    use crate::Transform;
 
     // -- type access through `self` -------------------------------------------
 

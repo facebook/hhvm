@@ -3,19 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
+use nast::Abstraction;
+use nast::Class_;
+use nast::ClassishKind;
+use nast::Hint;
+use nast::Hint_;
+use nast::Id;
 
-use naming_special_names_rust as sn;
-use oxidized::naming_error::NamingError;
-use oxidized::nast::Abstraction;
-use oxidized::nast::Class_;
-use oxidized::nast::ClassishKind;
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Id;
-
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabEnumClassPass;
@@ -50,7 +45,7 @@ impl Pass for ElabEnumClassPass {
             );
             elem.extends.push(extend_hint)
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     fn on_ty_hint__top_down(&mut self, env: &Env, elem: &mut Hint_) -> ControlFlow<()> {
@@ -69,22 +64,21 @@ impl Pass for ElabEnumClassPass {
                 _ => (),
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
+    use nast::Enum_;
+    use nast::Pos;
+    use nast::UserAttributes;
     use ocamlrep::rc::RcOc;
     use oxidized::namespace_env;
-    use oxidized::nast::Enum_;
-    use oxidized::nast::Pos;
-    use oxidized::nast::UserAttributes;
     use oxidized::s_map::SMap;
 
     use super::*;
-    use crate::Transform;
 
     fn make_enum_class_(kind: ClassishKind, enum_: Enum_) -> Class_ {
         Class_ {

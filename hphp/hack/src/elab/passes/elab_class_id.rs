@@ -3,23 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::ops::ControlFlow;
-
-use naming_special_names_rust as sn;
+use nast::ClassId;
+use nast::ClassId_;
+use nast::Expr;
+use nast::Expr_;
+use nast::Id;
+use nast::Lid;
+use nast::Pos;
+use nast::Sid;
 use oxidized::local_id;
-use oxidized::naming_error::NamingError;
-use oxidized::nast;
-use oxidized::nast::ClassId;
-use oxidized::nast::ClassId_;
-use oxidized::nast::Expr;
-use oxidized::nast::Expr_;
-use oxidized::nast::Id;
-use oxidized::nast::Lid;
-use oxidized::nast::Pos;
-use oxidized::nast::Sid;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabClassIdPass {
@@ -91,7 +85,7 @@ impl Pass for ElabClassIdPass {
                         let ci_name = std::mem::take(cname);
                         *class_id_ = ClassId_::CI(Id(ci_pos, ci_name))
                     }
-                    ControlFlow::Continue(())
+                    Continue(())
                 }
 
                 Expr_::Lvar(lid) => {
@@ -101,20 +95,20 @@ impl Pass for ElabClassIdPass {
                     if local_id::get_name(lcl_id) == sn::special_idents::THIS {
                         *expr_ = Expr_::This
                     }
-                    ControlFlow::Continue(())
+                    Continue(())
                 }
-                _ => ControlFlow::Continue(()),
+                _ => Continue(()),
             }
         } else {
             // We only ever expect a `CIexpr(..)` to come from lowering.
             // We should change the lowered AST repr to make this impossible.
-            ControlFlow::Continue(())
+            Continue(())
         }
     }
 
     fn on_ty_class__top_down(&mut self, _: &Env, _: &mut nast::Class_) -> ControlFlow<()> {
         self.in_class = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 
     /* The attributes applied to a class exist outside the current class so
@@ -125,14 +119,14 @@ impl Pass for ElabClassIdPass {
         _: &mut nast::UserAttributes,
     ) -> ControlFlow<()> {
         self.in_class = true;
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Transform;
+
     // Elaboration of CIexpr(..,..,Id(..,..)) when the id refers to a class
     #[test]
     fn test_ciexpr_id_class_ref() {

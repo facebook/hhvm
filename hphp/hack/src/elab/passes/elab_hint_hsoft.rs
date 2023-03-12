@@ -2,14 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::ops::ControlFlow;
 
-use oxidized::nast::Hint;
-use oxidized::nast::Hint_;
-use oxidized::nast::Pos;
+use nast::Hint;
+use nast::Hint_;
+use nast::Pos;
 
-use crate::env::Env;
-use crate::Pass;
+use crate::prelude::*;
 
 #[derive(Clone, Copy, Default)]
 pub struct ElabHintHsoftPass;
@@ -34,21 +32,20 @@ impl Pass for ElabHintHsoftPass {
                 **hint_ = inner_hint_
             }
         }
-        ControlFlow::Continue(())
+        Continue(())
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use oxidized::nast::Hint;
-    use oxidized::nast::Hint_;
-    use oxidized::nast::Pos;
+    use nast::Hint;
+    use nast::Hint_;
+    use nast::Pos;
     use oxidized::typechecker_options::TypecheckerOptions;
 
     use super::*;
     use crate::env::ProgramSpecificOptions;
-    use crate::Transform;
 
     #[test]
     fn test() {

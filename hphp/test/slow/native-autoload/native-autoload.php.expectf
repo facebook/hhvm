@@ -6,21 +6,3 @@ Paths:
   %s/test/slow/native-autoload/dir1/native-autoload-const.inc
   %s/test/slow/native-autoload/native-autoload-function.inc
   %s/test/slow/native-autoload/native-autoload.php
-
-Notice: Attempted to call HH\autoload_set_paths() while the native autoloader is enabled. HH\autoload_set_paths() disables the native autoloader, putting us on a deprecated code path that will soon stop working.%s
-Overriding: true
-Native Autoload: false
-Paths:
-Test passed successfully
-Native Autoload: true
-Paths:
-  %s/test/slow/native-autoload/dir1/dir2/native-autoload-class.inc
-  %s/test/slow/native-autoload/dir1/dir2/native-autoload-type-alias.inc
-  %s/test/slow/native-autoload/dir1/native-autoload-const.inc
-  %s/test/slow/native-autoload/native-autoload-function.inc
-  %s/test/slow/native-autoload/native-autoload.php
-
-Notice: Attempted to call HH\autoload_set_paths() while the native autoloader is enabled. HH\autoload_set_paths() disables the native autoloader, putting us on a deprecated code path that will soon stop working.%s
-Overriding: true
-Native Autoload: false
-Paths:

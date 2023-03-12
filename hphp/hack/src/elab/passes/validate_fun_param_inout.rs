@@ -52,9 +52,14 @@ fn check_params(env: &Env, id: &Id, attrs: &UserAttributes, params: &[FunParam])
                 }
             }
         });
-        if let Some(param_pos) = has_inout_param && has_memoize_user_attr {
-        env.emit_error(NastCheckError::InoutParamsMemoize { pos: id.pos().clone(), param_pos })
-      }
+        if let Some(param_pos) = has_inout_param {
+            if has_memoize_user_attr {
+                env.emit_error(NastCheckError::InoutParamsMemoize {
+                    pos: id.pos().clone(),
+                    param_pos,
+                })
+            }
+        }
     }
 }
 

@@ -69,23 +69,14 @@ mod tests {
 
         elem.transform(&env, &mut pass);
 
-        assert!(match elem {
-            Expr_::Binop(inner) => {
-                let (_, e1, e2) = *inner;
-                let e1_ok = match e1.2 {
-                    Expr_::Invalid(inner) => inner.is_some_and(|expr| match expr.2 {
-                        Expr_::Int(n) => n == "42",
-                        _ => false,
-                    }),
-                    _ => false,
-                };
-                let e2_ok = match e2.2 {
-                    Expr_::Int(n) => n == "0",
-                    _ => false,
-                };
-                e1_ok && e2_ok
-            }
-            _ => false,
-        })
+        assert!(matches!(
+            elem,
+            Expr_::Binop(box (
+                _,
+                Expr(_, _, Expr_::Invalid(box Some(Expr(_, _, Expr_::Int(n))))),
+                Expr(_, _, Expr_::Int(m)),
+            ))
+            if n == "42" && m == "0"
+        ));
     }
 }

@@ -136,39 +136,27 @@ mod tests {
         let mut q = VecDeque::from(elem.0);
 
         // First def is Break
-        assert!(q.pop_front().is_some_and(|def| match def {
-            Def::Stmt(stmt) => match &stmt.1 {
-                Stmt_::Break => true,
-                _ => false,
-            },
-            _ => false,
-        }));
+        assert!(matches!(
+            q.pop_front(),
+            Some(Def::Stmt(box Stmt(_, Stmt_::Break)))
+        ));
 
         // Second def is Fallthrough
-        assert!(q.pop_front().is_some_and(|def| match def {
-            Def::Stmt(stmt) => match &stmt.1 {
-                Stmt_::Fallthrough => true,
-                _ => false,
-            },
-            _ => false,
-        }));
+        assert!(matches!(
+            q.pop_front(),
+            Some(Def::Stmt(box Stmt(_, Stmt_::Fallthrough)))
+        ));
 
         // Third def is Break
-        assert!(q.pop_front().is_some_and(|def| match def {
-            Def::Stmt(stmt) => match &stmt.1 {
-                Stmt_::Break => true,
-                _ => false,
-            },
-            _ => false,
-        }));
+        assert!(matches!(
+            q.pop_front(),
+            Some(Def::Stmt(box Stmt(_, Stmt_::Break)))
+        ));
 
         // Last def is Fallthrough
-        assert!(q.pop_front().is_some_and(|def| match def {
-            Def::Stmt(stmt) => match &stmt.1 {
-                Stmt_::Fallthrough => true,
-                _ => false,
-            },
-            _ => false,
-        }));
+        assert!(matches!(
+            q.pop_front(),
+            Some(Def::Stmt(box Stmt(_, Stmt_::Fallthrough)))
+        ));
     }
 }

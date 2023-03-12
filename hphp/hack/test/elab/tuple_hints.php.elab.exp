@@ -141,7 +141,7 @@ Program(
                                         Happly(
                                             Id(
                                                 |tuple_hints.php(12:13-18),
-                                                "tuple",
+                                                "\\tuple",
                                             ),
                                             [
                                                 Hint(

@@ -1039,7 +1039,7 @@ Program(
                                                             Id(
                                                                 Id(
                                                                     |num_type_hint.php(40:9-10),
-                                                                    "f",
+                                                                    "\\f",
                                                                 ),
                                                             ),
                                                         ),
@@ -1251,7 +1251,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(44:2-3),
-                                                                "f",
+                                                                "\\f",
                                                             ),
                                                         ),
                                                     ),
@@ -1298,7 +1298,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(45:2-3),
-                                                                "f",
+                                                                "\\f",
                                                             ),
                                                         ),
                                                     ),
@@ -1345,7 +1345,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(46:2-3),
-                                                                "f",
+                                                                "\\f",
                                                             ),
                                                         ),
                                                     ),
@@ -1392,7 +1392,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(47:2-3),
-                                                                "f",
+                                                                "\\f",
                                                             ),
                                                         ),
                                                     ),
@@ -1439,7 +1439,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(49:2-7),
-                                                                "f_opt",
+                                                                "\\f_opt",
                                                             ),
                                                         ),
                                                     ),
@@ -1486,7 +1486,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(50:2-7),
-                                                                "f_opt",
+                                                                "\\f_opt",
                                                             ),
                                                         ),
                                                     ),
@@ -1533,7 +1533,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(51:2-7),
-                                                                "f_opt",
+                                                                "\\f_opt",
                                                             ),
                                                         ),
                                                     ),
@@ -1580,7 +1580,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(52:2-7),
-                                                                "f_opt",
+                                                                "\\f_opt",
                                                             ),
                                                         ),
                                                     ),
@@ -1627,7 +1627,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(53:2-7),
-                                                                "f_opt",
+                                                                "\\f_opt",
                                                             ),
                                                         ),
                                                     ),
@@ -1937,7 +1937,7 @@ Program(
                                                         Id(
                                                             Id(
                                                                 |num_type_hint.php(58:2-9),
-                                                                "hh_show",
+                                                                "\\hh_show",
                                                             ),
                                                         ),
                                                     ),
@@ -2116,7 +2116,7 @@ Program(
                                                                                     Id(
                                                                                         Id(
                                                                                             |num_type_hint.php(66:6-13),
-                                                                                            "hh_show",
+                                                                                            "\\hh_show",
                                                                                         ),
                                                                                     ),
                                                                                 ),

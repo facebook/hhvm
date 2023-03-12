@@ -394,6 +394,12 @@ function get_all_packages(
 function get_all_deployments(
 ): dict<string, shape('packages' => vec<string>, 'domains' => vec<string>)>;
 
+/*
+ * Returns whether a package named $name exist in the current deployment.
+ */
+<<__Native>>
+function package_exists(string $name): bool;
+
 } // HH
 
 namespace HH\Rx {

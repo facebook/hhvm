@@ -26,6 +26,8 @@
 
 namespace HPHP {
 
+struct StringData;
+
 struct PackageInfo {
   struct Package {
     hphp_vector_string_set m_uses;
@@ -53,6 +55,9 @@ struct PackageInfo {
 
   const PackageMap& packages() const { return m_packages; }
   const DeploymentMap& deployments() const { return m_deployments; }
+
+  const Deployment* getActiveDeployment() const;
+  bool isPackageInActiveDeployment(const StringData* package) const;
 
   std::string mangleForCacheKey() const;
 

@@ -16,6 +16,11 @@
 
 #include "hphp/runtime/base/package.h"
 
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/string-data.h"
+
+#include "hphp/util/trace.h"
+
 //TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
 #ifdef FACEBOOK
 #include "hphp/hack/src/package/ffi_bridge/package_ffi.rs.h"
@@ -117,6 +122,30 @@ std::string PackageInfo::mangleForCacheKey() const {
   }
 
   return folly::toJson(result);
+}
+
+const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
+  if (RO::RepoAuthoritative || !RuntimeOption::ServerExecutionMode()) {
+    auto const it = deployments().find(RO::EvalActiveDeployment);
+    if (it == end(deployments())) return nullptr;
+    return &it->second;
+  }
+  if (!g_context || !g_context->getTransport()) return nullptr;
+  auto const host = g_context->getTransport()->getHeader("Host");
+  for (auto const& [_, deployment]: deployments()) {
+    for (auto const& domain: deployment.m_domains) {
+      if (re2::RE2::FullMatch(host, *domain)) return &deployment;
+    }
+  }
+  return nullptr;
+}
+
+bool PackageInfo::isPackageInActiveDeployment(const StringData* package) const {
+  if (!package || package->empty()) return false;
+  auto const activeDeployment = getActiveDeployment();
+  // If there's no active deployment, return whether package exists at all
+  if (!activeDeployment) return packages().contains(package->toCppString());
+  return activeDeployment->m_packages.contains(package->toCppString());
 }
 
 } // namespace HPHP

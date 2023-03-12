@@ -1524,6 +1524,12 @@ Array HHVM_FUNCTION(get_all_deployments) {
   return result.toArray();
 }
 
+bool HHVM_FUNCTION(package_exists, StringArg name) {
+  assertx(name.get());
+  if (name.get()->empty()) return false;
+  return getPackageInfo().isPackageInActiveDeployment(name.get());
+}
+
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1567,6 +1573,7 @@ static struct HHExtension final : Extension {
     X(collect_function_coverage);
     X(get_all_packages);
     X(get_all_deployments);
+    X(package_exists);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

@@ -16,6 +16,7 @@ server/http/tests/get_headers_secure_dv_array.php
 server/http/tests/globalDocumentTest.php
 server/http/tests/hhvmconfig-update.php
 server/http/tests/method.php
+server/http/tests/package-exists-1.php
 server/http/tests/reify-multifile.php
 server/http/tests/rename-multifile.php
 server/http/tests/requesIdTest.php
@@ -161,6 +162,8 @@ zend/good/ext/xsl/tests/bug53965.php
 
 # TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved
 slow/packages/basic-1.php
+slow/packages/basic-2.php
+slow/packages/basic-3.php
 
 # TODO(T140203569) Need to determine why Native Autoload tests fail w/ cmake
 slow/reflection/enum_get_underlying_type.php

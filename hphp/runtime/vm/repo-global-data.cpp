@@ -48,6 +48,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalDiamondTraitMethods                      = DiamondTraitMethods;
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
   RO::EvalEmitBespokeTypeStructures                = EmitBespokeTypeStructures;
+  RO::EvalActiveDeployment                         = ActiveDeployment;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 

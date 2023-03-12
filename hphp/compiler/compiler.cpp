@@ -477,6 +477,7 @@ RepoGlobalData getGlobalData() {
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.EmitBespokeTypeStructures = RO::EvalEmitBespokeTypeStructures;
+  gd.ActiveDeployment = RO::EvalActiveDeployment;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

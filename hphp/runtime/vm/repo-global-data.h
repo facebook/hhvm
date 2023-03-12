@@ -160,6 +160,11 @@ struct RepoGlobalData {
 
   std::unordered_map<std::string, int> EvalCoeffectEnforcementLevels = {};
 
+  /*
+   * Describes the active deployment for selecting the set of packages
+   */
+  std::string ActiveDeployment = "";
+
   /* Enable a method defined in a trait to be imported multiple times
    * along trait use paths
    */
@@ -220,6 +225,7 @@ struct RepoGlobalData {
       (EvalCoeffectEnforcementLevels, std::less<std::string>{})
       (SourceRootForFileBC)
       (EmitBespokeTypeStructures)
+      (ActiveDeployment)
       ;
   }
 };

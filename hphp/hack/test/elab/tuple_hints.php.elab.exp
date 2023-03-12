@@ -93,6 +93,7 @@ Program(
                         "meth_caller": "HH\\meth_caller",
                         "objprof_get_data": "HH\\objprof_get_data",
                         "objprof_get_paths": "HH\\objprof_get_paths",
+                        "package_exists": "HH\\package_exists",
                         "server_warmup_status": "HH\\server_warmup_status",
                         "thread_mark_stack": "HH\\thread_mark_stack",
                         "thread_memory_stats": "HH\\thread_memory_stats",

@@ -102,6 +102,7 @@ static FUNCS: &[&str] = &[
     "meth_caller",
     "objprof_get_data",
     "objprof_get_paths",
+    "package_exists",
     "server_warmup_status",
     "thread_mark_stack",
     "thread_memory_stats",

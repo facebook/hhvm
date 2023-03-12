@@ -1359,6 +1359,11 @@ struct RuntimeOption {
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /*                                                                    \
+   * Describes the active deployment for selecting the set of packages  \
+   * Value is only read in repo authoritative or cli mode.              \
+   */                                                                   \
+  F(std::string, ActiveDeployment, "")                                  \
+  /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \
    * 0 - Nothing                                                        \

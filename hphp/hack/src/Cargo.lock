@@ -1483,10 +1483,12 @@ dependencies = [
 name = "elab_ffi"
 version = "0.0.0"
 dependencies = [
+ "elab",
  "elaborate_namespaces_visitor",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
+ "relative_path",
 ]
 
 [[package]]

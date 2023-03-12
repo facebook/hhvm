@@ -1,0 +1,147 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-22], "\\takes_an_int");
+      fd_fun =
+      { f_span = [3:1-41]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:34-38], (Hprim Tvoid)))); 
+        f_tparams = []; f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:23-26], (Hprim Tint)))); 
+           param_is_variadic = false; param_pos = [3:27-31]; param_name = "$int"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([5:10-25], "\\pipe_param_call");
+       fd_fun =
+       { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([5:35-39], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([5:26-29], (Hprim Tint)))); 
+            param_is_variadic = false; param_pos = [5:30-32]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([6:3-26],
+             (Expr
+                ((), [6:3-25],
+                 (Pipe (([6:3-25], $_), ((), [6:3-5], (Lvar ([6:3-5], $x))),
+                    ((), [6:9-25], (Call (((), [6:9-21], (Id ([6:9-21], "\\takes_an_int"))), [], [(Pnormal, ((), [6:22-24], (Dollardollar ([6:22-24], $$))))], None))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([9:10-25], "\\pipe_local_call");
+       fd_fun =
+       { f_span = [9:1-12:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([9:29-33], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([10:3-10], (Expr ((), [10:3-9], (Binop ((Eq None), ((), [10:3-5], (Lvar ([10:3-5], $x))), ((), [10:8-9], (Int "1")))))));
+             ([11:3-26],
+              (Expr
+                 ((), [11:3-25],
+                  (Pipe (([11:3-25], $_), ((), [11:3-5], (Lvar ([11:3-5], $x))),
+                     ((), [11:9-25], (Call (((), [11:9-21], (Id ([11:9-21], "\\takes_an_int"))), [], [(Pnormal, ((), [11:22-24], (Dollardollar ([11:22-24], $$))))], None))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Class
+     { c_span = [14:1-16:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([14:7-10], "\\Foo"); c_tparams = []; c_extends = []; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = []; c_consts = []; c_typeconsts = [];
+       c_vars =
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((), (Some ([15:17-20], (Hprim Tint)))); 
+          cv_id = ([15:21-27], "myInt"); cv_expr = (Some ((), [15:30-31], (Int "0"))); 
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+          cv_is_static = true; cv_span = [15:21-31] }
+         ];
+       c_methods = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([18:10-22], "\\pipe_taccess");
+       fd_fun =
+       { f_span = [18:1-21:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([18:26-30], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([19:3-21],
+             (Expr ((), [19:3-20], (Binop ((Eq None), ((), [19:3-7], (Lvar ([19:3-7], $foo))), ((), [19:10-20], (Class_const (((), [19:10-13], (CI ([19:10-13], "\\Foo"))), ([19:15-20], "class")))))))));
+             ([20:3-22],
+              (Expr
+                 ((), [20:3-21],
+                  (Pipe (([20:3-21], $_), ((), [20:3-7], (Lvar ([20:3-7], $foo))),
+                     ((), [20:11-21], (Class_get (((), [20:11-13], (CIexpr ((), [20:11-13], (Dollardollar ([20:11-13], $$))))), (CGstring ([20:15-21], "$myInt")), Is_prop))))))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([23:10-27], "\\pipe_taccess_call");
+       fd_fun =
+       { f_span = [23:1-25:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([23:31-35], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([24:3-36],
+             (Expr
+                ((), [24:3-35],
+                 (Pipe (([24:3-35], $_), ((), [24:3-7], (Lvar ([24:3-7], $foo))),
+                    ((), [24:11-35],
+                     (Call (((), [24:11-23], (Id ([24:11-23], "\\takes_an_int"))), 
+                        [], [(Pnormal, ((), [24:24-34], (Class_get (((), [24:24-26], (CIexpr ((), [24:24-26], (Dollardollar ([24:24-26], $$))))), (CGstring ([24:28-34], "$myInt")), Is_prop))))], None
+                        )))
+                    )))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

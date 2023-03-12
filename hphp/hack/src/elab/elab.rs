@@ -23,53 +23,68 @@ mod pass;
 mod passes;
 mod transform;
 
+use env::Env;
 use env::ProgramSpecificOptions;
-use oxidized::ast;
 use oxidized::naming_phase_error::NamingPhaseError;
+use oxidized::nast;
 use oxidized::typechecker_options::TypecheckerOptions;
 use pass::Pass;
+use relative_path::RelativePath;
 use transform::Transform;
 
 pub fn elaborate_program(
-    program: &mut ast::Program,
     tco: &TypecheckerOptions,
+    path: &RelativePath,
+    program: &mut nast::Program,
 ) -> Vec<NamingPhaseError> {
-    let pos = program.first_pos();
-    let filename = pos.map(|pos| pos.filename().path());
+    elaborate(tco, path, program)
+}
 
-    let is_hhi = pos.map_or(false, |pos| {
-        pos.filename().prefix() == relative_path::Prefix::Hhi
-    });
+pub fn elaborate_fun_def(
+    tco: &TypecheckerOptions,
+    path: &RelativePath,
+    f: &mut nast::FunDef,
+) -> Vec<NamingPhaseError> {
+    elaborate(tco, path, f)
+}
 
-    let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
-        || tco
-            .tco_allowed_files_for_module_declarations
-            .iter()
-            .any(|spec| {
-                !spec.is_empty()
-                    && filename.map_or(false, |filename| {
-                        spec.ends_with('*') && filename.starts_with(&spec[..spec.len() - 1])
-                            || filename.to_str().unwrap() == spec
-                    })
-            });
+pub fn elaborate_class_(
+    tco: &TypecheckerOptions,
+    path: &RelativePath,
+    c: &mut nast::Class_,
+) -> Vec<NamingPhaseError> {
+    elaborate(tco, path, c)
+}
 
-    elaborate(
-        program,
-        tco,
-        &ProgramSpecificOptions {
-            is_hhi,
-            allow_module_declarations,
-        },
-    )
+pub fn elaborate_module_def(
+    tco: &TypecheckerOptions,
+    path: &RelativePath,
+    m: &mut nast::ModuleDef,
+) -> Vec<NamingPhaseError> {
+    elaborate(tco, path, m)
+}
+
+pub fn elaborate_gconst(
+    tco: &TypecheckerOptions,
+    path: &RelativePath,
+    c: &mut nast::Gconst,
+) -> Vec<NamingPhaseError> {
+    elaborate(tco, path, c)
+}
+
+pub fn elaborate_typedef(
+    tco: &TypecheckerOptions,
+    path: &RelativePath,
+    t: &mut nast::Typedef,
+) -> Vec<NamingPhaseError> {
+    elaborate(tco, path, t)
 }
 
 fn elaborate<T: Transform>(
-    node: &mut T,
     tco: &TypecheckerOptions,
-    pso: &ProgramSpecificOptions,
+    rel_path: &RelativePath,
+    node: &mut T,
 ) -> Vec<NamingPhaseError> {
-    let env = env::Env::new(tco, pso);
-
     #[rustfmt::skip]
     let mut passes = passes![
         // Stop on `Invalid` expressions
@@ -217,11 +232,9 @@ fn elaborate<T: Transform>(
         // and instance and static member variables in an interface definition
         passes::validate_interface::ValidateInterfacePass::default(),
 
-
         // Checks for use of reserved names in functions, methods, class identifiers
         // and class constants
         passes::validate_illegal_name::ValidateIllegalNamePass::default(),
-
 
         passes::validate_control_context::ValidateControlContextPass::default(),
 
@@ -244,6 +257,26 @@ fn elaborate<T: Transform>(
         passes::validate_php_lambda::ValidatePhpLambdaPass::default(),
     ];
 
+    let is_hhi = rel_path.is_hhi();
+    let path = rel_path.path();
+
+    let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
+        || tco
+            .tco_allowed_files_for_module_declarations
+            .iter()
+            .any(|spec| {
+                !spec.is_empty()
+                    && (spec.ends_with('*') && path.starts_with(&spec[..spec.len() - 1])
+                        || path == std::path::Path::new(spec))
+            });
+
+    let env = Env::new(
+        tco,
+        &ProgramSpecificOptions {
+            is_hhi,
+            allow_module_declarations,
+        },
+    );
     node.transform(&env, &mut passes);
     env.into_errors()
 }

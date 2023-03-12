@@ -1,0 +1,21 @@
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([3:10-28], "\\like_hint_toplevel");
+      fd_fun =
+      { f_span = [3:1-46]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([3:39-43], (Hprim Tvoid)))); 
+        f_tparams = []; f_where_constraints = [];
+        f_params =
+        [{ param_annotation = (); param_type_hint = ((), (Some ([3:29-33], (Hlike ([3:30-33], (Hprim Tint)))))); 
+           param_is_variadic = false; param_pos = [3:34-36]; param_name = "$x"; 
+           param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+           param_user_attributes = []; param_visibility = None }
+          ];
+        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None })
+  ]

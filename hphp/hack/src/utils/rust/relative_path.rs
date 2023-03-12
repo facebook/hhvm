@@ -28,6 +28,12 @@ pub enum Prefix {
 }
 impl arena_trait::TrivialDrop for Prefix {}
 
+impl Prefix {
+    pub fn is_hhi(self) -> bool {
+        matches!(self, Prefix::Hhi)
+    }
+}
+
 impl TryFrom<usize> for Prefix {
     type Error = String;
 
@@ -100,6 +106,10 @@ impl RelativePath {
 
     pub fn prefix(&self) -> Prefix {
         self.prefix
+    }
+
+    pub fn is_hhi(&self) -> bool {
+        self.prefix.is_hhi()
     }
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {

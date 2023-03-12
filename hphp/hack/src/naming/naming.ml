@@ -175,10 +175,9 @@ let ( elab_core_program,
       elab_core_typedef ) =
   Naming_phase_pass.mk_visitor passes
 
-let elab_elem elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core =
+let elab_elem elem ~elab_ns ~elab_capture ~elab_core =
   reset_errors ();
-  let env = mk_env filename tcopt in
-  let elem = elab_ns elem |> elab_capture |> elab_core env in
+  let elem = elab_ns elem |> elab_capture |> elab_core in
   Naming_phase_error.emit @@ get_errors ();
   reset_errors ();
   elem
@@ -203,92 +202,177 @@ let program_filename defs =
 
 module Rust_elaborate_namespaces = struct
   external elaborate_program : (unit, unit) Aast.program -> Nast.program
-    = "hh_elaborate_program"
+    = "hh_elab_ns_program"
 
   external elaborate_fun_def : (unit, unit) Aast.fun_def -> Nast.fun_def
-    = "hh_elaborate_fun_def"
+    = "hh_elab_ns_fun_def"
 
   external elaborate_class_ : (unit, unit) Aast.class_ -> Nast.class_
-    = "hh_elaborate_class_"
+    = "hh_elab_ns_class_"
 
   external elaborate_module_def :
-    (unit, unit) Aast.module_def -> Nast.module_def = "hh_elaborate_module_def"
+    (unit, unit) Aast.module_def -> Nast.module_def = "hh_elab_ns_module_def"
 
   external elaborate_gconst : (unit, unit) Aast.gconst -> Nast.gconst
-    = "hh_elaborate_gconst"
+    = "hh_elab_ns_gconst"
 
   external elaborate_typedef : (unit, unit) Aast.typedef -> Nast.typedef
-    = "hh_elaborate_typedef"
+    = "hh_elab_ns_typedef"
+end
+
+module Rust_elab_core = struct
+  external elab_program :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    Nast.program ->
+    Nast.program * Naming_phase_error.t list = "hh_elab_program"
+
+  external elab_fun_def :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    Nast.fun_def ->
+    Nast.fun_def * Naming_phase_error.t list = "hh_elab_fun_def"
+
+  external elab_class_ :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    Nast.class_ ->
+    Nast.class_ * Naming_phase_error.t list = "hh_elab_class_"
+
+  external elab_module_def :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    Nast.module_def ->
+    Nast.module_def * Naming_phase_error.t list = "hh_elab_module_def"
+
+  external elab_gconst :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    Nast.gconst ->
+    Nast.gconst * Naming_phase_error.t list = "hh_elab_gconst"
+
+  external elab_typedef :
+    TypecheckerOptions.t ->
+    Relative_path.t ->
+    Nast.typedef ->
+    Nast.typedef * Naming_phase_error.t list = "hh_elab_typedef"
+
+  let add_errors elab_x tcopt filename x =
+    let (x, errs) = elab_x tcopt filename x in
+    List.iter errs ~f:on_error;
+    x
+
+  let elab_program = add_errors elab_program
+
+  let elab_fun_def = add_errors elab_fun_def
+
+  let elab_class_ = add_errors elab_class_
+
+  let elab_module_def = add_errors elab_module_def
+
+  let elab_gconst = add_errors elab_gconst
+
+  let elab_typedef = add_errors elab_typedef
 end
 
 let program ctx program =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = program_filename program
-  and elab_ns =
+  let filename = program_filename program in
+  let elab_ns =
     if TypecheckerOptions.rust_elab tcopt then
       Rust_elaborate_namespaces.elaborate_program
     else
       Naming_elaborate_namespaces_endo.elaborate_program
   and elab_capture = Naming_captures.elab_program
-  and elab_core = elab_core_program in
-  elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core program
+  and elab_core =
+    if TypecheckerOptions.rust_elab tcopt then
+      Rust_elab_core.elab_program tcopt filename
+    else
+      elab_core_program (mk_env filename tcopt)
+  in
+  elab_elem ~elab_ns ~elab_capture ~elab_core program
 
 let fun_def ctx fd =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = Pos.filename fd.Aast.fd_fun.Aast.f_span
-  and elab_ns =
+  let filename = Pos.filename fd.Aast.fd_fun.Aast.f_span in
+  let elab_ns =
     if TypecheckerOptions.rust_elab tcopt then
       Rust_elaborate_namespaces.elaborate_fun_def
     else
       Naming_elaborate_namespaces_endo.elaborate_fun_def
   and elab_capture = Naming_captures.elab_fun_def
-  and elab_core = elab_core_fun_def in
-  elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core fd
+  and elab_core =
+    if TypecheckerOptions.rust_elab tcopt then
+      Rust_elab_core.elab_fun_def tcopt filename
+    else
+      elab_core_fun_def (mk_env filename tcopt)
+  in
+  elab_elem ~elab_ns ~elab_capture ~elab_core fd
 
 let class_ ctx c =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = Pos.filename c.Aast.c_span
-  and elab_ns =
+  let filename = Pos.filename c.Aast.c_span in
+  let elab_ns =
     if TypecheckerOptions.rust_elab tcopt then
       Rust_elaborate_namespaces.elaborate_class_
     else
       Naming_elaborate_namespaces_endo.elaborate_class_
   and elab_capture = Naming_captures.elab_class
-  and elab_core = elab_core_class in
-  elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core c
+  and elab_core =
+    if TypecheckerOptions.rust_elab tcopt then
+      Rust_elab_core.elab_class_ tcopt filename
+    else
+      elab_core_class (mk_env filename tcopt)
+  in
+  elab_elem ~elab_ns ~elab_capture ~elab_core c
 
 let module_ ctx md =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = Pos.filename md.Aast.md_span
-  and elab_ns =
+  let filename = Pos.filename md.Aast.md_span in
+  let elab_ns =
     if TypecheckerOptions.rust_elab tcopt then
       Rust_elaborate_namespaces.elaborate_module_def
     else
       Naming_elaborate_namespaces_endo.elaborate_module_def
   and elab_capture = Naming_captures.elab_module_def
-  and elab_core = elab_core_module_def in
-  elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core md
+  and elab_core =
+    if TypecheckerOptions.rust_elab tcopt then
+      Rust_elab_core.elab_module_def tcopt filename
+    else
+      elab_core_module_def (mk_env filename tcopt)
+  in
+  elab_elem ~elab_ns ~elab_capture ~elab_core md
 
 let global_const ctx cst =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = Pos.filename cst.Aast.cst_span
-  and elab_ns =
+  let filename = Pos.filename cst.Aast.cst_span in
+  let elab_ns =
     if TypecheckerOptions.rust_elab tcopt then
       Rust_elaborate_namespaces.elaborate_gconst
     else
       Naming_elaborate_namespaces_endo.elaborate_gconst
   and elab_capture = Naming_captures.elab_gconst
-  and elab_core = elab_core_gconst in
-  elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core cst
+  and elab_core =
+    if TypecheckerOptions.rust_elab tcopt then
+      Rust_elab_core.elab_gconst tcopt filename
+    else
+      elab_core_gconst (mk_env filename tcopt)
+  in
+  elab_elem ~elab_ns ~elab_capture ~elab_core cst
 
 let typedef ctx td =
   let tcopt = Provider_context.get_tcopt ctx in
-  let filename = Pos.filename @@ td.Aast.t_span
-  and elab_ns =
+  let filename = Pos.filename @@ td.Aast.t_span in
+  let elab_ns =
     if TypecheckerOptions.rust_elab tcopt then
       Rust_elaborate_namespaces.elaborate_typedef
     else
       Naming_elaborate_namespaces_endo.elaborate_typedef
   and elab_capture = Naming_captures.elab_typedef
-  and elab_core = elab_core_typedef in
-  elab_elem ~filename ~tcopt ~elab_ns ~elab_capture ~elab_core td
+  and elab_core =
+    if TypecheckerOptions.rust_elab tcopt then
+      Rust_elab_core.elab_typedef tcopt filename
+    else
+      elab_core_typedef (mk_env filename tcopt)
+  in
+  elab_elem ~elab_ns ~elab_capture ~elab_core td

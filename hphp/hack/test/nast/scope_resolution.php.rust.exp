@@ -1,0 +1,544 @@
+Errors:
+  [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
+  [165:9-14] Cannot use dynamic class or method name in strict mode
+  [166:10-21] Cannot use dynamic class or method name in strict mode
+  [167:10-31] Cannot use dynamic class or method name in strict mode
+  [169:9-17] Cannot use dynamic class or method name in strict mode
+  [170:10-18] Cannot use dynamic class or method name in strict mode
+  [171:10-18] Cannot use dynamic class or method name in strict mode
+  [173:9-13] Cannot use dynamic class or method name in strict mode
+  [174:10-14] Cannot use dynamic class or method name in strict mode
+  [175:10-14] Cannot use dynamic class or method name in strict mode
+  [177:9-13] Cannot use dynamic class or method name in strict mode
+  [178:10-14] Cannot use dynamic class or method name in strict mode
+  [179:10-14] Cannot use dynamic class or method name in strict mode
+  [181:9-15] Cannot use dynamic class or method name in strict mode
+  [182:10-16] Cannot use dynamic class or method name in strict mode
+  [183:10-16] Cannot use dynamic class or method name in strict mode
+  [185:9-15] Cannot use dynamic class or method name in strict mode
+  [186:10-16] Cannot use dynamic class or method name in strict mode
+  [187:10-16] Cannot use dynamic class or method name in strict mode
+  [189:9-13] Cannot use dynamic class or method name in strict mode
+  [190:10-14] Cannot use dynamic class or method name in strict mode
+  [191:10-14] Cannot use dynamic class or method name in strict mode
+  [193:9-13] Cannot use dynamic class or method name in strict mode
+  [194:10-14] Cannot use dynamic class or method name in strict mode
+  [195:10-14] Cannot use dynamic class or method name in strict mode
+  [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [125:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [130:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+[(Fun
+    { fd_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([4:10-13], "\\bar");
+      fd_fun =
+      { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
+        f_readonly_ret = None; f_ret = ((), (Some ([4:17-23], (Hprim Tstring)))); 
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None; f_body = { fb_ast = [([5:3-18], (Return (Some ((), [5:10-17], (String "class")))))] }; 
+        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+        f_doc_comment = None };
+      fd_internal = false; fd_module = None });
+  (Class
+     { c_span = [7:1-17:2]; c_annotation = (); c_mode = Mstrict; c_final = true; 
+       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([7:13-16], "\\Foo"); c_tparams = []; c_extends = []; 
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; 
+       c_implements = []; c_where_constraints = [];
+       c_consts =
+       [{ cc_user_attributes = []; cc_type = (Some ([8:9-15], (Hprim Tstring))); 
+          cc_id = ([8:16-19], "bar"); cc_kind = (CCConcrete ((), [8:22-27], (String "baz"))); 
+          cc_span = [8:3-28]; cc_doc_comment = None };
+         { cc_user_attributes = []; cc_type = (Some ([9:9-21], (Happly (([9:9-12], "\\HH\\vec"), [([9:13-20], Hnothing)])))); 
+           cc_id = ([9:22-27], "class"); cc_kind = (CCConcrete ((), [9:30-35], (ValCollection (([9:30-33], Vec), None, [])))); 
+           cc_span = [9:3-36]; cc_doc_comment = None }
+         ];
+       c_typeconsts = [];
+       c_vars =
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Public;
+          cv_type =
+          ((),
+           (Some ([10:17-34],
+                  (Hfun
+                     { hf_is_readonly = None; hf_param_tys = []; hf_param_info = []; hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([10:30-33], (Hprim Tint)); hf_is_readonly_return = None }))));
+          cv_id = ([10:35-37], "_"); cv_expr = (Some ((), [10:40-53], (FunctionPointer ((FP_class_const (((), [10:40-44], CIself), ([10:46-51], "class"))), [])))); 
+          cv_user_attributes = []; cv_doc_comment = None; cv_is_promoted_variadic = false; 
+          cv_is_static = true; cv_span = [10:35-53] }
+         ];
+       c_methods =
+       [{ m_span = [11:3-13:4]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = true; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([11:26-29], "bar"); m_tparams = []; m_where_constraints = []; 
+          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([12:5-20], (Return (Some ((), [12:12-19], (Float "3.14159")))))] }; 
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((), (Some ([11:33-38], (Hprim Tfloat)))); m_external = false; 
+          m_doc_comment = None };
+         { m_span = [14:3-16:4]; m_annotation = (); m_final = false; 
+           m_abstract = false; m_static = true; m_readonly_this = false; 
+           m_visibility = Public; m_name = ([14:26-31], "class"); m_tparams = []; 
+           m_where_constraints = []; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
+           m_body = { fb_ast = [([15:5-15], (Return (Some ((), [15:12-14], (Int "42")))))] }; 
+           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+           m_ret = ((), (Some ([14:35-38], (Hprim Tint)))); m_external = false; 
+           m_doc_comment = None }
+         ];
+       c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+       c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+       c_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([20:10-21], "\\class_const");
+       fd_fun =
+       { f_span = [20:1-104:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([20:35-39], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([20:22-29], Hdynamic))); 
+            param_is_variadic = false; param_pos = [20:30-32]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([21:3-12], (Expr ((), [21:3-11], (Class_const (((), [21:3-6], (CI ([21:3-6], "\\Foo"))), ([21:8-11], "bar"))))));
+             ([22:3-11], (Expr ((), [22:3-10], (Class_const (((), [22:3-5], (CIexpr ((), [22:3-5], (Lvar ([22:3-5], $x))))), ([22:7-10], "bar"))))));
+             ([23:3-14], (Expr ((), [23:3-13], (Call (((), [23:3-11], (Class_const (((), [23:3-6], (CI ([23:3-6], "\\Foo"))), ([23:8-11], "bar")))), [], [], None)))));
+             ([24:3-13], (Expr ((), [24:3-12], (Call (((), [24:3-10], (Class_const (((), [24:3-5], (CIexpr ((), [24:3-5], (Lvar ([24:3-5], $x))))), ([24:7-10], "bar")))), [], [], None)))));
+             ([26:3-14], (Expr ((), [26:4-12], (Class_const (((), [26:4-7], (CI ([26:4-7], "\\Foo"))), ([26:9-12], "bar"))))));
+             ([27:3-15], (Expr ((), [27:5-12], (Class_const (((), [27:5-7], (CIexpr ((), [27:5-7], (Lvar ([27:5-7], $x))))), ([27:9-12], "bar"))))));
+             ([28:3-20], (Expr ((), [28:3-19], (Call (((), [28:6-14], (Class_const (((), [28:6-9], (CI ([28:6-9], "\\Foo"))), ([28:11-14], "bar")))), [], [], None)))));
+             ([29:3-21], (Expr ((), [29:3-20], (Call (((), [29:7-14], (Class_const (((), [29:7-9], (CIexpr ((), [29:7-9], (Lvar ([29:7-9], $x))))), ([29:11-14], "bar")))), [], [], None)))));
+             ([31:3-16], (Expr ((), [31:3-15], (Class_const (((), [31:3-6], (CI ([31:3-6], "\\Foo"))), ([31:8-15], "bar\\baz"))))));
+             ([32:3-18], (Expr ((), [32:4-16], (Class_const (((), [32:4-7], (CI ([32:4-7], "\\Foo"))), ([32:9-16], "bar\\baz"))))));
+             ([33:3-18], (Expr ((), [33:3-17], (Call (((), [33:3-15], (Class_const (((), [33:3-6], (CI ([33:3-6], "\\Foo"))), ([33:8-15], "bar\\baz")))), [], [], None)))));
+             ([34:3-20], (Expr ((), [34:3-19], (Call (((), [34:4-16], (Class_const (((), [34:4-7], (CI ([34:4-7], "\\Foo"))), ([34:9-16], "bar\\baz")))), [], [], None)))));
+             ([36:3-14], (Expr ((), [36:3-13], (Class_const (((), [36:3-6], (CI ([36:3-6], "\\Foo"))), ([36:9-12], "bar"))))));
+             ([37:3-16], (Expr ((), [37:4-14], (Class_const (((), [37:4-7], (CI ([37:4-7], "\\Foo"))), ([37:10-13], "bar"))))));
+             ([38:3-16], (Expr ((), [38:3-15], (Call (((), [38:3-13], (Class_const (((), [38:3-6], (CI ([38:3-6], "\\Foo"))), ([38:9-12], "bar")))), [], [], None)))));
+             ([39:3-18], (Expr ((), [39:3-17], (Call (((), [39:4-14], (Class_const (((), [39:4-7], (CI ([39:4-7], "\\Foo"))), ([39:10-13], "bar")))), [], [], None)))));
+             ([41:3-16], (Expr ((), [41:3-15], (Class_const (((), [41:3-6], (CI ([41:3-6], "\\Foo"))), ([41:10-13], "bar"))))));
+             ([42:3-20], (Expr ((), [42:4-18], (Class_const (((), [42:4-7], (CI ([42:4-7], "\\Foo"))), ([42:12-15], "bar"))))));
+             ([43:3-22], (Expr ((), [43:3-21], (Call (((), [43:3-19], (Class_const (((), [43:3-6], (CI ([43:3-6], "\\Foo"))), ([43:12-15], "bar")))), [], [], None)))));
+             ([44:3-26], (Expr ((), [44:3-25], (Call (((), [44:4-22], (Class_const (((), [44:4-7], (CI ([44:4-7], "\\Foo"))), ([44:14-17], "bar")))), [], [], None)))));
+             ([46:3-18], (Expr ((), [46:3-17], (Class_const (((), [46:3-6], (CI ([46:3-6], "\\Foo"))), ([46:9-16], "bar\\baz"))))));
+             ([47:3-20], (Expr ((), [47:4-18], (Class_const (((), [47:4-7], (CI ([47:4-7], "\\Foo"))), ([47:10-17], "bar\\baz"))))));
+             ([48:3-20], (Expr ((), [48:3-19], (Call (((), [48:3-17], (Class_const (((), [48:3-6], (CI ([48:3-6], "\\Foo"))), ([48:9-16], "bar\\baz")))), [], [], None)))));
+             ([49:3-22], (Expr ((), [49:3-21], (Call (((), [49:4-18], (Class_const (((), [49:4-7], (CI ([49:4-7], "\\Foo"))), ([49:10-17], "bar\\baz")))), [], [], None)))));
+             ([51:3-14], (Expr ((), [51:3-13], (Class_const (((), [51:3-6], (CI ([51:3-6], "\\Foo"))), ([51:8-13], "class"))))));
+             ([52:3-16], (Expr ((), [52:4-14], (Class_const (((), [52:4-7], (CI ([52:4-7], "\\Foo"))), ([52:9-14], "class"))))));
+             ([53:3-16], (Expr ((), [53:3-15], (Call (((), [53:3-13], (Class_const (((), [53:3-6], (CI ([53:3-6], "\\Foo"))), ([53:8-13], "class")))), [], [], None)))));
+             ([54:3-18], (Expr ((), [54:3-17], (Call (((), [54:4-14], (Class_const (((), [54:4-7], (CI ([54:4-7], "\\Foo"))), ([54:9-14], "class")))), [], [], None)))));
+             ([56:3-13], (Expr ((), [56:3-12], (Class_const (((), [56:3-6], (CI ([56:3-6], "\\Foo"))), ([56:9-11], ""))))));
+             ([57:3-15], (Expr ((), [57:4-13], (Class_const (((), [57:4-7], (CI ([57:4-7], "\\Foo"))), ([57:10-12], ""))))));
+             ([58:3-15], (Expr ((), [58:3-14], (Call (((), [58:3-12], (Class_const (((), [58:3-6], (CI ([58:3-6], "\\Foo"))), ([58:9-11], "")))), [], [], None)))));
+             ([59:3-17], (Expr ((), [59:3-16], (Call (((), [59:4-13], (Class_const (((), [59:4-7], (CI ([59:4-7], "\\Foo"))), ([59:10-12], "")))), [], [], None)))));
+             ([61:3-16], (Expr ((), [61:3-15], (Class_const (((), [61:3-6], (CI ([61:3-6], "\\Foo"))), ([61:9-14], "bar"))))));
+             ([62:3-18], (Expr ((), [62:4-16], (Class_const (((), [62:4-7], (CI ([62:4-7], "\\Foo"))), ([62:10-15], "bar"))))));
+             ([63:3-18], (Expr ((), [63:3-17], (Call (((), [63:3-15], (Class_const (((), [63:3-6], (CI ([63:3-6], "\\Foo"))), ([63:9-14], "bar")))), [], [], None)))));
+             ([64:3-20], (Expr ((), [64:3-19], (Call (((), [64:4-16], (Class_const (((), [64:4-7], (CI ([64:4-7], "\\Foo"))), ([64:10-15], "bar")))), [], [], None)))));
+             ([66:3-21], (Expr ((), [66:3-20], (Class_const (((), [66:3-6], (CI ([66:3-6], "\\Foo"))), ([66:9-19], "bar\\baz"))))));
+             ([67:3-23], (Expr ((), [67:4-21], (Class_const (((), [67:4-7], (CI ([67:4-7], "\\Foo"))), ([67:10-20], "bar\\baz"))))));
+             ([68:3-23], (Expr ((), [68:3-22], (Call (((), [68:3-20], (Class_const (((), [68:3-6], (CI ([68:3-6], "\\Foo"))), ([68:9-19], "bar\\baz")))), [], [], None)))));
+             ([69:3-25], (Expr ((), [69:3-24], (Call (((), [69:4-21], (Class_const (((), [69:4-7], (CI ([69:4-7], "\\Foo"))), ([69:10-20], "bar\\baz")))), [], [], None)))));
+             ([71:3-18], (Expr ((), [71:3-17], (Class_const (((), [71:3-6], (CI ([71:3-6], "\\Foo"))), ([71:9-16], "class"))))));
+             ([72:3-20], (Expr ((), [72:4-18], (Class_const (((), [72:4-7], (CI ([72:4-7], "\\Foo"))), ([72:10-17], "class"))))));
+             ([73:3-20], (Expr ((), [73:3-19], (Call (((), [73:3-17], (Class_const (((), [73:3-6], (CI ([73:3-6], "\\Foo"))), ([73:9-16], "class")))), [], [], None)))));
+             ([74:3-22], (Expr ((), [74:3-21], (Call (((), [74:4-18], (Class_const (((), [74:4-7], (CI ([74:4-7], "\\Foo"))), ([74:10-17], "class")))), [], [], None)))));
+             ([76:3-15], (Expr ((), [76:3-14], (Class_const (((), [76:3-6], (CI ([76:3-6], "\\Foo"))), ([76:9-13], "$x"))))));
+             ([77:3-17], (Expr ((), [77:4-15], (Class_const (((), [77:4-7], (CI ([77:4-7], "\\Foo"))), ([77:10-14], "$x"))))));
+             ([78:3-17], (Expr ((), [78:3-16], (Call (((), [78:3-14], (Class_const (((), [78:3-6], (CI ([78:3-6], "\\Foo"))), ([78:9-13], "$x")))), [], [], None)))));
+             ([79:3-19], (Expr ((), [79:3-18], (Call (((), [79:4-15], (Class_const (((), [79:4-7], (CI ([79:4-7], "\\Foo"))), ([79:10-14], "$x")))), [], [], None)))));
+             ([81:3-16], (Expr ((), [81:3-15], (Class_const (((), [81:3-6], (CI ([81:3-6], "\\Foo"))), ([81:9-14], "$x"))))));
+             ([82:3-18], (Expr ((), [82:4-16], (Class_const (((), [82:4-7], (CI ([82:4-7], "\\Foo"))), ([82:10-15], "$x"))))));
+             ([83:3-18], (Expr ((), [83:3-17], (Call (((), [83:3-15], (Class_const (((), [83:3-6], (CI ([83:3-6], "\\Foo"))), ([83:9-14], "$x")))), [], [], None)))));
+             ([84:3-20], (Expr ((), [84:3-19], (Call (((), [84:4-16], (Class_const (((), [84:4-7], (CI ([84:4-7], "\\Foo"))), ([84:10-15], "$x")))), [], [], None)))));
+             ([86:3-15], (Expr ((), [86:3-14], (Class_const (((), [86:3-6], (CI ([86:3-6], "\\Foo"))), ([86:9-13], "$_"))))));
+             ([87:3-17], (Expr ((), [87:4-15], (Class_const (((), [87:4-7], (CI ([87:4-7], "\\Foo"))), ([87:10-14], "$_"))))));
+             ([88:3-17], (Expr ((), [88:3-16], (Call (((), [88:3-14], (Class_const (((), [88:3-6], (CI ([88:3-6], "\\Foo"))), ([88:9-13], "$_")))), [], [], None)))));
+             ([89:3-19], (Expr ((), [89:3-18], (Call (((), [89:4-15], (Class_const (((), [89:4-7], (CI ([89:4-7], "\\Foo"))), ([89:10-14], "$_")))), [], [], None)))));
+             ([91:3-16], (Expr ((), [91:3-15], (Class_const (((), [91:3-6], (CI ([91:3-6], "\\Foo"))), ([91:9-14], "$_"))))));
+             ([92:3-18], (Expr ((), [92:4-16], (Class_const (((), [92:4-7], (CI ([92:4-7], "\\Foo"))), ([92:10-15], "$_"))))));
+             ([93:3-18], (Expr ((), [93:3-17], (Call (((), [93:3-15], (Class_const (((), [93:3-6], (CI ([93:3-6], "\\Foo"))), ([93:9-14], "$_")))), [], [], None)))));
+             ([94:3-20], (Expr ((), [94:3-19], (Call (((), [94:4-16], (Class_const (((), [94:4-7], (CI ([94:4-7], "\\Foo"))), ([94:10-15], "$_")))), [], [], None)))));
+             ([96:3-99:5], (Expr ((), [96:3-99:4], (Class_const (((), [96:3-6], (CI ([96:3-6], "\\Foo"))), ([96:9-98:4], "such amaze$ $"))))));
+             ([100:3-103:8], (Expr ((), [100:3-103:7], (Call (((), [100:4-103:4], (Class_const (((), [100:4-7], (CI ([100:4-7], "\\Foo"))), ([100:10-102:4], "very $wow")))), [], [], None)))))]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([107:10-19], "\\class_get");
+       fd_fun =
+       { f_span = [107:1-157:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([107:33-37], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([107:20-27], Hdynamic))); 
+            param_is_variadic = false; param_pos = [107:28-30]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([108:3-11], (Expr ((), [108:3-10], (Class_get (((), [108:3-6], (CI ([108:3-6], "\\Foo"))), (CGstring ([108:8-10], "$x")), Is_prop)))));
+             ([109:3-10], (Expr ((), [109:3-9], (Class_get (((), [109:3-5], (CIexpr ((), [109:3-5], (Lvar ([109:3-5], $x))))), (CGstring ([109:7-9], "$x")), Is_prop)))));
+             ([110:3-13],
+              (Expr ((), [110:3-12], (Call (((), [110:3-10], (Class_get (((), [110:3-6], (CI ([110:3-6], "\\Foo"))), (CGexpr ((), [110:8-10], (Lvar ([110:8-10], $x)))), Is_method))), [], [], None)))));
+             ([111:3-12],
+              (Expr
+                 ((), [111:3-11],
+                  (Call (((), [111:3-9], (Class_get (((), [111:3-5], (CIexpr ((), [111:3-5], (Lvar ([111:3-5], $x))))), (CGexpr ((), [111:7-9], (Lvar ([111:7-9], $x)))), Is_method))), [], [], None)))));
+             ([113:3-13], (Expr ((), [113:4-11], (Class_get (((), [113:4-7], (CI ([113:4-7], "\\Foo"))), (CGstring ([113:9-11], "$x")), Is_prop)))));
+             ([114:3-14], (Expr ((), [114:5-11], (Class_get (((), [114:5-7], (CIexpr ((), [114:5-7], (Lvar ([114:5-7], $x))))), (CGstring ([114:9-11], "$x")), Is_prop)))));
+             ([115:3-19], (Expr ((), [115:3-18], (Call (((), [115:6-13], (Class_get (((), [115:6-9], (CI ([115:6-9], "\\Foo"))), (CGstring ([115:11-13], "$x")), Is_prop))), [], [], None)))));
+             ([116:3-20],
+              (Expr ((), [116:3-19], (Call (((), [116:7-13], (Class_get (((), [116:7-9], (CIexpr ((), [116:7-9], (Lvar ([116:7-9], $x))))), (CGstring ([116:11-13], "$x")), Is_prop))), [], [], None)))));
+             ([118:3-11], (Expr ((), [118:3-10], (Class_get (((), [118:3-6], (CI ([118:3-6], "\\Foo"))), (CGstring ([118:8-10], "$_")), Is_prop)))));
+             ([119:3-13], (Expr ((), [119:4-11], (Class_get (((), [119:4-7], (CI ([119:4-7], "\\Foo"))), (CGstring ([119:9-11], "$_")), Is_prop)))));
+             ([120:3-13],
+              (Expr
+                 ((), [120:3-12], (Call (((), [120:3-10], (Class_get (((), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((), [120:8-10], (Lplaceholder [120:8-10]))), Is_method))), [], [], None)))));
+             ([121:3-15], (Expr ((), [121:3-14], (Call (((), [121:4-11], (Class_get (((), [121:4-7], (CI ([121:4-7], "\\Foo"))), (CGstring ([121:9-11], "$_")), Is_prop))), [], [], None)))));
+             ([123:3-13], (Expr ((), [123:3-12], (Class_get (((), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGstring ([123:9-11], "$x")), Is_prop)))));
+             ([124:3-15], (Expr ((), [124:4-13], (Class_get (((), [124:4-7], (CI ([124:4-7], "\\Foo"))), (CGstring ([124:10-12], "$x")), Is_prop)))));
+             ([125:3-15],
+              (Expr ((), [125:3-14], (Call (((), [125:3-12], (Class_get (((), [125:3-6], (CI ([125:3-6], "\\Foo"))), (CGexpr ((), [125:9-11], (Lvar ([125:9-11], $x)))), Is_method))), [], [], None)))));
+             ([126:3-17], (Expr ((), [126:3-16], (Call (((), [126:4-13], (Class_get (((), [126:4-7], (CI ([126:4-7], "\\Foo"))), (CGstring ([126:10-12], "$x")), Is_prop))), [], [], None)))));
+             ([128:3-13], (Expr ((), [128:3-12], (Class_get (((), [128:3-6], (CI ([128:3-6], "\\Foo"))), (CGstring ([128:9-11], "$_")), Is_prop)))));
+             ([129:3-15], (Expr ((), [129:4-13], (Class_get (((), [129:4-7], (CI ([129:4-7], "\\Foo"))), (CGstring ([129:10-12], "$_")), Is_prop)))));
+             ([130:3-15],
+              (Expr
+                 ((), [130:3-14], (Call (((), [130:3-12], (Class_get (((), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((), [130:9-11], (Lplaceholder [130:9-11]))), Is_method))), [], [], None)))));
+             ([131:3-17], (Expr ((), [131:3-16], (Call (((), [131:4-13], (Class_get (((), [131:4-7], (CI ([131:4-7], "\\Foo"))), (CGstring ([131:10-12], "$_")), Is_prop))), [], [], None)))));
+             ([133:3-18],
+              (Expr
+                 ((), [133:3-17],
+                  (Call (
+                     ((), [133:3-15],
+                      (Class_get (((), [133:3-6], (CI ([133:3-6], "\\Foo"))), (CGexpr ((), [133:9-14], (Call (((), [133:9-12], (Id ([133:9-12], "\\bar"))), [], [], None)))), Is_method))),
+                     [], [], None)))));
+             ([134:3-34],
+              (Expr
+                 ((), [134:3-33],
+                  (Call (
+                     ((), [134:3-31],
+                      (Class_get (((), [134:3-6], (CI ([134:3-6], "\\Foo"))),
+                         (CGexpr
+                            ((), [134:9-30],
+                             (Call (((), [134:9-17], (Id ([134:9-17], "\\vsprintf"))), [], [(Pnormal, ((), [134:18-22], (String "%s"))); (Pnormal, ((), [134:24-29], (String "wow")))], None)))),
+                         Is_method))),
+                     [], [], None)))));
+             ([135:3-32],
+              (Expr
+                 ((), [135:3-31],
+                  (Call (
+                     ((), [135:3-29],
+                      (Class_get (((), [135:3-6], (CI ([135:3-6], "\\Foo"))),
+                         (CGexpr ((), [135:9-28], (Cast (([135:10-16], (Hprim Tstring)), ((), [135:18-27], (Binop (Plus, ((), [135:18-21], (Int "123")), ((), [135:24-27], (Int "456"))))))))),
+                         Is_method))),
+                     [], [], None)))));
+             ([137:3-21],
+              (Expr
+                 ((), [137:3-20],
+                  (Call (
+                     ((), [137:3-18],
+                      (Class_get (((), [137:3-6], (CI ([137:3-6], "\\Foo"))), (CGexpr ((), [137:9-17], (Binop (Dot, ((), [137:9-13], (String "ba")), ((), [137:14-17], (String "r")))))), Is_method))),
+                     [], [], None)))));
+             ([139:3-26],
+              (Expr
+                 ((), [139:3-25],
+                  (Call (
+                     ((), [139:3-23],
+                      (Class_get (((), [139:3-6], (CI ([139:3-6], "\\Foo"))), (
+                         CGexpr ((), [139:9-22], (Binop (Dot, ((), [139:9-16], (String "bar\\")), ((), [139:17-22], (String "baz")))))), Is_method))),
+                     [], [], None)))));
+             ([141:3-17],
+              (Expr
+                 ((), [141:3-16],
+                  (Call (((), [141:3-14], (Class_get (((), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((), [141:9-13], (String2 [((), [141:10-12], (Lvar ([141:10-12], $x)))]))), Is_method))), 
+                     [], [], None)))));
+             ([143:3-17],
+              (Expr
+                 ((), [143:3-16],
+                  (Call (((), [143:3-14], (Class_get (((), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((), [143:9-13], (String2 [((), [143:10-12], (Lplaceholder [143:10-12]))]))), Is_method))),
+                     [], [], None)))));
+             ([145:3-19],
+              (Expr
+                 ((), [145:3-18],
+                  (Call (
+                     ((), [145:3-16],
+                      (Class_get (((), [145:3-6], (CI ([145:3-6], "\\Foo"))), (
+                         CGexpr ((), [145:9-15], (String2 [((), [145:10-12], (String "ba")); ((), [145:12-14], (Lvar ([145:12-14], $x)))]))), Is_method))),
+                     [], [], None)))));
+             ([147:3-19],
+              (Expr
+                 ((), [147:3-18],
+                  (Call (
+                     ((), [147:3-16],
+                      (Class_get (((), [147:3-6], (CI ([147:3-6], "\\Foo"))), (
+                         CGexpr ((), [147:9-15], (String2 [((), [147:10-12], (String "ba")); ((), [147:12-14], (Lplaceholder [147:12-14]))]))), Is_method))),
+                     [], [], None)))));
+             ([149:3-17],
+              (Expr
+                 ((), [149:3-16],
+                  (Call (
+                     ((), [149:3-14], (Class_get (((), [149:3-6], (CI ([149:3-6], "\\Foo"))), (CGexpr ((), [149:9-13], (Call (((), [149:9-11], (Lvar ([149:9-11], $x))), [], [], None)))), Is_method))),
+                     [], [], None)))));
+             ([151:3-17],
+              (Expr
+                 ((), [151:3-16],
+                  (Call (
+                     ((), [151:3-14],
+                      (Class_get (((), [151:3-6], (CI ([151:3-6], "\\Foo"))), (CGexpr ((), [151:9-13], (Call (((), [151:9-11], (Lplaceholder [151:9-11])), [], [], None)))), Is_method))),
+                     [], [], None)))));
+             ([153:3-156:7],
+              (Expr
+                 ((), [153:3-156:6],
+                  (Call (
+                     ((), [153:3-156:4],
+                      (Class_get (((), [153:3-6], (CI ([153:3-6], "\\Foo"))), (
+                         CGexpr ((), [153:9-155:4], (String2 [((), [154:1-6], (Lvar ([154:1-6], $much))); ((), [154:6-11], (String " doge"))]))), Is_method))),
+                     [], [], None)))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None });
+  (Fun
+     { fd_namespace =
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       fd_file_attributes = []; fd_mode = Mstrict; fd_name = ([159:10-23], "\\invalid_exprs");
+       fd_fun =
+       { f_span = [159:1-196:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((), (Some ([159:37-41], (Hprim Tvoid)))); 
+         f_tparams = []; f_where_constraints = [];
+         f_params =
+         [{ param_annotation = (); param_type_hint = ((), (Some ([159:24-31], Hdynamic))); 
+            param_is_variadic = false; param_pos = [159:32-34]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
+         f_body =
+         { fb_ast =
+           [([165:3-16],
+             (Expr
+                ((), [165:3-15],
+                 (Invalid
+                    (Some ((), [165:3-15],
+                           (Class_get (((), [165:3-6], (CI ([165:3-6], "\\Foo"))), (CGexpr ((), [165:9-14], (Call (((), [165:9-12], (Id ([165:9-12], "\\bar"))), [], [], None)))), Is_prop))))))));
+             ([166:3-24],
+              (Expr
+                 ((), [166:4-22],
+                  (Invalid
+                     (Some ((), [166:4-22],
+                            (Class_get (((), [166:4-7], (CI ([166:4-7], "\\Foo"))),
+                               (CGexpr
+                                  ((), [166:10-21],
+                                   (Binop (Dot, ((), [166:10-15], (Call (((), [166:10-13], (Id ([166:10-13], "\\bar"))), [], [], None))),
+                                      ((), [166:16-21], (Call (((), [166:16-19], (Id ([166:16-19], "\\baz"))), [], [], None))))))),
+                               Is_prop))))))));
+             ([167:3-36],
+              (Expr
+                 ((), [167:3-35],
+                  (Call (
+                     ((), [167:4-32],
+                      (Invalid
+                         (Some ((), [167:4-32],
+                                (Class_get (((), [167:4-7], (CI ([167:4-7], "\\Foo"))),
+                                   (CGexpr
+                                      ((), [167:10-31],
+                                       (Call (((), [167:10-18], (Id ([167:10-18], "\\vsprintf"))), 
+                                          [], [(Pnormal, ((), [167:19-23], (String "%s"))); (Pnormal, ((), [167:25-30], (String "wow")))], None)))),
+                                   Is_prop)))))),
+                     [], [], None)))));
+             ([169:3-19],
+              (Expr
+                 ((), [169:3-18],
+                  (Invalid
+                     (Some ((), [169:3-18],
+                            (Class_get (((), [169:3-6], (CI ([169:3-6], "\\Foo"))), (
+                               CGexpr ((), [169:9-17], (Binop (Dot, ((), [169:9-13], (String "ba")), ((), [169:14-17], (String "r")))))), Is_prop))))))));
+             ([170:3-21],
+              (Expr
+                 ((), [170:4-19],
+                  (Invalid
+                     (Some ((), [170:4-19],
+                            (Class_get (((), [170:4-7], (CI ([170:4-7], "\\Foo"))), (
+                               CGexpr ((), [170:10-18], (Binop (Dot, ((), [170:10-14], (String "ba")), ((), [170:15-18], (String "r")))))), Is_prop))))))));
+             ([171:3-23],
+              (Expr
+                 ((), [171:3-22],
+                  (Call (
+                     ((), [171:4-19],
+                      (Invalid
+                         (Some ((), [171:4-19],
+                                (Class_get (((), [171:4-7], (CI ([171:4-7], "\\Foo"))), (
+                                   CGexpr ((), [171:10-18], (Binop (Dot, ((), [171:10-13], (String "b")), ((), [171:14-18], (String "ar")))))), Is_prop)))))),
+                     [], [], None)))));
+             ([173:3-15],
+              (Expr
+                 ((), [173:3-14],
+                  (Invalid
+                     (Some ((), [173:3-14], (Class_get (((), [173:3-6], (CI ([173:3-6], "\\Foo"))), (CGexpr ((), [173:9-13], (String2 [((), [173:10-12], (Lvar ([173:10-12], $x)))]))), Is_prop))))))));
+             ([174:3-17],
+              (Expr
+                 ((), [174:4-15],
+                  (Invalid
+                     (Some ((), [174:4-15], (Class_get (((), [174:4-7], (CI ([174:4-7], "\\Foo"))), (CGexpr ((), [174:10-14], (String2 [((), [174:11-13], (Lvar ([174:11-13], $x)))]))), Is_prop))))))));
+             ([175:3-19],
+              (Expr
+                 ((), [175:3-18],
+                  (Call (
+                     ((), [175:4-15],
+                      (Invalid
+                         (Some ((), [175:4-15], (Class_get (((), [175:4-7], (CI ([175:4-7], "\\Foo"))), (CGexpr ((), [175:10-14], (String2 [((), [175:11-13], (Lvar ([175:11-13], $x)))]))), Is_prop)))))),
+                     [], [], None)))));
+             ([177:3-15],
+              (Expr
+                 ((), [177:3-14],
+                  (Invalid
+                     (Some ((), [177:3-14], (Class_get (((), [177:3-6], (CI ([177:3-6], "\\Foo"))), (CGexpr ((), [177:9-13], (String2 [((), [177:10-12], (Lplaceholder [177:10-12]))]))), Is_prop))))))));
+             ([178:3-17],
+              (Expr
+                 ((), [178:4-15],
+                  (Invalid
+                     (Some ((), [178:4-15], (Class_get (((), [178:4-7], (CI ([178:4-7], "\\Foo"))), (CGexpr ((), [178:10-14], (String2 [((), [178:11-13], (Lplaceholder [178:11-13]))]))), Is_prop))))))));
+             ([179:3-19],
+              (Expr
+                 ((), [179:3-18],
+                  (Call (
+                     ((), [179:4-15],
+                      (Invalid
+                         (Some ((), [179:4-15],
+                                (Class_get (((), [179:4-7], (CI ([179:4-7], "\\Foo"))), (CGexpr ((), [179:10-14], (String2 [((), [179:11-13], (Lplaceholder [179:11-13]))]))), Is_prop)))))),
+                     [], [], None)))));
+             ([181:3-17],
+              (Expr
+                 ((), [181:3-16],
+                  (Invalid
+                     (Some ((), [181:3-16],
+                            (Class_get (((), [181:3-6], (CI ([181:3-6], "\\Foo"))),
+                               (CGexpr ((), [181:9-15], (String2 [((), [181:10-12], (String "ba")); ((), [181:12-14], (Lvar ([181:12-14], $x)))]))), Is_prop))))))));
+             ([182:3-19],
+              (Expr
+                 ((), [182:4-17],
+                  (Invalid
+                     (Some ((), [182:4-17],
+                            (Class_get (((), [182:4-7], (CI ([182:4-7], "\\Foo"))),
+                               (CGexpr ((), [182:10-16], (String2 [((), [182:11-13], (String "ba")); ((), [182:13-15], (Lvar ([182:13-15], $x)))]))), Is_prop))))))));
+             ([183:3-21],
+              (Expr
+                 ((), [183:3-20],
+                  (Call (
+                     ((), [183:4-17],
+                      (Invalid
+                         (Some ((), [183:4-17],
+                                (Class_get (((), [183:4-7], (CI ([183:4-7], "\\Foo"))),
+                                   (CGexpr ((), [183:10-16], (String2 [((), [183:11-13], (String "ba")); ((), [183:13-15], (Lvar ([183:13-15], $x)))]))), Is_prop)))))),
+                     [], [], None)))));
+             ([185:3-17],
+              (Expr
+                 ((), [185:3-16],
+                  (Invalid
+                     (Some ((), [185:3-16],
+                            (Class_get (((), [185:3-6], (CI ([185:3-6], "\\Foo"))),
+                               (CGexpr ((), [185:9-15], (String2 [((), [185:10-12], (String "ba")); ((), [185:12-14], (Lplaceholder [185:12-14]))]))), Is_prop))))))));
+             ([186:3-19],
+              (Expr
+                 ((), [186:4-17],
+                  (Invalid
+                     (Some ((), [186:4-17],
+                            (Class_get (((), [186:4-7], (CI ([186:4-7], "\\Foo"))),
+                               (CGexpr ((), [186:10-16], (String2 [((), [186:11-13], (String "ba")); ((), [186:13-15], (Lplaceholder [186:13-15]))]))), Is_prop))))))));
+             ([187:3-21],
+              (Expr
+                 ((), [187:3-20],
+                  (Call (
+                     ((), [187:4-17],
+                      (Invalid
+                         (Some ((), [187:4-17],
+                                (Class_get (((), [187:4-7], (CI ([187:4-7], "\\Foo"))),
+                                   (CGexpr ((), [187:10-16], (String2 [((), [187:11-13], (String "ba")); ((), [187:13-15], (Lplaceholder [187:13-15]))]))), Is_prop)))))),
+                     [], [], None)))));
+             ([189:3-15],
+              (Expr
+                 ((), [189:3-14],
+                  (Invalid
+                     (Some ((), [189:3-14],
+                            (Class_get (((), [189:3-6], (CI ([189:3-6], "\\Foo"))), (CGexpr ((), [189:9-13], (Call (((), [189:9-11], (Lvar ([189:9-11], $x))), [], [], None)))), Is_prop))))))));
+             ([190:3-17],
+              (Expr
+                 ((), [190:4-15],
+                  (Invalid
+                     (Some ((), [190:4-15],
+                            (Class_get (((), [190:4-7], (CI ([190:4-7], "\\Foo"))), (CGexpr ((), [190:10-14], (Call (((), [190:10-12], (Lvar ([190:10-12], $x))), [], [], None)))), Is_prop))))))));
+             ([191:3-19],
+              (Expr
+                 ((), [191:3-18],
+                  (Call (
+                     ((), [191:4-15],
+                      (Invalid
+                         (Some ((), [191:4-15],
+                                (Class_get (((), [191:4-7], (CI ([191:4-7], "\\Foo"))), (CGexpr ((), [191:10-14], (Call (((), [191:10-12], (Lvar ([191:10-12], $x))), [], [], None)))), Is_prop)))))),
+                     [], [], None)))));
+             ([193:3-15],
+              (Expr
+                 ((), [193:3-14],
+                  (Invalid
+                     (Some ((), [193:3-14],
+                            (Class_get (((), [193:3-6], (CI ([193:3-6], "\\Foo"))), (CGexpr ((), [193:9-13], (Call (((), [193:9-11], (Lplaceholder [193:9-11])), [], [], None)))), Is_prop))))))));
+             ([194:3-17],
+              (Expr
+                 ((), [194:4-15],
+                  (Invalid
+                     (Some ((), [194:4-15],
+                            (Class_get (((), [194:4-7], (CI ([194:4-7], "\\Foo"))), (CGexpr ((), [194:10-14], (Call (((), [194:10-12], (Lplaceholder [194:10-12])), [], [], None)))), Is_prop))))))));
+             ([195:3-19],
+              (Expr
+                 ((), [195:3-18],
+                  (Call (
+                     ((), [195:4-15],
+                      (Invalid
+                         (Some ((), [195:4-15],
+                                (Class_get (((), [195:4-7], (CI ([195:4-7], "\\Foo"))), (CGexpr ((), [195:10-14], (Call (((), [195:10-12], (Lplaceholder [195:10-12])), [], [], None)))), Is_prop)))))),
+                     [], [], None)))))
+             ]
+           };
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+         f_doc_comment = None };
+       fd_internal = false; fd_module = None })
+  ]

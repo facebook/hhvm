@@ -20,8 +20,6 @@
 
 namespace apache::thrift::conformance::data::test {
 
-using namespace ::testing;
-
 TEST(PatchGeneratorTest, Basic) {
   auto suite = createPatchSuite();
   constexpr size_t kNumTypes = 9;

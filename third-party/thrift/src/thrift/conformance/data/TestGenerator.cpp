@@ -28,7 +28,6 @@
 
 namespace mp11 = boost::mp11;
 using apache::thrift::test::testset::FieldModifier;
-using apache::thrift::test::testset::detail::mod_set;
 
 namespace apache::thrift::conformance::data {
 

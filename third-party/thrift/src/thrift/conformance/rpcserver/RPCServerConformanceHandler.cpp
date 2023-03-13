@@ -22,7 +22,6 @@
 #include <folly/experimental/coro/AsyncGenerator.h>
 
 namespace apache::thrift::conformance {
-using apache::thrift::transport::TTransportException;
 
 // =================== Request-Response ===================
 void RPCServerConformanceHandler::requestResponseBasic(

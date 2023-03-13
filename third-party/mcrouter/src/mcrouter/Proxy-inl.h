@@ -85,7 +85,7 @@ Proxy<RouterInfo>::addRouteTask(
   auto funcCtx = sharedCtx;
 
   fiberManager().addTaskFinally(
-      [&req, ctx = std::move(funcCtx)]() mutable {
+      [&req, ctx = std::move(funcCtx)]() FOLLY_NOINLINE mutable {
         try {
           auto& proute = ctx->proxyRoute();
           fiber_local<RouterInfo>::setSharedCtx(std::move(ctx));

@@ -131,5 +131,28 @@ function col_from_array(string $s1, string $s2) : void {
   $c3 = ImmVector { $s1, $s2 };
 }
 
+// TEST-CHECK-BAL: define $root.check_switch
+// CHECK: define $root.check_switch($this: *void, $x: *HackInt) : *void {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &$x
+// CHECK:   n1 = $builtins.hhbc_cmp_eq(n0, $builtins.hack_int(5))
+// CHECK:   jmp b1, b2
+// CHECK: #b1:
+// CHECK:   prune $builtins.hack_is_true(n1)
+// CHECK:   n2 = $builtins.hhbc_print($builtins.hack_string("5"))
+// CHECK:   jmp b3
+// CHECK: #b2:
+// CHECK:   prune ! $builtins.hack_is_true(n1)
+// CHECK:   n3 = $builtins.hhbc_throw_non_exhaustive_switch()
+// CHECK:   jmp b3
+// CHECK: #b3:
+// CHECK:   ret null
+// CHECK: }
+function check_switch(int $x): void {
+  switch ($x) {
+    case 5: echo "5"; break;
+  }
+}
+
 // TEST-CHECK-1: declare $builtins.hhbc_add_elem_c
 // CHECK: declare $builtins.hhbc_add_elem_c(...): *HackMixed

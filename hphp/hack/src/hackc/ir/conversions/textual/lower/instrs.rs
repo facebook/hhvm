@@ -137,6 +137,7 @@ impl LowerInstrs<'_> {
             Hhbc::Print(..) => hack::Hhbc::Print,
             Hhbc::RecordReifiedGeneric(..) => hack::Hhbc::RecordReifiedGeneric,
             Hhbc::Sub(..) => hack::Hhbc::Sub,
+            Hhbc::ThrowNonExhaustiveSwitch(..) => hack::Hhbc::ThrowNonExhaustiveSwitch,
             _ => return None,
         };
         Some(builtin)

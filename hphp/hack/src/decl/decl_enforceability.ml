@@ -418,11 +418,17 @@ end
 module E = Enforce (ShallowContextAccess)
 include E
 
-let make_like_type ~return_from_async ty =
+let make_like_type ~intersect_with ~return_from_async ty =
+  let like_and_intersect r ty =
+    let like_ty = Typing_make_type.like r ty in
+    match intersect_with with
+    | None -> like_ty
+    | Some enf_ty -> Typing_make_type.intersection r [enf_ty; like_ty]
+  in
   let like_if_not_void ty =
     match get_node ty with
     | Tprim Aast.(Tvoid | Tnoreturn) -> ty
-    | _ -> Typing_make_type.like (get_reason ty) ty
+    | _ -> like_and_intersect (get_reason ty) ty
   in
   if return_from_async then
     match get_node ty with
@@ -430,7 +436,7 @@ let make_like_type ~return_from_async ty =
       when String.equal Naming_special_names.Classes.cAwaitable name ->
       mk
         ( get_reason ty,
-          Tapply ((pos, name), [Typing_make_type.like (get_reason ty) ty]) )
+          Tapply ((pos, name), [like_and_intersect (get_reason ty) ty]) )
     | _ -> like_if_not_void ty
   else
     like_if_not_void ty
@@ -468,7 +474,7 @@ let pessimise_type ~is_xhp_attr ~this_class ctx ty =
   then
     ty
   else
-    make_like_type ~return_from_async:false ty
+    make_like_type ~intersect_with:None ~return_from_async:false ty
 
 let maybe_pessimise_type ~is_xhp_attr ~this_class ctx ty =
   if Provider_context.implicit_sdt_for_class ctx this_class then
@@ -484,12 +490,6 @@ type fun_kind =
   | Abstract_method
   | Concrete_method
 
-let intersect_enforceable ~fun_kind ret_ty ty_to_wrap =
-  match (ret_ty, fun_kind) with
-  | (Some enf_ty, Concrete_method) ->
-    Typing_make_type.intersection (get_reason ty_to_wrap) [enf_ty; ty_to_wrap]
-  | _ -> ty_to_wrap
-
 (* We do not pessimise parameter types *except* for inout parameters,
  * which we pessimise regardless of enforcement, because override doesn't
  * preserve enforcement e.g. `inout int` might beoverridden by `inout C::MyTypeConstant`
@@ -503,7 +503,11 @@ let pessimise_param_type fp =
       fp_type =
         {
           et_enforced = Unenforced;
-          et_type = make_like_type ~return_from_async:false fp.fp_type.et_type;
+          et_type =
+            make_like_type
+              ~intersect_with:None
+              ~return_from_async:false
+              fp.fp_type.et_type;
         };
     }
 
@@ -548,19 +552,29 @@ let pessimise_fun_type ~fun_kind ~this_class ctx p ty =
     | (Abstract_method, _) ->
       mk
         ( get_reason ty,
-          Tfun (update_return_ty ft (make_like_type ~return_from_async ret_ty))
+          Tfun
+            (update_return_ty
+               ft
+               (make_like_type ~intersect_with:None ~return_from_async ret_ty))
         )
     | _ ->
       (match get_enforcement ~return_from_async ~this_class ctx ret_ty with
       | Enforced _ -> mk (get_reason ty, Tfun ft)
       | Unenforced enf_ty_opt ->
+        (* For partially enforced type such as enums, we intersect with the
+         * base type for concrete method return types in order to avoid
+         * issues with hierarchies e.g. overriding a method that returns
+         * the base type
+         *)
+        let intersect_with =
+          match fun_kind with
+          | Concrete_method -> enf_ty_opt
+          | _ -> None
+        in
         mk
           ( get_reason ty,
             Tfun
               (update_return_ty
                  ft
-                 (intersect_enforceable
-                    ~fun_kind
-                    enf_ty_opt
-                    (make_like_type ~return_from_async ret_ty))) )))
+                 (make_like_type ~intersect_with ~return_from_async ret_ty)) )))
   | _ -> ty

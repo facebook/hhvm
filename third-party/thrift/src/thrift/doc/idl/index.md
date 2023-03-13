@@ -227,7 +227,7 @@ struct PeopleSearchResponse {
 
 If there is a circular dependency between files, a compile-time error is reported. So `a.thrift` cannot include itself, and cannot include `b.thrift` if `b.thrift` includes `a.thrift`. Including multiple files with a common ancestor is okay - so `a.thrift` can include `b.thrift` and `c.thrift` when both `b.thrift` and `c.thrift` include `d.thrift`.
 
-### Package Declaration
+### Package Declaration {#package}
 
 A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](spec/definition/universal-name.md) prefix.
 
@@ -259,6 +259,8 @@ Let `namespace_path` denote `path` where every `/` is replaced with `.` and `rev
 * Python (`python`, `py3`): The namespace is a concatenation of `reverse(domain_prefix)` and `namespace_path` with the last path component (and preceding `.`) removed if it is equal to the Thrift file name without extension. The domain prefix and the path are separated by a period.
 * Hack: The namespace is the value of `namespace_path`.
 * Java (`java.swift`): The namespace is a concatenation of `reverse(domain)` and `namespace_path` separated by a period.
+
+Other Thrift implementations must define their own mappings from package names to namespaces.
 
 Here is an example with the package name containing the Thrift file without extension (`query`):
 

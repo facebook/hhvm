@@ -15,7 +15,6 @@
                      hf_param_info = [(Some { hfparam_kind = Pnormal; hfparam_readonlyness = None })]; 
                      hf_variadic_ty = None; hf_ctxs = None; hf_return_ty = ([3:67-70], (Hprim Tint)); 
                      hf_is_readonly_return = None }))));
-        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = ();
            param_type_hint =
@@ -33,5 +32,5 @@
         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-13], (Return (Some ((), [4:10-12], (Lvar ([4:10-12], $f))))))] }; 
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
-      fd_internal = false; fd_module = None })
+      fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })
   ]

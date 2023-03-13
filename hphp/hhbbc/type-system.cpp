@@ -113,7 +113,7 @@ LegacyMark intersectionOf(LegacyMark a, LegacyMark b) {
   if (b == LegacyMark::Bottom) return LegacyMark::Bottom;
   if (a == LegacyMark::Unknown) return b;
   if (b == LegacyMark::Unknown) return a;
-  return LegacyMark::Unknown;
+  return LegacyMark::Bottom;
 }
 
 bool legacyMarkSubtypeOf(LegacyMark a, LegacyMark b) {
@@ -126,11 +126,6 @@ bool legacyMarkCouldBe(LegacyMark a, LegacyMark b) {
   if (a == b) return true;
   if (a == LegacyMark::Bottom || b == LegacyMark::Bottom) return false;
   return a == LegacyMark::Unknown || b == LegacyMark::Unknown;
-}
-
-bool legacyMarkIsBottom(LegacyMark m, trep b) {
-  return couldBe(b, Type::kLegacyMarkBits)
-    ? (m == LegacyMark::Bottom) : false;
 }
 
 LegacyMark project(LegacyMark m, trep b) {
@@ -4262,7 +4257,15 @@ Type intersection_of(Type a, Type b) {
     project(a.m_legacyMark, isect),
     project(b.m_legacyMark, isect)
   );
-  if (legacyMarkIsBottom(mark, isect)) return TBottom;
+  if (couldBe(isect, Type::kLegacyMarkBits) &&
+      mark == LegacyMark::Bottom) {
+    isect &= ~Type::kLegacyMarkBits;
+    if (!isect) return TBottom;
+    a = remove_bits(std::move(a), Type::kLegacyMarkBits);
+    b = remove_bits(std::move(b), Type::kLegacyMarkBits);
+    assertx(!a.is(BBottom));
+    assertx(!b.is(BBottom));
+  }
 
   // Return intersected type without a specialization.
   auto const nodata = [&] {

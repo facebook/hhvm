@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
 use ir::func_builder::TransformInstr;
 use ir::func_builder::TransformState;
 use ir::instr::CallDetail;
@@ -27,13 +25,16 @@ use ir::Func;
 use ir::FuncBuilder;
 use ir::FuncBuilderEx as _;
 use ir::GlobalId;
+use ir::InitPropOp;
 use ir::Instr;
 use ir::InstrId;
 use ir::IsTypeOp;
 use ir::LocId;
 use ir::LocalId;
+use ir::MemberOpBuilder;
 use ir::MethodId;
 use ir::ObjMethodOp;
+use ir::PropId;
 use ir::SpecialClsRef;
 use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
@@ -46,7 +47,7 @@ use crate::func::FuncInfo;
 use crate::hack;
 
 /// Lower individual Instrs in the Func to simpler forms.
-pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: Arc<FuncInfo<'_>>) {
+pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: &FuncInfo<'_>) {
     let mut lowerer = LowerInstrs {
         changed: false,
         func_info,
@@ -68,7 +69,7 @@ pub(crate) fn lower_instrs(builder: &mut FuncBuilder<'_>, func_info: Arc<FuncInf
 
 struct LowerInstrs<'a> {
     changed: bool,
-    func_info: Arc<FuncInfo<'a>>,
+    func_info: &'a FuncInfo<'a>,
 }
 
 impl LowerInstrs<'_> {
@@ -177,6 +178,24 @@ impl LowerInstrs<'_> {
             }
             _ => None,
         }
+    }
+
+    fn check_prop(&self, builder: &mut FuncBuilder<'_>, _pid: PropId, _loc: LocId) -> Instr {
+        // CheckProp checks to see if the prop has already been initialized - we'll just always say "no".
+        Instr::copy(builder.emit_constant(Constant::Bool(false)))
+    }
+
+    fn init_prop(
+        &self,
+        builder: &mut FuncBuilder<'_>,
+        vid: ValueId,
+        pid: PropId,
+        _op: InitPropOp,
+        loc: LocId,
+    ) -> Instr {
+        // $this->pid = vid
+        MemberOpBuilder::base_h(loc).emit_set_m_pt(builder, pid, vid);
+        Instr::tombstone()
     }
 
     fn iter_init(
@@ -451,6 +470,7 @@ impl TransformInstr for LowerInstrs<'_> {
                 let lid = LocalId::Named(this);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
             }
+            Instr::Hhbc(Hhbc::CheckProp(pid, loc)) => self.check_prop(builder, pid, loc),
             Instr::Hhbc(Hhbc::CheckThis(loc)) => {
                 let builtin = hack::Hhbc::CheckThis;
                 let op = BareThisOp::NoNotice;
@@ -483,6 +503,9 @@ impl TransformInstr for LowerInstrs<'_> {
                 };
 
                 builder.hhbc_builtin(builtin, &[vid], loc)
+            }
+            Instr::Hhbc(Hhbc::InitProp(vid, pid, op, loc)) => {
+                self.init_prop(builder, vid, pid, op, loc)
             }
             Instr::Hhbc(Hhbc::InstanceOfD(vid, cid, loc)) => {
                 let cid = builder.emit_constant(Constant::String(cid.id));

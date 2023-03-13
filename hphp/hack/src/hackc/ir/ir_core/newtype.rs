@@ -58,15 +58,24 @@ interned_hhbc_id!(ConstId, ConstName);
 interned_hhbc_id!(FunctionId, FunctionName);
 
 const __FACTORY: &str = "__factory";
+pub const _86PINIT: &str = "86pinit";
 
 interned_hhbc_id!(MethodId, MethodName);
 impl MethodId {
-    pub fn factory(strings: &StringInterner) -> Self {
-        Self::from_str(__FACTORY, strings)
+    pub fn _86pinit(strings: &StringInterner) -> Self {
+        Self::from_str(_86PINIT, strings)
     }
 
     pub fn constructor(strings: &StringInterner) -> Self {
         Self::from_str(members::__CONSTRUCT, strings)
+    }
+
+    pub fn factory(strings: &StringInterner) -> Self {
+        Self::from_str(__FACTORY, strings)
+    }
+
+    pub fn is_86pinit(&self, strings: &StringInterner) -> bool {
+        strings.eq_str(self.id, _86PINIT)
     }
 
     pub fn is_constructor(&self, strings: &StringInterner) -> bool {

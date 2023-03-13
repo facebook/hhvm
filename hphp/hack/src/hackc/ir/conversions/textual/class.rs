@@ -336,27 +336,22 @@ impl ClassState<'_, '_, '_> {
         };
 
         let this_ty = class_ty(self.class.name, is_static);
-        let func = {
-            let method_info = MethodInfo {
-                name: method.name,
-                class: &self.class,
-                is_static,
-                flags: method.flags,
-            };
-            let func = lower::lower_func(
-                method.func,
-                Arc::new(FuncInfo::Method(method_info)),
-                Arc::clone(&self.unit_state.strings),
-            );
-            ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings);
-            func
-        };
 
-        let method_info = MethodInfo {
+        let mut func_info = FuncInfo::Method(MethodInfo {
             name: method.name,
             class: &self.class,
             is_static,
             flags: method.flags,
+        });
+
+        let func = {
+            let func = lower::lower_func(
+                method.func,
+                &mut func_info,
+                Arc::clone(&self.unit_state.strings),
+            );
+            ir::verify::verify_func(&func, &Default::default(), &self.unit_state.strings);
+            func
         };
 
         func::write_func(
@@ -364,7 +359,7 @@ impl ClassState<'_, '_, '_> {
             self.unit_state,
             this_ty,
             func,
-            Arc::new(FuncInfo::Method(method_info)),
+            Arc::new(func_info),
         )?;
 
         Ok(())

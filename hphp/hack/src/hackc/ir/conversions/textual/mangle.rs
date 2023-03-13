@@ -87,6 +87,7 @@ pub(crate) enum Intrinsic {
     Construct(ir::ClassId),
     Factory(ir::ClassId),
     InitStatic(ir::ClassId),
+    PropInit(ir::ClassId),
 }
 
 /// Represents a named callable thing.  This includes top-level functions and
@@ -137,6 +138,7 @@ impl fmt::Display for FmtFunctionName<'_> {
                     Intrinsic::InitStatic(cid) => {
                         (Some(TypeName::StaticClass(*cid)), "$init_static")
                     }
+                    Intrinsic::PropInit(cid) => (Some(TypeName::Class(*cid)), "_86pinit"),
                 };
                 if let Some(ty) = ty {
                     write!(f, "{}.{}", ty.display(strings), name)?;

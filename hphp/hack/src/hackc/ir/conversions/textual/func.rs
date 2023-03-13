@@ -63,24 +63,14 @@ pub(crate) fn write_function(
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr(&state.strings));
 
-    let func = lower::lower_func(
-        function.func,
-        Arc::new(FuncInfo::Function(FunctionInfo {
-            name: function.name,
-        })),
-        Arc::clone(&state.strings),
-    );
+    let mut func_info = FuncInfo::Function(FunctionInfo {
+        name: function.name,
+    });
+
+    let func = lower::lower_func(function.func, &mut func_info, Arc::clone(&state.strings));
     ir::verify::verify_func(&func, &Default::default(), &state.strings);
 
-    write_func(
-        txf,
-        state,
-        textual::Ty::VoidPtr,
-        func,
-        Arc::new(FuncInfo::Function(FunctionInfo {
-            name: function.name,
-        })),
-    )
+    write_func(txf, state, textual::Ty::VoidPtr, func, Arc::new(func_info))
 }
 
 pub(crate) fn compute_func_params<'a>(
@@ -303,6 +293,13 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // instruction.
             let ty = class::non_static_ty(clsid).deref();
             let obj = state.fb.write_expr_stmt(Expr::Alloc(ty))?;
+            // HHVM calls 86pinit via NewObjD (and friends) when necessary. We
+            // can't be sure so just call it explicitly.
+            state.fb.call_static(
+                &FunctionName::Intrinsic(Intrinsic::PropInit(clsid)),
+                obj.into(),
+                (),
+            )?;
             state.set_iid(iid, obj);
         }
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
@@ -991,6 +988,13 @@ impl<'a> FuncInfo<'a> {
         match self {
             FuncInfo::Function(_) => panic!("{}", why),
             FuncInfo::Method(mi) => mi,
+        }
+    }
+
+    pub(crate) fn _name_id(&self) -> ir::UnitBytesId {
+        match self {
+            FuncInfo::Function(fi) => fi.name.id,
+            FuncInfo::Method(mi) => mi.name.id,
         }
     }
 }

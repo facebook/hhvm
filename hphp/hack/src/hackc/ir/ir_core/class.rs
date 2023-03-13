@@ -65,6 +65,12 @@ pub struct Class<'a> {
     pub uses: Vec<ClassId>,
 }
 
+impl<'a> Class<'a> {
+    pub fn get_prop_by_pid(&self, pid: PropId) -> Option<&Property<'a>> {
+        self.properties.iter().find(|prop| prop.name == pid)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Property<'a> {
     pub name: PropId,

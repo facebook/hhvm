@@ -5,14 +5,20 @@
 
 use std::sync::Arc;
 
+use ir::instr::Call;
+use ir::instr::CallDetail;
 use ir::instr::Hhbc;
+use ir::FCallArgsFlags;
 use ir::Func;
 use ir::FuncBuilder;
 use ir::Instr;
 use ir::LocalId;
 use ir::MemberOpBuilder;
 use ir::MethodFlags;
+use ir::MethodId;
+use ir::SpecialClsRef;
 use ir::StringInterner;
+use ir::UnitBytesId;
 use log::trace;
 
 use crate::func::FuncInfo;
@@ -20,7 +26,7 @@ use crate::func::MethodInfo;
 
 pub(crate) fn lower_func<'a>(
     mut func: Func<'a>,
-    func_info: Arc<FuncInfo<'_>>,
+    func_info: &mut FuncInfo<'_>,
     strings: Arc<StringInterner>,
 ) -> Func<'a> {
     trace!(
@@ -31,9 +37,14 @@ pub(crate) fn lower_func<'a>(
     // In a closure we implicitly load all the properties as locals - so start
     // with that as a prelude to all entrypoints.
     match *func_info {
-        FuncInfo::Method(ref method_info) => {
+        FuncInfo::Method(ref mut method_info) => {
             if method_info.flags.contains(MethodFlags::IS_CLOSURE_BODY) {
                 load_closure_vars(&mut func, method_info, &strings);
+            }
+
+            // We want 86pinit to be 'instance' but hackc marks it as 'static'.
+            if method_info.name.is_86pinit(&strings) {
+                method_info.is_static = crate::class::IsStatic::NonStatic;
             }
         }
         FuncInfo::Function(_) => {}
@@ -47,6 +58,28 @@ pub(crate) fn lower_func<'a>(
     );
 
     let mut builder = FuncBuilder::with_func(func, Arc::clone(&strings));
+
+    // 86pinit needs to call its base
+    match func_info {
+        FuncInfo::Method(mi) if mi.class.base.is_some() && mi.name.is_86pinit(&strings) => {
+            let clsref = SpecialClsRef::ParentCls;
+            let method = MethodId::_86pinit(&strings);
+            let detail = CallDetail::FCallClsMethodSD { clsref, method };
+            let call = Instr::call(Call {
+                operands: Default::default(),
+                context: UnitBytesId::NONE,
+                detail,
+                flags: FCallArgsFlags::default(),
+                num_rets: 0,
+                inouts: None,
+                readonly: None,
+                loc: builder.func.loc_id,
+            });
+            let iid = builder.func.alloc_instr(call);
+            builder.func.blocks[Func::ENTRY_BID].iids.insert(0, iid);
+        }
+        _ => {}
+    }
 
     // Simplify various Instrs.
     super::instrs::lower_instrs(&mut builder, func_info);

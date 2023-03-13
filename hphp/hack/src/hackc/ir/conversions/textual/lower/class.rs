@@ -30,6 +30,15 @@ pub(crate) fn lower_class<'a>(mut class: Class<'a>, strings: Arc<StringInterner>
         }
     }
 
+    let has_86pinit = class
+        .methods
+        .iter()
+        .any(|method| method.name.is_86pinit(&strings));
+    if !has_86pinit {
+        // We need to make a fake p86init.
+        create_default_86pinit(&mut class, Arc::clone(&strings));
+    }
+
     if class.flags.contains(Attr::AttrIsClosureClass) {
         create_default_closure_constructor(&mut class, strings);
     }
@@ -62,6 +71,29 @@ fn create_default_closure_constructor<'a>(class: &mut Class<'a>, strings: Arc<St
             MemberOpBuilder::base_h(loc).emit_set_m_pt(fb, prop.name, value);
         }
 
+        let null = fb.emit_constant(Constant::Null);
+        fb.emit(Instr::ret(null, loc));
+    });
+
+    let method = Method {
+        attributes: Vec::new(),
+        attrs: Attr::AttrNone,
+        coeffects: Coeffects::default(),
+        flags: MethodFlags::empty(),
+        func,
+        name,
+        visibility: Visibility::Public,
+    };
+    class.methods.push(method);
+}
+
+fn create_default_86pinit<'a>(class: &mut Class<'a>, strings: Arc<StringInterner>) {
+    let name = MethodId::_86pinit(&strings);
+
+    let func = FuncBuilder::build_func(Arc::clone(&strings), |fb| {
+        let loc = fb.add_loc(class.src_loc.clone());
+        fb.func.loc_id = loc;
+        // The call to parent::86pinit() is added by the func lowering code.
         let null = fb.emit_constant(Constant::Null);
         fb.emit(Instr::ret(null, loc));
     });

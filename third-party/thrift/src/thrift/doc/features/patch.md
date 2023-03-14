@@ -30,6 +30,17 @@ To enable Patch, `@patch.GeneratePatch` annotation **must** be used recursively 
 
 ## C++
 
+In C++, there are 2 representations of a Patch — Static Patch and Dynamic Patch. Both have identical wire format, though they have different requirements and provide different APIs. In general, Static Patch is preferred unless you can not include the generated thrift header.
+
+* Static Patch, or Schema-full Patch, is generated from Thrift codegen and has 1:1 mapping to Thrift type.
+    * Pros: More user-friendly APIs (e.g., be able to modify patch based on field name, user can’t generate invalid patch).
+    * Cons: Requires thrift file to be available (e.g., `<thrift_file>_types.h` must be included).
+* Dynamic Patch, or Schema-less Patch, is a schema-less representation of static patch that is consumed with dynamic type `protocol::Object`.
+    * Pros: Can be used without thrift file.
+    * Cons: Less user-friendly APIs.
+
+## C++ Static Patch
+
 ### Struct Patch
 
 Considering the following thrift struct.
@@ -54,7 +65,7 @@ s.field() = "hi";
 MyStructPatch patch;
 op::StringPatch& stringPatch = patch.patch<ident::field>();
 stringPatch.prepend("(");
-stringPatch += ")";
+stringPatch.append(")");
 patch.apply(s);
 EXPECT_EQ(s.field(), "(hi)");
 ```
@@ -133,15 +144,13 @@ You can patch elements by key, e.g.,
 MyMapStructPatch patch;
 auto &stringPatch = patch.patch<ident::nested>().patchByKey(42);
 stringPatch.prepend("(");
-stringPatch += ")";
+stringPatch.append(")");
 
 MyMapStruct s;
 s.nested[42] = "hi";
 patch.apply(s);
 EXPECT_EQ(s.nested[42], "(hi)");
 ```
-
-## Utilities
 
 ### Type alias for Patch type
 
@@ -151,3 +160,26 @@ You can get Patch type from original type, vice versa. e.g.,
 static_assert(std::is_same_v<apache::thrift::op::patch_type<MyStruct>, MyStructPatch>);
 static_assert(std::is_same_v<MyStruct, MyStructPatch::value_type>);
 ```
+
+## C++ Dynamic Patch
+
+If you can not include the generated thrift header, you can still serialize any abritrary patch to `protocol::Object` and apply it. Here is an example how to apply the dynamic patch:
+
+```
+MyStruct s;
+s.field() = "hi";
+
+MyStructPatch patch;
+op::StringPatch& stringPatch = patch.patch<ident::field>();
+stringPatch.prepend("(");
+stringPatch.append(")");
+
+protocol::Object dynamicStruct = apache::thrift::protocol::toObject(s);
+protocol::Object dynamicPatch = apache::thrift::protocol::toObject(patch);
+protocol::applyPatch(dynamicPatch, dynamicStruct);
+
+EXPECT_EQ(dynamicStruct[FieldId{1}].as_string(), "(hi)");
+
+```
+
+You can find all dynamic patch APIs [here](../../ref/cpp/file/thrift/lib/cpp2/protocol/Patch.h).

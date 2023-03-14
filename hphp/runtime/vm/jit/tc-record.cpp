@@ -235,6 +235,7 @@ void reportJitMaturity() {
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
   const size_t hotSize = beforeRetranslateAll ? 0 : getOptMainUsage();
+  const size_t liveSize = getLiveMainUsage();
   // When we jit from serialized profile data, the profile code won't be
   // present. In order to make jit maturity somewhat comparable between the two
   // cases, we pretend to have some profiling code.
@@ -248,18 +249,16 @@ void reportJitMaturity() {
     getProfMainUsage() + (isJitSerializing() ? ProfData::prevProfSize() : 0),
     hotSize
   );
-  auto const mainSize = code().main().used();
-
-  auto const fullSize = RuntimeOption::EvalJitMatureSize;
   auto const codeSize =
-    std::max(mainSize,
+    std::max(hotSize + liveSize,
              static_cast<size_t>(profSize * RO::EvalJitMaturityProfWeight));
+  auto const fullSize = RO::EvalJitMatureSize;
 
   int64_t maturity = before;
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
-  } else if (mainSize >= CodeCache::AMaxUsage ||
-             getLiveMainUsage() >= RO::EvalJitMaxLiveMainUsage ||
+  } else if (liveSize >= RO::EvalJitMaxLiveMainUsage ||
+             code().main().used() >= CodeCache::AMaxUsage ||
              code().cold().used() >= CodeCache::AColdMaxUsage ||
              code().frozen().used() >= CodeCache::AFrozenMaxUsage) {
     maturity = 100;

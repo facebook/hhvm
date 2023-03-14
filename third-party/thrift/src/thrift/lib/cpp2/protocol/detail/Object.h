@@ -137,6 +137,7 @@ class BaseObjectAdapter {
   static constexpr bool kUsesFieldNames() { return true; }
   static constexpr bool kOmitsContainerSizes() { return false; }
   static constexpr bool kSortKeys() { return false; }
+  static constexpr bool kHasIndexSupport() { return false; }
 };
 
 class ObjectWriter : public BaseObjectAdapter {

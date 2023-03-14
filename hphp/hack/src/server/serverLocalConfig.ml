@@ -475,7 +475,7 @@ type t = {
   go_to_implementation: bool;
       (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;
-      (** Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
+      (** Allows unstable features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   watchman: Watchman.t;
   naming_sqlite_in_hack_64: bool;
       (** Add sqlite naming table to hack/64 ss job *)

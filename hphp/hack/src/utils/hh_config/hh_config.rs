@@ -2,14 +2,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+mod local_config;
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Context;
 use anyhow::Result;
 use config_file::ConfigFile;
+pub use local_config::LocalConfig;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::global_options::GlobalOptions;
 
@@ -17,6 +20,8 @@ pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
 
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
+///
+/// Fields correspond to ServerConfig.t
 #[derive(Debug, Clone, Default)]
 pub struct HhConfig {
     pub version: Option<String>,
@@ -28,6 +33,7 @@ pub struct HhConfig {
     pub hash: String,
 
     pub opts: GlobalOptions,
+    pub local_config: LocalConfig,
 
     /// Config settings that did not match any setting known to this parser.
     pub unknown: Vec<(String, String)>,
@@ -44,16 +50,26 @@ pub struct HhConfig {
 impl HhConfig {
     pub fn from_root(root: impl AsRef<Path>, overrides: &ConfigFile) -> Result<Self> {
         let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
-        Self::from_file(&hhconfig_path, overrides)
-            .with_context(|| hhconfig_path.display().to_string())
+        let hh_conf_path = system_config_path();
+        Self::from_files(hhconfig_path, hh_conf_path, overrides)
     }
 
-    pub fn from_file(hhconfig_path: impl AsRef<Path>, overrides: &ConfigFile) -> Result<Self> {
-        let (hash, mut config) = ConfigFile::from_file_with_sha1(hhconfig_path)?;
-        config.apply_overrides(overrides);
+    pub fn from_files(
+        hhconfig_path: impl AsRef<Path>,
+        hh_conf_path: impl AsRef<Path>,
+        overrides: &ConfigFile,
+    ) -> Result<Self> {
+        let hhconfig_path = hhconfig_path.as_ref();
+        let (hash, mut hhconfig) = ConfigFile::from_file_with_sha1(hhconfig_path)
+            .with_context(|| hhconfig_path.display().to_string())?;
+        hhconfig.apply_overrides(overrides);
+        let hh_conf_path = hh_conf_path.as_ref();
+        let mut hh_conf = ConfigFile::from_file(hh_conf_path)
+            .with_context(|| hh_conf_path.display().to_string())?;
+        hh_conf.apply_overrides(overrides);
         Ok(Self {
             hash,
-            ..Self::from_config(config)?
+            ..Self::from_configs(hhconfig, hh_conf)?
         })
     }
 
@@ -61,14 +77,28 @@ impl HhConfig {
         let (hash, config) = ConfigFile::from_slice_with_sha1(bytes);
         Ok(Self {
             hash,
-            ..Self::from_config(config)?
+            ..Self::from_configs(config, Default::default())?
         })
     }
 
-    pub fn from_config(config: ConfigFile) -> Result<Self> {
-        let mut c = Self::default();
-        for (key, mut value) in config {
-            let go = &mut c.opts;
+    /// Construct from .hhconfig and hh.conf files with CLI overrides already applied.
+    pub fn from_configs(hhconfig: ConfigFile, hh_conf: ConfigFile) -> Result<Self> {
+        let current_rolled_out_flag_idx = hhconfig
+            .get_int("current_saved_state_rollout_flag_index")
+            .unwrap_or(Ok(isize::MIN))?;
+
+        let version = hhconfig.get_str("version");
+        let mut c = Self {
+            local_config: LocalConfig::from_config(version, current_rolled_out_flag_idx, hh_conf)?,
+            ..Self::default()
+        };
+
+        // Some GlobalOptions fields are copied from LocalConfig
+        let go = &mut c.opts;
+        go.po_allow_unstable_features = c.local_config.allow_unstable_features;
+        go.tco_rust_elab = c.local_config.rust_elab;
+
+        for (key, mut value) in hhconfig {
             match key.as_str() {
                 "auto_namespace_map" => {
                     let map: BTreeMap<String, String> = parse_json(&value)?;
@@ -255,6 +285,15 @@ fn parse_iset(value: &str) -> Result<BTreeSet<isize>> {
         .split_terminator(',')
         .map(|s| Ok(s.trim().parse()?))
         .collect::<Result<_>>()
+}
+
+/// Return the local config file path, allowing HH_LOCALCONF_PATH to override it.
+pub fn system_config_path() -> PathBuf {
+    const HH_CONF: &str = "hh.conf";
+    match std::env::var_os("HH_LOCALCONF_PATH") {
+        Some(path) => Path::new(&path).join(HH_CONF),
+        None => Path::new("/etc").join(HH_CONF), // TODO see options/buildOptions.ml for mac cfg
+    }
 }
 
 #[cfg(test)]

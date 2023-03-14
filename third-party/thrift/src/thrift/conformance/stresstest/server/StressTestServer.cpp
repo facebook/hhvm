@@ -22,6 +22,10 @@
 DEFINE_int32(port, 5000, "Server port");
 DEFINE_int32(io_threads, 0, "Number of IO threads (0 == number of cores)");
 DEFINE_int32(cpu_threads, 0, "Number of CPU threads (0 == number of cores)");
+DEFINE_int32(
+    max_requests,
+    -1,
+    "Configures max requests, 0 will disable max request limit");
 DEFINE_string(
     certPath,
     "folly/io/async/test/certs/tests-cert.pem",
@@ -71,7 +75,13 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   server->setPort(FLAGS_port);
   server->setNumIOWorkerThreads(sanitizeNumThreads(FLAGS_io_threads));
   server->setNumCPUWorkerThreads(sanitizeNumThreads(FLAGS_cpu_threads));
+
+  if (FLAGS_max_requests > -1) {
+    LOG(INFO) << "Setting max server requests: " << FLAGS_max_requests;
+    server->setMaxRequests(FLAGS_max_requests);
+  }
   server->setSSLPolicy(apache::thrift::SSLPolicy::PERMITTED);
+
   if (!FLAGS_certPath.empty() && !FLAGS_keyPath.empty() &&
       !FLAGS_caPath.empty()) {
     server->setSSLConfig(getSSLConfig());

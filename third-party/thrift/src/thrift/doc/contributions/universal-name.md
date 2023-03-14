@@ -1,6 +1,6 @@
 # Universal Name
 
-This guide provides details how universal name can be supported in a language. Universal name is mainly used in conformance Any, thrift Any and SemiAny. Refer to the [spec](../spec/definition/universal-name) and [user guide](../features/universal-name) for details. A major component for universal name is the Type Registry.
+This guide provides details how universal name can be supported in a language. Universal name is mainly used in conformance Any, thrift Any and SemiAny. Refer to the [user guide](../features/universal-name) for details. A major component for universal name is the Type Registry.
 
 ## Type registry
 Type registry provides different mappings between hash to type, universal name URI to type and type to URI/hash.
@@ -15,4 +15,4 @@ Java [TypeRegistry](https://github.com/facebook/fbthrift/blob/main/thrift/lib/ja
 All the universal names, mapping to the thrift types, **must** be registered to the `Type Registry` to resolve a type from given hash prefix. Iterating through all thrift objects might not be practical when an application start. A better approach is to read all thrift objects during codegen, generate code to register these objects automatically when the application starts.
 
 ## Validation
-Universal names are validated by the thrift compiler during compile time. Any URI that does not match the rules defined in the [spec](../spec/definition/universal-name#universal-names) cause an error. Supported thrift languages **should not** do any extra validation and assume a valid URI is passed to the application.
+Universal names are validated by the thrift compiler during compile time. Any URI that does not match the rules defined in the [spec](../features/universal-name#universal-names) cause an error. Supported thrift languages **should not** do any extra validation and assume a valid URI is passed to the application.

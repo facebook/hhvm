@@ -229,7 +229,7 @@ If there is a circular dependency between files, a compile-time error is reporte
 
 ### Package Declaration {#package}
 
-A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](spec/definition/universal-name.md) prefix.
+A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](../features/universal-name.md) prefix.
 
 ```grammar
 package_declaration ::=  [annotations] "package" package_name

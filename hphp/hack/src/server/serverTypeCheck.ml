@@ -965,7 +965,7 @@ functor
       in
 
       (* PARSING ***************************************************************)
-      ServerProgress.send_progress
+      ServerProgress.write
         ~include_in_logs:false
         "parsing %d files"
         reparse_count;
@@ -1003,9 +1003,7 @@ functor
       let t = Hh_logger.log_duration logstring t in
 
       (* UPDATE NAMING TABLES **************************************************)
-      ServerProgress.send_progress
-        ~include_in_logs:false
-        "updating naming tables";
+      ServerProgress.write ~include_in_logs:false "updating naming tables";
       let logstring = "updating naming tables" in
       Hh_logger.log "Begin %s" logstring;
       let telemetry =
@@ -1045,7 +1043,7 @@ functor
       in
 
       (* REDECL PHASE 1 ********************************************************)
-      ServerProgress.send_progress ~include_in_logs:false "determining changes";
+      ServerProgress.write ~include_in_logs:false "determining changes";
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
       in
@@ -1253,7 +1251,7 @@ functor
           ~changed_files:files_to_parse
           ~parse_t
       in
-      ServerProgress.send_progress
+      ServerProgress.write
         ~include_in_logs:false
         "typechecking %d files"
         to_recheck_count;

@@ -153,7 +153,6 @@ module Program = struct
 end
 
 let finalize_init init_env typecheck_telemetry init_telemetry =
-  ServerProgress.send_warning None;
   (* rest is just logging/telemetry *)
   let t' = Unix.gettimeofday () in
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
@@ -672,7 +671,7 @@ let serve_one_iteration genv env client_provider =
    * And if the selected_client was a request, then once we discover the nature
    * of that request then ServerCommand.handle will send its own status updates too.
    *)
-  ServerProgress.send_progress
+  ServerProgress.write
     ~include_in_logs:false
     "%s"
     (match selected_client with
@@ -1215,7 +1214,7 @@ let program_init genv env =
     }
   in
   Hh_logger.log "Waiting for daemon(s) to be ready...";
-  ServerProgress.send_progress "wrapping up init...";
+  ServerProgress.write "wrapping up init...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   EventLogger.set_init_type init_type;
@@ -1303,12 +1302,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   | _ -> ());
   (try Unix.unlink server_receipt_to_monitor_file with
   | _ -> ());
-  ServerProgress.write
-    {
-      ServerProgress.server_warning = None;
-      server_progress = "starting up";
-      server_timestamp = Unix.gettimeofday ();
-    };
+  ServerProgress.write "startuping up";
   Exit.add_hook_upon_clean_exit (fun finale_data ->
       begin
         try Unix.unlink server_receipt_to_monitor_file with
@@ -1324,14 +1318,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         | _ -> ()
       end;
       begin
-        try
-          ServerProgress.write
-            {
-              ServerProgress.server_warning = None;
-              server_progress = "shutting down";
-              server_timestamp = Unix.gettimeofday ();
-            }
-        with
+        try ServerProgress.write "shutting down" with
         | _ -> ()
       end;
       ());

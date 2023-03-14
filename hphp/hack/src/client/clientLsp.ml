@@ -1784,32 +1784,23 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
         int_of_float (time -. ienv.first_start_time) |> string_of_int
     in
     (* TODO: better to report time that hh_server has spent initializing *)
-    let (progress, warning) =
+    let progress_message =
       match state with
       | In_init _
       | Main_loop _ ->
-        let ServerProgress.{ server_progress; server_warning; _ } =
-          ServerProgress.read ()
-        in
-        (server_progress, server_warning)
-      | _ -> ("connecting", None)
+        let ServerProgress.{ message; _ } = ServerProgress.read () in
+        message
+      | _ -> "connecting"
     in
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
        it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
        or "connecting", if there is no relevant progress to show.
        [warning] comes from the same place, and if present is a human-readable string
        that warns about saved-state-init failure. *)
-    let warning =
-      if Option.is_some warning then
-        " (saved-state not found - will take a while)"
-      else
-        ""
-    in
     let message =
       Printf.sprintf
-        "hh_server initializing%s: %s [%s seconds]"
-        warning
-        progress
+        "hh_server initializing: %s [%s seconds]"
+        progress_message
         delay_in_secs
     in
     Some

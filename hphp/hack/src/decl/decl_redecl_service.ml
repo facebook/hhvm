@@ -197,7 +197,7 @@ let load_defs_compare_and_get_fanout ctx _acc (filel : Relative_path.t list) :
 let merge_on_the_fly
     files_initial_count files_declared_count (count, errorl1) errorl2 =
   files_declared_count := !files_declared_count + count;
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"declaring"
     ~done_count:!files_declared_count
     ~total_count:files_initial_count
@@ -222,7 +222,7 @@ let merge_compute_deps
     }
   in
 
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"computing dependencies of"
     ~done_count:!files_computed_count
     ~total_count:files_initial_count
@@ -250,7 +250,7 @@ let parallel_redecl_compare_and_get_fanout
     let files_declared_count = ref 0 in
     let t = Unix.gettimeofday () in
     Hh_logger.log ~lvl "Declaring on-the-fly %d files" files_initial_count;
-    ServerProgress.send_percentage_progress
+    ServerProgress.write_percentage
       ~operation:"declaring"
       ~done_count:!files_declared_count
       ~total_count:files_initial_count
@@ -267,7 +267,7 @@ let parallel_redecl_compare_and_get_fanout
     let t = Hh_logger.log_duration ~lvl "Finished declaring on-the-fly" t in
     Hh_logger.log ~lvl "Computing dependencies of %d files" files_initial_count;
     let files_computed_count = ref 0 in
-    ServerProgress.send_percentage_progress
+    ServerProgress.write_percentage
       ~operation:"computing dependencies of"
       ~done_count:!files_computed_count
       ~total_count:files_initial_count
@@ -418,7 +418,7 @@ let merge_dependent_classes
     (dependent_classes, filtered)
     acc =
   classes_filtered_count := !classes_filtered_count + filtered;
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"filtering"
     ~done_count:!classes_filtered_count
     ~total_count:classes_initial_count
@@ -439,7 +439,7 @@ let filter_dependent_classes_parallel
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
     Hh_logger.log ~lvl "Filtering %d dependent classes" classes_initial_count;
-    ServerProgress.send_percentage_progress
+    ServerProgress.write_percentage
       ~operation:"filtering"
       ~done_count:!classes_filtered_count
       ~total_count:classes_initial_count
@@ -481,7 +481,7 @@ let merge_elements
   classes_processed_count := !classes_processed_count + count;
 
   let acc = SMap.union elements acc in
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"getting members of"
     ~done_count:!classes_processed_count
     ~total_count:classes_initial_count
@@ -511,7 +511,7 @@ let get_elems
       Decl_class_elements.get_for_classes ~old classes
     else
       let classes_processed_count = ref 0 in
-      ServerProgress.send_percentage_progress
+      ServerProgress.write_percentage
         ~operation:"getting members of"
         ~done_count:!classes_processed_count
         ~total_count:classes_initial_count

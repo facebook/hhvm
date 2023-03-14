@@ -690,7 +690,7 @@ let merge
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"typechecking"
     ~done_count:!files_checked_count
     ~total_count:workitems_initial_count
@@ -895,7 +895,7 @@ let process_in_parallel
   in
   let controller_started = Delegate.controller_started !delegate_state in
   let batch_counts_by_worker_id = ref SMap.empty in
-  ServerProgress.send_percentage_progress
+  ServerProgress.write_percentage
     ~operation:"typechecking"
     ~done_count:0
     ~total_count:workitems_initial_count

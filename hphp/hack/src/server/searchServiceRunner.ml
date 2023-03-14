@@ -36,7 +36,7 @@ module SearchServiceRunner = struct
       sienv
     else begin
       Hh_logger.log "UPDATE_SEARCH start";
-      if len > 10 then ServerProgress.send_progress "indexing %d files" len;
+      if len > 10 then ServerProgress.write "indexing %d files" len;
       let sienv =
         SymbolIndexCore.update_files ~ctx ~sienv ~paths:defs_per_file
       in

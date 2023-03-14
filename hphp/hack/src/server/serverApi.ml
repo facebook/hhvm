@@ -18,7 +18,7 @@ let make_local_server_api
     ~(deps_mode : Typing_deps_mode.t) : (module LocalServerApi) =
   (module struct
     let send_progress (message : string) : unit =
-      ServerProgress.send_progress "%s" message
+      ServerProgress.write "%s" message
 
     let update_state ~(state_filename : string) ~(check_id : string option) :
         unit =

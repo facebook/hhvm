@@ -76,13 +76,7 @@ let tty_progress_reporter () =
 We store this in a mutable variable, so we can know whether it's changed and hence whether
 to display the warning banner. *)
 let latest_server_progress : ServerProgress.t ref =
-  ref
-    ServerProgress.
-      {
-        server_progress = "connecting";
-        server_warning = None;
-        server_timestamp = 0.;
-      }
+  ref ServerProgress.{ message = "connecting"; timestamp = 0. }
 
 (** This reads from the progress file and assigns into mutable variable "latest_status_progress",
 and returns whether there was new status. *)
@@ -91,41 +85,25 @@ let check_progress () : bool =
   if
     not
       (Float.equal
-         server_progress.ServerProgress.server_timestamp
-         !latest_server_progress.ServerProgress.server_timestamp)
+         server_progress.ServerProgress.timestamp
+         !latest_server_progress.ServerProgress.timestamp)
   then begin
     log
-      "check_progress: [%s] %s / %s"
-      (Utils.timestring server_progress.ServerProgress.server_timestamp)
-      server_progress.ServerProgress.server_progress
-      (Option.value
-         server_progress.ServerProgress.server_warning
-         ~default:"[none]");
+      "check_progress: [%s] %s"
+      (Utils.timestring server_progress.ServerProgress.timestamp)
+      server_progress.ServerProgress.message;
     latest_server_progress := server_progress;
     true
   end else
     false
 
 let show_progress (progress_callback : string option -> unit) : unit =
-  let had_warning =
-    Option.is_some !latest_server_progress.ServerProgress.server_warning
-  in
   let (_any_changes : bool) = check_progress () in
-  if not had_warning then
-    Option.iter
-      !latest_server_progress.ServerProgress.server_warning
-      ~f:(Printf.eprintf "\n%s\n%!");
-  let progress = !latest_server_progress.ServerProgress.server_progress in
-  let final_suffix =
-    if Option.is_some !latest_server_progress.ServerProgress.server_warning then
-      " - this can take a long time, see warning above]"
-    else
-      "]"
-  in
+  let message = !latest_server_progress.ServerProgress.message in
   (* We always show progress, even if there were no changes, just so the user
      can see the spinner keep turning around. It looks better that way for things
      like "loading saved-state" which would otherwise look stuck for 30s. *)
-  progress_callback (Some ("[" ^ progress ^ final_suffix));
+  progress_callback (Some ("[" ^ message ^ "]"));
   ()
 
 let check_for_deadline deadline_opt =

@@ -59,7 +59,7 @@ let save_state
 
 let post_init genv (env, _t) =
   (* Configure symbol index settings *)
-  ServerProgress.send_progress "updating search index...";
+  ServerProgress.write "updating search index...";
   let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
   let env =
     {
@@ -179,7 +179,6 @@ let lazy_saved_state_init
     Hh_logger.log "LOAD_STATE_EXN %s" (Telemetry.to_string telemetry);
     (match next_step with
     | Exit_status.No_error ->
-      ServerProgress.send_warning (Some user_message);
       let fall_back_to_full_init profiling =
         ServerLazyInit.full_init genv env profiling |> post_init genv
       in

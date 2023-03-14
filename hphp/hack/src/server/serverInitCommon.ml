@@ -13,7 +13,7 @@ open ServerEnv
 
 let indexing ?hhi_filter ~(telemetry_label : string) (genv : ServerEnv.genv) :
     Relative_path.t list Bucket.next * float =
-  ServerProgress.send_progress "indexing";
+  ServerProgress.write "indexing";
   let t = Unix.gettimeofday () in
   let get_next =
     ServerUtils.make_next
@@ -42,8 +42,8 @@ let parsing
   @@ fun _cgroup_step ->
   begin
     match count with
-    | None -> ServerProgress.send_progress "%s" "parsing"
-    | Some c -> ServerProgress.send_progress "parsing %d files" c
+    | None -> ServerProgress.write "parsing"
+    | Some c -> ServerProgress.write "parsing %d files" c
   end;
   let quick = lazy_parse in
   let ctx = Provider_utils.ctx_from_server_env env in
@@ -96,7 +96,7 @@ let naming
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   CgroupProfiler.step_start_end cgroup_steps telemetry_label
   @@ fun _cgroup_step ->
-  ServerProgress.send_progress "resolving symbol references";
+  ServerProgress.write "resolving symbol references";
   let ctx = Provider_utils.ctx_from_server_env env in
   let count = ref 0 in
   let env =

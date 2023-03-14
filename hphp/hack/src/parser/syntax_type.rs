@@ -193,8 +193,5 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_module_exports(ctx: &C, module_exports_exports_keyword: Self, module_exports_left_brace: Self, module_exports_exports: Self, module_exports_right_brace: Self) -> Self;
     fn make_module_imports(ctx: &C, module_imports_imports_keyword: Self, module_imports_left_brace: Self, module_imports_imports: Self, module_imports_right_brace: Self) -> Self;
     fn make_module_membership_declaration(ctx: &C, module_membership_declaration_module_keyword: Self, module_membership_declaration_name: Self, module_membership_declaration_semicolon: Self) -> Self;
-    fn make_package_declaration(ctx: &C, package_declaration_attribute_spec: Self, package_declaration_package_keyword: Self, package_declaration_name: Self, package_declaration_left_brace: Self, package_declaration_uses: Self, package_declaration_includes: Self, package_declaration_right_brace: Self) -> Self;
-    fn make_package_uses(ctx: &C, package_uses_use_keyword: Self, package_uses_left_brace: Self, package_uses_uses: Self, package_uses_right_brace: Self) -> Self;
-    fn make_package_includes(ctx: &C, package_includes_include_keyword: Self, package_includes_left_brace: Self, package_includes_includes: Self, package_includes_right_brace: Self) -> Self;
 
 }

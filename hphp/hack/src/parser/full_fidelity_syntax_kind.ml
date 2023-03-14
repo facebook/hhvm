@@ -194,9 +194,6 @@ type t =
   | ModuleExports
   | ModuleImports
   | ModuleMembershipDeclaration
-  | PackageDeclaration
-  | PackageUses
-  | PackageIncludes
 [@@deriving show, eq]
 
 let to_string kind =
@@ -377,6 +374,3 @@ let to_string kind =
   | ModuleExports -> "module_exports"
   | ModuleImports -> "module_imports"
   | ModuleMembershipDeclaration -> "module_membership_declaration"
-  | PackageDeclaration -> "package_declaration"
-  | PackageUses -> "package_uses"
-  | PackageIncludes -> "package_includes"

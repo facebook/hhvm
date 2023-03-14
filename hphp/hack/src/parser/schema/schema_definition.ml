@@ -2440,54 +2440,6 @@ let schema : schema_node list =
           ("semicolon", Token);
         ];
     };
-    {
-      kind_name = "PackageDeclaration";
-      type_name = "package_declaration";
-      func_name = "package_declaration";
-      description = "package_declaration";
-      prefix = "package_declaration";
-      aggregates = [TopLevelDeclaration];
-      fields =
-        [
-          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
-          ("package_keyword", Token);
-          ("name", Token);
-          ("left_brace", Token);
-          ("uses", Just "PackageUses");
-          ("includes", Just "PackageIncludes");
-          ("right_brace", Token);
-        ];
-    };
-    {
-      kind_name = "PackageUses";
-      type_name = "package_uses";
-      func_name = "package_uses";
-      description = "package_uses";
-      prefix = "package_uses";
-      aggregates = [];
-      fields =
-        [
-          ("use_keyword", Token);
-          ("left_brace", Token);
-          ("uses", ZeroOrMore (Aggregate Name));
-          ("right_brace", Token);
-        ];
-    };
-    {
-      kind_name = "PackageIncludes";
-      type_name = "package_includes";
-      func_name = "package_includes";
-      description = "package_includes";
-      prefix = "package_includes";
-      aggregates = [];
-      fields =
-        [
-          ("include_keyword", Token);
-          ("left_brace", Token);
-          ("includes", ZeroOrMore (Aggregate Name));
-          ("right_brace", Token);
-        ];
-    };
   ]
 
 (******************************************************************************(

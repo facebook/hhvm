@@ -375,8 +375,6 @@
       "token_text" : "readonly" },
     { "token_kind" : "Internal",
       "token_text" : "internal" },
-    { "token_kind" : "Package",
-      "token_text" : "package" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -2142,39 +2140,6 @@
         { "field_name" : "module_keyword" },
         { "field_name" : "name" },
         { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "PackageDeclaration",
-      "type_name" : "package_declaration",
-      "description" : "package_declaration",
-      "prefix" : "package_declaration",
-      "fields" : [
-        { "field_name" : "attribute_spec" },
-        { "field_name" : "package_keyword" },
-        { "field_name" : "name" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "uses" },
-        { "field_name" : "includes" },
-        { "field_name" : "right_brace" }
-      ] },
-    { "kind_name" : "PackageUses",
-      "type_name" : "package_uses",
-      "description" : "package_uses",
-      "prefix" : "package_uses",
-      "fields" : [
-        { "field_name" : "use_keyword" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "uses" },
-        { "field_name" : "right_brace" }
-      ] },
-    { "kind_name" : "PackageIncludes",
-      "type_name" : "package_includes",
-      "description" : "package_includes",
-      "prefix" : "package_includes",
-      "fields" : [
-        { "field_name" : "include_keyword" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "includes" },
-        { "field_name" : "right_brace" }
       ] },
 
     { "kind_name" : "Token",

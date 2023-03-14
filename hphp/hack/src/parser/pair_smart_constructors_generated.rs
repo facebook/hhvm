@@ -773,16 +773,4 @@ where
         Node(self.0.make_module_membership_declaration(module_keyword.0, name.0, semicolon.0), self.1.make_module_membership_declaration(module_keyword.1, name.1, semicolon.1))
     }
 
-    fn make_package_declaration(&mut self, attribute_spec: Self::Output, package_keyword: Self::Output, name: Self::Output, left_brace: Self::Output, uses: Self::Output, includes: Self::Output, right_brace: Self::Output) -> Self::Output {
-        Node(self.0.make_package_declaration(attribute_spec.0, package_keyword.0, name.0, left_brace.0, uses.0, includes.0, right_brace.0), self.1.make_package_declaration(attribute_spec.1, package_keyword.1, name.1, left_brace.1, uses.1, includes.1, right_brace.1))
-    }
-
-    fn make_package_uses(&mut self, use_keyword: Self::Output, left_brace: Self::Output, uses: Self::Output, right_brace: Self::Output) -> Self::Output {
-        Node(self.0.make_package_uses(use_keyword.0, left_brace.0, uses.0, right_brace.0), self.1.make_package_uses(use_keyword.1, left_brace.1, uses.1, right_brace.1))
-    }
-
-    fn make_package_includes(&mut self, include_keyword: Self::Output, left_brace: Self::Output, includes: Self::Output, right_brace: Self::Output) -> Self::Output {
-        Node(self.0.make_package_includes(include_keyword.0, left_brace.0, includes.0, right_brace.0), self.1.make_package_includes(include_keyword.1, left_brace.1, includes.1, right_brace.1))
-    }
-
 }

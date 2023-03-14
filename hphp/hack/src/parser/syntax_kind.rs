@@ -199,9 +199,6 @@ pub enum SyntaxKind {
     ModuleExports,
     ModuleImports,
     ModuleMembershipDeclaration,
-    PackageDeclaration,
-    PackageUses,
-    PackageIncludes,
 
 }
 
@@ -384,9 +381,6 @@ impl SyntaxKind {
             SyntaxKind::ModuleExports                     => "module_exports",
             SyntaxKind::ModuleImports                     => "module_imports",
             SyntaxKind::ModuleMembershipDeclaration       => "module_membership_declaration",
-            SyntaxKind::PackageDeclaration                => "package_declaration",
-            SyntaxKind::PackageUses                       => "package_uses",
-            SyntaxKind::PackageIncludes                   => "package_includes",
         }
     }
 
@@ -568,9 +562,6 @@ impl SyntaxKind {
             SyntaxKind::ModuleExports => 172,
             SyntaxKind::ModuleImports => 173,
             SyntaxKind::ModuleMembershipDeclaration => 174,
-            SyntaxKind::PackageDeclaration => 175,
-            SyntaxKind::PackageUses => 176,
-            SyntaxKind::PackageIncludes => 177,
         }
     }
 }

@@ -1033,27 +1033,6 @@ module type Syntax_S = sig
         module_membership_declaration_name: t;
         module_membership_declaration_semicolon: t;
       }
-    | PackageDeclaration of {
-        package_declaration_attribute_spec: t;
-        package_declaration_package_keyword: t;
-        package_declaration_name: t;
-        package_declaration_left_brace: t;
-        package_declaration_uses: t;
-        package_declaration_includes: t;
-        package_declaration_right_brace: t;
-      }
-    | PackageUses of {
-        package_uses_use_keyword: t;
-        package_uses_left_brace: t;
-        package_uses_uses: t;
-        package_uses_right_brace: t;
-      }
-    | PackageIncludes of {
-        package_includes_include_keyword: t;
-        package_includes_left_brace: t;
-        package_includes_includes: t;
-        package_includes_right_brace: t;
-      }
   [@@deriving sexp_of]
 
   val rust_parse :
@@ -1466,12 +1445,6 @@ module type Syntax_S = sig
 
   val make_module_membership_declaration : t -> t -> t -> t
 
-  val make_package_declaration : t -> t -> t -> t -> t -> t -> t -> t
-
-  val make_package_uses : t -> t -> t -> t -> t
-
-  val make_package_includes : t -> t -> t -> t -> t
-
   val position : Relative_path.t -> t -> Pos.t option
 
   val offset : t -> int option
@@ -1825,12 +1798,6 @@ module type Syntax_S = sig
   val is_module_imports : t -> bool
 
   val is_module_membership_declaration : t -> bool
-
-  val is_package_declaration : t -> bool
-
-  val is_package_uses : t -> bool
-
-  val is_package_includes : t -> bool
 
   val is_specific_token : TokenKind.t -> t -> bool
 

@@ -1915,40 +1915,4 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_package_declaration(ctx: &C, attribute_spec: Self, package_keyword: Self, name: Self, left_brace: Self, uses: Self, includes: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PackageDeclaration(ctx.get_arena().alloc(PackageDeclarationChildren {
-            attribute_spec,
-            package_keyword,
-            name,
-            left_brace,
-            uses,
-            includes,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_package_uses(ctx: &C, use_keyword: Self, left_brace: Self, uses: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PackageUses(ctx.get_arena().alloc(PackageUsesChildren {
-            use_keyword,
-            left_brace,
-            uses,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_package_includes(ctx: &C, include_keyword: Self, left_brace: Self, includes: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PackageIncludes(ctx.get_arena().alloc(PackageIncludesChildren {
-            include_keyword,
-            left_brace,
-            includes,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
  }

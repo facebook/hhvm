@@ -758,16 +758,4 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_module_membership_declaration(self, module_keyword, name, semicolon)
     }
 
-    fn make_package_declaration(&mut self, attribute_spec: Self::Output, package_keyword: Self::Output, name: Self::Output, left_brace: Self::Output, uses: Self::Output, includes: Self::Output, right_brace: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_package_declaration(self, attribute_spec, package_keyword, name, left_brace, uses, includes, right_brace)
-    }
-
-    fn make_package_uses(&mut self, use_keyword: Self::Output, left_brace: Self::Output, uses: Self::Output, right_brace: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_package_uses(self, use_keyword, left_brace, uses, right_brace)
-    }
-
-    fn make_package_includes(&mut self, include_keyword: Self::Output, left_brace: Self::Output, includes: Self::Output, right_brace: Self::Output) -> Self::Output {
-        <Self as FlattenSmartConstructors>::make_package_includes(self, include_keyword, left_brace, includes, right_brace)
-    }
-
 }

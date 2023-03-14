@@ -1581,36 +1581,6 @@ ss.serialize_field("module_membership_declaration_name", &self.with(name))?;
 ss.serialize_field("module_membership_declaration_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::PackageDeclaration (PackageDeclarationChildren{attribute_spec,package_keyword,name,left_brace,uses,includes,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 8)?;
-      ss.serialize_field("kind", "package_declaration")?;
-      ss.serialize_field("package_declaration_attribute_spec", &self.with(attribute_spec))?;
-ss.serialize_field("package_declaration_package_keyword", &self.with(package_keyword))?;
-ss.serialize_field("package_declaration_name", &self.with(name))?;
-ss.serialize_field("package_declaration_left_brace", &self.with(left_brace))?;
-ss.serialize_field("package_declaration_uses", &self.with(uses))?;
-ss.serialize_field("package_declaration_includes", &self.with(includes))?;
-ss.serialize_field("package_declaration_right_brace", &self.with(right_brace))?;
-      ss.end()
-} 
-SyntaxVariant::PackageUses (PackageUsesChildren{use_keyword,left_brace,uses,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "package_uses")?;
-      ss.serialize_field("package_uses_use_keyword", &self.with(use_keyword))?;
-ss.serialize_field("package_uses_left_brace", &self.with(left_brace))?;
-ss.serialize_field("package_uses_uses", &self.with(uses))?;
-ss.serialize_field("package_uses_right_brace", &self.with(right_brace))?;
-      ss.end()
-} 
-SyntaxVariant::PackageIncludes (PackageIncludesChildren{include_keyword,left_brace,includes,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "package_includes")?;
-      ss.serialize_field("package_includes_include_keyword", &self.with(include_keyword))?;
-ss.serialize_field("package_includes_left_brace", &self.with(left_brace))?;
-ss.serialize_field("package_includes_includes", &self.with(includes))?;
-ss.serialize_field("package_includes_right_brace", &self.with(right_brace))?;
-      ss.end()
-} 
 
         }
     }

@@ -2215,7 +2215,6 @@ where
             {
                 self.parse_module_declaration(attribute_specification)
             }
-            TokenKind::Package => self.parse_package_declaration(attribute_specification),
             _ => {
                 // ERROR RECOVERY: we encountered an unexpected token, raise an error and continue
                 // TODO: This is wrong; we have lost the attribute specification
@@ -2564,70 +2563,6 @@ where
             .make_module_membership_declaration(module_kw, name, semicolon)
     }
 
-    fn parse_package_declaration(&mut self, attrs: S::Output) -> S::Output {
-        let package_kw = self.assert_token(TokenKind::Package);
-
-        let name = self.require_token(TokenKind::Name, Errors::error1004);
-        let lb = self.require_left_brace();
-        let pos = self.pos();
-        let mut uses_block = self.sc_mut().make_missing(pos);
-        let mut includes_block = self.sc_mut().make_missing(pos);
-        loop {
-            let kind = self.peek_token_kind();
-
-            match kind {
-                TokenKind::Use => {
-                    let use_kw = self.require_token(TokenKind::Use, Errors::error1070);
-                    let use_lb = self.require_left_brace();
-                    let clauses = self.parse_comma_list_allow_trailing_opt(
-                        TokenKind::RightBrace,
-                        Errors::error1004,
-                        |x: &mut Self| x.require_qualified_referenced_module_name(),
-                    );
-                    let use_rb = self.require_right_brace();
-
-                    if !uses_block.is_missing() {
-                        self.with_error(Errors::error1068);
-                    }
-
-                    uses_block = self
-                        .sc_mut()
-                        .make_package_uses(use_kw, use_lb, clauses, use_rb);
-                }
-                TokenKind::Include => {
-                    let include_kw = self.require_token(TokenKind::Include, Errors::error1070);
-                    let include_lb = self.require_left_brace();
-                    let clauses = self.parse_comma_list_allow_trailing_opt(
-                        TokenKind::RightBrace,
-                        Errors::error1004,
-                        |x: &mut Self| x.require_name(),
-                    );
-                    let include_rb = self.require_right_brace();
-
-                    if !includes_block.is_missing() {
-                        self.with_error(Errors::error1069);
-                    }
-
-                    includes_block = self
-                        .sc_mut()
-                        .make_package_includes(include_kw, include_lb, clauses, include_rb);
-                }
-                _ => {
-                    let rb = self.require_right_brace();
-                    return self.sc_mut().make_package_declaration(
-                        attrs,
-                        package_kw,
-                        name,
-                        lb,
-                        uses_block,
-                        includes_block,
-                        rb,
-                    );
-                }
-            }
-        }
-    }
-
     fn parse_declaration(&mut self) -> S::Output {
         self.expect_in_new_scope(ExpectedTokens::Classish);
         let mut parser1 = self.clone();
@@ -2718,11 +2653,6 @@ where
                 let pos = self.pos();
                 let missing = self.sc_mut().make_missing(pos);
                 self.parse_module_declaration(missing)
-            }
-            TokenKind::Package => {
-                let pos = self.pos();
-                let missing = self.sc_mut().make_missing(pos);
-                self.parse_package_declaration(missing)
             }
             // TODO: What if it's not a legal statement? Do we still make progress here?
             _ => self.with_statement_parser(|p: &mut StatementParser<'a, S>| p.parse_statement()),

@@ -1753,39 +1753,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            PackageDeclaration(x) => {
-                get_index(7).and_then(|index| { match index {
-                        0 => Some(&x.attribute_spec),
-                    1 => Some(&x.package_keyword),
-                    2 => Some(&x.name),
-                    3 => Some(&x.left_brace),
-                    4 => Some(&x.uses),
-                    5 => Some(&x.includes),
-                    6 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            PackageUses(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.use_keyword),
-                    1 => Some(&x.left_brace),
-                    2 => Some(&x.uses),
-                    3 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            PackageIncludes(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.include_keyword),
-                    1 => Some(&x.left_brace),
-                    2 => Some(&x.includes),
-                    3 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
 
         };
         if res.is_some() {

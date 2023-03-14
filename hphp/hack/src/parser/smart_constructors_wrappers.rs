@@ -593,15 +593,6 @@ where S: SmartConstructors<State = St>,
     fn make_module_membership_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ModuleMembershipDeclaration, self.s.make_module_membership_declaration(arg0.1, arg1.1, arg2.1))
     }
-    fn make_package_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::PackageDeclaration, self.s.make_package_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1, arg6.1))
-    }
-    fn make_package_uses(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::PackageUses, self.s.make_package_uses(arg0.1, arg1.1, arg2.1, arg3.1))
-    }
-    fn make_package_includes(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
-        compose(SyntaxKind::PackageIncludes, self.s.make_package_includes(arg0.1, arg1.1, arg2.1, arg3.1))
-    }
 
 }
 

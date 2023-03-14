@@ -1164,26 +1164,5 @@ struct
         module_membership_declaration_name: t;
         module_membership_declaration_semicolon: t;
       }
-    | PackageDeclaration of {
-        package_declaration_attribute_spec: t;
-        package_declaration_package_keyword: t;
-        package_declaration_name: t;
-        package_declaration_left_brace: t;
-        package_declaration_uses: t;
-        package_declaration_includes: t;
-        package_declaration_right_brace: t;
-      }
-    | PackageUses of {
-        package_uses_use_keyword: t;
-        package_uses_left_brace: t;
-        package_uses_uses: t;
-        package_uses_right_brace: t;
-      }
-    | PackageIncludes of {
-        package_includes_include_keyword: t;
-        package_includes_left_brace: t;
-        package_includes_includes: t;
-        package_includes_right_brace: t;
-      }
   [@@deriving sexp_of]
 end

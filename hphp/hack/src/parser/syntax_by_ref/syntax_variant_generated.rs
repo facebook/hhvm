@@ -199,9 +199,6 @@ pub enum SyntaxVariant<'a, T, V> {
     ModuleExports(&'a ModuleExportsChildren<'a, T, V>),
     ModuleImports(&'a ModuleImportsChildren<'a, T, V>),
     ModuleMembershipDeclaration(&'a ModuleMembershipDeclarationChildren<'a, T, V>),
-    PackageDeclaration(&'a PackageDeclarationChildren<'a, T, V>),
-    PackageUses(&'a PackageUsesChildren<'a, T, V>),
-    PackageIncludes(&'a PackageIncludesChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -1567,33 +1564,6 @@ pub struct ModuleMembershipDeclarationChildren<'a, T, V> {
     pub module_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PackageDeclarationChildren<'a, T, V> {
-    pub attribute_spec: Syntax<'a, T, V>,
-    pub package_keyword: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub uses: Syntax<'a, T, V>,
-    pub includes: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PackageUsesChildren<'a, T, V> {
-    pub use_keyword: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub uses: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct PackageIncludesChildren<'a, T, V> {
-    pub include_keyword: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub includes: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
 }
 
 

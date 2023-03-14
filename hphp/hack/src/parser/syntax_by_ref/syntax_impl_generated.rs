@@ -198,9 +198,6 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::ModuleExports {..} => SyntaxKind::ModuleExports,
             SyntaxVariant::ModuleImports {..} => SyntaxKind::ModuleImports,
             SyntaxVariant::ModuleMembershipDeclaration {..} => SyntaxKind::ModuleMembershipDeclaration,
-            SyntaxVariant::PackageDeclaration {..} => SyntaxKind::PackageDeclaration,
-            SyntaxVariant::PackageUses {..} => SyntaxKind::PackageUses,
-            SyntaxVariant::PackageIncludes {..} => SyntaxKind::PackageIncludes,
         }
     }
 }

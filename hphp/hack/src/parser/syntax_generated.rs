@@ -1909,42 +1909,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_package_declaration(_: &C, package_declaration_attribute_spec: Self, package_declaration_package_keyword: Self, package_declaration_name: Self, package_declaration_left_brace: Self, package_declaration_uses: Self, package_declaration_includes: Self, package_declaration_right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PackageDeclaration(Box::new(PackageDeclarationChildren {
-            package_declaration_attribute_spec,
-            package_declaration_package_keyword,
-            package_declaration_name,
-            package_declaration_left_brace,
-            package_declaration_uses,
-            package_declaration_includes,
-            package_declaration_right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_package_uses(_: &C, package_uses_use_keyword: Self, package_uses_left_brace: Self, package_uses_uses: Self, package_uses_right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PackageUses(Box::new(PackageUsesChildren {
-            package_uses_use_keyword,
-            package_uses_left_brace,
-            package_uses_uses,
-            package_uses_right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_package_includes(_: &C, package_includes_include_keyword: Self, package_includes_left_brace: Self, package_includes_includes: Self, package_includes_right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::PackageIncludes(Box::new(PackageIncludesChildren {
-            package_includes_include_keyword,
-            package_includes_left_brace,
-            package_includes_includes,
-            package_includes_right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
  }
 
 impl<T, V> Syntax<T, V>
@@ -3331,33 +3295,6 @@ where
                 let acc = f(module_membership_declaration_semicolon, acc);
                 acc
             },
-            SyntaxVariant::PackageDeclaration(x) => {
-                let PackageDeclarationChildren { package_declaration_attribute_spec, package_declaration_package_keyword, package_declaration_name, package_declaration_left_brace, package_declaration_uses, package_declaration_includes, package_declaration_right_brace } = *x;
-                let acc = f(package_declaration_attribute_spec, acc);
-                let acc = f(package_declaration_package_keyword, acc);
-                let acc = f(package_declaration_name, acc);
-                let acc = f(package_declaration_left_brace, acc);
-                let acc = f(package_declaration_uses, acc);
-                let acc = f(package_declaration_includes, acc);
-                let acc = f(package_declaration_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::PackageUses(x) => {
-                let PackageUsesChildren { package_uses_use_keyword, package_uses_left_brace, package_uses_uses, package_uses_right_brace } = *x;
-                let acc = f(package_uses_use_keyword, acc);
-                let acc = f(package_uses_left_brace, acc);
-                let acc = f(package_uses_uses, acc);
-                let acc = f(package_uses_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::PackageIncludes(x) => {
-                let PackageIncludesChildren { package_includes_include_keyword, package_includes_left_brace, package_includes_includes, package_includes_right_brace } = *x;
-                let acc = f(package_includes_include_keyword, acc);
-                let acc = f(package_includes_left_brace, acc);
-                let acc = f(package_includes_includes, acc);
-                let acc = f(package_includes_right_brace, acc);
-                acc
-            },
 
         }
     }
@@ -3540,9 +3477,6 @@ where
             SyntaxVariant::ModuleExports {..} => SyntaxKind::ModuleExports,
             SyntaxVariant::ModuleImports {..} => SyntaxKind::ModuleImports,
             SyntaxVariant::ModuleMembershipDeclaration {..} => SyntaxKind::ModuleMembershipDeclaration,
-            SyntaxVariant::PackageDeclaration {..} => SyntaxKind::PackageDeclaration,
-            SyntaxVariant::PackageUses {..} => SyntaxKind::PackageUses,
-            SyntaxVariant::PackageIncludes {..} => SyntaxKind::PackageIncludes,
         }
     }
 
@@ -4742,30 +4676,6 @@ where
                  module_membership_declaration_module_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::PackageDeclaration, 7) => SyntaxVariant::PackageDeclaration(Box::new(PackageDeclarationChildren {
-                 package_declaration_right_brace: ts.pop().unwrap(),
-                 package_declaration_includes: ts.pop().unwrap(),
-                 package_declaration_uses: ts.pop().unwrap(),
-                 package_declaration_left_brace: ts.pop().unwrap(),
-                 package_declaration_name: ts.pop().unwrap(),
-                 package_declaration_package_keyword: ts.pop().unwrap(),
-                 package_declaration_attribute_spec: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PackageUses, 4) => SyntaxVariant::PackageUses(Box::new(PackageUsesChildren {
-                 package_uses_right_brace: ts.pop().unwrap(),
-                 package_uses_uses: ts.pop().unwrap(),
-                 package_uses_left_brace: ts.pop().unwrap(),
-                 package_uses_use_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::PackageIncludes, 4) => SyntaxVariant::PackageIncludes(Box::new(PackageIncludesChildren {
-                 package_includes_right_brace: ts.pop().unwrap(),
-                 package_includes_includes: ts.pop().unwrap(),
-                 package_includes_left_brace: ts.pop().unwrap(),
-                 package_includes_include_keyword: ts.pop().unwrap(),
-                 
-             })),
              _ => panic!("from_children called with wrong number of children"),
          }
     }
@@ -4948,9 +4858,6 @@ where
             SyntaxVariant::ModuleExports(x) => unsafe { std::slice::from_raw_parts(&x.module_exports_exports_keyword, 4) },
             SyntaxVariant::ModuleImports(x) => unsafe { std::slice::from_raw_parts(&x.module_imports_imports_keyword, 4) },
             SyntaxVariant::ModuleMembershipDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.module_membership_declaration_module_keyword, 3) },
-            SyntaxVariant::PackageDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.package_declaration_attribute_spec, 7) },
-            SyntaxVariant::PackageUses(x) => unsafe { std::slice::from_raw_parts(&x.package_uses_use_keyword, 4) },
-            SyntaxVariant::PackageIncludes(x) => unsafe { std::slice::from_raw_parts(&x.package_includes_include_keyword, 4) },
         }
     }
 
@@ -5132,9 +5039,6 @@ where
             SyntaxVariant::ModuleExports(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_exports_exports_keyword, 4) },
             SyntaxVariant::ModuleImports(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_imports_imports_keyword, 4) },
             SyntaxVariant::ModuleMembershipDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_membership_declaration_module_keyword, 3) },
-            SyntaxVariant::PackageDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.package_declaration_attribute_spec, 7) },
-            SyntaxVariant::PackageUses(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.package_uses_use_keyword, 4) },
-            SyntaxVariant::PackageIncludes(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.package_includes_include_keyword, 4) },
         }
     }
 }
@@ -6677,36 +6581,6 @@ pub struct ModuleMembershipDeclarationChildren<T, V> {
     pub module_membership_declaration_semicolon: Syntax<T, V>,
 }
 
-#[derive(Debug, Clone)]
-#[repr(C)]
-pub struct PackageDeclarationChildren<T, V> {
-    pub package_declaration_attribute_spec: Syntax<T, V>,
-    pub package_declaration_package_keyword: Syntax<T, V>,
-    pub package_declaration_name: Syntax<T, V>,
-    pub package_declaration_left_brace: Syntax<T, V>,
-    pub package_declaration_uses: Syntax<T, V>,
-    pub package_declaration_includes: Syntax<T, V>,
-    pub package_declaration_right_brace: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-#[repr(C)]
-pub struct PackageUsesChildren<T, V> {
-    pub package_uses_use_keyword: Syntax<T, V>,
-    pub package_uses_left_brace: Syntax<T, V>,
-    pub package_uses_uses: Syntax<T, V>,
-    pub package_uses_right_brace: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-#[repr(C)]
-pub struct PackageIncludesChildren<T, V> {
-    pub package_includes_include_keyword: Syntax<T, V>,
-    pub package_includes_left_brace: Syntax<T, V>,
-    pub package_includes_includes: Syntax<T, V>,
-    pub package_includes_right_brace: Syntax<T, V>,
-}
-
 
 #[derive(Debug, Clone)]
 pub enum SyntaxVariant<T, V> {
@@ -6886,9 +6760,6 @@ pub enum SyntaxVariant<T, V> {
     ModuleExports(Box<ModuleExportsChildren<T, V>>),
     ModuleImports(Box<ModuleImportsChildren<T, V>>),
     ModuleMembershipDeclaration(Box<ModuleMembershipDeclarationChildren<T, V>>),
-    PackageDeclaration(Box<PackageDeclarationChildren<T, V>>),
-    PackageUses(Box<PackageUsesChildren<T, V>>),
-    PackageIncludes(Box<PackageIncludesChildren<T, V>>),
 }
 
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
@@ -8618,39 +8489,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.module_membership_declaration_module_keyword),
                     1 => Some(&x.module_membership_declaration_name),
                     2 => Some(&x.module_membership_declaration_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            PackageDeclaration(x) => {
-                get_index(7).and_then(|index| { match index {
-                        0 => Some(&x.package_declaration_attribute_spec),
-                    1 => Some(&x.package_declaration_package_keyword),
-                    2 => Some(&x.package_declaration_name),
-                    3 => Some(&x.package_declaration_left_brace),
-                    4 => Some(&x.package_declaration_uses),
-                    5 => Some(&x.package_declaration_includes),
-                    6 => Some(&x.package_declaration_right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            PackageUses(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.package_uses_use_keyword),
-                    1 => Some(&x.package_uses_left_brace),
-                    2 => Some(&x.package_uses_uses),
-                    3 => Some(&x.package_uses_right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            PackageIncludes(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.package_includes_include_keyword),
-                    1 => Some(&x.package_includes_left_brace),
-                    2 => Some(&x.package_includes_includes),
-                    3 => Some(&x.package_includes_right_brace),
                         _ => None,
                     }
                 })

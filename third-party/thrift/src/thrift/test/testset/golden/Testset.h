@@ -13140,6 +13140,666 @@ struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Lazy, FieldM
 };
 
 template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<>> {
+  using type = struct_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<>> {
+  using type = struct_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<>> {
+  using type = struct_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<>> {
+  using type = struct_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<>> {
+  using type = struct_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<>> {
+  using type = struct_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<>> {
+  using type = struct_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<>> {
+  using type = struct_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<>> {
+  using type = struct_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = struct_list_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = struct_set_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = struct_set_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_string_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = struct_map_adapted_typedef_i64_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_bool_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_byte_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_i16_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_i32_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_i64_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_float_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_double_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_binary_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<FieldModifier::CustomDefault>> {
+  using type = struct_adapted_typedef_string_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_bool_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_byte_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_i16_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_i32_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_i64_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_float_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_double_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_binary_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<FieldModifier::AlternativeCustomDefault>> {
+  using type = struct_adapted_typedef_string_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_list_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_set_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_set_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_string_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::Adapter>> {
+  using type = struct_adapted_map_adapted_typedef_i64_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_list_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_set_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_set_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_string_adapted_typedef_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<FieldModifier::FieldAdapter>> {
+  using type = struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_string;
+};
+
+template <>
 struct union_ByFieldType<type::list<type::bool_t>, mod_set<>> {
   using type = union_list_bool;
 };
@@ -14217,6 +14877,386 @@ struct union_ByFieldType<type::binary_t, mod_set<FieldModifier::OpEncode>> {
 template <>
 struct union_ByFieldType<type::string_t, mod_set<FieldModifier::OpEncode>> {
   using type = union_string_op_encoded;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<>> {
+  using type = union_adapted_typedef_bool;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<>> {
+  using type = union_adapted_typedef_byte;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<>> {
+  using type = union_adapted_typedef_i16;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<>> {
+  using type = union_adapted_typedef_i32;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<>> {
+  using type = union_adapted_typedef_i64;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<>> {
+  using type = union_adapted_typedef_float;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<>> {
+  using type = union_adapted_typedef_double;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<>> {
+  using type = union_adapted_typedef_binary;
+};
+
+template <>
+struct union_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<>> {
+  using type = union_adapted_typedef_string;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_bool;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_byte;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_i16;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_i32;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_i64;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_float;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_double;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_binary;
+};
+
+template <>
+struct union_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = union_list_adapted_typedef_string;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = union_set_adapted_typedef_string;
+};
+
+template <>
+struct union_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = union_set_adapted_typedef_i64;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_bool;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_byte;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_i16;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_i32;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_i64;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_float;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_double;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_binary;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_string_adapted_typedef_string;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_bool;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_byte;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_i16;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_i32;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_i64;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_float;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_double;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_binary;
+};
+
+template <>
+struct union_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = union_map_adapted_typedef_i64_adapted_typedef_string;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>, mod_set<>> {
+  using type = exception_adapted_typedef_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>, mod_set<>> {
+  using type = exception_adapted_typedef_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>, mod_set<>> {
+  using type = exception_adapted_typedef_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>, mod_set<>> {
+  using type = exception_adapted_typedef_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, mod_set<>> {
+  using type = exception_adapted_typedef_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>, mod_set<>> {
+  using type = exception_adapted_typedef_float;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>, mod_set<>> {
+  using type = exception_adapted_typedef_double;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>, mod_set<>> {
+  using type = exception_adapted_typedef_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, mod_set<>> {
+  using type = exception_adapted_typedef_string;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_float;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_double;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = exception_list_adapted_typedef_string;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = exception_set_adapted_typedef_string;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = exception_set_adapted_typedef_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_float;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_double;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_string_adapted_typedef_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::bool_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::byte_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i16_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i32_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::float_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_float;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::double_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_double;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::binary_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::i64_t>, type::adapted<::apache::thrift::test::TemplatedTestAdapter, type::string_t>>, mod_set<>> {
+  using type = exception_map_adapted_typedef_i64_adapted_typedef_string;
 };
 
 

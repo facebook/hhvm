@@ -17,7 +17,7 @@ import doctest
 import os
 import sys
 from enum import Enum
-from typing import Dict, Iterable, List, TextIO
+from typing import Dict, Iterable, List, Optional, TextIO
 
 
 class Target(Enum):
@@ -146,6 +146,12 @@ KEY_TYPES = (
 
 CPP2_TYPE_NS = "type"
 
+HACK_TYPE_ADAPTER = "|@hack.Adapter{{name = 'ConformanceTestAdapter_{}'}}"
+OTHER_TYPE_ADAPTERS = "|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestAdapter'}}|@java.Adapter{{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}"
+TYPE_ADAPTERS: str = OTHER_TYPE_ADAPTERS + HACK_TYPE_ADAPTER
+
+FIELD_ADAPTERS = "|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}}|@java.Wrapper{{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}|@hack.Wrapper{{name = '\\ConformanceTestFieldWrapper'}}"
+
 PRIMATIVE_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "{}",
     Target.THRIFT: "{}",
@@ -262,14 +268,38 @@ BOX_TRANSFORM: Dict[Target, str] = {
 
 ADAPTER_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "adapted_{}",
-    Target.THRIFT: "{0}|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestAdapter'}}|@java.Adapter{{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}|@hack.Adapter{{name = 'ConformanceTestAdapter_{1}'}}",
+    Target.THRIFT: "{}" + TYPE_ADAPTERS,
+    Target.CPP2: "{}|FieldModifier::Adapter",
+}
+
+NON_HACK_ADAPTER_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "adapted_{}",
+    Target.THRIFT: "{}" + OTHER_TYPE_ADAPTERS,
     Target.CPP2: "{}|FieldModifier::Adapter",
 }
 
 FIELD_ADAPTER_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "field_adapted_{}",
-    Target.THRIFT: "{}|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}}|@java.Wrapper{{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}",
+    Target.THRIFT: "{}" + FIELD_ADAPTERS,
     Target.CPP2: "{}|FieldModifier::FieldAdapter",
+}
+
+ADAPTED_TYPEDEF_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "adapted_typedef_{}",
+    Target.THRIFT: "typedef {} {}" + TYPE_ADAPTERS,
+    Target.CPP2: "{}",
+}
+
+TYPEDEF_STRUCT_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "struct_{}",
+    Target.THRIFT: "@cpp.UseOpEncode\nstruct {}",
+    Target.CPP2: CPP2_TYPE_NS + "::struct_t<{}>",
+}
+
+HACK_NONCONFORMING_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "{}",
+    Target.THRIFT: "{}|@hack.SkipCodegen{{reason = 'Invalid key type'}}",
+    Target.CPP2: "{}",
 }
 
 
@@ -305,6 +335,19 @@ def get_custom_default(s: str) -> str:
     if not has_custom_default(s):
         return ""
     return s[s.find("{") + 1 : s.find("}")]
+
+
+def has_modifiers(s: str) -> bool:
+    return "|" in s
+
+
+def remove_modifiers(s: str) -> str:
+    return s.partition("|")[0]
+
+
+def get_modifiers(s: str) -> str:
+    partition = s.partition("|")
+    return partition[1] + partition[2]
 
 
 def gen_primatives_impl(
@@ -406,8 +449,13 @@ def gen_box(target: Target, values: Dict[str, str]) -> Dict[str, str]:
     return _gen_unary_tramsform(BOX_TRANSFORM, target, values)
 
 
-def gen_adapted(target: Target, values: Dict[str, str]) -> Dict[str, str]:
-    return _gen_unary_tramsform(ADAPTER_TRANSFORM, target, values)
+def gen_adapted(
+    target: Target, values: Dict[str, str], include_hack: bool = True
+) -> Dict[str, str]:
+    if include_hack:
+        return _gen_unary_tramsform(ADAPTER_TRANSFORM, target, values)
+    else:
+        return _gen_unary_tramsform(NON_HACK_ADAPTER_TRANSFORM, target, values)
 
 
 def gen_field_adapted(target: Target, values: Dict[str, str]) -> Dict[str, str]:
@@ -464,12 +512,137 @@ def gen_struct_fields(target: Target) -> Dict[str, str]:
     return ret
 
 
+def gen_exclude_hack(target: Target, values: Dict[str, str]) -> Dict[str, str]:
+    return _gen_unary_tramsform(HACK_NONCONFORMING_TRANSFORM, target, values)
+
+
+def gen_adapted_typedefs_transform(
+    target: Target, values: Dict[str, str]
+) -> Dict[str, str]:
+    adapted_typedefs = {}
+    for key in values:
+        if target == Target.CPP2:
+            adapted_typedefs[f"adapted_typedef_{key}"] = (
+                "type::adapted<::apache::thrift::test::TemplatedTestAdapter, "
+                + f"{remove_modifiers(values[key])}>{get_modifiers(values[key])}"
+            )
+        else:
+            if has_custom_default(values[key]):
+                adapted_typedefs[
+                    f"adapted_typedef_{key}"
+                ] = f"adapted_typedef_{remove_custom_default(values[key])}{{{get_custom_default(values[key])}}}"
+            else:
+                adapted_typedefs[f"adapted_typedef_{key}"] = f"adapted_typedef_{key}"
+    return adapted_typedefs
+
+
+def gen_adapted_typedef_fields(target: Target) -> Dict[str, str]:
+    primitives = gen_primatives(target)
+    return gen_adapted_typedefs_transform(target, primitives)
+
+
+def gen_adapted_typedef_key_fields(target: Target) -> Dict[str, str]:
+    primitives = gen_primatives(target, KEY_TYPES)
+    return gen_adapted_typedefs_transform(target, primitives)
+
+
+def gen_adapted_typedef_fields_with_custom_default(target: Target) -> Dict[str, str]:
+    primitives = gen_primatives_with_custom_default(target)
+    return gen_adapted_typedefs_transform(target, primitives)
+
+
+def gen_adapted_typedef_fields_with_alternative_custom_default(
+    target: Target,
+) -> Dict[str, str]:
+    primitives = gen_primatives_with_alternative_custom_default(target)
+    return gen_adapted_typedefs_transform(target, primitives)
+
+
+def gen_union_adapted_typedef_fields(target: Target) -> Dict[str, str]:
+    ret = gen_adapted_typedef_fields(target)
+    ret.update(**gen_lists(target, gen_adapted_typedef_fields(target)))
+    ret.update(
+        **gen_exclude_hack(
+            target,
+            gen_sets(target, gen_adapted_typedef_key_fields(target)),
+        )
+    )
+    ret.update(
+        **gen_exclude_hack(
+            target,
+            gen_maps(
+                target,
+                gen_adapted_typedef_key_fields(target),
+                gen_adapted_typedef_fields(target),
+            ),
+        )
+    )
+    return ret
+
+
+def gen_adapted_typedef_structs(target: Target) -> Dict[str, str]:
+    ret = gen_union_adapted_typedef_fields(target)
+    ret.update(**gen_adapted_typedef_fields_with_custom_default(target))
+    ret.update(**gen_adapted_typedef_fields_with_alternative_custom_default(target))
+    ret.update(
+        **gen_adapted(
+            target, gen_union_adapted_typedef_fields(target), include_hack=False
+        )
+    )
+    ret.update(**gen_field_adapted(target, gen_union_adapted_typedef_fields(target)))
+    return ret
+
+
 def is_structured_annot(annot: str) -> bool:
     return annot[0] == "@"
 
 
 def is_unstructured_annot(annot: str) -> bool:
     return not is_structured_annot(annot)
+
+
+def gen_thrift_value(
+    field_type: str,
+    idx: Optional[int],
+) -> str:
+    annotations = ""
+    structured_annotations = ""
+    if has_modifiers(field_type):
+        v = field_type.split("|")
+        field_type = v[0]
+
+        annots = list(filter(is_unstructured_annot, v[1:]))
+        structured_annots = list(filter(is_structured_annot, v[1:]))
+
+        if annots:
+            annotations = " (" + ", ".join(annots) + ")"
+        if structured_annots:
+            structured_annotations = "  " + "\n  ".join(structured_annots) + "\n"
+    if not has_custom_default(field_type):
+        if idx is not None:
+            return "{3}  {0}: {1} field_{0}{2};".format(
+                idx + 1, field_type, annotations, structured_annotations
+            )
+        else:
+            return "{2}  {0} {1}".format(
+                field_type, annotations, structured_annotations
+            )
+    else:
+        if idx is not None:
+            return "{4}  {0}: {1} field_{0} = {2}{3};".format(
+                idx + 1,
+                remove_custom_default(field_type),
+                get_custom_default(field_type),
+                annotations,
+                structured_annotations,
+            )
+        else:
+            return "{3}  {0} = {1}{2};".format(
+                remove_custom_default(field_type),
+                get_custom_default(field_type),
+                annotations,
+                structured_annotations,
+            )
 
 
 def gen_thrift_def(
@@ -491,50 +664,44 @@ def gen_thrift_def(
     decl = transform[Target.THRIFT].format(name)
     lines = [f"{decl} {{"]
     for idx, field_type in enumerate(field_types):
-        annotations = ""
-        structured_annotations = ""
-        if "|" in field_type:
-            v = field_type.split("|")
-            field_type = v[0]
-
-            annots = list(filter(is_unstructured_annot, v[1:]))
-            structured_annots = list(filter(is_structured_annot, v[1:]))
-
-            if annots:
-                annotations = " (" + ", ".join(annots) + ")"
-            if structured_annots:
-                structured_annotations = "  " + "\n  ".join(structured_annots) + "\n"
-        if not has_custom_default(field_type):
-            lines.append(
-                "{3}  {0}: {1} field_{0}{2};".format(
-                    idx + 1, field_type, annotations, structured_annotations
-                )
-            )
-        else:
-            lines.append(
-                "{4}  {0}: {1} field_{0} = {2}{3};".format(
-                    idx + 1,
-                    remove_custom_default(field_type),
-                    get_custom_default(field_type),
-                    annotations,
-                    structured_annotations,
-                )
-            )
+        lines.append(gen_thrift_value(field_type, idx))
     lines.append(f'}} (thrift.uri="facebook.com/thrift/test/testset/{name}")')
     return "\n".join(lines)
 
 
-def print_thrift_defs(
+def print_thrift_typedefs(
+    transform: Dict[Target, str], fields: Dict[str, str], *, file: TextIO = sys.stdout
+) -> List[str]:
+    classes = []
+    for name, value_t in fields.items():
+        class_name = transform[Target.NAME].format(name)
+        classes.append(class_name)
+        class_name += get_modifiers(value_t)
+        value_t = remove_modifiers(value_t)
+        print(
+            gen_thrift_value(
+                transform[Target.THRIFT].format(value_t, class_name, class_name), None
+            ),
+            file=file,
+        )
+    return classes
+
+
+def print_thrift_structs(
     transform: Dict[Target, str],
     fields: Dict[str, str],
     count: int = 1,
+    include_empty: bool = True,
     *,
     file: TextIO = sys.stdout,
 ) -> List[str]:
     """Prints one thrift class def per field in fields and returns the names of all the classes."""
-    empty_name = transform[Target.NAME].format("empty")
-    print(gen_thrift_def(transform, empty_name, []), file=file)
-    classes = [empty_name]
+    if include_empty:
+        empty_name = transform[Target.NAME].format("empty")
+        print(gen_thrift_def(transform, empty_name, []), file=file)
+        classes = [empty_name]
+    else:
+        classes = []
     for name, value_t in fields.items():
         class_name = transform[Target.NAME].format(name)
         classes.append(class_name)
@@ -549,24 +716,46 @@ def gen_thrift(path: str) -> None:
 
         # Generate all structs.
         struct_fields = gen_struct_fields(Target.THRIFT)
-        classes.extend(print_thrift_defs(STRUCT_TRANSFORM, struct_fields, file=file))
+        classes.extend(print_thrift_structs(STRUCT_TRANSFORM, struct_fields, file=file))
         classes.extend(
-            print_thrift_defs(OP_ENCODED_STRUCT_TRANSFORM, struct_fields, file=file)
+            print_thrift_structs(OP_ENCODED_STRUCT_TRANSFORM, struct_fields, file=file)
         )
 
         # Generate all exceptions, with the struct fields.
-        print_thrift_defs(EXCEPTION_TRANSFORM, struct_fields, file=file)
-        print_thrift_defs(OP_ENCODED_EXCEPTION_TRANSFORM, struct_fields, file=file)
+        print_thrift_structs(EXCEPTION_TRANSFORM, struct_fields, file=file)
+        print_thrift_structs(OP_ENCODED_EXCEPTION_TRANSFORM, struct_fields, file=file)
 
-        # Generate all unions.
-        union_fields = gen_union_fields(Target.THRIFT)
+        # Generate all typedefs and structs that use them.
+        typedef_fields = gen_primatives(Target.THRIFT)
+        print_thrift_typedefs(ADAPTED_TYPEDEF_TRANSFORM, typedef_fields, file=file)
         classes.extend(
-            print_thrift_defs(UNION_TRANSFORM, union_fields, count=2, file=file)
+            print_thrift_structs(
+                TYPEDEF_STRUCT_TRANSFORM,
+                gen_adapted_typedef_structs(Target.THRIFT),
+                include_empty=False,
+                file=file,
+            )
+        )
+
+        union_fields = gen_union_fields(Target.THRIFT)
+        # Generate all unions.
+        classes.extend(
+            print_thrift_structs(UNION_TRANSFORM, union_fields, count=2, file=file)
         )
         classes.extend(
-            print_thrift_defs(
+            print_thrift_structs(
                 OP_ENCODED_UNION_TRANSFORM, union_fields, count=2, file=file
             )
+        )
+
+        union_typedefs = gen_union_adapted_typedef_fields(Target.THRIFT)
+        classes.extend(
+            print_thrift_structs(
+                UNION_TRANSFORM, union_typedefs, include_empty=False, count=2, file=file
+            )
+        )
+        print_thrift_structs(
+            EXCEPTION_TRANSFORM, union_typedefs, include_empty=False, file=file
         )
 
 
@@ -581,11 +770,10 @@ def print_cpp2_specialization(
     transform: Dict[Target, str], fields: Dict[str, str], *, file: TextIO = sys.stdout
 ) -> None:
     for field, value_mods in fields.items():
-        splits = value_mods.split("|")
-        value_t = splits[0]
-        mods = splits[1:]
-        mods += transform[Target.CPP2].format(field).split("|")[1:]
-        mods = ", ".join(mods)
+        value_t = remove_modifiers(value_mods)
+        mods = get_modifiers(value_mods)
+        mods += get_modifiers(transform[Target.CPP2].format(field))
+        mods = mods[1:].replace("|", ", ")
         name = transform[Target.NAME].format(field)
         by_type = name.split("_")[0] + "_ByFieldType"
         print(CPP2_SPECIALIZE_TEMPLATE.format(by_type, value_t, mods, name), file=file)
@@ -606,10 +794,20 @@ def gen_cpp2(path: str) -> None:
             OP_ENCODED_EXCEPTION_TRANSFORM, struct_fields, file=file
         )
 
+        print_cpp2_specialization(
+            TYPEDEF_STRUCT_TRANSFORM,
+            gen_adapted_typedef_structs(Target.CPP2),
+            file=file,
+        )
+
         # Generate specialization for all unions.
         union_fields = gen_union_fields(Target.CPP2)
         print_cpp2_specialization(UNION_TRANSFORM, union_fields, file=file)
         print_cpp2_specialization(OP_ENCODED_UNION_TRANSFORM, union_fields, file=file)
+
+        union_typedefs = gen_union_adapted_typedef_fields(Target.CPP2)
+        print_cpp2_specialization(UNION_TRANSFORM, union_typedefs, file=file)
+        print_cpp2_specialization(EXCEPTION_TRANSFORM, union_typedefs, file=file)
 
         print(CPP2_FOOTER, file=file)
 

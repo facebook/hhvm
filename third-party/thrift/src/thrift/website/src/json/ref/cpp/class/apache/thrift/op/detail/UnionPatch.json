@@ -77,15 +77,15 @@
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a0af3ab3096a6561e649cd9bc0d5320f7",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1UnionPatch_1a5fbb25547e8184548078566b731cf27b",
       "prot": "private",
       "tparams": [
         {
           "type_html": "typename Id"
         }
       ],
-      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;Id, T&gt;&gt;",
-      "definition_html": "using apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::F =  type::native_type&lt;get_field_tag&lt;Id, T&gt; &gt;",
+      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;T, Id&gt;&gt;",
+      "definition_html": "using apache::thrift::op::detail::UnionPatch&lt; Patch &gt;::F =  type::native_type&lt;get_field_tag&lt;T, Id&gt; &gt;",
       "argsstring_html": "",
       "name_html": "F",
       "location": {

@@ -60,15 +60,15 @@
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a7c3d92eb0b116adc73b54245589748b9",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1StructPatch_1a73a8f23890ee2feeb4383b33e8ea8524",
       "prot": "private",
       "tparams": [
         {
           "type_html": "typename Id"
         }
       ],
-      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;Id, T&gt;&gt;",
-      "definition_html": "using apache::thrift::op::detail::StructPatch&lt; Patch &gt;::F =  type::native_type&lt;get_field_tag&lt;Id, T&gt; &gt;",
+      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;T, Id&gt;&gt;",
+      "definition_html": "using apache::thrift::op::detail::StructPatch&lt; Patch &gt;::F =  type::native_type&lt;get_field_tag&lt;T, Id&gt; &gt;",
       "argsstring_html": "",
       "name_html": "F",
       "location": {

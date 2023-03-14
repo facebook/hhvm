@@ -93,15 +93,15 @@
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp"
     },
     {
-      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1a1d661c38a1d9972e0f312b832fd30de0",
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1StructuredOp_1abfcd955b1082aa543f7e944b9666d967",
       "prot": "public",
       "tparams": [
         {
           "type_html": "typename Id"
         }
       ],
-      "type_html": "<code>op::get_field_tag</code>&lt;Id,<code> T</code>&gt;",
-      "definition_html": "using apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::FTag =  op::get_field_tag&lt;Id, T&gt;",
+      "type_html": "<code>op::get_field_tag</code>&lt;<code>T</code>, Id&gt;",
+      "definition_html": "using apache::thrift::op::detail::StructuredOp&lt; T, Tag &gt;::FTag =  op::get_field_tag&lt;T, Id&gt;",
       "argsstring_html": "",
       "name_html": "FTag",
       "location": {

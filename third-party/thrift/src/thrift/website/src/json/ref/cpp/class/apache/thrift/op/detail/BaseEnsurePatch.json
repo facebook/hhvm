@@ -67,15 +67,15 @@
       "parentid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch"
     },
     {
-      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1aee220c151b2b4ad3af04c21e79f34fcb",
+      "refid": "classapache_1_1thrift_1_1op_1_1detail_1_1BaseEnsurePatch_1ae474803b6aaf8de6eb599acadd2b3ed1",
       "prot": "private",
       "tparams": [
         {
           "type_html": "typename Id"
         }
       ],
-      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;Id, T&gt;&gt;",
-      "definition_html": "using apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::F =  type::native_type&lt;get_field_tag&lt;Id, T&gt; &gt;",
+      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;T, Id&gt;&gt;",
+      "definition_html": "using apache::thrift::op::detail::BaseEnsurePatch&lt; Patch, Derived &gt;::F =  type::native_type&lt;get_field_tag&lt;T, Id&gt; &gt;",
       "argsstring_html": "",
       "name_html": "F",
       "location": {

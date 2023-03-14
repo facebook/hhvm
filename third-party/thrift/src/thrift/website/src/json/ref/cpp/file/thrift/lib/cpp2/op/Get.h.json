@@ -140,17 +140,17 @@
       "mutable": "no",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
       "type_html": "FOLLY_INLINE_VARIABLE constexpr type::Ordinal",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr type::Ordinal apache::thrift::op::get_ordinal_v",
       "argsstring_html": "",
       "name_html": "get_ordinal_v",
-      "initializer_html": "=\n    <code>get_ordinal</code>&lt;Id, T&gt;::<code>value</code>",
+      "initializer_html": "=\n    <code>get_ordinal</code>&lt;T, Id&gt;::<code>value</code>",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
         "line": "45",
@@ -160,7 +160,7 @@
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the ordinal, for example:</p><p><ul>\n<li><p>using Ord = <code>get_ordinal_v&lt;ident::foo, MyS&gt;</code> // Resolves to ordinal at which the field \"foo\" was defined in MyS. </p></li></ul>\n</p>"
+        "detailed_html": "<p>Gets the ordinal, for example:</p><p><ul>\n<li><p>using Ord = <code>get_ordinal_v&lt;MyS, ident::foo&gt;</code> // Resolves to ordinal at which the field \"foo\" was defined in MyS. </p></li></ul>\n</p>"
       }
     },
     {
@@ -170,17 +170,17 @@
       "mutable": "no",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
       "type_html": "FOLLY_INLINE_VARIABLE constexpr FieldId",
       "definition_html": "FOLLY_INLINE_VARIABLE constexpr FieldId apache::thrift::op::get_field_id_v",
       "argsstring_html": "",
       "name_html": "get_field_id_v",
-      "initializer_html": "=\n    <code>get_field_id</code>&lt;Id, T&gt;::<code>value</code>",
+      "initializer_html": "=\n    <code>get_field_id</code>&lt;T, Id&gt;::<code>value</code>",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
         "line": "79",
@@ -190,7 +190,7 @@
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the field id, for example:</p><p><ul>\n<li><p>using FieldId = <code>get_field_id&lt;ident::foo, MyS&gt;</code> // Resolves to field id assigned to the field \"foo\" in MyS. </p></li></ul>\n</p>"
+        "detailed_html": "<p>Gets the field id, for example:</p><p><ul>\n<li><p>using FieldId = <code>get_field_id&lt;MyS, ident::foo&gt;</code> // Resolves to field id assigned to the field \"foo\" in MyS. </p></li></ul>\n</p>"
       }
     },
     {
@@ -200,17 +200,17 @@
       "mutable": "no",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
       "type_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece",
       "definition_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece apache::thrift::op::get_name_v",
       "argsstring_html": "",
       "name_html": "get_name_v",
-      "initializer_html": "=\n    detail::pa::__fbthrift_get_field_name&lt;T, <code>get_ordinal</code>&lt;Id, T&gt;&gt;()",
+      "initializer_html": "=\n    detail::pa::__fbthrift_get_field_name&lt;T, <code>get_ordinal</code>&lt;T, Id&gt;&gt;()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
         "line": "137",
@@ -220,7 +220,7 @@
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the thrift field name, for example:</p><p><ul>\n<li><p><code>op::get_name_v</code>&lt;field_id&lt;7&gt;, MyStruct&gt; // Returns the thrift field name associated with field 7 in MyStruct. </p></li></ul>\n</p>"
+        "detailed_html": "<p>Gets the thrift field name, for example:</p><p><ul>\n<li><p><code>op::get_name_v</code>&lt;MyStruct, field_id&lt;7&gt;&gt; // Returns the thrift field name associated with field 7 in MyStruct. </p></li></ul>\n</p>"
       }
     },
     {
@@ -230,23 +230,23 @@
       "mutable": "no",
       "tparams": [
         {
-          "type_html": "typename S"
+          "type_html": "typename T"
         },
         {
-          "type_html": "class Id"
+          "type_html": "typename Id"
         }
       ],
       "type_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece",
       "definition_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece apache::thrift::op::get_name",
       "argsstring_html": "",
       "name_html": "get_name",
-      "initializer_html": "=\n    detail::pa::__fbthrift_get_field_name&lt;S, <code>get_ordinal</code>&lt;Id, S&gt;&gt;()",
+      "initializer_html": "= <code>get_name_v</code>&lt;T, Id&gt;",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "141",
+        "line": "142",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "141",
+        "bodystart": "142",
         "bodyend": "-1"
       }
     },
@@ -600,10 +600,10 @@
       "prot": "public",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
       "type_html": "typename <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/GetOrdinalImpl\">detail::GetOrdinalImpl</a>&lt;Id, type::infer_tag&lt;T&gt;&gt;::type",
@@ -620,18 +620,18 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a9e04a24c9d19f3ae1aeb80c61e4e8095",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a1cc2ff3f076c63ae84d1df67fb6b0334",
       "prot": "public",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
-      "type_html": "folly::conditional_t&lt;\n    <code>get_ordinal</code>&lt;Id, T&gt;::<code>value</code> == type::Ordinal{},\n    type::field_id&lt;0&gt;,\n    detail::pa::field_id&lt;T,<code> get_ordinal</code>&lt;Id, T&gt;&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_field_id = typedef folly::conditional_t&lt; get_ordinal&lt;Id, T&gt;::value == type::Ordinal{}, type::field_id&lt;0&gt;, detail::pa::field_id&lt;T, get_ordinal&lt;Id, T&gt; &gt;&gt;",
+      "type_html": "folly::conditional_t&lt;\n    <code>get_ordinal</code>&lt;T, Id&gt;::<code>value</code> == type::Ordinal{},\n    type::field_id&lt;0&gt;,\n    detail::pa::field_id&lt;T,<code> get_ordinal</code>&lt;T, Id&gt;&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_field_id = typedef folly::conditional_t&lt; get_ordinal&lt;T, Id&gt;::value == type::Ordinal{}, type::field_id&lt;0&gt;, detail::pa::field_id&lt;T, get_ordinal&lt;T, Id&gt; &gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_field_id",
       "location": {
@@ -644,18 +644,18 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a7ef396d7424bddeae22983c49707427f",
+      "refid": "namespaceapache_1_1thrift_1_1op_1ada84492fc1972941c81f6ddd514baf18",
       "prot": "public",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
-      "type_html": "detail::pa::ident&lt;T, <code>get_ordinal</code>&lt;Id, T&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_ident = typedef detail::pa::ident&lt;T, get_ordinal&lt;Id, T&gt; &gt;",
+      "type_html": "detail::pa::ident&lt;T, <code>get_ordinal</code>&lt;T, Id&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_ident = typedef detail::pa::ident&lt;T, get_ordinal&lt;T, Id&gt; &gt;",
       "argsstring_html": "",
       "name_html": "get_ident",
       "location": {
@@ -667,22 +667,22 @@
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the ident, for example:</p><p>// Resolves to thrift::ident::* type associated with field 7 in MyS. using Ident = get_ident&lt;field_id&lt;7&gt;, MyS&gt; </p>"
+        "detailed_html": "<p>Gets the ident, for example:</p><p>// Resolves to thrift::ident::* type associated with field 7 in MyS. using Ident = get_ident&lt;MyS, field_id&lt;7&gt;&gt; </p>"
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a75a1afb484ea9c53cc3eda459bde1774",
+      "refid": "namespaceapache_1_1thrift_1_1op_1a65d3e354cd701e9cadbbb387eb454e15",
       "prot": "public",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
-      "type_html": "detail::pa::type_tag&lt;T, <code>get_ordinal</code>&lt;Id, T&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_type_tag = typedef detail::pa::type_tag&lt;T, get_ordinal&lt;Id, T&gt; &gt;",
+      "type_html": "detail::pa::type_tag&lt;T, <code>get_ordinal</code>&lt;T, Id&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_type_tag = typedef detail::pa::type_tag&lt;T, get_ordinal&lt;T, Id&gt; &gt;",
       "argsstring_html": "",
       "name_html": "get_type_tag",
       "location": {
@@ -694,22 +694,22 @@
         "bodyend": "-1"
       },
       "description": {
-        "detailed_html": "<p>Gets the Thrift type tag, for example:</p><p>// Resolves to Thrift type tag for the field \"foo\" in MyS. using Tag = <code>get_type_tag&lt;ident::foo, MyS&gt;</code> </p>"
+        "detailed_html": "<p>Gets the Thrift type tag, for example:</p><p>// Resolves to Thrift type tag for the field \"foo\" in MyS. using Tag = <code>get_type_tag&lt;MyS, ident::foo&gt;</code> </p>"
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a1ba73bdfd41933adb2b387b9cfa05fbe",
+      "refid": "namespaceapache_1_1thrift_1_1op_1afae5dcf2b18558632b5c949affcc0237",
       "prot": "public",
       "tparams": [
         {
-          "type_html": "typename Id"
+          "type_html": "typename T"
         },
         {
-          "type_html": "typename T"
+          "type_html": "typename Id"
         }
       ],
-      "type_html": "typename std::conditional_t&lt;\n    <code>get_ordinal</code>&lt;Id, T&gt;::<code>value</code> == type::Ordinal{},\n    void,\n    type::field&lt;<code>\n        get_type_tag</code>&lt;Id, T&gt;,\n        FieldContext&lt;T, folly::to_underlying(<code>get_field_id</code>&lt;Id, T&gt;::<code>value</code>)&gt;&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_field_tag = typedef typename std::conditional_t&lt; get_ordinal&lt;Id, T&gt;::value == type::Ordinal{}, void, type::field&lt; get_type_tag&lt;Id, T&gt;, FieldContext&lt;T, folly::to_underlying(get_field_id&lt;Id, T&gt;::value)&gt; &gt;&gt;",
+      "type_html": "typename std::conditional_t&lt;\n    <code>get_ordinal</code>&lt;T, Id&gt;::<code>value</code> == type::Ordinal{},\n    void,\n    type::field&lt;<code>\n        get_type_tag</code>&lt;T, Id&gt;,\n        FieldContext&lt;T, folly::to_underlying(<code>get_field_id</code>&lt;T, Id&gt;::<code>value</code>)&gt;&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_field_tag = typedef typename std::conditional_t&lt; get_ordinal&lt;T, Id&gt;::value == type::Ordinal{}, void, type::field&lt; get_type_tag&lt;T, Id&gt;, FieldContext&lt;T, folly::to_underlying(get_field_id&lt;T, Id&gt;::value)&gt; &gt;&gt;",
       "argsstring_html": "",
       "name_html": "get_field_tag",
       "location": {
@@ -722,7 +722,7 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1a27200d6b3519c44e15227d875ed56a52",
+      "refid": "namespaceapache_1_1thrift_1_1op_1aa9fe99e4ad3dff46dd02cc6a3d9c8e6f",
       "prot": "public",
       "tparams": [
         {
@@ -732,8 +732,8 @@
           "type_html": "typename T"
         }
       ],
-      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;Id, T&gt;&gt;",
-      "definition_html": "using apache::thrift::op::get_native_type = typedef type::native_type&lt;get_field_tag&lt;Id, T&gt; &gt;",
+      "type_html": "type::native_type&lt;<code>get_field_tag</code>&lt;T, Id&gt;&gt;",
+      "definition_html": "using apache::thrift::op::get_native_type = typedef type::native_type&lt;get_field_tag&lt;T, Id&gt; &gt;",
       "argsstring_html": "",
       "name_html": "get_native_type",
       "location": {

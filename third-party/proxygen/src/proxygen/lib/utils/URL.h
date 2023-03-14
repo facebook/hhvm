@@ -13,6 +13,14 @@
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
 #include <proxygen/lib/utils/ParseURL.h>
 
+#ifdef STRICT
+#undef STRICT
+#endif
+
+#ifdef STRICT_COMPAT
+#undef STRICT_COMPAT
+#endif
+
 namespace proxygen {
 
 /**

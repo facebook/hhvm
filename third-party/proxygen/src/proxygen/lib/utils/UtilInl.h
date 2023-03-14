@@ -11,6 +11,14 @@
 #include <folly/Range.h>
 #include <folly/portability/Windows.h> // for windows compatibility: STRICT maybe defined by some win headers
 
+#ifdef STRICT
+#undef STRICT
+#endif
+
+#ifdef STRICT_COMPAT
+#undef STRICT_COMPAT
+#endif
+
 namespace proxygen {
 
 // Case-insensitive string comparison

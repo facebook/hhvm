@@ -36,6 +36,7 @@ mod prelude {
     pub use oxidized::naming_phase_error::NamingPhaseError;
     pub use oxidized::nast;
     pub use oxidized::nast_check_error::NastCheckError;
+    pub use oxidized::parsing_error::ParsingError;
 
     pub(crate) use crate::elab_utils;
     pub use crate::env::Env;
@@ -275,6 +276,9 @@ fn elaborate<T: Transform>(
         passes::validate_function_pointer::ValidateFunctionPointerPass::default(),
 
         passes::validate_php_lambda::ValidatePhpLambdaPass::default(),
+
+        passes::validate_xhp_attribute::ValidateXhpAttributePass::default(),
+
     ];
 
     let is_hhi = rel_path.is_hhi();

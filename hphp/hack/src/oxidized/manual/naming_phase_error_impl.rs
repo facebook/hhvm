@@ -7,6 +7,7 @@ use crate::naming_error::NamingError;
 use crate::naming_phase_error::ExperimentalFeature;
 use crate::naming_phase_error::NamingPhaseError;
 use crate::nast_check_error::NastCheckError;
+use crate::parsing_error::ParsingError;
 
 impl From<NamingError> for NamingPhaseError {
     fn from(err: NamingError) -> Self {
@@ -23,5 +24,11 @@ impl From<NastCheckError> for NamingPhaseError {
 impl From<ExperimentalFeature> for NamingPhaseError {
     fn from(err: ExperimentalFeature) -> Self {
         Self::ExperimentalFeature(err)
+    }
+}
+
+impl From<ParsingError> for NamingPhaseError {
+    fn from(err: ParsingError) -> Self {
+        Self::Parsing(err)
     }
 }

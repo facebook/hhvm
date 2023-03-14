@@ -75,6 +75,7 @@ pub use gen::naming_error;
 pub use gen::naming_phase_error;
 pub use gen::nast_check_error;
 pub use gen::parser_options;
+pub use gen::parsing_error;
 pub use gen::pos_or_decl;
 pub use gen::quickfix;
 pub use gen::saved_state_rollouts;

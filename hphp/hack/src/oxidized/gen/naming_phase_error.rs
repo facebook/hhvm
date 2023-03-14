@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<68d240440800358c01cc8696a6cc0f3d>>
+// @generated SignedSource<<e6d3dee33c6bcc3772beebf38708506b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -65,6 +65,7 @@ pub enum ExperimentalFeature {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(attr = r#"ocaml.warning "-37""#)]
 #[repr(C, u8)]
 pub enum NamingPhaseError {
     Naming(naming_error::NamingError),
@@ -76,6 +77,8 @@ pub enum NamingPhaseError {
     MalformedAccess(pos::Pos),
     #[rust_to_ocaml(name = "Experimental_feature")]
     ExperimentalFeature(ExperimentalFeature),
+    #[rust_to_ocaml(attr = r#"warning "-37""#)]
+    Parsing(parsing_error::ParsingError),
 }
 
 #[derive(
@@ -100,4 +103,5 @@ pub struct Agg {
     pub unexpected_hints: Vec<pos::Pos>,
     pub malformed_accesses: Vec<pos::Pos>,
     pub experimental_features: Vec<ExperimentalFeature>,
+    pub parsing: Vec<parsing_error::ParsingError>,
 }

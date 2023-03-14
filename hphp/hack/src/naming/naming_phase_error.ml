@@ -24,8 +24,14 @@ type t =
   | Unexpected_hint of Pos.t
   | Malformed_access of Pos.t
   | Experimental_feature of experimental_feature
+  (* We use this constructor (or at least the [Xhp_parsing_error] ctor) in Rust
+     elaboration *)
+  | Parsing of Parsing_error.t [@warning "-37"]
+[@@ocaml.warning "-37"]
 
 let naming err = Naming err
+
+let parsing err = Parsing err
 
 let nast_check err = Nast_check err
 
@@ -49,6 +55,7 @@ type agg = {
   unexpected_hints: Pos.t list;
   malformed_accesses: Pos.t list;
   experimental_features: experimental_feature list;
+  parsing: Parsing_error.t list;
 }
 
 let empty =
@@ -58,6 +65,7 @@ let empty =
     unexpected_hints = [];
     malformed_accesses = [];
     experimental_features = [];
+    parsing = [];
   }
 
 let add t = function
@@ -69,6 +77,7 @@ let add t = function
     { t with malformed_accesses = err :: t.malformed_accesses }
   | Experimental_feature err ->
     { t with experimental_features = err :: t.experimental_features }
+  | Parsing err -> { t with parsing = err :: t.parsing }
 
 let emit_experimental_feature = function
   | Like_type pos -> Errors.experimental_feature pos "like-types"
@@ -86,6 +95,7 @@ let emit
       unexpected_hints;
       malformed_accesses;
       experimental_features;
+      parsing;
     } =
   List.iter ~f:Errors.add_naming_error naming;
   List.iter ~f:Errors.add_nast_check_error nast_check;
@@ -99,7 +109,8 @@ let emit
         pos
         "Malformed hint: expected Haccess (Happly ...) from ast_to_nast")
     malformed_accesses;
-  List.iter ~f:emit_experimental_feature experimental_features
+  List.iter ~f:emit_experimental_feature experimental_features;
+  List.iter ~f:Errors.add_parsing_error parsing
 
 (* Helper for constructing expression to be substituted for invalid expressions
    TODO[mjt] this probably belongs with the AAST defs

@@ -52,4 +52,5 @@ pub mod validate_module;
 pub mod validate_php_lambda;
 pub mod validate_shape_name;
 pub mod validate_user_attribute_dynamically_callable;
+pub mod validate_xhp_attribute;
 pub mod validate_xhp_name;

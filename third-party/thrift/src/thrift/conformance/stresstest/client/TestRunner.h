@@ -18,8 +18,12 @@
 
 #include <unordered_map>
 
+#include <folly/experimental/FunctionScheduler.h>
+
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
+
+DECLARE_int64(runtime_s);
 
 namespace apache {
 namespace thrift {
@@ -35,6 +39,7 @@ struct StressTestStats {
 class TestRunner {
  public:
   explicit TestRunner(ClientConfig cfg);
+  ~TestRunner() { functionScheduler_.shutdown(); }
 
   const std::vector<std::string>& getSelectedTests() const;
   const std::vector<std::string>& getAvailableTests() const;
@@ -47,10 +52,19 @@ class TestRunner {
 
   static ClientConfig createClientConfigFromFlags();
 
+  void runTests();
+
+  void scheduleContinuousStats(ClientRunner& runner);
+
  private:
   const ClientConfig cfg_;
   const std::vector<std::string> availableTests_;
   std::vector<std::string> selectedTests_;
+  folly::FunctionScheduler functionScheduler_;
+
+  void runContinuously();
+  void runContinuously(std::unique_ptr<StressTestBase> test);
+  void runFixedTime();
 };
 
 } // namespace stress

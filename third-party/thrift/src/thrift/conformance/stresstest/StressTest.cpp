@@ -45,12 +45,7 @@ int main(int argc, char* argv[]) {
   // create a test runner instance
   auto clientCfg = TestRunner::createClientConfigFromFlags();
   TestRunner testRunner(std::move(clientCfg));
-
-  for (const auto& test : testRunner.getSelectedTests()) {
-    LOG(INFO) << fmt::format("Running stress test '{}'", test);
-    auto result = testRunner.run(test);
-    result.log();
-  }
+  testRunner.runTests();
 
   return 0;
 }

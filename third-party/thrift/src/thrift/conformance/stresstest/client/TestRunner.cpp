@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
+
 #include <thrift/conformance/stresstest/client/TestRunner.h>
 
 #include <fmt/core.h>
@@ -25,7 +27,7 @@
 DEFINE_string(server_host, "::1", "Host running the stress test server");
 DEFINE_int32(server_port, 5000, "Port of the stress test server");
 DEFINE_string(test_name, "", "Stress test to run");
-DEFINE_int64(client_threads, 1, "Nnumber of client threads");
+DEFINE_int64(client_threads, 1, "Number of client threads");
 DEFINE_int64(connections_per_thread, 1, "Number of clients per client thread");
 DEFINE_int64(clients_per_connection, 1, "Number of clients per connection");
 DEFINE_string(
@@ -44,6 +46,7 @@ DEFINE_string(
     client_ca_path,
     "folly/io/async/test/certs/ca-cert.pem",
     "Path to client trusted CA file");
+DEFINE_bool(continuous, false, "Runs a single test continuously");
 
 namespace apache {
 namespace thrift {
@@ -166,7 +169,69 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
       static_cast<uint64_t>(FLAGS_clients_per_connection);
   config.connConfig = std::move(connCfg);
 
+  if (FLAGS_continuous && FLAGS_test_name.empty()) {
+    LOG(FATAL) << "A test must be specified if you want to use continuous mode";
+  }
+
+  config.continuous = FLAGS_continuous;
+
   return config;
+}
+void TestRunner::runTests() {
+  if (FLAGS_continuous) {
+    runContinuously();
+  } else {
+    runFixedTime();
+  }
+}
+
+void TestRunner::runContinuously() {
+  LOG(INFO) << fmt::format("Starting Continuous Benchmark");
+  auto& testName = getSelectedTests().front();
+  LOG(INFO) << fmt::format("Running stress test '{}'", testName);
+  runContinuously(instantiate(testName));
+}
+
+void TestRunner::runContinuously(std::unique_ptr<StressTestBase> test) {
+  resetMemoryStats();
+
+  // initialize the client runner
+  ClientRunner runner(cfg_);
+
+  scheduleContinuousStats(runner);
+
+  // run the test
+  runner.run(test.get());
+  runner.stop();
+}
+
+void TestRunner::scheduleContinuousStats(ClientRunner& runner) {
+  LOG(INFO) << "scheduling stats poller every " << FLAGS_runtime_s
+            << " seconds";
+  functionScheduler_.addFunction(
+      [&] {
+        LOG(INFO) << "\nStress Test Stats:";
+        auto stats = StressTestStats{
+            .memoryStats = runner.getMemoryStats(),
+            .rpcStats = runner.getRpcStats(),
+        };
+        stats.log();
+
+        runner.resetStats();
+      },
+      std::chrono::seconds(FLAGS_runtime_s),
+      "stats",
+      std::chrono::seconds(FLAGS_runtime_s));
+  functionScheduler_.start();
+}
+
+void TestRunner::runFixedTime() {
+  LOG(INFO) << fmt::format("Starting Fixed Duration Benchmark");
+  for (const auto& test : getSelectedTests()) {
+    LOG(INFO) << fmt::format("Running stress test '{}'", test);
+    auto result = run(test);
+    result.log();
+  }
 }
 
 } // namespace stress

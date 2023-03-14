@@ -46,6 +46,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   explicit ClientThread(const ClientConfig& cfg)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
         testDoneTimeout_(testDone_) {
+    continuous_ = cfg.continuous;
     auto* evb = thread_.getEventBase();
     // create clients in event base thread
     evb->runInEventBaseThreadAndWait([&]() {
@@ -75,8 +76,10 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   }
 
   void run(const StressTestBase* test) {
-    thread_.getEventBase()->timer().scheduleTimeout(
-        &testDoneTimeout_, std::chrono::seconds(FLAGS_runtime_s));
+    if (!continuous_) {
+      thread_.getEventBase()->timer().scheduleTimeout(
+          &testDoneTimeout_, std::chrono::seconds(FLAGS_runtime_s));
+    }
     for (auto& client : clients_) {
       scope_.add(
           runInternal(client.get(), test).scheduleOn(thread_.getEventBase()));
@@ -110,6 +113,11 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   const ClientRpcStats& getRpcStats() const { return rpcStats_; }
   const ClientThreadMemoryStats& getMemoryStats() const { return memoryStats_; }
 
+  void resetStats() {
+    rpcStats_.numFailure = 0;
+    rpcStats_.numSuccess = 0;
+  }
+
  private:
   folly::coro::Task<void> runInternal(
       StressTestClient* client, const StressTestBase* test) {
@@ -124,11 +132,13 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   folly::coro::AsyncScope scope_;
   std::vector<std::unique_ptr<StressTestClient>> clients_;
   folly::ScopedEventBaseThread thread_;
+  bool continuous_{false};
   bool testDone_{false};
   TestDoneTimeout testDoneTimeout_;
 };
 
-ClientRunner::ClientRunner(const ClientConfig& config) : clientThreads_() {
+ClientRunner::ClientRunner(const ClientConfig& config)
+    : continuous_(config.continuous), clientThreads_() {
   for (size_t i = 0; i < config.numClientThreads; i++) {
     clientThreads_.emplace_back(std::make_unique<ClientThread>(config));
   }
@@ -158,7 +168,8 @@ void ClientRunner::stop() {
 }
 
 ClientRpcStats ClientRunner::getRpcStats() const {
-  CHECK(stopped_) << "ClientRunner must be stopped before accessing statistics";
+  CHECK(stopped_ || continuous_)
+      << "ClientRunner must be stopped before accessing statistics";
   ClientRpcStats combinedStats;
   for (auto& clientThread : clientThreads_) {
     combinedStats.combine(clientThread->getRpcStats());
@@ -167,12 +178,18 @@ ClientRpcStats ClientRunner::getRpcStats() const {
 }
 
 ClientThreadMemoryStats ClientRunner::getMemoryStats() const {
-  CHECK(stopped_) << "ClientRunner must be stopped before accessing statistics";
+  CHECK(stopped_ || continuous_)
+      << "ClientRunner must be stopped before accessing statistics";
   ClientThreadMemoryStats combinedStats;
   for (auto& clientThread : clientThreads_) {
     combinedStats.combine(clientThread->getMemoryStats());
   }
   return combinedStats;
+}
+void ClientRunner::resetStats() {
+  for (auto& clientThread : clientThreads_) {
+    clientThread->resetStats();
+  }
 }
 
 } // namespace stress

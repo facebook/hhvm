@@ -37,6 +37,7 @@ struct ClientConfig {
   uint64_t numClientThreads;
   uint64_t numConnectionsPerThread;
   uint64_t numClientsPerConnection;
+  bool continuous{false};
   ClientConnectionConfig connConfig;
 };
 
@@ -61,9 +62,12 @@ class ClientRunner {
   ClientRpcStats getRpcStats() const;
   ClientThreadMemoryStats getMemoryStats() const;
 
+  void resetStats();
+
  private:
   bool started_{false};
   bool stopped_{false};
+  bool continuous_{false};
   std::vector<std::unique_ptr<ClientThread>> clientThreads_;
 };
 

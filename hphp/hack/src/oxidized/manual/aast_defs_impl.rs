@@ -23,6 +23,10 @@ impl Lid {
     pub fn pos(&self) -> &Pos {
         &self.0
     }
+
+    pub fn as_local_id(&self) -> &LocalId {
+        &self.1
+    }
 }
 
 impl Hint {

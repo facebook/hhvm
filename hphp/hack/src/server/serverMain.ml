@@ -652,19 +652,19 @@ let serve_one_iteration genv env client_provider =
         client_kind
   in
 
-  (* We'll now update any waiting clients with our status.
-   * (Or more precisely, we'll tell the monitor, so any waiting clients
-   * will know when they poll the monitor.)
-   *
-   * By updating status now at the start of the serve_one_iteration,
+  (* ServerProgress: By updating status now at the start of the serve_one_iteration,
    * it means there's no obligation on the "doing work" part of the previous
    * iteration to clean up its own status-reporting once done.
+   *
    * Caveat: that's not quite true, since ClientProvider.sleep_and_check will
-   * wait up to 1s if there are no pending requests. So theoretically we
-   * won't update our status for up to 1s after the previous work is done.
+   * wait up to 0.1s if there are no pending requests. So theoretically we
+   * won't update our status for up to 0.1s after the previous work is done.
    * That doesn't really matter, since (1) if there are no pending requests
    * then no client will even ask for status, and (2) it's worth it to
    * keep the code clean and simple.
+   *
+   * By the same token, we will be writing "ready" once every 0.1s to the status file.
+   * Think of it as a heartbeat!
    *
    * Note: the message here might soon be replaced. If we discover disk changes
    * that prompt a typecheck, then typechecking sends its own status updates.

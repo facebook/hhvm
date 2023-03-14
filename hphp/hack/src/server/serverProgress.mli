@@ -9,6 +9,7 @@
 
 (** These are human-readable messages, shown at command-line and within the editor. *)
 type t = {
+  pid: int;
   message: string;  (** e.g. "typechecking 5/15 files" *)
   timestamp: float;
 }
@@ -31,3 +32,6 @@ val write_percentage :
   unit:string ->
   extra:string option ->
   unit
+
+(** Call this upon shutdown to delete the progress file *)
+val try_delete : unit -> unit

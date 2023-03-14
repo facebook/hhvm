@@ -707,6 +707,12 @@ let update_status_ (env : env msg_update) monitor_config :
           ~exit_code
           ~exit_status
           ~is_oom;
+        ServerProgress.write
+          "%s"
+          (Option.value_map
+             exit_status
+             ~f:Exit_status.show
+             ~default:"server stopped");
         set_server (Ok env) (Died_unexpectedly (proc_stat, is_oom)))
     | Not_yet_started
     | Died_config_changed

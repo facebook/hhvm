@@ -76,7 +76,7 @@ let tty_progress_reporter () =
 We store this in a mutable variable, so we can know whether it's changed and hence whether
 to display the warning banner. *)
 let latest_server_progress : ServerProgress.t ref =
-  ref ServerProgress.{ message = "connecting"; timestamp = 0. }
+  ref ServerProgress.{ message = "connecting"; timestamp = 0.; pid = 0 }
 
 (** This reads from the progress file and assigns into mutable variable "latest_status_progress",
 and returns whether there was new status. *)

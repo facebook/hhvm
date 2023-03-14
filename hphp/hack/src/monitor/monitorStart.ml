@@ -99,6 +99,11 @@ let monitor_daemon_main
 
   Typing_global_inference.set_path ();
 
+  (* Now that we've got an exclusive lock and all globals have been initialized: *)
+  ServerProgress.write "monitor initializing...";
+  Exit.add_hook_upon_clean_exit (fun _finale_data ->
+      ServerProgress.try_delete ());
+
   if ServerArgs.check_mode options then (
     Hh_logger.log "%s" "Will run once in check mode then exit.";
     ServerMain.run_once options config local_config
@@ -125,20 +130,23 @@ let monitor_daemon_main
           | _ -> false);
       }
     in
-    MonitorMain.start_monitoring
-      ~current_version
-      ~waiting_client
-      ~max_purgatory_clients:
-        local_config.ServerLocalConfig.max_purgatory_clients
-      options
-      informant_options
-      MonitorUtils.
-        {
-          socket_file = ServerFiles.socket_file www_root;
-          lock_file = ServerFiles.lock_file www_root;
-          server_log_file = ServerFiles.log_link www_root;
-          monitor_log_file = ServerFiles.monitor_log_link www_root;
-        }
+    Utils.try_finally
+      ~f:(fun () ->
+        MonitorMain.start_monitoring
+          ~current_version
+          ~waiting_client
+          ~max_purgatory_clients:
+            local_config.ServerLocalConfig.max_purgatory_clients
+          options
+          informant_options
+          MonitorUtils.
+            {
+              socket_file = ServerFiles.socket_file www_root;
+              lock_file = ServerFiles.lock_file www_root;
+              server_log_file = ServerFiles.log_link www_root;
+              monitor_log_file = ServerFiles.monitor_log_link www_root;
+            })
+      ~finally:ServerProgress.try_delete
 
 let daemon_entry =
   Daemon.register_entry_point

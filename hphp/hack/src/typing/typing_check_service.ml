@@ -687,15 +687,12 @@ let merge
   let completed_check_count = completed_check_count - deferred_check_count in
 
   files_checked_count := !files_checked_count + completed_check_count;
-  let delegate_progress =
-    Typing_service_delegate.get_progress !delegate_state
-  in
   ServerProgress.write_percentage
     ~operation:"typechecking"
     ~done_count:!files_checked_count
     ~total_count:workitems_initial_count
     ~unit:"files"
-    ~extra:delegate_progress;
+    ~extra:(Typing_service_delegate.get_progress !delegate_state);
 
   let (diag_pusher, time_errors_pushed) =
     possibly_push_new_errors_to_lsp_client
@@ -890,17 +887,8 @@ let process_in_parallel
   let diagnostic_pusher = ref diagnostic_pusher in
   let time_first_error = ref None in
   let errors_so_far = ref 0 in
-  let delegate_progress =
-    Typing_service_delegate.get_progress !delegate_state
-  in
   let controller_started = Delegate.controller_started !delegate_state in
   let batch_counts_by_worker_id = ref SMap.empty in
-  ServerProgress.write_percentage
-    ~operation:"typechecking"
-    ~done_count:0
-    ~total_count:workitems_initial_count
-    ~unit:"files"
-    ~extra:delegate_progress;
 
   let (telemetry, telemetry_start_t) : Telemetry.t * float option =
     if controller_started then (
@@ -1147,6 +1135,7 @@ let go_with_interrupt
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
+  ServerProgress.write "typechecking %d files" (BigList.length fnl);
   let fnl =
     if Float.(sample_rate >= 1.0) then
       fnl

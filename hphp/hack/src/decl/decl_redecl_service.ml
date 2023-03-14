@@ -486,7 +486,7 @@ let merge_elements
     ~done_count:!classes_processed_count
     ~total_count:classes_initial_count
     ~unit:"classes"
-    ~extra:(Some (Printf.sprintf "%d elements" (SMap.cardinal acc)));
+    ~extra:None;
   acc
 
 (**

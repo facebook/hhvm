@@ -986,6 +986,7 @@ let persistent_client_interrupt_handler genv :
          `Persistent
      with
     | ServerUtils.Needs_full_recheck { env; finish_command_handling; reason } ->
+      ServerProgress.write "typechecking";
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
       assert (
@@ -1014,7 +1015,9 @@ let persistent_client_interrupt_handler genv :
           full_check_status;
         },
         MultiThreadedCall.Cancel )
-    | ServerUtils.Done env -> (env, MultiThreadedCall.Continue))
+    | ServerUtils.Done env ->
+      ServerProgress.write "typechecking";
+      (env, MultiThreadedCall.Continue))
 
 let setup_interrupts env client_provider =
   {

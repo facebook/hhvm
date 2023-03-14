@@ -137,7 +137,11 @@ let make_percentage_progress_message
     else
       unit ^ " "
   in
-  let percent = 100.0 *. float_of_int done_count /. float_of_int total_count in
+  let percent =
+    Float.round_down
+      (1000.0 *. float_of_int done_count /. float_of_int total_count)
+    /. 10.0 (* so that 999999/1000000 will show as 99.9%, not 100.0% *)
+  in
   let main_message =
     Printf.sprintf
       "%s %d/%d %s(%.1f%%)"

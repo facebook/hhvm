@@ -732,6 +732,7 @@ functor
           ~previously_oldified_defs:FileInfo.empty_names
           ~defs:defs_per_file
       in
+      ServerProgress.write "determining files";
       let to_recheck = Naming_provider.get_files ctx to_recheck_deps in
       { changed; to_recheck; to_recheck_deps; old_decl_missing_count }
 
@@ -1043,7 +1044,7 @@ functor
       in
 
       (* REDECL PHASE 1 ********************************************************)
-      ServerProgress.write ~include_in_logs:false "determining changes";
+      ServerProgress.write "determining changes";
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
       in
@@ -1145,6 +1146,7 @@ functor
         CheckKind.get_env_after_decl ~old_env:env ~naming_table ~failed_naming
       in
       (* HANDLE PRECHECKED FILES AFTER LOCAL CHANGES ***************************)
+      ServerProgress.write "determining trunk changes";
       Hh_logger.log "Begin evaluating prechecked changes";
       let telemetry =
         Telemetry.duration telemetry ~key:"prechecked1_start" ~start_time
@@ -1188,6 +1190,7 @@ functor
 
       (* TYPE CHECKING *********************************************************)
       let type_check_start_t = Unix.gettimeofday () in
+      ServerProgress.write "typechecking";
 
       (* For a full check, typecheck everything which may be affected by the
          changes. For a lazy check, typecheck only the affected files which are
@@ -1223,8 +1226,8 @@ functor
         Option.first_some time_first_error time_erased_errors
       in
 
-      Hh_logger.log
-        "There are %d files to typecheck."
+      ServerProgress.write
+        "typechecking %d files"
         (Relative_path.Set.cardinal files_to_check);
 
       let files_to_check =
@@ -1251,10 +1254,6 @@ functor
           ~changed_files:files_to_parse
           ~parse_t
       in
-      ServerProgress.write
-        ~include_in_logs:false
-        "typechecking %d files"
-        to_recheck_count;
       Hh_logger.log "Begin typechecking %d files." to_recheck_count;
 
       ServerCheckpoint.process_updates files_to_check;
@@ -1293,6 +1292,7 @@ functor
 
       let heap_size = SharedMem.SMTelemetry.heap_size () in
 
+      ServerProgress.write "typecheck ending";
       let logstring =
         Printf.sprintf
           "Typechecked %d files [%d errors]"

@@ -47,9 +47,12 @@ fn test_foo_default() {
         );
         assert_eq!(default_foo.ident_field, "".to_string());
         assert_eq!(default_foo.typedef_str_val, CustomString("".to_string()));
-        assert_eq!(default_foo.double_adapted_i64, NonZeroI64::new(42).unwrap());
         assert_eq!(
-            default_foo.double_adapted_and_field_i64,
+            default_foo.pass_through_adapted_i64,
+            NonZeroI64::new(42).unwrap()
+        );
+        assert_eq!(
+            default_foo.pass_through_adapted_and_field_i64,
             NonZeroI64::new(2).unwrap()
         );
         assert_eq!(
@@ -74,6 +77,10 @@ fn test_foo_default() {
                 CustomString("world".to_string()),
             ]]]
         );
+        assert_eq!(
+            default_foo.field_adapted_adapted_string_list,
+            vec![CustomString("zucc".to_string()),]
+        );
 
         assert_eq!(
             r#"{
@@ -86,15 +93,16 @@ fn test_foo_default() {
           "field_checked": "",
           "ident_field": "",
           "typedef_str_val": "",
-          "double_adapted_i64": 42,
-          "double_adapted_and_field_i64": 2,
+          "pass_through_adapted_i64": 42,
+          "pass_through_adapted_and_field_i64": 2,
           "adapted_int_list": [1, 2, 3],
           "adapted_string_list": ["hello", "world"],
           "nested_adapted_string_list": [[["hello", "world"]]],
           "nested_adapted_int_map": {
             "hello": [[[1, 2, 3], [4, 5, 6]]],
             "world": [[[7, 8, 9]]]
-          }
+          },
+          "field_adapted_adapted_string_list": ["zucc"]
         }"#
             .replace(['\n', ' '], ""),
             String::from_utf8(simplejson_protocol::serialize(default_foo).into()).unwrap()
@@ -113,7 +121,7 @@ fn test_foo_deser() {
           "str_val_adapted_optional": "golang",
           "validated_int_val": 42,
           "list_val": ["zzz", "hi", "there"],
-          "double_adapted_and_field_i64": 100
+          "pass_through_adapted_and_field_i64": 100
         }"#,
     )
     .unwrap();
@@ -136,7 +144,7 @@ fn test_foo_deser() {
         ])
     );
     assert_eq!(
-        foo.double_adapted_and_field_i64,
+        foo.pass_through_adapted_and_field_i64,
         NonZeroI64::new(100).unwrap()
     );
 }
@@ -178,8 +186,8 @@ fn test_foo_ser() {
         ]),
         ident_field: "foobar".to_string(),
         typedef_str_val: CustomString("haskell".to_string()),
-        double_adapted_i64: NonZeroI64::new(13).unwrap(),
-        double_adapted_and_field_i64: NonZeroI64::new(14).unwrap(),
+        pass_through_adapted_i64: NonZeroI64::new(13).unwrap(),
+        pass_through_adapted_and_field_i64: NonZeroI64::new(14).unwrap(),
         adapted_int_list: vec![NonZeroI64::new(15).unwrap()],
         adapted_string_list: vec![CustomString("java".to_string())],
         nested_adapted_string_list: vec![vec![vec![CustomString("ada".to_string())]]],
@@ -198,15 +206,16 @@ fn test_foo_ser() {
           "field_checked": "",
           "ident_field": "foobar",
           "typedef_str_val": "haskell",
-          "double_adapted_i64": 13,
-          "double_adapted_and_field_i64": 14,
+          "pass_through_adapted_i64": 13,
+          "pass_through_adapted_and_field_i64": 14,
           "adapted_int_list": [15],
           "adapted_string_list": ["java"],
           "nested_adapted_string_list": [[["ada"]]],
           "nested_adapted_int_map": {
             "hello": [[[1, 2, 3], [4, 5, 6]]],
             "world": [[[7, 8, 9]]]
-          }
+          },
+          "field_adapted_adapted_string_list": ["zucc"]
         }"#
         .replace(['\n', ' '], ""),
         std::string::String::from_utf8(simplejson_protocol::serialize(foo).into()).unwrap()

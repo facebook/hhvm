@@ -19,29 +19,23 @@ include "thrift/annotation/rust.thrift"
 @rust.Adapter{name = "::adapters::StringAdapter"}
 typedef string AdaptedString
 
-@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+@rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
 typedef i64 AdaptedI64
 
 typedef AdaptedI64 PassThroughAdaptedI64
 
-@rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
-typedef PassThroughAdaptedI64 DoubleAdaptedI64
-
-@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
-typedef DoubleAdaptedI64 TripleAdaptedI64
-
-typedef list<TripleAdaptedI64> NestedTripleAdaptedI64
+typedef list<PassThroughAdaptedI64> NestedPassThroughAdaptedI64
 
 typedef list<AdaptedString> AdaptedListNewType (rust.newtype)
 
 typedef binary (rust.type = "bytes::Bytes") IOBuf
 
-@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+@rust.Adapter{name = "crate::IOBufIdentityAdapter"}
 typedef IOBuf AdaptedBytes
 
 typedef AdaptedBytes WrappedAdaptedBytes (rust.newtype)
 
-@rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+@rust.Adapter{name = "crate::WrappedAdaptedBytesIdentityAdapter"}
 typedef WrappedAdaptedBytes AdaptedWrappedAdaptedBytes
 
 typedef AdaptedWrappedAdaptedBytes PassThroughAdaptedWrappedAdaptedBytes
@@ -68,18 +62,23 @@ struct Foo {
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
   9: string ident_field;
   10: AdaptedString typedef_str_val;
-  11: DoubleAdaptedI64 double_adapted_i64 = 42;
+  11: PassThroughAdaptedI64 pass_through_adapted_i64 = 42;
   @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
-  12: DoubleAdaptedI64 double_adapted_and_field_i64 = 2;
-  13: list<DoubleAdaptedI64> adapted_int_list = [1, 2, 3];
+  12: PassThroughAdaptedI64 pass_through_adapted_and_field_i64 = 2;
+  13: list<PassThroughAdaptedI64> adapted_int_list = [1, 2, 3];
   14: list<AdaptedString> adapted_string_list = ["hello", "world"];
   15: list<list<list<AdaptedString>>> nested_adapted_string_list = [
     [["hello", "world"]],
   ];
-  16: map<string, list<list<NestedTripleAdaptedI64>>> nested_adapted_int_map = {
+  16: map<
+    string,
+    list<list<NestedPassThroughAdaptedI64>>
+  > nested_adapted_int_map = {
     "hello": [[[1, 2, 3], [4, 5, 6]]],
     "world": [[[7, 8, 9]]],
   };
+  @rust.Adapter{name = "crate::AdaptedStringListIdentityAdapter"}
+  17: list<AdaptedString> field_adapted_adapted_string_list = ["zucc"];
 }
 
 union Bar {

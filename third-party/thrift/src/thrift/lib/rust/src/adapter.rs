@@ -22,20 +22,20 @@ use std::marker::PhantomData;
 
 pub trait ThriftAdapter {
     /// Aka the "from" type.
-    type OriginalType;
+    type StandardType;
     /// Aka the "to" type.
     type AdaptedType: Clone + Debug + PartialEq + Send + Sync;
 
-    /// The error type thrown if `from_original` fails during deserialization.
+    /// The error type thrown if `from_thrift` fails during deserialization.
     type Error: Into<anyhow::Error> + Debug;
 
-    /// Converts an instance of `OriginalType` to `AdaptedType` during deserialization.
+    /// Converts an instance of `StandardType` to `AdaptedType` during deserialization.
     ///
     /// The `Err` returned by this method will be propagated as a deserialization error.
-    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error>;
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error>;
 
     // TODO(emersonford): should we support a moved param here?
-    /// Converts from the given `AdaptedType` back to the given `OriginalType` during
+    /// Converts from the given `AdaptedType` back to the given `StandardType` during
     /// serialization.
     ///
     /// This must be an infallible operation as `serialize` is infallible.
@@ -45,32 +45,32 @@ pub trait ThriftAdapter {
     /// the Thrift struct creation time, meaning it will be extremely difficult to debug what the
     /// true "source" of the panic.
     ///
-    /// If your `AdaptedType` -> `OriginalType` conversion is truly fallible, you probably shouldn't
+    /// If your `AdaptedType` -> `StandardType` conversion is truly fallible, you probably shouldn't
     /// use an adapter to begin with.
-    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType;
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType;
 
     /// Method called when this adapter is used on a Thrift struct's field. Provides information
     /// about the specific field ID and the type ID of the parent struct this field is in.
     ///
-    /// Defaults to calling `from_original`.
+    /// Defaults to calling `from_thrift`.
     fn from_thrift_field(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         _field_id: i16,
         _strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
-        Self::from_original(value)
+        Self::from_thrift(value)
     }
 
     /// Method called when this adapter is used on a Thrift struct's field. Provides information
     /// about the specific field ID and the type ID of the parent struct this field is in.
     ///
-    /// Defaults to calling `to_original`.
+    /// Defaults to calling `to_thrift`.
     fn to_thrift_field(
         value: &Self::AdaptedType,
         _field_id: i16,
         _strct: TypeId,
-    ) -> Self::OriginalType {
-        Self::to_original(value)
+    ) -> Self::StandardType {
+        Self::to_thrift(value)
     }
 
     /// Method called when the adapted type is not present in a field during deserialization or is
@@ -84,7 +84,7 @@ pub trait ThriftAdapter {
     /// WARNING: This defaults to calling `from_thrift_field` and **assumes `from_thrift_field`
     /// will not return an `Err` for the default value**.
     fn from_thrift_default(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Self::AdaptedType {
@@ -106,8 +106,8 @@ pub struct LayeredThriftAdapter<Fst, Snd>
 where
     Fst: ThriftAdapter,
     Snd: ThriftAdapter,
-    Fst::OriginalType: Into<Snd::AdaptedType>,
-    Snd::AdaptedType: Into<Fst::OriginalType>,
+    Fst::StandardType: Into<Snd::AdaptedType>,
+    Snd::AdaptedType: Into<Fst::StandardType>,
 {
     _inner_first: PhantomData<Fst>,
     _inner_second: PhantomData<Snd>,
@@ -117,18 +117,18 @@ impl<Fst, Snd> ThriftAdapter for LayeredThriftAdapter<Fst, Snd>
 where
     Fst: ThriftAdapter,
     Snd: ThriftAdapter,
-    Fst::OriginalType: Into<Snd::AdaptedType>,
-    Snd::AdaptedType: Into<Fst::OriginalType>,
+    Fst::StandardType: Into<Snd::AdaptedType>,
+    Snd::AdaptedType: Into<Fst::StandardType>,
 {
-    type OriginalType = <Snd as ThriftAdapter>::OriginalType;
+    type StandardType = <Snd as ThriftAdapter>::StandardType;
     type AdaptedType = <Fst as ThriftAdapter>::AdaptedType;
 
     type Error = anyhow::Error;
 
     #[inline]
-    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
-        <Fst as ThriftAdapter>::from_original(
-            <Snd as ThriftAdapter>::from_original(value)
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
+        <Fst as ThriftAdapter>::from_thrift(
+            <Snd as ThriftAdapter>::from_thrift(value)
                 .map_err(Into::<anyhow::Error>::into)?
                 .into(),
         )
@@ -136,13 +136,13 @@ where
     }
 
     #[inline]
-    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
-        <Snd as ThriftAdapter>::to_original(&<Fst as ThriftAdapter>::to_original(value).into())
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        <Snd as ThriftAdapter>::to_thrift(&<Fst as ThriftAdapter>::to_thrift(value).into())
     }
 
     #[inline]
     fn from_thrift_field(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
@@ -161,7 +161,7 @@ where
         value: &Self::AdaptedType,
         field_id: i16,
         strct: TypeId,
-    ) -> Self::OriginalType {
+    ) -> Self::StandardType {
         <Snd as ThriftAdapter>::to_thrift_field(
             &<Fst as ThriftAdapter>::to_thrift_field(value, field_id, strct).into(),
             field_id,
@@ -171,7 +171,7 @@ where
 
     #[inline]
     fn from_thrift_default(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Self::AdaptedType {
@@ -183,7 +183,7 @@ where
     }
 }
 
-/// Transforms the given adapter `A` into an adapter with the signature `Vec<OriginalType>`
+/// Transforms the given adapter `A` into an adapter with the signature `Vec<StandardType>`
 /// -> `Vec<AdaptedType>`. Because Rust doesn't have HKT, we cannot make this "generic" over
 /// multiple collection types.
 pub struct ListMapAdapter<A>
@@ -197,27 +197,27 @@ impl<A> ThriftAdapter for ListMapAdapter<A>
 where
     A: ThriftAdapter,
 {
-    type OriginalType = Vec<A::OriginalType>;
+    type StandardType = Vec<A::StandardType>;
     type AdaptedType = Vec<A::AdaptedType>;
 
     type Error = A::Error;
 
     #[inline]
-    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
         value
             .into_iter()
-            .map(|elem| A::from_original(elem))
+            .map(|elem| A::from_thrift(elem))
             .collect::<Result<Self::AdaptedType, Self::Error>>()
     }
 
     #[inline]
-    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
-        value.iter().map(|elem| A::to_original(elem)).collect()
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        value.iter().map(|elem| A::to_thrift(elem)).collect()
     }
 
     #[inline]
     fn from_thrift_field(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
@@ -232,7 +232,7 @@ where
         value: &Self::AdaptedType,
         field_id: i16,
         strct: TypeId,
-    ) -> Self::OriginalType {
+    ) -> Self::StandardType {
         value
             .iter()
             .map(|elem| A::to_thrift_field(elem, field_id, strct))
@@ -241,7 +241,7 @@ where
 
     #[inline]
     fn from_thrift_default(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Self::AdaptedType {
@@ -252,13 +252,13 @@ where
     }
 }
 
-/// Transforms the given adapter `A` into an adapter with the signature `BTreeSet<OriginalType>`
+/// Transforms the given adapter `A` into an adapter with the signature `BTreeSet<StandardType>`
 /// -> `BTreeSet<AdaptedType>`. Because Rust doesn't have HKT, we cannot make this "generic" over
 /// multiple collection types.
 pub struct SetMapAdapter<A>
 where
     A: ThriftAdapter,
-    A::OriginalType: Ord + PartialEq,
+    A::StandardType: Ord + PartialEq,
     A::AdaptedType: Ord + PartialEq,
 {
     _inner_adapter: PhantomData<A>,
@@ -267,30 +267,30 @@ where
 impl<A> ThriftAdapter for SetMapAdapter<A>
 where
     A: ThriftAdapter,
-    A::OriginalType: Ord + PartialEq,
+    A::StandardType: Ord + PartialEq,
     A::AdaptedType: Ord + PartialEq,
 {
-    type OriginalType = BTreeSet<A::OriginalType>;
+    type StandardType = BTreeSet<A::StandardType>;
     type AdaptedType = BTreeSet<A::AdaptedType>;
 
     type Error = A::Error;
 
     #[inline]
-    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
         value
             .into_iter()
-            .map(|elem| A::from_original(elem))
+            .map(|elem| A::from_thrift(elem))
             .collect::<Result<Self::AdaptedType, Self::Error>>()
     }
 
     #[inline]
-    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
-        value.iter().map(|elem| A::to_original(elem)).collect()
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        value.iter().map(|elem| A::to_thrift(elem)).collect()
     }
 
     #[inline]
     fn from_thrift_field(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
@@ -305,7 +305,7 @@ where
         value: &Self::AdaptedType,
         field_id: i16,
         strct: TypeId,
-    ) -> Self::OriginalType {
+    ) -> Self::StandardType {
         value
             .iter()
             .map(|elem| A::to_thrift_field(elem, field_id, strct))
@@ -314,7 +314,7 @@ where
 
     #[inline]
     fn from_thrift_default(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Self::AdaptedType {
@@ -326,13 +326,13 @@ where
 }
 
 /// Transforms the given adapter `KA` and `KV` into an adapter with the signature
-/// `BTreeMap<KA::OriginalType, KV::OriginalType>` -> `BTreeMap<KA::AdaptedType, KV::AdaptedType>`.
+/// `BTreeMap<KA::StandardType, KV::StandardType>` -> `BTreeMap<KA::AdaptedType, KV::AdaptedType>`.
 /// Because Rust doesn't have HKT, we cannot make this "generic" over multiple collection types.
 pub struct MapMapAdapter<KA, KV>
 where
     KA: ThriftAdapter,
     KV: ThriftAdapter,
-    KA::OriginalType: Ord + PartialEq,
+    KA::StandardType: Ord + PartialEq,
     KA::AdaptedType: Ord + PartialEq,
 {
     _inner_key_adapter: PhantomData<KA>,
@@ -343,38 +343,38 @@ impl<KA, KV> ThriftAdapter for MapMapAdapter<KA, KV>
 where
     KA: ThriftAdapter,
     KV: ThriftAdapter,
-    KA::OriginalType: Ord + PartialEq,
+    KA::StandardType: Ord + PartialEq,
     KA::AdaptedType: Ord + PartialEq,
 {
-    type OriginalType = BTreeMap<KA::OriginalType, KV::OriginalType>;
+    type StandardType = BTreeMap<KA::StandardType, KV::StandardType>;
     type AdaptedType = BTreeMap<KA::AdaptedType, KV::AdaptedType>;
 
     type Error = anyhow::Error;
 
     #[inline]
-    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
         value
             .into_iter()
             .map(|(key, val)| {
                 Ok((
-                    KA::from_original(key).map_err(Into::<anyhow::Error>::into)?,
-                    KV::from_original(val).map_err(Into::<anyhow::Error>::into)?,
+                    KA::from_thrift(key).map_err(Into::<anyhow::Error>::into)?,
+                    KV::from_thrift(val).map_err(Into::<anyhow::Error>::into)?,
                 ))
             })
             .collect::<Result<Self::AdaptedType, Self::Error>>()
     }
 
     #[inline]
-    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
         value
             .iter()
-            .map(|(key, val)| (KA::to_original(key), KV::to_original(val)))
-            .collect::<Self::OriginalType>()
+            .map(|(key, val)| (KA::to_thrift(key), KV::to_thrift(val)))
+            .collect::<Self::StandardType>()
     }
 
     #[inline]
     fn from_thrift_field(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
@@ -396,7 +396,7 @@ where
         value: &Self::AdaptedType,
         field_id: i16,
         strct: TypeId,
-    ) -> Self::OriginalType {
+    ) -> Self::StandardType {
         value
             .iter()
             .map(|(key, val)| {
@@ -405,12 +405,12 @@ where
                     KV::to_thrift_field(val, field_id, strct),
                 )
             })
-            .collect::<Self::OriginalType>()
+            .collect::<Self::StandardType>()
     }
 
     #[inline]
     fn from_thrift_default(
-        value: Self::OriginalType,
+        value: Self::StandardType,
         field_id: i16,
         strct: TypeId,
     ) -> Self::AdaptedType {
@@ -438,16 +438,16 @@ impl<T> ThriftAdapter for IdentityAdapter<T>
 where
     T: Clone + Debug + Send + Sync + PartialEq,
 {
-    type OriginalType = T;
+    type StandardType = T;
     type AdaptedType = T;
 
     type Error = std::convert::Infallible;
 
-    fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
         Ok(value)
     }
 
-    fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
         value.clone()
     }
 }
@@ -464,43 +464,43 @@ mod tests {
     struct BoolToStringAdapter {}
 
     impl ThriftAdapter for BoolToStringAdapter {
-        type OriginalType = bool;
+        type StandardType = bool;
         type AdaptedType = String;
 
         type Error = anyhow::Error;
 
-        fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
             Ok(value.to_string())
         }
 
-        fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
             value == "true"
         }
 
         fn from_thrift_field(
-            value: Self::OriginalType,
+            value: Self::StandardType,
             field_id: i16,
             strct: TypeId,
         ) -> Result<Self::AdaptedType, Self::Error> {
             assert_eq!(field_id, 42);
             assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
 
-            Self::from_original(value)
+            Self::from_thrift(value)
         }
 
         fn to_thrift_field(
             value: &Self::AdaptedType,
             field_id: i16,
             strct: TypeId,
-        ) -> Self::OriginalType {
+        ) -> Self::StandardType {
             assert_eq!(field_id, 42);
             assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
 
-            Self::to_original(value)
+            Self::to_thrift(value)
         }
 
         fn from_thrift_default(
-            value: Self::OriginalType,
+            value: Self::StandardType,
             field_id: i16,
             strct: TypeId,
         ) -> Self::AdaptedType {
@@ -514,12 +514,12 @@ mod tests {
     struct I64ToBoolAdapter {}
 
     impl ThriftAdapter for I64ToBoolAdapter {
-        type OriginalType = i64;
+        type StandardType = i64;
         type AdaptedType = bool;
 
         type Error = anyhow::Error;
 
-        fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
             match value {
                 0 => Ok(false),
                 1 => Ok(true),
@@ -527,34 +527,34 @@ mod tests {
             }
         }
 
-        fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
             if *value { 1 } else { 0 }
         }
 
         fn from_thrift_field(
-            value: Self::OriginalType,
+            value: Self::StandardType,
             field_id: i16,
             strct: TypeId,
         ) -> Result<Self::AdaptedType, Self::Error> {
             assert_eq!(field_id, 42);
             assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
 
-            Self::from_original(value)
+            Self::from_thrift(value)
         }
 
         fn to_thrift_field(
             value: &Self::AdaptedType,
             field_id: i16,
             strct: TypeId,
-        ) -> Self::OriginalType {
+        ) -> Self::StandardType {
             assert_eq!(field_id, 42);
             assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
 
-            Self::to_original(value)
+            Self::to_thrift(value)
         }
 
         fn from_thrift_default(
-            value: Self::OriginalType,
+            value: Self::StandardType,
             field_id: i16,
             strct: TypeId,
         ) -> Self::AdaptedType {
@@ -568,43 +568,43 @@ mod tests {
     struct I8ToI64Adapter {}
 
     impl ThriftAdapter for I8ToI64Adapter {
-        type OriginalType = i8;
+        type StandardType = i8;
         type AdaptedType = i64;
 
         type Error = anyhow::Error;
 
-        fn from_original(value: Self::OriginalType) -> Result<Self::AdaptedType, Self::Error> {
+        fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
             Ok(value.into())
         }
 
-        fn to_original(value: &Self::AdaptedType) -> Self::OriginalType {
+        fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
             (*value).try_into().unwrap()
         }
 
         fn from_thrift_field(
-            value: Self::OriginalType,
+            value: Self::StandardType,
             field_id: i16,
             strct: TypeId,
         ) -> Result<Self::AdaptedType, Self::Error> {
             assert_eq!(field_id, 42);
             assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
 
-            Self::from_original(value)
+            Self::from_thrift(value)
         }
 
         fn to_thrift_field(
             value: &Self::AdaptedType,
             field_id: i16,
             strct: TypeId,
-        ) -> Self::OriginalType {
+        ) -> Self::StandardType {
             assert_eq!(field_id, 42);
             assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
 
-            Self::to_original(value)
+            Self::to_thrift(value)
         }
 
         fn from_thrift_default(
-            value: Self::OriginalType,
+            value: Self::StandardType,
             field_id: i16,
             strct: TypeId,
         ) -> Self::AdaptedType {
@@ -622,22 +622,22 @@ mod tests {
 
     #[test]
     fn test_from_thrift() {
-        assert_eq!(TestLayeredAdapter::from_original(0_i8).unwrap(), "false");
-        assert_eq!(TestLayeredAdapter::from_original(1_i8).unwrap(), "true");
+        assert_eq!(TestLayeredAdapter::from_thrift(0_i8).unwrap(), "false");
+        assert_eq!(TestLayeredAdapter::from_thrift(1_i8).unwrap(), "true");
     }
 
     #[test]
     fn test_from_thrift_error() {
-        let res = TestLayeredAdapter::from_original(3_i8);
+        let res = TestLayeredAdapter::from_thrift(3_i8);
 
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().to_string(), "invalid num 3");
     }
 
     #[test]
-    fn test_to_original() {
-        assert_eq!(TestLayeredAdapter::to_original(&"false".to_string()), 0_i8);
-        assert_eq!(TestLayeredAdapter::to_original(&"true".to_string()), 1_i8);
+    fn test_to_thrift() {
+        assert_eq!(TestLayeredAdapter::to_thrift(&"false".to_string()), 0_i8);
+        assert_eq!(TestLayeredAdapter::to_thrift(&"true".to_string()), 1_i8);
     }
 
     #[test]

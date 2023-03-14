@@ -1,0 +1,620 @@
+{
+  "refid": "Patch_8cpp",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "Patch.cpp",
+  "includes": [
+    {
+      "refid": "protocol_2Patch_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/Patch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "cmath"
+    },
+    {
+      "local": "no",
+      "text_html": "limits"
+    },
+    {
+      "local": "no",
+      "text_html": "stdexcept"
+    },
+    {
+      "local": "no",
+      "text_html": "fmt/core.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/MapUtil.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/io/IOBufQueue.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/lang/Exception.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp/util/EnumUtils.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp/util/SaturatingMath.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp/util/VarintUtils.h"
+    },
+    {
+      "refid": "Get_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Get.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/BinaryProtocol.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/CompactProtocol.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/FieldMask.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/Object.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Id.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/NativeType.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Tag.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/thrift/gen-cpp2/patch_types.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/thrift/gen-cpp2/protocol_types.h"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache",
+      "text_html": "apache"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift",
+      "text_html": "apache::thrift"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol",
+      "text_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1_1detail",
+      "text_html": "apache::thrift::protocol::detail"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp"
+  },
+  "filepath": "file/thrift/lib/cpp2/protocol/Patch.cpp",
+  "href": "/ref/cpp/thrift/lib/cpp2/protocol/Patch.cpp",
+  "free_vars": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a6fc3260a68f9fdbe44341b22e4fe2e4f",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "FOLLY_INLINE_VARIABLE constexpr <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/detail/ApplyPatch\">detail::ApplyPatch</a>",
+      "definition_html": "FOLLY_INLINE_VARIABLE constexpr detail::ApplyPatch apache::thrift::protocol::applyPatch",
+      "argsstring_html": "",
+      "name_html": "applyPatch",
+      "initializer_html": "{}",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "55",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "bodystart": "55",
+        "bodyend": "-1"
+      },
+      "description": {
+        "param": [
+          {
+            "names_html": [
+              "patch"
+            ],
+            "description_html": "<p>Object </p>"
+          },
+          {
+            "names_html": [
+              "value"
+            ],
+            "description_html": "<p>to be patched </p>"
+          }
+        ],
+        "detailed_html": "<p>Takes protocol Object and targer protocol Value. Makes sure that Object represents a Patch and tries to apply this patch to the target Value.</p><p>\n</p>"
+      }
+    }
+  ],
+  "free_functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1abc5eb0c602568f2c57f357e87f7cce4a",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
+      "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+      "argsstring_html": "(const protocol::Object &amp;patch)",
+      "name_html": "extractMaskFromPatch",
+      "param": [
+        {
+          "type_html": "const protocol::Object &amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "line": "646",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "bodystart": "646",
+        "bodyend": "648"
+      },
+      "definition": {
+        "simple_html": "ExtractedMasks extractMaskFromPatch(const protocol::Object&amp; patch)",
+        "simple_raw": "ExtractedMasks extractMaskFromPatch(const protocol::Object& patch)",
+        "detailed_html": "ExtractedMasks extractMaskFromPatch(const protocol::Object&amp; patch)",
+        "detailed_raw": "ExtractedMasks extractMaskFromPatch(const protocol::Object& patch)",
+        "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+        "original_argsstring_html": "(const protocol::Object &amp;patch)"
+      },
+      "description": {
+        "detailed_html": "<p>Constructs a Mask that only contains fields that are modified by the Patch. It will construct nested Mask for map and object patches. For map, it uses the address of Value key as the key for the mask. Note that Mask contains pointer to <code>protocol::Value</code> in patch, so caller needs to make sure Patch has longer lifetime than the mask. </p>"
+      },
+      "compoundname_html": "apache::thrift::protocol::extractMaskFromPatch",
+      "namespace_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a91eccea76e54fece03d13f989ac70dc9",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "type::StandardProtocol",
+          "declname_html": "Protocol",
+          "defname_html": "Protocol"
+        }
+      ],
+      "type_html": "std::unique_ptr&lt; folly::IOBuf &gt;",
+      "definition_html": "std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::protocol::applyPatchToSerializedData",
+      "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+      "name_html": "applyPatchToSerializedData",
+      "param": [
+        {
+          "type_html": "const protocol::Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "const folly::IOBuf &amp;",
+          "declname_html": "buf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "line": "651",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "bodystart": "651",
+        "bodyend": "670"
+      },
+      "definition": {
+        "simple_html": "template &lt;type::StandardProtocol Protocol&gt;\nstd::unique_ptr&lt;folly::IOBuf&gt; applyPatchToSerializedData(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "simple_raw": "template <type::StandardProtocol Protocol>\nstd::unique_ptr<folly::IOBuf> applyPatchToSerializedData(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "detailed_html": "template &lt;type::StandardProtocol Protocol&gt;\nstd::unique_ptr&lt;folly::IOBuf&gt; applyPatchToSerializedData(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "detailed_raw": "template <type::StandardProtocol Protocol>\nstd::unique_ptr<folly::IOBuf> applyPatchToSerializedData(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "original_definition_html": "std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::protocol::applyPatchToSerializedData",
+        "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+      },
+      "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData",
+      "namespace_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1aaa9a88b3362d4e4b6a85c3bb14f152a2",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "template std::unique_ptr&lt; folly::IOBuf &gt;",
+      "definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+      "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+      "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+      "param": [
+        {
+          "type_html": "const protocol::Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "const folly::IOBuf &amp;",
+          "declname_html": "buf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "line": "673",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Binary&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "simple_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Binary>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "detailed_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Binary&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "detailed_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Binary>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "original_definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+        "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+      },
+      "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+      "namespace_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1ada01d004da19baa77b91d9fce5861768",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "template std::unique_ptr&lt; folly::IOBuf &gt;",
+      "definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+      "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+      "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+      "param": [
+        {
+          "type_html": "const protocol::Object &amp;",
+          "declname_html": "patch"
+        },
+        {
+          "type_html": "const folly::IOBuf &amp;",
+          "declname_html": "buf"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+        "line": "676",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Compact&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "simple_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Compact>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "detailed_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Compact&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+        "detailed_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Compact>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+        "original_definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+        "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+      },
+      "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+      "namespace_html": "apache::thrift::protocol"
+    },
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol_1a655a1b9a3c326e4aec80ffbbfbc6e50e",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
+      "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+      "argsstring_html": "(Object &amp;&amp;patch)=delete",
+      "name_html": "extractMaskFromPatch",
+      "param": [
+        {
+          "type_html": "Object &amp;&amp;",
+          "declname_html": "patch"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "70",
+        "column": "1"
+      },
+      "definition": {
+        "simple_html": "ExtractedMasks extractMaskFromPatch(Object&amp;&amp; patch)",
+        "simple_raw": "ExtractedMasks extractMaskFromPatch(Object&& patch)",
+        "detailed_html": "ExtractedMasks extractMaskFromPatch(Object&amp;&amp; patch) = delete",
+        "detailed_raw": "ExtractedMasks extractMaskFromPatch(Object&& patch) = delete",
+        "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+        "original_argsstring_html": "(Object &amp;&amp;patch)=delete"
+      },
+      "compoundname_html": "apache::thrift::protocol::extractMaskFromPatch",
+      "namespace_html": "apache::thrift::protocol"
+    }
+  ],
+  "free_overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "extractMaskFromPatch",
+          "compoundname_html": "apache::thrift::protocol::extractMaskFromPatch",
+          "functions": [
+            {
+              "refid": "namespaceapache_1_1thrift_1_1protocol_1abc5eb0c602568f2c57f357e87f7cce4a",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
+              "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+              "argsstring_html": "(const protocol::Object &amp;patch)",
+              "name_html": "extractMaskFromPatch",
+              "param": [
+                {
+                  "type_html": "const protocol::Object &amp;",
+                  "declname_html": "patch"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+                "line": "646",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+                "bodystart": "646",
+                "bodyend": "648"
+              },
+              "definition": {
+                "simple_html": "ExtractedMasks extractMaskFromPatch(const protocol::Object&amp; patch)",
+                "simple_raw": "ExtractedMasks extractMaskFromPatch(const protocol::Object& patch)",
+                "detailed_html": "ExtractedMasks extractMaskFromPatch(const protocol::Object&amp; patch)",
+                "detailed_raw": "ExtractedMasks extractMaskFromPatch(const protocol::Object& patch)",
+                "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+                "original_argsstring_html": "(const protocol::Object &amp;patch)"
+              },
+              "description": {
+                "detailed_html": "<p>Constructs a Mask that only contains fields that are modified by the Patch. It will construct nested Mask for map and object patches. For map, it uses the address of Value key as the key for the mask. Note that Mask contains pointer to <code>protocol::Value</code> in patch, so caller needs to make sure Patch has longer lifetime than the mask. </p>"
+              },
+              "compoundname_html": "apache::thrift::protocol::extractMaskFromPatch",
+              "namespace_html": "apache::thrift::protocol"
+            },
+            {
+              "refid": "namespaceapache_1_1thrift_1_1protocol_1a655a1b9a3c326e4aec80ffbbfbc6e50e",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "<a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks\">ExtractedMasks</a>",
+              "definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+              "argsstring_html": "(Object &amp;&amp;patch)=delete",
+              "name_html": "extractMaskFromPatch",
+              "param": [
+                {
+                  "type_html": "Object &amp;&amp;",
+                  "declname_html": "patch"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+                "line": "70",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "ExtractedMasks extractMaskFromPatch(Object&amp;&amp; patch)",
+                "simple_raw": "ExtractedMasks extractMaskFromPatch(Object&& patch)",
+                "detailed_html": "ExtractedMasks extractMaskFromPatch(Object&amp;&amp; patch) = delete",
+                "detailed_raw": "ExtractedMasks extractMaskFromPatch(Object&& patch) = delete",
+                "original_definition_html": "ExtractedMasks apache::thrift::protocol::extractMaskFromPatch",
+                "original_argsstring_html": "(Object &amp;&amp;patch)=delete"
+              },
+              "compoundname_html": "apache::thrift::protocol::extractMaskFromPatch",
+              "namespace_html": "apache::thrift::protocol"
+            }
+          ],
+          "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/extractMaskFromPatch",
+          "namespace_html": "apache::thrift::protocol",
+          "minprot": "public",
+          "displayname_html": "extractMaskFromPatch",
+          "brief_html": "<p>Constructs a Mask that only contains fields that are modified by the Patch. It will construct nested Mask for map and object patches. For map, it uses the address of Value key as the key for the mask. Note that Mask contains pointer to <code>protocol::Value</code> in patch, so caller needs to make sure Patch has longer lifetime than the mask. </p>",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/extractMaskFromPatch",
+          "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/extractMaskFromPatch"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "applyPatchToSerializedData",
+          "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData",
+          "functions": [
+            {
+              "refid": "namespaceapache_1_1thrift_1_1protocol_1a91eccea76e54fece03d13f989ac70dc9",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "type::StandardProtocol",
+                  "declname_html": "Protocol",
+                  "defname_html": "Protocol"
+                }
+              ],
+              "type_html": "std::unique_ptr&lt; folly::IOBuf &gt;",
+              "definition_html": "std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::protocol::applyPatchToSerializedData",
+              "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+              "name_html": "applyPatchToSerializedData",
+              "param": [
+                {
+                  "type_html": "const protocol::Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "const folly::IOBuf &amp;",
+                  "declname_html": "buf"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+                "line": "651",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+                "bodystart": "651",
+                "bodyend": "670"
+              },
+              "definition": {
+                "simple_html": "template &lt;type::StandardProtocol Protocol&gt;\nstd::unique_ptr&lt;folly::IOBuf&gt; applyPatchToSerializedData(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+                "simple_raw": "template <type::StandardProtocol Protocol>\nstd::unique_ptr<folly::IOBuf> applyPatchToSerializedData(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+                "detailed_html": "template &lt;type::StandardProtocol Protocol&gt;\nstd::unique_ptr&lt;folly::IOBuf&gt; applyPatchToSerializedData(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+                "detailed_raw": "template <type::StandardProtocol Protocol>\nstd::unique_ptr<folly::IOBuf> applyPatchToSerializedData(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+                "original_definition_html": "std::unique_ptr&lt; folly::IOBuf &gt; apache::thrift::protocol::applyPatchToSerializedData",
+                "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+              },
+              "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData",
+              "namespace_html": "apache::thrift::protocol"
+            }
+          ],
+          "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/applyPatchToSerializedData",
+          "namespace_html": "apache::thrift::protocol",
+          "minprot": "public",
+          "displayname_html": "applyPatchToSerializedData",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/applyPatchToSerializedData",
+          "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/applyPatchToSerializedData"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+          "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+          "functions": [
+            {
+              "refid": "namespaceapache_1_1thrift_1_1protocol_1aaa9a88b3362d4e4b6a85c3bb14f152a2",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "template std::unique_ptr&lt; folly::IOBuf &gt;",
+              "definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+              "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+              "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+              "param": [
+                {
+                  "type_html": "const protocol::Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "const folly::IOBuf &amp;",
+                  "declname_html": "buf"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+                "line": "673",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Binary&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+                "simple_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Binary>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+                "detailed_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Binary&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+                "detailed_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Binary>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+                "original_definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+                "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+              },
+              "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+              "namespace_html": "apache::thrift::protocol"
+            }
+          ],
+          "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/2a6296",
+          "namespace_html": "apache::thrift::protocol",
+          "minprot": "public",
+          "displayname_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Binary &gt;",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/2a6296",
+          "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/2a6296"
+        },
+        {
+          "kind": "overloadset",
+          "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+          "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+          "functions": [
+            {
+              "refid": "namespaceapache_1_1thrift_1_1protocol_1ada01d004da19baa77b91d9fce5861768",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "type_html": "template std::unique_ptr&lt; folly::IOBuf &gt;",
+              "definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+              "argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)",
+              "name_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+              "param": [
+                {
+                  "type_html": "const protocol::Object &amp;",
+                  "declname_html": "patch"
+                },
+                {
+                  "type_html": "const folly::IOBuf &amp;",
+                  "declname_html": "buf"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/protocol/Patch.cpp",
+                "line": "676",
+                "column": "1"
+              },
+              "definition": {
+                "simple_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Compact&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+                "simple_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Compact>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+                "detailed_html": "template std::unique_ptr&lt;folly::IOBuf&gt;\napplyPatchToSerializedData&lt;type::StandardProtocol::Compact&gt;(\n    const protocol::Object&amp; patch, const folly::IOBuf&amp; buf)",
+                "detailed_raw": "template std::unique_ptr<folly::IOBuf>\napplyPatchToSerializedData<type::StandardProtocol::Compact>(\n    const protocol::Object& patch, const folly::IOBuf& buf)",
+                "original_definition_html": "template std::unique_ptr&lt;folly::IOBuf&gt; apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+                "original_argsstring_html": "(const protocol::Object &amp;patch, const folly::IOBuf &amp;buf)"
+              },
+              "compoundname_html": "apache::thrift::protocol::applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+              "namespace_html": "apache::thrift::protocol"
+            }
+          ],
+          "filepath": "f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/d5eb39",
+          "namespace_html": "apache::thrift::protocol",
+          "minprot": "public",
+          "displayname_html": "applyPatchToSerializedData&lt; type::StandardProtocol::Compact &gt;",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/d5eb39",
+          "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/protocol/Patch.cpp/d5eb39"
+        }
+      ]
+    }
+  ]
+}

@@ -15,6 +15,7 @@ buck2 run //fbcref/docgen:maker -- \
   --allowlist \
     'thrift/lib/cpp/TProcessorEventHandler.h' \
     'thrift/lib/cpp/protocol/TCompactProtocol.*' \
+    'thrift/lib/cpp2/protocol/Patch.h' \
     'thrift/lib/cpp2/FieldRef.h' \
     'thrift/lib/cpp2/op/.*'
 
@@ -39,7 +40,7 @@ Operator Library
   cpp/file/thrift/lib/cpp2/op/Hash.h
   cpp/file/thrift/lib/cpp2/op/Patch.h
 
-Patch
+Static Patch
   cpp/class/apache/thrift/op/detail/AssignPatch
   cpp/class/apache/thrift/op/detail/ListPatch
   cpp/class/apache/thrift/op/detail/SetPatch
@@ -51,6 +52,9 @@ Patch
   cpp/class/apache/thrift/op/detail/BinaryPatch
   cpp/class/apache/thrift/op/detail/NumberPatch
   cpp/class/apache/thrift/op/detail/BoolPatch
+
+Dynamic Patch
+  cpp/file/thrift/lib/cpp2/protocol/Patch.h
 EOTOC
 )
 python3.6 ../../fbcref/docgen/tocgen.py "$toc" > src/json/cpp_api_toc.json

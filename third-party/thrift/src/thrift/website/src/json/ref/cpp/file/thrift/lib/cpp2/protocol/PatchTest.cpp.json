@@ -1,0 +1,86 @@
+{
+  "refid": "protocol_2PatchTest_8cpp",
+  "kind": "file",
+  "language": "C++",
+  "compoundname_html": "PatchTest.cpp",
+  "includes": [
+    {
+      "refid": "protocol_2Patch_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/Patch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "stdexcept"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/io/IOBuf.h"
+    },
+    {
+      "local": "no",
+      "text_html": "folly/portability/GTest.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp/util/VarintUtils.h"
+    },
+    {
+      "refid": "op_2Patch_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Patch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/CompactProtocol.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/Object.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/Serializer.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Id.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/type/Tag.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/thrift/gen-cpp2/patch_types.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/test/gen-cpp2/StructPatchTest_fatal_types.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/test/gen-cpp2/StructPatchTest_types.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/test/testset/Testset.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h"
+    }
+  ],
+  "innernamespace": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1protocol",
+      "text_html": "apache::thrift::protocol"
+    }
+  ],
+  "file_location": {
+    "file": "fbcode/thrift/lib/cpp2/protocol/PatchTest.cpp"
+  },
+  "filepath": "file/thrift/lib/cpp2/protocol/PatchTest.cpp",
+  "href": "/ref/cpp/thrift/lib/cpp2/protocol/PatchTest.cpp",
+  "free_overloadgroups": []
+}

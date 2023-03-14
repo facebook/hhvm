@@ -1,5 +1,5 @@
 {
-  "refid": "Patch_8h",
+  "refid": "op_2Patch_8h",
   "kind": "file",
   "language": "C++",
   "compoundname_html": "Patch.h",
@@ -9,7 +9,7 @@
       "text_html": "thrift/lib/cpp2/Thrift.h"
     },
     {
-      "refid": "detail_2Patch_8h",
+      "refid": "op_2detail_2Patch_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/Patch.h"
     },

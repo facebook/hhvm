@@ -59,11 +59,11 @@ struct ExtractedMasks {
   Mask write; // write mask from patch
 };
 
-// Constructs a Mask that only contains fields that are modified by the Patch.
-// It will construct nested Mask for map and object patches.
-// For map, it uses the address of Value key as the key for the mask.
-// Note that Mask contains pointer to `protocol::Value` in patch, so
-// caller needs to make sure Patch has longer lifetime than the mask.
+/// Constructs a Mask that only contains fields that are modified by the Patch.
+/// It will construct nested Mask for map and object patches.
+/// For map, it uses the address of Value key as the key for the mask.
+/// Note that Mask contains pointer to `protocol::Value` in patch, so
+/// caller needs to make sure Patch has longer lifetime than the mask.
 ExtractedMasks extractMaskFromPatch(const protocol::Object& patch);
 
 // Extracting mask from a temporary patch is dangerous and should be disallowed.

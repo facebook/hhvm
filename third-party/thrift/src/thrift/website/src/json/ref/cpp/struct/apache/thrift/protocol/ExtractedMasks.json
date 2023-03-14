@@ -1,0 +1,74 @@
+{
+  "refid": "structapache_1_1thrift_1_1protocol_1_1ExtractedMasks",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::protocol::ExtractedMasks",
+  "includes": {
+    "refid": "protocol_2Patch_8h",
+    "local": "no",
+    "text_html": "Patch.h"
+  },
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+    "line": "57",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+    "bodystart": "57",
+    "bodyend": "60"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "protocol",
+    "ExtractedMasks"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1ExtractedMasks_1ad4df835b10589becadf7eaef1bdc97cc",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "Mask",
+      "definition_html": "Mask apache::thrift::protocol::ExtractedMasks::read",
+      "argsstring_html": "",
+      "name_html": "read",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "58",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "bodystart": "58",
+        "bodyend": "-1"
+      }
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1protocol_1_1ExtractedMasks_1a31adabc4177db47faaee18457485596a",
+      "prot": "public",
+      "static": "no",
+      "mutable": "no",
+      "type_html": "Mask",
+      "definition_html": "Mask apache::thrift::protocol::ExtractedMasks::write",
+      "argsstring_html": "",
+      "name_html": "write",
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "line": "59",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/protocol/Patch.h",
+        "bodystart": "59",
+        "bodyend": "-1"
+      }
+    }
+  ],
+  "friends": [],
+  "declaration_raw": "struct ExtractedMasks;",
+  "declaration_html": "struct ExtractedMasks;",
+  "filepath": "struct/apache/thrift/protocol/ExtractedMasks",
+  "href": "/ref/cpp/struct/apache/thrift/protocol/ExtractedMasks",
+  "overloadgroups": [],
+  "free_overloadgroups": []
+}

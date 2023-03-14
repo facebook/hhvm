@@ -2500,9 +2500,9 @@ To string conversions:
   associated with the ActRec provided by S0.  Set the native resume address
   to S1, resume offset to S2, and mark it blocked on non-finished child S3.
 
-| CreateAAWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc
+| CreateCCWH<local,count>, DAllocObj, S(FramePtr) S(Int), PRc
 
-  Create an AwaitAllWaitHandle and add the count elements from frame contiguous
+  Create a ConcurrentWaitHandle and add the count elements from frame contiguous
   frame locals beginning at local and extending count locals. S1 denotes the
   total number of non-completed waithandles. All locals must be subclasses of
   WaitHandle.

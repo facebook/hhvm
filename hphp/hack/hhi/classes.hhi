@@ -117,6 +117,7 @@ namespace HH {
   <<
     __Sealed(
       AwaitAllWaitHandle::class,
+      ConcurrentWaitHandle::class,
       ConditionWaitHandle::class,
       ExternalThreadEventWaitHandle::class,
       RescheduleWaitHandle::class,
@@ -210,6 +211,13 @@ namespace HH {
     )[]: Awaitable<void>;
     public static function setOnCreateCallback(
       ?(function(AwaitAllWaitHandle, vec<WaitableWaitHandle<mixed>>): void) $callback,
+    ): void {}
+  }
+
+  <<__SupportDynamicType>>
+  final class ConcurrentWaitHandle extends WaitableWaitHandle<void> {
+    public static function setOnCreateCallback(
+      ?(function(ConcurrentWaitHandle, vec<WaitableWaitHandle<mixed>>): void) $callback,
     ): void {}
   }
 

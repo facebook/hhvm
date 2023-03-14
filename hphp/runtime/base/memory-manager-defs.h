@@ -29,6 +29,7 @@
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
@@ -242,6 +243,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* AsyncFunction */
     sizeClass<c_AsyncGeneratorWaitHandle>(),
     0, /* AwaitAll */
+    0, /* Concurrent */
     sizeClass<c_ConditionWaitHandle>(),
     sizeClass<c_RescheduleWaitHandle>(),
     sizeClass<c_SleepWaitHandle>(),
@@ -266,6 +268,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* WaitHandle */
     sizeClass<c_AsyncFunctionWaitHandle>(),
     0, /* AwaitAllWH */
+    0, /* ConcurrentWH */
     0, /* Closure */
     sizeClass<c_Vector>(),
     sizeClass<c_Map>(),
@@ -311,6 +314,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(NativeObject)
   CHECKSIZE(WaitHandle)
   CHECKSIZE(AwaitAllWH)
+  CHECKSIZE(ConcurrentWH)
   CHECKSIZE(Closure)
   CHECKSIZE(AsyncFuncFrame)
   CHECKSIZE(NativeData)
@@ -362,20 +366,25 @@ inline size_t allocSize(const HeapObject* h) {
       auto obj = static_cast<const ObjectData*>(h);
       auto whKind = wait_handle<c_Awaitable>(obj)->getKind();
       size = waithandle_sizes[(int)whKind];
-      assertx(size != 0); // AsyncFuncFrame or AwaitAllWH
+      assertx(size != 0); // AsyncFuncFrame, AwaitAllWH or ConcurrentWH
       assertx(size == MemoryManager::sizeClass(size));
       return size;
     }
-    case HeaderKind::AwaitAllWH:
-      // size = h->m_cap * sz(Node) + sz(c_AAWH)
-      // [ObjectData][children...]
-      size = static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
-      break;
     case HeaderKind::AsyncFuncFrame:
       // size = h->obj_offset + C // 32-bit
       // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
       size = static_cast<const NativeNode*>(h)->obj_offset +
              sizeof(c_AsyncFunctionWaitHandle);
+      break;
+    case HeaderKind::AwaitAllWH:
+      // size = h->m_cap * sz(Node) + sz(c_AAWH)
+      // [ObjectData][children...]
+      size = static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
+      break;
+    case HeaderKind::ConcurrentWH:
+      // size = h->m_cap * sz(Node) + sz(c_CCWH)
+      // [ObjectData][children...]
+      size = static_cast<const c_ConcurrentWaitHandle*>(h)->heapSize();
       break;
     case HeaderKind::NativeData: {
       // h->obj_offset + (h+h->obj_offset)->m_cls->m_extra * sz(TV) + sz(OD)

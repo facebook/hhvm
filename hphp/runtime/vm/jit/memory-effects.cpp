@@ -713,9 +713,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAGWH:
     return may_load_store(AHeapAny | AActRec { inst.src(0) }, AHeapAny);
 
-  case CreateAAWH:
+  case CreateCCWH:
     {
-      auto const extra = inst.extra<CreateAAWH>();
+      auto const extra = inst.extra<CreateCCWH>();
       auto const frame = ALocal {
         inst.src(0),
         AliasIdSet {

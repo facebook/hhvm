@@ -35,7 +35,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
@@ -257,8 +257,8 @@ constexpr ptrdiff_t ar_rel(ptrdiff_t off) {
  */
 void emitIsAwaitable(Vout& v, Vreg obj, Vreg sf) {
   auto constexpr minwh = (int)HeaderKind::WaitHandle;
-  auto constexpr maxwh = (int)HeaderKind::AwaitAllWH;
-  static_assert(maxwh - minwh == 2, "WH range check needs updating");
+  auto constexpr maxwh = (int)HeaderKind::ConcurrentWH;
+  static_assert(maxwh - minwh == 3, "WH range check needs updating");
 
   auto const kind = v.makeReg();
   auto const wh_index = v.makeReg();
@@ -318,13 +318,13 @@ void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CreateAAWHData>();
+void cgCreateCCWH(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<CreateCCWHData>();
 
   cgCallHelper(
     vmain(env),
     env,
-    CallSpec::direct(c_AwaitAllWaitHandle::fromFrameNoCheck),
+    CallSpec::direct(c_ConcurrentWaitHandle::fromFrameNoCheck),
     callDest(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)

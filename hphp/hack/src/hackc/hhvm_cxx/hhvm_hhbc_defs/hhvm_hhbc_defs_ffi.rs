@@ -178,13 +178,13 @@ pub mod ffi {
     #[repr(u8)]
     #[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize)]
     enum CollectionType {
-        Vector = 0x11,
-        Map = 0x12,
-        Set = 0x13,
-        Pair = 0x14,
-        ImmVector = 0x15,
-        ImmMap = 0x16,
-        ImmSet = 0x17,
+        Vector = 0x12,
+        Map = 0x13,
+        Set = 0x14,
+        Pair = 0x15,
+        ImmVector = 0x16,
+        ImmMap = 0x17,
+        ImmSet = 0x18,
     }
 
     #[repr(u8)]

@@ -24,37 +24,44 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// class AwaitAllWaitHandle
+// class ConcurrentWaitHandle
 
 /**
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
-  WAITHANDLE_CLASSOF(AwaitAllWaitHandle);
+struct c_ConcurrentWaitHandle final : c_WaitableWaitHandle {
+  WAITHANDLE_CLASSOF(ConcurrentWaitHandle);
   static void instanceDtor(ObjectData* obj, const Class*) {
-    auto wh = wait_handle<c_AwaitAllWaitHandle>(obj);
+    auto wh = wait_handle<c_ConcurrentWaitHandle>(obj);
     auto const sz = wh->heapSize();
-    wh->~c_AwaitAllWaitHandle();
+    wh->~c_ConcurrentWaitHandle();
     tl_heap->objFree(obj, sz);
   }
 
-  explicit c_AwaitAllWaitHandle(unsigned cap = 0)
-    : c_WaitableWaitHandle(classof(), HeaderKind::AwaitAllWH,
+  explicit c_ConcurrentWaitHandle(unsigned cap = 0)
+    : c_WaitableWaitHandle(classof(), HeaderKind::ConcurrentWH,
         type_scan::getIndexForMalloc<
-          c_AwaitAllWaitHandle,
+          c_ConcurrentWaitHandle,
           type_scan::Action::WithSuffix<Node>
         >())
     , m_cap(cap)
     , m_unfinished(cap - 1)
   {}
-  ~c_AwaitAllWaitHandle() {
+  ~c_ConcurrentWaitHandle() {
     assertx(isFinished());
     for (int32_t i = 0; i < m_cap; i++) {
       assertx(isFailed() || m_children[i].m_child->isFinished());
       decRefObj(m_children[i].m_child);
     }
   }
+
+  // [frame, last) are the set of locals, and cnt is number of
+  // non-finished wait handles in that range.
+  static ObjectData* fromFrameNoCheck(const ActRec* fp,
+                                      uint32_t first,
+                                      uint32_t last,
+                                      uint32_t cnt);
 
  public:
   struct Node final {
@@ -66,10 +73,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
       return m_index;
     }
 
-    inline c_AwaitAllWaitHandle* getWaitHandle() {
-      return reinterpret_cast<c_AwaitAllWaitHandle*>(const_cast<char*>(
+    inline c_ConcurrentWaitHandle* getWaitHandle() {
+      return reinterpret_cast<c_ConcurrentWaitHandle*>(const_cast<char*>(
         reinterpret_cast<const char*>(this - getChildIdx())
-        - c_AwaitAllWaitHandle::childrenOff()));
+        - c_ConcurrentWaitHandle::childrenOff()));
     }
 
     bool isFirstUnfinishedChild() {
@@ -86,7 +93,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   };
 
   static constexpr ptrdiff_t childrenOff() {
-    return offsetof(c_AwaitAllWaitHandle, m_children);
+    return offsetof(c_ConcurrentWaitHandle, m_children);
   }
 
   String getName();
@@ -96,26 +103,17 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
   size_t heapSize() const { return heapSize(m_cap); }
   static size_t heapSize(unsigned count) {
-    return sizeof(c_AwaitAllWaitHandle) + count * sizeof(Node);
+    return sizeof(c_ConcurrentWaitHandle) + count * sizeof(Node);
   }
   void scan(type_scan::Scanner&) const;
 
  private:
-  template<typename Iter>
-  static Object Create(Iter iter);
-  static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
+  static req::ptr<c_ConcurrentWaitHandle> Alloc(int32_t cnt);
   void initialize(context_idx_t ctx_idx);
   void markAsFinished(void);
   void markAsFailed(const Object& exception);
-  void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
+  void setState(uint8_t state) { setKindState(Kind::Concurrent, state); }
 
-  // Construct an AAWH from an array-like without making layout assumptions.
-  static Object fromArrLike(const ArrayData* ad);
-
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
-                                   const Array& dependencies);
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
-                                   const Array& dependencies);
  private:
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
@@ -126,14 +124,14 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   static const int8_t STATE_BLOCKED = 2;
 };
 
-inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
-  assertx(getKind() == Kind::AwaitAll);
-  return static_cast<c_AwaitAllWaitHandle*>(this);
+inline c_ConcurrentWaitHandle* c_Awaitable::asConcurrent() {
+  assertx(getKind() == Kind::Concurrent);
+  return static_cast<c_ConcurrentWaitHandle*>(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#define incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle-inl.h"
-#undef incl_HPHP_EXT_ASIO_AWAIT_ALL_WAIT_HANDLE_H_
+#define incl_HPHP_EXT_ASIO_CONCURRENT_WAIT_HANDLE_H_
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle-inl.h"
+#undef incl_HPHP_EXT_ASIO_CONCURRENT_WAIT_HANDLE_H_

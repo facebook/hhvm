@@ -22,6 +22,7 @@ let types =
     "AwaitAllWaitHandle";
     "classname";
     "Collection";
+    "ConcurrentWaitHandle";
     "ConditionWaitHandle";
     "Container";
     "darray";

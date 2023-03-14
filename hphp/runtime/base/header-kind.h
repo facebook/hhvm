@@ -43,7 +43,8 @@ enum class HeaderKind : uint8_t {
 
   // Valid kinds for an ObjectData; all but Object and NativeObject are
   // isCppBuiltin()
-  Object, NativeObject, WaitHandle, AsyncFuncWH, AwaitAllWH, Closure,
+  Object, NativeObject, WaitHandle, AsyncFuncWH, AwaitAllWH, ConcurrentWH,
+  Closure,
   // Collections. Vector and ImmSet are used for range checks; be careful
   // when adding new collection kinds.
   Vector, Map, Set, Pair, ImmVector, ImmMap, ImmSet,
@@ -256,7 +257,7 @@ namespace detail {
 // pass the isCppBuiltin() predicate.
 constexpr auto FirstCppBuiltin = HeaderKind::WaitHandle;
 constexpr auto LastCppBuiltin = HeaderKind::ImmSet;
-static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 10,
+static_assert(uint8_t(LastCppBuiltin) - uint8_t(FirstCppBuiltin) == 11,
               "keep predicate in sync with enum");
 }
 
@@ -272,10 +273,12 @@ inline constexpr bool hasInstanceDtor(HeaderKind k) {
   return k >= HeaderKind::NativeObject && k <= detail::LastCppBuiltin;
 }
 
-inline constexpr bool isWaithandleKind(HeaderKind k) {
-  return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
-  static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
-                "isWaithandleKind requires updating");
+inline constexpr bool isWaitHandleKind(HeaderKind k) {
+  return k >= HeaderKind::WaitHandle && k <= HeaderKind::ConcurrentWH;
+  static_assert(
+    (int)HeaderKind::ConcurrentWH - (int)HeaderKind::WaitHandle == 3,
+    "isWaitHandleKind requires updating"
+  );
 }
 
 }

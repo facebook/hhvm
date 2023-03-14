@@ -72,6 +72,7 @@ final class StaticWaitHandle<T> extends Awaitable<T> {}
  */
 <<__Sealed(
   AwaitAllWaitHandle::class,
+  ConcurrentWaitHandle::class,
   ConditionWaitHandle::class,
   ExternalThreadEventWaitHandle::class,
   RescheduleWaitHandle::class,
@@ -148,6 +149,17 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
   )[]: Awaitable<void>;
 
   /** Set callback for when a AwaitAllWaitHandle is created
+   * @param mixed $callback - A Closure to be called on creation
+   */
+  <<__Native>>
+  public static function setOnCreateCallback(mixed $callback): void;
+}
+
+/** A wait handle that waits for a list of other wait handles
+ */
+final class ConcurrentWaitHandle extends WaitableWaitHandle<void> {
+
+  /** Set callback for when a ConcurrentWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
   <<__Native>>

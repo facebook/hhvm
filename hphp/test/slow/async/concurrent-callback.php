@@ -29,7 +29,7 @@ async function test() {
 async function main_await_all_callback() {
   $join_it = new Ref(0);
 
-  AwaitAllWaitHandle::setOnCreateCallback(($a, $b) ==> {
+  ConcurrentWaitHandle::setOnCreateCallback(($a, $b) ==> {
     echo "onCreateCallback()...\n";
     if ($join_it->value === 1) HH\Asio\join($a);
     if ($join_it->value === 2) exit(0);

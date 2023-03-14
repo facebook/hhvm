@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -220,6 +221,24 @@ void AsioSession::onAwaitAllCreate(
     m_onAwaitAllCreate,
     make_vec_array(waitHandle, std::move(dependencies)),
     "AwaitAllWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::setOnConcurrentCreate(const Variant& callback) {
+  m_onConcurrentCreate = checkCallback(
+    callback,
+    "ConcurrentWaitHandle::onCreate"
+  );
+}
+
+void AsioSession::onConcurrentCreate(
+  c_ConcurrentWaitHandle* waitHandle,
+  Array&& dependencies
+) {
+  runCallback(
+    m_onConcurrentCreate,
+    make_vec_array(waitHandle, std::move(dependencies)),
+    "ConcurrentWaitHandle::onCreate"
   );
 }
 

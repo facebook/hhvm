@@ -77,6 +77,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
       out << ":" << static_cast<const ObjectData*>(h)->classname_cstr();
       break;
     case HeaderKind::Vector:

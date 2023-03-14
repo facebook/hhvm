@@ -661,8 +661,8 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
 
       auto const wh = gen(
         env,
-        CreateAAWH,
-        CreateAAWHData { locals.first, locals.count },
+        CreateCCWH,
+        CreateCCWHData { locals.first, locals.count },
         fp(env),
         cnt
       );
@@ -673,7 +673,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
         [&] (Block* taken) {
           gen(env, JmpNZero, taken, state);
         },
-        [&] { // Extremely unlikely: profiling hook finished the AAWH.
+        [&] { // Extremely unlikely: profiling hook finished the CCWH.
           hint(env, Block::Hint::Unused);
           push(env, cns(env, TInitNull));
         },

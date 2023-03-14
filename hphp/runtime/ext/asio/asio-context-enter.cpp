@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
@@ -71,6 +72,13 @@ namespace {
       });
     }
 
+    void discover(c_ConcurrentWaitHandle* node) {
+      assertx(node->getState() == c_ConcurrentWaitHandle::STATE_BLOCKED);
+      node->forEachChild([this] (c_WaitableWaitHandle* child) {
+        enqueue(child);
+      });
+    }
+
     void discover(c_ConditionWaitHandle* node) {
       assertx(node->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
       enqueue(node->getChild());
@@ -90,6 +98,9 @@ namespace {
             break;
           case Kind::AwaitAll:
             discover(node->asAwaitAll());
+            break;
+          case Kind::Concurrent:
+            discover(node->asConcurrent());
             break;
           case Kind::Condition:
             discover(node->asCondition());
@@ -154,6 +165,7 @@ namespace {
           case Kind::AsyncFunction:
           case Kind::AsyncGenerator:
           case Kind::AwaitAll:
+          case Kind::Concurrent:
           case Kind::Condition:
           case Kind::Reschedule:
             break;
@@ -177,6 +189,7 @@ namespace {
             break;
           case Kind::Static:
           case Kind::AwaitAll:
+          case Kind::Concurrent:
           case Kind::Condition:
             break;
         }

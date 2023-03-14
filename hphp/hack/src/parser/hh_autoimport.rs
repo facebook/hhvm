@@ -25,6 +25,7 @@ pub static TYPES: &[&str] = &[
     "AwaitAllWaitHandle",
     "classname",
     "Collection",
+    "ConcurrentWaitHandle",
     "ConditionWaitHandle",
     "Container",
     "darray",

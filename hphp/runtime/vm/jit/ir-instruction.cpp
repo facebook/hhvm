@@ -41,7 +41,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -306,8 +306,8 @@ Type allocObjReturn(const IRInstruction* inst) {
     case CreateAGWH:
       return Type::ExactObj(c_AsyncGeneratorWaitHandle::classof());
 
-    case CreateAAWH:
-      return Type::ExactObj(c_AwaitAllWaitHandle::classof());
+    case CreateCCWH:
+      return Type::ExactObj(c_ConcurrentWaitHandle::classof());
 
     case CreateSSWH:
       return Type::ExactObj(c_StaticWaitHandle::classof());

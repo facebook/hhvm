@@ -170,6 +170,7 @@ void AsioExtension::moduleInit() {
   initResumableWaitHandle();
   initAsyncGenerator();
   initAwaitAllWaitHandle();
+  initConcurrentWaitHandle();
   initConditionWaitHandle();
   initSleepWaitHandle();
   initRescheduleWaitHandle();

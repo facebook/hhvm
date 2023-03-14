@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -69,6 +70,7 @@ String c_WaitableWaitHandle::getName() {
     case Kind::AsyncFunction:       return asAsyncFunction()->getName();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getName();
     case Kind::AwaitAll:            return asAwaitAll()->getName();
+    case Kind::Concurrent:          return asConcurrent()->getName();
     case Kind::Condition:           return asCondition()->getName();
     case Kind::Reschedule:          return asReschedule()->getName();
     case Kind::Sleep:               return asSleep()->getName();
@@ -85,6 +87,7 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::AsyncFunction:       return asAsyncFunction()->getChild();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getChild();
     case Kind::AwaitAll:            return asAwaitAll()->getChild();
+    case Kind::Concurrent:          return asConcurrent()->getChild();
     case Kind::Condition:           return asCondition()->getChild();
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;

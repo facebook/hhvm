@@ -67,7 +67,7 @@
 #include "hphp/runtime/base/vanilla-keyset.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
-#include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
@@ -5051,12 +5051,12 @@ OPTBLD_INLINE JitResumeAddr iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
   }
 
   auto obj = Object::attach(
-    c_AwaitAllWaitHandle::fromFrameNoCheck(vmfp(), locals.first,
-                                           locals.first + locals.count, cnt)
+    c_ConcurrentWaitHandle::fromFrameNoCheck(vmfp(), locals.first,
+                                             locals.first + locals.count, cnt)
   );
   assertx(obj->isWaitHandle());
   if (UNLIKELY(static_cast<c_Awaitable*>(obj.get())->isFinished())) {
-    // A profiler hook may have finished the AAWH.
+    // A profiler hook may have finished the CCWH.
     vmStack().pushNull();
     return JitResumeAddr::none();
   }

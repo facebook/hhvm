@@ -31,6 +31,7 @@ namespace HPHP {
 struct ActRec;
 struct c_Awaitable;
 struct c_AwaitAllWaitHandle;
+struct c_ConcurrentWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_ResumableWaitHandle;
 
@@ -130,6 +131,11 @@ struct AsioSession final {
   bool hasOnAwaitAllCreate() { return !!m_onAwaitAllCreate; }
   void onAwaitAllCreate(c_AwaitAllWaitHandle* wh, Array&& dependencies);
 
+  // ConcurrentWaitHandle callbacks:
+  void setOnConcurrentCreate(const Variant& callback);
+  bool hasOnConcurrentCreate() { return !!m_onConcurrentCreate; }
+  void onConcurrentCreate(c_ConcurrentWaitHandle* wh, Array&& dependencies);
+
   // ConditionWaitHandle callbacks:
   void setOnConditionCreate(const Variant& callback);
   bool hasOnConditionCreate() { return !!m_onConditionCreate; }
@@ -175,6 +181,7 @@ private:
   Object m_onResumableSuccess;
   Object m_onResumableFail;
   Object m_onAwaitAllCreate;
+  Object m_onConcurrentCreate;
   Object m_onConditionCreate;
   Object m_onExtThreadEventCreate;
   Object m_onExtThreadEventSuccess;

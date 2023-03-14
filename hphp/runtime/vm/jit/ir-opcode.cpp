@@ -298,7 +298,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvObjToStr:
   case ConvObjToVec:
   case Count:
-  case CreateAAWH:
+  case CreateCCWH:
   case DictGet:
   case DictSet:
   case ElemDictD:

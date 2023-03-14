@@ -37,6 +37,7 @@ struct AsioBlockable final {
     AsyncFunctionWaitHandleNode,
     AsyncGeneratorWaitHandle,
     AwaitAllWaitHandleNode,
+    ConcurrentWaitHandleNode,
     ConditionWaitHandle,
   };
 

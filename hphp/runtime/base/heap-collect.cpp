@@ -177,6 +177,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::ImmSet:
     case HeaderKind::WaitHandle:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
       // Object kinds. None of these have native-data, because if they
       // do, the mapped header should be for the NativeData prefix.
       break;

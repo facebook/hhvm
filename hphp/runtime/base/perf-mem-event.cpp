@@ -328,6 +328,7 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
     case HeaderKind::RClsMeth:

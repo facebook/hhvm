@@ -38,8 +38,10 @@ String HHVM_METHOD(Awaitable, getName);
  *   ResumableWaitHandle           - wait handle that can resume PHP execution
  *    AsyncFunctionWaitHandle      - async function-based async execution
  *    AsyncGeneratorWaitHandle     - async generator-based async execution
- *   AwaitAllWaitHandle            - wait handle representing a collection of
- *                                     WHs, does not propagate results
+ *   AwaitAllWaitHandle            - wait handle that finishes when all provided
+ *                                     wait handles finish, returns null
+ *   ConcurrentWaitHandle          - wait handle that finishes when all wait
+ *                                     handles in the concurrent block finish
  *   ConditionWaitHandle           - wait handle implementing condition variable
  *   RescheduleWaitHandle          - wait handle that reschedules execution
  *   SleepWaitHandle               - wait handle that finishes after a timeout
@@ -54,6 +56,7 @@ String HHVM_METHOD(Awaitable, getName);
 struct c_AsyncFunctionWaitHandle;
 struct c_AsyncGeneratorWaitHandle;
 struct c_AwaitAllWaitHandle;
+struct c_ConcurrentWaitHandle;
 struct c_ConditionWaitHandle;
 struct c_RescheduleWaitHandle;
 struct c_SleepWaitHandle;
@@ -88,6 +91,7 @@ struct c_Awaitable : ObjectData {
     AsyncFunction,
     AsyncGenerator,
     AwaitAll,
+    Concurrent,
     Condition,
     Reschedule,
     Sleep,
@@ -155,6 +159,7 @@ struct c_Awaitable : ObjectData {
   c_AsyncFunctionWaitHandle* asAsyncFunction();
   c_AsyncGeneratorWaitHandle* asAsyncGenerator();
   c_AwaitAllWaitHandle* asAwaitAll();
+  c_ConcurrentWaitHandle* asConcurrent();
   c_ConditionWaitHandle* asCondition();
   c_RescheduleWaitHandle* asReschedule();
   c_ResumableWaitHandle* asResumable();

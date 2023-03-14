@@ -15,40 +15,21 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_H_
-#define incl_HPHP_EXT_ASIO_H_
-
-#include "hphp/runtime/ext/extension.h"
+#ifndef incl_HPHP_EXT_ASIO_CONCURRENT_WAIT_HANDLE_H_
+#error "This should only be included by ext_concurrent-wait-handle.h"
+#endif
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-struct AsioExtension final : Extension {
-  AsioExtension() : Extension("asio", "0.1") {}
-  void moduleInit() override;
-  void requestInit() override;
-  void loadDecls() override;
-
-private:
-  void initFunctions();
-
-  void initWaitHandle();
-  void initResumableWaitHandle();
-  void initAsyncGenerator();
-  void initAwaitAllWaitHandle();
-  void initConcurrentWaitHandle();
-  void initConditionWaitHandle();
-  void initSleepWaitHandle();
-  void initRescheduleWaitHandle();
-  void initExternalThreadEventWaitHandle();
-  void initStaticWaitHandle();
-  void requestInitSingletons();
-
-  void finishClasses();
-};
-
-Object HHVM_FUNCTION(asio_get_running);
-size_t asio_object_size(const ObjectData* obj);
-
+template<typename T>
+void c_ConcurrentWaitHandle::forEachChild(T fn) {
+  for (uint32_t idx = 0; idx < m_cap; ++idx) {
+    auto const child = m_children[idx].m_child;
+    if (child->isFinished()) continue;
+    fn(child);
+  }
 }
 
-#endif // incl_HPHP_EXT_ASIO_H_
+///////////////////////////////////////////////////////////////////////////////
+}

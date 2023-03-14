@@ -262,7 +262,7 @@ inline bool ObjectData::isCppBuiltin() const {
 }
 
 inline bool ObjectData::isWaitHandle() const {
-  return isWaithandleKind(m_kind);
+  return isWaitHandleKind(m_kind);
 }
 
 inline bool ObjectData::isMutableCollection() const {

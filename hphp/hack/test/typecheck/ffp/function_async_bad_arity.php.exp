@@ -2,5 +2,5 @@ File "function_async_bad_arity.php", line 5, characters 23-41:
 `Awaitable<_>` takes exactly one type argument. (Parsing[1002])
 File "function_async_bad_arity.php", line 5, characters 23-41:
 Wrong number of type arguments (expected 1, got 2) (Typing[4101])
-  File "classes.hhi", line 165, characters 18-26:
+  File "classes.hhi", line 166, characters 18-26:
   Definition is here

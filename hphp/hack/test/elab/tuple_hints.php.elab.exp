@@ -16,6 +16,7 @@ Program(
                         "AwaitAllWaitHandle": "HH\\AwaitAllWaitHandle",
                         "Awaitable": "HH\\Awaitable",
                         "Collection": "HH\\Collection",
+                        "ConcurrentWaitHandle": "HH\\ConcurrentWaitHandle",
                         "ConditionWaitHandle": "HH\\ConditionWaitHandle",
                         "Container": "HH\\Container",
                         "ExternalThreadEventWaitHandle": "HH\\ExternalThreadEventWaitHandle",

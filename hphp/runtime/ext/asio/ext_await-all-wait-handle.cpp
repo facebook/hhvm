@@ -26,7 +26,6 @@
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
-#include "hphp/runtime/vm/runtime.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -103,42 +102,6 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
   assertx(next == &result->m_children[0]);
   result->initialize(ctx_idx);
   return Object{std::move(result)};
-}
-
-ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
-  const ActRec* fp, uint32_t first, uint32_t last, uint32_t cnt
-) {
-  assertx(cnt);
-  assertx(first < last);
-
-  auto result = Alloc(cnt);
-  auto ctx_idx = std::numeric_limits<context_idx_t>::max();
-  auto next = &result->m_children[cnt];
-  uint32_t idx = cnt;
-
-  for (int64_t i = first; i < last; i++) {
-    auto const local = frame_local(fp, i);
-    if (tvIsNull(local)) continue;
-    auto const waitHandle = c_Awaitable::fromTVAssert(*local);
-    if (waitHandle->isFinished()) continue;
-
-    auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);
-    ctx_idx = std::min(ctx_idx, child->getContextIdx());
-
-    child->incRefCount();
-    (--next)->m_child = child;
-    next->m_index = --idx;
-    next->m_child->getParentChain().addParent(
-      next->m_blockable,
-      AsioBlockable::Kind::AwaitAllWaitHandleNode
-    );
-
-    if (!idx) break;
-  }
-
-  assertx(next == &result->m_children[0]);
-  result->initialize(ctx_idx);
-  return result.detach();
 }
 
 Object c_AwaitAllWaitHandle::fromArrLike(const ArrayData* ad) {

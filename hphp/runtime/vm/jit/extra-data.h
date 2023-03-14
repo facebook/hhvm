@@ -1832,8 +1832,8 @@ struct InitVanillaVecLoopData : IRExtraData {
   uint32_t size;
 };
 
-struct CreateAAWHData : IRExtraData {
-  explicit CreateAAWHData(uint32_t first, uint32_t count)
+struct CreateCCWHData : IRExtraData {
+  explicit CreateCCWHData(uint32_t first, uint32_t count)
     : first(first)
     , count(count)
   {}
@@ -1849,7 +1849,7 @@ struct CreateAAWHData : IRExtraData {
     );
   }
 
-  bool equals(const CreateAAWHData& o) const {
+  bool equals(const CreateCCWHData& o) const {
     return first == o.first && count == o.count;
   }
 
@@ -2953,7 +2953,7 @@ X(InitVecElem,                  IndexData);
 X(InitDictElem,                 KeyedIndexData);
 X(InitStructElem,               KeyedIndexData);
 X(LdTypeStructureValCns,        KeyedData);
-X(CreateAAWH,                   CreateAAWHData);
+X(CreateCCWH,                   CreateCCWHData);
 X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckDictOffset,              IndexData);
 X(CheckKeysetOffset,            IndexData);

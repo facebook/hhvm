@@ -373,8 +373,9 @@ std::pair<int, double> tvGetSize(TypedValue tv, ObjprofState& env) {
       add_array_size(arr);
       break;
     }
-    case HeaderKind::AwaitAllWH:
     case HeaderKind::AsyncFuncWH:
+    case HeaderKind::AwaitAllWH:
+    case HeaderKind::ConcurrentWH:
     case HeaderKind::WaitHandle:
     case HeaderKind::NativeObject:
     case HeaderKind::Vector:

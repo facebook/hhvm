@@ -227,8 +227,9 @@ private:
       case HeaderKind::RClsMeth:
       case HeaderKind::RFunc:
         // TODO: Handle above trash.
-      case HeaderKind::AwaitAllWH:
       case HeaderKind::AsyncFuncWH:
+      case HeaderKind::AwaitAllWH:
+      case HeaderKind::ConcurrentWH:
       case HeaderKind::NativeData:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::Cpp:
@@ -1029,8 +1030,9 @@ void makeStatic(std::vector<TypedValue>& roots) {
         case HeaderKind::RClsMeth:
         case HeaderKind::RFunc:
           // TODO: Handle above trash (T29639296)
-        case HeaderKind::AwaitAllWH:
         case HeaderKind::AsyncFuncWH:
+        case HeaderKind::AwaitAllWH:
+        case HeaderKind::ConcurrentWH:
         case HeaderKind::NativeData:
         case HeaderKind::AsyncFuncFrame:
         case HeaderKind::Resource:

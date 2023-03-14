@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -57,6 +58,13 @@ inline c_AwaitAllWaitHandle::Node* getAwaitAllWaitHandleNode(
 ) {
   assertx(blockable->getKind() == Kind::AwaitAllWaitHandleNode);
   return getContainingObject<c_AwaitAllWaitHandle::Node>(blockable);
+}
+
+inline c_ConcurrentWaitHandle::Node* getConcurrentWaitHandleNode(
+  const AsioBlockable* blockable
+) {
+  assertx(blockable->getKind() == Kind::ConcurrentWaitHandleNode);
+  return getContainingObject<c_ConcurrentWaitHandle::Node>(blockable);
 }
 
 inline c_ConditionWaitHandle* getConditionWaitHandle(
@@ -109,6 +117,16 @@ inline void exitContextImpl(
 
 inline void exitContextImpl(
   std::vector<AsioBlockableChain>& worklist,
+  c_ConcurrentWaitHandle::Node* node,
+  context_idx_t ctx_idx
+) {
+  if (node->isFirstUnfinishedChild()) {
+    exitContextImpl(worklist, node->getWaitHandle(), ctx_idx);
+  }
+}
+
+inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_ConditionWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
@@ -131,6 +149,8 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
       return getAsyncGeneratorWaitHandle(this);
     case Kind::AwaitAllWaitHandleNode:
       return getAwaitAllWaitHandleNode(this)->getWaitHandle();
+    case Kind::ConcurrentWaitHandleNode:
+      return getConcurrentWaitHandleNode(this)->getWaitHandle();
     case Kind::ConditionWaitHandle:
       return getConditionWaitHandle(this);
   }
@@ -151,6 +171,9 @@ void AsioBlockableChain::unblock() {
         break;
       case Kind::AwaitAllWaitHandleNode:
         getAwaitAllWaitHandleNode(cur)->onUnblocked();
+        break;
+      case Kind::ConcurrentWaitHandleNode:
+        getConcurrentWaitHandleNode(cur)->onUnblocked();
         break;
       case Kind::ConditionWaitHandle:
         getConditionWaitHandle(cur)->onUnblocked();
@@ -177,6 +200,9 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
         case Kind::AwaitAllWaitHandleNode:
           exitContextImpl(worklist, getAwaitAllWaitHandleNode(cur), ctx_idx);
           break;
+        case Kind::ConcurrentWaitHandleNode:
+          exitContextImpl(worklist, getConcurrentWaitHandleNode(cur), ctx_idx);
+          break;
         case Kind::ConditionWaitHandle:
           exitContextImpl(worklist, getConditionWaitHandle(cur), ctx_idx);
           break;
@@ -185,14 +211,15 @@ void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
   }
 }
 
-// Currently only AAWH utilizes this to handle failures.
+// Currently only AAWH and CCWH utilizes this to handle failures.
 void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
   AsioBlockable* next = nullptr;
   for (AsioBlockable* cur = m_lastParent, *prev; cur; cur = prev) {
     prev = cur->getPrevParent();
     if (ab == cur) {
-      // Found the AAWH we need to remove
-      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode);
+      // Found the AAWH or CCWH we need to remove
+      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode ||
+              cur->getKind() == Kind::ConcurrentWaitHandleNode);
       if (!next) {
         m_lastParent = prev;
       } else {

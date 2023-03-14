@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
+#include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -95,6 +96,8 @@ size_t asio_object_size(const ObjectData* od) {
 #undef X
     case c_Awaitable::Kind::AwaitAll:
       return obj->asAwaitAll()->heapSize();
+    case c_Awaitable::Kind::Concurrent:
+      return obj->asConcurrent()->heapSize();
     case c_Awaitable::Kind::AsyncFunction:
       return obj->asAsyncFunction()->resumable()->size();
   }
@@ -162,6 +165,7 @@ void AsioExtension::finishClasses() {
   finish_class<c_Awaitable>();
   finish_class<c_WaitableWaitHandle>();
   finish_class<c_AwaitAllWaitHandle>();
+  finish_class<c_ConcurrentWaitHandle>();
   finish_class<c_ResumableWaitHandle>();
   finish_class<c_AsyncFunctionWaitHandle>();
   finish_class<c_AsyncGeneratorWaitHandle>();

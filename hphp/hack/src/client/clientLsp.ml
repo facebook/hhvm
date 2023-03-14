@@ -3089,7 +3089,10 @@ let do_findReferences_local (params : FindReferences.params) =
   let formatted_cmd = Printf.sprintf "%s:%d,%d" filename line column in
   let bin_path = Path.executable_name |> Path.to_string in
   let exec_cmd =
-    Printf.sprintf "%s --ide-find-refs %s --json" bin_path formatted_cmd
+    Printf.sprintf
+      "%s --from 'clientLsp:ide-find-refs' --ide-find-refs %s --json"
+      bin_path
+      formatted_cmd
   in
   match Sys_utils.exec_try_read exec_cmd with
   | Some resp ->
@@ -3660,7 +3663,7 @@ let kickoff_hh_check_if_standalone (state : state) : state =
              "--autostart-server";
              "false";
              "--from";
-             "lsp_check";
+             "clientLsp:check'";
            |])
     in
     Lost_server { lenv with Lost_env.current_hh_check }

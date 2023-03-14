@@ -138,11 +138,16 @@ UniquePyObjectPtr getDefaultValue(
 
 PyObject* createStructTuple(const detail::StructInfo& structInfo) {
   auto numFields = structInfo.numFields;
-  std::string zeros(numFields, '\0');
-  UniquePyObjectPtr issetArr{
-      PyBytes_FromStringAndSize(zeros.c_str(), numFields)};
+  UniquePyObjectPtr issetArr{PyBytes_FromStringAndSize(nullptr, numFields)};
   if (!issetArr) {
     THRIFT_PY3_CHECK_ERROR();
+  }
+  char* flags = PyBytes_AsString(issetArr.get());
+  if (!flags) {
+    THRIFT_PY3_CHECK_ERROR();
+  }
+  for (Py_ssize_t i = 0; i < numFields; ++i) {
+    flags[i] = '\0';
   }
   // create a tuple with the first element as a bytearray for isset flags, and
   // the rest numFields for struct fields.
@@ -172,29 +177,11 @@ PyObject* createStructTuple(const detail::StructInfo& structInfo) {
 void setStructIsset(void* object, int16_t index, bool set) {
   PyObject** isset_bytes_ptr =
       toPyObjectPtr(static_cast<char*>(object) + kHeadOffset);
-  PyObject* oldValue = *isset_bytes_ptr;
-  auto sz = PyBytes_GET_SIZE(oldValue);
-  if (sz == -1) {
+  char* flags = PyBytes_AsString(*isset_bytes_ptr);
+  if (!flags) {
     THRIFT_PY3_CHECK_ERROR();
-  } else if (sz == 1) {
-    // specialize single field case as PyBytes_FromStringAndSize caches and
-    // reuse the single byte bytes objects, so we can't mutate the cached
-    // singleton
-    // https://github.com/python/cpython/blob/3.8/Objects/bytesobject.c#L110-L118
-    DCHECK(index == 0);
-    *isset_bytes_ptr = set ? PyBytes_FromStringAndSize("\x01", 1)
-                           : PyBytes_FromStringAndSize("\x00", 1);
-    if (!*isset_bytes_ptr) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    Py_DECREF(oldValue);
-  } else {
-    char* flags = PyBytes_AsString(*isset_bytes_ptr);
-    if (!flags) {
-      THRIFT_PY3_CHECK_ERROR();
-    }
-    flags[index] = set;
   }
+  flags[index] = set;
 }
 
 void* setStruct(void* object, const detail::TypeInfo& typeInfo) {
@@ -376,18 +363,16 @@ void SetTypeInfo::read(
     void* object,
     std::uint32_t setSize,
     void (*reader)(const void* /*context*/, void* /*val*/)) {
-  UniquePyObjectPtr iterable{PyTuple_New(setSize)};
-  if (!iterable) {
+  UniquePyObjectPtr frozenset{PyFrozenSet_New(nullptr)};
+  if (!frozenset) {
     THRIFT_PY3_CHECK_ERROR();
   }
   for (std::uint32_t i = 0; i < setSize; ++i) {
     PyObject* elem{};
     reader(context, &elem);
-    PyTuple_SET_ITEM(iterable.get(), i, elem);
-  }
-  UniquePyObjectPtr frozenset{PyFrozenSet_New(iterable.get())};
-  if (!frozenset) {
-    THRIFT_PY3_CHECK_ERROR();
+    if (PySet_Add(frozenset.get(), elem) == -1) {
+      THRIFT_PY3_CHECK_ERROR();
+    }
   }
   setPyObject(object, std::move(frozenset));
 }
@@ -423,6 +408,11 @@ size_t SetTypeInfo::write(
   return written;
 }
 
+// keep until python3.9, where Py_SET_REFCNT is available officially
+inline void _fbthrift_Py_SET_REFCNT(PyObject* ob, Py_ssize_t refcnt) {
+  ob->ob_refcnt = refcnt;
+}
+
 void SetTypeInfo::consumeElem(
     const void* context,
     void* object,
@@ -431,21 +421,16 @@ void SetTypeInfo::consumeElem(
   DCHECK(*pyObjPtr);
   PyObject* elem = nullptr;
   reader(context, &elem);
+  DCHECK(elem);
   // This is nasty hack since Cython generated code will incr the refcnt
   // so PySet_Add will fail. Need to temporarily decrref.
   auto currentRefCnt = Py_REFCNT(*pyObjPtr);
-  auto guard = folly::makeGuard([pyObjPtr, currentRefCnt] {
-    while (Py_REFCNT(*pyObjPtr) < currentRefCnt) {
-      Py_INCREF(*pyObjPtr);
-    }
-  });
-  while (Py_REFCNT(*pyObjPtr) > 1) {
-    Py_DECREF(*pyObjPtr);
-  }
-  DCHECK(elem);
+  _fbthrift_Py_SET_REFCNT(*pyObjPtr, 1);
   if (PySet_Add(*pyObjPtr, elem) == -1) {
+    _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
     THRIFT_PY3_CHECK_ERROR();
   }
+  _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
 }
 
 void MapTypeInfo::read(

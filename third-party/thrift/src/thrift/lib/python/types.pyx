@@ -20,9 +20,10 @@ from folly.iobuf cimport cIOBuf, IOBuf, from_unique_ptr
 from libcpp.utility cimport move as cmove
 from libcpp.memory cimport make_unique
 from cpython cimport bool as pbool, int as pint, float as pfloat
-from cpython.object cimport Py_LT, Py_EQ, Py_NE, Py_GT, Py_GE, Py_LE
+from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
 from cpython.tuple cimport PyTuple_New, PyTuple_SET_ITEM, PyTuple_GET_ITEM, PyTuple_Check
 from cpython.ref cimport Py_INCREF, Py_DECREF
+from cpython.unicode cimport PyUnicode_AsUTF8String, PyUnicode_FromEncodedObject
 from cython.operator cimport dereference as deref
 
 import copy
@@ -101,13 +102,11 @@ cdef class StringTypeInfo:
 
     # validate and convert to format serializer may understand
     def to_internal_data(self, object value not None):
-        if not isinstance(value, str):
-            raise TypeError(f"value {value} is not a <class 'str'>.")
-        return value.encode("UTF-8")
+        return PyUnicode_AsUTF8String(value)
 
     # convert deserialized data to user format
     def to_python_value(self, object value):
-        return value.decode("UTF-8")
+        return PyUnicode_FromEncodedObject(value, NULL, NULL)
 
     def to_container_value(self, object value not None):
         if not isinstance(value, str):
@@ -147,29 +146,43 @@ typeinfo_iobuf = IOBufTypeInfo.create(iobufTypeInfo)
 StructOrError = cython.fused_type(Struct, GeneratedError)
 
 
+cdef inline isPrimitiveType(t):
+    return (t is typeinfo_bool) or (
+        t is typeinfo_byte) or (
+        t is typeinfo_i16) or (
+        t is typeinfo_i32) or (
+        t is typeinfo_i64) or (
+        t is typeinfo_double) or (
+        t is typeinfo_float) or (
+        t is typeinfo_binary) or (
+        t is typeinfo_iobuf) or isinstance(t, EnumTypeInfo)
+
+
 cdef class StructInfo:
     def __cinit__(self, name, fields):
-        cname = name.encode("utf-8")
         self.fields = fields
+        cdef int16_t size = len(fields)
         self.cpp_obj = make_unique[cDynamicStructInfo](
-            <const char*>cname,
-            len(fields),
+            PyUnicode_AsUTF8(name),
+            size,
             False,
         )
-        self.type_infos = []
+        self.type_infos = PyTuple_New(size)
         self.name_to_index = {}
 
     cdef void fill(self) except *:
         cdef cDynamicStructInfo* info_ptr = self.cpp_obj.get()
+        type_infos = self.type_infos
         for idx, (id, qualifier, name, type_info, _, _) in enumerate(self.fields):
             # type_info can be a lambda function so types with dependencies
             # won't need to be defined in order
-            if callable(type_info):
+            if PyCallable_Check(type_info):
                 type_info = type_info()
-            self.type_infos.append(type_info)
+            Py_INCREF(type_info)
+            PyTuple_SET_ITEM(type_infos, idx, type_info)
             self.name_to_index[name] = idx
             info_ptr.addFieldInfo(
-                id, qualifier, name.encode("utf-8"), getCTypeInfo(type_info)
+                id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
             )
 
     cdef void store_field_values(self) except *:
@@ -189,10 +202,9 @@ cdef class StructInfo:
 
 cdef class UnionInfo:
     def __cinit__(self, name, fields):
-        cname = name.encode("utf-8")
         self.fields = fields
         self.cpp_obj = make_unique[cDynamicStructInfo](
-            <const char*>cname,
+            PyUnicode_AsUTF8(name),
             len(fields),
             True,
         )
@@ -211,7 +223,7 @@ cdef class UnionInfo:
             self.id_to_adapter_info[id] = adapter_info
             self.name_to_index[name] = idx
             info_ptr.addFieldInfo(
-                id, qualifier, name.encode("utf-8"), getCTypeInfo(type_info)
+                id, qualifier, PyUnicode_AsUTF8(name), getCTypeInfo(type_info)
             )
 
 
@@ -238,6 +250,10 @@ cdef const cTypeInfo* getCTypeInfo(type_info):
             return getCTypeInfo((<AdaptedTypeInfo>type_info)._orig_type_info)
 
 
+cdef to_container_elements_no_convert(type_info):
+    return isinstance(type_info, (TypeInfo, IntegerTypeInfo)) or type_info is typeinfo_iobuf
+
+
 cdef class ListTypeInfo:
     def __cinit__(self, val_info):
         self.val_info = val_info
@@ -254,7 +270,7 @@ cdef class ListTypeInfo:
     def to_python_value(self, object value):
         cdef List inst = List.__new__(List)
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = tuple(self.val_info.to_python_value(v) for v in value)
+        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else tuple(self.val_info.to_python_value(v) for v in value)
         return inst
 
     def to_container_value(self, object value not None):
@@ -279,7 +295,7 @@ cdef class SetTypeInfo:
     def to_python_value(self, object value):
         cdef Set inst = Set.__new__(Set)
         inst._fbthrift_val_info = self.val_info
-        inst._fbthrift_elements = frozenset(self.val_info.to_python_value(v) for v in value)
+        inst._fbthrift_elements = value if to_container_elements_no_convert(self.val_info) else frozenset(self.val_info.to_python_value(v) for v in value)
         return inst
 
     def to_container_value(self, object value not None):
@@ -440,7 +456,7 @@ cdef class Struct(StructOrUnion):
         self._fbthrift_data = createStructTuple(
             info.cpp_obj.get().getStructInfo()
         )
-        self._fbthrift_fields_cache = dict()
+        self._fbthrift_field_cache = PyTuple_New(len(info.fields))
 
     def __init__(self, **kwargs):
         cdef StructInfo info = self._fbthrift_struct_info
@@ -452,7 +468,7 @@ cdef class Struct(StructOrUnion):
                 continue
             # field adapter
             adapter_info = info.fields[index][5]
-            if adapter_info:
+            if adapter_info is not None:
                 adapter_class, transitive_annotation = adapter_info
                 field_id = info.fields[index][0]
                 value = adapter_class.to_thrift_field(
@@ -466,6 +482,7 @@ cdef class Struct(StructOrUnion):
                 index,
                 info.type_infos[index].to_internal_data(value),
             )
+        self._fbthrift_populate_primitive_fields()
 
     def __call__(self, **kwargs):
         if not kwargs:
@@ -497,6 +514,7 @@ cdef class Struct(StructOrUnion):
             set_struct_field(new_inst._fbthrift_data, index, value_to_copy)
         if kwargs:
             raise TypeError(f"__call__() got an expected keyword argument '{kwargs.keys()[0]}'")
+        new_inst._fbthrift_populate_primitive_fields()
         return new_inst
 
     def __copy__(Struct self):
@@ -560,27 +578,47 @@ cdef class Struct(StructOrUnion):
 
     cdef uint32_t _deserialize(self, folly.iobuf.IOBuf buf, Protocol proto) except? 0:
         cdef StructInfo info = self._fbthrift_struct_info
-        return cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        cdef uint32_t len = cdeserialize(deref(info.cpp_obj), buf._this, self._fbthrift_data, proto)
+        self._fbthrift_populate_primitive_fields()
+        return len
 
     cdef _fbthrift_get_field_value(self, int16_t index):
-        if index in self._fbthrift_fields_cache:
-            return self._fbthrift_fields_cache[index]
-        data = self._fbthrift_data[index + 1]
-        if data is None:
-            return
+        cdef PyObject* value = PyTuple_GET_ITEM(self._fbthrift_field_cache, index)
+        if value != NULL:
+            return <object>value
         cdef StructInfo info = self._fbthrift_struct_info
-        with threading.Lock():
-            if index in self._fbthrift_fields_cache:
-                return self._fbthrift_fields_cache[index]
-            val = info.type_infos[index].to_python_value(data)
-            self._fbthrift_fields_cache[index] = val
-            return val
+        field_info = info.fields[index]
+        field_id = field_info[0]
+        adapter_info = field_info[5]
+        data = self._fbthrift_data[index + 1]
+        if data is not None:
+            py_value = info.type_infos[index].to_python_value(data)
+            if adapter_info is not None:
+                adapter_class, transitive_annotation = adapter_info
+                py_value = adapter_class.from_thrift_field(
+                    py_value,
+                    field_id,
+                    self,
+                    transitive_annotation=transitive_annotation(),
+                )
+        else:
+            py_value = None
+        PyTuple_SET_ITEM(self._fbthrift_field_cache, index, py_value)
+        Py_INCREF(py_value)
+        return py_value
 
+
+    cdef _fbthrift_populate_primitive_fields(self):
+        for index, name, type_info in self._fbthrift_primitive_types:
+            data = self._fbthrift_data[index + 1]
+            val = type_info.to_python_value(data) if data is not None else None
+            object.__setattr__(self, name, val)
 
     @classmethod
     def _fbthrift_create(cls, data):
         cdef Struct inst = cls.__new__(cls)
         inst._fbthrift_data = data
+        inst._fbthrift_populate_primitive_fields()
         return inst
 
     @staticmethod
@@ -747,21 +785,8 @@ cdef class Union(StructOrUnion):
     def __reduce__(self):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
 
-
-
-cdef make_fget_struct(i, field_id, adapter_info):
-    if adapter_info:
-        adapter_class, transitive_annotation = adapter_info
-        return property(lambda self:
-            adapter_class.from_thrift_field(
-                (<Struct>self)._fbthrift_get_field_value(i),
-                field_id,
-                self,
-                transitive_annotation=transitive_annotation(),
-            )
-        )
+cdef make_fget_struct(i):
     return property(lambda self: (<Struct>self)._fbthrift_get_field_value(i))
-
 
 cdef make_fget_union(type_value, adapter_info):
     if adapter_info:
@@ -777,13 +802,26 @@ cdef make_fget_union(type_value, adapter_info):
     return property(lambda self: (<Union>self)._fbthrift_get_field_value(type_value))
 
 
+def _fbthrift_setattr(name, _):
+    raise AttributeError(f"can't set attribute '{name}'")
+
+
 class StructMeta(type):
     def __new__(cls, name, bases, dct):
         fields = dct.pop('_fbthrift_SPEC')
         num_fields = len(fields)
         dct["_fbthrift_struct_info"] = StructInfo(name, fields)
+        dct["__setattr__"] = _fbthrift_setattr
+        primitive_types = []
+        slots = []
         for i, f in enumerate(fields):
-            dct[f[2]] = make_fget_struct(i, f[0], f[5])
+            if f[5] is not None or not isPrimitiveType(f[3]):
+                dct[f[2]] = make_fget_struct(i)
+            else:
+                primitive_types.append((i, f[2], f[3]))
+                slots.append(f[2])
+        dct["_fbthrift_primitive_types"] = primitive_types
+        dct["__slots__"] = slots
         return super().__new__(cls, name, (Struct,), dct)
 
     def _fbthrift_fill_spec(cls):
@@ -973,10 +1011,7 @@ cdef class List(Container):
     def __contains__(self, item):
         if item is None:
             return False
-        try:
-            return self._fbthrift_val_info.to_container_value(item) in self._fbthrift_elements
-        except TypeError:
-            return False
+        return item in self._fbthrift_elements
 
     def __iter__(self):
         return iter(self._fbthrift_elements)
@@ -985,20 +1020,12 @@ cdef class List(Container):
         return reversed(self._fbthrift_elements)
 
     def index(self, item, start=0, stop=None):
-        try:
-            item_value = self._fbthrift_val_info.to_container_value(item)
-        except TypeError:
-            raise ValueError(f"{item} is not in list")
         if stop is None:
             stop = len(self)
-        return self._fbthrift_elements.index(item_value, start, stop)
+        return self._fbthrift_elements.index(item, start, stop)
 
     def count(self, item):
-        try:
-            item_value = self._fbthrift_val_info.to_container_value(item)
-        except TypeError:
-            return 0
-        return self._fbthrift_elements.count(item_value)
+        return self._fbthrift_elements.count(item)
 
 Sequence.register(List)
 
@@ -1082,10 +1109,7 @@ cdef class Set(Container):
     def __contains__(self, item):
         if item is None:
             return False
-        try:
-            return self._fbthrift_val_info.to_container_value(item) in self._fbthrift_elements
-        except TypeError:
-            return False
+        return item in self._fbthrift_elements
 
     def __iter__(self):
         return iter(self._fbthrift_elements)
@@ -1168,18 +1192,12 @@ cdef class Map(Container):
         return (Map, (self._fbthrift_key_info, self._fbthrift_val_info, dict(self),))
 
     def __getitem__(Map self, object key):
-        try:
-            key_obj = self._fbthrift_key_info.to_container_value(key)
-        except TypeError:
-            raise KeyError(repr(key))
-        return self._fbthrift_elements[key_obj]
+        return self._fbthrift_elements[key]
 
     def __contains__(self, key):
-        try:
-            key_obj = self._fbthrift_key_info.to_container_value(key)
-        except TypeError:
+        if key is None:
             return False
-        return key_obj in self._fbthrift_elements
+        return key in self._fbthrift_elements
 
     def __iter__(Map self):
         return iter(self._fbthrift_elements)

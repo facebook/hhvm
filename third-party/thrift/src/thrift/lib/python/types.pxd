@@ -14,6 +14,8 @@
 
 from libc.stdint cimport uint32_t, int16_t, int64_t
 cimport folly.iobuf
+
+from cpython.ref cimport PyObject
 from libcpp.memory cimport unique_ptr
 
 from thrift.python.serializer cimport Protocol
@@ -66,6 +68,10 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
     cdef const cTypeInfo  iobufTypeInfo
 
 
+cdef extern from "<Python.h>":
+    cdef const char * PyUnicode_AsUTF8(object unicode)
+
+
 cdef class TypeInfo:
     cdef const cTypeInfo* cpp_obj
     cdef tuple pytypes
@@ -91,7 +97,7 @@ cdef class IOBufTypeInfo:
 
 cdef class StructInfo:
     cdef unique_ptr[cDynamicStructInfo] cpp_obj
-    cdef list type_infos
+    cdef tuple type_infos
     cdef tuple fields
     cdef dict name_to_index
     cdef void fill(self) except *
@@ -137,15 +143,15 @@ cdef class AdaptedTypeInfo:
 
 cdef class StructOrUnion:
     cdef object _fbthrift_data
-    cdef object _fbthrift_fields_cache
     cdef folly.iobuf.IOBuf _serialize(StructOrUnion self, Protocol proto)
     cdef uint32_t _deserialize(StructOrUnion self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
     cdef _fbthrift_get_field_value(self, int16_t index)
 
 cdef class Struct(StructOrUnion):
+    cdef tuple _fbthrift_field_cache
     cdef folly.iobuf.IOBuf _serialize(Struct self, Protocol proto)
     cdef uint32_t _deserialize(Struct self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
-    cdef _fbthrift_get_field_value(self, int16_t index)
+    cdef _fbthrift_populate_primitive_fields(self)
 
 cdef class Union(StructOrUnion):
     cdef readonly object type
@@ -155,7 +161,6 @@ cdef class Union(StructOrUnion):
     cdef void _fbthrift_update_type_value(self, type_value, value) except *
     cdef folly.iobuf.IOBuf _serialize(Union self, Protocol proto)
     cdef uint32_t _deserialize(Union self, folly.iobuf.IOBuf buf, Protocol proto) except? 0
-    cdef _fbthrift_get_field_value(self, int16_t index)
 
 cdef class BadEnum:
     cdef object _enum

@@ -18,6 +18,10 @@ type t =
       pos: Pos.t;
       msg: string;
     }
+  | Package_config_error of {
+      pos: Pos.t;
+      msg: string;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.Parsing

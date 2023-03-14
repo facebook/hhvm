@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<930aa557bddd718f9cd0b894e180f932>>
+// @generated SignedSource<<e7f078c4e7fe9ba38effb30f402fee61>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,6 +44,7 @@ pub enum Parsing {
     ParsingError = 1002,
     XhpParsingError = 1007,
     HhIgnoreComment = 1008,
+    PackageConfigError = 1009,
 }
 impl TrivialDrop for Parsing {}
 arena_deserializer::impl_deserialize_in_arena!(Parsing);

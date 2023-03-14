@@ -28,6 +28,7 @@
   annotated_ast
   ast
   collections
+  errors
   package_ocaml_ffi)
  (preprocess
   (pps ppx_deriving.std)))

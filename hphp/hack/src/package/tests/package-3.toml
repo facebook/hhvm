@@ -1,0 +1,8 @@
+[packages]
+
+[packages.foo]
+includes = ["baz"]
+uses = ["b.*"]
+
+[packages.bar]
+uses = ["b.*"]

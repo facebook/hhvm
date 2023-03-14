@@ -1265,8 +1265,7 @@ let post_saved_state_initialization
   in
 
   (* Load and parse packages.toml if it exists at the root. *)
-  let get_package_for_module = PackageConfig.load_and_parse () in
-  let env = { env with get_package_for_module = Some get_package_for_module } in
+  let env = PackageConfig.load_and_parse env in
 
   (* Parse and name all dirty files uniformly *)
   let dirty_files =

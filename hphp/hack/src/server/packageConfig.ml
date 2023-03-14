@@ -16,10 +16,16 @@ let repo_config_path =
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"packages" ?exn:None msg
 
-let load_and_parse () : string -> Package.package option =
+let load_and_parse env : ServerEnv.env =
   let pkgs_config_abs_path = Relative_path.to_absolute repo_config_path in
-  if Sys.file_exists pkgs_config_abs_path then (
-    Package.initialize_packages_info pkgs_config_abs_path;
-    log_debug "Parsed %s" pkgs_config_abs_path
-  );
-  Package.get_package_for_module
+  if not @@ Sys.file_exists pkgs_config_abs_path then
+    env
+  else
+    let errors = Package.initialize_packages_info pkgs_config_abs_path in
+    log_debug "Parsed %s" pkgs_config_abs_path;
+    ServerEnv.
+      {
+        env with
+        get_package_for_module = Some Package.get_package_for_module;
+        errorl = Errors.merge env.errorl errors;
+      }

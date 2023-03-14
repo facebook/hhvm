@@ -64,8 +64,7 @@ let init
   in
 
   (* Load and parse packages.toml if it exists at the root. *)
-  let get_package_for_module = PackageConfig.load_and_parse () in
-  let env = { env with get_package_for_module = Some get_package_for_module } in
+  let env = PackageConfig.load_and_parse env in
 
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =

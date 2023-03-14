@@ -15,6 +15,8 @@
 
 type pos_id = Pos.t * string [@@deriving eq, show]
 
+type errors = (Pos.t * string) list
+
 type package = {
   name: pos_id;
   uses: pos_id list;
@@ -22,18 +24,32 @@ type package = {
 }
 [@@deriving eq, show]
 
-external extract_packages_from_text : string -> string -> package list
+external extract_packages_from_text :
+  string -> string -> (package list, errors) result
   = "extract_packages_from_text_ffi"
 
 let glob_to_package : (string, package) Hashtbl.t = Hashtbl.create 0
 
 let initialize_packages_info (path : string) =
   let contents = Sys_utils.cat path in
-  let packages = extract_packages_from_text path contents in
-  List.iter
-    (fun pkg ->
-      List.iter (fun (_, glob) -> Hashtbl.add glob_to_package glob pkg) pkg.uses)
-    packages
+  let errors =
+    match extract_packages_from_text path contents with
+    | Error errors ->
+      List.map
+        (fun (pos, msg) ->
+          Parsing_error.(to_user_error @@ Package_config_error { pos; msg }))
+        errors
+      |> Errors.from_error_list
+    | Ok packages ->
+      List.iter
+        (fun pkg ->
+          List.iter
+            (fun (_, glob) -> Hashtbl.add glob_to_package glob pkg)
+            pkg.uses)
+        packages;
+      Errors.empty
+  in
+  errors
 
 let get_package_for_module md =
   let matching_pkgs =

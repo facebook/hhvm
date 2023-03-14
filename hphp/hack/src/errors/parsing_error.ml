@@ -19,6 +19,10 @@ type t =
       pos: Pos.t;
       msg: string;
     }
+  | Package_config_error of {
+      pos: Pos.t;
+      msg: string;
+    }
 
 let to_user_error = function
   | Fixme_format pos ->
@@ -37,3 +41,5 @@ let to_user_error = function
     User_error.make Error_code.(to_enum ParsingError) ~quickfixes (pos, msg) []
   | Xhp_parsing_error { pos; msg } ->
     User_error.make Error_code.(to_enum XhpParsingError) (pos, msg) []
+  | Package_config_error { pos; msg } ->
+    User_error.make Error_code.(to_enum PackageConfigError) (pos, msg) []

@@ -6,6 +6,6 @@
  *
  *)
 
-val load_and_parse : unit -> string -> Package.package option
+val load_and_parse : ServerEnv.env -> ServerEnv.env
 
 val repo_config_path : Relative_path.t

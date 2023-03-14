@@ -2800,7 +2800,7 @@ let decl_and_run_mode
     match packages_config_path with
     | None -> (fun _ -> None)
     | Some path ->
-      Package.initialize_packages_info path;
+      let _errors = Package.initialize_packages_info path in
       Package.get_package_for_module
   in
   let ctx =

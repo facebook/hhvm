@@ -23,4 +23,4 @@ val get_package_for_module : string -> package option
 
 val includes : package -> package -> bool
 
-val initialize_packages_info : string -> unit
+val initialize_packages_info : string -> Errors.t

@@ -47,7 +47,20 @@ module.exports = {
             id: "fb/howtos/implementing-a-server/index",
           },
           items: [
-            'fb/howtos/implementing-a-server/cpp',
+            {
+              type: 'category',
+              label: 'C++',
+              items: [
+                'fb/howtos/implementing-a-server/cpp/getting-started',
+                {
+                  type: 'category',
+                  label: 'Archived',
+                  items: [
+                    'fb/howtos/implementing-a-server/cpp/archived/thrift-server-example',
+                  ]
+                }
+              ]
+            },
             'fb/howtos/implementing-a-server/java',
             'fb/howtos/implementing-a-server/python'
           ]

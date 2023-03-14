@@ -34,6 +34,13 @@ std::function<std::shared_ptr<fizz::client::FizzClientContext>()>
 std::function<std::shared_ptr<fizz::CertificateVerifier>()>
     customFizzVerifierFn;
 
+folly::AsyncTransport::UniquePtr createEPollSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg);
+folly::AsyncTransport::UniquePtr createTLSSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg);
+folly::AsyncTransport::UniquePtr createFizzSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg);
+
 class ConnectCallback : public folly::AsyncSocket::ConnectCallback,
                         public folly::DelayedDestruction {
  public:
@@ -95,26 +102,37 @@ std::shared_ptr<fizz::CertificateVerifier> getFizzVerifier(
 
 folly::AsyncTransport::UniquePtr createSocket(
     folly::EventBase* evb, const ClientConnectionConfig& cfg) {
-  folly::AsyncSocket::UniquePtr sock;
   switch (cfg.security) {
-    case ClientSecurity::None: {
-      sock = folly::AsyncSocket::newSocket(evb);
-      sock->connect(new ConnectCallback(), cfg.serverHost);
-      return sock;
-    }
-    case ClientSecurity::TLS: {
-      sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
-      sock->connect(new ConnectCallback(), cfg.serverHost);
-      return sock;
-    }
-    case ClientSecurity::FIZZ: {
-      auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
-          new fizz::client::AsyncFizzClient(evb, getFizzContext(cfg)));
-      fizzClient->connect(
-          cfg.serverHost, new ConnectCallback(), getFizzVerifier(cfg), {}, {});
-      return fizzClient;
-    }
+    case ClientSecurity::None:
+      return createEPollSocket(evb, cfg);
+    case ClientSecurity::TLS:
+      return createTLSSocket(evb, cfg);
+    case ClientSecurity::FIZZ:
+      return createFizzSocket(evb, cfg);
   }
+}
+
+folly::AsyncTransport::UniquePtr createEPollSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg) {
+  auto sock = folly::AsyncSocket::newSocket(evb);
+  sock->connect(new ConnectCallback(), cfg.serverHost);
+  return sock;
+}
+
+folly::AsyncTransport::UniquePtr createTLSSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg) {
+  auto sock = folly::AsyncSSLSocket::newSocket(getSslContext(cfg), evb);
+  sock->connect(new ConnectCallback(), cfg.serverHost);
+  return sock;
+}
+
+folly::AsyncTransport::UniquePtr createFizzSocket(
+    folly::EventBase* evb, const ClientConnectionConfig& cfg) {
+  auto fizzClient = fizz::client::AsyncFizzClient::UniquePtr(
+      new fizz::client::AsyncFizzClient(evb, getFizzContext(cfg)));
+  fizzClient->connect(
+      cfg.serverHost, new ConnectCallback(), getFizzVerifier(cfg), {}, {});
+  return fizzClient;
 }
 
 } // namespace

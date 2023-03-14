@@ -19,6 +19,7 @@ macro_rules! passes {
 
 mod elab_utils;
 mod env;
+mod lambda_captures;
 mod pass;
 mod passes;
 mod transform;
@@ -46,6 +47,8 @@ mod prelude {
 
 use env::Env;
 use env::ProgramSpecificOptions;
+use ocamlrep::rc::RcOc;
+use oxidized::namespace_env;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
 use oxidized::typechecker_options::TypecheckerOptions;
@@ -58,7 +61,10 @@ pub fn elaborate_program(
     path: &RelativePath,
     program: &mut nast::Program,
 ) -> Vec<NamingPhaseError> {
-    elaborate(tco, path, program)
+    elaborate_namespaces_visitor::elaborate_program(ns_env(tco), program);
+    let mut env = make_env(tco, path);
+    lambda_captures::elaborate_program(&mut env, program);
+    elaborate(env, program)
 }
 
 pub fn elaborate_fun_def(
@@ -66,7 +72,10 @@ pub fn elaborate_fun_def(
     path: &RelativePath,
     f: &mut nast::FunDef,
 ) -> Vec<NamingPhaseError> {
-    elaborate(tco, path, f)
+    elaborate_namespaces_visitor::elaborate_fun_def(ns_env(tco), f);
+    let mut env = make_env(tco, path);
+    lambda_captures::elaborate_fun_def(&mut env, f);
+    elaborate(env, f)
 }
 
 pub fn elaborate_class_(
@@ -74,7 +83,10 @@ pub fn elaborate_class_(
     path: &RelativePath,
     c: &mut nast::Class_,
 ) -> Vec<NamingPhaseError> {
-    elaborate(tco, path, c)
+    elaborate_namespaces_visitor::elaborate_class_(ns_env(tco), c);
+    let mut env = make_env(tco, path);
+    lambda_captures::elaborate_class_(&mut env, c);
+    elaborate(env, c)
 }
 
 pub fn elaborate_module_def(
@@ -82,7 +94,10 @@ pub fn elaborate_module_def(
     path: &RelativePath,
     m: &mut nast::ModuleDef,
 ) -> Vec<NamingPhaseError> {
-    elaborate(tco, path, m)
+    elaborate_namespaces_visitor::elaborate_module_def(ns_env(tco), m);
+    let mut env = make_env(tco, path);
+    lambda_captures::elaborate_module_def(&mut env, m);
+    elaborate(env, m)
 }
 
 pub fn elaborate_gconst(
@@ -90,7 +105,10 @@ pub fn elaborate_gconst(
     path: &RelativePath,
     c: &mut nast::Gconst,
 ) -> Vec<NamingPhaseError> {
-    elaborate(tco, path, c)
+    elaborate_namespaces_visitor::elaborate_gconst(ns_env(tco), c);
+    let mut env = make_env(tco, path);
+    lambda_captures::elaborate_gconst(&mut env, c);
+    elaborate(env, c)
 }
 
 pub fn elaborate_typedef(
@@ -98,14 +116,44 @@ pub fn elaborate_typedef(
     path: &RelativePath,
     t: &mut nast::Typedef,
 ) -> Vec<NamingPhaseError> {
-    elaborate(tco, path, t)
+    elaborate_namespaces_visitor::elaborate_typedef(ns_env(tco), t);
+    let mut env = make_env(tco, path);
+    lambda_captures::elaborate_typedef(&mut env, t);
+    elaborate(env, t)
 }
 
-fn elaborate<T: Transform>(
-    tco: &TypecheckerOptions,
-    rel_path: &RelativePath,
-    node: &mut T,
-) -> Vec<NamingPhaseError> {
+fn ns_env(tco: &TypecheckerOptions) -> RcOc<namespace_env::Env> {
+    RcOc::new(namespace_env::Env::empty(
+        vec![],
+        tco.po_codegen,
+        tco.po_disable_xhp_element_mangling,
+    ))
+}
+
+fn make_env(tco: &TypecheckerOptions, rel_path: &RelativePath) -> Env {
+    let is_hhi = rel_path.is_hhi();
+    let path = rel_path.path();
+
+    let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
+        || tco
+            .tco_allowed_files_for_module_declarations
+            .iter()
+            .any(|spec| {
+                !spec.is_empty()
+                    && (spec.ends_with('*') && path.starts_with(&spec[..spec.len() - 1])
+                        || path == std::path::Path::new(spec))
+            });
+
+    Env::new(
+        tco,
+        &ProgramSpecificOptions {
+            is_hhi,
+            allow_module_declarations,
+        },
+    )
+}
+
+fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
     #[rustfmt::skip]
     let mut passes = passes![
         // Stop on `Invalid` expressions
@@ -281,26 +329,6 @@ fn elaborate<T: Transform>(
 
     ];
 
-    let is_hhi = rel_path.is_hhi();
-    let path = rel_path.path();
-
-    let allow_module_declarations = tco.tco_allow_all_files_for_module_declarations
-        || tco
-            .tco_allowed_files_for_module_declarations
-            .iter()
-            .any(|spec| {
-                !spec.is_empty()
-                    && (spec.ends_with('*') && path.starts_with(&spec[..spec.len() - 1])
-                        || path == std::path::Path::new(spec))
-            });
-
-    let env = Env::new(
-        tco,
-        &ProgramSpecificOptions {
-            is_hhi,
-            allow_module_declarations,
-        },
-    );
     node.transform(&env, &mut passes);
     env.into_errors()
 }

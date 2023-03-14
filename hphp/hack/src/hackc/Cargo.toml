@@ -23,7 +23,6 @@ decl_parser = { version = "0.0.0", path = "../hackrs/decl_parser/cargo/decl_pars
 decl_provider = { version = "0.0.0", path = "decl_provider" }
 direct_decl_parser = { version = "0.0.0", path = "../parser/api/cargo/direct_decl_parser" }
 elab = { version = "0.0.0", path = "../elab" }
-elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elaborate_namespaces" }
 env_logger = "0.7"
 facts_rust = { version = "0.0.0", path = "../facts/cargo/facts_rust" }
 ffi = { version = "0.0.0", path = "../utils/ffi" }

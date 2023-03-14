@@ -1470,6 +1470,7 @@ dependencies = [
  "bitflags",
  "bstr 1.2.0",
  "core_utils_rust",
+ "elaborate_namespaces_visitor",
  "file_info",
  "hash",
  "itertools 0.10.5",
@@ -1484,8 +1485,6 @@ name = "elab_ffi"
 version = "0.0.0"
 dependencies = [
  "elab",
- "elaborate_namespaces_visitor",
- "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
  "relative_path",
@@ -2103,7 +2102,6 @@ dependencies = [
  "decl_provider",
  "direct_decl_parser",
  "elab",
- "elaborate_namespaces_visitor",
  "env_logger 0.7.1",
  "facts_rust",
  "ffi",

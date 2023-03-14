@@ -52,8 +52,6 @@ fn process_one_file(single_file: bool, path: &Path, _: &Opts) -> anyhow::Result<
     let mut parser_result = AastParser::from_text(&Default::default(), &source_text)
         .map_err(|e| anyhow!("failed to parse {}: {:#?}", path.display(), e))?;
     let tco = TypecheckerOptions::default();
-    let env = RcOc::new(oxidized::namespace_env::Env::empty_from_popt(&tco));
-    elaborate_namespaces_visitor::elaborate_program(env, &mut parser_result.aast);
     let errs = elab::elaborate_program(&tco, &rel_path, &mut parser_result.aast);
     print_parse_result(single_file, path, &parser_result, &errs)?;
     Ok(())

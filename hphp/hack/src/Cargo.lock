@@ -2336,6 +2336,7 @@ dependencies = [
 name = "hh_config"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "config_file",
  "oxidized",
  "serde",

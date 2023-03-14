@@ -49,7 +49,7 @@ pub struct Args {
 pub fn build_naming_table(args: Args) -> anyhow::Result<ExitStatus> {
     let (log, _guard) = hh_slog::init_term_envlogger("");
 
-    let hhconfig = hh_config::HhConfig::from_root(&args.www)?;
+    let hhconfig = hh_config::HhConfig::from_root(&args.www, &Default::default())?;
 
     if args.output.exists() {
         let output = args.output.display();

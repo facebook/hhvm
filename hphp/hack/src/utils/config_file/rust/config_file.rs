@@ -10,18 +10,12 @@ use bstr::ByteSlice;
 use sha1::Digest;
 use sha1::Sha1;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ConfigFile {
     map: BTreeMap<String, String>,
 }
 
 impl ConfigFile {
-    pub fn empty() -> Self {
-        Self {
-            map: BTreeMap::new(),
-        }
-    }
-
     pub fn from_file(path: impl AsRef<Path>) -> std::io::Result<Self> {
         let contents = std::fs::read(path.as_ref())?;
         Ok(Self::from_slice(&contents))

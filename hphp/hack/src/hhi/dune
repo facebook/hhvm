@@ -10,7 +10,6 @@
   (wrapped false)
   (libraries
     global_config
-    hhi_get
     relative_path
     sys_utils)
   (modules hhi)

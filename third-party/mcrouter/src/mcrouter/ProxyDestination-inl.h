@@ -208,7 +208,8 @@ ProxyDestination<Transport>::create(
     std::shared_ptr<AccessPoint> ap,
     std::chrono::milliseconds timeout,
     uint32_t qosClass,
-    uint32_t qosPath) {
+    uint32_t qosPath,
+    uint32_t idx) {
   checkLogic(
       Transport::isCompatible(ap->getProtocol()),
       "Transport {} not compatible with {} protocol.",
@@ -216,7 +217,7 @@ ProxyDestination<Transport>::create(
       mc_protocol_to_string(ap->getProtocol()));
   std::shared_ptr<ProxyDestination<Transport>> ptr(
       new ProxyDestination<Transport>(
-          proxy, std::move(ap), timeout, qosClass, qosPath));
+          proxy, std::move(ap), timeout, qosClass, qosPath, idx));
   ptr->selfPtr_ = ptr;
   return ptr;
 }
@@ -247,8 +248,15 @@ ProxyDestination<Transport>::ProxyDestination(
     std::shared_ptr<AccessPoint> ap,
     std::chrono::milliseconds timeout,
     uint32_t qosClass,
-    uint32_t qosPath)
-    : ProxyDestinationBase(proxy, std::move(ap), timeout, qosClass, qosPath),
+    uint32_t qosPath,
+    uint32_t idx)
+    : ProxyDestinationBase(
+          proxy,
+          std::move(ap),
+          timeout,
+          qosClass,
+          qosPath,
+          idx),
       rxmitsToCloseConnection_(
           proxy.router().opts().min_rxmit_reconnect_threshold) {}
 

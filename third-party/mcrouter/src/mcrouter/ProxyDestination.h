@@ -115,7 +115,8 @@ class ProxyDestination : public ProxyDestinationBase {
       std::shared_ptr<AccessPoint> ap,
       std::chrono::milliseconds timeout,
       uint32_t qosClass,
-      uint32_t qosPath);
+      uint32_t qosPath,
+      uint32_t idx = 0);
 
   Transport& getTransport();
   void initializeTransport();
@@ -125,7 +126,8 @@ class ProxyDestination : public ProxyDestinationBase {
       std::shared_ptr<AccessPoint> ap,
       std::chrono::milliseconds timeout,
       uint32_t qosClass,
-      uint32_t qosPath);
+      uint32_t qosPath,
+      uint32_t idx);
 
   // Process tko, stats and duration timer.
   void onReply(

@@ -204,7 +204,8 @@ class McRouteHandleProvider
       int32_t poolStatIndex,
       bool disableRequestDeadlineCheck,
       const std::shared_ptr<PoolTkoTracker>& poolTkoTracker,
-      bool keepRoutingPrefix);
+      bool keepRoutingPrefix,
+      uint32_t idx);
 
   RouteHandleFactoryMap buildRouteMap();
   RouteHandleFactoryMapWithProxy buildRouteMapWithProxy();

@@ -76,7 +76,8 @@ class ProxyDestinationBase {
       std::shared_ptr<const AccessPoint> ap,
       std::chrono::milliseconds timeout,
       uint32_t qosClass,
-      uint32_t qosPath);
+      uint32_t qosPath,
+      uint32_t idx);
   virtual ~ProxyDestinationBase();
 
   /**
@@ -173,6 +174,9 @@ class ProxyDestinationBase {
   uint32_t qosPath() const {
     return qosPath_;
   }
+  uint32_t idx() const {
+    return idx_;
+  }
   bool probeInflight() const {
     return probeInflight_;
   }
@@ -192,6 +196,7 @@ class ProxyDestinationBase {
   std::chrono::milliseconds shortestWriteTimeout_{0};
   const uint32_t qosClass_{0};
   const uint32_t qosPath_{0};
+  const uint32_t idx_{0};
 
   Stats stats_;
 

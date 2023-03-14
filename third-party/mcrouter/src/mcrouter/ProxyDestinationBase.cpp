@@ -75,13 +75,15 @@ ProxyDestinationBase::ProxyDestinationBase(
     std::shared_ptr<const AccessPoint> ap,
     std::chrono::milliseconds timeout,
     uint32_t qosClass,
-    uint32_t qosPath)
+    uint32_t qosPath,
+    uint32_t idx)
     : proxy_(proxy),
       accessPoint_(std::move(ap)),
       shortestConnectTimeout_(timeout),
       shortestWriteTimeout_(timeout),
       qosClass_(qosClass),
-      qosPath_(qosPath) {
+      qosPath_(qosPath),
+      idx_(idx) {
   proxy_.stats().increment(num_servers_new_stat);
   proxy_.stats().increment(num_servers_stat);
   if (accessPoint()->useSsl()) {

@@ -16,22 +16,32 @@ namespace memcache {
 namespace mcrouter {
 
 ProxyDestinationKey::ProxyDestinationKey(const ProxyDestinationBase& dst)
-    : ProxyDestinationKey(*dst.accessPoint(), dst.shortestWriteTimeout()) {}
+    : ProxyDestinationKey(
+          *dst.accessPoint(),
+          dst.shortestWriteTimeout(),
+          dst.idx()) {}
 ProxyDestinationKey::ProxyDestinationKey(
     const AccessPoint& ap,
-    std::chrono::milliseconds timeout_)
-    : accessPoint(ap), timeout(timeout_) {}
-
-ProxyDestinationKey::ProxyDestinationKey(const AccessPoint& ap)
-    : ProxyDestinationKey(ap, std::chrono::milliseconds{0}) {}
+    std::chrono::milliseconds timeout_,
+    uint32_t id)
+    : accessPoint(ap), timeout(timeout_), idx(id) {}
 
 std::string ProxyDestinationKey::str() const {
+  std::string additionalConnectionIdx;
+  if (idx > 0) {
+    additionalConnectionIdx = folly::sformat("-{}", idx);
+  }
   if (accessPoint.getProtocol() == mc_ascii_protocol) {
     // we cannot send requests with different timeouts for ASCII, since
     // it will break in-order nature of the protocol
-    return folly::sformat("{}-{}", accessPoint.toString(), timeout.count());
+    return folly::sformat(
+        "{}-{}{}",
+        accessPoint.toString(),
+        timeout.count(),
+        additionalConnectionIdx);
   } else {
-    return accessPoint.toString();
+    return folly::sformat(
+        "{}{}", accessPoint.toString(), additionalConnectionIdx);
   }
 }
 
@@ -44,6 +54,9 @@ size_t ProxyDestinationKey::hash() const {
       static_cast<std::underlying_type_t<SecurityMech>>(
           accessPoint.getSecurityMech()),
       accessPoint.compressed());
+  if (idx > 0) {
+    result = folly::hash::hash_combine(result, idx);
+  }
   if (accessPoint.getProtocol() == mc_ascii_protocol) {
     result = folly::hash::hash_combine(result, timeout.count());
   }
@@ -55,7 +68,8 @@ bool ProxyDestinationKey::operator==(const ProxyDestinationKey& other) const {
       accessPoint.getPort() != other.accessPoint.getPort() ||
       accessPoint.getProtocol() != other.accessPoint.getProtocol() ||
       accessPoint.getSecurityMech() != other.accessPoint.getSecurityMech() ||
-      accessPoint.compressed() != other.accessPoint.compressed()) {
+      accessPoint.compressed() != other.accessPoint.compressed() ||
+      idx != other.idx) {
     return false;
   }
   return timeout == other.timeout ||

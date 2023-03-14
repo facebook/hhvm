@@ -29,7 +29,7 @@ std::shared_ptr<const AccessPoint> ProxyDestinationMap::replace(
   // temp access point. If it is found, the old access point is replaced
   // with new access point
   std::lock_guard<std::mutex> lck(destinationsLock_);
-  auto it = destinations_.find(ProxyDestinationKey(tmpAccessPoint, timeout));
+  auto it = destinations_.find(ProxyDestinationKey(tmpAccessPoint, timeout, 0));
   if (it != destinations_.end()) {
     auto destination = std::dynamic_pointer_cast<ProxyDestination<Transport>>(
         (*it)->selfPtr().lock());
@@ -51,11 +51,12 @@ std::shared_ptr<ProxyDestination<Transport>> ProxyDestinationMap::emplace(
     std::chrono::milliseconds timeout,
     uint32_t qosClass,
     uint32_t qosPath,
-    const std::shared_ptr<PoolTkoTracker>& poolTkoTracker) {
+    const std::shared_ptr<PoolTkoTracker>& poolTkoTracker,
+    uint32_t idx) {
   std::shared_ptr<ProxyDestination<Transport>> destination;
   {
     std::lock_guard<std::mutex> lck(destinationsLock_);
-    auto it = destinations_.find(ProxyDestinationKey(*ap, timeout));
+    auto it = destinations_.find(ProxyDestinationKey(*ap, timeout, idx));
     if (it != destinations_.end()) {
       destination = std::dynamic_pointer_cast<ProxyDestination<Transport>>(
           (*it)->selfPtr().lock());
@@ -64,7 +65,7 @@ std::shared_ptr<ProxyDestination<Transport>> ProxyDestinationMap::emplace(
     }
 
     destination = ProxyDestination<Transport>::create(
-        *proxy_, std::move(ap), timeout, qosClass, qosPath);
+        *proxy_, std::move(ap), timeout, qosClass, qosPath, idx);
     destinations_.emplace(destination.get());
   }
 

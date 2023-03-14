@@ -66,7 +66,8 @@ class ProxyDestinationMap {
       std::chrono::milliseconds timeout,
       uint32_t qosClass,
       uint32_t qosPath,
-      const std::shared_ptr<PoolTkoTracker>& poolTkoTracker);
+      const std::shared_ptr<PoolTkoTracker>& poolTkoTracker,
+      uint32_t idx);
 
   template <class Transport>
   std::shared_ptr<const AccessPoint> replace(

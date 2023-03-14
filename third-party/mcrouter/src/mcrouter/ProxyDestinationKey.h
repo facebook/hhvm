@@ -22,10 +22,13 @@ class ProxyDestinationBase;
 struct ProxyDestinationKey {
   const AccessPoint& accessPoint;
   const std::chrono::milliseconds timeout;
+  const uint32_t idx{0};
 
   explicit ProxyDestinationKey(const ProxyDestinationBase& dst);
-  ProxyDestinationKey(const AccessPoint& ap, std::chrono::milliseconds timeout);
-  explicit ProxyDestinationKey(const AccessPoint& ap);
+  ProxyDestinationKey(
+      const AccessPoint& ap,
+      std::chrono::milliseconds timeout,
+      uint32_t idx);
 
   std::string str() const;
   size_t hash() const;

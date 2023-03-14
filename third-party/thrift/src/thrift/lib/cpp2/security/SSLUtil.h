@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <fizz/client/AsyncFizzClient.h>
+#include <fizz/server/AsyncFizzServer.h>
 #include <folly/io/async/AsyncSocket.h>
 
 namespace apache {
@@ -25,7 +27,8 @@ namespace thrift {
  * underlying fd while trying to preserve as much information as possible. The
  * intended use case is to downgrade a secure transport to a plaintext one.
  */
-folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
-    folly::AsyncTransportWrapper* socket);
+template <class FizzSocket>
+folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* socket);
+
 } // namespace thrift
 } // namespace apache

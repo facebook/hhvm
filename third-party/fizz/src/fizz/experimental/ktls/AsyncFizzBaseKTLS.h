@@ -17,6 +17,7 @@
 
 #include <fizz/experimental/ktls/AsyncKTLSSocket.h>
 #include <fizz/experimental/ktls/FizzKTLSCallback.h>
+#include <fizz/experimental/util/CertExtraction.h>
 #include <fizz/protocol/AsyncFizzBase.h>
 #include <folly/Expected.h>
 #include <glog/logging.h>
@@ -61,20 +62,6 @@ KTLSCallbackImpl::TicketHandler getTicketHandler(
   return makeTicketHandler(
       std::move(pskIdentity).value(), client.getState(), std::move(pskCache));
 }
-
-template <class SM>
-std::pair<std::shared_ptr<const Cert>, std::shared_ptr<const Cert>>
-getSelfPeerCertificateShared(const fizz::client::AsyncFizzClientT<SM>& client) {
-  return std::make_pair(
-      client.getState().clientCert(), client.getState().serverCert());
-}
-template <class SM>
-std::pair<std::shared_ptr<const Cert>, std::shared_ptr<const Cert>>
-getSelfPeerCertificateShared(const fizz::server::AsyncFizzServerT<SM>& server) {
-  return std::make_pair(
-      server.getState().serverCert(), server.getState().clientCert());
-}
-
 } // namespace detail
 
 /**

@@ -107,6 +107,7 @@ set(FIZZ_HEADER_DIRS
   crypto/signature
   crypto/openssl
   experimental/ktls
+  experimental/util
   extensions/delegatedcred
   extensions/exportedauth
   extensions/tokenbinding

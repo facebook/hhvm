@@ -20,23 +20,53 @@
 #include <folly/io/async/ssl/BasicTransportCertificate.h>
 
 #include <fizz/client/AsyncFizzClient.h>
+#include <fizz/experimental/util/CertExtraction.h>
 #include <fizz/protocol/Exporter.h>
 #include <fizz/server/AsyncFizzServer.h>
 
 namespace apache {
 namespace thrift {
+
 // private class meant to encapsulate all the information that needs to be
 // preserved across sockets for the tls downgrade scenario
 namespace {
 class StopTLSSocket : public folly::AsyncSocket {
  public:
-  using AsyncSocket::AsyncSocket;
+  StopTLSSocket(
+      folly::EventBase* evb,
+      folly::NetworkSocket fd,
+      uint32_t zeroCopyBufId,
+      std::shared_ptr<const fizz::Cert> selfCert,
+      std::shared_ptr<const fizz::Cert> peerCert)
+      : AsyncSocket(evb, fd, zeroCopyBufId),
+        selfCert_(std::move(selfCert)),
+        peerCert_(std::move(peerCert)) {}
+
+  StopTLSSocket(
+      folly::EventBase* evb,
+      std::shared_ptr<const fizz::Cert> selfCert,
+      std::shared_ptr<const fizz::Cert> peerCert)
+      : AsyncSocket(evb),
+        selfCert_(std::move(selfCert)),
+        peerCert_(std::move(peerCert)) {}
 
   std::string getSecurityProtocol() const override { return "stopTLS"; }
 
   std::string getApplicationProtocol() const noexcept override { return alpn_; }
 
   void setApplicationProtocol(std::string alpn) noexcept { alpn_ = alpn; }
+
+  const folly::AsyncTransportCertificate* getPeerCertificate() const override {
+    return peerCert_.get();
+  }
+
+  const folly::AsyncTransportCertificate* getSelfCertificate() const override {
+    return selfCert_.get();
+  }
+
+  void dropPeerCertificate() noexcept override { peerCert_.reset(); }
+
+  void dropSelfCertificate() noexcept override { selfCert_.reset(); }
 
   void setCipher(fizz::CipherSuite cipher) { origCipherSuite_ = cipher; }
 
@@ -64,56 +94,47 @@ class StopTLSSocket : public folly::AsyncSocket {
  private:
   // alpn of original socket, must save
   std::string alpn_;
+  std::shared_ptr<const fizz::Cert> selfCert_;
+  std::shared_ptr<const fizz::Cert> peerCert_;
   fizz::CipherSuite origCipherSuite_;
   std::unique_ptr<folly::IOBuf> exportedMasterSecret_{nullptr};
 };
 } // namespace
 
-folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
-    folly::AsyncTransportWrapper* transport) {
-  // Grab certs from transport
-  auto selfCert = folly::ssl::BasicTransportCertificate::create(
-      transport->getSelfCertificate());
-  auto peerCert = folly::ssl::BasicTransportCertificate::create(
-      transport->getPeerCertificate());
-  // Note we're indifferent to client vs server
-  auto fizzSock = transport->getUnderlyingTransport<fizz::AsyncFizzBase>();
+template <class FizzSocket>
+folly::AsyncSocketTransport::UniquePtr moveToPlaintext(FizzSocket* fizzSock) {
+  if (fizzSock == nullptr) {
+    return nullptr;
+  }
+  auto [selfCert, peerCert] =
+      fizz::detail::getSelfPeerCertificateShared(*fizzSock);
+
   auto cipher = fizzSock->getCipher();
   std::unique_ptr<folly::IOBuf> exportedMasterSecret{nullptr};
-
-  if (auto fizzClient =
-          transport->getUnderlyingTransport<fizz::client::AsyncFizzClient>()) {
-    if (fizzClient->getState().exporterMasterSecret().has_value() &&
-        fizzClient->getState().exporterMasterSecret().value() != nullptr) {
-      exportedMasterSecret =
-          fizzClient->getState().exporterMasterSecret().value()->clone();
-    }
-  } else if (
-      auto fizzServer =
-          transport->getUnderlyingTransport<fizz::server::AsyncFizzServer>()) {
-    if (fizzServer->getState().exporterMasterSecret().has_value() &&
-        fizzServer->getState().exporterMasterSecret().value() != nullptr) {
-      exportedMasterSecret =
-          fizzServer->getState().exporterMasterSecret().value()->clone();
-    }
+  if (fizzSock->getState().exporterMasterSecret().has_value() &&
+      fizzSock->getState().exporterMasterSecret().value() != nullptr) {
+    exportedMasterSecret =
+        fizzSock->getState().exporterMasterSecret().value()->clone();
   }
 
-  auto sock = transport->getUnderlyingTransport<folly::AsyncSocket>();
+  auto sock = fizzSock->template getUnderlyingTransport<folly::AsyncSocket>();
   folly::AsyncSocketTransport::UniquePtr plaintextTransport;
 #if __has_include(<liburing.h>)
-  if (!sock && transport->getUnderlyingTransport<folly::AsyncIoUringSocket>()) {
-    auto stopTLSSocket = new StopTLSSocket(transport->getEventBase());
+  if (!sock &&
+      fizzSock->template getUnderlyingTransport<folly::AsyncIoUringSocket>()) {
+    auto stopTLSSocket =
+        new StopTLSSocket(fizzSock->getEventBase(), selfCert, peerCert);
     if (cipher.hasValue()) {
       stopTLSSocket->setCipher(cipher.value());
       stopTLSSocket->setExportedMasterSecret(std::move(exportedMasterSecret));
     }
     auto newSocket = folly::AsyncTransport::UniquePtr(stopTLSSocket);
     folly::AsyncIoUringSocket::UniquePtr io =
-        transport->tryExchangeUnderlyingTransport<folly::AsyncIoUringSocket>(
-            newSocket);
+        fizzSock->template tryExchangeUnderlyingTransport<
+            folly::AsyncIoUringSocket>(newSocket);
     if (io) {
       io->setReadCB(nullptr);
-      io->setApplicationProtocol(transport->getApplicationProtocol());
+      io->setApplicationProtocol(fizzSock->getApplicationProtocol());
       plaintextTransport = std::move(io);
     }
   }
@@ -125,19 +146,19 @@ folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
     auto zcId = sock->getZeroCopyBufId();
 
     // create new socket make sure not to throw
-    auto stopTLSSocket = new StopTLSSocket(eb, fd, zcId);
-    stopTLSSocket->setApplicationProtocol(transport->getApplicationProtocol());
+    auto stopTLSSocket = new StopTLSSocket(eb, fd, zcId, selfCert, peerCert);
+    stopTLSSocket->setApplicationProtocol(fizzSock->getApplicationProtocol());
     if (cipher.hasValue()) {
       stopTLSSocket->setCipher(cipher.value());
       stopTLSSocket->setExportedMasterSecret(std::move(exportedMasterSecret));
     }
     plaintextTransport = folly::AsyncSocketTransport::UniquePtr(stopTLSSocket);
   }
-
-  plaintextTransport->setSelfCertificate(std::move(selfCert));
-  plaintextTransport->setPeerCertificate(std::move(peerCert));
   return plaintextTransport;
 }
-
+template folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
+    fizz::client::AsyncFizzClient* socket);
+template folly::AsyncSocketTransport::UniquePtr moveToPlaintext(
+    fizz::server::AsyncFizzServer* socket);
 } // namespace thrift
 } // namespace apache

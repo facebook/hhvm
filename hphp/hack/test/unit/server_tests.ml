@@ -18,10 +18,7 @@ let test_process_data =
     {
       pid = 2758734;
       server_specific_files =
-        {
-          ServerCommandTypes.server_finale_file = "2758734.fin";
-          server_progress_file = "progress.2758734.json";
-        };
+        { ServerCommandTypes.server_finale_file = "2758734.fin" };
       start_t = 0.0;
       in_fd = Unix.stdin;
       out_fds = [("default", Unix.stdout)];

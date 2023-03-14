@@ -92,18 +92,15 @@ let start_server_daemon
      started up quickly enough to write its initial message first. It's benign because
      either message will communicate the right intent to the user, and in any case the server
      will always have further progress updates to write. *)
-  let server_progress_file = ServerFiles.server_progress_file pid in
   let server_progress =
-    ServerCommandTypes.
+    ServerProgress.
       {
         server_progress = "starting hh_server";
         server_warning = None;
         server_timestamp = Unix.gettimeofday ();
       }
   in
-  ServerCommandTypesUtils.write_progress_file
-    ~server_progress_file
-    ~server_progress;
+  ServerProgress.write server_progress;
 
   let server =
     ServerProcess.
@@ -113,7 +110,6 @@ let start_server_daemon
           {
             ServerCommandTypes.server_finale_file =
               ServerFiles.server_finale_file pid;
-            server_progress_file;
           };
         in_fd = Daemon.descr_of_in_channel ic;
         out_fds =

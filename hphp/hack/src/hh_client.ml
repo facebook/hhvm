@@ -91,6 +91,7 @@ let () =
     match root with
     | None -> None
     | Some root ->
+      ServerProgress.set_root root;
       (* The code to load hh.conf (ServerLocalConfig) is a bit weirdly factored.
          It requires a ServerArgs structure, solely to pick out --config options. We
          dont have ServerArgs (we only have client args!) but we do parse --config

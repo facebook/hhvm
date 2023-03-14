@@ -46,8 +46,8 @@ let monitor_log_link root = path_of_root root "monitor_log"
 let server_finale_file (pid : int) : string =
   Filename.concat GlobalConfig.tmp_dir (spf "%d.fin" pid)
 
-let server_progress_file (pid : int) : string =
-  Filename.concat GlobalConfig.tmp_dir (spf "progress.%d.json" pid)
+let server_progress_file (root : Path.t) : string =
+  path_of_root root "progress.json"
 
 let server_receipt_to_monitor_file (pid : int) : string =
   Filename.concat

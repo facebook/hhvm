@@ -1785,17 +1785,13 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     in
     (* TODO: better to report time that hh_server has spent initializing *)
     let (progress, warning) =
-      let open ServerCommandTypes in
       match state with
-      | In_init { In_init_env.conn; _ }
-      | Main_loop { Main_env.conn; _ } ->
-        let server_progress_file =
-          conn.server_specific_files.ServerCommandTypes.server_progress_file
+      | In_init _
+      | Main_loop _ ->
+        let ServerProgress.{ server_progress; server_warning; _ } =
+          ServerProgress.read ()
         in
-        let server_progress =
-          ServerCommandTypesUtils.read_progress_file ~server_progress_file
-        in
-        (server_progress.server_progress, server_progress.server_warning)
+        (server_progress, server_warning)
       | _ -> ("connecting", None)
     in
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
@@ -4421,6 +4417,7 @@ let handle_client_message
          [get_root_exn] becomes available after we've set up initialize_params_ref, above. *)
       let root = get_root_exn () in
       Relative_path.set_path_prefix Relative_path.Root root;
+      ServerProgress.set_root root;
       set_up_hh_logger_for_client_lsp root;
       Hh_logger.log "cmd: %s" (String.concat ~sep:" " (Array.to_list Sys.argv));
       Hh_logger.log "LSP Init id: %s" env.init_id;

@@ -1294,8 +1294,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         and upon clean exit we'll write "shutting down" to it.
      In both case of clean exit and abrupt exit there'll be leftover files.
      We'll rely upon tmpclean to eventually clean them up. *)
+  ServerProgress.set_root (ServerArgs.root options);
   let server_finale_file = ServerFiles.server_finale_file pid in
-  let server_progress_file = ServerFiles.server_progress_file pid in
   let server_receipt_to_monitor_file =
     ServerFiles.server_receipt_to_monitor_file pid
   in
@@ -1303,14 +1303,12 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   | _ -> ());
   (try Unix.unlink server_receipt_to_monitor_file with
   | _ -> ());
-  ServerCommandTypesUtils.write_progress_file
-    ~server_progress_file
-    ~server_progress:
-      {
-        ServerCommandTypes.server_warning = None;
-        server_progress = "starting up";
-        server_timestamp = Unix.gettimeofday ();
-      };
+  ServerProgress.write
+    {
+      ServerProgress.server_warning = None;
+      server_progress = "starting up";
+      server_timestamp = Unix.gettimeofday ();
+    };
   Exit.add_hook_upon_clean_exit (fun finale_data ->
       begin
         try Unix.unlink server_receipt_to_monitor_file with
@@ -1327,14 +1325,12 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       end;
       begin
         try
-          ServerCommandTypesUtils.write_progress_file
-            ~server_progress_file
-            ~server_progress:
-              {
-                ServerCommandTypes.server_warning = None;
-                server_progress = "shutting down";
-                server_timestamp = Unix.gettimeofday ();
-              }
+          ServerProgress.write
+            {
+              ServerProgress.server_warning = None;
+              server_progress = "shutting down";
+              server_timestamp = Unix.gettimeofday ();
+            }
         with
         | _ -> ()
       end;

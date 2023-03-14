@@ -665,17 +665,13 @@ let update_status_ (env : env msg_update) monitor_config :
         in
         let (exit_type, exit_code) = Exit_status.unpack proc_stat in
         let time_taken = Unix.time () -. process.start_t in
-        ServerCommandTypesUtils.write_progress_file
-          ~server_progress_file:
-            process.server_specific_files
-              .ServerCommandTypes.server_progress_file
-          ~server_progress:
-            ServerCommandTypes.
-              {
-                server_progress = "writing crash logs";
-                server_warning = None;
-                server_timestamp = Unix.gettimeofday ();
-              };
+        ServerProgress.write
+          ServerProgress.
+            {
+              server_progress = "writing crash logs";
+              server_warning = None;
+              server_timestamp = Unix.gettimeofday ();
+            };
         let telemetry =
           Telemetry.create ()
           |> Telemetry.string_ ~key:"unix_exit_type" ~value:exit_type

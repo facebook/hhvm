@@ -546,17 +546,7 @@ type 'a message_type =
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout
 
-(** Invariant: the progress file is created almost immediately upon server startup,
-certainly before any messages are exchanged; it is deleted upon clean exit.
-The server_finale_file is created by Exit.exit and left there. *)
+(** Invariant: The server_finale_file is created by Exit.exit and left there. *)
 type server_specific_files = {
   server_finale_file: string;  (** just before exit, server will write here *)
-  server_progress_file: string;  (** server will write progress to this file *)
-}
-
-(** These are human-readable messages, shown at command-line and within the editor. *)
-type server_progress = {
-  server_progress: string;  (** e.g. "typechecking 5/15 files" *)
-  server_warning: string option;  (** e.g. "typechecking will be slow" *)
-  server_timestamp: float;
 }

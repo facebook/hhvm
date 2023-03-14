@@ -32,6 +32,7 @@ let monitor_daemon_main
   Folly.ensure_folly_init ();
 
   let www_root = ServerArgs.root options in
+  ServerProgress.set_root www_root;
 
   (* Check mode: --check means we'll start up the server and it will do a typecheck
      and then terminate; in the absence of that flag, (1) if a monitor was already running

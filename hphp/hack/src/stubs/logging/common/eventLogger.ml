@@ -27,6 +27,15 @@ let disable_logging _ = ()
 
 let log _ = ()
 
+let log_subsampling
+    ?subsample_key:_
+    ?max_tolerable_long_term_interval:_
+    ?max_tolerable_short_term_spike:_
+    ?logger:_
+    ?now:_
+    _ =
+  ()
+
 let logger_pid () = None
 
 let set_init_type _ = ()

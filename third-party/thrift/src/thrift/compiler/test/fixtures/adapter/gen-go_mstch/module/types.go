@@ -832,10 +832,10 @@ var (
     }
 
     ColorValues = []Color{
-        0,
-        1,
-        2,
-        3,
+        Color_UNKNOWN,
+        Color_RED,
+        Color_GREEN,
+        Color_BLUE,
     }
 )
 
@@ -889,8 +889,8 @@ var (
     }
 
     ThriftAdaptedEnumValues = []ThriftAdaptedEnum{
-        0,
-        1,
+        ThriftAdaptedEnum_Zero,
+        ThriftAdaptedEnum_One,
     }
 )
 

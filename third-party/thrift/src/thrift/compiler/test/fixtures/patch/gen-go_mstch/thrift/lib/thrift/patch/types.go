@@ -80,16 +80,16 @@ var (
     }
 
     PatchOpValues = []PatchOp{
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        0,
+        PatchOp_Assign,
+        PatchOp_Clear,
+        PatchOp_PatchPrior,
+        PatchOp_EnsureUnion,
+        PatchOp_EnsureStruct,
+        PatchOp_PatchAfter,
+        PatchOp_Remove,
+        PatchOp_Add,
+        PatchOp_Put,
+        PatchOp_Unspecified,
     }
 )
 

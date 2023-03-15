@@ -44,9 +44,9 @@ var (
     }
 
     EnumValues = []Enum{
-        0,
-        1,
-        2,
+        Enum_A,
+        Enum_B,
+        Enum_C,
     }
 )
 

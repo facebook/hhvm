@@ -42,8 +42,8 @@ var (
     }
 
     MyEnumValues = []MyEnum{
-        0,
-        1,
+        MyEnum_MyValue1,
+        MyEnum_MyValue2,
     }
 )
 

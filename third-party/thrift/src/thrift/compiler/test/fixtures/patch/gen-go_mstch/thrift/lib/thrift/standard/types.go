@@ -118,7 +118,7 @@ var (
     }
 
     VoidValues = []Void{
-        0,
+        Void_Unused,
     }
 )
 
@@ -184,11 +184,11 @@ var (
     }
 
     StandardProtocolValues = []StandardProtocol{
-        0,
-        1,
-        2,
-        3,
-        4,
+        StandardProtocol_Custom,
+        StandardProtocol_Binary,
+        StandardProtocol_Compact,
+        StandardProtocol_Json,
+        StandardProtocol_SimpleJson,
     }
 )
 

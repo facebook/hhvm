@@ -244,10 +244,10 @@ var (
     }
 
     CityValues = []City{
-        0,
-        1,
-        2,
-        3,
+        City_NYC,
+        City_MPK,
+        City_SEA,
+        City_LON,
     }
 )
 
@@ -309,10 +309,10 @@ var (
     }
 
     CompanyValues = []Company{
-        0,
-        1,
-        2,
-        3,
+        Company_FACEBOOK,
+        Company_WHATSAPP,
+        Company_OCULUS,
+        Company_INSTAGRAM,
     }
 )
 

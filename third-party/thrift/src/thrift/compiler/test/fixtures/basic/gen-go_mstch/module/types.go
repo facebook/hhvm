@@ -42,8 +42,8 @@ var (
     }
 
     MyEnumValues = []MyEnum{
-        0,
-        1,
+        MyEnum_MyValue1,
+        MyEnum_MyValue2,
     }
 )
 
@@ -97,8 +97,8 @@ var (
     }
 
     HackEnumValues = []HackEnum{
-        0,
-        1,
+        HackEnum_Value1,
+        HackEnum_Value2,
     }
 )
 

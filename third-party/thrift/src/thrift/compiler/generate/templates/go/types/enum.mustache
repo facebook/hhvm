@@ -53,7 +53,7 @@ var (
 
     {{enum:go_name}}Values = []{{enum:go_name}}{
     {{#enum:values}}
-        {{enum_value:value}},
+        {{enum:go_name}}_{{enum_value:name}},
     {{/enum:values}}
     }
     {{/program:compat?}}

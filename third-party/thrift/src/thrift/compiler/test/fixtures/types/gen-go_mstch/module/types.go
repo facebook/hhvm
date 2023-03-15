@@ -137,11 +137,11 @@ var (
     }
 
     HasBitwiseOpsValues = []HasBitwiseOps{
-        0,
-        1,
-        2,
-        4,
-        8,
+        HasBitwiseOps_none,
+        HasBitwiseOps_zero,
+        HasBitwiseOps_one,
+        HasBitwiseOps_two,
+        HasBitwiseOps_three,
     }
 )
 
@@ -195,8 +195,8 @@ var (
     }
 
     IsUnscopedValues = []IsUnscoped{
-        0,
-        1,
+        IsUnscoped_hello,
+        IsUnscoped_world,
     }
 )
 
@@ -250,8 +250,8 @@ var (
     }
 
     MyForwardRefEnumValues = []MyForwardRefEnum{
-        0,
-        12,
+        MyForwardRefEnum_ZERO,
+        MyForwardRefEnum_NONZERO,
     }
 )
 

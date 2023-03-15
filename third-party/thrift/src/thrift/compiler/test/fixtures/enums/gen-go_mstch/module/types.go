@@ -54,11 +54,11 @@ var (
     }
 
     MetasyntacticValues = []Metasyntactic{
-        1,
-        2,
-        3,
-        4,
-        0,
+        Metasyntactic_FOO,
+        Metasyntactic_BAR,
+        Metasyntactic_BAZ,
+        Metasyntactic_BAX,
+        Metasyntactic_Unspecified,
     }
 )
 
@@ -128,12 +128,12 @@ var (
     }
 
     MyEnum1Values = []MyEnum1{
-        1,
-        2,
-        3,
-        5,
-        6,
-        0,
+        MyEnum1_ME1_1,
+        MyEnum1_ME1_2,
+        MyEnum1_ME1_3,
+        MyEnum1_ME1_5,
+        MyEnum1_ME1_6,
+        MyEnum1_ME1_0,
     }
 )
 
@@ -191,9 +191,9 @@ var (
     }
 
     MyEnum2Values = []MyEnum2{
-        0,
-        1,
-        2,
+        MyEnum2_ME2_0,
+        MyEnum2_ME2_1,
+        MyEnum2_ME2_2,
     }
 )
 
@@ -263,12 +263,12 @@ var (
     }
 
     MyEnum3Values = []MyEnum3{
-        0,
-        1,
-        -2,
-        -1,
-        9,
-        10,
+        MyEnum3_ME3_0,
+        MyEnum3_ME3_1,
+        MyEnum3_ME3_N2,
+        MyEnum3_ME3_N1,
+        MyEnum3_ME3_9,
+        MyEnum3_ME3_10,
     }
 )
 
@@ -334,11 +334,11 @@ var (
     }
 
     MyEnum4Values = []MyEnum4{
-        2147483645,
-        2147483646,
-        2147483647,
-        -2147483648,
-        0,
+        MyEnum4_ME4_A,
+        MyEnum4_ME4_B,
+        MyEnum4_ME4_C,
+        MyEnum4_ME4_D,
+        MyEnum4_Unspecified,
     }
 )
 
@@ -400,10 +400,10 @@ var (
     }
 
     MyBitmaskEnum1Values = []MyBitmaskEnum1{
-        1,
-        2,
-        4,
-        0,
+        MyBitmaskEnum1_ONE,
+        MyBitmaskEnum1_TWO,
+        MyBitmaskEnum1_FOUR,
+        MyBitmaskEnum1_Unspecified,
     }
 )
 
@@ -465,10 +465,10 @@ var (
     }
 
     MyBitmaskEnum2Values = []MyBitmaskEnum2{
-        1,
-        2,
-        4,
-        0,
+        MyBitmaskEnum2_ONE,
+        MyBitmaskEnum2_TWO,
+        MyBitmaskEnum2_FOUR,
+        MyBitmaskEnum2_Unspecified,
     }
 )
 

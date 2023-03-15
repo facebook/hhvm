@@ -42,7 +42,7 @@ var (
     }
 
     MyEnumValues = []MyEnum{
-        0,
+        MyEnum_MyValue0,
     }
 )
 

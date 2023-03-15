@@ -48,9 +48,9 @@ var (
     }
 
     RefTypeValues = []RefType{
-        0,
-        1,
-        2,
+        RefType_Unique,
+        RefType_Shared,
+        RefType_SharedMutable,
     }
 )
 
@@ -116,11 +116,11 @@ var (
     }
 
     EnumUnderlyingTypeValues = []EnumUnderlyingType{
-        0,
-        1,
-        2,
-        3,
-        4,
+        EnumUnderlyingType_I8,
+        EnumUnderlyingType_U8,
+        EnumUnderlyingType_I16,
+        EnumUnderlyingType_U16,
+        EnumUnderlyingType_U32,
     }
 )
 

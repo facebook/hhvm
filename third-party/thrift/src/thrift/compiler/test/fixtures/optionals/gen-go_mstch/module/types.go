@@ -70,9 +70,9 @@ var (
     }
 
     AnimalValues = []Animal{
-        1,
-        2,
-        3,
+        Animal_DOG,
+        Animal_CAT,
+        Animal_TARANTULA,
     }
 )
 

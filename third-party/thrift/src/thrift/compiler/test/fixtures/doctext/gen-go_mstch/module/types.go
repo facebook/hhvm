@@ -88,7 +88,7 @@ var (
     }
 
     BValues = []B{
-        0,
+        B_HELLO,
     }
 )
 

@@ -35,7 +35,7 @@ FOLLY_GFLAGS_DEFINE_bool(
 THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
 
 THRIFT_FLAG_DEFINE_bool(
-    allow_resource_pools_set_thread_manager_from_executor, false);
+    allow_resource_pools_set_thread_manager_from_executor, true);
 
 namespace apache::thrift {
 

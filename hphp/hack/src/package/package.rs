@@ -227,7 +227,7 @@ mod test {
         assert_eq!(info.errors[0].msg(), "Undefined package: baz");
         assert_eq!(
             info.errors[1].msg(),
-            "This module can only be used one package: b.*"
+            "This module can only be used in one package: b.*"
         );
     }
 }

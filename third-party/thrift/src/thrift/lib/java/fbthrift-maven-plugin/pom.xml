@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vim: set ts=4 sw=4 et: -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.facebook.mojo</groupId>
+    <artifactId>fbthrift-maven-plugin-root</artifactId>
+    <packaging>pom</packaging>
+    <version>2.2-SNAPSHOT</version>
+    <name>${project.artifactId}</name>
+
+    <modules>
+        <module>fbthrift-maven-plugin</module>
+    </modules>
+
+    <properties>
+        <mavenVersion>3.6.3</mavenVersion>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencyManagement>
+      <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+        </dependency>
+      </dependencies>
+    </dependencyManagement>
+
+
+    <distributionManagement>
+        <!--
+            We still push our jars to the old location. We can't push to the new
+            location (namely
+            https://maven.thefacebook.com/nexus/content/repositories/releases/)
+            because the new location does not allow pushing jars in groupId's in
+            org/apache.
+        -->
+        <repository>
+            <id>libs-releases-local</id>
+            <url>https://maven.thefacebook.com/nexus/content/repositories/libs-releases-local/</url>
+        </repository>
+        <snapshotRepository>
+            <id>libs-snapshots-local</id>
+            <url>https://maven.thefacebook.com/nexus/content/repositories/libs-snapshots-local/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>3.7.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.5.3</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

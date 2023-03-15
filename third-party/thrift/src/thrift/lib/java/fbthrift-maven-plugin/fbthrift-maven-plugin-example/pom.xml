@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+vim: ts=4:sw=4
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <version>2.2-SNAPSHOT</version>
+    <groupId>com.facebook.mojo</groupId>
+    <artifactId>fbthrift-maven-plugin-example</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>
+        An example of how to use com.facebook.mojo:fbthrift-maven-plugin
+    </description>
+
+    <properties>
+        <mavenVersion>3.6.3</mavenVersion>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <!--
+            That's kinda funny, but to make it compile on laptops you can include both
+            fbthrift and apache thrift into classpath. On devserver thrift compiler is
+            fbthrift compiler, while on laptops it's apache thrift compiler.
+            Keep in mind that we only care about files being generated here, actual
+            implementation of those files does not matter for this test project.
+        -->
+        <dependency>
+            <groupId>com.facebook.fbthrift</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.facebook.mojo</groupId>
+                <artifactId>fbthrift-maven-plugin</artifactId>
+                <version>2.2-SNAPSHOT</version>
+                <configuration>
+                    <compiler>
+                      <extraOptions>
+                        <option>-allow-neg-keys</option>
+                        <option>-r</option>
+                      </extraOptions>
+                    </compiler>
+                    <baseDirectory>${project.basedir}</baseDirectory>
+                    <sources>
+                        <param>Example1.thrift</param>
+                    </sources>
+                    <generator>mstch_java</generator>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>thrift-generate-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <ignoredUnusedDeclaredDependencies>
+                        <ignoredUnusedDeclaredDependency>org.apache.thrift:libthrift</ignoredUnusedDeclaredDependency>
+                        <ignoredUnusedDeclaredDependency>com.facebook:thrift</ignoredUnusedDeclaredDependency>
+                        <ignoredUnusedDeclaredDependency>javax.servlet:javax.servlet-api</ignoredUnusedDeclaredDependency>
+                        <ignoredUnusedDeclaredDependency>org.slf4j:slf4j-api</ignoredUnusedDeclaredDependency>
+                        <ignoredUnusedDeclaredDependency>commons-codec:commons-codec</ignoredUnusedDeclaredDependency>
+                    </ignoredUnusedDeclaredDependencies>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

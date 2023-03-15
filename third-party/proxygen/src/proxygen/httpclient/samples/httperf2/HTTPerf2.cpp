@@ -354,8 +354,7 @@ ClientRunner::ClientRunner(HTTPerfStats& parentStats,
   }
 
   std::vector<std::string> headers;
-  folly::split<std::string, std::string, std::string>(
-      "::", FLAGS_headers, headers);
+  folly::split(std::string_view("::"), FLAGS_headers, headers);
   for (const auto& header : headers) {
     if (header.length() == 0) {
       continue;

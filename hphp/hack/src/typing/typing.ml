@@ -4016,41 +4016,36 @@ and expr_
           (env, Some ty1_expected, Some ty2_expected, None)
         | _ -> (env, None, None, None))
     in
-    let (env, te1, ty1) = expr ?expected:expected1 env e1 in
-    let (env, te2, ty2) = expr ?expected:expected2 env e2 in
     let (_, p1, _) = e1 in
     let (_, p2, _) = e2 in
-    let (env, ty1, err_opt1) =
-      compute_supertype
+    let (env, tel1, ty1) =
+      compute_exprs_and_supertype
         ~expected:expected1
-        ~reason:Reason.URpair_value
         ~use_pos:p1
+        ~reason:Reason.URpair_value
+        ~coerce_for_op:false
+        ~bound:None
         (Reason.Rtype_variable_generics (p1, "T1", "Pair"))
         env
-        [ty1]
+        [e1]
+        array_value
     in
-    let (env, ty2, err_opt2) =
-      compute_supertype
+    let (env, tel2, ty2) =
+      compute_exprs_and_supertype
         ~expected:expected2
-        ~reason:Reason.URpair_value
         ~use_pos:p2
+        ~reason:Reason.URpair_value
+        ~coerce_for_op:false
+        ~bound:None
         (Reason.Rtype_variable_generics (p2, "T2", "Pair"))
         env
-        [ty2]
+        [e2]
+        array_value
     in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
-    make_result
-      env
-      p
-      (Aast.Pair
-         ( th,
-           hole_on_ty_mismatch
-             te1
-             ~ty_mismatch_opt:(Option.join @@ List.hd err_opt1),
-           hole_on_ty_mismatch
-             te2
-             ~ty_mismatch_opt:(Option.join @@ List.hd err_opt2) ))
-      ty
+    let te1 = List.hd_exn tel1 in
+    let te2 = List.hd_exn tel2 in
+    make_result env p (Aast.Pair (th, te1, te2)) ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e valkind in
     let env = might_throw env in

@@ -459,11 +459,6 @@ void Cpp2Worker::dispatchRequest(
           return;
         }
 
-        auto* maybeWildcardMetadata = found->metadata.isWildcard()
-            ? static_cast<const AsyncProcessorFactory::WildcardMethodMetadata*>(
-                  &found->metadata)
-            : nullptr;
-
         SelectPoolResult poolResult =
             serverConfigs->resourcePoolSet().selectResourcePool(serverRequest);
 
@@ -482,8 +477,8 @@ void Cpp2Worker::dispatchRequest(
           return;
         } else {
           // std::monostate So a ResourcePool is picked based on default logic
-          if (maybeWildcardMetadata &&
-              maybeWildcardMetadata->executorType ==
+          if (found->metadata.isWildcard() &&
+              found->metadata.executorType ==
                   AsyncProcessorFactory::MethodMetadata::ExecutorType::EVB) {
             // if this is a wildcard method enabled for using Sync path of
             // ResourcePool

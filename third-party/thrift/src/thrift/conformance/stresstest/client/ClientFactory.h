@@ -39,6 +39,7 @@ struct ClientConnectionConfig {
   std::string certPath;
   std::string keyPath;
   std::string trustedCertsPath;
+  bool ioUring{false};
 };
 
 class ClientFactory {

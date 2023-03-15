@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <chrono>
-
 #include <thrift/conformance/stresstest/client/TestRunner.h>
 
 #include <fmt/core.h>
@@ -27,7 +25,7 @@
 DEFINE_string(server_host, "::1", "Host running the stress test server");
 DEFINE_int32(server_port, 5000, "Port of the stress test server");
 DEFINE_string(test_name, "", "Stress test to run");
-DEFINE_int64(client_threads, 1, "Number of client threads");
+DEFINE_int64(client_threads, 1, "Nnumber of client threads");
 DEFINE_int64(connections_per_thread, 1, "Number of clients per client thread");
 DEFINE_int64(clients_per_connection, 1, "Number of clients per connection");
 DEFINE_string(
@@ -47,6 +45,11 @@ DEFINE_string(
     "folly/io/async/test/certs/ca-cert.pem",
     "Path to client trusted CA file");
 DEFINE_bool(continuous, false, "Runs a single test continuously");
+DEFINE_int64(
+    stats_interval,
+    10,
+    "How often to poll in secs stats when running continuously");
+DEFINE_bool(io_uring, false, "Flag to enable io_uring on the client");
 
 namespace apache {
 namespace thrift {
@@ -124,11 +127,9 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
 
   // initialize the client runner
   ClientRunner runner(cfg_);
-
   // run the test
   runner.run(test.get());
   runner.stop();
-
   // collect and print statistics
   return StressTestStats{
       .memoryStats = runner.getMemoryStats(),
@@ -158,6 +159,7 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
   connCfg.certPath = FLAGS_client_cert_path;
   connCfg.keyPath = FLAGS_client_key_path;
   connCfg.trustedCertsPath = FLAGS_client_ca_path;
+  connCfg.ioUring = FLAGS_io_uring;
 
   ClientConfig config{};
   config.numClientThreads = FLAGS_client_threads <= 0
@@ -169,15 +171,10 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
       static_cast<uint64_t>(FLAGS_clients_per_connection);
   config.connConfig = std::move(connCfg);
 
-  if (FLAGS_continuous && FLAGS_test_name.empty()) {
-    LOG(FATAL) << "A test must be specified if you want to use continuous mode";
-  }
-
-  config.continuous = FLAGS_continuous;
-
   return config;
 }
 void TestRunner::runTests() {
+  LOG(INFO) << "Using io_uring: " << (FLAGS_io_uring ? "true" : "false");
   if (FLAGS_continuous) {
     runContinuously();
   } else {
@@ -186,7 +183,7 @@ void TestRunner::runTests() {
 }
 
 void TestRunner::runContinuously() {
-  LOG(INFO) << fmt::format("Starting Continuous Benchmark");
+  LOG(INFO) << "Starting Continuous Benchmark";
   auto& testName = getSelectedTests().front();
   LOG(INFO) << fmt::format("Running stress test '{}'", testName);
   runContinuously(instantiate(testName));

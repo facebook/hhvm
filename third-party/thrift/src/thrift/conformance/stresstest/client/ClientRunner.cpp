@@ -19,6 +19,8 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include <thrift/conformance/stresstest/util/Util.h>
 
+#include <folly/experimental/io/IoUringBackend.h>
+
 DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
 
 namespace apache {
@@ -41,13 +43,48 @@ class TestDoneTimeout : public folly::HHWheelTimer::Callback {
   bool& testDone_;
 };
 
+folly::IoUringBackend::Options getIoUringOptions() {
+  size_t buffer = 1 << 15;
+  folly::IoUringBackend::Options options;
+  options.setMaxSubmit(128)
+      .setMaxGet(128)
+      .setInitialProvidedBuffers(4096, buffer)
+      .setRegisterRingFd(true)
+      .setTaskRunCoop(true)
+      .setDeferTaskRun(true);
+
+  // must have enough capacity to stop overflows
+  options.setCapacity(std::max<uint32_t>(16384, 2 * buffer));
+  options.setUseRegisteredFds(0);
+
+  return options;
+}
+
+std::unique_ptr<folly::EventBaseBackendBase> getIOUringBackend() {
+  return std::make_unique<folly::IoUringBackend>(getIoUringOptions());
+}
+
+std::unique_ptr<folly::EventBaseBackendBase> getDefaultBackend() {
+  return folly::EventBase::getDefaultBackend();
+}
+
 class ClientThread : public folly::HHWheelTimer::Callback {
  public:
-  explicit ClientThread(const ClientConfig& cfg)
+  explicit ClientThread(const ClientConfig& cfg, size_t index)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
         testDoneTimeout_(testDone_) {
     continuous_ = cfg.continuous;
-    auto* evb = thread_.getEventBase();
+
+    auto ebm = folly::EventBaseManager::get();
+    auto factoryFunction = cfg.connConfig.ioUring
+        ? folly::EventBaseBackendBase::FactoryFunc(getIOUringBackend)
+        : folly::EventBaseBackendBase::FactoryFunc(getDefaultBackend);
+    auto threadName = fmt::format("client-runner-thread-{}", index);
+    thread_ = std::make_unique<folly::ScopedEventBaseThread>(
+        folly::EventBase::Options().setBackendFactory(factoryFunction),
+        ebm,
+        threadName);
+    auto* evb = thread_->getEventBase();
     // create clients in event base thread
     evb->runInEventBaseThreadAndWait([&]() {
       // capture baseline memory usage
@@ -71,25 +108,25 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 
   ~ClientThread() {
     // destroy clients in event base thread
-    thread_.getEventBase()->runInEventBaseThreadAndWait(
+    thread_->getEventBase()->runInEventBaseThreadAndWait(
         [clients = std::move(clients_)]() {});
   }
 
   void run(const StressTestBase* test) {
     if (!continuous_) {
-      thread_.getEventBase()->timer().scheduleTimeout(
+      thread_->getEventBase()->timer().scheduleTimeout(
           &testDoneTimeout_, std::chrono::seconds(FLAGS_runtime_s));
     }
     for (auto& client : clients_) {
       scope_.add(
-          runInternal(client.get(), test).scheduleOn(thread_.getEventBase()));
+          runInternal(client.get(), test).scheduleOn(thread_->getEventBase()));
     }
   }
 
   folly::SemiFuture<folly::Unit> stop() {
     return scope_.joinAsync()
         .semi()
-        .via(thread_.getEventBase())
+        .via(thread_->getEventBase())
         .thenValue([&](auto&&) -> folly::Unit {
           // cancel memory monitoring timeout and capture residual memory usage
           cancelTimeout();
@@ -106,7 +143,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   void timeoutExpired() noexcept override {
     memoryHistogram_.addValue(getThreadMemoryUsage());
     // reschedule the timeout
-    thread_.getEventBase()->timer().scheduleTimeout(
+    thread_->getEventBase()->timer().scheduleTimeout(
         this, std::chrono::seconds(1));
   }
 
@@ -131,7 +168,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   folly::Histogram<size_t> memoryHistogram_;
   folly::coro::AsyncScope scope_;
   std::vector<std::unique_ptr<StressTestClient>> clients_;
-  folly::ScopedEventBaseThread thread_;
+  std::unique_ptr<folly::ScopedEventBaseThread> thread_;
   bool continuous_{false};
   bool testDone_{false};
   TestDoneTimeout testDoneTimeout_;
@@ -140,7 +177,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
 ClientRunner::ClientRunner(const ClientConfig& config)
     : continuous_(config.continuous), clientThreads_() {
   for (size_t i = 0; i < config.numClientThreads; i++) {
-    clientThreads_.emplace_back(std::make_unique<ClientThread>(config));
+    clientThreads_.emplace_back(std::make_unique<ClientThread>(config, i));
   }
 }
 
@@ -168,8 +205,6 @@ void ClientRunner::stop() {
 }
 
 ClientRpcStats ClientRunner::getRpcStats() const {
-  CHECK(stopped_ || continuous_)
-      << "ClientRunner must be stopped before accessing statistics";
   ClientRpcStats combinedStats;
   for (auto& clientThread : clientThreads_) {
     combinedStats.combine(clientThread->getRpcStats());
@@ -178,8 +213,6 @@ ClientRpcStats ClientRunner::getRpcStats() const {
 }
 
 ClientThreadMemoryStats ClientRunner::getMemoryStats() const {
-  CHECK(stopped_ || continuous_)
-      << "ClientRunner must be stopped before accessing statistics";
   ClientThreadMemoryStats combinedStats;
   for (auto& clientThread : clientThreads_) {
     combinedStats.combine(clientThread->getMemoryStats());

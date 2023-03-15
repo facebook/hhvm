@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/experimental/io/IoUringBackend.h>
 #include <thrift/conformance/stresstest/server/StressTestServer.h>
 
 #include <folly/portability/GFlags.h>
@@ -26,6 +27,7 @@ DEFINE_int32(
     max_requests,
     -1,
     "Configures max requests, 0 will disable max request limit");
+DEFINE_bool(io_uring, false, "Enables io_uring if available when set to true");
 DEFINE_string(
     certPath,
     "folly/io/async/test/certs/tests-cert.pem",
@@ -38,6 +40,14 @@ DEFINE_string(
     caPath,
     "folly/io/async/test/certs/ca-cert.pem",
     "Path to client trusted CA file");
+DEFINE_bool(use_iouring_event_eventfd, true, "");
+DEFINE_int32(io_submit_sqe, -1, "");
+DEFINE_int32(io_max_get, 64, "");
+DEFINE_bool(set_iouring_defer_taskrun, true, "");
+DEFINE_int32(io_max_submit, -1, "");
+DEFINE_int32(io_registers, 16000, "");
+DEFINE_int32(io_prov_buffs_size, 131072, "");
+DEFINE_int32(io_prov_buffs, 2000, "");
 
 namespace apache {
 namespace thrift {
@@ -65,6 +75,72 @@ std::shared_ptr<StressTestHandler> createStressTestHandler() {
   return std::make_shared<StressTestHandler>();
 }
 
+folly::IoUringBackend::Options iouOptions() {
+  folly::IoUringBackend::Options options;
+  options.setCapacity(static_cast<size_t>(16000))
+      .setUseRegisteredFds(static_cast<size_t>(FLAGS_io_registers))
+      .setMaxSubmit(static_cast<size_t>(128))
+      .setMaxGet(static_cast<size_t>(-1))
+      .setInitialProvidedBuffers(FLAGS_io_prov_buffs_size, FLAGS_io_prov_buffs)
+      .setRegisterRingFd(true);
+
+  if (FLAGS_io_max_get > 0) {
+    options.setMaxGet(FLAGS_io_max_get);
+  }
+
+  if (FLAGS_io_submit_sqe > 0) {
+    options.setSqeSize(FLAGS_io_submit_sqe);
+  }
+
+  if (FLAGS_io_max_submit > 0) {
+    options.setMaxSubmit(FLAGS_io_max_submit);
+  }
+
+  if (FLAGS_set_iouring_defer_taskrun) {
+    if (folly::IoUringBackend::kernelSupportsDeferTaskrun()) {
+      options.setDeferTaskRun(true);
+    } else {
+      LOG(ERROR) << "not setting DeferTaskRun as not supported on this kernel";
+    }
+  }
+  return options;
+}
+
+std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
+  try {
+    // TODO numa node affinitization
+    // static int sqSharedCore = 0;
+    // LOG(INFO) << "Sharing eb sq poll on core: " << sqSharedCore;
+    // options.setSQGroupName("fast_eb").setSQCpu(sqSharedCore);
+    return std::make_unique<folly::IoUringBackend>(iouOptions());
+  } catch (const std::exception& ex) {
+    LOG(FATAL) << "Failed to create io_uring backend: "
+               << folly::exceptionStr(ex);
+  }
+}
+
+std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
+    const std::string& name, size_t numThreads) {
+  auto threadFactory = std::make_shared<folly::NamedThreadFactory>(name);
+  if (FLAGS_io_uring) {
+    LOG(INFO) << "using io_uring EventBase backend";
+    folly::EventBaseBackendBase::FactoryFunc func(getEventBaseBackendFunc);
+    static folly::EventBaseManager ebm(
+        folly::EventBase::Options().setBackendFactory(std::move(func)));
+
+    auto* evb = folly::EventBaseManager::get()->getEventBase();
+    // use the same EventBase for the main thread
+    if (evb) {
+      ebm.setEventBase(evb, false);
+    }
+    return std::make_shared<folly::IOThreadPoolExecutor>(
+        numThreads, threadFactory, &ebm);
+  } else {
+    return std::make_shared<folly::IOThreadPoolExecutor>(
+        numThreads, threadFactory);
+  }
+}
+
 std::shared_ptr<ThriftServer> createStressTestServer(
     std::shared_ptr<StressTestHandler> handler) {
   if (!handler) {
@@ -73,7 +149,9 @@ std::shared_ptr<ThriftServer> createStressTestServer(
   auto server = std::make_shared<ThriftServer>();
   server->setInterface(std::move(handler));
   server->setPort(FLAGS_port);
-  server->setNumIOWorkerThreads(sanitizeNumThreads(FLAGS_io_threads));
+  server->setPreferIoUring(FLAGS_io_uring);
+  server->setIOThreadPool(
+      getIOThreadPool("thrift_eventbase", FLAGS_io_threads));
   server->setNumCPUWorkerThreads(sanitizeNumThreads(FLAGS_cpu_threads));
 
   if (FLAGS_max_requests > -1) {
@@ -81,7 +159,6 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     server->setMaxRequests(FLAGS_max_requests);
   }
   server->setSSLPolicy(apache::thrift::SSLPolicy::PERMITTED);
-
   if (!FLAGS_certPath.empty() && !FLAGS_keyPath.empty() &&
       !FLAGS_caPath.empty()) {
     server->setSSLConfig(getSSLConfig());

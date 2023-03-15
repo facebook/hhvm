@@ -52,6 +52,7 @@ module.exports = {
               label: 'C++',
               items: [
                 'fb/howtos/implementing-a-server/cpp/getting-started',
+                'fb/howtos/implementing-a-server/cpp/implementing-rpcs',
                 {
                   type: 'category',
                   label: 'Archived',

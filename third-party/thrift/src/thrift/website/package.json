@@ -53,15 +53,18 @@
     ]
   },
   "resolutions": {
-    "@braintree/sanitize-url": "^6.0.0",
+    "@braintree/sanitize-url": "^6.0.1",
     "@sideway/formula": "^3.0.1",
     "d3-color": "^3.1.0",
     "eta": "^2.0.0",
     "got": "^11.8.5",
+    "json5": "^2.2.2",
     "http-cache-semantics": "^4.1.1",
     "loader-utils": "^2.0.3",
     "mermaid": "^9.1.2",
     "minimatch": "^3.0.5",
-    "trim": "^0.0.3"
+    "trim": "^0.0.3",
+    "ua-parser-js": "^0.7.33",
+    "webpack": "^5.76.0"
   }
 }

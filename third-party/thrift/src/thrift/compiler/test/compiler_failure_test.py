@@ -93,7 +93,7 @@ class CompilerFailureTest(unittest.TestCase):
                     @Experimental
                     i32 field2; // Warning
                     @Testing
-                    i32 field3; // Allowed
+                    i32 field3; // Warning
                 }
 
                 struct Bar {
@@ -107,6 +107,7 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             "[ERROR:foo.thrift:7] No field id specified for `field1`, resulting protocol may have conflicts or not be backwards compatible!\n"
             "[WARNING:foo.thrift:8] No field id specified for `field2`, resulting protocol may have conflicts or not be backwards compatible!\n"
+            "[WARNING:foo.thrift:10] No field id specified for `field3`, resulting protocol may have conflicts or not be backwards compatible!\n"
             "[WARNING:foo.thrift:15] No field id specified for `field4`, resulting protocol may have conflicts or not be backwards compatible!\n",
         )
         self.assertEqual(ret, 1)
@@ -292,7 +293,7 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             "[ERROR:underflow.thrift:4] Integer constant -32769 outside the range of field ids ([-32768, 32767]).\n"
             "[WARNING:underflow.thrift:2] Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.\n"
-            '[ERROR:underflow.thrift:4] Field identifier 32767 for "f6" has already been used.\n'
+            "[ERROR:underflow.thrift:4] Field id 32767 for `f6` has already been used.\n"
             "[WARNING:underflow.thrift:2] No field id specified for `f4`, resulting protocol may have conflicts or not be backwards compatible!\n",
         )
         self.assertEqual(ret, 1)
@@ -1678,7 +1679,7 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             textwrap.dedent(
-                '[ERROR:foo.thrift:3] Field identifier 1 for "field2" has already been used.\n'
+                "[ERROR:foo.thrift:3] Field id 1 for `field2` has already been used.\n"
             ),
         )
 

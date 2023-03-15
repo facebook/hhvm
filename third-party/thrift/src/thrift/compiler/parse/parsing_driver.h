@@ -203,37 +203,15 @@ class parsing_driver : public parser_actions {
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws,
-      std::unique_ptr<t_annotations> annotations) override {
-    auto function = std::make_unique<t_function>(
-        program, std::move(return_type), fmt::to_string(name.str));
-    function->set_qualifier(qual);
-    set_fields(function->params(), std::move(params));
-    function->set_exceptions(std::move(throws));
-    function->set_src_range(range);
-    // TODO: Leave the param list unnamed.
-    function->params().set_name(function->name() + "_args");
-    set_attributes(*function, std::move(attrs), std::move(annotations), range);
-    return function;
-  }
+      std::unique_ptr<t_annotations> annotations) override;
 
   t_type_ref on_stream_return_type(
-      source_range range, type_throws_spec spec) override {
-    auto stream_response =
-        std::make_unique<t_stream_response>(std::move(spec.type));
-    stream_response->set_exceptions(std::move(spec.throws));
-    return new_type_ref(range, std::move(stream_response), {});
-  }
+      source_range range, type_throws_spec spec) override;
 
   t_type_ref on_sink_return_type(
       source_range range,
       type_throws_spec sink_spec,
-      type_throws_spec final_response_spec) override {
-    auto sink = std::make_unique<t_sink>(
-        std::move(sink_spec.type), std::move(final_response_spec.type));
-    sink->set_sink_exceptions(std::move(sink_spec.throws));
-    sink->set_final_response_exceptions(std::move(final_response_spec.throws));
-    return new_type_ref(range, std::move(sink), {});
-  }
+      type_throws_spec final_response_spec) override;
 
   t_type_ref on_list_type(
       source_range range,
@@ -418,10 +396,6 @@ class parsing_driver : public parser_actions {
       const source_range& range,
       bool is_const = false);
 
-  // Tries to set the given fields, reporting a failure on a collsion.
-  // TODO(afuller): Disallow auto-id allocation.
-  void set_fields(t_structured& tstruct, t_field_list&& fields);
-
   void set_functions(
       t_interface& node, std::unique_ptr<t_function_list> functions);
 
@@ -483,14 +457,14 @@ class parsing_driver : public parser_actions {
       std::unique_ptr<t_annotations> annotations,
       const source_range& range = source_range());
 
-  // Automatic numbering for field ids.
+  // Automatic numbering for field ids (deprecated).
   //
   // Field id are assigned starting from -1 and working their way down.
-  //
-  // TODO(afuller): Move auto field ids to a post parse phase (or remove the
-  // feature entirely).
   void allocate_field_id(t_field_id& next_id, t_field& field);
   void maybe_allocate_field_id(t_field_id& next_id, t_field& field);
+
+  // Tries to set the given fields, reporting a failure on a collsion.
+  void set_fields(t_structured& s, t_field_list&& fields);
 
   template <typename T>
   T narrow_int(source_location loc, int64_t value, const char* name);

@@ -117,15 +117,13 @@ class t_field final : public t_named {
 
  private:
   t_type_ref type_;
-  // TODO(afuller): Make this const, once we remove support for auto assigned
-  // ids.
   t_field_id id_;
   boost::optional<t_field_id> explicit_id_;
 
   t_field_qualifier qual_ = {};
   std::unique_ptr<t_const_value> value_;
 
-  bool injected_{};
+  bool injected_ = false;
 
   // TODO(afuller): Delete everything below here. It is only provided for
   // backwards compatibility.

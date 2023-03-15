@@ -625,8 +625,7 @@ void validate_uri_uniqueness(diagnostic_context& ctx, const t_program& prog) {
 }
 
 void validate_field_id(diagnostic_context& ctx, const t_field& node) {
-  if (node.explicit_id() != node.id() &&
-      node.release_state() > t_release_state::testing) {
+  if (node.explicit_id() != node.id()) {
     ctx.report(
         node,
         ctx.has(context_type::no_legacy) &&

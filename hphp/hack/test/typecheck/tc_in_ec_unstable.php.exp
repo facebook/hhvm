@@ -1,4 +1,0 @@
-File "tc_in_ec_unstable.php", line 13, characters 3-21:
-Cannot use unstable feature: `enum_class_type_constants` (Parsing[1002])
-File "tc_in_ec_unstable.php", line 17, characters 2-23:
-Cannot use unstable feature: `enum_class_type_constants` (Parsing[1002])

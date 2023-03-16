@@ -18,32 +18,28 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/util/service-data.h"
+
 namespace HPHP {
 
+namespace {
+int getVal(const char* key) {
+    std::map<std::string, int64_t> values;
+    ServiceData::exportAll(values);
+    return values[key];
+}
+}
+
 TEST(COUNTERS, static_string) {
-    int ss = 0;
-    {
-      std::map<std::string, int64_t> values;
-      ServiceData::exportAll(values);
-      ss = values["admin.static-strings"];
-    }
+    int ss = getVal("admin.static-strings");
     EXPECT_EQ(ss, makeStaticStringCount());
 
     makeStaticString("bananas");
     ++ss;
-    {
-      std::map<std::string, int64_t> values;
-      ServiceData::exportAll(values);
-      EXPECT_EQ(ss, values["admin.static-strings"]);
-    }
+    EXPECT_EQ(ss, getVal("admin.static-strings"));
     EXPECT_EQ(ss, makeStaticStringCount());
 
     refineStaticStringTableSize();
-    {
-      std::map<std::string, int64_t> values;
-      ServiceData::exportAll(values);
-      EXPECT_EQ(ss, values["admin.static-strings"]);
-    }
+    EXPECT_EQ(ss, getVal("admin.static-strings"));
     EXPECT_EQ(ss, makeStaticStringCount());
 }
 

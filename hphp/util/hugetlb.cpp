@@ -33,6 +33,7 @@
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
+#include "hphp/util/service-data.h"
 
 #endif
 
@@ -56,6 +57,7 @@ constexpr unsigned kMaxNum1GPages = 16;
 static void* s_1GPages[kMaxNum1GPages];
 
 static unsigned s_num2MPages;
+static auto hp_counter = ServiceData::createCounter("admin.huge-pages");
 
 // Record error message based on errno, with an optional message.
 static void record_err_msg(const char* msg = nullptr) {
@@ -524,6 +526,7 @@ void* mmap_1g(void* addr, int node, bool map_fixed) {
 #endif
   void* ret = mmap_1g_impl(addr, map_fixed);
   if (ret != nullptr) {
+    hp_counter->increment();
     s_1GPages[s_num1GPages++] = ret;
   }
   return ret;

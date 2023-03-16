@@ -608,7 +608,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
     where
         F: FnOnce(&[u8]) -> T,
     {
-        let tyid = self.read_byte()? as i8;
+        let tyid = self.read_byte()?;
         let cty = CType::try_from(tyid & 0x0f)?;
         let didx = (tyid >> 4) & 0x0f;
 
@@ -649,7 +649,7 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         let kcty = CType::try_from((kvtype >> 4) & 0x0f)?;
         let vcty = CType::try_from((kvtype) & 0x0f)?;
 
-        Ok((TType::from(kcty), TType::from(vcty), Some(size as usize)))
+        Ok((TType::from(kcty), TType::from(vcty), Some(size)))
     }
 
     #[inline]

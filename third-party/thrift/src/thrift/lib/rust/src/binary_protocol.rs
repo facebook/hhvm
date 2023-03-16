@@ -150,7 +150,7 @@ impl<B: BufMutExt> ProtocolWriter for BinaryProtocolSerializer<B> {
     type Final = B::Final;
 
     fn write_message_begin(&mut self, name: &str, type_id: MessageType, seqid: u32) {
-        let version = (BINARY_VERSION_1 as u32) | (type_id as u32);
+        let version = BINARY_VERSION_1 | (type_id as u32);
         self.write_i32(version as i32);
         self.write_string(name);
         self.write_u32(seqid);

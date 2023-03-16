@@ -29,9 +29,10 @@ use crate::ttype::TType;
 use crate::Result;
 
 // Reference is thrift/lib/cpp/TApplicationException.h
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 #[repr(i32)]
 pub enum ApplicationExceptionErrorCode {
+    #[default]
     Unknown = 0,
     UnknownMethod = 1,
     InvalidMessageType = 2,
@@ -48,12 +49,6 @@ pub enum ApplicationExceptionErrorCode {
     InjectedFailure = 13,
     ChecksumMismatch = 14,
     Interruption = 15,
-}
-
-impl Default for ApplicationExceptionErrorCode {
-    fn default() -> Self {
-        ApplicationExceptionErrorCode::Unknown
-    }
 }
 
 const TAPPLICATION_EXCEPTION_ERROR_CODE: &str = "ApplicationExceptionErrorCode";

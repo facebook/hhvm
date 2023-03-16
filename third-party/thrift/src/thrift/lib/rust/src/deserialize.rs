@@ -350,7 +350,7 @@ where
     /// Vec<T> is Thrift List type
     fn read(p: &mut P) -> Result<Self> {
         let (_elem_ty, len) = p.read_list_begin()?;
-        let mut list = Vec::with_capacity(len.unwrap_or_default() as usize);
+        let mut list = Vec::with_capacity(len.unwrap_or_default());
 
         if let Some(0) = len {
             return Ok(list);

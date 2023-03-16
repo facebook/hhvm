@@ -35,8 +35,6 @@ end = struct
     let kind = "kind"
 
     let function_ = "function"
-
-    let classish_kind_unknown = "classish_kind_unknown"
   end
 
   let json_obj_of_nadable Summary.{ id; kind } =
@@ -44,10 +42,9 @@ end = struct
       match kind with
       | Summary.Function -> Names.function_
       | Summary.ClassLike classish_kind_opt ->
-        Option.(
-          classish_kind_opt
-          >>| show_classish_kind
-          |> value ~default:Names.classish_kind_unknown)
+        classish_kind_opt
+        |> Option.sexp_of_t sexp_of_classish_kind
+        |> Sexp.to_string
     in
     J.JSON_Object
       [

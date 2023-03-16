@@ -27,7 +27,7 @@ end
 type abstraction = Ast_defs.abstraction =
   | Concrete
   | Abstract
-[@@deriving eq, hash, ord, show { with_path = false }]
+[@@deriving eq, hash, ord, sexp, show { with_path = false }]
 
 let hash_abstraction : abstraction -> int =
   Obj.magic hash_abstraction (* workaround for T92019055 *)
@@ -38,7 +38,7 @@ type classish_kind = Ast_defs.classish_kind =
   | Ctrait  (** Kind for `trait` *)
   | Cenum  (** Kind for `enum` *)
   | Cenum_class of abstraction
-[@@deriving eq, hash, ord, show { with_path = false }]
+[@@deriving eq, hash, ord, sexp, show { with_path = false }]
 
 let hash_classish_kind : classish_kind -> int =
   Obj.magic hash_classish_kind (* workaround for T92019055 *)

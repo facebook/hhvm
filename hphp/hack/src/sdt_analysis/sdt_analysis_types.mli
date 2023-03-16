@@ -35,7 +35,7 @@ end
 type abstraction = Ast_defs.abstraction =
   | Concrete
   | Abstract
-[@@deriving eq, hash, ord, show { with_path = false }]
+[@@deriving eq, hash, ord, sexp, show { with_path = false }]
 
 val hash_abstraction : abstraction -> int
 
@@ -45,7 +45,7 @@ type classish_kind = Ast_defs.classish_kind =
   | Ctrait  (** Kind for `trait` *)
   | Cenum  (** Kind for `enum` *)
   | Cenum_class of abstraction
-[@@deriving eq, hash, ord, show { with_path = false }]
+[@@deriving eq, hash, ord, sexp, show { with_path = false }]
 
 val hash_classish_kind : classish_kind -> int
 

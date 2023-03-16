@@ -32,6 +32,7 @@
 #include "mcrouter/routes/ExtraRouteHandleProviderIf.h"
 #include "mcrouter/routes/FailoverRoute.h"
 #include "mcrouter/routes/HashRouteFactory.h"
+#include "mcrouter/routes/McBucketRoute.h"
 #include "mcrouter/routes/PoolRouteUtils.h"
 #include "mcrouter/routes/RateLimitRoute.h"
 #include "mcrouter/routes/RateLimiter.h"
@@ -512,6 +513,20 @@ McRouteHandleProvider<MemcacheRouterInfo>::createSRRoute(
 
 template <class RouterInfo>
 std::shared_ptr<typename RouterInfo::RouteHandleIf>
+McRouteHandleProvider<RouterInfo>::bucketize(
+    std::shared_ptr<typename RouterInfo::RouteHandleIf> route,
+    const folly::dynamic& /*json*/) {
+  return route;
+}
+
+template <>
+std::shared_ptr<MemcacheRouterInfo::RouteHandleIf>
+McRouteHandleProvider<MemcacheRouterInfo>::bucketize(
+    std::shared_ptr<typename MemcacheRouterInfo::RouteHandleIf> route,
+    const folly::dynamic&);
+
+template <class RouterInfo>
+std::shared_ptr<typename RouterInfo::RouteHandleIf>
 McRouteHandleProvider<RouterInfo>::makePoolRoute(
     RouteHandleFactory<RouteHandleIf>& factory,
     const folly::dynamic& json) {
@@ -590,7 +605,9 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
     if (needAsynclog) {
       route = createAsynclogRoute(std::move(route), asynclogName.str());
     }
-
+    if (json.isObject()) {
+      route = bucketize(std::move(route), json);
+    }
     return route;
   } catch (const std::exception& e) {
     throwLogic("PoolRoute {}: {}", poolJson.name, e.what());

@@ -191,6 +191,8 @@ class McRouteHandleProvider
       RouteHandlePtr route,
       std::string asynclogName);
 
+  RouteHandlePtr bucketize(RouteHandlePtr route, const folly::dynamic& json);
+
   template <class Transport>
   std::pair<RouteHandlePtr, std::shared_ptr<const AccessPoint>>
   createDestinationRoute(

@@ -95,6 +95,7 @@ impl HhConfig {
 
         // Some GlobalOptions fields are copied from LocalConfig
         let go = &mut c.opts;
+        go.tco_saved_state = c.local_config.saved_state.clone();
         go.po_allow_unstable_features = c.local_config.allow_unstable_features;
         go.tco_rust_elab = c.local_config.rust_elab;
 
@@ -298,6 +299,8 @@ pub fn system_config_path() -> PathBuf {
 
 #[cfg(test)]
 mod test {
+    use oxidized::saved_state_rollouts::SavedStateRollouts;
+
     use super::*;
 
     #[test]
@@ -306,6 +309,91 @@ mod test {
         assert_eq!(
             hhconf.opts.log_levels.get("pessimise").copied(),
             Some(1isize)
+        );
+    }
+
+    #[test]
+    fn dummy_one() {
+        let hhconfig =
+            ConfigFile::from_args(["current_saved_state_rollout_flag_index=0".as_bytes()]);
+        let hhconf = ConfigFile::from_args(["ss_force=candidate".as_bytes()]);
+        let c = HhConfig::from_configs(hhconfig, hhconf).unwrap();
+        assert_eq!(
+            c.opts.tco_saved_state.rollouts,
+            SavedStateRollouts {
+                one: true,
+                two: false,
+                three: false,
+            }
+        );
+    }
+
+    #[test]
+    fn dummy_two() {
+        let hhconfig =
+            ConfigFile::from_args(["current_saved_state_rollout_flag_index=0".as_bytes()]);
+        let hhconf = ConfigFile::from_args(["ss_force=prod_with_flag_on:dummy_two".as_bytes()]);
+        let c = HhConfig::from_configs(hhconfig, hhconf).unwrap();
+        assert_eq!(
+            c.opts.tco_saved_state.rollouts,
+            SavedStateRollouts {
+                one: false,
+                two: true,
+                three: false,
+            }
+        );
+    }
+
+    #[test]
+    fn dummy_three() {
+        let hhconfig =
+            ConfigFile::from_args(["current_saved_state_rollout_flag_index=0".as_bytes()]);
+        let hhconf = ConfigFile::from_args([
+            "dummy_one=true".as_bytes(),
+            "dummy_two=true".as_bytes(),
+            "dummy_three=true".as_bytes(),
+            "ss_force=prod_with_flag_on:dummy_three".as_bytes(),
+        ]);
+        let c = HhConfig::from_configs(hhconfig, hhconf).unwrap();
+        assert_eq!(
+            c.opts.tco_saved_state.rollouts,
+            SavedStateRollouts {
+                one: false,
+                two: false,
+                three: true,
+            }
+        );
+    }
+
+    #[test]
+    fn dummy_three_err() {
+        let hhconfig =
+            ConfigFile::from_args(["current_saved_state_rollout_flag_index=0".as_bytes()]);
+        let hhconf = ConfigFile::from_args([
+            "ss_force=prod_with_myflag".as_bytes(), // bad ss_force syntax
+        ]);
+        let c = HhConfig::from_configs(hhconfig, hhconf);
+        assert!(c.is_err())
+    }
+
+    #[test]
+    fn dummy_one_prod() {
+        let hhconfig =
+            ConfigFile::from_args(["current_saved_state_rollout_flag_index=1".as_bytes()]);
+        let hhconf = ConfigFile::from_args([
+            "dummy_one=true".as_bytes(),
+            "dummy_two=true".as_bytes(),
+            "dummy_three=true".as_bytes(),
+            "ss_force=prod".as_bytes(),
+        ]);
+        let c = HhConfig::from_configs(hhconfig, hhconf).unwrap();
+        assert_eq!(
+            c.opts.tco_saved_state.rollouts,
+            SavedStateRollouts {
+                one: true,
+                two: false,
+                three: false,
+            }
         );
     }
 }

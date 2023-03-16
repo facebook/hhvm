@@ -98,13 +98,14 @@ end
 
 let flag_name flag = String.lowercase (show_flag flag)
 
-(* We need to guarantee that for all flag combination, there is an available saved
+(* We need to guarantee that for all flag combinations, there is an available saved
    state corresponding to that combination. There are however an exponential number
    of flag combinations.
-   What follows allows to restrict the number of possible combinations per www revision
+   What follows allows restricting the number of possible combinations per www revision
    to just two (one for the production saved state, one for the candidate saved state).
 
-   We specify a rollout order below, while .hhconfig provides a flag current_saved_state_rollout_flag_index
+   We specify a rollout order below, and .hhconfig provides
+     current_saved_state_rollout_flag_index = N
    which specifies which flag is currently being rolled out for that www revision
    using that order (current_saved_state_rollout_flag_index is an integer).
    Only that flag will get its value from JustKnob,

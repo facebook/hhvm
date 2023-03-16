@@ -3574,6 +3574,7 @@ dependencies = [
  "relative_path",
  "rust_to_ocaml_attr",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

@@ -452,6 +452,62 @@ where
     }
 }
 
+/// Convenience trait for newtype adapters.
+///
+/// This trait simplifies construction of adapters that newtype the standard
+/// type. On top of the standard bounds, the newtype (adapted type) needs to
+/// also have a [`From`] and [`Into`] implementation for the standard thrift
+/// type.
+///
+/// # Examples
+///
+/// ```
+/// use fbthrift::adapter::NewTypeAdapter;
+///
+/// #[derive(Clone, Debug)]
+/// struct MyInt(i64);
+///
+/// impl From<MyInt> for i64 {
+///     fn from(v: MyInt) -> Self { v.0 }
+/// }
+///
+/// impl From<i64> for MyInt {
+///     fn from(v: i64) -> Self { Self(v) }
+/// }
+///
+/// struct MyIntAdapter;
+///
+/// impl NewTypeAdapter for MyIntAdapter {
+///     type StandardType = i64;
+///     type AdaptedType = MyInt;
+/// }
+/// ```
+pub trait NewTypeAdapter {
+    /// The thrift type that the adapter interprets.
+    type StandardType;
+    /// The Rust type to adapt to.
+    type AdaptedType;
+}
+
+impl<Adapter, StandardType, AdaptedType> ThriftAdapter for Adapter
+where
+    Adapter: NewTypeAdapter<StandardType = StandardType, AdaptedType = AdaptedType>,
+    AdaptedType: From<StandardType> + Into<StandardType> + Clone + Debug + Send + Sync + PartialEq,
+{
+    type StandardType = <Self as NewTypeAdapter>::StandardType;
+    type AdaptedType = <Self as NewTypeAdapter>::AdaptedType;
+
+    type Error = <Self::AdaptedType as TryFrom<Self::StandardType>>::Error;
+
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        value.clone().into()
+    }
+
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
+        Self::AdaptedType::try_from(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

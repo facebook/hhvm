@@ -350,6 +350,7 @@ module.exports = {
         id: "fb/server/index",
       },
       items: [
+        'fb/server/server-lifecycle',
         'fb/server/components',
         'fb/server/transport',
         'fb/server/threading-models',

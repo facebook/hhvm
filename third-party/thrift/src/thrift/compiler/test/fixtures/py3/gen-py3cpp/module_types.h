@@ -1008,15 +1008,10 @@ class AdaptedUnion final  {
     return *this;
   }
 
-  ~AdaptedUnion() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
     ::std::int16_t best;
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const AdaptedUnion&) const;

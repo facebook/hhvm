@@ -166,9 +166,11 @@ class <%#struct:exception?%>FOLLY_EXPORT <%/struct:exception?%><%struct:cpp_unde
 
 <% > module_types_h/union_assign_overload%>
 
+<%^struct:is_trivially_destructible?%>
   <%#struct:virtual%>virtual <%/struct:virtual%>~<%struct:cpp_underlying_name%>() {
     apache::thrift::clear(*this);
   }
+<%/struct:is_trivially_destructible?%>
 
 <% > module_types_h/union_storage%>
 

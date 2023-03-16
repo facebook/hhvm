@@ -10047,16 +10047,11 @@ class FloatUnion final  {
     return *this;
   }
 
-  ~FloatUnion() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
     float floatSide;
     double doubleSide;
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const FloatUnion&) const;

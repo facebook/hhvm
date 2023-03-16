@@ -9305,9 +9305,6 @@ class union_with_special_names final  {
     return *this;
   }
 
-  ~union_with_special_names() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
     ::std::int32_t get;
@@ -9339,8 +9336,6 @@ class union_with_special_names final  {
     ::std::int32_t field;
     ::std::int32_t fields;
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const union_with_special_names&) const;

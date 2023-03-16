@@ -1683,15 +1683,10 @@ class UnionToBeRenamed final  {
     return *this;
   }
 
-  ~UnionToBeRenamed() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
     ::std::int32_t reserved_field;
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const UnionToBeRenamed&) const;

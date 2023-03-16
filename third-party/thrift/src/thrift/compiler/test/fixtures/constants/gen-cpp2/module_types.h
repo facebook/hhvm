@@ -2103,16 +2103,11 @@ class union1 final  {
     return *this;
   }
 
-  ~union1() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
     ::std::int32_t i;
     double d;
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const union1&) const;

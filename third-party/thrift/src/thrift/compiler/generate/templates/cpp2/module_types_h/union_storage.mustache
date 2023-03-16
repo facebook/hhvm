@@ -19,6 +19,8 @@
     <%field:cpp_storage_type%> <%field:cpp_name%>;
 <%/struct:fields%>
 
+<%^struct:is_trivially_destructible?%>
     storage_type() {}
     ~storage_type() {}
+<%/struct:is_trivially_destructible?%>
   } ;

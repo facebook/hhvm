@@ -1176,6 +1176,8 @@ class cpp_mstch_struct : public mstch_struct {
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
             {"struct:patch?", &cpp_mstch_struct::patch},
+            {"struct:is_trivially_destructible?",
+             &cpp_mstch_struct::is_trivially_destructible},
         });
   }
   mstch::node fields_size() { return std::to_string(struct_->fields().size()); }
@@ -1648,6 +1650,16 @@ class cpp_mstch_struct : public mstch_struct {
     return !struct_->is_exception() &&
         struct_->program()->inherit_annotation_or_null(
             *struct_, kGeneratePatchUri) != nullptr;
+  }
+
+  mstch::node is_trivially_destructible() {
+    for (const auto& field : struct_->fields()) {
+      const t_type* type = field.get_type()->get_true_type();
+      if (cpp2::is_custom_type(field) || !type->is_scalar()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   std::shared_ptr<cpp2_generator_context> cpp_context_;

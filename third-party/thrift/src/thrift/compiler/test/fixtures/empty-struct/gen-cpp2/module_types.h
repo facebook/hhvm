@@ -245,14 +245,9 @@ class Nada final  {
     return *this;
   }
 
-  ~Nada() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const Nada&) const;

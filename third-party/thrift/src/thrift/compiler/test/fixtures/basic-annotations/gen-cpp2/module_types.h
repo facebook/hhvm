@@ -440,14 +440,9 @@ class YourUnion final  {
     return *this;
   }
 
-  ~YourUnion() {
-    apache::thrift::clear(*this);
-  }
 
   union storage_type {
 
-    storage_type() {}
-    ~storage_type() {}
   } ;
 
   bool operator==(const YourUnion&) const;

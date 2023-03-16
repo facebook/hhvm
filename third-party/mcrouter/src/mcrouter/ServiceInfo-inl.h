@@ -196,6 +196,91 @@ class RouteCommandDispatcher {
       dispatcher_;
 };
 
+template <class RouterInfo>
+class GetBucketCommandDispatcher {
+ public:
+  bool dispatch(
+      size_t typeId,
+      const std::shared_ptr<
+          ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>& ctx,
+      folly::StringPiece keyStr,
+      Proxy<RouterInfo>& proxy,
+      const ProxyRoute<RouterInfo>& proxyRoute) {
+    return dispatcher_.dispatch(typeId, *this, ctx, keyStr, proxy, proxyRoute);
+  }
+
+  template <class Request>
+  static void processMsg(
+      GetBucketCommandDispatcher<RouterInfo>& /* me */,
+      const std::shared_ptr<
+          ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>& ctx,
+      folly::StringPiece keyStr,
+      Proxy<RouterInfo>& proxy,
+      const ProxyRoute<RouterInfo>& proxyRoute) {
+    using KeyBucketKeyspaceTuple =
+        std::tuple<std::string, std::string, std::string>;
+    proxy.fiberManager().addTaskFinally(
+        [keyStr, &proxy, &proxyRoute]() {
+          auto keyBucketKeyspaceTuples =
+              std::make_unique<std::vector<KeyBucketKeyspaceTuple>>();
+          auto cb = [&keyBucketKeyspaceTuples](
+                        std::string keyRecorded,
+                        const uint64_t bucketIdRecorded,
+                        const std::string_view bucketizationKeyspaceRecorded) {
+            keyBucketKeyspaceTuples->push_back(std::make_tuple(
+                std::move(keyRecorded),
+                folly::to<std::string>(bucketIdRecorded),
+                folly::to<std::string>(bucketizationKeyspaceRecorded)));
+          };
+          folly::fibers::Baton baton;
+          auto rctx =
+              ProxyRequestContextWithInfo<RouterInfo>::createRecordingNotify(
+                  proxy, baton, nullptr, nullptr, std::move(cb));
+          Request recordingReq;
+          recordingReq.key_ref() = keyStr;
+          fiber_local<RouterInfo>::runWithLocals(
+              [ctx = std::move(rctx), &recordingReq, &proxyRoute]() mutable {
+                fiber_local<RouterInfo>::setSharedCtx(std::move(ctx));
+                proxyRoute.route(recordingReq);
+              });
+          baton.wait();
+          return keyBucketKeyspaceTuples;
+        },
+        [ctx](folly::Try<std::unique_ptr<std::vector<KeyBucketKeyspaceTuple>>>&&
+                  data) {
+          std::string str;
+          const auto& tuplesPtr = *data;
+          for (const auto& [key, bucket, keyspace] : *tuplesPtr) {
+            if (!str.empty()) {
+              str.append("\r\n");
+            }
+            str.append(key);
+            str.push_back('\t');
+            str.append(bucket);
+            str.push_back('\t');
+            str.append(keyspace);
+          }
+          ReplyT<ServiceInfoRequest> reply(carbon::Result::FOUND);
+          reply.value_ref() = folly::IOBuf(folly::IOBuf::COPY_BUFFER, str);
+          ctx->sendReply(std::move(reply));
+        });
+  }
+
+ private:
+  CallDispatcher<
+      // Request List
+      typename RouterInfo::RoutableRequests,
+      // Dispatcher class
+      detail::GetBucketCommandDispatcher<RouterInfo>,
+      // List of types of args to Dispatcher::processMsg()
+      const std::shared_ptr<
+          ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>&,
+      folly::StringPiece,
+      Proxy<RouterInfo>&,
+      const ProxyRoute<RouterInfo>&>
+      dispatcher_;
+};
+
 } // namespace detail
 
 template <class RouterInfo>
@@ -210,6 +295,8 @@ struct ServiceInfo<RouterInfo>::ServiceInfoImpl {
   detail::RouteHandlesCommandDispatcher<RouterInfo>
       routeHandlesCommandDispatcher_;
   mutable detail::RouteCommandDispatcher<RouterInfo> routeCommandDispatcher_;
+  mutable detail::GetBucketCommandDispatcher<RouterInfo>
+      getBucketCommandDispatcher_;
 
   ServiceInfoImpl(
       Proxy<RouterInfo>& proxy,
@@ -221,6 +308,11 @@ struct ServiceInfo<RouterInfo>::ServiceInfoImpl {
           ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>& ctx) const;
 
   void handleRouteCommand(
+      const std::shared_ptr<
+          ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>& ctx,
+      const std::vector<folly::StringPiece>& args) const;
+
+  void handleGetBucketCommand(
       const std::shared_ptr<
           ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>& ctx,
       const std::vector<folly::StringPiece>& args) const;
@@ -492,6 +584,11 @@ void ServiceInfo<RouterInfo>::ServiceInfoImpl::handleRequest(
       return;
     }
 
+    if (cmd == "get_bucket") {
+      handleGetBucketCommand(ctx, args);
+      return;
+    }
+
     auto it = commands_.find(cmd.str());
     if (it == commands_.end()) {
       throw std::runtime_error("unknown command: " + cmd.str());
@@ -526,6 +623,28 @@ void ServiceInfo<RouterInfo>::ServiceInfoImpl::handleRouteCommand(
           typeId, ctx, key, proxy_, proxyRoute_)) {
     throw std::runtime_error(
         folly::sformat("route: unknown request {}", requestName));
+  }
+}
+
+template <class RouterInfo>
+void ServiceInfo<RouterInfo>::ServiceInfoImpl::handleGetBucketCommand(
+    const std::shared_ptr<
+        ProxyRequestContextTyped<RouterInfo, ServiceInfoRequest>>& ctx,
+    const std::vector<folly::StringPiece>& args) const {
+  if (args.size() != 1) {
+    throw std::runtime_error("get_bucket: 1 arg (key) expected");
+  }
+  auto key = args[0];
+
+  std::string res;
+  if (!getBucketCommandDispatcher_.dispatch(
+          facebook::memcache::McGetRequest::typeId,
+          ctx,
+          key,
+          proxy_,
+          proxyRoute_)) {
+    throw std::runtime_error(
+        folly::sformat("get_bucket: couldn't find bucket for key {}", key));
   }
 }
 

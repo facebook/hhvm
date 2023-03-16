@@ -3277,17 +3277,15 @@ and expr_
   (*
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
-   * The optional coerce_for_op parameter controls whether any arguments of type
-   * dynamic can be coerced to enforceable types because they are arguments to a
-   * built-in operator.
+   * If the optional bound parameter is present then arguments of type
+   * dynamic can be coerced to this bound.
    *)
   let compute_supertype
       ~(expected : ExpectedTy.t option)
       ~reason
       ~use_pos
       ?bound
-      ?(coerce_for_op = false)
-      ?(can_pessimise = false)
+      ~can_pessimise
       r
       env
       tys =
@@ -3319,7 +3317,7 @@ and expr_
     | Tany _ -> (env, supertype, List.map tys ~f:(fun _ -> None))
     | _ ->
       let really_coerce =
-        coerce_for_op
+        Option.is_some bound
         (* Don't do coercion when we are pessimising *)
         && not
              (can_pessimise
@@ -3336,6 +3334,7 @@ and expr_
         else
           let (env, pess_supertype) =
             if can_pessimise then
+              (* If pessimised_builtins is set then make like type *)
               Typing_array_access.maybe_pessimise_type env supertype
             else
               (env, supertype)
@@ -3391,9 +3390,8 @@ and expr_
   let compute_exprs_and_supertype
       ~(expected : ExpectedTy.t option)
       ?(reason = Reason.URarray_value)
-      ?(can_pessimise = false)
+      ~can_pessimise
       ~bound
-      ~coerce_for_op
       ~use_pos
       r
       env
@@ -3423,7 +3421,6 @@ and expr_
         ~reason
         ~use_pos
         ?bound
-        ~coerce_for_op
         ~can_pessimise
         r
         env
@@ -3533,23 +3530,16 @@ and expr_
     make_result env p Aast.Omitted ty
   | Varray (th, el)
   | ValCollection (_, th, el) ->
-    let ( get_expected_kind,
-          name,
-          subtype_val,
-          coerce_for_op,
-          make_expr,
-          make_ty,
-          key_bound ) =
+    let (get_expected_kind, name, subtype_val, make_expr, make_ty, key_bound) =
       match e with
       | ValCollection ((kind_pos, kind), _, _) ->
         let class_name = Nast.vc_kind_to_name kind in
-        let (subtype_val, coerce_for_op, key_bound) =
+        let (subtype_val, key_bound) =
           match kind with
           | Set
           | ImmSet
           | Keyset ->
             ( arraykey_value p class_name true,
-              true,
               Some
                 (MakeType.arraykey
                    (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name)))
@@ -3557,12 +3547,11 @@ and expr_
           | Vector
           | ImmVector
           | Vec ->
-            (array_value, false, None)
+            (array_value, None)
         in
         ( get_vc_inst env p kind,
           class_name,
           subtype_val,
-          coerce_for_op,
           (fun th elements ->
             Aast.ValCollection ((kind_pos, kind), th, elements)),
           (fun value_ty ->
@@ -3572,7 +3561,6 @@ and expr_
         ( get_vc_inst env p Vec,
           "varray",
           array_value,
-          false,
           (fun th elements -> Aast.ValCollection ((p, Vec), th, elements)),
           (fun value_ty -> MakeType.vec (Reason.Rwitness p) value_ty),
           None )
@@ -3604,7 +3592,6 @@ and expr_
         ~use_pos:p
         ~reason:Reason.URvector
         ~can_pessimise:true
-        ~coerce_for_op
         ~bound:key_bound
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
@@ -3666,7 +3653,6 @@ and expr_
         ~reason:(Reason.URkey name)
         ~bound:(Some (MakeType.arraykey r))
         ~can_pessimise:true
-        ~coerce_for_op:true
         r
         env
         kl
@@ -3678,7 +3664,6 @@ and expr_
         ~use_pos:p
         ~reason:(Reason.URvalue name)
         ~can_pessimise:true
-        ~coerce_for_op:false
         ~bound:None
         (Reason.Rtype_variable_generics (p, "Tv", strip_ns name))
         env
@@ -4023,8 +4008,8 @@ and expr_
         ~expected:expected1
         ~use_pos:p1
         ~reason:Reason.URpair_value
-        ~coerce_for_op:false
         ~bound:None
+        ~can_pessimise:false
         (Reason.Rtype_variable_generics (p1, "T1", "Pair"))
         env
         [e1]
@@ -4035,8 +4020,8 @@ and expr_
         ~expected:expected2
         ~use_pos:p2
         ~reason:Reason.URpair_value
-        ~coerce_for_op:false
         ~bound:None
+        ~can_pessimise:false
         (Reason.Rtype_variable_generics (p2, "T2", "Pair"))
         env
         [e2]

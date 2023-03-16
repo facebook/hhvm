@@ -123,7 +123,6 @@ let parse_check_args cmd =
   let custom_hhi_path = ref None in
   let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
-  let format_from = ref 0 in
   let from = ref "" in
   let show_spinner = ref None in
   let gen_saved_ignore_type_errors = ref false in
@@ -146,7 +145,6 @@ let parse_check_args cmd =
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
   let refactor_before = ref "" in
-  let refactor_mode = ref Unspecified in
   let remote = ref false in
   let sort_results = ref false in
   let stdin_name = ref None in
@@ -213,7 +211,7 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> set_mode MODE_AUTO_COMPLETE),
         " (mode) auto-completes the text on stdin" );
       ( "--autostart-server",
-        Arg.Bool (fun x -> autostart := x),
+        Arg.Bool (( := ) autostart),
         " automatically start hh_server if it's not running (default: true)" );
       ( "--color",
         Arg.String (fun x -> set_mode (MODE_COLORING x)),
@@ -333,11 +331,12 @@ let parse_check_args cmd =
         " (mode) finds references of the provided method name" );
       Common_argspecs.force_dormant_start force_dormant_start;
       ( "--format",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> format_from := x);
-            Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)));
-          ],
+        (let format_from = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) format_from);
+             Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)));
+           ]),
         "" );
       Common_argspecs.from from;
       ( "--from-arc-diff",
@@ -587,27 +586,29 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
       ( "--refactor-sound-dynamic",
-        Arg.Tuple
-          [
-            Arg.Symbol
-              ( ["Class"; "Function"],
-                (fun x -> refactor_mode := string_to_refactor_mode x) );
-            Arg.String
-              (fun x ->
-                set_mode @@ MODE_REFACTOR_SOUND_DYNAMIC (!refactor_mode, x));
-          ],
+        (let refactor_mode = ref Unspecified in
+         Arg.Tuple
+           [
+             Arg.Symbol
+               ( ["Class"; "Function"],
+                 (fun x -> refactor_mode := string_to_refactor_mode x) );
+             Arg.String
+               (fun x ->
+                 set_mode @@ MODE_REFACTOR_SOUND_DYNAMIC (!refactor_mode, x));
+           ]),
         "" );
       ( "--refactor",
-        Arg.Tuple
-          [
-            Arg.Symbol
-              ( ["Class"; "Function"; "Method"],
-                (fun x -> refactor_mode := string_to_refactor_mode x) );
-            Arg.String (fun x -> refactor_before := x);
-            Arg.String
-              (fun x ->
-                set_mode (MODE_REFACTOR (!refactor_mode, !refactor_before, x)));
-          ],
+        (let refactor_mode = ref Unspecified in
+         Arg.Tuple
+           [
+             Arg.Symbol
+               ( ["Class"; "Function"; "Method"],
+                 (fun x -> refactor_mode := string_to_refactor_mode x) );
+             Arg.String (fun x -> refactor_before := x);
+             Arg.String
+               (fun x ->
+                 set_mode (MODE_REFACTOR (!refactor_mode, !refactor_before, x)));
+           ]),
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );
       ("--remote", Arg.Set remote, " force remote type checking");

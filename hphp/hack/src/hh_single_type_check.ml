@@ -215,8 +215,6 @@ let parse_options () =
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let mode = ref Errors in
   let no_builtins = ref false in
-  let line = ref 0 in
-  let log_key = ref "" in
   let log_levels = ref SMap.empty in
   let max_errors = ref None in
   let batch_mode = ref false in
@@ -325,8 +323,6 @@ let parse_options () =
   in
   let memtrace = ref None in
   let enable_global_access_check = ref false in
-  let refactor_mode = ref "" in
-  let refactor_analysis_mode = ref "" in
   let packages_config_path = ref None in
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
@@ -356,18 +352,20 @@ let parse_options () =
             set_mode (Shape_analysis mode) ()),
         " Run the flow analysis" );
       ( "--refactor-sound-dynamic",
-        Arg.Tuple
-          [
-            Arg.String (fun mode -> refactor_analysis_mode := mode);
-            Arg.String (fun mode -> refactor_mode := mode);
-            Arg.String
-              (fun x ->
-                batch_mode := true;
-                set_mode
-                  (Refactor_sound_dynamic
-                     (!refactor_analysis_mode, !refactor_mode, x))
-                  ());
-          ],
+        (let refactor_analysis_mode = ref "" in
+         let refactor_mode = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) refactor_analysis_mode);
+             Arg.String (( := ) refactor_mode);
+             Arg.String
+               (fun x ->
+                 batch_mode := true;
+                 set_mode
+                   (Refactor_sound_dynamic
+                      (!refactor_analysis_mode, !refactor_mode, x))
+                   ());
+           ]),
         " Run the flow analysis" );
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -435,19 +433,21 @@ let parse_options () =
         " Print a list of files this file depends on. The provided integer is the depth of the traversal. Requires --root, --naming-table and --depth"
       );
       ( "--identify-symbol",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int
-              (fun column -> set_mode (Identify_symbol (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int
+               (fun column -> set_mode (Identify_symbol (!line, column)) ());
+           ]),
         "<pos> Show info about symbol at given line and column" );
       ( "--find-local",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int (fun column -> set_mode (Find_local (!line, column)) ());
+           ]),
         "<pos> Find all usages of local at given line and column" );
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
@@ -475,25 +475,29 @@ let parse_options () =
         " List of type hint to be ignored and inferred again using global inference."
       );
       ( "--find-refs",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int (fun column -> set_mode (Find_refs (!line, column)) ());
+           ]),
         "<pos> Find all usages of a symbol at given line and column" );
       ( "--go-to-impl",
         Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Go_to_impl (!line, column)) ());
-          ],
+          (let line = ref 0 in
+           [
+             Arg.Int (( := ) line);
+             Arg.Int (fun column -> set_mode (Go_to_impl (!line, column)) ());
+           ]),
         "<pos> Find all implementations of a symbol at given line and column" );
       ( "--highlight-refs",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (( := ) line);
+             Arg.Int
+               (fun column -> set_mode (Highlight_refs (!line, column)) ());
+           ]),
         "<pos> Highlight all usages of a symbol at given line and column" );
       ( "--decl-compare",
         Arg.Unit (set_mode Decl_compare),
@@ -519,12 +523,13 @@ let parse_options () =
         Arg.Int (fun secs -> timeout := Some secs),
         " Timeout in seconds for checking a function or a class." );
       ( "--hh-log-level",
-        Arg.Tuple
-          [
-            Arg.String (fun x -> log_key := x);
-            Arg.Int
-              (fun level -> log_levels := SMap.add !log_key level !log_levels);
-          ],
+        (let log_key = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) log_key);
+             Arg.Int
+               (fun level -> log_levels := SMap.add !log_key level !log_levels);
+           ]),
         " Set the log level for a key" );
       ( "--batch-files",
         Arg.Set batch_mode,
@@ -753,11 +758,12 @@ let parse_options () =
         Arg.Bool (fun x -> meth_caller_only_public_visibility := x),
         " Controls whether meth_caller can be used on non-public methods" );
       ( "--hover",
-        Arg.Tuple
-          [
-            Arg.Int (fun x -> line := x);
-            Arg.Int (fun column -> set_mode (Hover (Some (!line, column))) ());
-          ],
+        (let line = ref 0 in
+         Arg.Tuple
+           [
+             Arg.Int (fun x -> line := x);
+             Arg.Int (fun column -> set_mode (Hover (Some (!line, column))) ());
+           ]),
         "<pos> Display hover tooltip" );
       ( "--hover-at-caret",
         Arg.Unit (fun () -> set_mode (Hover None) ()),

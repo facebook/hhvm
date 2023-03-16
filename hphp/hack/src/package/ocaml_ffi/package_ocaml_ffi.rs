@@ -16,7 +16,7 @@ use relative_path::RelativePath;
 use toml::Spanned;
 
 type PosId = (Pos, String);
-type Errors = Vec<(Pos, String)>;
+type Errors = Vec<(Pos, String, Vec<(Pos, String)>)>;
 
 #[derive(ToOcamlRep)]
 struct Package {
@@ -47,7 +47,10 @@ ocaml_ffi! {
         let errors = info.errors().iter().map(|e| {
             let pos = pos_from_span(e.span());
             let msg = e.msg();
-            (pos, msg)
+            let reasons = e.reasons().into_iter().map(|(start, end, reason)| {
+                (pos_from_span((start, end)), reason)
+            }).collect();
+            (pos, msg, reasons)
         }).collect::<Errors>();
         if !errors.is_empty() {
             return Err(errors);

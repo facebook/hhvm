@@ -1,0 +1,31 @@
+[packages]
+
+[packages.a]
+includes = ["b"]
+
+[packages.b]
+includes = ["c", "d"]
+
+[packages.c]
+includes = ["a", "e", "h"]
+
+[packages.d]
+includes = ["e"]
+
+[packages.e]
+includes = ["f", "g"]
+
+[packages.f]
+includes = ["e"]
+
+[packages.g]
+includes = ["e"]
+
+[packages.h]
+includes = ["j"]
+
+[packages.i]
+includes = ["h"]
+
+[packages.j]
+includes = ["i"]

@@ -15,7 +15,7 @@
 
 type pos_id = Pos.t * string [@@deriving eq, show]
 
-type errors = (Pos.t * string) list
+type errors = (Pos.t * string * (Pos.t * string) list) list
 
 type package = {
   name: pos_id;
@@ -36,8 +36,12 @@ let initialize_packages_info (path : string) =
     match extract_packages_from_text path contents with
     | Error errors ->
       List.map
-        (fun (pos, msg) ->
-          Parsing_error.(to_user_error @@ Package_config_error { pos; msg }))
+        (fun (pos, msg, reasons) ->
+          let reasons =
+            List.map (fun (p, s) -> (Pos_or_decl.of_raw_pos p, s)) reasons
+          in
+          Parsing_error.(
+            to_user_error @@ Package_config_error { pos; msg; reasons }))
         errors
       |> Errors.from_error_list
     | Ok packages ->

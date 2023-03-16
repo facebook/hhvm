@@ -21,6 +21,7 @@ type t =
   | Package_config_error of {
       pos: Pos.t;
       msg: string;
+      reasons: Pos_or_decl.t Message.t list;
     }
 
 include

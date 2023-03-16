@@ -16,7 +16,7 @@ use error::Error;
 
 // Preserve the order for ease of testing
 // Alternatively, we could use HashMap for performance
-type PackageMap = IndexMap<Spanned<String>, Package>;
+pub type PackageMap = IndexMap<Spanned<String>, Package>;
 type DeploymentMap = IndexMap<String, Deployment>;
 pub type NameSet = IndexSet<Spanned<String>>;
 
@@ -159,6 +159,29 @@ mod test {
         assert_eq!(
             info.errors[1].msg(),
             "This module can only be used in one package: b.*"
+        );
+    }
+
+    #[test]
+    fn test_config_errors1() {
+        let contents = include_str!("tests/package-4.toml");
+        let info = PackageInfo::from_text(contents).unwrap();
+        let errors = info
+            .errors
+            .iter()
+            .map(|e| e.msg())
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            errors,
+            [
+                String::from("Circular dependency detected: e -> g -> e"),
+                String::from("Circular dependency detected: e -> f -> e"),
+                String::from("Circular dependency detected: a -> b -> c -> a"),
+                String::from("Circular dependency detected: h -> j -> i -> h"),
+            ]
+            .iter()
+            .cloned()
+            .collect::<std::collections::HashSet<_>>()
         );
     }
 }

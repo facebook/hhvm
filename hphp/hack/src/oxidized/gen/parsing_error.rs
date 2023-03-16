@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<19855cebf995ece0cef1283455852094>>
+// @generated SignedSource<<1678040748804598fcbd6f77f10174a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,5 +49,9 @@ pub enum ParsingError {
     #[rust_to_ocaml(name = "Xhp_parsing_error")]
     XhpParsingError { pos: pos::Pos, msg: String },
     #[rust_to_ocaml(name = "Package_config_error")]
-    PackageConfigError { pos: pos::Pos, msg: String },
+    PackageConfigError {
+        pos: pos::Pos,
+        msg: String,
+        reasons: Vec<message::Message<pos_or_decl::PosOrDecl>>,
+    },
 }

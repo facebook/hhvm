@@ -92,11 +92,16 @@ void detect_low_process_priority() {
   auto nice_value = nice(0);
   folly::checkPosixError(errno, "failed to get `nice` value");
 
-  if (nice_value > cfg_get_int("min_acceptable_nice_value", 0)) {
-    log(watchman::FATAL,
-        "Watchman is running at a lower than normal priority. Since that "
-        "results in poor performance that is otherwise very difficult to "
-        "trace, diagnose and debug, Watchman is refusing to start.\n");
+  auto min_acceptable_nice_value = cfg_get_int("min_acceptable_nice_value", 0);
+  if (nice_value > min_acceptable_nice_value) {
+    logf(
+        watchman::FATAL,
+        "Watchman is running at a lower than normal priority. (nice_value={}, "
+        "min_acceptable_nice_value={}). Since that results in poor performance "
+        "that is otherwise very difficult to trace, diagnose and debug, "
+        "Watchman is refusing to start.\n",
+        nice_value,
+        min_acceptable_nice_value);
   }
 #endif
 }

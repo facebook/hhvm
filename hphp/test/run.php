@@ -3184,90 +3184,7 @@ function run_test(Options $options, string $test): mixed {
   }
 
   if ($options->repo) {
-    if (file_exists($test.'.norepo')) {
-      return 'skip-norepo';
-    }
-    if (file_exists($test.'.onlyjumpstart') &&
-       ($options->jit_serialize is null || (int)$options->jit_serialize < 1)) {
-      return 'skip-onlyjumpstart';
-    }
-
-    $test_repo = test_repo($options, $test);
-    if ($options->repo_out is nonnull) {
-      // we may need to clean up after a previous run
-      $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc'];
-      foreach ($repo_files as $repo_file) {
-        @unlink("$test_repo/$repo_file");
-      }
-    } else {
-      // create tmpdir now so that we can write repos
-      Status::createTestTmpDir($test);
-    }
-
-    $program = "hhvm";
-
-    if (file_exists($test . '.hphpc_assert')) {
-      $hphp = hphp_cmd($options, $test, $program);
-      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
-    } else if (file_exists($test . '.hhbbc_assert')) {
-      $hphp = hphp_cmd($options, $test, $program);
-      if (repo_separate($options, $test)) {
-        $result = exec_with_stack($hphp);
-        if ($result is string) return false;
-        $hhbbc = hhbbc_cmd($options, $test, $program);
-        return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
-      } else {
-        return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
-      }
-    }
-
-    if (!repo_mode_compile($options, $test, $program)) {
-      return false;
-    }
-
-    if ($options->hhbbc2) {
-      invariant(
-        count($hhvm) === 1,
-        "get_options forbids modes because we're not runnig code"
-      );
-      // create tmpdir now so that we can write hhas
-      Status::createTestTmpDir($test);
-      $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
-      if ($hhas_temp1 is null) {
-        Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
-        return false;
-      }
-      shell_exec("mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc");
-      $hhbbc = hhbbc_cmd($options, $test, $program);
-      $result = exec_with_stack($hhbbc);
-      if ($result is string) {
-        Status::writeDiff($test, $result);
-        return false;
-      }
-      $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
-      if ($hhas_temp2 is null) {
-        Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
-        return false;
-      }
-      $diff = shell_exec("diff $hhas_temp1 $hhas_temp2");
-      if (trim($diff) !== '') {
-        Status::writeDiff($test, $diff);
-        return false;
-      }
-    }
-
-    if ($options->jit_serialize is nonnull) {
-      invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
-      $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
-      $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-      if ($outputs is null) return false;
-      $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
-      $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-      if ($outputs is null) return false;
-      $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
-    }
-
-    return run_foreach_config($options, $test, $hhvm, $hhvm_env);
+    return run_repo_test($options, $test, $hhvm, $hhvm_env);
   }
 
   if (file_exists($test.'.onlyrepo')) {
@@ -3300,6 +3217,99 @@ function run_test(Options $options, string $test): mixed {
   if ($options->server) {
     return run_config_server($options, $test);
   }
+  return run_foreach_config($options, $test, $hhvm, $hhvm_env);
+}
+
+// Returns "(string | bool)".
+function run_repo_test(
+  Options $options,
+  string $test,
+  vec<string> $hhvm,
+  dict<string, mixed> $hhvm_env,
+): mixed {
+  if (file_exists($test.'.norepo')) {
+    return 'skip-norepo';
+  }
+  if (file_exists($test.'.onlyjumpstart') &&
+      ($options->jit_serialize is null || (int)$options->jit_serialize < 1)) {
+    return 'skip-onlyjumpstart';
+  }
+
+  $test_repo = test_repo($options, $test);
+  if ($options->repo_out is nonnull) {
+    // we may need to clean up after a previous run
+    $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc'];
+    foreach ($repo_files as $repo_file) {
+      @unlink("$test_repo/$repo_file");
+    }
+  } else {
+    // create tmpdir now so that we can write repos
+    Status::createTestTmpDir($test);
+  }
+
+  $program = "hhvm";
+
+  if (file_exists($test . '.hphpc_assert')) {
+    $hphp = hphp_cmd($options, $test, $program);
+    return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
+  } else if (file_exists($test . '.hhbbc_assert')) {
+    $hphp = hphp_cmd($options, $test, $program);
+    if (repo_separate($options, $test)) {
+      $result = exec_with_stack($hphp);
+      if ($result is string) return false;
+      $hhbbc = hhbbc_cmd($options, $test, $program);
+      return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
+    } else {
+      return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
+    }
+  }
+
+  if (!repo_mode_compile($options, $test, $program)) {
+    return false;
+  }
+
+  if ($options->hhbbc2) {
+    invariant(
+      count($hhvm) === 1,
+      "get_options forbids modes because we're not running code"
+    );
+    // create tmpdir now so that we can write hhas
+    Status::createTestTmpDir($test);
+    $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
+    if ($hhas_temp1 is null) {
+      Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
+      return false;
+    }
+    shell_exec("mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc");
+    $hhbbc = hhbbc_cmd($options, $test, $program);
+    $result = exec_with_stack($hhbbc);
+    if ($result is string) {
+      Status::writeDiff($test, $result);
+      return false;
+    }
+    $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
+    if ($hhas_temp2 is null) {
+      Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
+      return false;
+    }
+    $diff = shell_exec("diff $hhas_temp1 $hhas_temp2");
+    if (trim($diff) !== '') {
+      Status::writeDiff($test, $diff);
+      return false;
+    }
+  }
+
+  if ($options->jit_serialize is nonnull) {
+    invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
+    $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
+    $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
+    if ($outputs is null) return false;
+    $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
+    $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
+    if ($outputs is null) return false;
+    $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
+  }
+
   return run_foreach_config($options, $test, $hhvm, $hhvm_env);
 }
 

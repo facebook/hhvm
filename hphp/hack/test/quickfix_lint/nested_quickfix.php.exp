@@ -1,0 +1,12 @@
+//// nested_quickfix.php
+<?hh
+
+// Currently, the quickfix applying tool cannot handle, nested patches, so it
+// drops the one that encloses the other.
+function nested_quickfix(): void {
+  (float) (42.0 + 24.0);
+}
+
+
+There were input 3 patches for 1 files.
+Dropped patch count: 1 (1 overlapping, 0 original not found)

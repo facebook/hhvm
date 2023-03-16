@@ -61,10 +61,17 @@ let parse_command ~command ~verbosity ~on_bad_command =
   in
   Sdt_analysis_options.mk ~verbosity ~command
 
-let print_solution reader : unit =
+let print_solution reader ~validate_parseable : unit =
   let summary = Sdt_analysis_summary.calc reader in
   Sdt_analysis_summary_jsonl.of_summary summary
-  |> Sequence.iter ~f:(Format.printf "%s\n")
+  |> Sequence.iter ~f:(fun line ->
+         if validate_parseable then (
+           let (_ : Summary.nadable list option) =
+             Sdt_analysis_summary_jsonl.nadables_of_line_exn line
+           in
+           ();
+           Format.printf "%s\n" line
+         ))
 
 let do_tast
     (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
@@ -130,7 +137,7 @@ let do_tast
     in
     let reader = H.solve ~db_dir in
     if verbosity > 0 then log_intras reader;
-    print_solution reader
+    print_solution reader ~validate_parseable:true
   | Options.DumpPersistedConstraints ->
     let reader = H.debug_dump ~db_dir:default_db_dir in
     H.Read.get_keys reader
@@ -144,7 +151,7 @@ let do_tast
            Format.print_newline ())
   | Options.SolvePersistedConstraints ->
     let reader = H.solve ~db_dir:default_db_dir in
-    print_solution reader
+    print_solution reader ~validate_parseable:false
 
 let do_ ~command ~verbosity ~on_bad_command =
   let opts = parse_command ~command ~on_bad_command ~verbosity in

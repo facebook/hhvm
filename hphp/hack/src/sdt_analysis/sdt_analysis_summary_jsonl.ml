@@ -24,6 +24,8 @@ let stats_json_of_summary
 
 module Nad : sig
   val json_of_nadables : Summary.nadable list -> J.json
+
+  val nadables_of_json_exn : J.json -> Summary.nadable list option
 end = struct
   module Names = struct
     let add_no_auto_dynamic_attr = "add_no_auto_dynamic_attr"
@@ -36,6 +38,9 @@ end = struct
 
     let function_ = "function"
   end
+
+  let extract_exn access_result =
+    access_result |> Result.ok |> Option.value_exn |> fst
 
   let json_obj_of_nadable Summary.{ id; kind } =
     let kind_str =
@@ -59,6 +64,30 @@ end = struct
         (entry_kind_label, J.string_ Names.add_no_auto_dynamic_attr);
         (Names.items, nadables_arr);
       ]
+
+  let nadable_of_json_obj_exn obj =
+    let sid = J.Access.get_string Names.sid (obj, []) |> extract_exn in
+    let kind_string = J.Access.get_string Names.kind (obj, []) |> extract_exn in
+    if String.equal kind_string Names.function_ then
+      let id = H.Id.Function sid in
+      let kind = Summary.Function in
+      Summary.{ id; kind }
+    else
+      let classish_kind_opt =
+        kind_string |> Sexp.of_string |> Option.t_of_sexp classish_kind_of_sexp
+      in
+      let id = H.Id.ClassLike sid in
+      let kind = Summary.ClassLike classish_kind_opt in
+      Summary.{ id; kind }
+
+  let nadables_of_json_exn obj =
+    match J.Access.get_string entry_kind_label (obj, []) |> extract_exn with
+    | key when String.equal key Names.add_no_auto_dynamic_attr ->
+      J.Access.get_array Names.items (obj, [])
+      |> extract_exn
+      |> List.map ~f:nadable_of_json_obj_exn
+      |> Option.some
+    | _ -> None
 end
 
 let of_summary summary : string Sequence.t =
@@ -72,3 +101,7 @@ let of_summary summary : string Sequence.t =
     |> Sequence.map ~f:to_string
   in
   Sequence.append stats groups
+
+let nadables_of_line_exn s =
+  let obj = J.json_of_string ~strict:true s in
+  Nad.nadables_of_json_exn obj

@@ -10,6 +10,10 @@ use hash::IndexSet;
 use serde::Deserialize;
 use toml::Spanned;
 
+mod error;
+use error::check_config;
+use error::Error;
+
 // Preserve the order for ease of testing
 // Alternatively, we could use HashMap for performance
 type PackageMap = IndexMap<Spanned<String>, Package>;
@@ -17,7 +21,7 @@ type DeploymentMap = IndexMap<String, Deployment>;
 pub type NameSet = IndexSet<Spanned<String>>;
 
 #[derive(Debug, Deserialize)]
-struct Config {
+pub struct Config {
     packages: PackageMap,
     deployments: Option<DeploymentMap>,
 }
@@ -40,45 +44,6 @@ pub struct PackageInfo {
     deployments: Option<DeploymentMap>,
     line_offsets: Vec<usize>,
     errors: Vec<Error>,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Error {
-    UndefinedInclude { name: String, span: (usize, usize) },
-    DuplicateUse { name: String, span: (usize, usize) },
-}
-
-impl Error {
-    pub fn undefined_package(x: &Spanned<String>) -> Self {
-        Self::UndefinedInclude {
-            name: x.get_ref().into(),
-            span: x.span(),
-        }
-    }
-
-    pub fn duplicate_use(x: &Spanned<String>) -> Self {
-        Self::DuplicateUse {
-            name: x.get_ref().into(),
-            span: x.span(),
-        }
-    }
-
-    pub fn span(&self) -> (usize, usize) {
-        match self {
-            Self::DuplicateUse { span, .. } | Self::UndefinedInclude { span, .. } => *span,
-        }
-    }
-
-    pub fn msg(&self) -> String {
-        match self {
-            Self::UndefinedInclude { name, .. } => {
-                format!("Undefined package: {}", name)
-            }
-            Self::DuplicateUse { name, .. } => {
-                format!("This module can only be used in one package: {}", name)
-            }
-        }
-    }
 }
 
 impl PackageInfo {
@@ -127,40 +92,6 @@ impl PackageInfo {
             prev_line_end + 1
         }
     }
-}
-
-fn check_config(config: &Config) -> Vec<Error> {
-    let check_packages_are_defined = |errors: &mut Vec<Error>, pkgs: &Option<NameSet>| {
-        if let Some(packages) = pkgs {
-            packages.iter().for_each(|package| {
-                if !config.packages.contains_key(package) {
-                    errors.push(Error::undefined_package(package))
-                }
-            })
-        }
-    };
-    let mut used_globs = NameSet::default();
-    let mut check_each_glob_is_used_once = |errors: &mut Vec<Error>, globs: &Option<NameSet>| {
-        if let Some(l) = globs {
-            l.iter().for_each(|glob| {
-                if used_globs.contains(glob) {
-                    errors.push(Error::duplicate_use(glob))
-                }
-                used_globs.insert(glob.clone());
-            })
-        }
-    };
-    let mut errors = vec![];
-    for (_, package) in config.packages.iter() {
-        check_packages_are_defined(&mut errors, &package.includes);
-        check_each_glob_is_used_once(&mut errors, &package.uses);
-    }
-    if let Some(deployments) = &config.deployments {
-        for (_, deployment) in deployments.iter() {
-            check_packages_are_defined(&mut errors, &deployment.packages);
-        }
-    };
-    errors
 }
 
 #[cfg(test)]

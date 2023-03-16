@@ -162,6 +162,8 @@ StringData** precompute_chars() {
 
 }
 
+ServiceData::ExportedCounter* ss_counter;
+
 StringData* insertStaticString(StringData* sd,
                                void (*deleter)(StringData*)) {
   assertx(sd->isStatic());
@@ -186,6 +188,7 @@ StringData* insertStaticString(StringData* sd,
     }
     static std::atomic<bool> signaled{false};
     checkAHMSubMaps(*s_stringDataMap, "static string table", signaled);
+    ss_counter->increment();
   }
   assertx(to_sdata(pair.first->first) != nullptr);
 
@@ -194,6 +197,7 @@ StringData* insertStaticString(StringData* sd,
 
 void create_string_data_map() {
   always_assert(!s_stringDataMap);
+  ss_counter = ServiceData::createCounter("admin.static-strings");
   StringDataMap::Config config;
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;

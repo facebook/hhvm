@@ -1485,7 +1485,7 @@ class ConfigPreprocessor::BuiltIns {
       }
       return value;
     } else { // array
-      for (size_t index = 0; index < dictionary.size(); ++index) {
+      for (size_t index = 0, e = dictionary.size(); index < e; ++index) {
         auto& item = dictionary[index];
         // add %key%, %item% and %value% to current context.
         keyRef = index;
@@ -2025,7 +2025,7 @@ dynamic ConfigPreprocessor::expandMacros(dynamic json, const Context& context)
     }
     return result;
   } else if (json.isArray()) {
-    for (size_t i = 0; i < json.size(); ++i) {
+    for (size_t i = 0, e = json.size(); i < e; ++i) {
       auto& value = json[i];
       try {
         value = expandMacros(std::move(value), context);

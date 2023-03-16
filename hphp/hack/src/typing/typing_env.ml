@@ -1391,6 +1391,7 @@ let closure env f =
   let old_return = get_return env in
   let old_params = get_params env in
   let outer_fun_kind = get_fn_kind env in
+  let outer_check_status = env.checked in
   (* Typing *)
   let (env, ret) = f env in
   (* Restore the environment fields that were clobbered *)
@@ -1398,6 +1399,7 @@ let closure env f =
   let env = set_params env old_params in
   let env = set_return env old_return in
   let env = set_fn_kind env outer_fun_kind in
+  let env = { env with checked = outer_check_status } in
   (env, ret)
 
 let in_try env f =

@@ -5679,8 +5679,8 @@ and closure_make
   let env =
     Typing_env.set_fun_tast_info env Tast.{ has_implicit_return; has_readonly }
   in
-  let () =
-    if sdt_dynamic_check_required then
+  let env =
+    if sdt_dynamic_check_required then begin
       Fn.ignore
       @@ check_function_dynamically_callable
            ~this_class
@@ -5688,9 +5688,15 @@ and closure_make
            None
            f
            params_decl_ty
-           hret.et_type
-    else
-      ()
+           hret.et_type;
+      (* The following modification is independent from the line above that
+         does the dynamic check. Check status is changed to dynamic assumptions
+         within the call above. Because we don't store alternative lambdas in
+         the TAST, we unconditionally overwrite the check status to be under
+         normal assumptions here. *)
+      { env with checked = Tast.CUnderNormalAssumptions }
+    end else
+      env
   in
   let tfun_ =
     {

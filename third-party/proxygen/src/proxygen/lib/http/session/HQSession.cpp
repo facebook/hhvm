@@ -1116,6 +1116,8 @@ void HQSession::readError(quic::StreamId id, quic::QuicError error) noexcept {
               << " streamID=" << id << " sess=" << *this;
       if (errorCode == quic::LocalErrorCode::CONNECT_FAILED) {
         ex.setProxygenError(kErrorConnect);
+      } else if (errorCode == quic::LocalErrorCode::IDLE_TIMEOUT) {
+        ex.setProxygenError(kErrorEOF);
       } else {
         ex.setProxygenError(kErrorShutdown);
       }

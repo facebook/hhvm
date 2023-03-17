@@ -1,12 +1,8 @@
 File "unseq_default_arg.php", line 4, characters 33-34:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "unseq_default_arg.php", line 4, characters 33-36:
-Expected constant expression for initializer (Parsing[1002])
 File "unseq_default_arg.php", line 4, characters 40-41:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "unseq_default_arg.php", line 4, characters 40-43:
-Expected constant expression for initializer (Parsing[1002])
 File "unseq_default_arg.php", line 4, characters 33-34:
 Unsequenced modifications to local variable. Modified here (Typing[4144])
-  File "unseq_default_arg.php", line 4, characters 40-41:
-  And also modified here
+File "unseq_default_arg.php", line 4, characters 40-41:
+And also modified here

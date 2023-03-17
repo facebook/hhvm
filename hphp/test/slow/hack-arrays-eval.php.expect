@@ -36,3 +36,18 @@ keyset(3) {
 bool(true)
 bool(true)
 bool(true)
+============ test_default_value ==============================
+vec(2) {
+  int(1)
+  int(2)
+}
+dict(2) {
+  [100]=>
+  string(1) "a"
+  [200]=>
+  string(1) "b"
+}
+keyset(2) {
+  string(1) "a"
+  string(1) "b"
+}

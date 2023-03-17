@@ -1,0 +1,17 @@
+bar()
+foo(
+  string(5) "Hello"
+  string(5) "World"
+  int(123)
+);
+bar()
+foo(
+  string(5) "Hello"
+  string(5) "World"
+  int(123)
+);
+foo(
+  string(7) "Goodbye"
+  string(4) "Land"
+  int(123)
+);

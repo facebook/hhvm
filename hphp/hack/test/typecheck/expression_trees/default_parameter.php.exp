@@ -1,7 +1,3 @@
-File "default_parameter.php", line 5, characters 71-83:
-Expected constant expression for initializer (Parsing[1002])
-File "default_parameter.php", line 9, characters 61-73:
-Expected constant expression for initializer (Parsing[1002])
 File "default_parameter.php", line 5, characters 71-80:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "default_parameter.php", line 5, characters 66-67:

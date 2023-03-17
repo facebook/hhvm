@@ -2373,8 +2373,26 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           prefixed_code_left_backtick = left_bt;
           prefixed_code_body = body;
           prefixed_code_right_backtick = right_bt;
-        } ->
-      Concat [t env prefix; transform_braced_item env left_bt body right_bt]
+        } -> begin
+      match Syntax.syntax body with
+      | Syntax.CompoundStatement
+          { compound_left_brace; compound_statements; compound_right_brace } ->
+        Concat
+          [
+            t env prefix;
+            t env left_bt;
+            handle_compound_statement
+              env
+              ~allow_collapse:true
+              ~prepend_space:false
+              compound_left_brace
+              compound_statements
+              compound_right_brace;
+            t env right_bt;
+          ]
+      | _ ->
+        Concat [t env prefix; transform_braced_item env left_bt body right_bt]
+    end
     | Syntax.DecoratedExpression
         {
           decorated_expression_decorator = op;
@@ -2698,10 +2716,18 @@ and handle_possible_compound_statement
   | _ -> Concat [Newline; BlockNest [t env node]]
 
 and handle_compound_statement
-    env ?(allow_collapse = false) left_b statements right_b =
+    env
+    ?(allow_collapse = false)
+    ?(prepend_space = true)
+    left_b
+    statements
+    right_b =
   Concat
     [
-      Space;
+      (if prepend_space then
+        Space
+      else
+        Nothing);
       braced_block_nest
         env
         ~allow_collapse

@@ -1,0 +1,79 @@
+#!/usr/bin/env dotslash
+
+// @generated SignedSource<<22d30d8d382034a006fe7d20d084fed0>>
+// MSDK schedule URL: https://our.intern.facebook.com/intern/msdk/bump/?action=view&schedule_fbid=1270489207183943
+// sandcastle build trigger URL: https://our.intern.facebook.com/intern/sandcastle/job/13510799788254982/
+
+{
+    "name": "erlang_thrift_conformance_client",
+    "oncall": "oncall+whatsapp_c3@xmail.facebook.com",
+    "build_info": {
+        "config_script": "erl/util/thrift_conformance_client/msdk_spec.py",
+        "commit_repo": "whatsapp/server.git",
+        "commit_hash": "5c288a7bcca0d1112ea0c4809e3f9d9b257a33fd",
+        "commit_date": "2023-03-17 04:36:11 PDT",
+        "commit_timestamp": 1679052971,
+        "msdk_package_fbid": "591369176342541"
+    },
+    "signatures": {
+        "msdk": "<<crypto.managed_sdk.mac:AeWMZyHtqTK1NnBXN9chq4z1Gt-hIwYWA74h_H2YyhH4yJ5L>>"
+    },
+    "platforms": {
+        "linux": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        },
+        "linux/aarch64": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        },
+        "linux/x86_64": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        },
+        "macos": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        },
+        "macos/aarch64": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        },
+        "macos/x86_64": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        },
+        "windows": {
+            "scheme": "everstore",
+            "handle": "GDPS-hMFxATtH2kAANYmEeMt1CUKblMqAAAA",
+            "extract": {
+                "path": "thrift-conformance-client",
+                "decompress": "tar.gz"
+            }
+        }
+    }
+}

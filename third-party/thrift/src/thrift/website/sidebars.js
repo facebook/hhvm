@@ -53,6 +53,7 @@ module.exports = {
               items: [
                 'fb/howtos/implementing-a-server/cpp/getting-started',
                 'fb/howtos/implementing-a-server/cpp/implementing-rpcs',
+                'fb/howtos/implementing-a-server/cpp/tailer-services',
                 {
                   type: 'category',
                   label: 'Archived',

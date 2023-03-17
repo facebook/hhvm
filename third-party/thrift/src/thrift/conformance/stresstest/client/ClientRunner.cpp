@@ -44,17 +44,15 @@ class TestDoneTimeout : public folly::HHWheelTimer::Callback {
 };
 
 folly::IoUringBackend::Options getIoUringOptions() {
-  size_t buffer = 1 << 15;
   folly::IoUringBackend::Options options;
   options.setMaxSubmit(128)
-      .setMaxGet(128)
-      .setInitialProvidedBuffers(4096, buffer)
+      .setInitialProvidedBuffers(128, 1)
       .setRegisterRingFd(true)
       .setTaskRunCoop(true)
       .setDeferTaskRun(true);
 
   // must have enough capacity to stop overflows
-  options.setCapacity(std::max<uint32_t>(16384, 2 * buffer));
+  options.setCapacity(1024);
   options.setUseRegisteredFds(0);
 
   return options;

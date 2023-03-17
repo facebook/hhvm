@@ -7,7 +7,6 @@ a way that specific _type_ or _context_ constant(s) are more specific
 For example, given the definition
 
 ```Hack file:box-with-type+ctx.hack
-<<file:__EnableUnstableFeatures('type_refinements')>>
 
 interface Box {
   abstract const type T;

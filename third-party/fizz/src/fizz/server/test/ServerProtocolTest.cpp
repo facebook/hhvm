@@ -29,43 +29,6 @@ namespace fizz {
 namespace server {
 namespace test {
 
-class MockDecrypter : public ech::Decrypter {
- public:
-  MOCK_METHOD(
-      folly::Optional<ech::DecrypterResult>,
-      decryptClientHello,
-      (const ClientHello& chlo));
-
-  MOCK_METHOD(
-      ClientHello,
-      _decryptClientHelloHRR_Stateful,
-      (const ClientHello& chlo, std::unique_ptr<hpke::HpkeContext>& context));
-
-  ClientHello decryptClientHelloHRR(
-      const ClientHello& chlo,
-      std::unique_ptr<hpke::HpkeContext>& context) override {
-    return _decryptClientHelloHRR_Stateful(chlo, context);
-  }
-
-  MOCK_METHOD(
-      ClientHello,
-      _decryptClientHelloHRR_Stateless,
-      (const ClientHello& chlo,
-       const std::unique_ptr<folly::IOBuf>& encapsulatedKey));
-
-  ClientHello decryptClientHelloHRR(
-      const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override {
-    return _decryptClientHelloHRR_Stateless(chlo, encapsulatedKey);
-  }
-
-  MOCK_METHOD(
-      std::vector<ech::ECHConfig>,
-      getRetryConfigs,
-      (),
-      (const, override));
-};
-
 class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
  public:
   void SetUp() override {
@@ -1157,7 +1120,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
   Sequence contextSeq;
   context_->setClientAuthMode(ClientAuthMode::Required);
 
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, decryptClientHello(_))
       .WillOnce(
           InvokeWithoutArgs([=]() -> folly::Optional<ech::DecrypterResult> {
@@ -1481,7 +1444,7 @@ TEST_F(ServerProtocolTest, TestECHMissingInnerExtension) {
   setUpExpectingClientHello();
   Sequence contextSeq;
 
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, decryptClientHello(_))
       .WillOnce(
           InvokeWithoutArgs([=]() -> folly::Optional<ech::DecrypterResult> {
@@ -1504,7 +1467,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   Sequence contextSeq;
   context_->setClientAuthMode(ClientAuthMode::Required);
 
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, decryptClientHello(_))
       .WillOnce(InvokeWithoutArgs([=]() { return folly::none; }));
   EXPECT_CALL(*decrypter, getRetryConfigs())
@@ -3069,7 +3032,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloPskDheFlow) {
 
 TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
   setUpExpectingClientHelloRetryECH();
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
@@ -3365,7 +3328,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
 TEST_F(ServerProtocolTest, TestRetryECHMissingInnerExtension) {
   setUpExpectingClientHelloRetryECH();
 
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateful(_, _))
       .WillOnce(
           InvokeWithoutArgs([=]() { return TestMessages::clientHello(); }));
@@ -3381,7 +3344,7 @@ TEST_F(ServerProtocolTest, TestRetryECHMissingInnerExtension) {
 TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   setUpExpectingClientHelloRetry();
   state_.echStatus() = ECHStatus::Rejected;
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   EXPECT_CALL(*decrypter, getRetryConfigs())
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
@@ -5220,7 +5183,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloCookie) {
 
 TEST_F(ServerProtocolTest, TestRetryClientHelloECHRequired) {
   setUpExpectingClientHelloRetryECH();
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
   state_.echStatus() = ECHStatus::Accepted;
   auto actions =
@@ -5231,7 +5194,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRequired) {
 
 TEST_F(ServerProtocolTest, TestRetryClientHelloECHCipherMismatch) {
   setUpExpectingClientHelloRetryECH();
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
   state_.echStatus() = ECHStatus::Accepted;
   auto chlo = setupClientHelloOuterHRR();
@@ -5338,7 +5301,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECH) {
   expectCookie();
   setUpExpectingClientHello();
 
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
   EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateless(_, _))
       .WillOnce(Invoke(
@@ -5371,7 +5334,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECHMissingInner) {
   expectCookie();
   setUpExpectingClientHello();
 
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
   EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateless(_, _))
       .WillOnce(Invoke(
@@ -5528,7 +5491,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieNoGroup) {
 TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHCipher) {
   expectCookie();
   setUpExpectingClientHello();
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
 
   auto chlo = setupClientHelloOuterHRR();
@@ -5555,7 +5518,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHCipher) {
 TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHRequired) {
   expectCookie();
   setUpExpectingClientHello();
-  auto decrypter = std::make_shared<MockDecrypter>();
+  auto decrypter = std::make_shared<MockECHDecrypter>();
   context_->setECHDecrypter(decrypter);
 
   auto chlo = TestMessages::clientHello();

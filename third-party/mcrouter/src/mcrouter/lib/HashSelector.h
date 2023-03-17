@@ -11,8 +11,8 @@
 
 #include <folly/Conv.h>
 #include <folly/Range.h>
-#include <folly/fibers/FiberManager.h>
 
+#include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/lib/HashUtil.h"
 
 namespace facebook {
@@ -77,6 +77,27 @@ class HashSelector : public HashSelectorBase<HashFunc> {
       req.key_ref()->setLastHash(hash, size, HashFunc::typeId());
     }
     return hash;
+  }
+};
+
+template <class HashFunc, class RouterInfo>
+class BucketHashSelector : public HashSelectorBase<HashFunc> {
+ public:
+  BucketHashSelector(std::string salt, HashFunc hashFunc)
+      : HashSelectorBase<HashFunc>(std::move(salt), std::move(hashFunc)) {}
+
+  template <class Request>
+  size_t select(const Request& /*req*/, size_t size) const {
+    auto bucketId = mcrouter::fiber_local<RouterInfo>::getBucketId();
+    if (UNLIKELY(!bucketId.has_value())) {
+      throw std::runtime_error(
+          "The context doesn't contain bucket id. You must use McBucketRoute in front of bucketized PoolRoute");
+    }
+    // Hash functions can be stack-intensive, so jump back to the main context
+    return folly::fibers::runInMainContext(
+        [this, size, bucketId = folly::to<std::string>(*bucketId)]() {
+          return this->selectInternal(bucketId, size);
+        });
   }
 };
 

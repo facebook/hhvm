@@ -1,7 +1,8 @@
 {
   "pools": {
     "foo": {
-      "servers": [ "localhost:12345", "localhost:12346", "localhost:12347", "localhost:12348", "localhost:12349" ]
+      "servers": [ "localhost:12345", "localhost:12346", "localhost:12347", "localhost:12348", "localhost:12349" ],
+      "weights": [0.5, 0.5, 0.5, 0.5, 0.5]
     }
   },
   "route": {
@@ -9,6 +10,8 @@
     "pool": "foo",
     "bucketize": true,
     "total_buckets": 1000,
-    "bucketization_keyspace": "test"
+    "bucketize_until": 1000,
+    "bucketization_keyspace": "test",
+    "hash": "WeightedCh3"
   }
 }

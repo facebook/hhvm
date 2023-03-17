@@ -35,11 +35,28 @@ HashSelector<HashFunc> createHashSelector(std::string salt, HashFunc func) {
   return HashSelector<HashFunc>(std::move(salt), std::move(func));
 }
 
+template <class HashFunc, class RouterInfo>
+BucketHashSelector<HashFunc, RouterInfo> createBucketHashSelector(
+    std::string salt,
+    HashFunc func) {
+  return BucketHashSelector<HashFunc, RouterInfo>(
+      std::move(salt), std::move(func));
+}
+
 template <class RouterInfo, class HashFunc>
 typename RouterInfo::RouteHandlePtr createHashRoute(
     std::vector<typename RouterInfo::RouteHandlePtr> rh,
     std::string salt,
-    HashFunc func) {
+    HashFunc func,
+    bool bucketized = false) {
+  if (bucketized) {
+    return createSelectionRoute<
+        RouterInfo,
+        BucketHashSelector<HashFunc, RouterInfo>>(
+        std::move(rh),
+        createBucketHashSelector<HashFunc, RouterInfo>(
+            std::move(salt), std::move(func)));
+  }
   return createSelectionRoute<RouterInfo, HashSelector<HashFunc>>(
       std::move(rh),
       createHashSelector<HashFunc>(std::move(salt), std::move(func)));
@@ -52,6 +69,7 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
     size_t threadId) {
   std::string salt;
   folly::StringPiece funcType = Ch3HashFunc::type();
+  auto bucketize = false;
   if (json.isObject()) {
     if (auto jsalt = json.get_ptr("salt")) {
       checkLogic(jsalt->isString(), "HashRoute: salt is not a string");
@@ -60,6 +78,9 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
     if (auto jhashFunc = json.get_ptr("hash_func")) {
       checkLogic(jhashFunc->isString(), "HashRoute: hash_func is not a string");
       funcType = jhashFunc->stringPiece();
+    }
+    if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
+      bucketize = parseBool(*jNeedBucketization, "bucketize");
     }
   }
 
@@ -80,7 +101,7 @@ std::shared_ptr<typename RouterInfo::RouteHandleIf> createHashRoute(
   } else if (funcType == WeightedCh3HashFunc::type()) {
     WeightedCh3HashFunc func{json, n};
     return createHashRoute<RouterInfo, WeightedCh3HashFunc>(
-        std::move(rh), std::move(salt), std::move(func));
+        std::move(rh), std::move(salt), std::move(func), bucketize);
   } else if (funcType == WeightedCh4HashFunc::type()) {
     WeightedCh4HashFunc func{json, n};
     return createHashRoute<RouterInfo, WeightedCh4HashFunc>(

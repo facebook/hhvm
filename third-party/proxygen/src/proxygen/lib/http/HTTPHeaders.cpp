@@ -252,7 +252,8 @@ bool HTTPHeaders::transferHeaderIfPresent(folly::StringPiece name,
   return transferred;
 }
 
-void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders) {
+void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders,
+                                     bool stripPriority) {
   int len;
   forEachValueOfHeader(
       HTTP_HEADER_CONNECTION, [&](const string& stdStr) -> bool {
@@ -305,7 +306,8 @@ void HTTPHeaders::stripPerHopHeaders(HTTPHeaders& strippedHeaders) {
   // Strip hop-by-hop headers
   auto& perHopHeaders = perHopHeaderCodes();
   for (size_t i = 0; i < length_; ++i) {
-    if (perHopHeaders[codes()[i]]) {
+    if (perHopHeaders[codes()[i]] ||
+        (stripPriority && codes()[i] == HTTP_HEADER_PRIORITY)) {
       strippedHeaders.emplace_back(
           codes()[i], names()[i], std::move(values()[i]));
       codes()[i] = HTTP_HEADER_NONE;

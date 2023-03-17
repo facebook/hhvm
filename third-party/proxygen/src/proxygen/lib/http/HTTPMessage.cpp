@@ -44,7 +44,7 @@ const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion09(0, 9);
 const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion10(1, 0);
 const pair<uint8_t, uint8_t> HTTPMessage::kHTTPVersion11(1, 1);
 
-void HTTPMessage::stripPerHopHeaders() {
+void HTTPMessage::stripPerHopHeaders(bool stripPriority) {
   // Some code paths end up recyling a single HTTPMessage instance for multiple
   // requests, and adding their own per-hop headers each time. In that case, we
   // don't want to accumulate these headers.
@@ -60,7 +60,7 @@ void HTTPMessage::stripPerHopHeaders() {
     trailersAllowed_ = checkForHeaderToken(HTTP_HEADER_TE, "trailers", false);
   }
 
-  headers_.stripPerHopHeaders(*strippedPerHopHeaders_);
+  headers_.stripPerHopHeaders(*strippedPerHopHeaders_, stripPriority);
 }
 
 HTTPMessage::HTTPMessage()

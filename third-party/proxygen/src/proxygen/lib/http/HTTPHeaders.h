@@ -274,9 +274,14 @@ class HTTPHeaders {
 
   /**
    * Remove per-hop-headers and headers named in the Connection header
-   * and place the value in strippedHeaders
+   * and place the value in strippedHeaders.
+   *
+   * Also optionally strips the Priority header.
+   * The Priority header is defined as end-to-end in the RFC, but a proxy that
+   * coalesces requests from multiple downstream connections over the same
+   * upstream connection may want to use a hop-by-hop semantics.
    */
-  void stripPerHopHeaders(HTTPHeaders& strippedHeaders);
+  void stripPerHopHeaders(HTTPHeaders& strippedHeaders, bool stripPriority);
 
   /**
    * Get the total number of headers.

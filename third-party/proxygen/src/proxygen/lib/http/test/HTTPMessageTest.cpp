@@ -398,6 +398,7 @@ TEST(HTTPMessage, TestHeaderStripPerHop) {
   msg.getHeaders().add(HTTP_HEADER_CONNECTION, ", e");
   msg.getHeaders().add(HTTP_HEADER_CONNECTION, " f ,\tg\t, \r\n\th ");
   msg.getHeaders().add("Keep-Alive", "true");
+  msg.getHeaders().add("Priority", "u=5, i");
 
   msg.getHeaders().add("a", "1");
   msg.getHeaders().add("b", "2");
@@ -408,10 +409,13 @@ TEST(HTTPMessage, TestHeaderStripPerHop) {
   msg.getHeaders().add("g", "7");
   msg.getHeaders().add("h", "8");
 
-  EXPECT_EQ(msg.getHeaders().size(), 15);
+  EXPECT_EQ(msg.getHeaders().size(), 16);
   msg.stripPerHopHeaders();
-  EXPECT_EQ(msg.getHeaders().size(), 0);
+  EXPECT_EQ(msg.getHeaders().size(), 1);
   EXPECT_EQ(msg.getStrippedPerHopHeaders().size(), 15);
+  msg.stripPerHopHeaders(/* stripPriority */ true);
+  EXPECT_EQ(msg.getHeaders().size(), 0);
+  EXPECT_EQ(msg.getStrippedPerHopHeaders().size(), 1);
 }
 
 TEST(HTTPMessage, TestEmptyName) {

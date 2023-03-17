@@ -30,10 +30,10 @@ type Finder interface {
 
 // Deprecated: Use Finder instead.
 type FinderClientInterface interface {
-  thrift.ClientInterface
-  ByPlate(plate Plate) (*Automobile, error)
-  AliasByPlate(plate Plate) (*Car, error)
-  PreviousPlate(plate Plate) (Plate, error)
+    thrift.ClientInterface
+    ByPlate(plate Plate) (*Automobile, error)
+    AliasByPlate(plate Plate) (*Car, error)
+    PreviousPlate(plate Plate) (Plate, error)
 }
 
 type FinderChannelClient struct {

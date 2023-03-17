@@ -31,9 +31,9 @@ type MyService interface {
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
-  thrift.ClientInterface
-  Query(s *module.MyStruct, i *includes.Included) error
-  HasArgDocs(s *module.MyStruct, i *includes.Included) error
+    thrift.ClientInterface
+    Query(s *module.MyStruct, i *includes.Included) error
+    HasArgDocs(s *module.MyStruct, i *includes.Included) error
 }
 
 type MyServiceChannelClient struct {

@@ -34,14 +34,14 @@ type MyService interface {
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
-  thrift.ClientInterface
-  Ping() error
-  GetRandomData() (string, error)
-  HasDataById(id int64) (bool, error)
-  GetDataById(id int64) (string, error)
-  PutDataById(id int64, data string) error
-  LobDataById(id int64, data string) error
-  GoDoNothing() error
+    thrift.ClientInterface
+    Ping() error
+    GetRandomData() (string, error)
+    HasDataById(id int64) (bool, error)
+    GetDataById(id int64) (string, error)
+    PutDataById(id int64, data string) error
+    LobDataById(id int64, data string) error
+    GoDoNothing() error
 }
 
 type MyServiceChannelClient struct {
@@ -2190,9 +2190,9 @@ type MyServicePrioParent interface {
 
 // Deprecated: Use MyServicePrioParent instead.
 type MyServicePrioParentClientInterface interface {
-  thrift.ClientInterface
-  Ping() error
-  Pong() error
+    thrift.ClientInterface
+    Ping() error
+    Pong() error
 }
 
 type MyServicePrioParentChannelClient struct {
@@ -2763,8 +2763,8 @@ type MyServicePrioChild interface {
 
 // Deprecated: Use MyServicePrioChild instead.
 type MyServicePrioChildClientInterface interface {
-  thrift.ClientInterface
-  Pang() error
+    thrift.ClientInterface
+    Pang() error
 }
 
 type MyServicePrioChildChannelClient struct {
@@ -3093,15 +3093,13 @@ func (p *procFuncMyServicePrioChildPang) Run(reqStruct thrift.Struct) (thrift.Wr
 
 
 type BadService interface {
-    CreateBadInteraction(ctx context.Context) (, error)
     Bar(ctx context.Context) (int32, error)
 }
 
 // Deprecated: Use BadService instead.
 type BadServiceClientInterface interface {
-  thrift.ClientInterface
-  CreateBadInteraction() (, error)
-  Bar() (int32, error)
+    thrift.ClientInterface
+    Bar() (int32, error)
 }
 
 type BadServiceChannelClient struct {
@@ -3187,19 +3185,6 @@ func NewBadServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.Protocol
 }
 
 
-func (c *BadServiceChannelClient) CreateBadInteraction(ctx context.Context) (, error) {
-    in := &reqBadServiceCreateBadInteraction{
-    }
-    out := newRespBadServiceCreateBadInteraction()
-    err := c.ch.Call(ctx, "createBadInteraction", in, out)
-    return out.Value, err
-}
-
-func (c *BadServiceClient) CreateBadInteraction() (, error) {
-    return c.chClient.CreateBadInteraction(nil)
-}
-
-
 func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
     in := &reqBadServiceBar{
     }
@@ -3213,207 +3198,6 @@ func (c *BadServiceClient) Bar() (int32, error) {
 }
 
 
-type reqBadServiceCreateBadInteraction struct {
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &reqBadServiceCreateBadInteraction{}
-
-func newReqBadServiceCreateBadInteraction() *reqBadServiceCreateBadInteraction {
-    return (&reqBadServiceCreateBadInteraction{})
-}
-
-func (x *reqBadServiceCreateBadInteraction) String() string {
-    return fmt.Sprintf("%+v", x)
-}
-
-
-// Deprecated: Use reqBadServiceCreateBadInteraction.Set* methods instead or set the fields directly.
-type reqBadServiceCreateBadInteractionBuilder struct {
-    obj *reqBadServiceCreateBadInteraction
-}
-
-func newReqBadServiceCreateBadInteractionBuilder() *reqBadServiceCreateBadInteractionBuilder {
-    return &reqBadServiceCreateBadInteractionBuilder{
-        obj: newReqBadServiceCreateBadInteraction(),
-    }
-}
-
-func (x *reqBadServiceCreateBadInteractionBuilder) Emit() *reqBadServiceCreateBadInteraction {
-    var objCopy reqBadServiceCreateBadInteraction = *x.obj
-    return &objCopy
-}
-func (x *reqBadServiceCreateBadInteraction) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("reqBadServiceCreateBadInteraction"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *reqBadServiceCreateBadInteraction) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, typ, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if typ == thrift.STOP {
-            break;
-        }
-
-        switch id {
-        default:
-            if err := p.Skip(typ); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
-type respBadServiceCreateBadInteraction struct {
-    Value  `thrift:"value,0,required" json:"value" db:"value"`
-}
-// Compile time interface enforcer
-var _ thrift.Struct = &respBadServiceCreateBadInteraction{}
-
-func newRespBadServiceCreateBadInteraction() *respBadServiceCreateBadInteraction {
-    return (&respBadServiceCreateBadInteraction{})
-}
-
-func (x *respBadServiceCreateBadInteraction) GetValueNonCompat()  {
-    return x.Value
-}
-
-func (x *respBadServiceCreateBadInteraction) GetValue()  {
-    return x.Value
-}
-
-func (x *respBadServiceCreateBadInteraction) SetValue(value ) *respBadServiceCreateBadInteraction {
-    x.Value = value
-    return x
-}
-
-
-func (x *respBadServiceCreateBadInteraction) writeField0(p thrift.Protocol) error {  // Value
-    if err := p.WriteFieldBegin("value", , 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetValueNonCompat()
-    
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *respBadServiceCreateBadInteraction) readField0(p thrift.Protocol) error {  // Value
-    
-    x.SetValue(result)
-    return nil
-}
-
-func (x *respBadServiceCreateBadInteraction) String() string {
-    return fmt.Sprintf("%+v", x)
-}
-
-
-// Deprecated: Use respBadServiceCreateBadInteraction.Set* methods instead or set the fields directly.
-type respBadServiceCreateBadInteractionBuilder struct {
-    obj *respBadServiceCreateBadInteraction
-}
-
-func newRespBadServiceCreateBadInteractionBuilder() *respBadServiceCreateBadInteractionBuilder {
-    return &respBadServiceCreateBadInteractionBuilder{
-        obj: newRespBadServiceCreateBadInteraction(),
-    }
-}
-
-func (x *respBadServiceCreateBadInteractionBuilder) Value(value ) *respBadServiceCreateBadInteractionBuilder {
-    x.obj.Value = value
-    return x
-}
-
-func (x *respBadServiceCreateBadInteractionBuilder) Emit() *respBadServiceCreateBadInteraction {
-    var objCopy respBadServiceCreateBadInteraction = *x.obj
-    return &objCopy
-}
-func (x *respBadServiceCreateBadInteraction) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("respBadServiceCreateBadInteraction"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField0(p); err != nil {
-        return err
-    }
-
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *respBadServiceCreateBadInteraction) Read(p thrift.Protocol) error {
-    if _, err := p.ReadStructBegin(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
-    }
-
-    for {
-        _, typ, id, err := p.ReadFieldBegin()
-        if err != nil {
-            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
-        }
-
-        if typ == thrift.STOP {
-            break;
-        }
-
-        switch id {
-        case 0:  // value
-            if err := x.readField0(p); err != nil {
-                return err
-            }
-        default:
-            if err := p.Skip(typ); err != nil {
-                return err
-            }
-        }
-
-        if err := p.ReadFieldEnd(); err != nil {
-            return err
-        }
-    }
-
-    if err := p.ReadStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
-    }
-
-    return nil
-}
 type reqBadServiceBar struct {
 }
 // Compile time interface enforcer
@@ -3661,61 +3445,10 @@ func NewBadServiceProcessor(handler BadService) *BadServiceProcessor {
         processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
-    p.AddToProcessorMap("createBadInteraction", &procFuncBadServiceCreateBadInteraction{handler: handler})
     p.AddToProcessorMap("bar", &procFuncBadServiceBar{handler: handler})
-    p.AddToFunctionServiceMap("createBadInteraction", "BadService")
     p.AddToFunctionServiceMap("bar", "BadService")
 
     return p
-}
-
-
-type procFuncBadServiceCreateBadInteraction struct {
-    handler BadService
-}
-// Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncBadServiceCreateBadInteraction{}
-
-func (p *procFuncBadServiceCreateBadInteraction) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
-    args := newReqBadServiceCreateBadInteraction()
-    if err := args.Read(iprot); err != nil {
-        return nil, err
-    }
-    iprot.ReadMessageEnd()
-    return args, nil
-}
-
-func (p *procFuncBadServiceCreateBadInteraction) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
-    var err2 error
-    messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
-        messageType = thrift.EXCEPTION
-    }
-    if err2 = oprot.WriteMessageBegin("CreateBadInteraction", messageType, seqId); err2 != nil {
-        err = err2
-    }
-    if err2 = result.Write(oprot); err == nil && err2 != nil {
-        err = err2
-    }
-    if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
-        err = err2
-    }
-    if err2 = oprot.Flush(); err == nil && err2 != nil {
-        err = err2
-    }
-    return err
-}
-
-func (p *procFuncBadServiceCreateBadInteraction) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
-    result := newRespBadServiceCreateBadInteraction()
-    if retval, err := p.handler.CreateBadInteraction(); err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing CreateBadInteraction: " + err.Error(), err)
-        return x, x
-    } else {
-        result.Value = retval
-    }
-
-    return result, nil
 }
 
 

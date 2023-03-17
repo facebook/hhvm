@@ -33,9 +33,9 @@ type SomeService interface {
 
 // Deprecated: Use SomeService instead.
 type SomeServiceClientInterface interface {
-  thrift.ClientInterface
-  BounceMap(m included.SomeMap) (included.SomeMap, error)
-  BinaryKeyedMap(r []int64) (map[TBinary]int64, error)
+    thrift.ClientInterface
+    BounceMap(m included.SomeMap) (included.SomeMap, error)
+    BinaryKeyedMap(r []int64) (map[TBinary]int64, error)
 }
 
 type SomeServiceChannelClient struct {

@@ -26,8 +26,8 @@ type MyRoot interface {
 
 // Deprecated: Use MyRoot instead.
 type MyRootClientInterface interface {
-  thrift.ClientInterface
-  DoRoot() error
+    thrift.ClientInterface
+    DoRoot() error
 }
 
 type MyRootChannelClient struct {
@@ -383,8 +383,8 @@ type MyNode interface {
 
 // Deprecated: Use MyNode instead.
 type MyNodeClientInterface interface {
-  thrift.ClientInterface
-  DoMid() error
+    thrift.ClientInterface
+    DoMid() error
 }
 
 type MyNodeChannelClient struct {
@@ -721,8 +721,8 @@ type MyLeaf interface {
 
 // Deprecated: Use MyLeaf instead.
 type MyLeafClientInterface interface {
-  thrift.ClientInterface
-  DoLeaf() error
+    thrift.ClientInterface
+    DoLeaf() error
 }
 
 type MyLeafChannelClient struct {

@@ -31,11 +31,11 @@ type Raiser interface {
 
 // Deprecated: Use Raiser instead.
 type RaiserClientInterface interface {
-  thrift.ClientInterface
-  DoBland() error
-  DoRaise() error
-  Get200() (string, error)
-  Get500() (string, error)
+    thrift.ClientInterface
+    DoBland() error
+    DoRaise() error
+    Get200() (string, error)
+    Get500() (string, error)
 }
 
 type RaiserChannelClient struct {

@@ -38,8 +38,8 @@ type Service interface {
 
 // Deprecated: Use Service instead.
 type ServiceClientInterface interface {
-  thrift.ClientInterface
-  Func(arg1 StringWithAdapter, arg2 string, arg3 *Foo) (MyI32, error)
+    thrift.ClientInterface
+    Func(arg1 StringWithAdapter, arg2 string, arg3 *Foo) (MyI32, error)
 }
 
 type ServiceChannelClient struct {
@@ -633,9 +633,9 @@ type AdapterService interface {
 
 // Deprecated: Use AdapterService instead.
 type AdapterServiceClientInterface interface {
-  thrift.ClientInterface
-  Count() (*CountingStruct, error)
-  AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error)
+    thrift.ClientInterface
+    Count() (*CountingStruct, error)
+    AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error)
 }
 
 type AdapterServiceChannelClient struct {

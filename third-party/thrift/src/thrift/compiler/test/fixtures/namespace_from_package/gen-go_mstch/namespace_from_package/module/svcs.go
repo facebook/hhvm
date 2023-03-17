@@ -26,8 +26,8 @@ type TestService interface {
 
 // Deprecated: Use TestService instead.
 type TestServiceClientInterface interface {
-  thrift.ClientInterface
-  Init(int1 int64) (int64, error)
+    thrift.ClientInterface
+    Init(int1 int64) (int64, error)
 }
 
 type TestServiceChannelClient struct {

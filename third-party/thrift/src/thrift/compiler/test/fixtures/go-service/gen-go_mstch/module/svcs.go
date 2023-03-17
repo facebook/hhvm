@@ -38,20 +38,20 @@ type GetEntity interface {
 
 // Deprecated: Use GetEntity instead.
 type GetEntityClientInterface interface {
-  thrift.ClientInterface
-  GetEntity(r *GetEntityRequest) (*GetEntityResponse, error)
-  GetBool() (bool, error)
-  GetByte() (byte, error)
-  GetI16() (int16, error)
-  GetI32() (int32, error)
-  GetI64() (int64, error)
-  GetDouble() (float64, error)
-  GetString() (string, error)
-  GetBinary() ([]byte, error)
-  GetMap() (map[string]string, error)
-  GetSet() ([]string, error)
-  GetList() ([]string, error)
-  GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
+    thrift.ClientInterface
+    GetEntity(r *GetEntityRequest) (*GetEntityResponse, error)
+    GetBool() (bool, error)
+    GetByte() (byte, error)
+    GetI16() (int16, error)
+    GetI32() (int32, error)
+    GetI64() (int64, error)
+    GetDouble() (float64, error)
+    GetString() (string, error)
+    GetBinary() ([]byte, error)
+    GetMap() (map[string]string, error)
+    GetSet() ([]string, error)
+    GetList() ([]string, error)
+    GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error)
 }
 
 type GetEntityChannelClient struct {

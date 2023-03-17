@@ -22,16 +22,14 @@ var _ = thrift.ZERO
 
 type C interface {
     F(ctx context.Context) error
-
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
 // Deprecated: Use C instead.
 type CClientInterface interface {
-  thrift.ClientInterface
-  F() error
-
-  Thing(a int32, b string, c []int32) (string, error)
+    thrift.ClientInterface
+    F() error
+    Thing(a int32, b string, c []int32) (string, error)
 }
 
 type CChannelClient struct {

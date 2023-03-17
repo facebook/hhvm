@@ -8,12 +8,10 @@ import (
     "context"
     "fmt"
 
-    thrift0 "thrift/annotation/thrift"
 
     "thrift/lib/go/thrift"
 )
 
-var _ = thrift0.GoUnusedProtection__
 
 // (needed to ensure safety because of naive import list construction)
 var _ = context.Background
@@ -23,13 +21,13 @@ var _ = thrift.ZERO
 
 
 type MyService interface {
-    Query(ctx context.Context, u *MyUnion) (*MyStruct, error)
+    Foo(ctx context.Context) error
 }
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Query(u *MyUnion) (*MyStruct, error)
+    Foo() error
 }
 
 type MyServiceChannelClient struct {
@@ -115,117 +113,51 @@ func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolF
 }
 
 
-func (c *MyServiceChannelClient) Query(ctx context.Context, u *MyUnion) (*MyStruct, error) {
-    in := &reqMyServiceQuery{
-        U: u,
+func (c *MyServiceChannelClient) Foo(ctx context.Context) error {
+    in := &reqMyServiceFoo{
     }
-    out := newRespMyServiceQuery()
-    err := c.ch.Call(ctx, "query", in, out)
-    return out.Value, err
+    out := newRespMyServiceFoo()
+    err := c.ch.Call(ctx, "foo", in, out)
+    return err
 }
 
-func (c *MyServiceClient) Query(u *MyUnion) (*MyStruct, error) {
-    return c.chClient.Query(nil, u)
+func (c *MyServiceClient) Foo() error {
+    return c.chClient.Foo(nil)
 }
 
 
-type reqMyServiceQuery struct {
-    U *MyUnion `thrift:"u,1" json:"u" db:"u"`
+type reqMyServiceFoo struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &reqMyServiceQuery{}
+var _ thrift.Struct = &reqMyServiceFoo{}
 
-func newReqMyServiceQuery() *reqMyServiceQuery {
-    return (&reqMyServiceQuery{})
+func newReqMyServiceFoo() *reqMyServiceFoo {
+    return (&reqMyServiceFoo{})
 }
 
-// Deprecated: Use newReqMyServiceQuery().U instead.
-var reqMyServiceQuery_U_DEFAULT = newReqMyServiceQuery().U
-
-func (x *reqMyServiceQuery) GetUNonCompat() *MyUnion {
-    return x.U
-}
-
-func (x *reqMyServiceQuery) GetU() *MyUnion {
-    if !x.IsSetU() {
-      return NewMyUnion()
-    }
-
-    return x.U
-}
-
-func (x *reqMyServiceQuery) SetU(value MyUnion) *reqMyServiceQuery {
-    x.U = &value
-    return x
-}
-
-func (x *reqMyServiceQuery) IsSetU() bool {
-    return x.U != nil
-}
-
-func (x *reqMyServiceQuery) writeField1(p thrift.Protocol) error {  // U
-    if !x.IsSetU() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("u", thrift.STRUCT, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetUNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *reqMyServiceQuery) readField1(p thrift.Protocol) error {  // U
-    result := *NewMyUnion()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetU(result)
-    return nil
-}
-
-func (x *reqMyServiceQuery) String() string {
+func (x *reqMyServiceFoo) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
 
-// Deprecated: Use reqMyServiceQuery.Set* methods instead or set the fields directly.
-type reqMyServiceQueryBuilder struct {
-    obj *reqMyServiceQuery
+// Deprecated: Use reqMyServiceFoo.Set* methods instead or set the fields directly.
+type reqMyServiceFooBuilder struct {
+    obj *reqMyServiceFoo
 }
 
-func newReqMyServiceQueryBuilder() *reqMyServiceQueryBuilder {
-    return &reqMyServiceQueryBuilder{
-        obj: newReqMyServiceQuery(),
+func newReqMyServiceFooBuilder() *reqMyServiceFooBuilder {
+    return &reqMyServiceFooBuilder{
+        obj: newReqMyServiceFoo(),
     }
 }
 
-func (x *reqMyServiceQueryBuilder) U(value *MyUnion) *reqMyServiceQueryBuilder {
-    x.obj.U = value
-    return x
-}
-
-func (x *reqMyServiceQueryBuilder) Emit() *reqMyServiceQuery {
-    var objCopy reqMyServiceQuery = *x.obj
+func (x *reqMyServiceFooBuilder) Emit() *reqMyServiceFoo {
+    var objCopy reqMyServiceFoo = *x.obj
     return &objCopy
 }
-func (x *reqMyServiceQuery) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
+func (x *reqMyServiceFoo) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("reqMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -238,7 +170,7 @@ func (x *reqMyServiceQuery) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
+func (x *reqMyServiceFoo) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -254,10 +186,6 @@ func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 1:  // u
-            if err := x.readField1(p); err != nil {
-                return err
-            }
         default:
             if err := p.Skip(typ); err != nil {
                 return err
@@ -275,103 +203,38 @@ func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
 
     return nil
 }
-type respMyServiceQuery struct {
-    Value *MyStruct `thrift:"value,0,required" json:"value" db:"value"`
+type respMyServiceFoo struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &respMyServiceQuery{}
+var _ thrift.Struct = &respMyServiceFoo{}
 
-func newRespMyServiceQuery() *respMyServiceQuery {
-    return (&respMyServiceQuery{})
+func newRespMyServiceFoo() *respMyServiceFoo {
+    return (&respMyServiceFoo{})
 }
 
-// Deprecated: Use newRespMyServiceQuery().Value instead.
-var respMyServiceQuery_Value_DEFAULT = newRespMyServiceQuery().Value
-
-func (x *respMyServiceQuery) GetValueNonCompat() *MyStruct {
-    return x.Value
-}
-
-func (x *respMyServiceQuery) GetValue() *MyStruct {
-    if !x.IsSetValue() {
-      return NewMyStruct()
-    }
-
-    return x.Value
-}
-
-func (x *respMyServiceQuery) SetValue(value MyStruct) *respMyServiceQuery {
-    x.Value = &value
-    return x
-}
-
-func (x *respMyServiceQuery) IsSetValue() bool {
-    return x.Value != nil
-}
-
-func (x *respMyServiceQuery) writeField0(p thrift.Protocol) error {  // Value
-    if !x.IsSetValue() {
-        return nil
-    }
-
-    if err := p.WriteFieldBegin("value", thrift.STRUCT, 0); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetValueNonCompat()
-    if err := item.Write(p); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *respMyServiceQuery) readField0(p thrift.Protocol) error {  // Value
-    result := *NewMyStruct()
-err := result.Read(p)
-if err != nil {
-    return err
-}
-
-    x.SetValue(result)
-    return nil
-}
-
-func (x *respMyServiceQuery) String() string {
+func (x *respMyServiceFoo) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
 
-// Deprecated: Use respMyServiceQuery.Set* methods instead or set the fields directly.
-type respMyServiceQueryBuilder struct {
-    obj *respMyServiceQuery
+// Deprecated: Use respMyServiceFoo.Set* methods instead or set the fields directly.
+type respMyServiceFooBuilder struct {
+    obj *respMyServiceFoo
 }
 
-func newRespMyServiceQueryBuilder() *respMyServiceQueryBuilder {
-    return &respMyServiceQueryBuilder{
-        obj: newRespMyServiceQuery(),
+func newRespMyServiceFooBuilder() *respMyServiceFooBuilder {
+    return &respMyServiceFooBuilder{
+        obj: newRespMyServiceFoo(),
     }
 }
 
-func (x *respMyServiceQueryBuilder) Value(value *MyStruct) *respMyServiceQueryBuilder {
-    x.obj.Value = value
-    return x
-}
-
-func (x *respMyServiceQueryBuilder) Emit() *respMyServiceQuery {
-    var objCopy respMyServiceQuery = *x.obj
+func (x *respMyServiceFooBuilder) Emit() *respMyServiceFoo {
+    var objCopy respMyServiceFoo = *x.obj
     return &objCopy
 }
-func (x *respMyServiceQuery) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
+func (x *respMyServiceFoo) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("respMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField0(p); err != nil {
-        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -384,7 +247,7 @@ func (x *respMyServiceQuery) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *respMyServiceQuery) Read(p thrift.Protocol) error {
+func (x *respMyServiceFoo) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -400,10 +263,6 @@ func (x *respMyServiceQuery) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 0:  // value
-            if err := x.readField0(p); err != nil {
-                return err
-            }
         default:
             if err := p.Skip(typ); err != nil {
                 return err
@@ -460,21 +319,21 @@ func NewMyServiceProcessor(handler MyService) *MyServiceProcessor {
         processorMap:       make(map[string]thrift.ProcessorFunction),
         functionServiceMap: make(map[string]string),
     }
-    p.AddToProcessorMap("query", &procFuncMyServiceQuery{handler: handler})
-    p.AddToFunctionServiceMap("query", "MyService")
+    p.AddToProcessorMap("foo", &procFuncMyServiceFoo{handler: handler})
+    p.AddToFunctionServiceMap("foo", "MyService")
 
     return p
 }
 
 
-type procFuncMyServiceQuery struct {
+type procFuncMyServiceFoo struct {
     handler MyService
 }
 // Compile time interface enforcer
-var _ thrift.ProcessorFunction = &procFuncMyServiceQuery{}
+var _ thrift.ProcessorFunction = &procFuncMyServiceFoo{}
 
-func (p *procFuncMyServiceQuery) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
-    args := newReqMyServiceQuery()
+func (p *procFuncMyServiceFoo) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exception) {
+    args := newReqMyServiceFoo()
     if err := args.Read(iprot); err != nil {
         return nil, err
     }
@@ -482,13 +341,13 @@ func (p *procFuncMyServiceQuery) Read(iprot thrift.Protocol) (thrift.Struct, thr
     return args, nil
 }
 
-func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
+func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
     if _, ok := result.(thrift.ApplicationException); ok {
         messageType = thrift.EXCEPTION
     }
-    if err2 = oprot.WriteMessageBegin("Query", messageType, seqId); err2 != nil {
+    if err2 = oprot.WriteMessageBegin("Foo", messageType, seqId); err2 != nil {
         err = err2
     }
     if err2 = result.Write(oprot); err == nil && err2 != nil {
@@ -503,16 +362,12 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
     return err
 }
 
-func (p *procFuncMyServiceQuery) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
-    args := reqStruct.(*reqMyServiceQuery)
-    result := newRespMyServiceQuery()
-    if retval, err := p.handler.Query(args.U); err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Query: " + err.Error(), err)
+func (p *procFuncMyServiceFoo) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
+    result := newRespMyServiceFoo()
+    if err := p.handler.Foo(); err != nil {
+        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
-
     return result, nil
 }
 

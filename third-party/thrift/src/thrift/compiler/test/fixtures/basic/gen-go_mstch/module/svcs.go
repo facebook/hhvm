@@ -28,8 +28,8 @@ type FooService interface {
 
 // Deprecated: Use FooService instead.
 type FooServiceClientInterface interface {
-  thrift.ClientInterface
-  SimpleRPC() error
+    thrift.ClientInterface
+    SimpleRPC() error
 }
 
 type FooServiceChannelClient struct {
@@ -382,8 +382,8 @@ type FB303Service interface {
 
 // Deprecated: Use FB303Service instead.
 type FB303ServiceClientInterface interface {
-  thrift.ClientInterface
-  SimpleRPC(intParameter int32) (*ReservedKeyword, error)
+    thrift.ClientInterface
+    SimpleRPC(intParameter int32) (*ReservedKeyword, error)
 }
 
 type FB303ServiceChannelClient struct {
@@ -873,17 +873,17 @@ type MyService interface {
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
-  thrift.ClientInterface
-  Ping() error
-  GetRandomData() (string, error)
-  Sink(sink int64) error
-  PutDataById(id int64, data string) error
-  HasDataById(id int64) (bool, error)
-  GetDataById(id int64) (string, error)
-  DeleteDataById(id int64) error
-  LobDataById(id int64, data string) error
-  InvalidReturnForHack() ([]float32, error)
-  RpcSkippedCodegen() error
+    thrift.ClientInterface
+    Ping() error
+    GetRandomData() (string, error)
+    Sink(sink int64) error
+    PutDataById(id int64, data string) error
+    HasDataById(id int64) (bool, error)
+    GetDataById(id int64) (string, error)
+    DeleteDataById(id int64) error
+    LobDataById(id int64, data string) error
+    InvalidReturnForHack() ([]float32, error)
+    RpcSkippedCodegen() error
 }
 
 type MyServiceChannelClient struct {
@@ -3886,9 +3886,9 @@ type DbMixedStackArguments interface {
 
 // Deprecated: Use DbMixedStackArguments instead.
 type DbMixedStackArgumentsClientInterface interface {
-  thrift.ClientInterface
-  GetDataByKey0(key string) ([]byte, error)
-  GetDataByKey1(key string) ([]byte, error)
+    thrift.ClientInterface
+    GetDataByKey0(key string) ([]byte, error)
+    GetDataByKey1(key string) ([]byte, error)
 }
 
 type DbMixedStackArgumentsChannelClient struct {

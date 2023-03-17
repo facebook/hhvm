@@ -25,28 +25,28 @@
     {{#service:functions}}
     {{#function:go_supported?}}
     {{> svc/func_signature}}
-    {{/function:go_supported?}}
 
+    {{/function:go_supported?}}
     {{/service:functions}}
 }
 
 {{! COMPAT: backwards compatibility - remove once all code is migrated to ChannelClient. }}
 // Deprecated: Use {{service:go_name}} instead.
 type {{service:go_name}}ClientInterface interface {
-  thrift.ClientInterface
-  {{^program:compat?}}
-  {{#service:extends?}}
-  {{#service:extends}}
-  // Inherited/extended service
-  {{service:go_qualified_name}}ClientInterface
+    thrift.ClientInterface
+    {{^program:compat?}}
+    {{#service:extends?}}
+    {{#service:extends}}
+    // Inherited/extended service
+    {{service:go_qualified_name}}ClientInterface
 
-  {{/service:extends}}
-  {{/service:extends?}}
-  {{/program:compat?}}
-  {{#service:functions}}
-  {{#function:go_supported?}}
-  {{> svc/func_signature_no_ctx}}
-  {{/function:go_supported?}}
+    {{/service:extends}}
+    {{/service:extends?}}
+    {{/program:compat?}}
+    {{#service:functions}}
+    {{#function:go_supported?}}
+    {{> svc/func_signature_no_ctx}}
 
-  {{/service:functions}}
+    {{/function:go_supported?}}
+    {{/service:functions}}
 }

@@ -6,3 +6,4 @@ mstch_java src/module.thrift
 mstch_pyi src/module.thrift
 py:json src/module.thrift
 mstch_rust src/module.thrift
+mstch_go src/module.thrift

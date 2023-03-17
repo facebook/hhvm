@@ -30,12 +30,12 @@ type NestedContainers interface {
 
 // Deprecated: Use NestedContainers instead.
 type NestedContainersClientInterface interface {
-  thrift.ClientInterface
-  MapList(foo map[int32][]int32) error
-  MapSet(foo map[int32][]int32) error
-  ListMap(foo []map[int32]int32) error
-  ListSet(foo [][]int32) error
-  Turtles(foo [][]map[int32]map[int32][]int32) error
+    thrift.ClientInterface
+    MapList(foo map[int32][]int32) error
+    MapSet(foo map[int32][]int32) error
+    ListMap(foo []map[int32]int32) error
+    ListSet(foo [][]int32) error
+    Turtles(foo [][]map[int32]map[int32][]int32) error
 }
 
 type NestedContainersChannelClient struct {

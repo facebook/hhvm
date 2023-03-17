@@ -577,11 +577,6 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
           }
         }
       }
-      if (auto* jNeedBucketization = json.get_ptr("bucketize")) {
-        if (parseBool(*jNeedBucketization, "bucketize")) {
-          jhashWithWeights["bucketize"] = true;
-        }
-      }
     }
     auto route = createHashRoute<RouterInfo>(
         jhashWithWeights, std::move(destinations), factory.getThreadId());

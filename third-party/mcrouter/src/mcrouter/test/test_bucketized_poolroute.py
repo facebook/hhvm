@@ -31,12 +31,12 @@ class TestBucketizedPoolRoute(McrouterTestCase):
         val = "value1"
         self.assertTrue(mcr.set(key, val))
         self.assertEqual(mcr.get(key), val)
-        # todo key1 maps to bucketId 808 and server #5 with bucketization
+        # todo key1 maps to bucketId 808 and server #_ with bucketization
         self.assertFalse(self.mc1.get(key))
         self.assertFalse(self.mc2.get(key))
-        self.assertFalse(self.mc3.get(key))
+        self.assertEqual(self.mc3.get(key), val)
         self.assertFalse(self.mc4.get(key))
-        self.assertEqual(self.mc5.get(key), val)
+        self.assertFalse(self.mc5.get(key))
 
 class TestNonBucketizedPoolRoute(McrouterTestCase):
     config = "./mcrouter/test/mcrouter_test_bucketized_poolroute_nonbucketized.json"

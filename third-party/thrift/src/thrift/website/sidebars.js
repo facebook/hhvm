@@ -351,6 +351,7 @@ module.exports = {
       },
       items: [
         'fb/server/server-lifecycle',
+        'fb/server/background-tasks',
         'fb/server/components',
         'fb/server/transport',
         'fb/server/threading-models',

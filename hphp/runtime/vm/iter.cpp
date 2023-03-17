@@ -33,9 +33,6 @@
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 
-#include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/ext/asio/ext_async-generator.h"
-
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
@@ -180,24 +177,6 @@ void IterImpl::arrInit(const ArrayData* arr) {
   if (arr && incRef) arr->incRefCount();
 }
 
-namespace {
-
-void objInitErrors(ObjectData* obj) {
-  if (RO::EvalThrowOnIterationOverObjects == 0) return;
-  auto const cls = obj->getVMClass();
-  if (cls == Generator::getClass() || cls == AsyncGenerator::getClass()) return;
-  auto const msg =
-    folly::sformat("Cannot iterate over an object of type {} using foreach",
-                   cls->name());
-  if (RO::EvalThrowOnIterationOverObjects == 1) {
-    raise_warning(msg);
-  } else {
-    SystemLib::throwRuntimeExceptionObject(msg);
-  }
-}
-
-} // namespace
-
 template <bool incRef>
 void IterImpl::objInit(ObjectData* obj) {
   assertx(obj);
@@ -217,7 +196,6 @@ void IterImpl::objInit(ObjectData* obj) {
   }
 
   assertx(obj->instanceof(SystemLib::s_HH_IteratorClass));
-  objInitErrors(obj);
   setObject(obj);
   if (incRef) obj->incRefCount();
   try {

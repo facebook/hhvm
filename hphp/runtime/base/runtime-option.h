@@ -1463,8 +1463,6 @@ struct RuntimeOption {
   F(bool, EnableAbstractContextConstants, true)                         \
   F(bool, AbstractContextConstantUninitAccess, false)                   \
   F(bool, TraitConstantInterfaceBehavior, false)                        \
-  /* 0 nothing, 1 notice, 2 error */                                    \
-  F(uint32_t, ThrowOnIterationOverObjects, 0)                           \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   F(uint32_t, NFLogSlowWatchmanMsec, 500)                               \

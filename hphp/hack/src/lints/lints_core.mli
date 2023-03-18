@@ -18,6 +18,7 @@ type 'pos t = {
   message: string;
   bypass_changed_lines: bool;
   autofix: (string * Pos.t) option;
+  check_status: Tast.check_status option;
 }
 [@@deriving show]
 
@@ -26,6 +27,7 @@ val get_code : 'pos t -> int
 val get_pos : 'pos t -> 'pos
 
 val add :
+  ?check_status:Tast.check_status option ->
   ?bypass_changed_lines:bool ->
   ?autofix:(string * Pos.t) option ->
   int ->

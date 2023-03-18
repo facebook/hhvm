@@ -2862,9 +2862,9 @@ version = "0.0.0"
 dependencies = [
  "arena_deserializer",
  "arena_trait",
- "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
+ "oxidized",
  "rc_pos",
  "serde",
 ]

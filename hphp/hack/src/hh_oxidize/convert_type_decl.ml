@@ -135,6 +135,7 @@ end = struct
         "nast::*";
         "tast::*";
         "full_fidelity_parser_env::*";
+        "lints_core::*";
         "typing_env_types::*";
         "typing_tyvar_occurrences::*";
         "typing_per_cont_env::*";

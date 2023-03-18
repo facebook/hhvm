@@ -28,6 +28,7 @@ let mk_lowercase_constant pos cst =
           (Markdown_lite.md_codify cst);
       bypass_changed_lines = false;
       autofix = None;
+      check_status = None;
     }
 
 let lowercase_constant pos cst = add_lint (mk_lowercase_constant pos cst)

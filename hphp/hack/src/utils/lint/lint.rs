@@ -8,7 +8,6 @@
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 use arena_trait::TrivialDrop;
-use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
@@ -30,7 +29,6 @@ use crate::*;
     Debug,
     Deserialize,
     Eq,
-    EqModuloPos,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -59,7 +57,6 @@ arena_deserializer::impl_deserialize_in_arena!(Severity);
     Debug,
     Deserialize,
     Eq,
-    EqModuloPos,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -82,4 +79,5 @@ pub struct LintsCore<Pos> {
     /// flag bypasses that behavior
     pub bypass_changed_lines: bool,
     pub autofix: Option<(String, pos::Pos)>,
+    pub check_status: Option<tast::CheckStatus>,
 }

@@ -4,7 +4,7 @@
  (modules lints_core)
  (preprocess
   (pps ppx_deriving.std))
- (libraries errors pos))
+ (libraries typing_ast errors pos))
 
 (library
  (name linting_main)

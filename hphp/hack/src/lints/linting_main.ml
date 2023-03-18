@@ -107,6 +107,18 @@ let lint ctx fn content =
         lint_nast ctx fn parser_return;
 
         (* Get Typed AST and run TAST linters *)
+        let ctx =
+          Provider_context.map_tcopt
+            ~f:(fun tcopt ->
+              (* Sound type-based linters require agreement between TAST
+                 definition under dynamic and normal assumptions. So we apply
+                 the linter with the dynamic definitions produced. *)
+              if TypecheckerOptions.enable_sound_dynamic tcopt then
+                GlobalOptions.{ tcopt with tco_tast_under_dynamic = true }
+              else
+                tcopt)
+            ctx
+        in
         let (tast, _) = Typing_check_utils.type_file ctx fn fi in
         lint_tast ctx tast);
   Typing_deps.trace := orig_trace

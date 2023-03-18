@@ -24,66 +24,6 @@ module PatchHeap = struct
       end)
 end
 
-let rec can_be_captured =
-  let open Aast_defs in
-  function
-  | Darray _
-  | Varray _
-  | Shape _
-  | ValCollection _
-  | KeyValCollection _
-  | Null
-  | This
-  | True
-  | False
-  | Omitted
-  | Id _
-  | Lvar _
-  | Dollardollar _
-  | Array_get _
-  | Obj_get _
-  | Class_get _
-  | Class_const _
-  | Call _
-  | FunctionPointer _
-  | Int _
-  | Float _
-  | String _
-  | String2 _
-  | PrefixedString _
-  | Tuple _
-  | List _
-  | Xml _
-  | Import _
-  | Lplaceholder _
-  | Method_caller _
-  | EnumClassLabel _
-  | Invalid None ->
-    false
-  | Yield _
-  | Clone _
-  | Await _
-  | ReadonlyExpr _
-  | Cast _
-  | Unop _
-  | Binop _
-  | Pipe _
-  | Eif _
-  | Is _
-  | As _
-  | Upcast _
-  | New _
-  | Efun _
-  | Lfun _
-  | Collection _
-  | ExpressionTree _
-  | Pair _
-  | ET_Splice _ ->
-    true
-  | Invalid (Some (_, _, exp))
-  | Hole ((_, _, exp), _, _, _) ->
-    can_be_captured exp
-
 let patch_location_collection_handler =
   object
     inherit Tast_visitor.handler_base
@@ -102,7 +42,7 @@ let patch_location_collection_handler =
            `path` is empty. Later updates will be dropped on the floor. This is
            the desired behaviour as patches don't compose and we want to apply
            them one at a time per file. *)
-        PatchHeap.add path (can_be_captured expr, hole_pos, expr_pos)
+        PatchHeap.add path (Aast_utils.can_be_captured expr, hole_pos, expr_pos)
       | _ -> ()
   end
 

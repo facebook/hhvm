@@ -2,4 +2,4 @@
  (name remove_dead_unsafe_casts)
  (wrapped false)
  (modules remove_dead_unsafe_casts)
- (libraries server_command_types tast_env utils_core))
+ (libraries annotated_ast_utils server_command_types tast_env utils_core))

@@ -13,3 +13,9 @@
  (libraries collections core_kernel hh_autoimport parser_options)
  (preprocess
   (pps visitors.ppx ppx_deriving.std)))
+
+(library
+ (name annotated_ast_utils)
+ (modules aast_utils)
+ (wrapped false)
+ (libraries annotated_ast))

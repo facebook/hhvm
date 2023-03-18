@@ -7,8 +7,10 @@ from typing import Dict, List
 
 import attr
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 MULTIFILE_SPLITTER: re.Pattern = re.compile(r"^////\s*(.*?)\s*$")
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 FILENAME_MATCHER: re.Pattern = re.compile(r"^(base|changed)-(.+?)\s*$")
 
 

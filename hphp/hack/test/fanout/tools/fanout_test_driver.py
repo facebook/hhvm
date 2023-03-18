@@ -16,6 +16,7 @@ import attr
 from .fanout_information import FanoutInformation
 from .fanout_test_parser import FanoutTest
 
+# pyre-fixme[24]: Generic type `re.Pattern` expects 1 type parameter.
 WHITESPACE_SPLITTER: re.Pattern = re.compile(r"\s+")
 
 DEFAULT_HH_SERVER_FLAGS: List[str] = [

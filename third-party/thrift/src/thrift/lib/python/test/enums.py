@@ -232,6 +232,7 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(values_to_names[Color.red], "red")
 
     def test_enum_in_enum_out(self) -> None:
+        # pyre-fixme[45]: Cannot instantiate abstract class `Color`.
         self.assertIs(Color(Color.blue), Color.blue)
 
     def test_enum_value(self) -> None:
@@ -243,6 +244,7 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(len(Color), 3)
         self.assertEqual([Color.red, Color.blue, Color.green], lst)
         for i, color in enumerate("red blue green".split(), 0):
+            # pyre-fixme[45]: Cannot instantiate abstract class `Color`.
             e = Color(i)
             self.assertEqual(e, getattr(Color, color))
             self.assertEqual(e.value, i)

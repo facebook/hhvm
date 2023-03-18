@@ -31,7 +31,8 @@ let handler =
             | (A.Tfloat, A.Tfloat) ->
               let typing_env = Tast_env.tast_env_as_typing_env env in
               let cast = "(" ^ Typing_print.full typing_env expr_ty ^ ")" in
-              Lints_errors.redundant_cast cast pos expr_pos
+              let check_status = Tast_env.get_check_status env in
+              Lints_errors.redundant_cast ~check_status cast pos expr_pos
             | _ -> ()
           end
           | _ -> ()

@@ -12,6 +12,6 @@ done
 
 set -- "${OTHER_ARGS[@]}"
 
-FILE=$1
+FILE=$1; shift;
 
-"$HHSTC" --lint-json "$FILE" | "$QUICKFIX_LINT"
+"$HHSTC" --lint-json "$FILE" "$@" | "$QUICKFIX_LINT"

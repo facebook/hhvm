@@ -1,0 +1,23 @@
+//// redundant_cast3.php
+<?hh
+
+<<__SupportDynamicType>>
+function main1(float $f): void {
+  $f;
+}
+
+type Wrap<T> = T;
+
+<<__SupportDynamicType>>
+function main2(Wrap<float> $wf): void {
+  (float) $wf;
+}
+
+<<__SupportDynamicType>>
+function main2(vec<int> $_): void {
+  42.0;
+}
+
+
+There were input 3 patches for 1 files.
+Dropped patch count: 1 (1 overlapping, 0 original not found)

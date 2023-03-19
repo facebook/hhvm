@@ -46,11 +46,12 @@ namespace HPHP {
  */
 
 #define NO_EXTENSION_VERSION_YET "\0"
+#define NO_ONCALL_YET "\0"
 
-#define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
-  static class name ## Extension final : public Extension {   \
-  public:                                               \
-    name ## Extension() : Extension(#name, #v) {}       \
+#define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)                      \
+  static class name ## Extension final : public Extension {               \
+  public:                                                                 \
+    name ## Extension() : Extension(#name, #v, NO_ONCALL_YET) {}          \
   } s_ ## name ## _extension
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,10 +68,14 @@ struct Extension : IDebuggable {
                                const std::string &name,
                                const Native::FuncTable& nativeFuncs);
 public:
-  explicit Extension(const char* name, const char* version = "");
+  explicit Extension(const char name[],
+                     const char version[]= NO_EXTENSION_VERSION_YET,
+                     const char oncall[] = NO_ONCALL_YET);
   ~Extension() override {}
 
-  const char* getVersion() const { return m_version.c_str(); }
+  const char* getName() const { return m_name; }
+  const char* getVersion() const { return m_version; }
+  const char* getOncall() const { return m_oncall; }
 
   // override these functions to implement module specific init/shutdown
   // sequences and information display.
@@ -121,10 +126,6 @@ public:
     m_dsoName = name;
   }
 
-  const std::string& getName() const {
-    return m_name;
-  }
-
   void registerNativeFunc(const StringData* name,
                           const Native::NativeFunctionInfo&);
 
@@ -138,8 +139,9 @@ public:
   }
 
 private:
-  std::string m_name;
-  std::string m_version;
+  const char* m_name;
+  const char* m_version;
+  const char* m_oncall;
   std::string m_dsoName;
   std::vector<StringData*> m_functions;
   Native::FuncTable m_nativeFuncs;

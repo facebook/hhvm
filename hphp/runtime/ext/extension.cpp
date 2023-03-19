@@ -38,9 +38,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Extension::Extension(const char* name, const char* version /* = "" */)
+Extension::Extension(const char* name, const char* version, const char* oncall)
     : m_name(name)
-    , m_version(version ? version : "") {
+    , m_version(version)
+    , m_oncall(oncall) {
   ExtensionRegistry::registerExtension(this);
 }
 
@@ -80,11 +81,7 @@ namespace {
     const std::string& dsoName
   ) {
     assertx(!name.empty());
-#ifdef _MSC_VER
-    std::string section("ext_");
-#else
     std::string section("ext.");
-#endif
     section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
     return get_systemlib(section, dsoName);
   }

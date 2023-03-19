@@ -121,8 +121,9 @@ String File::TranslatePathWithFileCache(const String& filename) {
   // canonicalize asserts that we don't have nulls
   String canonicalized = FileUtil::canonicalize(filename);
   String translated = TranslatePath(canonicalized);
-  if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
-      StaticContentCache::TheFileCache) {
+  if (!translated.empty() && 
+      StaticContentCache::TheFileCache &&
+      access(translated.data(), F_OK) < 0) {
     if (StaticContentCache::TheFileCache->exists(canonicalized.data(),
                                                  false)) {
       // we use file cache's file name to make stat() work

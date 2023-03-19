@@ -45,6 +45,8 @@ MmapFile::~MmapFile() {
 }
 
 bool MmapFile::init() {
+  CHECK(!initialized_) << ": already initialized. MmapFile::init will cause memory leak.";
+   
   int fd = open(path_.c_str(), O_RDONLY);
 
   if (fd < 0) {

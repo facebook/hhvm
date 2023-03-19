@@ -404,7 +404,14 @@ let duplicate_property pos ~class_name ~prop_name ~class_names =
     ^ "): all instances will be aliased at runtime")
 
 let redundant_cast_common
-    ?(check_status = None) cast_type cast cast_pos expr_pos code severity =
+    ~can_be_captured
+    ?(check_status = None)
+    cast_type
+    cast
+    cast_pos
+    expr_pos
+    code
+    severity =
   let msg =
     "This use of `"
     ^ cast
@@ -424,19 +431,33 @@ let redundant_cast_common
     let lines = Errors.read_lines path in
     let content = String.concat ~sep:"\n" lines in
     let modified = Pos.get_text_from_pos ~content expr_pos in
+    let modified =
+      if can_be_captured then
+        "(" ^ modified ^ ")"
+      else
+        modified
+    in
     Some (modified, cast_pos)
   in
   Lints.add ~check_status ~autofix code severity cast_pos msg
 
-let redundant_unsafe_cast hole_pos expr_pos =
+let redundant_unsafe_cast ~can_be_captured hole_pos expr_pos =
   let cast = "HH\\FIXME\\UNSAFE_CAST" in
   let code = Codes.redundant_unsafe_cast in
-  redundant_cast_common `UNSAFE_CAST cast hole_pos expr_pos code Lint_error
+  redundant_cast_common
+    ~can_be_captured
+    `UNSAFE_CAST
+    cast
+    hole_pos
+    expr_pos
+    code
+    Lint_error
 
-let redundant_cast ~check_status cast cast_pos expr_pos =
+let redundant_cast ~can_be_captured ~check_status cast cast_pos expr_pos =
   let code = Codes.redundant_cast in
   redundant_cast_common
     ~check_status:(Some check_status)
+    ~can_be_captured
     `CAST
     cast
     cast_pos

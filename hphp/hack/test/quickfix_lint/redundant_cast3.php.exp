@@ -1,0 +1,10 @@
+//// redundant_cast3.php
+<?hh
+
+function main(): void {
+  (10.0 + 20.0) / 5
+}
+
+
+There were input 1 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

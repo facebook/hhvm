@@ -15,7 +15,7 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, pos, Aast.Cast (hint, (expr_ty, expr_pos, _))) ->
+      | (_, pos, Aast.Cast (hint, (expr_ty, expr_pos, expr))) ->
         (* This check is implemented with pattern matching rather than
            subtyping because I don't want to accidentally error on unlawfully
            typed code (e.g., on TAnys). Luckily there are only four
@@ -32,7 +32,13 @@ let handler =
               let typing_env = Tast_env.tast_env_as_typing_env env in
               let cast = "(" ^ Typing_print.full typing_env expr_ty ^ ")" in
               let check_status = Tast_env.get_check_status env in
-              Lints_errors.redundant_cast ~check_status cast pos expr_pos
+              let can_be_captured = Aast_utils.can_be_captured expr in
+              Lints_errors.redundant_cast
+                ~can_be_captured
+                ~check_status
+                cast
+                pos
+                expr_pos
             | _ -> ()
           end
           | _ -> ()

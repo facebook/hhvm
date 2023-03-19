@@ -31,10 +31,12 @@ let handler =
       function
       | ( _,
           hole_pos,
-          Aast.Hole ((expr_ty, expr_pos, _), _, dest_ty, Aast.UnsafeCast _) )
+          Aast.Hole ((expr_ty, expr_pos, expr), _, dest_ty, Aast.UnsafeCast _)
+        )
         when (not @@ Typing_defs.is_any expr_ty)
              && Typing_subtype.is_sub_type env expr_ty dest_ty ->
-        Lints_errors.redundant_unsafe_cast hole_pos expr_pos
+        let can_be_captured = Aast_utils.can_be_captured expr in
+        Lints_errors.redundant_unsafe_cast ~can_be_captured hole_pos expr_pos
       | (_, _, Aast.Hole ((exp_ty, hole_pos, _), src_ty, _, Aast.UnsafeCast _))
         when is_mixed src_ty && (not (is_mixed exp_ty)) && T.is_denotable exp_ty
         ->

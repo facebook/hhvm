@@ -43,6 +43,7 @@
   (pps ppx_deriving.std))
  (libraries
   annotated_ast
+  annotated_ast_utils
   errors
   naming
   nast

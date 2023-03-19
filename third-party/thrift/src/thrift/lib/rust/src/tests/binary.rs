@@ -440,7 +440,7 @@ fn write_message_begin() {
 
 #[test]
 fn serializer_overflow() {
-    let vec: Vec<u8> = (0..u8::MAX).into_iter().collect();
+    let vec: Vec<u8> = (0..u8::MAX).collect();
     let buf = serialize!(BinaryProtocol, |p| for i in 0..u8::MAX {
         let _ = p.write_byte(i as i8);
     });

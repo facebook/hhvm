@@ -38,6 +38,40 @@ let exit_if_incorrect_tcopt ctx : unit =
     exit 2
   )
 
+let print_intra_constraint = Fn.compose (Format.printf "%s\n") Constraint.show
+
+let print_inter_constraint =
+  Fn.compose (Format.printf "%s\n") H.show_inter_constraint_
+
+let print_solution reader ~validate_parseable : unit =
+  let summary = Sdt_analysis_summary.calc reader in
+  Sdt_analysis_summary_jsonl.of_summary summary
+  |> Sequence.iter ~f:(fun line ->
+         (if validate_parseable then
+           let (_ : Summary.nadable list option) =
+             Sdt_analysis_summary_jsonl.nadables_of_line_exn line
+           in
+           ());
+         Format.printf "%s\n" line)
+
+module StandaloneApi = struct
+  let dump_persisted ~db_dir =
+    let reader = H.debug_dump ~db_dir in
+    H.Read.get_keys reader
+    |> Sequence.iter ~f:(fun id ->
+           Format.printf "Intraprocedural constraints for %s\n" @@ H.Id.show id;
+           H.Read.get_intras reader id
+           |> Sequence.iter ~f:print_intra_constraint;
+           Format.printf "Interprocedural constraints for %s\n" @@ H.Id.show id;
+           H.Read.get_inters reader id
+           |> Sequence.iter ~f:print_inter_constraint;
+           Format.print_newline ())
+
+  let solve_persisted ~db_dir =
+    let reader = H.solve ~db_dir in
+    print_solution reader ~validate_parseable:false
+end
+
 let create_handler ~db_dir ~worker_id ctx : Tast_visitor.handler =
   exit_if_incorrect_tcopt ctx;
   let (_flush, writer) = H.Write.create ~db_dir ~worker_id in
@@ -61,18 +95,6 @@ let parse_command ~command ~verbosity ~on_bad_command =
   in
   Sdt_analysis_options.mk ~verbosity ~command
 
-let print_solution reader ~validate_parseable : unit =
-  let summary = Sdt_analysis_summary.calc reader in
-  Sdt_analysis_summary_jsonl.of_summary summary
-  |> Sequence.iter ~f:(fun line ->
-         if validate_parseable then (
-           let (_ : Summary.nadable list option) =
-             Sdt_analysis_summary_jsonl.nadables_of_line_exn line
-           in
-           ();
-           Format.printf "%s\n" line
-         ))
-
 let do_tast
     (options : Options.t) (ctx : Provider_context.t) (tast : Tast.program) =
   let Options.{ command; verbosity } = options in
@@ -86,12 +108,6 @@ let do_tast
              "%s\n"
              (PP.decorated ~show:Constraint.show ~verbosity constr));
     Format.printf "\n%!"
-  in
-  let print_intra_constraint =
-    Fn.compose (Format.printf "%s\n") Constraint.show
-  in
-  let print_inter_constraint =
-    Fn.compose (Format.printf "%s\n") H.show_inter_constraint_
   in
   let print_intra_constraints id (intra_constraints : Constraint.t list) =
     if not @@ List.is_empty intra_constraints then (
@@ -138,20 +154,6 @@ let do_tast
     let reader = H.solve ~db_dir in
     if verbosity > 0 then log_intras reader;
     print_solution reader ~validate_parseable:true
-  | Options.DumpPersistedConstraints ->
-    let reader = H.debug_dump ~db_dir:default_db_dir in
-    H.Read.get_keys reader
-    |> Sequence.iter ~f:(fun id ->
-           Format.printf "Intraprocedural constraints for %s\n" @@ H.Id.show id;
-           H.Read.get_intras reader id
-           |> Sequence.iter ~f:print_intra_constraint;
-           Format.printf "Interprocedural constraints for %s\n" @@ H.Id.show id;
-           H.Read.get_inters reader id
-           |> Sequence.iter ~f:print_inter_constraint;
-           Format.print_newline ())
-  | Options.SolvePersistedConstraints ->
-    let reader = H.solve ~db_dir:default_db_dir in
-    print_solution reader ~validate_parseable:false
 
 let do_ ~command ~verbosity ~on_bad_command =
   let opts = parse_command ~command ~on_bad_command ~verbosity in

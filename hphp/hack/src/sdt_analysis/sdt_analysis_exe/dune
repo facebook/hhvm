@@ -1,0 +1,8 @@
+(executable
+ (name sdt_analysis_exe)
+ (flags
+  (:standard -linkall))
+(modes exe byte_complete)
+ (libraries
+  sdt_analysis
+  default_injector_config))

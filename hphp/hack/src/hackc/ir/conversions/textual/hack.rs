@@ -229,6 +229,9 @@ pub(crate) enum Builtin {
     /// Gets a named field from a struct.
     #[decl(fn hack_dim_field_get_or_null(base: **HackMixed, name: *HackMixed) -> **HackMixed)]
     DimFieldGetOrNull,
+    /// Get the value of a named field from a struct.
+    #[decl(fn hack_field_get(base: *HackMixed, name: *HackMixed) -> *HackMixed)]
+    FieldGet,
     /// Turns a raw float into a Mixed.
     #[decl(fn hack_float(float) -> *HackFloat)]
     Float,

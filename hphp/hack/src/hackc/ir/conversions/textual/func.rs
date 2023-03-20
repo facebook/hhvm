@@ -43,6 +43,7 @@ use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
 use crate::mangle::TypeName;
+use crate::member_op;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Expr;
@@ -129,8 +130,8 @@ pub(crate) fn write_func(
 
     // See if we need a temp var for use by member_ops.
     let base_ty;
-    if crate::member_op::func_needs_base_var(&func) {
-        let base = crate::member_op::base_var(&unit_state.strings);
+    if member_op::func_needs_base_var(&func) {
+        let base = member_op::base_var(&unit_state.strings);
         base_ty = textual::Ty::mixed();
         locals.push((base, &base_ty));
     }
@@ -287,6 +288,45 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             | Hhbc::CUGetL(lid, _)
             | Hhbc::ConsumeL(lid, _),
         ) => write_load_var(state, iid, lid)?,
+        Instr::Hhbc(Hhbc::CGetS([field, class], _, _)) => {
+            let class_str = lookup_constant_string(state.func, class);
+            let field_str = lookup_constant_string(state.func, field);
+            let output = match (class_str, field_str) {
+                (None, Some(f)) => {
+                    // "C"::foo
+                    let this = state.lookup_vid(class);
+                    let field = util::escaped_string(&state.strings.lookup_bstr(f));
+                    state.call_builtin(hack::Builtin::FieldGet, (this, field))?
+                }
+                // Although the rest of these are technically valid they're
+                // basically impossible to produce with HackC.
+                _ => {
+                    panic!("Unhandled CGetS");
+                }
+            };
+            state.set_iid(iid, output);
+        }
+        Instr::Hhbc(Hhbc::SetS([field, class, value], _, _)) => {
+            let class_str = lookup_constant_string(state.func, class);
+            let field_str = lookup_constant_string(state.func, field);
+            let value = state.lookup_vid(value);
+            match (class_str, field_str) {
+                (None, Some(f)) => {
+                    // "C"::foo
+                    let obj = member_op::base_from_vid(state, class)?;
+                    let field = util::escaped_string(&state.strings.lookup_bstr(f));
+                    let dst = state.call_builtin(hack::Builtin::DimFieldGet, (obj, field))?;
+                    state.store_mixed(dst, value.clone())?;
+                }
+                // Although the rest of these are technically valid they're
+                // basically impossible to produce with HackC.
+                _ => {
+                    panic!("Unhandled SetS");
+                }
+            }
+
+            state.set_iid(iid, value);
+        }
         Instr::Hhbc(Hhbc::IncDecL(lid, op, _)) => write_inc_dec_l(state, iid, lid, op)?,
         Instr::Hhbc(Hhbc::NewObjD(clsid, _)) => {
             // NewObjD allocates a default initialized object; constructor invocation is a
@@ -334,7 +374,7 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
                 textual::Expr::Const(textual::Const::Null),
             )?;
         }
-        Instr::MemberOp(ref mop) => crate::member_op::write(state, iid, mop)?,
+        Instr::MemberOp(ref mop) => member_op::write(state, iid, mop)?,
         Instr::Special(Special::Textual(Textual::AssertFalse(vid, _))) => {
             // I think "prune_not" means "stop if this expression IS true"...
             let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
@@ -1060,5 +1100,34 @@ pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Re
     textual_todo! {
         let target = FunctionName::Unmangled(format!("$todo.{msg}"));
         fb.call(&target, ())
+    }
+}
+
+fn lookup_constant_string(func: &Func<'_>, mut vid: ValueId) -> Option<ir::UnitBytesId> {
+    use ir::FullInstrId;
+    loop {
+        match vid.full() {
+            FullInstrId::Instr(iid) => {
+                let instr = func.instr(iid);
+                match instr {
+                    // If the pointed-at instr is a copy then follow it and try
+                    // again.
+                    Instr::Special(Special::Copy(copy)) => {
+                        vid = *copy;
+                    }
+                    _ => return None,
+                }
+            }
+            FullInstrId::Constant(cid) => {
+                let constant = func.constant(cid);
+                match constant {
+                    Constant::String(id) => return Some(*id),
+                    _ => return None,
+                }
+            }
+            FullInstrId::None => {
+                return None;
+            }
+        }
     }
 }

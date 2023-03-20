@@ -396,6 +396,48 @@ function dynamic_const(C $c): void {
   echo $c::MY_CONSTANT;
 }
 
+// TEST-CHECK-BAL: define $root.cgets
+// CHECK: define $root.cgets($this: *void) : *void {
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
+// CHECK:   n1 = $builtins.hack_field_get(n0, "prop3")
+// CHECK:   n2 = $root.sink(null, n1)
+// CHECK:   ret null
+// CHECK: }
+function cgets(): void {
+  sink(C::$prop3);
+}
+
+// TEST-CHECK-BAL: define $root.sets
+// CHECK: define $root.sets($this: *void) : *void {
+// CHECK: local $0: *void, $1: *void
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hack_new_dict($builtins.hack_string("kind"), $builtins.hack_int(3))
+// CHECK:   n1 = $builtins.hhbc_class_get_c($builtins.hack_string("C"))
+// CHECK:   n2 = $root.source(null)
+// CHECK:   store &$0 <- n2: *HackMixed
+// CHECK:   store &$1 <- n0: *HackMixed
+// CHECK:   n3 = $builtins.hhbc_is_type_struct_c(n2, n0, $builtins.hack_int(1))
+// CHECK:   jmp b1, b2
+// CHECK: #b1:
+// CHECK:   prune $builtins.hack_is_true(n3)
+// CHECK:   n4: *HackMixed = load &$0
+// CHECK:   store &$1 <- null: *HackMixed
+// CHECK:   store &base <- n1: *HackMixed
+// CHECK:   n5 = $builtins.hack_dim_field_get(&base, "prop3")
+// CHECK:   store n5 <- n4: *HackMixed
+// CHECK:   ret null
+// CHECK: #b2:
+// CHECK:   prune ! $builtins.hack_is_true(n3)
+// CHECK:   n6: *HackMixed = load &$0
+// CHECK:   n7: *HackMixed = load &$1
+// CHECK:   n8 = $builtins.hhbc_throw_as_type_struct_exception(n6, n7)
+// CHECK:   unreachable
+// CHECK: }
+function sets(): void {
+  C::$prop3 = source() as float;
+}
+
 // TEST-CHECK-BAL: global const::C$static::MY_CONSTANT
 // CHECK: global const::C$static::MY_CONSTANT : *HackMixed
 

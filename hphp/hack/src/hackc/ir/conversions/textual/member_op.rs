@@ -282,7 +282,10 @@ pub(crate) fn func_needs_base_var(func: &ir::Func<'_>) -> bool {
     false
 }
 
-fn base_from_vid(state: &mut FuncState<'_, '_, '_>, src: ValueId) -> Result<textual::Expr> {
+pub(crate) fn base_from_vid(
+    state: &mut FuncState<'_, '_, '_>,
+    src: ValueId,
+) -> Result<textual::Expr> {
     // Unfortunately we need base to be a pointer to a value, not a
     // value itself - so store it in `base` so we can return a pointer
     // to `base`.

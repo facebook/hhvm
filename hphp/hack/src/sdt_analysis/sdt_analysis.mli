@@ -19,7 +19,8 @@ val default_db_dir : string
 val create_handler :
   db_dir:string -> worker_id:int -> Provider_context.t -> Tast_visitor.handler
 
-val patches_of_codemod_line : string -> ServerRefactorTypes.patch list
+val patches_of_codemod_line :
+  string -> ServerRefactorTypes.patch list * string list
 
 module StandaloneApi : sig
   (* solve constraints from `db_dir` and log the solution to stdout *)

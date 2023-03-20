@@ -12,6 +12,7 @@
   full_fidelity
   full_fidelity_refactor
   relative_path
+  sdt_analysis_remote_logging
   server_command_types
   tast_env
   typing_ast

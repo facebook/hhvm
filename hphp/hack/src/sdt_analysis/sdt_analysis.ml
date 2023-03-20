@@ -56,10 +56,18 @@ let print_solution reader ~validate_parseable : unit =
          Format.printf "%s\n" line)
 
 let patches_of_codemod_line line =
-  line
-  |> Sdt_analysis_summary_jsonl.nadables_of_line_exn
-  |> Option.value ~default:[]
-  |> List.bind ~f:Sdt_analysis_codemod.patches_of_nadable
+  let nadables =
+    line
+    |> Sdt_analysis_summary_jsonl.nadables_of_line_exn
+    |> Option.value ~default:[]
+  in
+  let patches =
+    nadables |> List.bind ~f:Sdt_analysis_codemod.patches_of_nadable
+  in
+  let ids =
+    nadables |> List.map ~f:(fun nadable -> nadable.Summary.id |> H.Id.sid_of_t)
+  in
+  (patches, ids)
 
 module StandaloneApi = struct
   let dump_persisted ~db_dir =

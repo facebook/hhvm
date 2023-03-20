@@ -5,6 +5,7 @@
  *
  *)
 open Hh_prelude
+module RemoteLogging = Sdt_analysis_remote_logging
 
 module Reverts = struct
   type revert = {
@@ -28,28 +29,37 @@ end
 
 let apply_all
     ~get_error_count ~get_patches ~apply_patches ~path_to_jsonl ~strategy =
+  let remote_logging = RemoteLogging.create ~strategy in
   let%lwt (baseline_error_count, init_telemetry) = get_error_count () in
 
   let handle_codemod_group codemod_line =
-    let%lwt (patches, telemetry) = get_patches codemod_line in
-    let reverts = Reverts.of_patches patches in
-    apply_patches patches;
-    let%lwt (error_count, more_telemetry) = get_error_count () in
-    let telemetry = Telemetry.add telemetry more_telemetry in
-    let error_count_diff = error_count - baseline_error_count in
-    assert (error_count_diff > -1);
-    let should_revert =
-      match strategy with
-      | `CodemodSdtCumulative -> error_count_diff > 0
-      | `CodemodSdtIndependent -> true
-    in
-    if should_revert then (
-      Reverts.apply reverts;
-      let%lwt (error_count, more_telemetry) = get_error_count () in
-      assert (error_count = baseline_error_count);
-      Lwt.return @@ Telemetry.add telemetry more_telemetry
-    ) else
+    let%lwt ((patches, patched_ids), telemetry) = get_patches codemod_line in
+    if List.is_empty patches then
       Lwt.return telemetry
+    else begin
+      let reverts = Reverts.of_patches patches in
+      apply_patches patches;
+      let%lwt (error_count, more_telemetry) = get_error_count () in
+      let telemetry = Telemetry.add telemetry more_telemetry in
+      let error_count_diff = error_count - baseline_error_count in
+      assert (error_count_diff > -1);
+      let should_revert =
+        match strategy with
+        | `CodemodSdtCumulative -> error_count_diff > 0
+        | `CodemodSdtIndependent -> true
+      in
+      RemoteLogging.submit_patch_result
+        remote_logging
+        ~patched_ids
+        ~error_count:error_count_diff;
+      if should_revert then (
+        Reverts.apply reverts;
+        let%lwt (error_count, more_telemetry) = get_error_count () in
+        assert (error_count = baseline_error_count);
+        Lwt.return @@ Telemetry.add telemetry more_telemetry
+      ) else
+        Lwt.return telemetry
+    end
   in
 
   let combine_line_results acc line =

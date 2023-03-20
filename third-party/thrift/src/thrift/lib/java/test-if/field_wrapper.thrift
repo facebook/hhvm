@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/java.thrift"
+include "thrift/lib/thrift/any.thrift"
 
 package "test.dev/thrift/lib/java/test/wrapper"
 
@@ -29,6 +30,10 @@ struct TestStruct {
   11: binary wrappedByteBuf_field2;
   12: i32 wrappedDoubleAdaptedInt_field;
   13: i32 wrappedSingleAdaptedInt_field;
+  14: list<i32> listAdaptedInt_field;
+  15: map<i32, map<i16, list<i16>>> nestedAdapted_field;
+  16: list<any.Any> anyList_field;
+  17: list<i32> wrappedDoubleAdaptedIntList_field;
 }
 
 @java.Adapter{
@@ -42,6 +47,18 @@ typedef binary SlicedByteBuf
   typeClassName = "java.lang.String",
 }
 typedef i32 adaptedInt
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.ShortToStringTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef i16 adaptedShort
+
+@java.Adapter{
+  adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter',
+  typeClassName = 'com.facebook.thrift.adapter.test.Wrapped<List<String>>',
+}
+typedef list<adaptedInt> doubleAdaptedIntList
 
 struct WrappedTestStruct {
   1001: i32 context;
@@ -86,6 +103,33 @@ struct WrappedTestStruct {
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<String>",
   }
   13: adaptedInt wrappedSingleAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<String>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<String>>",
+  }
+  14: list<adaptedInt> listAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Map<String, Map<String, List<String>>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Map<String, Map<String, List<String>>>>",
+  }
+  15: map<
+    adaptedInt,
+    map<adaptedShort, list<adaptedShort>>
+  > nestedAdapted_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
+  }
+  16: list<any.Any> anyList_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+  }
+  17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 }
 
 @thrift.TerseWrite
@@ -132,6 +176,30 @@ struct TerseWrappedTestStruct {
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<String>",
   }
   13: adaptedInt wrappedSingleAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<String>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<String>>",
+  }
+  14: list<adaptedInt> listAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Map<String, Map<Short, List<String>>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Map<String, Map<Short, List<String>>>>",
+  }
+  15: map<adaptedInt, map<i16, list<adaptedShort>>> nestedAdapted_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
+  }
+  16: list<any.Any> anyList_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+  }
+  17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 }
 
 @thrift.TerseWrite
@@ -177,6 +245,33 @@ struct MutableTerseWrappedTestStruct {
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<String>",
   }
   13: adaptedInt wrappedSingleAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<String>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<String>>",
+  }
+  14: list<adaptedInt> listAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Map<String, Map<String, List<String>>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Map<String, Map<String, List<String>>>>",
+  }
+  15: map<
+    adaptedInt,
+    map<adaptedShort, list<adaptedShort>>
+  > nestedAdapted_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
+  }
+  16: list<any.Any> anyList_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+  }
+  17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 } (java.swift.mutable = "true")
 
 safe permanent client exception WrappedTestException {
@@ -222,4 +317,31 @@ safe permanent client exception WrappedTestException {
     typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<String>",
   }
   13: optional adaptedInt wrappedSingleAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<String>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<String>>",
+  }
+  14: list<adaptedInt> listAdaptedInt_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<Map<String, Map<String, List<String>>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<Map<String, Map<String, List<String>>>>",
+  }
+  15: map<
+    adaptedInt,
+    map<adaptedShort, list<adaptedShort>>
+  > nestedAdapted_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<List<com.facebook.thrift.any.Any>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<List<com.facebook.thrift.any.Any>>",
+  }
+  16: list<any.Any> anyList_field;
+
+  @java.Wrapper{
+    wrapperClassName = "com.facebook.thrift.wrapper.test.FieldWrapper<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+    typeClassName = "com.facebook.thrift.wrapper.test.PoliciedField<com.facebook.thrift.adapter.test.Wrapped<List<String>>>",
+  }
+  17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 }

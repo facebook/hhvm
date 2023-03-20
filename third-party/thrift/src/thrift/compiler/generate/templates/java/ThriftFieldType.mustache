@@ -15,5 +15,5 @@
   limitations under the License.
 
 }}{{!
-}}{{#field:optional?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:optional?}}{{!
+}}{{#field:optional?}}{{#field:type}}{{#type:hasAdapter?}}{{> AdaptedBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}} {{/field:type}}{{/field:optional?}}{{!
 }}{{^field:optional?}}{{#field:type}}{{> Type}}{{/field:type}}{{/field:optional?}}

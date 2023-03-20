@@ -17,12 +17,7 @@
 }}{{^field:value}}{{!
   }}{{#field:terse?}}{{!
     }}{{#field:hasAdapter?}}{{!
-    }}{{#field:hasMultipleTypeAdapters?}}{{!
-      }}_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{#field:isObject?}}{{#field:type}}{{> BoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}})){{!
-    }}{{/field:hasMultipleTypeAdapters?}}{{!
-    }}{{^field:hasMultipleTypeAdapters?}}{{!
-      }}_{{field:javaName}}_Adapter.fromThrift({{#field:isObject?}}{{#field:type}}{{> BoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}}){{!
-    }}{{/field:hasMultipleTypeAdapters?}}{{!
+    }}{{> FromThriftStart}}{{#field:isObject?}}{{#field:type}}{{> ThriftBoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}}{{> FromThriftEnd}}{{!
     }}{{/field:hasAdapter?}}{{!
     }}{{^field:hasAdapter?}}{{!
       }}{{#field:isObject?}}{{!
@@ -46,12 +41,7 @@
 
 }}{{#field:value}}{{!
 }}{{#field:hasAdapter?}}{{!
-  }}{{#field:hasMultipleTypeAdapters?}}{{!
-    }}_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}})){{!
-  }}{{/field:hasMultipleTypeAdapters?}}{{!
-  }}{{^field:hasMultipleTypeAdapters?}}{{!
-    }}_{{field:javaName}}_Adapter.fromThrift({{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}){{!
-  }}{{/field:hasMultipleTypeAdapters?}}{{!
+  }}{{> FromThriftStart}}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{> FromThriftEnd}}{{!
 }}{{/field:hasAdapter?}}{{!
 }}{{^field:hasAdapter?}}{{!
   }}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{!

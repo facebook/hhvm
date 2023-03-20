@@ -14,12 +14,23 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-}}{{#field:hasAdapter?}}{{!
-  }}{{#field:hasFieldAdapter?}}{{field:fieldAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-  }}{{^field:hasFieldAdapter?}}{{field:typeAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-}}{{/field:hasAdapter?}}{{!
-}}{{^field:hasAdapter?}}{{!
-  }}{{#field:optional?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:optional?}}{{!
-  }}{{^field:optional?}}{{#field:type}}{{> Type}}{{/field:type}}{{/field:optional?}}{{!
-}}{{/field:hasAdapter?}}
+}}{{#type:javaType}}{{!
+  }}{{type:javaType}}{{!
+}}{{/type:javaType}}{{!
+}}{{^type:javaType}}{{!
+
+  }}{{#type:typedef?}}{{!
+    }}{{#type:typedef_type}}{{!
+      }}{{#type:lastAdapter?}}{{!
+        }}{{type:setAdapter}}{{> AdaptedBoxedType}}{{!
+      }}{{/type:lastAdapter?}}{{!
+      }}{{^type:lastAdapter?}}{{!
+        }}{{type:typeClassName}}{{!
+      }}{{/type:lastAdapter?}}{{!
+    }}{{/type:typedef_type}}{{!
+  }}{{/type:typedef?}}{{!
+  }}{{^type:typedef?}}{{!
+    }}{{> BoxedType}}{{!
+  }}{{/type:typedef?}}{{!
+
+}}{{/type:javaType}}

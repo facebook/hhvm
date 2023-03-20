@@ -14,21 +14,25 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}
-{{#struct:fields}}
-{{#field:hasAdapter?}}
-private static final com.facebook.thrift.adapter.TypeAdapter<{{#field:type}}{{> BoxedType}}{{/field:type}}, {{field:typeClassName}}> _{{field:javaName}}_Adapter = new {{field:adapterClassName}}();
-{{#field:hasMultipleTypeAdapters?}}
-private static final com.facebook.thrift.adapter.TypeAdapter<{{field:typeClassName}}, {{field:secondTypeClassName}}> _{{field:javaName}}_Adapter2 = new {{field:secondAdapterClassName}}();
-{{/field:hasMultipleTypeAdapters?}}
-{{/field:hasAdapter?}}
-{{#field:hasWrapper?}}
-private static final com.facebook.thrift.adapter.Wrapper<{{!
-  }}{{#field:hasAdapter?}}{{!
-    }}{{#field:hasMultipleTypeAdapters?}}{{field:secondTypeClassName}}{{/field:hasMultipleTypeAdapters?}}{{!
-    }}{{^field:hasMultipleTypeAdapters?}}{{field:typeClassName}}{{/field:hasMultipleTypeAdapters?}}{{!
-  }}{{/field:hasAdapter?}}{{!
-  }}{{^field:hasAdapter?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:hasAdapter?}}{{!
-  }}, {{field:wrapperType}}, com.facebook.thrift.payload.ThriftSerializable> _{{field:javaName}}_Wrapper = new {{field:wrapper}}();
-{{/field:hasWrapper?}}
-{{/struct:fields}}
+}}{{!
+}}{{struct:clearAdapter}}{{!
+}}{{#struct:fields}}{{!
+    }}{{#field:hasFieldAdapter?}}
+        private static final com.facebook.thrift.adapter.TypeAdapter<{{#field:type}}{{> BoxedType}}{{/field:type}}, {{field:fieldAdapterTypeClassName}}> _{{field:javaName}}_Adapter = new {{field:fieldAdapterClassName}}();
+    {{/field:hasFieldAdapter?}}{{!
+    }}{{#field:hasWrapper?}}
+        private static final com.facebook.thrift.adapter.Wrapper<{{!
+       }}{{#field:hasAdapter?}}{{!
+         }}{{#field:hasFieldAdapter?}}{{field:fieldAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
+         }}{{^field:hasFieldAdapter?}}{{field:typeAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
+       }}{{/field:hasAdapter?}}{{!
+       }}{{^field:hasAdapter?}}{{!
+         }}{{#field:type}}{{> BoxedType}}{{/field:type}}{{!
+       }}{{/field:hasAdapter?}}{{!
+      }}, {{field:wrapperType}}, com.facebook.thrift.payload.ThriftSerializable> _{{field:javaName}}_Wrapper = new {{field:wrapper}}();
+    {{/field:hasWrapper?}}{{!
+
+}}{{#field:type}}{{!
+  }}{{> struct/NestedAdapterDefinition}}{{!
+}}{{/field:type}}{{!
+}}{{/struct:fields}}

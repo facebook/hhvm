@@ -35,12 +35,7 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
           {{field:nestedDepth++}}{{> ReadType}}{{field:nestedDepth--}}
           {{/field:type}}
           {{#field:hasAdapter?}}
-          {{#field:hasMultipleTypeAdapters?}}
-          res.value = _{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));
-          {{/field:hasMultipleTypeAdapters?}}
-          {{^field:hasMultipleTypeAdapters?}}
-          res.value = _{{field:javaName}}_Adapter.fromThrift({{field:javaName}});
-          {{/field:hasMultipleTypeAdapters?}}
+          res.value = {{> FromThriftStart}}{{field:javaName}}{{> FromThriftEnd}};
           {{/field:hasAdapter?}}
           {{^field:hasAdapter?}}
           res.value = {{field:javaName}};

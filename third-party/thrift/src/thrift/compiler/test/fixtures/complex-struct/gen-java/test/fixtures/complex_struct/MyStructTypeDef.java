@@ -573,7 +573,6 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         oprot.writeMapBegin(new TMap(TType.I16, TType.LIST, _iter0.size()));
         for (Map.Entry<Short, List<List<Double>>> _iter1 : _iter0.entrySet()) {
           oprot.writeI16(_iter1.getKey());
-          
           oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
         for (List<Double> _iter2 : _iter1.getValue()) {
           oprot.writeListBegin(new TList(TType.DOUBLE, _iter2.size()));

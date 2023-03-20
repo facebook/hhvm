@@ -15,9 +15,16 @@
   limitations under the License.
 
 }}{{#type:typedef?}}{{!
-  }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
-  }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
-  }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{#type:isAdapterSet?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{type:setAdapter}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{/type:isAdapterSet?}}{{!
+  }}{{^type:isAdapterSet?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{/type:isAdapterSet?}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
 }}{{#type:set?}}{{> ReadTypeContainer}}{{/type:set?}}{{!
@@ -28,7 +35,7 @@
 
 }}{{#type:struct?}}{{!
 }}{{#field:isNested?}}{{> BoxedType}}.read0(oprot){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{#field:hasAdapter?}}{{> BoxedType}} {{field:javaName}} = {{> BoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = {{> BoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{#field:hasAdapter?}}{{> ThriftBoxedType}} {{field:javaName}} = {{> ThriftBoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = {{> ThriftBoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{/field:isNested?}}{{!
 }}{{/type:struct?}}{{!
 
 }}{{#type:enum?}}{{!
@@ -37,19 +44,29 @@
 }}{{/type:enum?}}{{!
 
 }}{{#type:binary?}}{{!
-}}{{#field:isNested?}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{/field:hasAdapter?}}{{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = {{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}};{{/field:hasAdapter?}}{{/field:isNested?}}{{!
+}}{{#field:isNested?}}{{!
+  }}{{> ReadTypeBinary}}{{!
+}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{!
+  }}{{#field:type}}{{#type:hasAdapter?}}{{> ThriftBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}}{{/field:type}} {{field:javaName}} = {{!
+  }}{{> ReadTypeBinary}};{{!
+}}{{/field:isNested?}}{{!
 }}{{/type:binary?}}{{!
 
 }}{{#type:string?}}{{!
 }}{{#field:isNested?}}{{!
-  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
+  }}{{#type:isBinaryString?}}{{!
+    }}{{> ReadTypeBinary}}{{!
+  }}{{/type:isBinaryString?}}{{!
   }}{{^type:isBinaryString?}}{{!
     }}oprot.readString({{> Utf8Validation}}){{!
   }}{{/type:isBinaryString?}}{{!
 }}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{!
-  }}{{#type:isBinaryString?}}{{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = {{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}};{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
+  }}{{#type:isBinaryString?}}{{!
+    }}{{#field:type}}{{#type:hasAdapter?}}{{> ThriftBoxedType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> BoxedType}}{{/type:hasAdapter?}}{{/field:type}} {{field:javaName}} = {{!
+    }}{{> ReadTypeBinary}};{{!
+  }}{{/type:isBinaryString?}}{{!
   }}{{^type:isBinaryString?}}{{> ThriftFieldType}} {{field:javaName}} = {{!
     }}oprot.readString({{> Utf8Validation}});{{!
   }}{{/type:isBinaryString?}}{{!

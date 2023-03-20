@@ -23,19 +23,9 @@ public void write0(TProtocol oprot) throws TException {
   com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
   {{/struct:hasTerseField?}}
   {{#struct:fields_in_serialization_order}}
-  {{#field:hasAdapter?}}
-  {{#field:hasMultipleTypeAdapters?}}
-  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(_{{field:javaName}}_Adapter2.toThrift({{#field:hasWrapper?}}_{{field:javaName}}_Wrapper.toThrift({{/field:hasWrapper?}}this.{{field:javaName}})){{#field:hasWrapper?}}){{/field:hasWrapper?}};
-  {{/field:hasMultipleTypeAdapters?}}
-  {{^field:hasMultipleTypeAdapters?}}
-  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift({{#field:hasWrapper?}}_{{field:javaName}}_Wrapper.toThrift({{/field:hasWrapper?}}this.{{field:javaName}}){{#field:hasWrapper?}}){{/field:hasWrapper?}};
-  {{/field:hasMultipleTypeAdapters?}}
-  {{/field:hasAdapter?}}
-  {{^field:hasAdapter?}}
-  {{#field:hasWrapper?}}
-  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Wrapper.toThrift(this.{{field:javaName}});
-  {{/field:hasWrapper?}}
-  {{/field:hasAdapter?}}
+  {{#field:hasAdapterOrWrapper?}}
+  {{#field:type}}{{> AdaptedBoxedType}}{{/field:type}} {{field:javaName}} = {{> ToThriftStart}}this.{{field:javaName}}{{> ToThriftEnd}};
+  {{/field:hasAdapterOrWrapper?}}
   {{#field:isNullableOrOptionalNotEnum?}}
   {{#field:terse?}}  
   java.util.Objects.requireNonNull({{field:javaName}}, "{{field:javaName}} must not be null");

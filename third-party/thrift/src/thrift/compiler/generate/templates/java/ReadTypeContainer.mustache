@@ -35,9 +35,9 @@
                 {{> ReadTypeContainerNestedValue }}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{> Type}} _value1 = {{> ReadType}};
+                {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{/type:isContainer?}}{{!
-                }}{{field:javaName}}.add(_value1);
+                }}{{field:javaName}}.add({{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value1){{#type:hasAdapter?}}){{/type:hasAdapter?}};
                 {{/type:set_elem_type}}
             }
             oprot.readSetEnd();
@@ -58,9 +58,9 @@
                 {{> ReadTypeContainerNestedValue }}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{> Type}} _value1 = {{> ReadType}};
+                {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{/type:isContainer?}}{{!
-                }}{{field:javaName}}.add(_value1);
+                }}{{field:javaName}}.add({{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value1){{#type:hasAdapter?}}){{/type:hasAdapter?}};
                 {{/type:list_elem_type}}
             }
             oprot.readListEnd();
@@ -81,7 +81,7 @@
                 {{> ReadTypeContainerNestedKey }}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{> Type}} _key1 = {{> ReadType}};
+                {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _key1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{/type:isContainer?}}
                 {{/type:key_type}}
                 {{#type:value_type}}
@@ -89,10 +89,12 @@
                 {{> ReadTypeContainerNestedValue }}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{> Type}} _value1 = {{> ReadType}};
+                {{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value1 = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};
                 {{/type:isContainer?}}
-                {{/type:value_type}}{{!
-                }}{{field:javaName}}.put(_key1, _value1);
+                {{/type:value_type}}
+                {{field:javaName}}.put({{!
+                }}{{#type:key_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_key1{{#type:hasAdapter?}}){{/type:hasAdapter?}}, {{/type:key_type}}{{!
+                }}{{#type:value_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}_value1{{#type:hasAdapter?}}){{/type:hasAdapter?}});{{/type:value_type}}
             }
             }
             oprot.readMapEnd();{{!

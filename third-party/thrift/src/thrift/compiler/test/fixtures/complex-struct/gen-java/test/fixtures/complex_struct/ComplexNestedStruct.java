@@ -1473,7 +1473,6 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
         for (Map.Entry<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
-          
           oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
         for (List<test.fixtures.complex_struct.MyStruct> _iter2 : _iter1.getValue()) {
           oprot.writeListBegin(new TList(TType.STRUCT, _iter2.size()));
@@ -1521,7 +1520,6 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
           oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter1.size()));
         for (Map.Entry<String, List<test.fixtures.complex_struct.MyStruct>> _iter2 : _iter1.entrySet()) {
           oprot.writeString(_iter2.getKey());
-          
           oprot.writeListBegin(new TList(TType.STRUCT, _iter2.getValue().size()));
         for (test.fixtures.complex_struct.MyStruct _iter3 : _iter2.getValue()) {
           _iter3.write0(oprot);
@@ -1543,7 +1541,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
           oprot.writeI32(_iter2);
         }
         oprot.writeSetEnd();
-oprot.writeI64(_iter1.getValue());
+          oprot.writeI64(_iter1.getValue());
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
@@ -1558,7 +1556,7 @@ oprot.writeI64(_iter1.getValue());
           oprot.writeString(_iter2);
         }
         oprot.writeListEnd();
-oprot.writeI32(_iter1.getValue());
+          oprot.writeI32(_iter1.getValue());
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
@@ -1574,7 +1572,6 @@ oprot.writeI32(_iter1.getValue());
           oprot.writeString(_iter2.getValue());
         }
         oprot.writeMapEnd();
-
           oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getValue().size()));
         for (Map.Entry<Integer, String> _iter2 : _iter1.getValue().entrySet()) {
           oprot.writeI32(_iter2.getKey());
@@ -1599,7 +1596,6 @@ oprot.writeI32(_iter1.getValue());
         oprot.writeListEnd();
         }
         oprot.writeSetEnd();
-
           oprot.writeMapBegin(new TMap(TType.LIST, TType.STRING, _iter1.getValue().size()));
         for (Map.Entry<List<Set<String>>, String> _iter2 : _iter1.getValue().entrySet()) {
           oprot.writeListBegin(new TList(TType.SET, _iter2.getKey().size()));
@@ -1611,7 +1607,7 @@ oprot.writeI32(_iter1.getValue());
         oprot.writeSetEnd();
         }
         oprot.writeListEnd();
-oprot.writeString(_iter2.getValue());
+          oprot.writeString(_iter2.getValue());
         }
         oprot.writeMapEnd();
         }
@@ -1631,10 +1627,9 @@ oprot.writeString(_iter2.getValue());
           oprot.writeString(_iter3.getValue());
         }
         oprot.writeMapEnd();
-oprot.writeString(_iter2.getValue());
+          oprot.writeString(_iter2.getValue());
         }
         oprot.writeMapEnd();
-
           oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getValue().size()));
         for (Map.Entry<Integer, String> _iter2 : _iter1.getValue().entrySet()) {
           oprot.writeI32(_iter2.getKey());
@@ -1651,7 +1646,6 @@ oprot.writeString(_iter2.getValue());
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
         for (Map.Entry<Integer, List<test.fixtures.complex_struct.MyStruct>> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
-          
           oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
         for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1.getValue()) {
           _iter2.write0(oprot);
@@ -1667,7 +1661,6 @@ oprot.writeString(_iter2.getValue());
         oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _iter0.size()));
         for (Map.Entry<Integer, Set<Boolean>> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
-          
           oprot.writeSetBegin(new TSet(TType.BOOL, _iter1.getValue().size()));
         for (boolean _iter2 : _iter1.getValue()) {
           oprot.writeBool(_iter2);
@@ -1687,7 +1680,7 @@ oprot.writeString(_iter2.getValue());
           oprot.writeBool(_iter2);
         }
         oprot.writeSetEnd();
-oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getValue()));
+          oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getValue()));
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
@@ -1702,7 +1695,6 @@ oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_
           oprot.writeI32(_iter2);
         }
         oprot.writeListEnd();
-
           oprot.writeSetBegin(new TSet(TType.MAP, _iter1.getValue().size()));
         for (Map<Double, String> _iter2 : _iter1.getValue()) {
           oprot.writeMapBegin(new TMap(TType.DOUBLE, TType.STRING, _iter2.size()));

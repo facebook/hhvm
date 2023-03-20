@@ -15,14 +15,14 @@
   limitations under the License.
 
 }}{{!
-}}{{#field:hasWrapper?}}{{field:wrapperType}}{{/field:hasWrapper?}}{{!
-}}{{^field:hasWrapper?}}{{!
-  }}{{#field:hasAdapter?}}{{!
-    }}{{#field:hasFieldAdapter?}}{{field:fieldAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-    }}{{^field:hasFieldAdapter?}}{{field:typeAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-  }}{{/field:hasAdapter?}}{{!
-  }}{{^field:hasAdapter?}}{{!
-    }}{{#field:optional?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:optional?}}{{!
-    }}{{^field:optional?}}{{#field:type}}{{> Type}}{{/field:type}}{{/field:optional?}}{{!
-  }}{{/field:hasAdapter?}}{{!
+}}{{#field:hasTypeAdapter?}}{{!
+  }}__{{#field:type}}{{type:name}}{{/field:type}}_Adapter.toThrift({{!
+}}{{/field:hasTypeAdapter?}}{{!
+
+}}{{#field:hasFieldAdapter?}}{{!
+  }}_{{field:javaName}}_Adapter.toThrift({{!
+}}{{/field:hasFieldAdapter?}}{{!
+
+}}{{#field:hasWrapper?}}{{!
+  }}_{{field:javaName}}_Wrapper.toThrift({{!
 }}{{/field:hasWrapper?}}

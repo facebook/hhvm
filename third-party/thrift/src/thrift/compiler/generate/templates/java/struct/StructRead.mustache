@@ -26,21 +26,16 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
   {{struct:javaCapitalName}}.Builder builder = new {{struct:javaCapitalName}}.Builder();
   {{#struct:fields}}
   {{#field:terse?}}
-  {{#field:value}}  
+  {{#field:value}}
   {{#field:hasAdapter?}}
-  {{#field:hasMultipleTypeAdapters?}}
-  builder.{{> SetterName}}(_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}})));
-  {{/field:hasMultipleTypeAdapters?}}
-  {{^field:hasMultipleTypeAdapters?}}
-  builder.{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}));
-  {{/field:hasMultipleTypeAdapters?}}
+  builder.{{> SetterName}}({{> FromThriftStart}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{> FromThriftEnd}});
   {{/field:hasAdapter?}}
   {{^field:hasAdapter?}}
   {{^field:isObject?}}builder.{{> SetterName}}({{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}});{{/field:isObject?}}
   {{/field:hasAdapter?}}
   {{/field:value}}
-  {{/field:terse?}}  
-  {{/struct:fields}}  
+  {{/field:terse?}}
+  {{/struct:fields}}
   while (true) {
     __field = oprot.readFieldBegin();
     if (__field.type == TType.STOP) { break; }
@@ -52,12 +47,7 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
         {{field:nestedDepth++}}{{> ReadType}}{{field:nestedDepth--}}
         {{/field:type}}
         {{#field:hasAdapter?}}
-        {{#field:hasMultipleTypeAdapters?}}
-        builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}(_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}})));
-        {{/field:hasMultipleTypeAdapters?}}
-        {{^field:hasMultipleTypeAdapters?}}
-        builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));
-        {{/field:hasMultipleTypeAdapters?}}
+        builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}({{> FromThriftStart}}{{field:javaName}}{{> FromThriftEnd}});
         {{/field:hasAdapter?}}
         {{^field:hasAdapter?}}
         builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}({{field:javaName}});

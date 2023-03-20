@@ -19,6 +19,7 @@ package com.facebook.thrift.wrapper;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;
 
+import com.facebook.thrift.any.Any;
 import com.facebook.thrift.test.wrapper.MutableTerseWrappedTestStruct;
 import com.facebook.thrift.test.wrapper.TerseWrappedTestStruct;
 import com.facebook.thrift.test.wrapper.TestStruct;
@@ -322,5 +323,41 @@ public class WrapperStructTest {
     assertEquals(
         IntrinsicDefaults.defaultLong(), (long) st.getWrappedDoubleAdaptedIntField().getValue());
     assertEquals("0", st.getWrappedSingleAdaptedIntField().getValue());
+  }
+
+  @Test
+  public void testIntListFieldWrapper() {
+    TestStruct st =
+        new TestStruct.Builder().setContext(1).setListAdaptedIntField(Arrays.asList(2)).build();
+    WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
+
+    assertEquals(2, (long) st.getListAdaptedIntField().get(0));
+    assertEquals("2", wrapped.getListAdaptedIntField().getValue().get(0));
+  }
+
+  @Test
+  public void testAnyListFieldWrapper() {
+    TestStruct st =
+        new TestStruct.Builder()
+            .setContext(1)
+            .setAnyListField(Arrays.asList(new Any.Builder("foo").build()))
+            .build();
+    WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
+
+    assertEquals("foo", st.getAnyListField().get(0).get());
+    assertEquals("foo", wrapped.getAnyListField().getValue().get(0).get());
+  }
+
+  @Test
+  public void testMultipleAdapterAndWrapper() {
+    TestStruct st =
+        new TestStruct.Builder()
+            .setContext(1)
+            .setWrappedDoubleAdaptedIntListField(Arrays.asList(3))
+            .build();
+    WrappedTestStruct wrapped = deserializeWrapped(serialize(st));
+
+    assertEquals(3, (long) st.getWrappedDoubleAdaptedIntListField().get(0));
+    assertEquals("3", wrapped.getWrappedDoubleAdaptedIntListField().getValue().getValue().get(0));
   }
 }

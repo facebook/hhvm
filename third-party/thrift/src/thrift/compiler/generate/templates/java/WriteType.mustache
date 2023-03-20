@@ -14,78 +14,79 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#type:typedef?}}{{!
-  }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
-  }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
-  }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+}}
+{{#type:typedef?}}{{!
+  }}{{type:setTypeName}}{{!
+  }}{{#type:isAdapterSet?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{type:setAdapter}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{type:setAdapter}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{type:setAdapter}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{/type:isAdapterSet?}}{{!
+  }}{{^type:isAdapterSet?}}{{!
+    }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+    }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+    }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> WriteType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
+  }}{{/type:isAdapterSet?}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
-}}{{#type:set?}}oprot.writeSetBegin(new TSet(TType.{{#type:set_elem_type}}{{> TType}}{{/type:set_elem_type}}, _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.size()));
-        for ({{#type:set_elem_type}}{{> Type}}{{/type:set_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}) {
+}}{{#type:set?}}oprot.writeSetBegin(new TSet(TType.{{#type:set_elem_type}}{{> TType}}{{/type:set_elem_type}}, _iter{{field:prevNestedDepth}}{{> KeyValue}}.size()));
+        for ({{#type:set_elem_type}}{{> AdaptedType}}{{/type:set_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{> KeyValue}}) {
           {{field:setIsNested}}{{type:setIsNotMap}}{{!
           }}{{#type:set_elem_type}}{{!
-          }}{{#type:isContainer?}}{{!
-          }}{{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteType}}
-          {{/type:isContainer?}}{{/type:set_elem_type}}
+          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
+          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:isContainer?}}{{/type:set_elem_type}}
         }
         oprot.writeSetEnd();{{!
 }}{{/type:set?}}{{!
 
 }}{{#type:list?}}{{!
-}}oprot.writeListBegin(new TList(TType.{{#type:list_elem_type}}{{> TType}}{{/type:list_elem_type}}, _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.size()));
-        for ({{#type:list_elem_type}}{{> Type}}{{/type:list_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}) {
+}}oprot.writeListBegin(new TList(TType.{{#type:list_elem_type}}{{> TType}}{{/type:list_elem_type}}, _iter{{field:prevNestedDepth}}{{> KeyValue}}.size()));
+        for ({{#type:list_elem_type}}{{> AdaptedType}}{{/type:list_elem_type}} _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{> KeyValue}}) {
           {{field:setIsNested}}{{type:setIsNotMap}}{{!
           }}{{#type:list_elem_type}}{{!
-          }}{{#type:isContainer?}}{{!
-          }}{{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteType}}
-          {{/type:isContainer?}}{{/type:list_elem_type}}
+          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
+          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:isContainer?}}{{/type:list_elem_type}}
         }
         oprot.writeListEnd();{{!
 }}{{/type:list?}}{{!
 
 }}{{#type:map?}}{{!
-}}oprot.writeMapBegin(new TMap(TType.{{#type:key_type}}{{> TType}}{{/type:key_type}}, TType.{{#type:value_type}}{{> TType}}{{/type:value_type}}, _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.size()));
-        for (Map.Entry<{{#type:key_type}}{{> BoxedType}}{{/type:key_type}}, {{#type:value_type}}{{> BoxedType}}{{/type:value_type}}> _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.entrySet()) {
+}}oprot.writeMapBegin(new TMap(TType.{{#type:key_type}}{{> TType}}{{/type:key_type}}, TType.{{#type:value_type}}{{> TType}}{{/type:value_type}}, _iter{{field:prevNestedDepth}}{{> KeyValue}}.size()));
+        for (Map.Entry<{{#type:key_type}}{{> BoxedType}}{{/type:key_type}}, {{#type:value_type}}{{> BoxedType}}{{/type:value_type}}> _iter{{field:nestedDepth}} : _iter{{field:prevNestedDepth}}{{> KeyValue}}.entrySet()) {
           {{field:setIsNested}}{{!
 
           }}{{#type:key_type}}{{type:setIsMapKey}}{{!
-          }}{{#type:isContainer?}}{{!
-          }}{{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteType}}
-          {{/type:isContainer?}}{{/type:key_type}}{{!
-
+          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
+          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
+          }}{{/type:isContainer?}}{{/type:key_type}}
+          {{!
           }}{{#type:value_type}}{{type:setIsMapValue}}{{!
-          }}{{#type:isContainer?}}
-          {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
-          {{/type:isContainer?}}{{!
-          }}{{^type:isContainer?}}{{> WriteType}}{{!
+          }}{{#type:isContainer?}}{{> WriteTypeAdapter}}{{/type:isContainer?}}{{!
+          }}{{^type:isContainer?}}{{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> WriteType}}{{!
           }}{{/type:isContainer?}}{{/type:value_type}}
         }
         oprot.writeMapEnd();{{!
 }}{{/type:map?}}{{!
 
 }}{{#type:struct?}}{{!
-}}{{#field:isNested?}}_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}.write0(oprot);
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}{{> WriteNestedType}}.write0(oprot);{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}}.write0(oprot);{{/field:isNested?}}{{!
 }}{{/type:struct?}}{{!
 
 }}{{#type:enum?}}{{!
-}}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue({{> WriteNestedType}}));{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeI32({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}} == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}}));{{/field:isNested?}}{{!
 }}{{/type:enum?}}{{!
 
 }}{{#type:binary?}}{{!
 }}{{#field:isNested?}}{{!
-}}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));{{/field:hasAdapterOrWrapper?}}{{!
-}}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});{{/field:hasAdapterOrWrapper?}}
-{{/field:isNested?}}{{!
+}}{{^field:hasAdapterOrWrapper?}}{{#type:isAdapterSet?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/type:isAdapterSet?}}{{^type:isAdapterSet?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}({{> WriteNestedType}}));{{/type:isAdapterSet?}}{{/field:hasAdapterOrWrapper?}}{{!
+}}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/field:hasAdapterOrWrapper?}}{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{!
 }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}({{^struct:isUnion?}}this.{{/struct:isUnion?}}{{field:javaName}}));{{/field:hasAdapterOrWrapper?}}{{!
 }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{field:javaName}});{{/field:hasAdapterOrWrapper?}}{{!
@@ -95,12 +96,12 @@
 }}{{#type:string?}}{{!
 }}{{#field:isNested?}}{{!
   }}{{#type:isBinaryString?}}{{!
-  }}{{^field:hasAdapterOrWrapper?}}oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));{{/field:hasAdapterOrWrapper?}}{{!
-  }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});{{/field:hasAdapterOrWrapper?}}{{!
+  }}{{^field:hasAdapterOrWrapper?}}{{#type:isAdapterSet?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/type:isAdapterSet?}}{{^type:isAdapterSet?}}oprot.writeBinary(java.nio.ByteBuffer.wrap({{> WriteNestedType}}));{{/type:isAdapterSet?}}{{/field:hasAdapterOrWrapper?}}{{!
+  }}{{#field:hasAdapterOrWrapper?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, {{> WriteNestedType}});{{/field:hasAdapterOrWrapper?}}{{!
   }}{{/type:isBinaryString?}}{{!
   }}{{^type:isBinaryString?}}{{!
-    }}oprot.writeString(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/type:isBinaryString?}}{{!
+    }}oprot.writeString({{> WriteNestedType}});{{!
+}}{{/type:isBinaryString?}}{{!
 }}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{!
   }}{{#type:isBinaryString?}}{{!
@@ -115,46 +116,45 @@
 }}{{/type:string?}}{{!
 
 }}{{#type:bool?}}{{!
-}}{{#field:isNested?}}oprot.writeBool(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeBool({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeBool({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:bool?}}{{!
 
 }}{{#type:byte?}}{{!
-}}{{#field:isNested?}}oprot.writeByte(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeByte({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeByte({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:byte?}}{{!
 
 }}{{#type:i16?}}{{!
-}}{{#field:isNested?}}oprot.writeI16(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeI16({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeI16({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:i16?}}{{!
 
 }}{{#type:i32?}}{{!
-}}{{#field:isNested?}}oprot.writeI32(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeI32({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeI32({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:i32?}}{{!
 
 }}{{#type:i64?}}{{!
-}}{{#field:isNested?}}oprot.writeI64(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeI64({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeI64({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:i64?}}{{!
 
 }}{{#type:float?}}{{!
-}}{{#field:isNested?}}oprot.writeFloat(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeFloat({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeFloat({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:float?}}{{!
 
 }}{{#type:double?}}{{!
-}}{{#field:isNested?}}oprot.writeDouble(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
-{{/field:isNested?}}{{!
+}}{{#field:isNested?}}oprot.writeDouble({{> WriteNestedType}});{{!
+}}{{/field:isNested?}}{{!
 }}{{^field:isNested?}}oprot.writeDouble({{^struct:isUnion?}}{{^field:hasAdapterOrWrapper?}}this.{{/field:hasAdapterOrWrapper?}}{{/struct:isUnion?}}{{field:javaName}});{{/field:isNested?}}{{!
 }}{{/type:double?}}{{!
 
-}}{{/type:typedef?}}{{!
-}}
+}}{{/type:typedef?}}

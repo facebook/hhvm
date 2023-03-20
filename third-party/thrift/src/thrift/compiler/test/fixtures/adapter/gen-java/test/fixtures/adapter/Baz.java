@@ -20,6 +20,7 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @SwiftGenerated
 @ThriftUnion("Baz")
 public final class Baz implements com.facebook.thrift.payload.ThriftSerializable {
+    
     private static final TStruct STRUCT_DESC = new TStruct("Baz");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -346,7 +347,6 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
         for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
-          
           oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
         for (String _iter2 : _iter1.getValue()) {
           oprot.writeString(_iter2);

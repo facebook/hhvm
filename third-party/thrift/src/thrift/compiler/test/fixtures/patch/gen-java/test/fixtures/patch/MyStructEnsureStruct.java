@@ -1400,7 +1400,6 @@ public final class MyStructEnsureStruct implements com.facebook.thrift.payload.T
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
         for (Map.Entry<String, Map<String, Integer>> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
-          
           oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.getValue().size()));
         for (Map.Entry<String, Integer> _iter2 : _iter1.getValue().entrySet()) {
           oprot.writeString(_iter2.getKey());

@@ -611,7 +611,6 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
         for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
-          
           oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
         for (String _iter2 : _iter1.getValue()) {
           oprot.writeString(_iter2);
@@ -627,7 +626,6 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
         for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
-          
           oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
         for (String _iter2 : _iter1.getValue()) {
           oprot.writeString(_iter2);

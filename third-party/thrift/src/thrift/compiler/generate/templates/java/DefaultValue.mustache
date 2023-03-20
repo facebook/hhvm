@@ -60,8 +60,8 @@
 
       }}{{#struct:asBean?}}com.google.common.collect.Maps.newHashMap({{/struct:asBean?}}ImmutableMap.<{{#type:key_type}}{{> BoxedType}}{{/type:key_type}}, {{#type:value_type}}{{> BoxedType}}{{/type:value_type}}>builder()
         {{#value:map_elements}}
-        .put({{#element:key}}{{#type:key_type}}{{> DefaultValue}}{{/type:key_type}}{{/element:key}}, {{!
-        }}{{#element:value}}{{#type:value_type}}{{> DefaultValue}}{{/type:value_type}}{{/element:value}})
+        .put({{#element:key}}{{#type:key_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}{{> DefaultValue}}{{#type:hasAdapter?}}){{/type:hasAdapter?}}{{/type:key_type}}{{/element:key}}, {{!
+        }}{{#element:value}}{{#type:value_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}{{> DefaultValue}}{{#type:hasAdapter?}}){{/type:hasAdapter?}}{{/type:value_type}}{{/element:value}})
         {{/value:map_elements}}
         .build(){{#struct:asBean?}}){{/struct:asBean?}}{{!
 
@@ -72,7 +72,7 @@
 
       }}{{#struct:asBean?}}com.google.common.collect.Lists.newArrayList({{/struct:asBean?}}ImmutableList.<{{#type:list_elem_type}}{{> BoxedType}}{{/type:list_elem_type}}>builder()
         {{#value:list_elements}}
-        .add({{#type:list_elem_type}}{{> DefaultValue}}{{/type:list_elem_type}})
+        .add({{#type:list_elem_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}{{> DefaultValue}}{{#type:hasAdapter?}}){{/type:hasAdapter?}}{{/type:list_elem_type}})
         {{/value:list_elements}}
         .build(){{#struct:asBean?}}){{/struct:asBean?}}{{!
 
@@ -83,7 +83,7 @@
 
       }}{{#struct:asBean?}}com.google.common.collect.Sets.newHashSet({{/struct:asBean?}}ImmutableSet.<{{#type:set_elem_type}}{{> BoxedType}}{{/type:set_elem_type}}>builder()
         {{#value:list_elements}}
-        .add({{#type:set_elem_type}}{{> DefaultValue}}{{/type:set_elem_type}})
+        .add({{#type:set_elem_type}}{{#type:hasAdapter?}}__{{type:name}}_Adapter.fromThrift({{/type:hasAdapter?}}{{> DefaultValue}}{{#type:hasAdapter?}}){{/type:hasAdapter?}}{{/type:set_elem_type}})
         {{/value:list_elements}}
         .build(){{#struct:asBean?}}){{/struct:asBean?}}{{!
 

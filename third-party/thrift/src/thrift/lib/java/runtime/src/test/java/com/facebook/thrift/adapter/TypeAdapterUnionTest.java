@@ -16,9 +16,10 @@
 
 package com.facebook.thrift.adapter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
+import com.facebook.thrift.any.Any;
 import com.facebook.thrift.test.adapter.AdaptedTestUnion;
 import com.facebook.thrift.test.adapter.TestUnion;
 import com.facebook.thrift.util.SerializationProtocol;
@@ -29,7 +30,10 @@ import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,10 +88,6 @@ public class TypeAdapterUnionTest {
 
   private String hexDump(byte[] bytes) {
     return ByteBufUtil.hexDump(bytes);
-  }
-
-  private String hexDump(String s) {
-    return ByteBufUtil.hexDump(s.getBytes());
   }
 
   @Test
@@ -404,5 +404,98 @@ public class TypeAdapterUnionTest {
 
     assertEquals("60", adapted.getMultipleTypedefAdaptedIntField());
     assertEquals(60, received.getMultipleTypedefIntField());
+  }
+
+  @Test
+  public void testAdaptedSetList() {
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedSetListField(Arrays.asList("7")));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertTrue(adapted.getAdaptedSetListField().get(0).contains("7"));
+    assertTrue(received.getAdaptedSetListField().get(0).contains(7));
+  }
+
+  @Test
+  public void testListOfAdaptedInt() {
+    List<String> list = Arrays.asList("1", "2", "3");
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromListAdaptedIntField(list));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertArrayEquals(list.toArray(), adapted.getListAdaptedIntField().toArray());
+    assertArrayEquals(new Integer[] {1, 2, 3}, received.getListAdaptedIntField().toArray());
+  }
+
+  @Test
+  public void testMapOfMapAdaptedInt() {
+    Map<String, Map<String, String>> map = new HashMap<>();
+    Map<String, String> map1 = new HashMap<>();
+    map1.put("5", "13");
+    map.put("7", map1);
+
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromMapOfIntToMapIntToShortField(map));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals("13", adapted.getMapOfIntToMapIntToShortField().get("7").get("5"));
+    assertEquals(13L, (long) received.getMapOfIntToMapIntToShortField().get(7).get(5));
+  }
+
+  @Test
+  public void testListOfAdaptedShort() {
+    List<String> list = Arrays.asList("10", "11");
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedShortListField(list));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertArrayEquals(list.toArray(), adapted.getAdaptedShortListField().toArray());
+    assertArrayEquals(new Short[] {10, 11}, received.getAdaptedShortListField().toArray());
+  }
+
+  @Test
+  public void testNestedListOfAdaptedBinary() {
+    byte[] foo = "foo".getBytes();
+    byte[] bar = "bar".getBytes();
+
+    List<List<List<ByteBuf>>> list =
+        Arrays.asList(
+            Arrays.asList(Arrays.asList(Unpooled.wrappedBuffer(foo), Unpooled.wrappedBuffer(bar))));
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedBinList3Field(list));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals(hexDump(foo), hexDump(adapted.getAdaptedBinList3Field().get(0).get(0).get(0)));
+    assertEquals(hexDump(bar), hexDump(adapted.getAdaptedBinList3Field().get(0).get(0).get(1)));
+    assertArrayEquals(foo, received.getAdaptedBinList3Field().get(0).get(0).get(0));
+    assertArrayEquals(bar, received.getAdaptedBinList3Field().get(0).get(0).get(1));
+  }
+
+  @Test
+  public void testListOfMultiLevelTypeDef() {
+    byte[] foo = "foo".getBytes();
+    byte[] bar = "bar".getBytes();
+
+    List<ByteBuf> list = Arrays.asList(Unpooled.wrappedBuffer(foo), Unpooled.wrappedBuffer(bar));
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromAdaptedBinNestedTypeDefListField(list));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals(hexDump(foo), hexDump(adapted.getAdaptedBinNestedTypeDefListField().get(0)));
+    assertEquals(hexDump(bar), hexDump(adapted.getAdaptedBinNestedTypeDefListField().get(1)));
+    assertArrayEquals(foo, received.getAdaptedBinNestedTypeDefListField().get(0));
+    assertArrayEquals(bar, received.getAdaptedBinNestedTypeDefListField().get(1));
+  }
+
+  @Test
+  public void testStructList() {
+    byte[] bytes =
+        serializeAdapted(
+            AdaptedTestUnion.fromAnyListField(Arrays.asList(new Any.Builder("foo").build())));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals("foo", adapted.getAnyListField().get(0).get());
+    assertEquals("foo", received.getAnyListField().get(0).get());
   }
 }

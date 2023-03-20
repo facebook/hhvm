@@ -20,6 +20,7 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @SwiftGenerated
 @ThriftUnion("ComplexUnion")
 public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSerializable {
+    
     private static final TStruct STRUCT_DESC = new TStruct("ComplexUnion");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();

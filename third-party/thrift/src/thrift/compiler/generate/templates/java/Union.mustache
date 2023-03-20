@@ -32,6 +32,8 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 @SwiftGenerated
 @ThriftUnion("{{struct:name}}"){{> common/ObjectCustomAnnotation}}
 public final class {{struct:javaCapitalName}} implements com.facebook.thrift.payload.ThriftSerializable {
+    {{> struct/AdapterDefinition}}
+
     private static final TStruct STRUCT_DESC = new TStruct("{{struct:name}}");
     private static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
@@ -41,12 +43,6 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     {{#struct:fields}}
     public static final int _{{field:javaAllCapsName}} = {{field:key}};
     private static final TField {{field:javaTFieldName}} = new TField("{{field:javaName}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
-    {{#field:hasAdapter?}}
-    private static final com.facebook.thrift.adapter.TypeAdapter<{{#field:type}}{{> BoxedType}}{{/field:type}}, {{field:typeClassName}}> _{{field:javaName}}_Adapter = new {{field:adapterClassName}}();
-    {{#field:hasMultipleTypeAdapters?}}
-    private static final com.facebook.thrift.adapter.TypeAdapter<{{field:typeClassName}}, {{field:secondTypeClassName}}> _{{field:javaName}}_Adapter2 = new {{field:secondAdapterClassName}}();
-    {{/field:hasMultipleTypeAdapters?}}
-    {{/field:hasAdapter?}}
     {{/struct:fields}}
 
     static {

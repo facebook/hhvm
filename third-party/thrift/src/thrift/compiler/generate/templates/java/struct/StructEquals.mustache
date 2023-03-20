@@ -29,21 +29,21 @@ public boolean equals(java.lang.Object o) {
     return
         {{#struct:fields}}
         {{#field:hasWrapper?}}
-        _{{field:javaName}}_Wrapper.equals({{field:javaName}}, other.{{field:javaName}}) && 
+        _{{field:javaName}}_Wrapper.equals({{field:javaName}}, other.{{field:javaName}}) &&
         {{/field:hasWrapper?}}
         {{^field:hasWrapper?}}
-        {{#field:hasAdapter?}}
-        {{#field:hasMultipleTypeAdapters?}}
-        _{{field:javaName}}_Adapter2.equals({{field:javaName}}, other.{{field:javaName}}) && 
-        {{/field:hasMultipleTypeAdapters?}}
-        {{^field:hasMultipleTypeAdapters?}}
-        _{{field:javaName}}_Adapter.equals({{field:javaName}}, other.{{field:javaName}}) && 
-        {{/field:hasMultipleTypeAdapters?}}        
-        {{/field:hasAdapter?}}
-        {{^field:hasAdapter?}}
+        {{#field:hasFieldAdapter?}}
+        _{{field:javaName}}_Adapter.equals({{field:javaName}}, other.{{field:javaName}}) &&
+        {{/field:hasFieldAdapter?}}
+        {{^field:hasFieldAdapter?}}
+        {{#field:hasTypeAdapter?}}
+        __{{#field:type}}{{type:name}}{{/field:type}}_Adapter.equals({{field:javaName}}, other.{{field:javaName}}) && 
+        {{/field:hasTypeAdapter?}}
+        {{^field:hasTypeAdapter?}}
         {{#field:type}}{{^type:javaType}}{{#type:binary?}}Arrays{{/type:binary?}}{{^type:binary?}}Objects{{/type:binary?}}{{/type:javaType}}{{!
         }}{{#type:javaType}}Objects{{/type:javaType}}{{/field:type}}.equals({{field:javaName}}, other.{{field:javaName}}) &&
-        {{/field:hasAdapter?}}
+        {{/field:hasTypeAdapter?}}
+        {{/field:hasFieldAdapter?}}
         {{/field:hasWrapper?}}
         {{/struct:fields}}
         true;

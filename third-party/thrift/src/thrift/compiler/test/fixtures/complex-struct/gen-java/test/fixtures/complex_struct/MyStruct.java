@@ -1561,7 +1561,6 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
           oprot.writeI32(_iter2);
         }
         oprot.writeListEnd();
-
           oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
         for (int _iter2 : _iter1.getValue()) {
           oprot.writeI32(_iter2);

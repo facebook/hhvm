@@ -328,7 +328,6 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
         for (Map.Entry<Integer, com.foo.FastIntLongMap> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
-          
           oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter1.getValue().size()));
         for (Map.Entry<Integer, Long> _iter2 : _iter1.getValue().entrySet()) {
           oprot.writeI32(_iter2.getKey());
@@ -345,7 +344,8 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
-          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));        }
+          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
+        }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }

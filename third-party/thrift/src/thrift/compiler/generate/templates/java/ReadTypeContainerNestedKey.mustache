@@ -35,7 +35,7 @@
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedValue }}{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{field:nestedDepth++}}{{> Type}} _value{{field:nestedDepth}} = {{> ReadType}};{{field:nestedDepth--}}
+                {{field:nestedDepth++}}{{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{field:nestedDepth++}}_key{{field:prevNestedDepth}}.add(_value{{field:nestedDepth}});{{field:nestedDepth--}}
                 {{/type:set_elem_type}}
@@ -58,7 +58,7 @@
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedValue }}{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{field:nestedDepth++}}{{> Type}} _value{{field:nestedDepth}} = {{> ReadType}};{{field:nestedDepth--}}
+                {{field:nestedDepth++}}{{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{field:nestedDepth++}}_key{{field:prevNestedDepth}}.add(_value{{field:nestedDepth}});{{field:nestedDepth--}}
                 {{/type:list_elem_type}}
@@ -81,7 +81,7 @@
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedKey }}{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{field:nestedDepth++}}{{> Type}} _key{{field:nestedDepth}} = {{> ReadType}};{{field:nestedDepth--}}
+                {{field:nestedDepth++}}{{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _key{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{/type:key_type}}
 
@@ -90,10 +90,10 @@
                 {{field:nestedDepth++}}{{> ReadTypeContainerNestedValue }}{{field:nestedDepth--}}
                 {{/type:isContainer?}}
                 {{^type:isContainer?}}
-                {{field:nestedDepth++}}{{> Type}} _value{{field:nestedDepth}} = {{> ReadType}};{{field:nestedDepth--}}
+                {{field:nestedDepth++}}{{#type:hasAdapter?}}{{> ThriftType}}{{/type:hasAdapter?}}{{^type:hasAdapter?}}{{> Type}}{{/type:hasAdapter?}} _value{{field:nestedDepth}} = {{#type:hasAdapter?}}{{type:setAdapter}}{{/type:hasAdapter?}}{{> ReadType}};{{field:nestedDepth--}}
                 {{/type:isContainer?}}
-                {{/type:value_type}}
                 {{field:nestedDepth++}}_key{{field:prevNestedDepth}}.put(_key{{field:nestedDepth}}, _value{{field:nestedDepth}});{{field:nestedDepth--}}
+                {{/type:value_type}}
             }
             oprot.readMapEnd();
             }

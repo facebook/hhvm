@@ -15,11 +15,13 @@
   limitations under the License.
 
 }}{{!
-}}{{#field:hasAdapter?}}{{!
-  }}{{#field:hasFieldAdapter?}}{{field:fieldAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-  }}{{^field:hasFieldAdapter?}}{{field:typeAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-}}{{/field:hasAdapter?}}{{!
-}}{{^field:hasAdapter?}}{{!
-  }}{{#field:optional?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:optional?}}{{!
-  }}{{^field:optional?}}{{#field:type}}{{> Type}}{{/field:type}}{{/field:optional?}}{{!
-}}{{/field:hasAdapter?}}
+
+}}{{field:nestedDepth++}}{{!
+  }}{{#type:hasAdapter?}}{{!
+    }}{{type:setAdapter}}{{!
+    }}{{> AdaptedBoxedType}} _iter{{field:nestedDepth}} = __{{type:name}}_Adapter{{!
+    }}.toThrift(_iter{{field:prevNestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});
+    {{field:nestedDepth++}}{{!
+  }}{{/type:hasAdapter?}}{{!
+  }}{{> WriteType}}{{!
+}}{{field:nestedDepth--}}

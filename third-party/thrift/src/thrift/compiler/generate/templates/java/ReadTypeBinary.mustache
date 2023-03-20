@@ -14,15 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{!
-}}{{#field:hasWrapper?}}{{field:wrapperType}}{{/field:hasWrapper?}}{{!
-}}{{^field:hasWrapper?}}{{!
+}}{{#type:isAdapterSet?}}{{!
+    }}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{!
+}}{{/type:isAdapterSet?}}{{!
+}}{{^type:isAdapterSet?}}{{!
   }}{{#field:hasAdapter?}}{{!
-    }}{{#field:hasFieldAdapter?}}{{field:fieldAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
-    }}{{^field:hasFieldAdapter?}}{{field:typeAdapterTypeClassName}}{{/field:hasFieldAdapter?}}{{!
+    }}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{!
   }}{{/field:hasAdapter?}}{{!
   }}{{^field:hasAdapter?}}{{!
-    }}{{#field:optional?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:optional?}}{{!
-    }}{{^field:optional?}}{{#field:type}}{{> Type}}{{/field:type}}{{/field:optional?}}{{!
+    }}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{!
   }}{{/field:hasAdapter?}}{{!
-}}{{/field:hasWrapper?}}
+}}{{/type:isAdapterSet?}}

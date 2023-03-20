@@ -1,12 +1,12 @@
 File "basic.php", line 24, characters 8-12:
-Required attribute `:a` is missing. (Typing[4314])
+Required attribute `a` is missing. (Typing[4314])
   File "basic.php", line 4, characters 38-40:
-  The attribute `:a` is declared here.
+  The attribute `a` is declared here.
 File "basic.php", line 25, characters 8-12:
-Required attribute `:a` is missing. (Typing[4314])
+Required attribute `a` is missing. (Typing[4314])
   File "basic.php", line 9, characters 5-7:
-  The attribute `:a` is declared here.
+  The attribute `a` is declared here.
 File "basic.php", line 26, characters 8-12:
-Required attribute `:a` is missing. (Typing[4314])
+Required attribute `a` is missing. (Typing[4314])
   File "basic.php", line 4, characters 38-40:
-  The attribute `:a` is declared here.
+  The attribute `a` is declared here.

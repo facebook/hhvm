@@ -1,4 +1,4 @@
 File "inheritance.php", line 6, characters 10-20:
-Required attribute `:a` is missing. (Typing[4314])
+Required attribute `a` is missing. (Typing[4314])
   File "inheritance.php", line 3, characters 41-43:
-  The attribute `:a` is declared here.
+  The attribute `a` is declared here.

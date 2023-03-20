@@ -1,16 +1,16 @@
 File "spread.php", line 22, characters 8-20:
-Required attribute `:a` is missing. (Typing[4314])
+Required attribute `a` is missing. (Typing[4314])
   File "spread.php", line 6, characters 38-40:
-  The attribute `:a` is declared here.
+  The attribute `a` is declared here.
 File "spread.php", line 22, characters 8-20:
-Required attribute `:b` is missing. (Typing[4314])
+Required attribute `b` is missing. (Typing[4314])
   File "spread.php", line 6, characters 65-67:
-  The attribute `:b` is declared here.
+  The attribute `b` is declared here.
 File "spread.php", line 29, characters 8-20:
-Required attribute `:b` is missing. (Typing[4314])
+Required attribute `b` is missing. (Typing[4314])
   File "spread.php", line 5, characters 38-40:
-  The attribute `:b` is declared here.
+  The attribute `b` is declared here.
 File "spread.php", line 36, characters 8-20:
-Required attribute `:a` is missing. (Typing[4314])
+Required attribute `a` is missing. (Typing[4314])
   File "spread.php", line 3, characters 38-40:
-  The attribute `:a` is declared here.
+  The attribute `a` is declared here.

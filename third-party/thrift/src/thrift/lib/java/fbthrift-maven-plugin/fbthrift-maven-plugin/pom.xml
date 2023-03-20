@@ -12,7 +12,7 @@
     <artifactId>fbthrift-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <version>2.2-SNAPSHOT</version>
-    <description>Maven Plugin that compiles Thrift</description>
+    <description>Maven plugin that compiles FBThrift to Java</description>
     <name>${project.artifactId}</name>
 
     <dependencies>

@@ -38,20 +38,10 @@
 
 
     <distributionManagement>
-        <!--
-            We still push our jars to the old location. We can't push to the new
-            location (namely
-            https://maven.thefacebook.com/nexus/content/repositories/releases/)
-            because the new location does not allow pushing jars in groupId's in
-            org/apache.
-        -->
-        <repository>
-            <id>libs-releases-local</id>
-            <url>https://maven.thefacebook.com/nexus/content/repositories/libs-releases-local/</url>
-        </repository>
+        <!-- https_proxy=fwdproxy:8080 http_proxy=fwdproxy:8080 mvn -e clean deploy -->
         <snapshotRepository>
-            <id>libs-snapshots-local</id>
-            <url>https://maven.thefacebook.com/nexus/content/repositories/libs-snapshots-local/</url>
+        <id>ossrh</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -70,6 +60,66 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>4.5.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.13</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <!-- Must login to OSSRH and manually release from there -->
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                    <goal>jar-no-fork</goal>
+                    </goals>
+                </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                <execution>
+                    <id>attach-javadocs</id>
+                    <goals>
+                    <goal>jar</goal>
+                    </goals>
+                </execution>
+                </executions>
+                <configuration>
+                <doclint>none</doclint>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -137,10 +137,6 @@ template <typename T, typename Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
     detail::pa::__fbthrift_get_field_name<T, get_ordinal<T, Id>>();
 
-// TODO: replace get_name with get_name_v
-template <typename T, typename Id>
-FOLLY_INLINE_VARIABLE const folly::StringPiece get_name = get_name_v<T, Id>;
-
 /// Gets the Thrift field, for example:
 ///
 ///   op::get<type::field_id<7>>(myStruct) = 4;

@@ -1,0 +1,12 @@
+(library
+ (name full_fidelity_refactor)
+ (wrapped true)
+ (flags
+  (:standard -linkall))
+ (libraries
+  full_fidelity
+  server_command_types
+  relative_path
+  )
+ (preprocess
+  (pps visitors.ppx ppx_deriving.std ppx_sexp_conv ppx_hash)))

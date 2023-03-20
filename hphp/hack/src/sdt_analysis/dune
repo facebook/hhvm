@@ -9,6 +9,8 @@
   file_provider
   provider_context
   aast_names_utils
+  full_fidelity
+  full_fidelity_refactor
   relative_path
   server_command_types
   tast_env

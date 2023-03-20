@@ -5,15 +5,12 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-(*
- * The code in this module is adapted from pessimise_aux.ml at 53bee442bbda.
- * The main change is to use ServerRefactorTypes.patch rather than hh_pessimisation Patches.patch
- *)
 open Hh_prelude
 module Syn = Full_fidelity_editable_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module Trivia = Full_fidelity_positioned_trivia
 module TriviaKind = Full_fidelity_trivia_kind
+module RT = ServerRefactorTypes
 
 let find_width_hh_fixme token =
   let rec find_width_hh_fixme_rec acc last sd =
@@ -35,7 +32,7 @@ let find_width_hh_fixme token =
     find_width_hh_fixme_rec 0 0 (List.rev sd.Syn.SourceData.leading)
   | _ -> 0
 
-let insert_before_leading_fixme file keyword text default_patch =
+let insert_before_leading_fixme file ~keyword ~text =
   match Syn.syntax keyword with
   | Syn.Token token ->
     Syn.Value.(
@@ -53,9 +50,9 @@ let insert_before_leading_fixme file keyword text default_patch =
             (start_offset - leading_text_width)
             end_offset
         in
-        Some ServerRefactorTypes.(Insert { pos = Pos.to_absolute pos; text })
-      | Synthetic -> default_patch keyword false))
-  | _ -> default_patch keyword false
+        Some RT.(Insert { pos = Pos.to_absolute pos; text })
+      | Synthetic -> None))
+  | _ -> None
 
 let insert_attribute file ~attribute ~enclosing_node ~attributes_node =
   let open Syn in
@@ -78,15 +75,14 @@ let insert_attribute file ~attribute ~enclosing_node ~attributes_node =
       Option.Monad_infix.(
         position_exclusive file old_attribute_specification_attributes
         >>| fun pos ->
-        ServerRefactorTypes.(
-          Insert { pos = Pos.to_absolute pos; text = attribute ^ ", " }))
+        RT.(Insert { pos = Pos.to_absolute pos; text = attribute ^ ", " }))
   | _ ->
     (* there are no other attributes, but we must distinguish
        * if there is a leading string (eg HHFIXME) or not *)
-    let default_patch node inline =
+    let default_patch inline node =
       Option.Monad_infix.(
         position_exclusive file node >>| fun pos ->
-        ServerRefactorTypes.(
+        RT.(
           Insert
             {
               pos = Pos.to_absolute pos;
@@ -98,11 +94,12 @@ let insert_attribute file ~attribute ~enclosing_node ~attributes_node =
             }))
     in
     let insert_attribute_before_leading_fixme keyword =
-      insert_before_leading_fixme
-        file
-        keyword
-        ("<<" ^ attribute ^ ">>\n")
-        default_patch
+      Option.first_some
+        (insert_before_leading_fixme
+           file
+           ~keyword
+           ~text:("<<" ^ attribute ^ ">>\n"))
+        (default_patch false keyword)
     in
 
     (match enclosing_node with
@@ -121,7 +118,7 @@ let insert_attribute file ~attribute ~enclosing_node ~attributes_node =
           | _ ->
             let modifiers = syntax_node_to_list function_modifiers in
             insert_attribute_before_leading_fixme (List.hd_exn modifiers))
-        | _ -> default_patch function_declaration_header false)
+        | _ -> default_patch false function_declaration_header)
       | ClassishDeclaration
           { classish_modifiers; classish_xhp; classish_keyword; _ } ->
         (match Syntax.kind classish_modifiers with
@@ -134,5 +131,5 @@ let insert_attribute file ~attribute ~enclosing_node ~attributes_node =
         | _ ->
           let modifiers = syntax_node_to_list classish_modifiers in
           insert_attribute_before_leading_fixme (List.hd_exn modifiers))
-      | _ -> default_patch enclosing_node false)
-    | None -> default_patch attributes_node true)
+      | _ -> default_patch false enclosing_node)
+    | None -> default_patch true attributes_node)

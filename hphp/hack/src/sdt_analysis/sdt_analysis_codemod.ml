@@ -10,7 +10,7 @@ open Sdt_analysis_types
 module PositionedTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 module Syn = Full_fidelity_editable_positioned_syntax
-module Aux = Sdt_analysis_codemod_aux
+module Refactor = Full_fidelity_refactor
 
 type 'a direction =
   | Continue of 'a
@@ -43,7 +43,7 @@ let patches_of_nadable_id ~source ~path id =
   in
   let collect_patches patches node =
     let nad_patch attributes_node =
-      Aux.insert_attribute
+      Refactor.insert_attribute
         path
         ~attribute:Naming_special_names.UserAttributes.uaNoAutoDynamic
         ~enclosing_node:(Some node)

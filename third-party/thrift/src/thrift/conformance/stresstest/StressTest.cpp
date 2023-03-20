@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
   }
 
   // create a test runner instance
-  auto clientCfg = TestRunner::createClientConfigFromFlags();
+  auto clientCfg = ClientConfig::createFromFlags();
   TestRunner testRunner(std::move(clientCfg));
   testRunner.runTests();
 

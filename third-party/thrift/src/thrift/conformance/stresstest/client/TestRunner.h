@@ -20,10 +20,9 @@
 
 #include <folly/experimental/FunctionScheduler.h>
 
+#include <thrift/conformance/stresstest/client/ClientConfig.h>
 #include <thrift/conformance/stresstest/client/ClientRunner.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
-
-DECLARE_int64(runtime_s);
 
 namespace apache {
 namespace thrift {
@@ -49,8 +48,6 @@ class TestRunner {
 
   StressTestStats run(std::string testName);
   StressTestStats run(std::unique_ptr<StressTestBase> test);
-
-  static ClientConfig createClientConfigFromFlags();
 
   void runTests();
 

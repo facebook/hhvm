@@ -21,8 +21,6 @@
 
 #include <folly/experimental/io/IoUringBackend.h>
 
-DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
-
 namespace apache {
 namespace thrift {
 namespace stress {

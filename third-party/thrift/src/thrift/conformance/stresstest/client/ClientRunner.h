@@ -21,25 +21,16 @@
 #include <folly/io/async/HHWheelTimer.h>
 #include <folly/io/async/ScopedEventBaseThread.h>
 #include <folly/synchronization/RelaxedAtomic.h>
+#include <thrift/conformance/stresstest/client/ClientConfig.h>
 #include <thrift/conformance/stresstest/client/ClientFactory.h>
 #include <thrift/conformance/stresstest/client/StressTestBase.h>
 #include <thrift/conformance/stresstest/if/gen-cpp2/StressTest.h>
-
-DECLARE_int64(runtime_s);
 
 namespace apache {
 namespace thrift {
 namespace stress {
 
 class ClientThread;
-
-struct ClientConfig {
-  uint64_t numClientThreads;
-  uint64_t numConnectionsPerThread;
-  uint64_t numClientsPerConnection;
-  bool continuous{false};
-  ClientConnectionConfig connConfig;
-};
 
 struct ClientThreadMemoryStats {
   void combine(const ClientThreadMemoryStats& other);

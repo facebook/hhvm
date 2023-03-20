@@ -226,8 +226,8 @@ SQLiteKey::SQLiteKey(
       INFO,
       previous != m_perms,
       "Coercing DB permission bits {:04o} to {:04o}",
-      m_perms,
-      (m_perms | 0600) & 0666);
+      previous,
+      m_perms);
 }
 
 } // namespace Facts

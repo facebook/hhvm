@@ -213,6 +213,32 @@ let parse_check_args cmd =
       ( "--autostart-server",
         Arg.Bool (( := ) autostart),
         " automatically start hh_server if it's not running (default: true)" );
+      ( "--codemod-sdt",
+        (let path_to_jsonl = ref "" in
+         Arg.Tuple
+           [
+             Arg.String (( := ) path_to_jsonl);
+             Arg.String
+               (function
+               | "cumulative-groups" ->
+                 set_mode
+                 @@ MODE_CODEMOD_SDT
+                      {
+                        path_to_jsonl = !path_to_jsonl;
+                        strategy = `CodemodSdtCumulative;
+                      }
+               | "independent-groups" ->
+                 set_mode
+                 @@ MODE_CODEMOD_SDT
+                      {
+                        path_to_jsonl = !path_to_jsonl;
+                        strategy = `CodemodSdtIndependent;
+                      }
+               | s ->
+                 raise
+                 @@ Arg.Bad (Format.sprintf "invalid --codemod-sdt mode: %s" s));
+           ]),
+        "apply codemod for adding <<__NoAutoDynamic>>" );
       ( "--color",
         Arg.String (fun x -> set_mode (MODE_COLORING x)),
         " (mode) pretty prints the file content showing what is checked (give '-' for stdin)"

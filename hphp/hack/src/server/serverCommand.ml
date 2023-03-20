@@ -20,9 +20,11 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   match msg with
   (* global error list is not updated during small checks *)
   | STATUS _ -> true
-  | LIST_FILES_WITH_ERRORS -> true (* Same as STATUS *)
-  | REMOVE_DEAD_FIXMES _ -> true (* needs same information as STATUS *)
-  | REMOVE_DEAD_UNSAFE_CASTS -> true (* needs same information as STATUS *)
+  | LIST_FILES_WITH_ERRORS
+  | REMOVE_DEAD_FIXMES _
+  | REMOVE_DEAD_UNSAFE_CASTS
+  | CODEMOD_SDT _ ->
+    true (* need same information as STATUS *)
   | REWRITE_LAMBDA_PARAMETERS _ -> true
   | REWRITE_TYPE_PARAMS_TYPE _ -> true
   (* Finding references/implementations uses global dependency table *)

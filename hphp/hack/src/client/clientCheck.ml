@@ -890,6 +890,26 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
             go ()
       in
       go ()
+    | MODE_CODEMOD_SDT { path_to_jsonl; strategy } ->
+      let status_cmd =
+        Rpc.STATUS
+          { ignore_ide = true; max_errors = args.max_errors; remote = false }
+      in
+      let get_error_count () =
+        let%lwt (status, telemetry) = rpc args status_cmd in
+        let error_count =
+          status.ServerCommandTypes.Server_status.error_list |> List.length
+        in
+        Lwt.return (error_count, telemetry)
+      in
+      let get_patches codemod_line = rpc args (Rpc.CODEMOD_SDT codemod_line) in
+
+      Sdt_analysis.ClientCheck.apply_all
+        ~get_error_count
+        ~get_patches
+        ~apply_patches
+        ~path_to_jsonl
+        ~strategy
     | MODE_REWRITE_LAMBDA_PARAMETERS files ->
       let%lwt conn = connect args in
       let%lwt (patches, telemetry) =

@@ -12,6 +12,7 @@ module IntraWalker = Sdt_analysis_intra_walker
 module InterWalker = Sdt_analysis_inter_walker
 module TastHandler = Sdt_analysis_tast_handler
 module PP = Sdt_analysis_pretty_printer
+module ClientCheck = Sdt_analysis_client_check
 
 let default_db_dir = "/tmp/sdt_analysis_constraints"
 
@@ -53,6 +54,12 @@ let print_solution reader ~validate_parseable : unit =
            in
            ());
          Format.printf "%s\n" line)
+
+let patches_of_codemod_line line =
+  line
+  |> Sdt_analysis_summary_jsonl.nadables_of_line_exn
+  |> Option.value ~default:[]
+  |> List.bind ~f:Sdt_analysis_codemod.patches_of_nadable
 
 module StandaloneApi = struct
   let dump_persisted ~db_dir =

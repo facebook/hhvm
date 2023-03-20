@@ -388,6 +388,7 @@ type _ t =
   | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
   | REFACTOR_CHECK_SD : ServerRefactorTypes.action -> string Done_or_retry.t t
   | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
+  | CODEMOD_SDT : string -> ServerRefactorTypes.patch list t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :
       int list

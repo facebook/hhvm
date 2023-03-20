@@ -12,6 +12,7 @@ module Options : sig
     | DumpConstraints
         (** print constraints for a single file without solving *)
     | SolveConstraints  (** generate and solve constraints for a single file *)
+    | Codemod
 
   type t = {
     command: command;

@@ -11,6 +11,7 @@ module Options = struct
   type command =
     | DumpConstraints
     | SolveConstraints
+    | Codemod
 
   type t = {
     command: command;

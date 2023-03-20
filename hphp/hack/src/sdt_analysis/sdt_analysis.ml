@@ -131,13 +131,9 @@ let do_tast
       Format.printf "\n%!"
     end
   in
-  match command with
-  | Options.DumpConstraints ->
-    IntraWalker.program ctx tast |> IdMap.iter print_decorated_intra_constraints;
-    InterWalker.program ctx tast |> IdMap.iter print_decorated_inter_constraints
-  | Options.SolveConstraints ->
-    let db_dir = fresh_db_dir () in
+  let solve () : H.Read.t =
     let worker_id = 0 in
+    let db_dir = fresh_db_dir () in
     let generate_constraints () =
       let (flush, writer) = H.Write.create ~db_dir ~worker_id in
       let tast_handler = TastHandler.create_handler ctx writer in
@@ -145,15 +141,65 @@ let do_tast
       flush ()
     in
     generate_constraints ();
+    H.solve ~db_dir
+  in
+  match command with
+  | Options.DumpConstraints ->
+    IntraWalker.program ctx tast |> IdMap.iter print_decorated_intra_constraints;
+    InterWalker.program ctx tast |> IdMap.iter print_decorated_inter_constraints
+  | Options.SolveConstraints ->
+    let reader = solve () in
     let log_intras reader =
       H.Read.get_keys reader
       |> Sequence.iter ~f:(fun id ->
              let intras = H.Read.get_intras reader id |> Sequence.to_list in
              print_intra_constraints id intras)
     in
-    let reader = H.solve ~db_dir in
     if verbosity > 0 then log_intras reader;
     print_solution reader ~validate_parseable:true
+  | Options.Codemod ->
+    let apply_all nadable_groups =
+      let ungroup_nadables nadable_groups =
+        let compare nadable1 nadable2 =
+          (nadable1, nadable2)
+          |> Tuple2.map ~f:(fun Summary.{ id; _ } -> id)
+          |> Tuple2.uncurry H.Id.compare
+        in
+        nadable_groups
+        |> Sequence.to_list
+        |> List.concat
+        |> List.dedup_and_sort ~compare
+      in
+      let reverse_patches_to_preserve_positions =
+        let compare patch1 patch2 =
+          (patch1, patch2)
+          |> Tuple2.map ~f:ServerRefactorTypes.get_pos
+          |> Tuple2.uncurry (Pos.compare_pos String.compare)
+          |> ( * ) (-1)
+        in
+        List.sort ~compare
+      in
+      let apply_patch (contents_opt : string option) patch : string option =
+        let contents =
+          match contents_opt with
+          | Some contents -> contents
+          | None ->
+            ServerRefactorTypes.get_pos patch |> Pos.filename |> Disk.cat
+        in
+        let buf = Buffer.create (String.length contents) in
+        ServerRefactorTypes.write_patches_to_buffer buf contents [patch];
+        Some (Buffer.contents buf)
+      in
+      nadable_groups
+      |> ungroup_nadables
+      |> List.bind ~f:Sdt_analysis_codemod.patches_of_nadable
+      |> reverse_patches_to_preserve_positions
+      |> List.fold ~f:apply_patch ~init:None
+      |> Option.iter ~f:Format.print_string
+    in
+    let reader = solve () in
+    let summary = Sdt_analysis_summary.calc reader in
+    apply_all summary.Summary.nadable_groups
 
 let do_ ~command ~verbosity ~on_bad_command =
   let opts = parse_command ~command ~on_bad_command ~verbosity in

@@ -2,7 +2,13 @@
  (name sdt_analysis_exe)
  (flags
   (:standard -linkall))
-(modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include ../../dune_config/ld-opts.sexp)))
  (libraries
   sdt_analysis
-  default_injector_config))
+  sys_utils
+  default_injector_config
+  )
+ (preprocess
+  (pps ppx_deriving.std)))

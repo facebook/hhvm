@@ -5,9 +5,12 @@
   (:standard -linkall))
  (libraries
   core_kernel
+  disk
+  file_provider
   provider_context
   aast_names_utils
   relative_path
+  server_command_types
   tast_env
   typing_ast
   typing_defs

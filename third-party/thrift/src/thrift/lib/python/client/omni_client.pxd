@@ -76,6 +76,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             const string& serviceName,
             const string& methodName,
             unique_ptr[cIOBuf] args,
+            cData&& metadata,
             const unordered_map[string, string] headers,
             cRpcOptions&& options,
         ) except+

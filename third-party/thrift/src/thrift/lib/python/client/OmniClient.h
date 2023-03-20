@@ -63,6 +63,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
+      apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers,
       apache::thrift::RpcOptions&& rpcOptions);
 
@@ -70,6 +71,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
+      apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers,
       apache::thrift::RpcOptions&& rpcOptions);
 

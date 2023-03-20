@@ -68,7 +68,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                     int1=int1,),
                 test.namespace_from_package.module.thrift_types._fbthrift_TestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uriOrName="test.dev/namespace_from_package/module/TestService",
+                uri_or_name="test.dev/namespace_from_package/module/TestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -104,6 +104,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 test.namespace_from_package.module.thrift_types._fbthrift_TestService_init_args(
                     int1=int1,),
                 test.namespace_from_package.module.thrift_types._fbthrift_TestService_init_result,
+                uri_or_name="test.dev/namespace_from_package/module/TestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

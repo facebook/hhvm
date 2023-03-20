@@ -5,5 +5,6 @@ Intraprocedural Constraints for (ClassLike "\\C"):
 Interprocedural Constraints for (ClassLike "\\C"):
      3: (CustomInterConstraint
    { classish_kind_opt = (Some (Cclass Concrete));
-     hierarchy_for_final_item = None })
+     hierarchy_for_final_item = None;
+     path_opt = (Some (Relative_path.Dummy, "signature_formation5.php")) })
 

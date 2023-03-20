@@ -35,9 +35,7 @@ end
 type abstraction = Ast_defs.abstraction =
   | Concrete
   | Abstract
-[@@deriving eq, hash, ord, sexp, show { with_path = false }]
-
-val hash_abstraction : abstraction -> int
+[@@deriving eq, ord, sexp, show { with_path = false }]
 
 type classish_kind = Ast_defs.classish_kind =
   | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
@@ -45,9 +43,7 @@ type classish_kind = Ast_defs.classish_kind =
   | Ctrait  (** Kind for `trait` *)
   | Cenum  (** Kind for `enum` *)
   | Cenum_class of abstraction
-[@@deriving eq, hash, ord, sexp, show { with_path = false }]
-
-val hash_classish_kind : classish_kind -> int
+[@@deriving eq, ord, sexp, show { with_path = false }]
 
 module CustomInterConstraint : sig
   (** Facts that help us summarize results. *)
@@ -60,6 +56,7 @@ module CustomInterConstraint : sig
         `Some [c1, c2]` indicates a final class that inherits transitively from c1 and c2.
         Anything else is `None`
         *)
+    path_opt: Relative_path.t option;
   }
 end
 
@@ -100,6 +97,7 @@ module Summary : sig
   type nadable = {
     id: H.Id.t;
     kind: nadable_kind;
+    path_opt: Relative_path.t option;
   }
 
   type t = {

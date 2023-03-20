@@ -37,12 +37,17 @@ end = struct
     let kind = "kind"
 
     let function_ = "function"
+
+    let path = "path"
   end
 
   let extract_exn access_result =
     access_result |> Result.ok |> Option.value_exn |> fst
 
-  let json_obj_of_nadable Summary.{ id; kind } =
+  let extract_opt access_result =
+    access_result |> Result.ok |> Option.map ~f:fst
+
+  let json_obj_of_nadable Summary.{ id; kind; path_opt } =
     let kind_str =
       match kind with
       | Summary.Function -> Names.function_
@@ -51,10 +56,12 @@ end = struct
         |> Option.sexp_of_t sexp_of_classish_kind
         |> Sexp.to_string
     in
+    let j_string_of_path = Fn.compose J.string_ Relative_path.suffix in
     J.JSON_Object
       [
         (Names.sid, J.string_ @@ H.Id.sid_of_t id);
         (Names.kind, J.string_ kind_str);
+        (Names.path, J.opt_ j_string_of_path path_opt);
       ]
 
   let json_of_nadables nadables =
@@ -67,18 +74,23 @@ end = struct
 
   let nadable_of_json_obj_exn obj =
     let sid = J.Access.get_string Names.sid (obj, []) |> extract_exn in
+    let path_opt =
+      J.Access.get_string Names.path (obj, [])
+      |> extract_opt
+      |> Option.map ~f:(fun suffix -> Relative_path.from_root ~suffix)
+    in
     let kind_string = J.Access.get_string Names.kind (obj, []) |> extract_exn in
     if String.equal kind_string Names.function_ then
       let id = H.Id.Function sid in
       let kind = Summary.Function in
-      Summary.{ id; kind }
+      Summary.{ id; kind; path_opt }
     else
       let classish_kind_opt =
         kind_string |> Sexp.of_string |> Option.t_of_sexp classish_kind_of_sexp
       in
       let id = H.Id.ClassLike sid in
       let kind = Summary.ClassLike classish_kind_opt in
-      Summary.{ id; kind }
+      Summary.{ id; kind; path_opt }
 
   let nadables_of_json_exn obj =
     match J.Access.get_string entry_kind_label (obj, []) |> extract_exn with

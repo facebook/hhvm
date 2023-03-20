@@ -10,9 +10,10 @@ open Hh_prelude
 open Sdt_analysis_types
 module A = Aast
 
-let create_custom_inter ~classish_kind_opt ~hierarchy_for_final_item =
+let create_custom_inter ~classish_kind_opt ~hierarchy_for_final_item ~path =
   H.CustomInterConstraint
-    CustomInterConstraint.{ classish_kind_opt; hierarchy_for_final_item }
+    CustomInterConstraint.
+      { classish_kind_opt; hierarchy_for_final_item; path_opt = Some path }
 
 let get_hierarchy_for_final_class ctx A.{ c_name = (_, sid); c_final; _ } =
   if not c_final then
@@ -74,7 +75,8 @@ let reduce_walk_result =
             decorated_data =
               create_custom_inter
                 ~classish_kind_opt:(Some c_kind)
-                ~hierarchy_for_final_item;
+                ~hierarchy_for_final_item
+                ~path:(Pos.filename c_pos);
           }
       in
       WalkResult.(wr @ super#on_class_ env class_)
@@ -97,7 +99,8 @@ let reduce_walk_result =
             decorated_data =
               create_custom_inter
                 ~classish_kind_opt:None
-                ~hierarchy_for_final_item;
+                ~hierarchy_for_final_item
+                ~path:(Pos.filename f_pos);
           }
       in
       let wr = WalkResult.add_id wr id in

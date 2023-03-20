@@ -29,9 +29,6 @@ type abstraction = Ast_defs.abstraction =
   | Abstract
 [@@deriving eq, hash, ord, sexp, show { with_path = false }]
 
-let hash_abstraction : abstraction -> int =
-  Obj.magic hash_abstraction (* workaround for T92019055 *)
-
 type classish_kind = Ast_defs.classish_kind =
   | Cclass of abstraction  (** Kind for `class` and `abstract class` *)
   | Cinterface  (** Kind for `interface` *)
@@ -40,13 +37,18 @@ type classish_kind = Ast_defs.classish_kind =
   | Cenum_class of abstraction
 [@@deriving eq, hash, ord, sexp, show { with_path = false }]
 
-let hash_classish_kind : classish_kind -> int =
-  Obj.magic hash_classish_kind (* workaround for T92019055 *)
+module Relative_path = struct
+  include Relative_path
+
+  let hash_fold_t hash_state path =
+    String.hash_fold_t hash_state (Relative_path.storage_to_string path)
+end
 
 module CustomInterConstraint = struct
   type t = {
     classish_kind_opt: classish_kind option;
     hierarchy_for_final_item: string list option;
+    path_opt: Relative_path.t option;
   }
   [@@deriving eq, hash, ord, show { with_path = false }]
 end
@@ -100,6 +102,7 @@ module Summary = struct
   type nadable = {
     id: H.Id.t;
     kind: nadable_kind;
+    path_opt: Relative_path.t option;
   }
 
   type t = {

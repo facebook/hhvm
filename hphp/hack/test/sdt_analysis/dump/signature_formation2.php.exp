@@ -7,13 +7,17 @@ Intraprocedural Constraints for (Function "\\g"):
 
 Interprocedural Constraints for (Function "\\f"):
      5: (CustomInterConstraint
-   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []);
+     path_opt = (Some (Relative_path.Dummy, "signature_formation2.php")) })
      5: (CustomInterConstraint
-   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []);
+     path_opt = (Some (Relative_path.Dummy, "signature_formation2.php")) })
 
 Interprocedural Constraints for (Function "\\g"):
      3: (CustomInterConstraint
-   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []);
+     path_opt = (Some (Relative_path.Dummy, "signature_formation2.php")) })
      3: (CustomInterConstraint
-   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []);
+     path_opt = (Some (Relative_path.Dummy, "signature_formation2.php")) })
 

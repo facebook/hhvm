@@ -4,5 +4,6 @@ Intraprocedural Constraints for (Function "\\f"):
 
 Interprocedural Constraints for (Function "\\f"):
      3: (CustomInterConstraint
-   { classish_kind_opt = None; hierarchy_for_final_item = (Some []) })
+   { classish_kind_opt = None; hierarchy_for_final_item = (Some []);
+     path_opt = (Some (Relative_path.Dummy, "dynamic_return.php")) })
 

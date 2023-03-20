@@ -27,18 +27,24 @@ let to_hierarchy_for_final_item = function
   | _ -> None
 
 let calc reader : Summary.t =
-  let to_nadable_single = function
-    | H.Id.Function _ as id -> Summary.{ id; kind = Function }
-    | H.Id.ClassLike _ as id ->
-      H.Read.get_inters reader id
-      |> Sequence.find_map ~f:(function
-             | H.CustomInterConstraint
-                 CustomInterConstraint.{ classish_kind_opt; _ } ->
-               Some Summary.{ id; kind = ClassLike classish_kind_opt }
-             | _ -> None)
-      (* The default is used when there is no CustomInterConstraint,
-         which can happen for classes defined in .hhi files *)
-      |> Option.value ~default:Summary.{ id; kind = ClassLike None }
+  let to_nadable_single id =
+    let (default_kind, create_kind) =
+      match id with
+      | H.Id.Function _ -> (Summary.Function, (fun _ -> Summary.Function))
+      | H.Id.ClassLike _ ->
+        ( Summary.ClassLike None,
+          (fun classish_kind_opt -> Summary.ClassLike classish_kind_opt) )
+    in
+    H.Read.get_inters reader id
+    |> Sequence.find_map ~f:(function
+           | H.CustomInterConstraint
+               CustomInterConstraint.{ classish_kind_opt; path_opt; _ } ->
+             Some Summary.{ id; kind = create_kind classish_kind_opt; path_opt }
+           | _ -> None)
+    (* The default is used when there is no CustomInterConstraint,
+       which can happen for items defined in .hhi files *)
+    |> Option.value
+         ~default:Summary.{ id; kind = default_kind; path_opt = None }
   in
 
   let to_nadable = Sequence.map ~f:to_nadable_single in

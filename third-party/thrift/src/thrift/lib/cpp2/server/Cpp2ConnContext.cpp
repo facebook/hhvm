@@ -129,5 +129,13 @@ ClientMetadataRef::getFields() const {
                                                     : emptyFields;
 }
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    folly::erased_unique_ptr, createPerConnectionInternalFields) {
+  return folly::empty_erased_unique_ptr();
+}
+
+} // namespace detail
+
 } // namespace thrift
 } // namespace apache

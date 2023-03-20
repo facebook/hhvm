@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp/server/TConnectionContext.h>
 #include <thrift/lib/cpp/server/TServerObserver.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <wangle/ssl/SSLUtil.h>
 
@@ -66,6 +67,11 @@ class ClientMetadataRef {
   const ClientMetadata& md_;
 };
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    folly::erased_unique_ptr, createPerConnectionInternalFields);
+}
+
 class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   Cpp2ConnContext(
       const folly::SocketAddress* address,
@@ -80,7 +86,8 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
         manager_(manager),
         duplexChannel_(duplexChannel),
         worker_(worker),
-        workerContext_(workerContext) {
+        workerContext_(workerContext),
+        internalFields_(detail::createPerConnectionInternalFields()) {
     if (address) {
       transportInfo_.peerAddress = *address;
     }
@@ -335,6 +342,9 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     return ClientMetadataRef{*clientMetadata_};
   }
 
+  void* getInternalFields() { return internalFields_.get(); }
+  const void* getInternalFields() const { return internalFields_.get(); }
+
   InterfaceKind getInterfaceKind() const { return interfaceKind_; }
 
   /**
@@ -508,6 +518,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   std::optional<TransportType> transportType_;
   std::optional<CLIENT_TYPE> clientType_;
   std::optional<ClientMetadata> clientMetadata_;
+  folly::erased_unique_ptr internalFields_;
 };
 
 class Cpp2ClientRequestContext

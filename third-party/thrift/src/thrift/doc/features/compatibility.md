@@ -106,7 +106,7 @@ struct Foo {
 Given the rules above, the following changes to Thrift structs will maintain compatibility between old and new versions:
 
 * Changing a **required** field to **unqualified**
-* Changing a **required** field to [**terse**](./index#optional-fields)
+* Changing a **required** field to **terse**
 * Changing an **optional** field to **unqualified**
 * Changing an **optional** field to **terse**
 * Changing an **unqualified** field to **required**

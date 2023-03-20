@@ -458,15 +458,15 @@ struct Encode<type::enum_t<T>> {
 };
 
 // TODO: add optimization used in protocol_methods.h
-template <typename Tag>
-struct Encode<type::list<Tag>> {
+template <typename Tag, template <class...> class EncodeImpl = Encode>
+struct ListEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& list) const {
     uint32_t xfer = 0;
     xfer += prot.writeListBegin(
         typeTagToTType<Tag>, checked_container_size(list.size()));
     for (const auto& elem : list) {
-      xfer += Encode<Tag>{}(prot, elem);
+      xfer += EncodeImpl<Tag>{}(prot, elem);
     }
     xfer += prot.writeListEnd();
     return xfer;
@@ -474,22 +474,31 @@ struct Encode<type::list<Tag>> {
 };
 
 template <typename Tag>
-struct Encode<type::set<Tag>> {
+struct Encode<type::list<Tag>> : ListEncode<Tag> {};
+
+template <typename Tag, template <class...> class EncodeImpl = Encode>
+struct SetEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& set) const {
     uint32_t xfer = 0;
     xfer += prot.writeSetBegin(
         typeTagToTType<Tag>, checked_container_size(set.size()));
     for (const auto& elem : set) {
-      xfer += Encode<Tag>{}(prot, elem);
+      xfer += EncodeImpl<Tag>{}(prot, elem);
     }
     xfer += prot.writeSetEnd();
     return xfer;
   }
 };
 
-template <typename Key, typename Value>
-struct Encode<type::map<Key, Value>> {
+template <typename Tag>
+struct Encode<type::set<Tag>> : SetEncode<Tag> {};
+
+template <
+    typename Key,
+    typename Value,
+    template <class...> class EncodeImpl = Encode>
+struct MapEncode {
   template <typename Protocol, typename T>
   uint32_t operator()(Protocol& prot, const T& map) const {
     uint32_t xfer = 0;
@@ -498,13 +507,16 @@ struct Encode<type::map<Key, Value>> {
         typeTagToTType<Value>,
         checked_container_size(map.size()));
     for (const auto& kv : map) {
-      xfer += Encode<Key>{}(prot, kv.first);
-      xfer += Encode<Value>{}(prot, kv.second);
+      xfer += EncodeImpl<Key>{}(prot, kv.first);
+      xfer += EncodeImpl<Value>{}(prot, kv.second);
     }
     xfer += prot.writeMapEnd();
     return xfer;
   }
 };
+
+template <typename Key, typename Value>
+struct Encode<type::map<Key, Value>> : MapEncode<Key, Value> {};
 
 template <typename T, typename Tag>
 struct Encode<type::cpp_type<T, Tag>> : Encode<Tag> {

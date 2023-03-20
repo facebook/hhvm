@@ -868,6 +868,10 @@ impl Call {
     pub fn obj(&self) -> ValueId {
         self.detail.obj(&self.operands)
     }
+
+    pub fn target(&self) -> ValueId {
+        self.detail.target(&self.operands)
+    }
 }
 
 impl CanThrow for Call {

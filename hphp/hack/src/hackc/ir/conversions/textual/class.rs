@@ -214,6 +214,7 @@ impl ClassState<'_, '_, '_> {
         flags.clear(ir::Attr::AttrProtected);
         flags.clear(ir::Attr::AttrPublic);
         flags.clear(ir::Attr::AttrSystemInitialValue);
+        flags.clear(ir::Attr::AttrInterceptable);
 
         let mut tx_attributes = Vec::new();
         let comments = Vec::new();

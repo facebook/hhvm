@@ -124,5 +124,36 @@ function fcall_nullsafe(?C $c): void {
   f($c?->g());
 }
 
-// TEST-CHECK-BAL: declare C$static.f
+// TEST-CHECK-BAL: define $root.fcall_class_meth
+// CHECK: define $root.fcall_class_meth($this: *void) : *void {
+// CHECK: local $x: *void, $0: *void
+// CHECK: #b0:
+// CHECK:   n0: *C$static = load &const::C$static::static_singleton
+// CHECK:   n1 = $builtins.lazy_initialize(n0)
+// CHECK:   n2 = __sil_allocate_curry("<C$static>", "sb", n0)
+// CHECK:   store &$x <- n2: *HackMixed
+// CHECK:   jmp b1
+// CHECK: #b1:
+// CHECK:   n3: *HackMixed = load &$x
+// CHECK:   store &$0 <- n3: *HackMixed
+// CHECK:   n4: *HackMixed = load &$0
+// CHECK:   n5 = n4.HackMixed.__invoke($builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   jmp b3
+// CHECK:   .handlers b2
+// CHECK: #b2(n6: *HackMixed):
+// CHECK:   store &$0 <- null: *HackMixed
+// CHECK:   n7 = $builtins.hhbc_throw(n6)
+// CHECK:   unreachable
+// CHECK: #b3:
+// CHECK:   ret null
+// CHECK: }
+function fcall_class_meth(): void {
+  $x = C::sb<>;
+  $x(1, 2, 3);
+}
+
+// TEST-CHECK-1: declare C$static.f
 // CHECK: declare C$static.f(...): *HackMixed
+
+// TEST-CHECK-1: declare __sil_allocate_curry
+// CHECK: declare __sil_allocate_curry(...): *HackMixed

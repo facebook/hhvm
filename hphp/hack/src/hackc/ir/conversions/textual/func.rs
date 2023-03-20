@@ -42,6 +42,7 @@ use crate::lower;
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
 use crate::mangle::Intrinsic;
+use crate::mangle::TypeName;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Expr;
@@ -305,6 +306,13 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
         Instr::Hhbc(Hhbc::ResolveClass(cid, _)) => {
             let vid = state.load_static_class(cid)?;
             state.set_iid(iid, vid);
+        }
+        Instr::Hhbc(Hhbc::ResolveClsMethodD(cid, method, _)) => {
+            let that = state.load_static_class(cid)?;
+            let name = FunctionName::Method(TypeName::StaticClass(cid), method);
+            let curry = textual::Expr::alloc_curry(name, that, ());
+            let expr = state.fb.write_expr_stmt(curry)?;
+            state.set_iid(iid, expr);
         }
         Instr::Hhbc(Hhbc::SelfCls(_)) => {
             let method_info = state
@@ -706,7 +714,13 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
             _ => unreachable!(),
         },
         CallDetail::FCallCtor => unreachable!(),
-        CallDetail::FCallFunc => state.write_todo("TODO_FCallFunc")?,
+        CallDetail::FCallFunc => {
+            // $foo()
+            let target = detail.target(operands);
+            let target = state.lookup_vid(target);
+            let name = FunctionName::Intrinsic(Intrinsic::Invoke(TypeName::HackMixed));
+            state.fb.call_virtual(&name, target, args)?
+        }
         CallDetail::FCallFuncD { func } => {
             // foo()
             let target = FunctionName::Function(func);

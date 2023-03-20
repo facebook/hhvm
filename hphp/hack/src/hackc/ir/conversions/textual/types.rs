@@ -3,13 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ir::BaseType;
+use ir::EnforceableType;
 use ir::StringInterner;
 use ir::TypeConstraintFlags;
 
 use crate::mangle::TypeName;
 use crate::textual;
 
-pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> textual::Ty {
+pub(crate) fn convert_ty(ty: &EnforceableType, strings: &StringInterner) -> textual::Ty {
     let mut base = convert_base(&ty.ty);
 
     let mut modifiers = ty.modifiers;
@@ -39,8 +41,7 @@ pub(crate) fn convert_ty(ty: &ir::EnforceableType, strings: &StringInterner) -> 
     base
 }
 
-fn convert_base(ty: &ir::BaseType) -> textual::Ty {
-    use ir::BaseType;
+fn convert_base(ty: &BaseType) -> textual::Ty {
     match ty {
         BaseType::Arraykey => textual::Ty::SpecialPtr(textual::SpecialTy::Arraykey),
         BaseType::Bool => textual::Ty::SpecialPtr(textual::SpecialTy::Bool),

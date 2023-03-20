@@ -26,7 +26,10 @@ use strum_macros::EnumProperty;
 
 use crate::mangle::FunctionName;
 use crate::mangle::GlobalName;
+use crate::mangle::Intrinsic;
+use crate::mangle::Mangle;
 use crate::mangle::TypeName;
+use crate::mangle::TOP_LEVELS_CLASS;
 
 pub(crate) const INDENT: &str = "  ";
 
@@ -307,15 +310,52 @@ impl<'a> TextualFile<'a> {
     }
 
     fn write_expr(&mut self, expr: &Expr) -> Result {
+        let strings = &self.strings;
         match *expr {
-            Expr::Alloc(ref ty) => {
-                write!(self.w, "__sil_allocate(<{}>)", ty.display(&self.strings))?
+            Expr::Alloc(ref ty) => write!(self.w, "__sil_allocate(<{}>)", ty.display(strings))?,
+            Expr::AllocCurry {
+                ref name,
+                ref this,
+                ref args,
+            } => {
+                let target = FunctionName::Intrinsic(Intrinsic::AllocCurry);
+                // TODO: Because textual doesn't actually know about
+                // __sil_allocate_curry we need to register it.
+                self.called_functions.insert(target.clone());
+                let mut write_curry =
+                    |cls: &dyn std::fmt::Display, meth: &dyn std::fmt::Display| {
+                        write!(
+                            self.w,
+                            "{}(\"<{cls}>\", \"{meth}\", ",
+                            target.display(strings)
+                        )
+                    };
+                match name {
+                    FunctionName::Function(fid) => {
+                        write_curry(&TOP_LEVELS_CLASS, &fid.as_bytes(strings).mangle(strings))?;
+                    }
+                    FunctionName::Method(cid, mid) => {
+                        write_curry(
+                            &cid.display(strings),
+                            &mid.as_bytes(strings).mangle(strings),
+                        )?;
+                    }
+                    FunctionName::Builtin(..)
+                    | FunctionName::Intrinsic(..)
+                    | FunctionName::Unmangled(..) => panic!("Cannot AllocCurry on {name:?}"),
+                }
+                self.write_expr(this)?;
+                for arg in args.iter() {
+                    write!(self.w, ", ")?;
+                    self.write_expr(arg)?;
+                }
+                write!(self.w, ")")?;
             }
             Expr::Call(ref target, ref params) => {
                 if !self.called_functions.contains(target) {
                     self.called_functions.insert(target.to_owned());
                 }
-                write!(self.w, "{}(", target.display(&self.strings))?;
+                write!(self.w, "{}(", target.display(strings))?;
                 let mut sep = "";
                 for param in params.iter() {
                     self.w.write_all(sep.as_bytes())?;
@@ -349,7 +389,7 @@ impl<'a> TextualFile<'a> {
                     }
                     Var::Local(_) => {}
                 }
-                write!(self.w, "{}", FmtVar(&self.strings, var))?
+                write!(self.w, "{}", FmtVar(strings, var))?
             }
         }
         Ok(())
@@ -574,6 +614,32 @@ impl fmt::Display for FmtConst<'_> {
 pub(crate) enum Expr {
     /// __sil_allocate(\<ty\>)
     Alloc(Ty),
+    /// A curry boxes up some parameters and returns an invokable.  This has to
+    /// be an intrinsic so we don't end up a ton of little duplicate classes.
+    ///
+    /// It's usually used for function pointers or meth_callers:
+    ///
+    ///   `foo<>` turns into `AllocCurry("<$root>", "foo", null, [])`.
+    ///   `C::foo<>` turns into `AllocCurry("<C$static>", "foo", static_this, [])`.
+    ///   `$x->foo<>` turns into `AllocCurry("<C>", "foo", $x, [])`.
+    ///
+    /// Note that it's important that when the curry is invoked it replaces the
+    /// callee's `this` with its own stored `this`.
+    ///
+    /// Curry can also be used for partial apply:
+    ///
+    ///   x = AllocCurry("<$root>", "foo", null, [1, 2])
+    ///   x(3, 4)
+    ///
+    /// would be the same as:
+    ///
+    ///   foo(1, 2, 3, 4)
+    ///
+    AllocCurry {
+        name: FunctionName,
+        this: Box<Expr>,
+        args: Box<[Expr]>,
+    },
     /// foo(1, 2, 3)
     Call(FunctionName, Box<[Expr]>),
     /// 0, null, etc
@@ -589,6 +655,18 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
+    pub(crate) fn alloc_curry(
+        name: FunctionName,
+        this: impl Into<Expr>,
+        args: impl VarArgs,
+    ) -> Expr {
+        Expr::AllocCurry {
+            name,
+            this: Box::new(this.into()),
+            args: args.into_exprs().into_boxed_slice(),
+        }
+    }
+
     pub(crate) fn call(target: FunctionName, params: impl VarArgs) -> Expr {
         Expr::Call(target, params.into_exprs().into_boxed_slice())
     }
@@ -832,7 +910,7 @@ impl FuncBuilder<'_, '_> {
     pub(crate) fn write_expr_stmt(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
         let expr = expr.into();
         match expr {
-            Expr::Alloc(_) | Expr::Const(_) | Expr::Deref(_) => {
+            Expr::Alloc(_) | Expr::AllocCurry { .. } | Expr::Const(_) | Expr::Deref(_) => {
                 let sid = self.alloc_sid();
                 write!(self.txf.w, "{INDENT}{} = ", FmtSid(sid))?;
                 self.txf.write_expr(&expr)?;

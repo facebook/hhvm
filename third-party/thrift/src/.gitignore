@@ -48,4 +48,4 @@ Makefile
 cmake_install.cmake
 /build/bin
 /build/thrift
-/thrift/lib/java/common/target
+/thrift/lib/java/**/target

@@ -154,9 +154,53 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
   let log str = Printf.eprintf "%s\n%!" str
 end
 
-module MarshalToolsFunctor (WriterReader : WRITER_READER) : sig
-  val expected_preamble_size : int
+let preamble_start_sentinel = '\142'
 
+(* Size in bytes. *)
+let preamble_core_size = 4
+
+let expected_preamble_size = preamble_core_size + 1
+
+(* Payload size in bytes = 2^31 - 1. *)
+let maximum_payload_size = (1 lsl (preamble_core_size * 8)) - 1
+
+let get_preamble_core (size : int) =
+  (* We limit payload size to 2^31 - 1 bytes. *)
+  if size >= maximum_payload_size then raise Payload_Size_Too_Large_Exception;
+  let rec loop i (remainder : int) acc =
+    if i < 0 then
+      acc
+    else
+      loop
+        (i - 1)
+        (remainder / 256)
+        (Bytes.set acc i (Char.chr (remainder mod 256));
+         acc)
+  in
+  loop (preamble_core_size - 1) size (Bytes.create preamble_core_size)
+
+let make_preamble (size : int) =
+  let preamble_core = get_preamble_core size in
+  let preamble = Bytes.create (preamble_core_size + 1) in
+  Bytes.set preamble 0 preamble_start_sentinel;
+  Bytes.blit preamble_core 0 preamble 1 4;
+  preamble
+
+let parse_preamble preamble =
+  if
+    Bytes.length preamble <> expected_preamble_size
+    || Bytes.get preamble 0 <> preamble_start_sentinel
+  then
+    raise Malformed_Preamble_Exception;
+  let rec loop i acc =
+    if i >= 5 then
+      acc
+    else
+      loop (i + 1) ((acc * 256) + int_of_char (Bytes.get preamble i))
+  in
+  loop 1 0
+
+module MarshalToolsFunctor (WriterReader : WRITER_READER) : sig
   val to_fd_with_preamble :
     ?timeout:Timeout.t ->
     ?flags:Marshal.extern_flags list ->
@@ -168,52 +212,6 @@ module MarshalToolsFunctor (WriterReader : WRITER_READER) : sig
     ?timeout:Timeout.t -> WriterReader.fd -> 'a WriterReader.result
 end = struct
   let ( >>= ) = WriterReader.( >>= )
-
-  let preamble_start_sentinel = '\142'
-
-  (* Size in bytes. *)
-  let preamble_core_size = 4
-
-  let expected_preamble_size = preamble_core_size + 1
-
-  (* Payload size in bytes = 2^31 - 1. *)
-  let maximum_payload_size = (1 lsl (preamble_core_size * 8)) - 1
-
-  let get_preamble_core (size : int) =
-    (* We limit payload size to 2^31 - 1 bytes. *)
-    if size >= maximum_payload_size then raise Payload_Size_Too_Large_Exception;
-    let rec loop i (remainder : int) acc =
-      if i < 0 then
-        acc
-      else
-        loop
-          (i - 1)
-          (remainder / 256)
-          (Bytes.set acc i (Char.chr (remainder mod 256));
-           acc)
-    in
-    loop (preamble_core_size - 1) size (Bytes.create preamble_core_size)
-
-  let make_preamble (size : int) =
-    let preamble_core = get_preamble_core size in
-    let preamble = Bytes.create (preamble_core_size + 1) in
-    Bytes.set preamble 0 preamble_start_sentinel;
-    Bytes.blit preamble_core 0 preamble 1 4;
-    preamble
-
-  let parse_preamble preamble =
-    if
-      Bytes.length preamble <> expected_preamble_size
-      || Bytes.get preamble 0 <> preamble_start_sentinel
-    then
-      raise Malformed_Preamble_Exception;
-    let rec loop i acc =
-      if i >= 5 then
-        acc
-      else
-        loop (i + 1) ((acc * 256) + int_of_char (Bytes.get preamble i))
-    in
-    loop 1 0
 
   let rec write_payload ?timeout fd buffer offset to_write =
     if to_write = 0 then

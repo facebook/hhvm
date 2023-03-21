@@ -87,9 +87,17 @@ module type WRITER_READER = sig
   val log : string -> unit
 end
 
-module MarshalToolsFunctor (WriterReader : WRITER_READER) : sig
-  val expected_preamble_size : int
+(** A "preamble" is a length 5 'bytes' that encodes a single integer up to size 2^31-1.
+One of its bytes is a parity byte, to help safeguard against corruption. *)
+val expected_preamble_size : int
 
+(** "make_preamble n" will return a length 5 'bytes' that encodes the integer n. *)
+val make_preamble : int -> bytes
+
+(** "make_preamble n |> parse_preamble" will return the integer n. *)
+val parse_preamble : bytes -> int
+
+module MarshalToolsFunctor (WriterReader : WRITER_READER) : sig
   val to_fd_with_preamble :
     ?timeout:Timeout.t ->
     ?flags:Marshal.extern_flags list ->

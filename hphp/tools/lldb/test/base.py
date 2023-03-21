@@ -14,29 +14,24 @@ import lldb
 from fblldb.utils import run_lldb_command, get_lldb_object_description
 
 hhvm_path = pathlib.Path(__file__).parent.parent / "hhvm_cpp"
+hhvm_types_path = pathlib.Path(__file__).parent.parent / "hhvm_types"
 hhvm_test_path = os.environ["HHVM_TEST_DIR"]
 scripts_path = os.environ["HHVM_LLDB_SCRIPTS"]
 
 class LLDBTestBase(BaseFacebookTestCase):
-    def setUp(self, file=None, interp=False):
+    def setUp(self):
         """ Set up a debugger for each test case instance """
         debugger = lldb.SBDebugger.Create()
         debugger.SetAsync(False)  # Important so that we only stop at our breakpoint, not arbitrary signals
         assert debugger.IsValid(), "Unable to create debugger instance"
 
-        target = debugger.CreateTarget(hhvm_path.as_posix())
+        target = debugger.CreateTarget(self.getTargetPath())
         assert target.IsValid(), "Unable to create target"
-
-        hhvm_args = []
-        if file:
-            hhvm_args.extend(["--file", f"{hhvm_test_path}/{file}"])
-        if interp:
-            hhvm_args.extend(["-vEval.Jit=0"])
 
         error = lldb.SBError()
         process = target.Launch(
             debugger.GetListener(),
-            hhvm_args,
+            self.getArgs(),
             None, None, None, None, os.getcwd(), 0, True, error)
         assert process.IsValid() and error.Success(), f"Unable to launch process ({get_lldb_object_description(error)})"
         assert process.GetState() == lldb.eStateStopped, "Process is not in Stopped state"
@@ -45,6 +40,13 @@ class LLDBTestBase(BaseFacebookTestCase):
         assert status == 0, output  # output will be the error message
 
         self.debugger = debugger
+
+    @typing.abstractmethod
+    def getTargetPath(self) -> str:
+        pass
+
+    def getArgs(self) -> typing.List[str]:
+        return []
 
     def tearDown(self):
         """ Clean up the debugger """
@@ -95,3 +97,22 @@ class LLDBTestBase(BaseFacebookTestCase):
         assert err.Success(), f"Unable to continue to breakpoint {breakpoint}"
         assert self.process.GetSelectedThread().GetStopReason() == lldb.eStopReasonBreakpoint, f"Unable to reach breakpoint at {breakpoint}"
 
+class TestHHVMBinary(LLDBTestBase):
+    def setUp(self, test_file=None, interp=False):
+        self.test_file = test_file
+        self.interp = interp
+
+    def getTargetPath(self) -> str:
+        return hhvm_path.as_posix()
+
+    def getArgs(self) -> typing.List[str]:
+        hhvm_args = []
+        if self.test_file:
+            hhvm_args.extend(["--file", f"{hhvm_test_path}/{self.test_file}"])
+        if self.interp:
+            hhvm_args.extend(["-vEval.Jit=0"])
+        return hhvm_args
+
+class TestHHVMTypesBinary(LLDBTestBase):
+    def getTargetPath(self) -> str:
+        return hhvm_types_path.as_posix()

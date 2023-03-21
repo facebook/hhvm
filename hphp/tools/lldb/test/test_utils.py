@@ -4,7 +4,7 @@ from . import base
 
 import hhvm_lldb.utils as utils
 
-class UtilsGivenTargetTestCase(base.LLDBTestBase):
+class UtilsGivenTargetTestCase(base.TestHHVMBinary):
     def setUp(self):
         super().setUp() # No Hack file needed; just load HHVM target
 

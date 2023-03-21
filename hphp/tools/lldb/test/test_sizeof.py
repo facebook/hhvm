@@ -3,7 +3,7 @@ from . import base
 import hhvm_lldb.utils as utils
 import hhvm_lldb.sizeof as sizeof
 
-class IdxCommandTestCase(base.LLDBTestBase):
+class IdxCommandTestCase(base.TestHHVMBinary):
 
     def setUp(self):
         super().setUp(file = "quick/properties2.php", interp=True)

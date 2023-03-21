@@ -4,7 +4,7 @@ from . import base
 
 import hhvm_lldb.idx as idx
 
-class IdxCommandTestCase(base.LLDBTestBase):
+class IdxCommandTestCase(base.TestHHVMBinary):
 
     def setUp(self):
         super().setUp(file = "slow/reified-generics/reified-parent.php")

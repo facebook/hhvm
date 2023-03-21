@@ -2,7 +2,7 @@ import re
 
 from . import base
 
-class WalkStkCommandTestCase(base.LLDBTestBase):
+class WalkStkCommandTestCase(base.TestHHVMBinary):
 
     def setUp(self):
         super().setUp(file = "slow/reified-generics/reified-parent.php")

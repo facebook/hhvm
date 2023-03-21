@@ -3,7 +3,7 @@ from . import base
 import hhvm_lldb.frame as frame
 import hhvm_lldb.utils as utils
 
-class FrameTestCase(base.LLDBTestBase):
+class FrameTestCase(base.TestHHVMBinary):
     def setUp(self):
         super().setUp(file="slow/reified-generics/reified-parent.php")
 

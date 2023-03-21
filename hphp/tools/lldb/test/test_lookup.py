@@ -3,7 +3,7 @@ from . import base
 import hhvm_lldb.utils as utils
 import hhvm_lldb.lookup as lookup
 
-class LookupCommandTestCase(base.LLDBTestBase):
+class LookupCommandTestCase(base.TestHHVMBinary):
 
     def setUp(self):
         super().setUp(file="quick/method2.php", interp=True)

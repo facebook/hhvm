@@ -182,15 +182,14 @@ OmniClientResponseWithHeaders OmniClient::sync_send(
     const std::string& serviceName,
     const std::string& functionName,
     std::unique_ptr<folly::IOBuf> args,
+    apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     apache::thrift::RpcOptions&& rpcOptions) {
-  apache::thrift::MethodMetadata::Data data(
-      functionName, apache::thrift::FunctionQualifier::Unspecified);
   return folly::coro::blockingWait(semifuture_send(
       serviceName,
       functionName,
       std::move(args),
-      std::move(data),
+      std::move(metadata),
       headers,
       std::move(rpcOptions)));
 }
@@ -199,12 +198,14 @@ OmniClientResponseWithHeaders OmniClient::sync_send(
     const std::string& serviceName,
     const std::string& functionName,
     const std::string& args,
+    apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     apache::thrift::RpcOptions&& rpcOptions) {
   return sync_send(
       serviceName,
       functionName,
       folly::IOBuf::copyBuffer(args),
+      std::move(metadata),
       headers,
       std::move(rpcOptions));
 }

@@ -49,12 +49,13 @@ class AsyncClient:
         function_name: str,
         args: StructOrUnion,
         response_cls: None,
+        *,
         rpc_kind: RpcKind = ...,
         qualifier: FunctionQualifier = ...,
         interaction_position: InteractionMethodPosition = ...,
         interaction_name: str = ...,
         created_interaction: AsyncClient = ...,
-        uriOrName: str = ...,
+        uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> None: ...
     @typing.overload
@@ -69,7 +70,7 @@ class AsyncClient:
         interaction_position: InteractionMethodPosition = ...,
         interaction_name: str = ...,
         created_interaction: AsyncClient = ...,
-        uriOrName: str = ...,
+        uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> TResponse: ...
     @typing.overload
@@ -87,7 +88,7 @@ class AsyncClient:
         interaction_position: InteractionMethodPosition = ...,
         interaction_name: str = ...,
         created_interaction: AsyncClient = ...,
-        uriOrName: str = ...,
+        uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> typing.Tuple[TResponse, typing.AsyncGenerator[TChunk, None]]: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...

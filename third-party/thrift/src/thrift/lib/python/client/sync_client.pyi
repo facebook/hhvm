@@ -38,6 +38,8 @@ class SyncClient:
         function_name: str = ...,
         args: Struct = ...,
         response_cls: typing.Optional[typing.Type[StructOrUnion]] = ...,
+        *,
+        uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> StructOrUnion: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...

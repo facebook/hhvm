@@ -49,6 +49,8 @@ cdef class SyncClient:
         string function_name,
         args,
         response_cls,
+        *,
+        string uri_or_name = b"",
         RpcOptions rpc_options = None,
     ):
         if not self._omni_client:
@@ -77,7 +79,7 @@ cdef class SyncClient:
                 service_name,
                 function_name,
                 args_iobuf.c_clone(),
-                cmove(cData(function_name, FunctionQualifier.OneWay, "".encode('ascii'), InteractionMethodPosition.None, "".encode('ascii'))),
+                cmove(cData(function_name, FunctionQualifier.OneWay, uri_or_name, InteractionMethodPosition.None, "".encode('ascii'))),
                 headers,
                 cmove(c_rpc_options),
             )
@@ -86,6 +88,7 @@ cdef class SyncClient:
                 service_name,
                 function_name,
                 args_iobuf.c_clone(),
+                cmove(cData(function_name, FunctionQualifier.Unspecified, uri_or_name, InteractionMethodPosition.None, "".encode('ascii'))),
                 headers,
                 cmove(c_rpc_options),
             )

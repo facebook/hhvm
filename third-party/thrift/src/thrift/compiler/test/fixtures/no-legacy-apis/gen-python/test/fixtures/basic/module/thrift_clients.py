@@ -69,7 +69,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uriOrName="test.dev/fixtures/no-legacy-apis/MyService",
+                uri_or_name="test.dev/fixtures/no-legacy-apis/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -105,6 +105,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_args(
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
+                uri_or_name="test.dev/fixtures/no-legacy-apis/MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

@@ -17,6 +17,7 @@
 #include "mcrouter/AsyncLog.h"
 #include "mcrouter/AsyncWriter.h"
 #include "mcrouter/CarbonRouterInstanceBase.h"
+#include "mcrouter/McInvalidationUtils.h"
 #include "mcrouter/McReqUtil.h"
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/McrouterLogFailure.h"
@@ -316,7 +317,7 @@ class DestinationRoute {
   }
 
   template <class Request>
-  FOLLY_NOINLINE bool spool(const Request& req) const {
+  FOLLY_NOINLINE bool spoolAsynclog(const Request& req) const {
     auto asynclogName = fiber_local<RouterInfo>::getAsynclogName();
     if (asynclogName.empty()) {
       return false;
@@ -355,6 +356,29 @@ class DestinationRoute {
       proxy->stats().increment(asynclog_requests_rate_stat);
     }
     return true;
+  }
+
+  template <class Request>
+  FOLLY_NOINLINE bool spool(const Request& req) const {
+    // return true if axonlog is enabled and appending to axon client succeed.
+    auto& axonCtx = fiber_local<RouterInfo>::getAxonCtx();
+    auto bucketId = fiber_local<RouterInfo>::getBucketId();
+    auto axonLogRes = bucketId && axonCtx &&
+        spoolAxonProxy(fiber_local<RouterInfo>::getSharedCtx()->proxy(),
+                       req,
+                       axonCtx,
+                       *bucketId);
+    // Try spool asynclog for mcreplay when:
+    // 1. Axon is not enabled
+    // 2. Axon is enabled, but isn't configured with fallback to Asynclog.
+    // 3. when fallback to asynclog is enabled, only attempt to spool asynclog
+    // if axon write is failed
+    bool asyncLogRes = false;
+    if (!axonCtx || !axonCtx->fallbackAsynclog || !axonLogRes) {
+      // return true if asyclog is enabled
+      asyncLogRes = spoolAsynclog(req);
+    }
+    return asyncLogRes || axonLogRes;
   }
 };
 

@@ -125,6 +125,22 @@ McRouteHandleProvider<RouterInfo>::createAsynclogRoute(
   return target;
 }
 
+template <>
+std::shared_ptr<typename MemcacheRouterInfo::RouteHandleIf>
+McRouteHandleProvider<MemcacheRouterInfo>::wrapAxonLogRoute(
+    MemcacheRouterInfo::RouteHandlePtr route,
+    ProxyBase& proxy,
+    const folly::dynamic& json);
+
+template <class RouterInfo>
+std::shared_ptr<typename RouterInfo::RouteHandleIf>
+McRouteHandleProvider<RouterInfo>::wrapAxonLogRoute(
+    RouteHandlePtr route,
+    ProxyBase& /* proxy */,
+    const folly::dynamic& /* json */) {
+  return route;
+}
+
 template <class RouterInfo>
 const std::vector<std::shared_ptr<typename RouterInfo::RouteHandleIf>>&
 McRouteHandleProvider<RouterInfo>::makePool(
@@ -611,6 +627,8 @@ McRouteHandleProvider<RouterInfo>::makePoolRoute(
       route = createAsynclogRoute(std::move(route), asynclogName.str());
     }
     if (json.isObject()) {
+      // Wrap AxonLogRoute if configured
+      route = wrapAxonLogRoute(std::move(route), proxy_, json);
       route = bucketize(std::move(route), json);
     }
     return route;

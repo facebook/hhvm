@@ -233,7 +233,9 @@ McrouterRouteHandlePtr makeWarmUpRoute(
     McRouteHandleFactory& factory,
     const folly::dynamic& json);
 
-MemcacheRouterInfo::RouteHandlePtr wrapAxonLogRoute(
+template <>
+std::shared_ptr<typename MemcacheRouterInfo::RouteHandleIf>
+McRouteHandleProvider<MemcacheRouterInfo>::wrapAxonLogRoute(
     MemcacheRouterInfo::RouteHandlePtr route,
     ProxyBase& proxy,
     const folly::dynamic& json) {

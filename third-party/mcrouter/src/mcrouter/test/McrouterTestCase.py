@@ -133,7 +133,7 @@ class McrouterTestCase(unittest.TestCase):
         sleep_time = 1
         result = False
         while retry < max_retry:
-            if (condition):
+            if (condition()):
                 result = True
                 break
             retry += 1

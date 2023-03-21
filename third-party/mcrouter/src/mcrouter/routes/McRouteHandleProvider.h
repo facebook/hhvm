@@ -193,6 +193,11 @@ class McRouteHandleProvider
 
   RouteHandlePtr bucketize(RouteHandlePtr route, const folly::dynamic& json);
 
+  RouteHandlePtr wrapAxonLogRoute(
+      RouteHandlePtr route,
+      ProxyBase& proxy,
+      const folly::dynamic& json);
+
   template <class Transport>
   std::pair<RouteHandlePtr, std::shared_ptr<const AccessPoint>>
   createDestinationRoute(

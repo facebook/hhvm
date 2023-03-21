@@ -41,6 +41,7 @@ pub mod validate_control_context;
 pub mod validate_coroutine;
 pub mod validate_expr_call_echo;
 pub mod validate_expr_cast;
+pub mod validate_expr_function_pointer;
 pub mod validate_fun_param_inout;
 pub mod validate_fun_params;
 pub mod validate_function_pointer;

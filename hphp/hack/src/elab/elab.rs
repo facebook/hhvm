@@ -339,6 +339,8 @@ fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
         passes::validate_trait_internal::ValidateTraitInternalPass::default(),
 
         passes::validate_hint_hrefinement::ValidateHintHrefinementPass::default(),
+
+        passes::validate_expr_function_pointer::ValidateExprFunctionPointerPass::default(),
     ];
 
     node.transform(&env, &mut passes);

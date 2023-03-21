@@ -606,6 +606,41 @@ struct res::Func::FuncInfo {
   CompactVector<FuncFamily*> families;
 };
 
+/*
+ * Currently inferred information about a Hack function.
+ *
+ * Nothing in this structure can ever be untrue. The way the algorithm
+ * works, whatever is in here must be factual (even if it is not
+ * complete information), because we may deduce other facts based on
+ * it.
+ *
+ * This class mirrors the FuncInfo struct, but is produced and used by
+ * remote workers. As needed, this struct will gain more and more of
+ * FuncInfo's fields (but stored in a more remote worker friendly
+ * way). Local calculations will continue to use FuncInfo. Once
+ * everything is converted to use remote workers, this struct will
+ * subsume FuncInfo entirely (and be renamed).
+ */
+struct FuncInfo2 {
+  /*
+   * Name of this function. If this is a top level function, this will
+   * be an unique identifier. For methods, it will just be the method
+   * name.
+   */
+  SString name;
+
+  /*
+   * The best-known return type of the function, if we have any
+   * information. May be TBottom if the function is known to never
+   * return (e.g. always throws).
+   */
+  Type returnTy = TInitCell;
+
+  template <typename SerDe> void serde(SerDe& sd) {
+    sd(name)(returnTy);
+  }
+};
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -1701,6 +1736,13 @@ struct ClassInfo2 {
   SStringToOneT<FuncFamilyEntry> methodFamilies;
 
   /*
+   * FuncInfo2s for the methods declared on this class (not
+   * flattened). This is in the same order as the methods vector on
+   * the associated php::Class.
+   */
+  CompactVector<std::unique_ptr<FuncInfo2>> funcInfos;
+
+  /*
    * Copy of attrs from associated php::Class. Might be modified as a
    * result of optimizations, in which case this copy takes precedence
    * over the php::Class one.
@@ -1782,6 +1824,7 @@ struct ClassInfo2 {
       (extraMethods, std::less<MethRef>{})
       (closures)
       (methodFamilies, string_data_lt{})
+      (funcInfos)
       (attrs)
       (hasConstProp)
       (subHasConstProp)
@@ -3533,6 +3576,12 @@ struct Index::IndexData {
   // associated ClassInfo2. Only has entries for instantiable classes.
   ISStringToOneT<UniquePtrRef<ClassInfo2>> classInfoRefs;
 
+  // Maps func name (global functions, not methods) to the
+  // extern-worked ref representing the func's associated
+  // FuncInfo2. The FuncInfo2 for methods are stored in their parent
+  // ClassInfo2.
+  ISStringToOneT<UniquePtrRef<FuncInfo2>> funcInfoRefs;
+
   // Func family entries representing all methods with a particular
   // name.
   SStringToOneT<FuncFamilyEntry> nameOnlyMethodFamilies;
@@ -3762,34 +3811,6 @@ void add_dependency(IndexData& data,
   );
 }
 
-std::mutex func_info_mutex;
-
-FuncInfo* create_func_info(IndexData& data, const php::Func* f) {
-  auto fi = &data.funcInfo[f->idx];
-  if (UNLIKELY(fi->func == nullptr)) {
-    if (f->isNative) {
-      std::lock_guard<std::mutex> g{func_info_mutex};
-      if (fi->func) {
-        assertx(fi->func == f);
-        return fi;
-      }
-      // We'd infer this anyway when we look at the bytecode body
-      // (NativeImpl) for the HNI function, but just initializing it
-      // here saves on whole-program iterations.
-      fi->returnTy = native_function_return_type(f);
-    }
-    fi->func = f;
-  }
-
-  assertx(fi->func == f);
-  return fi;
-}
-
-FuncInfo* func_info(IndexData& data, const php::Func* f) {
-  auto const fi = &data.funcInfo[f->idx];
-  return fi;
-}
-
 template <typename T>
 void find_deps(IndexData& data,
                T src,
@@ -3811,6 +3832,15 @@ void find_deps(IndexData& data,
       if (has_dep(kv.second, mask)) deps.insert(kv.first);
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+FuncInfo* func_info(IndexData& data, const php::Func* f) {
+  assertx(f->idx < data.funcInfo.size());
+  auto const fi = &data.funcInfo[f->idx];
+  assertx(fi->func == f);
+  return fi;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -4024,6 +4054,34 @@ void add_program_to_index(IndexData& index) {
     auto& s = index.classClosureMap[index.classes.at(c->closureContextCls)];
     s.emplace_back(c.get());
   }
+
+  // All funcs have been assigned indices above. Now for each func we
+  // initialize a default FuncInfo in the funcInfo vec at the
+  // appropriate index.
+
+  trace_time timer2{"create func-infos"};
+  timer2.ignore_client_stats();
+
+  index.funcInfo.resize(index.nextFuncId);
+
+  auto const create = [&] (const php::Func& f) {
+    assertx(f.idx < index.funcInfo.size());
+    auto& fi = index.funcInfo[f.idx];
+    assertx(!fi.func);
+    fi.func = &f;
+  };
+
+  parallel::for_each(
+    program.classes,
+    [&] (const std::unique_ptr<php::Class>& cls) {
+      for (auto const& m : cls->methods) create(*m);
+    }
+  );
+
+  parallel::for_each(
+    program.funcs,
+    [&] (const std::unique_ptr<php::Func>& func) { create(*func); }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5426,6 +5484,7 @@ struct FlattenJob {
     Variadic<std::unique_ptr<php::Class>>,
     Variadic<std::unique_ptr<ClassInfo2>>,
     Variadic<std::unique_ptr<php::Func>>,
+    Variadic<std::unique_ptr<FuncInfo2>>,
     OutputMeta
   >;
 
@@ -5581,6 +5640,10 @@ struct FlattenJob {
       outMeta.classTypeUses.emplace_back();
       update_type_constraints(index, *cls, outMeta.classTypeUses.back());
 
+      for (auto const& func : cls->methods) {
+        cinfo->funcInfos.emplace_back(make_func_info(index, *func));
+      }
+
       if (!is_closure(*cls)) {
         auto const& state = index.m_states.at(name);
         outMeta.parents.emplace_back();
@@ -5619,6 +5682,9 @@ struct FlattenJob {
       // requested to flatten.
       if (!outNames.count(clo->closureContextCls)) continue;
 
+      index.m_ctx = clo.get();
+      SCOPE_EXIT { index.m_ctx = nullptr; };
+
       outMeta.classTypeUses.emplace_back();
       update_type_constraints(index, *clo, outMeta.classTypeUses.back());
 
@@ -5630,19 +5696,25 @@ struct FlattenJob {
       outNewClosures.back().names.emplace_back(clo->name);
 
       auto& cinfo = index.m_classInfos.at(clo->name);
+      for (auto const& func : clo->methods) {
+        cinfo->funcInfos.emplace_back(make_func_info(index, *func));
+      }
       outClasses.vals.emplace_back(std::move(clo));
       outInfos.vals.emplace_back(std::move(cinfo));
     }
 
+    Variadic<std::unique_ptr<FuncInfo2>> funcInfos;
     for (auto& func : funcs.vals) {
       outMeta.funcTypeUses.emplace_back();
       update_type_constraints(index, *func, outMeta.funcTypeUses.back());
+      funcInfos.vals.emplace_back(make_func_info(index, *func));
     }
 
     return std::make_tuple(
       std::move(outClasses),
       std::move(outInfos),
       std::move(funcs),
+      std::move(funcInfos),
       std::move(outMeta)
     );
   }
@@ -7576,6 +7648,91 @@ private:
       for (auto& ub : prop.ubs) update_type_constraint(index, ub, uses);
     }
   }
+
+  static std::unique_ptr<FuncInfo2> make_func_info(const LocalIndex& index,
+                                                   const php::Func& f) {
+    auto finfo = std::make_unique<FuncInfo2>();
+    finfo->name = f.name;
+    finfo->returnTy = initial_return_type(index, f);
+    return finfo;
+  }
+
+  static Type initial_return_type(const LocalIndex& index,
+                                  const php::Func& f) {
+    auto const ty = [&] {
+      // Return type of native functions is calculated differently.
+      if (f.isNative) return native_function_return_type(&f);
+
+      if ((f.attrs & AttrBuiltin) || f.isMemoizeWrapper) return TInitCell;
+
+      if (f.isGenerator) {
+        if (f.isAsync) {
+          // Async generators always return AsyncGenerator object.
+          return objExact(UnresolvedClassMaker::make(s_AsyncGenerator.get()));
+        }
+        // Non-async generators always return Generator object.
+        return objExact(UnresolvedClassMaker::make(s_Generator.get()));
+      }
+
+      auto const make_type = [&] (const TypeConstraint& tc) {
+        auto lookup = type_from_constraint(
+          tc,
+          TInitCell,
+          [] (SString name) { return UnresolvedClassMaker::make(name); },
+          [&] () -> Optional<res::Class> {
+            if (!f.cls) return std::nullopt;
+            auto const& cls = f.cls->closureContextCls
+              ? index.cls(f.cls->closureContextCls)
+              : *f.cls;
+            if (cls.attrs & AttrTrait) return std::nullopt;
+            return UnresolvedClassMaker::make(cls.name);
+          }
+        );
+        if (lookup.coerceClassToString == TriBool::Yes) {
+          lookup.upper = promote_classish(std::move(lookup.upper));
+        } else if (lookup.coerceClassToString == TriBool::Maybe) {
+          lookup.upper |= TSStr;
+        }
+        return unctx(std::move(lookup.upper));
+      };
+
+      auto const process = [&] (const TypeConstraint& tc,
+                                const CompactVector<TypeConstraint>& ubs) {
+        auto ret = TInitCell;
+        ret = intersection_of(std::move(ret), make_type(tc));
+        for (auto const& ub : ubs) {
+          ret = intersection_of(std::move(ret), make_type(ub));
+        }
+        return ret;
+      };
+
+      auto ret = process(f.retTypeConstraint, f.returnUBs);
+      if (f.hasInOutArgs && !ret.is(BBottom)) {
+        std::vector<Type> types;
+        types.reserve(f.params.size() + 1);
+        types.emplace_back(std::move(ret));
+        for (auto const& p : f.params) {
+          if (!p.inout) continue;
+          auto t = process(p.typeConstraint, p.upperBounds);
+          if (t.is(BBottom)) return TBottom;
+          types.emplace_back(std::move(t));
+        }
+        std::reverse(begin(types)+1, end(types));
+        ret = vec(std::move(types));
+      }
+
+      if (f.isAsync) {
+        // Async functions always return WaitH<T>, where T is the type
+        // returned internally.
+        return wait_handle_unresolved(std::move(ret));
+      }
+      return ret;
+    }();
+
+    FTRACE(3, "Initial return type for {}: {}\n",
+           func_fullname(f), show(ty));
+    return ty;
+  }
 };
 
 /*
@@ -7657,38 +7814,65 @@ static std::string name() { return "hhbbc-flatten-missing"; }
 
   using Output = Multi<
     Variadic<std::unique_ptr<php::Class>>,
-    Variadic<std::unique_ptr<php::Func>>
+    Variadic<std::unique_ptr<ClassInfo2>>,
+    Variadic<std::unique_ptr<php::Func>>,
+    Variadic<std::unique_ptr<FuncInfo2>>
   >;
   static Output run(Variadic<std::unique_ptr<php::Class>> classes,
+                    Variadic<std::unique_ptr<ClassInfo2>> cinfos,
                     Variadic<std::unique_ptr<php::Func>> funcs,
+                    Variadic<std::unique_ptr<FuncInfo2>> finfos,
                     std::vector<SString> missingIn) {
+    assertx(classes.vals.size() == cinfos.vals.size());
+    assertx(funcs.vals.size() == finfos.vals.size());
     ISStringSet missing{ begin(missingIn), end(missingIn) };
-    for (auto& cls : classes.vals) update(*cls, missing);
-    for (auto& func : funcs.vals) update(*func, missing);
+    for (size_t i = 0, size = classes.vals.size(); i < size; ++i) {
+      update(*classes.vals[i], *cinfos.vals[i], missing);
+    }
+    for (size_t i = 0, size = funcs.vals.size(); i < size; ++i) {
+      update(*funcs.vals[i], *finfos.vals[i], missing);
+    }
     return std::make_tuple(
       std::move(classes),
-      std::move(funcs)
+      std::move(cinfos),
+      std::move(funcs),
+      std::move(finfos)
     );
   }
 private:
-  static void update(TypeConstraint& tc, const ISStringSet& missing) {
+  static bool update(TypeConstraint& tc, const ISStringSet& missing) {
     auto const name = tc.clsName();
-    if (!name || !missing.count(name)) return;
+    if (!name || !missing.count(name)) return false;
     tc.unresolve();
+    return true;
   }
 
-  static void update(php::Func& func, const ISStringSet& missing) {
+  static void update(php::Func& func,
+                     FuncInfo2& finfo,
+                     const ISStringSet& missing) {
     for (auto& p : func.params) {
       update(p.typeConstraint, missing);
       for (auto& ub : p.upperBounds) update(ub, missing);
     }
-    update(func.retTypeConstraint, missing);
-    for (auto& ub : func.returnUBs) update(ub, missing);
+    auto updated = update(func.retTypeConstraint, missing);
+    for (auto& ub : func.returnUBs) updated |= update(ub, missing);
+    if (updated) {
+      // One of the return constraints corresponds to a missing
+      // type. This means the function can never return and must have
+      // a Bottom return type.
+      FTRACE(2, "Fixing up return type of {} to Bottom\n", func_fullname(func));
+      finfo.returnTy = TBottom;
+    }
   }
 
-  static void update(php::Class& cls, const ISStringSet& missing) {
+  static void update(php::Class& cls,
+                     ClassInfo2& cinfo,
+                     const ISStringSet& missing) {
+    assertx(cls.methods.size() == cinfo.funcInfos.size());
     if (cls.attrs & AttrEnum) update(cls.enumBaseTy, missing);
-    for (auto& meth : cls.methods) update(*meth, missing);
+    for (size_t i = 0, size = cls.methods.size(); i < size; ++i) {
+      update(*cls.methods[i], *cinfo.funcInfos[i], missing);
+    }
     for (auto& prop : cls.properties) {
       update(prop.typeConstraint, missing);
       for (auto& ub : prop.ubs) update(ub, missing);
@@ -8180,6 +8364,8 @@ void flatten_classes_fixup_missing(IndexData& index,
 
     std::vector<UniquePtrRef<php::Class>> clsRefs;
     std::vector<UniquePtrRef<php::Func>> funcRefs;
+    std::vector<UniquePtrRef<ClassInfo2>> cinfoRefs;
+    std::vector<UniquePtrRef<FuncInfo2>> finfoRefs;
     std::vector<SString> clsNames;
     std::vector<SString> funcNames;
     ISStringSet missingSet;
@@ -8188,6 +8374,7 @@ void flatten_classes_fixup_missing(IndexData& index,
       if (auto const used = folly::get_ptr(classes, w)) {
         missingSet.insert(begin(*used), end(*used));
         clsRefs.emplace_back(index.classRefs.at(w));
+        cinfoRefs.emplace_back(index.classInfoRefs.at(w));
         clsNames.emplace_back(w);
       }
       // Not else if because of potentially collision between class
@@ -8195,6 +8382,7 @@ void flatten_classes_fixup_missing(IndexData& index,
       if (auto const used = folly::get_ptr(funcs, w)) {
         missingSet.insert(begin(*used), end(*used));
         funcRefs.emplace_back(index.funcRefs.at(w));
+        finfoRefs.emplace_back(index.funcInfoRefs.at(w));
         funcNames.emplace_back(w);
       }
     }
@@ -8217,7 +8405,9 @@ void flatten_classes_fixup_missing(IndexData& index,
         singleton_vec(
           std::make_tuple(
             std::move(clsRefs),
+            std::move(cinfoRefs),
             std::move(funcRefs),
+            std::move(finfoRefs),
             std::move(missingRef)
           )
         ),
@@ -8225,15 +8415,19 @@ void flatten_classes_fixup_missing(IndexData& index,
       )
     );
     assertx(results.size() == 1);
-    auto& [outClsRefs, outFuncRefs] = results[0];
+    auto& [outClsRefs, outCInfoRefs, outFuncRefs, outFInfoRefs] = results[0];
     assertx(outClsRefs.size() == clsNames.size());
     assertx(outFuncRefs.size() == funcNames.size());
+    assertx(outClsRefs.size() == outCInfoRefs.size());
+    assertx(outFuncRefs.size() == outFInfoRefs.size());
 
     for (size_t i = 0, size = clsNames.size(); i < size; ++i) {
       index.classRefs.at(clsNames[i]) = outClsRefs[i];
+      index.classInfoRefs.at(clsNames[i]) = outCInfoRefs[i];
     }
     for (size_t i = 0, size = funcNames.size(); i < size; ++i) {
       index.funcRefs.at(funcNames[i]) = outFuncRefs[i];
+      index.funcInfoRefs.at(funcNames[i]) = outFInfoRefs[i];
     }
 
     HPHP_CORO_RETURN_VOID;
@@ -8369,6 +8563,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   struct FuncUpdate {
     SString name;
     UniquePtrRef<php::Func> func;
+    UniquePtrRef<FuncInfo2> finfo;
     ISStringSet typeUses;
   };
   using Update = boost::variant<ClassUpdate, FuncUpdate>;
@@ -8471,9 +8666,10 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     // Every flattening job is a single work-unit, so we should only
     // ever get one result for each one.
     assertx(results.size() == 1);
-    auto& [clsRefs, cinfoRefs, funcRefs, classMetaRef] = results[0];
+    auto& [clsRefs, cinfoRefs, funcRefs, finfoRefs, classMetaRef] = results[0];
     assertx(clsRefs.size() == cinfoRefs.size());
     assertx(funcRefs.size() == work.funcs.size());
+    assertx(funcRefs.size() == finfoRefs.size());
 
     // We need the output metadata, but everything else stays
     // uploaded.
@@ -8548,6 +8744,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         FuncUpdate{
           work.funcs[i],
           std::move(funcRefs[i]),
+          std::move(finfoRefs[i]),
           std::move(clsMeta.funcTypeUses[i])
         }
       );
@@ -8619,6 +8816,20 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
             auto u = boost::get<FuncUpdate>(&update);
             if (!u) continue;
             index.funcRefs.at(u->name) = std::move(u->func);
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto u = boost::get<FuncUpdate>(&update);
+            if (!u) continue;
+            always_assert(
+              index.funcInfoRefs.emplace(
+                u->name,
+                std::move(u->finfo)
+              ).second
+            );
           }
         }
       },
@@ -11466,6 +11677,7 @@ struct AggregateJob {
     std::vector<std::unique_ptr<php::Class>> classes;
     std::vector<std::unique_ptr<ClassInfo2>> classInfos;
     std::vector<std::unique_ptr<php::Func>> funcs;
+    std::vector<std::unique_ptr<FuncInfo2>> funcInfos;
     std::vector<std::unique_ptr<php::Unit>> units;
     std::vector<FuncFamilyGroup> funcFamilies;
 
@@ -11474,6 +11686,7 @@ struct AggregateJob {
       sd(classes)
         (classInfos)
         (funcs)
+        (funcInfos)
         (units)
         (funcFamilies)
         ;
@@ -11483,12 +11696,14 @@ struct AggregateJob {
   static Bundle run(Variadic<std::unique_ptr<php::Class>> classes,
                     Variadic<std::unique_ptr<ClassInfo2>> classInfos,
                     Variadic<std::unique_ptr<php::Func>> funcs,
+                    Variadic<std::unique_ptr<FuncInfo2>> funcInfos,
                     Variadic<std::unique_ptr<php::Unit>> units,
                     Variadic<FuncFamilyGroup> funcFamilies) {
     Bundle bundle;
     bundle.classes.reserve(classes.vals.size());
     bundle.classInfos.reserve(classInfos.vals.size());
     bundle.funcs.reserve(funcs.vals.size());
+    bundle.funcInfos.reserve(funcInfos.vals.size());
     bundle.units.reserve(units.vals.size());
     bundle.funcFamilies.reserve(funcFamilies.vals.size());
     for (auto& c : classes.vals) {
@@ -11499,6 +11714,9 @@ struct AggregateJob {
     }
     for (auto& f : funcs.vals) {
       bundle.funcs.emplace_back(std::move(f));
+    }
+    for (auto& f : funcInfos.vals) {
+      bundle.funcInfos.emplace_back(std::move(f));
     }
     for (auto& u : units.vals) {
       bundle.units.emplace_back(std::move(u));
@@ -11512,6 +11730,31 @@ struct AggregateJob {
 
 Job<AggregateJob> s_aggregateJob;
 
+// Convert the FuncInfo2s we loaded from extern-worker into their
+// equivalent FuncInfos.
+void make_func_infos_local(IndexData& index,
+                           std::vector<std::unique_ptr<FuncInfo2>> remote) {
+  trace_time tracer{"make func-infos local"};
+  tracer.ignore_client_stats();
+
+  parallel::for_each(
+    remote,
+    [&] (const std::unique_ptr<FuncInfo2>& rfinfo) {
+      auto const it = index.funcs.find(rfinfo->name);
+      always_assert_flog(
+        it != end(index.funcs),
+        "Func-info for {} has no associated php::Func in index",
+        rfinfo->name
+      );
+      auto const func = it->second;
+      assertx(func->name == rfinfo->name);
+      auto finfo = func_info(index, func);
+      assertx(finfo->returnTy.is(BInitCell));
+      finfo->returnTy = std::move(rfinfo->returnTy);
+    }
+  );
+}
+
 // Convert the ClassInfo2s we loaded from extern-worker into their
 // equivalent ClassInfos (and store it in the Index).
 void make_class_infos_local(
@@ -11519,7 +11762,7 @@ void make_class_infos_local(
   std::vector<std::unique_ptr<ClassInfo2>> remote,
   std::vector<std::unique_ptr<FuncFamily2>> funcFamilies
 ) {
-  trace_time tracer("make class-infos local");
+  trace_time tracer{"make class-infos local"};
   tracer.ignore_client_stats();
 
   assertx(index.allClassInfos.empty());
@@ -11947,6 +12190,20 @@ void make_class_infos_local(
         }
       }
 
+      // Build the FuncInfo for every method on this class. The
+      // FuncInfos already have default types, so update them with the
+      // type from the FuncInfo2. Any class types here will be
+      // unresolved (will be resolved later).
+      assertx(cinfo->cls->methods.size() == rcinfo->funcInfos.size());
+      for (size_t i = 0, size = cinfo->cls->methods.size(); i < size; ++i) {
+        auto& func = cinfo->cls->methods[i];
+        auto& rfi = rcinfo->funcInfos[i];
+        assertx(func->name == rfi->name);
+        auto fi = func_info(index, func.get());
+        assertx(fi->returnTy.is(BInitCell));
+        fi->returnTy = std::move(rfi->returnTy);
+      }
+
       // Free memory as we go.
       rcinfo.reset();
     }
@@ -12026,8 +12283,6 @@ void make_class_infos_local(
   ffState.clear();
   decltype(index.nameOnlyMethodFamilies){}.swap(index.nameOnlyMethodFamilies);
 
-  index.funcInfo.resize(index.nextFuncId);
-
   // Now that all of the FuncFamilies have been created, generate the
   // back links from FuncInfo to their FuncFamilies.
   std::vector<FuncFamily*> work;
@@ -12044,8 +12299,6 @@ void make_class_infos_local(
     work,
     [&] (FuncFamily* ff) {
       for (auto const pf : ff->possibleFuncs()) {
-        // Ensure the FuncInfo is initialized.
-        create_func_info(index, pf.ptr());
         ++capacities[pf.ptr()->idx];
       }
     }
@@ -12068,7 +12321,7 @@ void make_class_infos_local(
     work,
     [&] (FuncFamily* ff) {
       for (auto const pf : ff->possibleFuncs()) {
-        auto finfo = create_func_info(index, pf.ptr());
+        auto finfo = func_info(index, pf.ptr());
         auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
         std::lock_guard<std::mutex> _{lock};
         finfo->families.emplace_back(ff);
@@ -12124,7 +12377,7 @@ void make_local(IndexData& index) {
     items.reserve(
       index.unitRefs.size() + index.classRefs.size() +
       index.classInfoRefs.size() + index.funcRefs.size() +
-      index.funcFamilyRefs.size()
+      index.funcInfoRefs.size() + index.funcFamilyRefs.size()
     );
     for (auto const& [name, ref] : index.unitRefs) {
       totalSize += ref.id().m_size;
@@ -12142,6 +12395,11 @@ void make_local(IndexData& index) {
       items.emplace_back(name);
     }
     for (auto const& [name, ref] : index.funcRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    for (auto const& [name, ref] : index.funcInfoRefs) {
       totalSize += ref.id().m_size;
       if (!seen.emplace(name).second) continue;
       items.emplace_back(name);
@@ -12182,6 +12440,10 @@ void make_local(IndexData& index) {
   // store them until we convert it.
   std::vector<std::unique_ptr<ClassInfo2>> remoteClassInfos;
   remoteClassInfos.reserve(index.classInfoRefs.size());
+
+  std::vector<std::unique_ptr<FuncInfo2>> remoteFuncInfos;
+  remoteFuncInfos.reserve(index.funcInfoRefs.size());
+
   hphp_fast_set<FuncFamily2::Id> remoteFuncFamilyIds;
   std::vector<std::unique_ptr<FuncFamily2>> remoteFuncFamilies;
   remoteFuncFamilies.reserve(index.funcFamilyRefs.size());
@@ -12194,6 +12456,7 @@ void make_local(IndexData& index) {
     std::vector<UniquePtrRef<php::Class>> classes;
     std::vector<UniquePtrRef<ClassInfo2>> classInfos;
     std::vector<UniquePtrRef<php::Func>> funcs;
+    std::vector<UniquePtrRef<FuncInfo2>> funcInfos;
     std::vector<UniquePtrRef<php::Unit>> units;
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
 
@@ -12226,6 +12489,11 @@ void make_local(IndexData& index) {
           funcs.emplace_back(*r);
         }
       }
+      if (auto const r = folly::get_optional(index.funcInfoRefs, name)) {
+        if (ids.emplace(r->id()).second) {
+          funcInfos.emplace_back(*r);
+        }
+      }
       if (auto const r = folly::get_optional(nameToFuncFamilyGroup, name)) {
         if (ids.emplace(r->id()).second) {
           funcFamilies.emplace_back(*r);
@@ -12249,6 +12517,7 @@ void make_local(IndexData& index) {
             std::move(classes),
             std::move(classInfos),
             std::move(funcs),
+            std::move(funcInfos),
             std::move(units),
             std::move(funcFamilies)
           )
@@ -12262,10 +12531,11 @@ void make_local(IndexData& index) {
     } else {
       // If we're using subprocess mode, we don't need to aggregate
       // and we can just download the items directly.
-      auto [c, cinfo, f, u, ff] = HPHP_CORO_AWAIT(coro::collect(
+      auto [c, cinfo, f, finfo, u, ff] = HPHP_CORO_AWAIT(coro::collect(
         index.client->load(std::move(classes)),
         index.client->load(std::move(classInfos)),
         index.client->load(std::move(funcs)),
+        index.client->load(std::move(funcInfos)),
         index.client->load(std::move(units)),
         index.client->load(std::move(funcFamilies))
       ));
@@ -12283,6 +12553,11 @@ void make_local(IndexData& index) {
         end(chunk.funcs),
         std::make_move_iterator(begin(f)),
         std::make_move_iterator(end(f))
+      );
+      chunk.funcInfos.insert(
+        end(chunk.funcInfos),
+        std::make_move_iterator(begin(finfo)),
+        std::make_move_iterator(end(finfo))
       );
       chunk.units.insert(
         end(chunk.units),
@@ -12313,6 +12588,11 @@ void make_local(IndexData& index) {
         std::make_move_iterator(begin(chunk.classInfos)),
         std::make_move_iterator(end(chunk.classInfos))
       );
+      remoteFuncInfos.insert(
+        end(remoteFuncInfos),
+        std::make_move_iterator(begin(chunk.funcInfos)),
+        std::make_move_iterator(end(chunk.funcInfos))
+      );
       for (auto& group : chunk.funcFamilies) {
         for (auto& ff : group.m_ffs) {
           if (remoteFuncFamilyIds.emplace(ff->m_id).second) {
@@ -12339,6 +12619,7 @@ void make_local(IndexData& index) {
   decltype(index.classRefs){}.swap(index.classRefs);
   decltype(index.funcRefs){}.swap(index.funcRefs);
   decltype(index.classInfoRefs){}.swap(index.classInfoRefs);
+  decltype(index.funcInfoRefs){}.swap(index.funcInfoRefs);
   decltype(index.funcFamilyRefs){}.swap(index.funcFamilyRefs);
 
   // Done with any extern-worker stuff at this point:
@@ -12391,11 +12672,31 @@ void make_local(IndexData& index) {
   // Buid Index data structures from the php::Program.
   add_program_to_index(index);
 
+  // Convert the FuncInfo2s into FuncInfos.
+  make_func_infos_local(
+    index,
+    std::move(remoteFuncInfos)
+  );
+
   // Convert the ClassInfo2s into ClassInfos.
   make_class_infos_local(
     index,
     std::move(remoteClassInfos),
     std::move(remoteFuncFamilies)
+  );
+
+  // Any classes in the FuncInfo return types are unresolved. Now that
+  // the index is completely built, we can resolve them to resolved
+  // classes instead.
+  trace_time tracer2{"resolve classes"};
+  tracer2.ignore_client_stats();
+
+  parallel::for_each(
+    index.funcInfo,
+    [&] (FuncInfo& fi) {
+      if (!fi.func) return;
+      fi.returnTy = resolve_classes(*index.m_index, std::move(fi.returnTy));
+    }
   );
 }
 
@@ -12448,22 +12749,6 @@ Index::Index(Input input,
   make_local(*m_data);
 
   check_invariants(*m_data);
-
-  trace_time tracer_2("initialize return types", sample);
-  parallel::for_each(
-    m_data->program->classes,
-    [&] (const std::unique_ptr<php::Class>& cls) {
-      for (auto const& func : cls->methods) {
-        init_return_type(func.get());
-      }
-    }
-  );
-  parallel::for_each(
-    m_data->program->funcs,
-    [&] (const std::unique_ptr<php::Func>& func) {
-      init_return_type(func.get());
-    }
-  );
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -15054,62 +15339,10 @@ void Index::fixup_return_type(const php::Func* func,
   }
 }
 
-void Index::init_return_type(const php::Func* func) {
-  if ((func->attrs & AttrBuiltin) || func->isMemoizeWrapper) {
-    return;
-  }
-
-  auto const make_type = [&] (const TypeConstraint& tc) {
-    auto const cls = func->cls && func->cls->closureContextCls
-       ? m_data->classes.at(func->cls->closureContextCls)
-       : func->cls;
-    auto lookup = lookup_constraint(
-      Context { m_data->units.at(func->unit), func, cls },
-      tc
-    );
-    if (lookup.coerceClassToString == TriBool::Yes) {
-      lookup.upper = promote_classish(std::move(lookup.upper));
-    } else if (lookup.coerceClassToString == TriBool::Maybe) {
-      lookup.upper |= TSStr;
-    }
-    return unctx(std::move(lookup.upper));
-  };
-
-  auto const finfo = create_func_info(*m_data, func);
-
-  auto tcT = [&] {
-    auto ret = make_type(func->retTypeConstraint);
-    if (!func->hasInOutArgs || ret.is(BBottom)) return ret;
-
-    std::vector<Type> types;
-    types.reserve(func->params.size() + 1);
-    types.emplace_back(std::move(ret));
-    for (auto const& p : func->params) {
-      if (!p.inout) continue;
-      auto t = make_type(p.typeConstraint);
-      if (t.is(BBottom)) return TBottom;
-      types.emplace_back(std::move(t));
-    }
-    std::reverse(begin(types)+1, end(types));
-    return vec(std::move(types));
-  }();
-
-  FTRACE(4, "Pre-fixup return type for {}{}{}: {}\n",
-         func->cls ? func->cls->name->data() : "",
-         func->cls ? "::" : "",
-         func->name, show(tcT));
-  fixup_return_type(func, tcT);
-  FTRACE(3, "Initial return type for {}{}{}: {}\n",
-         func->cls ? func->cls->name->data() : "",
-         func->cls ? "::" : "",
-         func->name, show(tcT));
-  finfo->returnTy = std::move(tcT);
-}
-
 void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
   auto const& func = fa.ctx.func;
-  auto const finfo = create_func_info(*m_data, func);
+  auto const finfo = func_info(*m_data, func);
 
   auto const error_loc = [&] {
     return folly::sformat(
@@ -15587,8 +15820,7 @@ void Index::thaw() {
 //////////////////////////////////////////////////////////////////////
 
 res::Func Index::do_resolve(const php::Func* f) const {
-  auto const finfo = create_func_info(*m_data, f);
-  return res::Func { finfo };
+  return res::Func { func_info(*m_data, f) };
 };
 
 // Return true if we know for sure that one php::Class must derive
@@ -15662,6 +15894,7 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 //////////////////////////////////////////////////////////////////////
 
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::ClassInfo2);
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncInfo2);
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::FuncFamily2);
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::BuildSubclassListJob::Split);
 

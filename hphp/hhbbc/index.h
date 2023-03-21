@@ -1473,8 +1473,6 @@ private:
   res::Func resolve_func_helper(const php::Func*, SString) const;
   res::Func do_resolve(const php::Func*) const;
 
-  void init_return_type(const php::Func* func);
-
   template <typename F>
   bool visit_every_dcls_cls(const DCls&, const F&) const;
 

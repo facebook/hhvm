@@ -27,6 +27,13 @@ class ProxyConfig;
 
 namespace detail {
 
+#if defined(__GNUC__) && !defined(__clang__)
+// Gcc wants the mutable keyword first
+#define FOLLY_NOINLINE_MUTABLE mutable FOLLY_NOINLINE
+#else
+#define FOLLY_NOINLINE_MUTABLE FOLLY_NOINLINE mutable
+#endif
+
 template <class RouterInfo>
 bool processGetServiceInfoRequest(
     const McGetRequest& req,
@@ -85,7 +92,7 @@ Proxy<RouterInfo>::addRouteTask(
   auto funcCtx = sharedCtx;
 
   fiberManager().addTaskFinally(
-      [&req, ctx = std::move(funcCtx)]() mutable {
+      [&req, ctx = std::move(funcCtx)]() FOLLY_NOINLINE_MUTABLE {
         try {
           auto& proute = ctx->proxyRoute();
           fiber_local<RouterInfo>::setSharedCtx(std::move(ctx));

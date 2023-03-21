@@ -373,6 +373,7 @@ void SetTypeInfo::read(
     if (PySet_Add(frozenset.get(), elem) == -1) {
       THRIFT_PY3_CHECK_ERROR();
     }
+    Py_DECREF(elem);
   }
   setPyObject(object, std::move(frozenset));
 }
@@ -430,6 +431,7 @@ void SetTypeInfo::consumeElem(
     _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
     THRIFT_PY3_CHECK_ERROR();
   }
+  Py_DECREF(elem);
   _fbthrift_Py_SET_REFCNT(*pyObjPtr, currentRefCnt);
 }
 

@@ -208,7 +208,6 @@ std::vector<w_string> Mercurial::getFilesChangedSinceMergeBaseWith(
                  "--traceback",
                  "status",
                  "-n",
-                 "-mardui",
                  "--rev",
                  commit,
                  // The "" argument at the end causes paths to be printed out

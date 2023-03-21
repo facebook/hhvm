@@ -104,7 +104,6 @@ module.exports = {
             "spec/definition/data",
             "spec/definition/value",
             "spec/definition/annotation",
-            "spec/definition/adapter",
             "spec/definition/patch",
           ]
         },

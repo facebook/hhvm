@@ -91,14 +91,7 @@ let read () : t =
        let timestamp = Hh_json_helpers.Jget.float_exn json "timestamp" in
        (* If the status had been left behind on disk by a process that terminated without deleting it,
           well, we'll return the same 'unknown' as if the file didn't exist. *)
-       let still_alive =
-         try
-           Unix.kill pid 0;
-           true
-         with
-         | _ -> false
-       in
-       if still_alive then
+       if Proc.is_alive ~pid ~expected:"" then
          { pid; message; timestamp }
        else
          unknown

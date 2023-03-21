@@ -1,3 +1,12 @@
+(*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+open Hh_prelude
 open Asserter
 
 (*
@@ -175,6 +184,16 @@ let test_get_proc_stack_non_existent_PID () : bool =
   | Ok _ -> false
   | Error _ -> true
 
+let test_is_alive () : bool =
+  let pid = Unix.getpid () in
+  (* we need to use a real pid, because "Unix.kill pid" isn't mocked *)
+  create_cmdline pid "cmdline1";
+  assert (Proc.is_alive ~pid ~expected:"cmdline1");
+  assert (Proc.is_alive ~pid ~expected:"");
+  assert (not (Proc.is_alive ~pid ~expected:"cmdline2"));
+  assert (not (Proc.is_alive ~pid:(pid + 1) ~expected:""));
+  true
+
 let tests =
   [
     ("Test get_cmdline on self", test_get_cmdline_self);
@@ -188,6 +207,7 @@ let tests =
       test_get_proc_stack_self_max_length );
     ( "Test get_proc_stack for a non-existent PID",
       test_get_proc_stack_non_existent_PID );
+    ("test_is_alive", test_is_alive);
   ]
 
 let () =

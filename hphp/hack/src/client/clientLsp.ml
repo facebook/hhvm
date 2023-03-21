@@ -2509,7 +2509,7 @@ let make_ide_completion_response
   let is_caret_followed_by_lparen = Char.equal result.char_at_pos '(' in
   let p = initialize_params_exc () in
 
-  let hack_to_insert (completion : complete_autocomplete_result) :
+  let hack_to_insert (completion : autocomplete_item) :
       [ `InsertText of string | `TextEdit of TextEdit.t list ]
       * Completion.insertTextFormat =
     match completion.func_details with
@@ -2539,7 +2539,7 @@ let make_ide_completion_response
           ],
         PlainText )
   in
-  let hack_completion_to_lsp (completion : complete_autocomplete_result) :
+  let hack_completion_to_lsp (completion : autocomplete_item) :
       Completion.completionItem =
     let (insertText, insertTextFormat, textEdits) =
       match hack_to_insert completion with
@@ -2584,8 +2584,7 @@ let make_ide_completion_response
               ]
              @ base_class))
     in
-    let hack_to_sort_text (completion : complete_autocomplete_result) :
-        string option =
+    let hack_to_sort_text (completion : autocomplete_item) : string option =
       let label = completion.res_label in
       let should_downrank label =
         String.length label > 2

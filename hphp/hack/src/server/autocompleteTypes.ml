@@ -22,8 +22,7 @@ type func_details_result = {
 }
 [@@deriving show]
 
-(* Results ready to be displayed to the user *)
-type complete_autocomplete_result = {
+type autocomplete_item = {
   res_decl_pos: Pos.absolute;
   res_replace_pos: Ide_api_types.range;
   res_base_class: string option;
@@ -39,12 +38,12 @@ type complete_autocomplete_result = {
 
 (* The type returned to the client *)
 type ide_result = {
-  completions: complete_autocomplete_result list;
+  completions: autocomplete_item list;
   char_at_pos: char;
   is_complete: bool;
 }
 
-type result = complete_autocomplete_result list
+type result = autocomplete_item list
 
 type legacy_autocomplete_context = {
   is_manually_invoked: bool;

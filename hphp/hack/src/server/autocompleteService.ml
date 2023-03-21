@@ -33,7 +33,7 @@ module Trivia = Full_fidelity_positioned_trivia
    This allows us to walk the syntax tree and identify the position
    of the cursor by looking for names containing "AUTO332". *)
 
-let autocomplete_results : complete_autocomplete_result list ref = ref []
+let autocomplete_items : autocomplete_item list ref = ref []
 
 let autocomplete_is_complete : bool ref = ref true
 
@@ -74,7 +74,7 @@ let matches_auto_complete_suffix x =
 (* Does [str] look like something we should offer code completion on? *)
 let is_auto_complete str : bool =
   let results_without_keywords =
-    List.filter !autocomplete_results ~f:(fun res ->
+    List.filter !autocomplete_items ~f:(fun res ->
         match res.res_kind with
         | SI_Keyword -> false
         | _ -> true)
@@ -144,8 +144,8 @@ let autocomplete_result_to_json res =
       (* legacy field, left here in case clients need it *)
     ]
 
-let add_res (res : complete_autocomplete_result) : unit =
-  autocomplete_results := res :: !autocomplete_results
+let add_res (res : autocomplete_item) : unit =
+  autocomplete_items := res :: !autocomplete_items
 
 let autocomplete_id (id : Aast.sid) : unit =
   if is_auto_complete (snd id) then auto_complete_for_global := snd id
@@ -1239,7 +1239,7 @@ let find_global_results
           }
         in
         add_res complete);
-    autocomplete_is_complete := List.length !autocomplete_results < max_results;
+    autocomplete_is_complete := List.length !autocomplete_items < max_results;
 
     (* Add any builtins that match *)
     match completion_type with
@@ -1628,7 +1628,7 @@ let visitor
 
 let reset () =
   auto_complete_for_global := "";
-  autocomplete_results := [];
+  autocomplete_items := [];
   autocomplete_is_complete := true
 
 let complete_keywords_at possible_keywords text pos : unit =
@@ -1946,11 +1946,11 @@ let go_ctx
 
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
-      let complete_autocomplete_results = !autocomplete_results in
+      let autocomplete_items = !autocomplete_items in
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
-          value = complete_autocomplete_results;
+          value = autocomplete_items;
         }
       in
       SymbolIndexCore.log_symbol_index_search

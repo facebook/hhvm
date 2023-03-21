@@ -11,11 +11,11 @@ val add_position_to_results :
   Provider_context.t -> SearchUtils.si_results -> SearchUtils.result
 
 val autocomplete_result_to_json :
-  AutocompleteTypes.complete_autocomplete_result -> Hh_json.json
+  AutocompleteTypes.autocomplete_item -> Hh_json.json
 
 val go_ctx :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   autocomplete_context:AutocompleteTypes.legacy_autocomplete_context ->
   sienv:SearchUtils.si_env ->
-  AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t
+  AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t

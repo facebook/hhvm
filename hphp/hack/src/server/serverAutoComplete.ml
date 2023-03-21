@@ -100,8 +100,7 @@ let go_at_auto332_ctx
     ~(entry : Provider_context.entry)
     ~(sienv : SearchUtils.si_env)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context) :
-    AutocompleteTypes.complete_autocomplete_result list
-    Utils.With_complete_flag.t =
+    AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t =
   AutocompleteService.go_ctx ~ctx ~entry ~sienv ~autocomplete_context
 
 (** Call this function if you have a raw text file that DOES NOT have "AUTO332" in it *)

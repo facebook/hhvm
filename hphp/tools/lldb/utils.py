@@ -412,6 +412,61 @@ def string_data_val(val: lldb.SBValue, keep_case=True):
 
 
 #------------------------------------------------------------------------------
+# TypedValue helpers
+def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
+    """ Get the pretty string representation of a TypedValue (or its subclasses)
+
+    Arguments:
+        typ: A HPHP::DataType wrapped by an lldb.SBValue
+        data: A HPHP::Value wrapped by an lldb.SBValue
+
+    Returns:
+        A Python string representing the TypedValue
+    """
+
+    target = typ.target
+    typ = typ.Cast(Type("HPHP::DataType", target))
+
+    def DT(elem):
+        return Enum("HPHP::DataType", elem, target).unsigned
+
+    val = None
+    name = None
+
+    if typ.unsigned in [DT("Uninit"), DT("Null")]:
+        pass
+    elif typ.unsigned == DT("Boolean"):
+        val = get(data, "num").unsigned
+        val = bool(val) if val in (0, 1) else val
+    elif typ.unsigned == DT("Int64"):
+        val = int(get(data, "num").value)
+    elif typ.unsigned == DT("Double"):
+        val = float(get(data, "dbl").value)
+    elif typ.unsigned in (DT("String"), DT("PersistentString")):
+        pstr = get(data, "pstr")
+        val = '\"%s\"' % string_data_val(pstr)
+    elif typ.unsigned == DT("Resource"):
+        val = get(data, "pres")
+    else:
+        typ_as_int8_t = typ.Cast(Type("int8_t", target))
+        num = int(get(data, "num"))
+        typ = 'Invalid(%d)' % typ_as_int8_t
+        val = '0x%x' % num
+
+    if isinstance(typ, lldb.SBValue):
+        typ = typ.value
+
+    if val is None:
+        out = '{ %s }' % typ
+    elif name is None:
+        out = '{ %s, %s }' % (typ, str(val))
+    else:
+        out = '{ %s, %s ("%s") }' % (typ, str(val), name)
+
+    return out
+
+
+#------------------------------------------------------------------------------
 # Architecture
 
 def arch(target: lldb.SBTarget) -> str:

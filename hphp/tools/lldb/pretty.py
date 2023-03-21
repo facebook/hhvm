@@ -54,6 +54,25 @@ def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]
     return utils.string_data_val(val_obj)
 
 
+@format("^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$", regex=True)
+def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
+    """ Pretty print HPHP::TypedValue (and its subtypes)
+
+    Arguments:
+        val_obj: an SBValue wrapping an HPHP::(TypedValue|Cell|Ref|Variant|VarNR)
+        internal_dict: an LLDB support object not to be used
+
+    Returns:
+        A string representing the TypedValue, or None if there was an error.
+    """
+    if val_obj.type.IsPointerType():
+        return ''
+
+    m_type = utils.get(val_obj, "m_type")
+    m_data = utils.get(val_obj, "m_data")
+    return utils.pretty_tv(m_type, m_data)
+
+
 @format("HPHP::ArrayData")
 def pp_ArrayData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     """ Pretty print HPHP::ArrayData

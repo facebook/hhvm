@@ -48,6 +48,7 @@ pub mod validate_global_const;
 pub mod validate_hint_habstr;
 pub mod validate_illegal_name;
 pub mod validate_interface;
+pub mod validate_method_private_final;
 pub mod validate_module;
 pub mod validate_php_lambda;
 pub mod validate_shape_name;

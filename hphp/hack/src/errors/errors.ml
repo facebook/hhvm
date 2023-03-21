@@ -481,30 +481,35 @@ let combining_sort (xs : 'a list) ~(f : 'a -> string) : _ list =
   List.concat_map (List.rev keys) ~f:(fun fn -> String.Map.find_exn grouped fn)
 
 (* E.g. "10 errors found." *)
-let format_summary format errors dropped_count max_errors : string option =
+let format_summary format ~displayed_count ~dropped_count ~max_errors :
+    string option =
   match format with
   | Context
   | Highlighted ->
-    let total = List.length errors + dropped_count in
-    let formatted_total =
+    let found_count = displayed_count + Option.value dropped_count ~default:0 in
+    let found_message =
       Printf.sprintf
         "%d error%s found"
-        total
-        (if total = 1 then
+        found_count
+        (if found_count = 1 then
           ""
         else
           "s")
     in
-    let truncated =
-      match max_errors with
-      | Some max_errors when dropped_count > 0 ->
+    let truncated_message =
+      match (max_errors, dropped_count) with
+      | (Some max_errors, Some dropped_count) when dropped_count > 0 ->
         Printf.sprintf
           " (only showing first %d, dropped %d).\n"
           max_errors
           dropped_count
+      | (Some max_errors, None) when displayed_count >= max_errors ->
+        Printf.sprintf
+          " (max-errors is %d; more errors may exist).\n"
+          max_errors
       | _ -> ".\n"
     in
-    Some (formatted_total ^ truncated)
+    Some (found_message ^ truncated_message)
   | Raw
   | Plain ->
     None

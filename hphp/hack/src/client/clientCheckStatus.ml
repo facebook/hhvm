@@ -20,6 +20,14 @@ let print_error_contextual e =
 let print_error_highlighted e =
   Printf.printf "%s" (Highlighted_error_formatter.to_string e)
 
+let print_error ~(error_format : Errors.format) (e : Errors.finalized_error) :
+    unit =
+  match error_format with
+  | Errors.Raw -> print_error_raw e
+  | Errors.Plain -> print_error_plain e
+  | Errors.Context -> print_error_contextual e
+  | Errors.Highlighted -> print_error_highlighted e
+
 let is_stale_msg liveness =
   match liveness with
   | Stale_status ->
@@ -48,7 +56,7 @@ let go status (output_json, prefer_stdout) from error_format max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  (if output_json || (not (String.equal from "")) || List.is_empty error_list
+  if output_json || (not (String.equal from "")) || List.is_empty error_list
   then
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)
@@ -65,21 +73,18 @@ let go status (output_json, prefer_stdout) from error_format max_errors =
       ~error_list
       ~save_state_result:None
       ~recheck_stats:last_recheck_stats
-  else
-    let f =
-      match error_format with
-      | Errors.Raw -> print_error_raw
-      | Errors.Plain -> print_error_plain
-      | Errors.Context -> print_error_contextual
-      | Errors.Highlighted -> print_error_highlighted
-    in
-    List.iter error_list ~f;
+  else begin
+    List.iter error_list ~f:(print_error ~error_format);
     Option.iter
-      (Errors.format_summary error_format error_list dropped_count max_errors)
+      (Errors.format_summary
+         error_format
+         ~displayed_count:(List.length error_list)
+         ~dropped_count:(Some dropped_count)
+         ~max_errors)
       ~f:(fun msg -> Printf.printf "%s" msg);
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
-    if has_unsaved_changes then warn_unsaved_changes ());
-
+    if has_unsaved_changes then warn_unsaved_changes ()
+  end;
   if List.is_empty error_list then
     Exit_status.No_error
   else

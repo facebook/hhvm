@@ -107,8 +107,14 @@ val combining_sort : 'a list -> f:('a -> string) -> 'a list
 
 val to_string : finalized_error -> string
 
+(** Prints a summary indicating things like how many errors were
+  found, how many are displayed and how many were dropped. *)
 val format_summary :
-  format -> ('pp, 'p) User_error.t list -> int -> int option -> string option
+  format ->
+  displayed_count:int ->
+  dropped_count:int option ->
+  max_errors:int option ->
+  string option
 
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 

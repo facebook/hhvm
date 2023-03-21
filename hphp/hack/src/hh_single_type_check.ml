@@ -165,9 +165,9 @@ let write_error_list format errors oc max_errors =
     match
       Errors.format_summary
         format
-        errors
-        (List.length dropped_errors)
-        max_errors
+        ~displayed_count:(List.length errors)
+        ~dropped_count:(Some (List.length dropped_errors))
+        ~max_errors
     with
     | Some summary -> Out_channel.output_string oc summary
     | None -> ()
@@ -186,9 +186,9 @@ let print_error_list format errors max_errors =
     match
       Errors.format_summary
         format
-        errors
-        (List.length dropped_errors)
-        max_errors
+        ~displayed_count:(List.length errors)
+        ~dropped_count:(Some (List.length dropped_errors))
+        ~max_errors
     with
     | Some summary -> Out_channel.output_string stderr summary
     | None -> ()

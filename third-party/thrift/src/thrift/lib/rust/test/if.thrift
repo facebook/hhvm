@@ -22,10 +22,6 @@ struct WrapString {
   1: string data;
 } (rust.exhaustive)
 
-struct PathBuf {
-  1: string (rust.type = "Utf8PathBuf") pathbuf;
-}
-
 struct NonstandardCollectionTypes {
   10: set<string> defaultset;
   11: set<string> (rust.type = "BTreeSet") btreeset;

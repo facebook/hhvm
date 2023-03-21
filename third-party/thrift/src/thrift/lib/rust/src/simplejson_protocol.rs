@@ -607,10 +607,10 @@ impl<B: Buf> SimpleJsonProtocolDeserializer<B> {
                 self.read_list_end()?;
             }
             TType::UTF8 => {
-                self.read_string::<String>()?;
+                self.read_string()?;
             }
             TType::UTF16 => {
-                self.read_string::<String>()?;
+                self.read_string()?;
             }
             TType::String => {
                 self.read_binary::<Vec<u8>>()?;
@@ -700,7 +700,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         }
 
         // Something went wrong if we dont find a string
-        let field_name = self.read_string::<String>()?;
+        let field_name = self.read_string()?;
         self.eat(b":")?;
 
         // Did we find a field we know about?
@@ -847,7 +847,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
         Ok(self.read_double()? as f32)
     }
 
-    fn read_string<V: TryFrom<String>>(&mut self) -> Result<V> {
+    fn read_string(&mut self) -> Result<String> {
         self.strip_whitespace();
         self.eat_only(b"\"")?;
         let mut ret = Vec::new();
@@ -884,12 +884,7 @@ impl<B: Buf> ProtocolReader for SimpleJsonProtocolDeserializer<B> {
 
         let v: std::result::Result<serde_json::Value, _> = serde_json::from_slice(&ret);
         match v {
-            Ok(serde_json::Value::String(s)) => V::try_from(s).map_err(|_| {
-                anyhow!(
-                    "converting to {} from `string` failed",
-                    std::any::type_name::<V>()
-                )
-            }),
+            Ok(serde_json::Value::String(s)) => Ok(s),
             _ => bail!("invalid string  "),
         }
     }

@@ -22,7 +22,6 @@ use std::hash::Hash;
 use std::sync::Arc;
 
 use bytes::Bytes;
-use camino::Utf8PathBuf;
 use ordered_float::OrderedFloat;
 
 use crate::protocol::should_break;
@@ -161,16 +160,6 @@ where
 }
 
 impl<P> Deserialize<P> for String
-where
-    P: ProtocolReader,
-{
-    #[inline]
-    fn read(p: &mut P) -> Result<Self> {
-        p.read_string()
-    }
-}
-
-impl<P> Deserialize<P> for Utf8PathBuf
 where
     P: ProtocolReader,
 {

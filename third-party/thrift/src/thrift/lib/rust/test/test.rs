@@ -22,7 +22,6 @@ use std::fmt::Debug;
 use std::io::Cursor;
 
 use bytes::Bytes;
-use camino::Utf8PathBuf;
 use fbthrift::serialize;
 use fbthrift::CompactProtocol;
 use fbthrift::Deserialize;
@@ -32,7 +31,6 @@ use fbthrift::ThriftEnum;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use interface::NonstandardCollectionTypes;
-use interface::PathBuf;
 use interface::TestBytesShared;
 use interface::TestEnum;
 use interface::TestEnumEmpty;
@@ -59,14 +57,6 @@ fn test_nonstandard_collection_types() {
         indexmap_c: IndexMap::new(),
         bin_smallvec: SmallVec::from(&b"smallvec"[..]),
         bin_bytes: Bytes::from(&b"bytes"[..]),
-        ..Default::default()
-    });
-}
-
-#[test]
-fn test_pathbuf() {
-    assert_round_trip(PathBuf {
-        pathbuf: Utf8PathBuf::from("hello/world"),
         ..Default::default()
     });
 }

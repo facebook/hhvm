@@ -102,9 +102,7 @@ fn read_write_string_list() {
         for v in &string_values {
             assert_eq!(
                 *v,
-                deserializer
-                    .read_string::<String>()
-                    .expect("failed to read string")
+                deserializer.read_string().expect("failed to read string")
             );
         }
         deserializer
@@ -383,9 +381,7 @@ fn read_write_string_i64_map() {
         for (k, v) in string_keys.iter().zip(INT64_VALUES.iter()) {
             assert_eq!(
                 *k,
-                deserializer
-                    .read_string::<String>()
-                    .expect("failed to read string")
+                deserializer.read_string().expect("failed to read string")
             );
             assert_eq!(*v, deserializer.read_i64().expect("failed to read i64"));
         }

@@ -19,9 +19,7 @@
   unsafe impls in structimpl.mustache need to be revisited.
   ====
 }}{{#type:void?}}(){{/type:void?}}{{!
-}}{{#type:string?}}{{!
-    }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
-    }}{{^type:rust}}::std::string::String{{/type:rust}}{{/type:string?}}{{!
+}}{{#type:string?}}::std::string::String{{/type:string?}}{{!
 }}{{#type:binary?}}{{!
     }}{{#type:rust}}::{{type:rust}}{{/type:rust}}{{!
     }}{{^type:rust}}::std::vec::Vec<::std::primitive::u8>{{/type:rust}}{{!

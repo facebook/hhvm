@@ -765,18 +765,11 @@ impl<B: BufExt> ProtocolReader for CompactProtocolDeserializer<B> {
         Ok(self.buffer.get_f32())
     }
 
-    fn read_string<V: TryFrom<String>>(&mut self) -> Result<V> {
+    fn read_string(&mut self) -> Result<String> {
         let vec = self.read_binary::<Vec<u8>>()?;
 
-        let string = String::from_utf8(vec)
-            .map_err(|utf8_error| anyhow!("deserializing `string` from Thrift compact protocol got invalid utf-8, you need to use `binary` instead: {utf8_error}"))?;
-
-        V::try_from(string).map_err(|_| {
-            anyhow!(
-                "converting to {} from `string` failed",
-                std::any::type_name::<V>()
-            )
-        })
+        String::from_utf8(vec)
+            .map_err(|utf8_error| anyhow!("deserializing `string` from Thrift compact protocol got invalid utf-8, you need to use `binary` instead: {utf8_error}"))
     }
 
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V> {

@@ -19,5 +19,4 @@
 pub use std::collections::*;
 
 pub use bytes::Bytes;
-pub use camino::Utf8PathBuf;
 pub use ordered_float::OrderedFloat;

@@ -22,7 +22,6 @@ use std::hash::Hash;
 use std::sync::Arc;
 
 use bytes::Bytes;
-use camino::Utf8PathBuf;
 use ordered_float::OrderedFloat;
 
 use crate::protocol::ProtocolWriter;
@@ -182,16 +181,6 @@ where
     #[inline]
     fn write(&self, p: &mut P) {
         p.write_string(self)
-    }
-}
-
-impl<P> Serialize<P> for Utf8PathBuf
-where
-    P: ProtocolWriter,
-{
-    #[inline]
-    fn write(&self, p: &mut P) {
-        p.write_string(self.as_str())
     }
 }
 

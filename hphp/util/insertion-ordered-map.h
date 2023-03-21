@@ -30,6 +30,8 @@ namespace HPHP {
 template <class K, class V, class Hash, class Equal>
 struct InsertionOrderedMap {
   using value_type = std::pair<K, V>;
+  using key_type = K;
+  using mapped_type = V;
 private:
   using extractor = boost::multi_index::member<
     value_type, K, &value_type::first>;
@@ -86,6 +88,10 @@ private:
 
   std::pair<iterator, bool> emplace_front(const K& k, const V& v) {
     return getList().push_front({k, v});
+  }
+
+  std::pair<iterator, bool> emplace(const K& k, const V& v) {
+    return emplace_back(k, v);
   }
 
   iterator begin() { return getList().begin(); }

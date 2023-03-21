@@ -258,6 +258,9 @@ Index make_index() {
     .class [unique builtin] HH\AwaitableChild extends HH\Awaitable {
     }
 
+    .class [unique builtin] HH\AwaitableChild2 extends HH\Awaitable {
+    }
+
     .class [unique builtin] Closure {
     }
 
@@ -2896,7 +2899,7 @@ TEST(Type, ObjToCls) {
   EXPECT_EQ(objcls(make_specialized_exact_object(BObj, *clsA)),
             make_specialized_exact_class(BCls, *clsA));
   EXPECT_EQ(objcls(make_specialized_wait_handle(BObj, TInt, index)),
-            make_specialized_sub_class(BCls, awaitable));
+            make_specialized_sub_class(BCls, awaitable, false, true, false));
 
   EXPECT_EQ(
     objcls(make_specialized_sub_object(BObj, *clsICanon11)),
@@ -7564,6 +7567,120 @@ TEST(Type, IterTypes) {
     EXPECT_EQ(iter.mayThrowOnInit, p.second.mayThrowOnInit);
     EXPECT_EQ(iter.mayThrowOnNext, p.second.mayThrowOnNext);
   }
+}
+
+
+TEST(Type, ResolveClasses) {
+  auto const index = make_index();
+
+  struct Hasher {
+    size_t operator()(const std::pair<Type, Type>& p) const {
+      return folly::hash::hash_combine(
+        TypeHasher{}(p.first),
+        TypeHasher{}(p.second)
+      );
+    }
+  };
+  hphp_fast_set<std::pair<Type, Type>, Hasher> types;
+
+#define MAKE(name) {                                                    \
+    auto const u = index.resolve_class_name_only(s_##name.get());       \
+    if (u.resolved()) ADD_FAILURE();                                    \
+    auto const r = index.resolve_class(s_##name.get());                 \
+    auto const t1 = r ? subObj(*r) : TBottom;                           \
+    auto const t2 = r ? subCls(*r) : TBottom;                           \
+    types.emplace(subObj(u), t1);                                       \
+    types.emplace(objExact(u), t1);                                     \
+    types.emplace(subCls(u), t2);                                       \
+    types.emplace(clsExact(u), t2);                                     \
+  }
+#define X(name) MAKE(name)
+#define Y(name) MAKE(name)
+  TEST_CLASSES
+#undef Y
+#undef X
+#undef MAKE
+
+  for (auto const& [t1, t2] : types) {
+    for (auto const& [t3, t4] : types) {
+      EXPECT_EQ(
+        resolve_classes(
+          index,
+          intersection_of(t1, t3)
+        ),
+        intersection_of(t2, t4)
+      );
+    }
+  }
+
+  EXPECT_EQ(resolve_classes(index, TBottom), TBottom);
+  EXPECT_EQ(resolve_classes(index, TInitCell), TInitCell);
+  EXPECT_EQ(resolve_classes(index, TInt), TInt);
+  EXPECT_EQ(resolve_classes(index, TCls), TCls);
+  EXPECT_EQ(resolve_classes(index, TObj), TObj);
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_int(BInt, 1)),
+            make_specialized_int(BInt, 1));
+  EXPECT_EQ(resolve_classes(index, make_specialized_string(BStr, s_A.get())),
+            make_specialized_string(BStr, s_A.get()));
+  EXPECT_EQ(resolve_classes(index, make_specialized_lazycls(BLazyCls, s_A.get())),
+            make_specialized_lazycls(BLazyCls, s_A.get()));
+  EXPECT_EQ(resolve_classes(index, make_specialized_double(BDbl, 1.23)),
+            make_specialized_double(BDbl, 1.23));
+
+  auto const svec = static_vec(1, 2, 3, 4);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrval(BSVecN, svec)),
+            make_specialized_arrval(BSVecN, svec));
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, TInt, index)),
+            make_specialized_wait_handle(BObj, TInt, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, TSStr)),
+            make_specialized_arrpackedn(BVecN, TSStr));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {TInt, TStr})),
+            make_specialized_arrpacked(BVecN, {TInt, TStr}));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, TInt)),
+            make_specialized_arrmapn(BDictN, TStr, TInt));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)})),
+            make_specialized_arrmap(BDictN, {map_elem(s_A, TInt)}));
+
+  auto const u1 = index.resolve_class_name_only(s_Base.get());
+  if (u1.resolved()) ADD_FAILURE();
+  auto const r1 = index.resolve_class(s_Base.get());
+  if (!r1 || !r1->resolved()) ADD_FAILURE();
+
+  auto const uobj1 = subObj(u1);
+  auto const robj1 = subObj(*r1);
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, uobj1, index)),
+            make_specialized_wait_handle(BObj, robj1, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, uobj1)),
+            make_specialized_arrpackedn(BVecN, robj1));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {uobj1, uobj1})),
+            make_specialized_arrpacked(BVecN, {robj1, robj1}));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, uobj1)),
+            make_specialized_arrmapn(BDictN, TStr, robj1));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, uobj1)})),
+            make_specialized_arrmap(BDictN, {map_elem(s_A, robj1)}));
+  EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u1)),
+            make_specialized_sub_object(BObj|BBool, *r1));
+
+  auto const u2 = index.resolve_class_name_only(s_Foo1.get());
+  if (u2.resolved()) ADD_FAILURE();
+  auto const uobj2 = subObj(u2);
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj, uobj2, index)),
+            make_specialized_wait_handle(BObj, TBottom, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN, uobj2)), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN, {TInt, uobj2})), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN, TStr, uobj2)), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN, {map_elem(s_A, uobj2)})), TBottom);
+  EXPECT_EQ(resolve_classes(index, make_specialized_sub_object(BObj|BBool, u2)), TBool);
+
+  EXPECT_EQ(resolve_classes(index, make_specialized_wait_handle(BObj|BBool, uobj2, index)),
+            make_specialized_wait_handle(BObj|BBool, TBottom, index));
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpackedn(BVecN|BBool, uobj2)), TBool);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrpacked(BVecN|BBool, {TInt, uobj2})), TBool);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmapn(BDictN|BBool, TStr, uobj2)), TBool);
+  EXPECT_EQ(resolve_classes(index, make_specialized_arrmap(BDictN|BBool, {map_elem(s_A, uobj2)})), TBool);
 }
 
 //////////////////////////////////////////////////////////////////////

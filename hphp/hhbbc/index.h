@@ -279,6 +279,7 @@ std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>&);
 
 // private types
 struct ClassInfo;
+struct UnresolvedClassMaker;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -527,6 +528,14 @@ struct Class {
                            folly::Range<const Class*> classes2,
                            bool nonRegular1,
                            bool nonRegular2);
+
+  /*
+   * Produce an unresolved class representing the base class of a wait
+   * handle (this will be a sub-class of Awaitable). Since this is
+   * unresolved, it does not require an Index.
+   */
+  static Class unresolvedWaitHandle();
+
   /*
    * Convert this class to/from an opaque integer. The integer is
    * "pointerish" (has upper bits cleared), so can be used in
@@ -540,6 +549,23 @@ struct Class {
 
   size_t hash() const { return val.toOpaque(); }
 
+  /*
+   * NB: Serd-ing a Class only encodes the name. Deserializing it
+   * always produces a name-only unresolved class, regardless of the
+   * original. If necessary, the Class must be manually resolved
+   * afterwards.
+   */
+  template <typename SerDe> void serde(SerDe& sd) {
+    static_assert(!SerDe::deserializing);
+    sd(name());
+  }
+
+  template <typename SerDe> static Class makeForSerde(SerDe& sd) {
+    SString n;
+    sd(n);
+    assertx(n);
+    return Class{n};
+  }
 private:
   explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
 
@@ -552,6 +578,7 @@ private:
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
   friend struct ::HPHP::HHBBC::ClassInfo;
+  friend struct ::HPHP::HHBBC::UnresolvedClassMaker;
   Either<SString,ClassInfo*> val;
 };
 

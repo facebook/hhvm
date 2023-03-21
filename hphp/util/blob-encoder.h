@@ -18,6 +18,7 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/copy-ptr.h"
+#include "hphp/util/insertion-ordered-map.h"
 #include "hphp/util/optional.h"
 
 #include <folly/sorted_vector_types.h>
@@ -276,6 +277,11 @@ struct BlobEncoder {
            typename C, typename A,
            typename G, typename C2>
   void encode(const folly::sorted_vector_map<K, V, C, A, G, C2>& map) {
+    encodeOrderedContainer(map);
+  }
+
+  template <typename K, typename V, typename H, typename E>
+  void encode(const InsertionOrderedMap<K, V, H, E>& map) {
     encodeOrderedContainer(map);
   }
 
@@ -715,6 +721,11 @@ struct BlobDecoder {
            typename C, typename A,
            typename G, typename C2>
   void decode(folly::sorted_vector_map<K, V, C, A, G, C2>& map) {
+    decodeMapContainer(map);
+  }
+
+  template <typename K, typename V, typename H, typename E>
+  void decode(InsertionOrderedMap<K, V, H, E>& map) {
     decodeMapContainer(map);
   }
 

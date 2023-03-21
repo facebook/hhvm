@@ -84,6 +84,14 @@ using namespace extern_worker;
 
 //////////////////////////////////////////////////////////////////////
 
+// This lets us create res::Class from anywhere within this file
+// without having to explicitly friend all of the the internals.
+struct UnresolvedClassMaker {
+  static res::Class make(SString name) { return res::Class { name }; }
+};
+
+//////////////////////////////////////////////////////////////////////
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////
@@ -404,6 +412,151 @@ PropState make_unknown_propstate(const Index& index,
 
   return ret;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename Resolve, typename Self>
+Index::ConstraintType<>
+type_from_constraint(const TypeConstraint& tc,
+                     const Type& candidate,
+                     const Resolve& resolve,
+                     const Self& self) {
+  using C = Index::ConstraintType<>;
+
+  assertx(IMPLIES(
+    !tc.isCheckable(),
+    tc.isMixed() || (tc.isUpperBound() && RO::EvalEnforceGenericsUB == 0)
+  ));
+
+  auto ty = [&] {
+    auto const exact = [&] (const Type& t) {
+      return C{ t, t };
+    };
+
+    switch (getAnnotMetaType(tc.type())) {
+      case AnnotMetaType::Precise: {
+        switch (getAnnotDataType(tc.type())) {
+          case KindOfNull:         return exact(TInitNull);
+          case KindOfBoolean:      return exact(TBool);
+          case KindOfInt64:        return exact(TInt);
+          case KindOfDouble:       return exact(TDbl);
+          case KindOfPersistentVec:
+          case KindOfVec:          return exact(TVec);
+          case KindOfPersistentDict:
+          case KindOfDict:         return exact(TDict);
+          case KindOfPersistentKeyset:
+          case KindOfKeyset:       return exact(TKeyset);
+          case KindOfResource:     return exact(TRes);
+          case KindOfClsMeth:      return exact(TClsMeth);
+          case KindOfObject: {
+            auto const cls = resolve(tc.clsName());
+            auto lower = subObj(cls);
+            auto upper = lower;
+
+            // The "magic" interfaces cannot be represented with a single
+            // type. Obj=Foo|Str, for example, is not a valid type. It is
+            // safe to only provide a subset as the lower bound. We can
+            // use any provided candidate type to refine the lower bound
+            // and supply the subset which would allow us to optimize away
+            // the check.
+            if (interface_supports_arrlike(cls.name())) {
+              if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
+              upper |= TArrLike;
+            }
+            if (interface_supports_int(cls.name())) {
+              if (candidate.subtypeOf(BInt)) lower = TInt;
+              upper |= TInt;
+            }
+            if (interface_supports_double(cls.name())) {
+              if (candidate.subtypeOf(BDbl)) lower = TDbl;
+              upper |= TDbl;
+            }
+
+            if (interface_supports_string(cls.name())) {
+              if (candidate.subtypeOf(BStr)) lower = TStr;
+              upper |= union_of(TStr, TCls, TLazyCls);
+              return C{
+                std::move(lower),
+                std::move(upper),
+                TriBool::Yes
+              };
+            }
+
+            return C{ std::move(lower), std::move(upper) };
+          }
+          case KindOfPersistentString:
+          case KindOfString:
+            return C{
+              TStr,
+              union_of(TStr, TCls, TLazyCls),
+              TriBool::Yes
+            };
+          case KindOfUninit:
+          case KindOfRFunc:
+          case KindOfFunc:
+          case KindOfRClsMeth:
+          case KindOfClass:
+          case KindOfLazyClass:    break;
+        }
+        always_assert(false);
+      }
+      case AnnotMetaType::Mixed:
+        return C{ TInitCell, TInitCell, TriBool::No, true };
+      case AnnotMetaType::Nothing:
+      case AnnotMetaType::NoReturn:   return exact(TBottom);
+      case AnnotMetaType::Nonnull:    return exact(TNonNull);
+      case AnnotMetaType::Number:     return exact(TNum);
+      case AnnotMetaType::VecOrDict:  return exact(TKVish);
+      case AnnotMetaType::ArrayLike:  return exact(TArrLike);
+      case AnnotMetaType::Unresolved:
+        return C{ TBottom, TBottom };
+      case AnnotMetaType::This:
+        if (auto const s = self()) {
+          auto obj = subObj(*s);
+          if (!s->couldBeMocked()) return exact(setctx(obj));
+          return C{ setctx(obj), obj };
+        }
+        return C{ TBottom, TObj };
+      case AnnotMetaType::Callable:
+        return C{
+          TBottom,
+          union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
+        };
+      case AnnotMetaType::ArrayKey:
+        return C{
+          TArrKey,
+          union_of(TArrKey, TCls, TLazyCls),
+          TriBool::Yes
+        };
+      case AnnotMetaType::Classname:
+        return C{
+          RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
+    }
+
+    always_assert(false);
+  }();
+
+  // Nullable constraint always includes TInitNull.
+  if (tc.isNullable()) {
+    ty.lower = opt(std::move(ty.lower));
+    ty.upper = opt(std::move(ty.upper));
+  }
+  // We cannot ever say an upper-bound check will succeed, so its
+  // lower-bound is always empty.
+  if (tc.isUpperBound()) ty.lower = TBottom;
+  // Soft type-constraints can potentially allow anything, so its
+  // upper-bound is maximal. We might still be able to optimize away
+  // the check if the lower bound is satisfied.
+  if (tc.isSoft() || (RO::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
+    ty.upper = TInitCell;
+    ty.maybeMixed = true;
+  }
+  return ty;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }
 
@@ -2371,7 +2524,7 @@ Class::forEachSubclass(const std::function<void(const php::Class*)>& f) const {
 std::string show(const Class& c) {
   return c.val.match(
     [] (SString s) {
-      return folly::sformat("{}*", s);
+      return folly::sformat("\"{}\"", s);
     },
     [] (ClassInfo* cinfo) {
       return cinfo->cls->name->toCppString();
@@ -3022,6 +3175,7 @@ TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
       for (auto const c : classes2) {
         if (c.val.left()) common.emplace_back(c);
       }
+      isectContainsNonRegular = bothNonRegular;
     }
   } else if (size2 == 0 || size1 <= size2) {
     process(classes1, classes2);
@@ -3066,6 +3220,10 @@ bool Class::couldBeIsect(folly::Range<const Class*> classes1,
     }
   );
   return couldBe;
+}
+
+Class Class::unresolvedWaitHandle() {
+  return Class { s_Awaitable.get() };
 }
 
 Func::Func(Rep val)
@@ -13480,138 +13638,17 @@ Index::ConstraintType<>
 Index::lookup_constraint(const Context& ctx,
                          const TypeConstraint& tc,
                          const Type& candidate) const {
-  assertx(IMPLIES(
-    !tc.isCheckable(),
-    tc.isMixed() || (tc.isUpperBound() && RO::EvalEnforceGenericsUB == 0)
-  ));
-
-  auto ty = [&] {
-    auto const exact = [&] (const Type& t) {
-      return ConstraintType<>{ t, t };
-    };
-
-    switch (getAnnotMetaType(tc.type())) {
-      case AnnotMetaType::Precise: {
-        switch (getAnnotDataType(tc.type())) {
-          case KindOfNull:         return exact(TInitNull);
-          case KindOfBoolean:      return exact(TBool);
-          case KindOfInt64:        return exact(TInt);
-          case KindOfDouble:       return exact(TDbl);
-          case KindOfPersistentVec:
-          case KindOfVec:          return exact(TVec);
-          case KindOfPersistentDict:
-          case KindOfDict:         return exact(TDict);
-          case KindOfPersistentKeyset:
-          case KindOfKeyset:       return exact(TKeyset);
-          case KindOfResource:     return exact(TRes);
-          case KindOfClsMeth:      return exact(TClsMeth);
-          case KindOfObject: {
-            auto const cls = resolve_class(tc.clsName());
-            assertx(cls.has_value());
-            auto lower = subObj(*cls);
-            auto upper = lower;
-
-            // The "magic" interfaces cannot be represented with a single
-            // type. Obj=Foo|Str, for example, is not a valid type. It is
-            // safe to only provide a subset as the lower bound. We can
-            // use any provided candidate type to refine the lower bound
-            // and supply the subset which would allow us to optimize away
-            // the check.
-            if (interface_supports_arrlike(cls->name())) {
-              if (candidate.subtypeOf(BArrLike)) lower = TArrLike;
-              upper |= TArrLike;
-            }
-            if (interface_supports_int(cls->name())) {
-              if (candidate.subtypeOf(BInt)) lower = TInt;
-              upper |= TInt;
-            }
-            if (interface_supports_double(cls->name())) {
-              if (candidate.subtypeOf(BDbl)) lower = TDbl;
-              upper |= TDbl;
-            }
-
-            if (interface_supports_string(cls->name())) {
-              if (candidate.subtypeOf(BStr)) lower = TStr;
-              upper |= union_of(TStr, TCls, TLazyCls);
-              return ConstraintType<> {
-                std::move(lower),
-                std::move(upper),
-                TriBool::Yes
-              };
-            }
-
-            return ConstraintType<>{ std::move(lower), std::move(upper) };
-          }
-          case KindOfPersistentString:
-          case KindOfString:
-            return ConstraintType<>{
-              TStr,
-              union_of(TStr, TCls, TLazyCls),
-              TriBool::Yes
-            };
-          case KindOfUninit:
-          case KindOfRFunc:
-          case KindOfFunc:
-          case KindOfRClsMeth:
-          case KindOfClass:
-          case KindOfLazyClass:    break;
-        }
-        always_assert(false);
-      }
-      case AnnotMetaType::Mixed:
-        return ConstraintType<>{ TInitCell, TInitCell, TriBool::No, true };
-      case AnnotMetaType::Nothing:
-      case AnnotMetaType::NoReturn:   return exact(TBottom);
-      case AnnotMetaType::Nonnull:    return exact(TNonNull);
-      case AnnotMetaType::Number:     return exact(TNum);
-      case AnnotMetaType::VecOrDict:  return exact(TKVish);
-      case AnnotMetaType::ArrayLike:  return exact(TArrLike);
-      case AnnotMetaType::Unresolved:
-        return ConstraintType<>{ TBottom, TBottom };
-      case AnnotMetaType::This:
-        if (auto const s = selfCls(ctx)) {
-          auto obj = subObj(*s);
-          if (!s->couldBeMocked()) return exact(setctx(obj));
-          return ConstraintType<>{ setctx(obj), obj };
-        }
-        return ConstraintType<>{ TBottom, TObj };
-      case AnnotMetaType::Callable:
-        return ConstraintType<>{
-          TBottom,
-          union_of(TStr, TVec, TDict, TFunc, TRFunc, TObj, TClsMeth, TRClsMeth)
-        };
-      case AnnotMetaType::ArrayKey:
-        return ConstraintType<>{
-          TArrKey,
-          union_of(TArrKey, TCls, TLazyCls),
-          TriBool::Yes
-        };
-      case AnnotMetaType::Classname:
-        return ConstraintType<>{
-          RO::EvalClassnameNotices ? TStr : union_of(TStr, TCls, TLazyCls),
-          union_of(TStr, TCls, TLazyCls)
-        };
-    }
-
-    always_assert(false);
-  }();
-
-  // Nullable constraint always includes TInitNull.
-  if (tc.isNullable()) {
-    ty.lower = opt(std::move(ty.lower));
-    ty.upper = opt(std::move(ty.upper));
-  }
-  // We cannot ever say an upper-bound check will succeed, so its
-  // lower-bound is always empty.
-  if (tc.isUpperBound()) ty.lower = TBottom;
-  // Soft type-constraints can potentially allow anything, so its
-  // upper-bound is maximal. We might still be able to optimize away
-  // the check if the lower bound is satisfied.
-  if (tc.isSoft() || (RO::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
-    ty.upper = TInitCell;
-    ty.maybeMixed = true;
-  }
-  return ty;
+  return type_from_constraint(
+    tc, candidate,
+    [&] (SString name) {
+      auto const cls = resolve_class(name);
+      // At this point we shouldn't have type constraints with
+      // non-existent classes.
+      assertx(cls.has_value());
+      return *cls;
+    },
+    [&] { return selfCls(ctx); }
+  );
 }
 
 bool Index::could_have_reified_type(Context ctx,

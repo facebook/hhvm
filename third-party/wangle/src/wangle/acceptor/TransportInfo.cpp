@@ -63,7 +63,7 @@ bool TransportInfo::initWithSocket(const folly::AsyncSocket* sock) {
 #endif // __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 17
   validTcpinfo = true;
 #else
-  (sock); // unused
+  (void)sock; // unused
   tcpinfoErrno = EINVAL;
   rtt = microseconds(-1);
   rtt_var = -1;
@@ -138,7 +138,7 @@ int64_t TransportInfo::readRTT(const folly::AsyncSocket* sock) {
 #elif defined(__APPLE__)
   return tcpinfo.tcpi_srtt;
 #else
-  (sock); // unused
+  (void)sock; // unused
   return -1;
 #endif
 }

@@ -2112,6 +2112,9 @@ HQSession::createStreamTransport(quic::StreamId streamId) {
 
   // tracks max historical streams
   HTTPSessionBase::onNewOutgoingStream(getNumOutgoingStreams());
+  if (infoCallback_) {
+    infoCallback_->onTransactionAttached(*this);
+  }
 
   return &matchPair.first->second;
 }
@@ -2348,10 +2351,10 @@ void HQSession::detachStreamTransport(HQStreamTransportBase* hqStream) {
       getConnectionManager()->onDeactivated(*this);
     }
     resetTimeout();
-  } else {
-    if (infoCallback_) {
-      infoCallback_->onTransactionDetached(*this);
-    }
+  }
+
+  if (infoCallback_) {
+    infoCallback_->onTransactionDetached(*this);
   }
 }
 

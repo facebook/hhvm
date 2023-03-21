@@ -188,6 +188,14 @@ class HTTPUpstreamTest
     commonSetUp(makeClientCodec<typename C::Codec>(C::version));
   }
 
+  void TearDown() override {
+    AsyncSocketException ex(AsyncSocketException::UNKNOWN, "");
+    for (auto& cb : cbs_) {
+      cb->writeErr(0, ex);
+    }
+    EXPECT_EQ(onTransactionSymmetricCounter, 0);
+  }
+
   void commonSetUp(unique_ptr<HTTPCodec> codec) {
     HTTPSession::setDefaultReadBufferLimit(65536);
     HTTPSession::setDefaultWriteBufferLimit(65536);
@@ -310,13 +318,6 @@ class HTTPUpstreamTest
     transactionsFull_ = false;
   }
 
-  void TearDown() override {
-    AsyncSocketException ex(AsyncSocketException::UNKNOWN, "");
-    for (auto& cb : cbs_) {
-      cb->writeErr(0, ex);
-    }
-  }
-
   std::unique_ptr<StrictMock<MockHTTPHandler>> openTransaction(
       bool expectStartPaused = false) {
     // Returns a mock handler with txn_ field set in it
@@ -363,6 +364,14 @@ class HTTPUpstreamTest
     return byteEventTracker;
   }
 
+  void onTransactionAttached(const HTTPSessionBase&) override {
+    onTransactionSymmetricCounter++;
+  }
+
+  void onTransactionDetached(const HTTPSessionBase&) override {
+    onTransactionSymmetricCounter--;
+  }
+
  protected:
   bool sessionCreated_{false};
   bool sessionDestroyed_{false};
@@ -386,6 +395,7 @@ class HTTPUpstreamTest
   bool failWrites_{false};
   bool pauseWrites_{false};
   bool writeInLoop_{false};
+  uint64_t onTransactionSymmetricCounter{0};
 };
 TYPED_TEST_SUITE_P(HTTPUpstreamTest);
 

@@ -93,6 +93,8 @@ class HTTPSessionBase : public wangle::ManagedConnection {
     }
     virtual void onIngressPaused(const HTTPSessionBase&) {
     }
+    virtual void onTransactionAttached(const HTTPSessionBase&) {
+    }
     virtual void onTransactionDetached(const HTTPSessionBase&) {
     }
     virtual void onPingReplySent(int64_t /*latency*/) {

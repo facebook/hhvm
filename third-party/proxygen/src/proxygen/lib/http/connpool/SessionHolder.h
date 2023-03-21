@@ -131,6 +131,7 @@ class SessionHolder : private HTTPSessionBase::InfoCallback {
   void onIngressMessage(const HTTPSessionBase&, const HTTPMessage&) override;
   void onIngressLimitExceeded(const HTTPSessionBase&) override;
   void onIngressPaused(const HTTPSessionBase&) override;
+  void onTransactionAttached(const HTTPSessionBase&) override;
   void onTransactionDetached(const HTTPSessionBase&) override;
   void onPingReplySent(int64_t latency) override;
   void onPingReplyReceived() override;

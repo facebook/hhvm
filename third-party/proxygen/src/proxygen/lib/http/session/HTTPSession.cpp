@@ -1931,10 +1931,10 @@ void HTTPSession::detach(HTTPTransaction* txn) noexcept {
     if (getConnectionManager()) {
       getConnectionManager()->onDeactivated(*this);
     }
-  } else {
-    if (infoCallback_) {
-      infoCallback_->onTransactionDetached(*this);
-    }
+  }
+
+  if (infoCallback_) {
+    infoCallback_->onTransactionDetached(*this);
   }
 
   if (!readsShutdown()) {
@@ -2698,6 +2698,10 @@ HTTPTransaction* HTTPSession::createTransaction(
     incrementIncomingStreams(txn);
   }
   // Downstream push is counted in HTTPSession::sendHeaders
+
+  if (infoCallback_) {
+    infoCallback_->onTransactionAttached(*this);
+  }
 
   return txn;
 }

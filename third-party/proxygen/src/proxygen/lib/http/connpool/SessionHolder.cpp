@@ -253,6 +253,12 @@ void SessionHolder::onIngressPaused(const HTTPSessionBase& session) {
   }
 }
 
+void SessionHolder::onTransactionAttached(const HTTPSessionBase& session) {
+  if (originalSessionInfoCb_) {
+    originalSessionInfoCb_->onTransactionAttached(session);
+  }
+}
+
 void SessionHolder::onTransactionDetached(const HTTPSessionBase& session) {
   if (originalSessionInfoCb_) {
     originalSessionInfoCb_->onTransactionDetached(session);

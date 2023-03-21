@@ -77,7 +77,7 @@ class HTTPDownstreamTest : public testing::Test {
         &mockController_,
         std::move(codec),
         mockTransportInfo /* no stats for now */,
-        nullptr);
+        &infoCb_);
     for (auto& param : flowControl) {
       if (param < 0) {
         param = rawCodec_->getDefaultWindowSize();
@@ -145,6 +145,16 @@ class HTTPDownstreamTest : public testing::Test {
     folly::EventBaseManager::get()->clearEventBase();
     HTTPSession::setDefaultWriteBufferLimit(65536);
     HTTP2PriorityQueue::setNodeLifetime(std::chrono::milliseconds(2));
+    EXPECT_CALL(infoCb_, onTransactionAttached(_)).WillRepeatedly([this]() {
+      onTransactionSymmetricCounter++;
+    });
+    EXPECT_CALL(infoCb_, onTransactionDetached(_)).WillRepeatedly([this]() {
+      onTransactionSymmetricCounter--;
+    });
+  }
+
+  void TearDown() override {
+    EXPECT_EQ(onTransactionSymmetricCounter, 0);
   }
 
   void cleanup() {
@@ -455,6 +465,8 @@ class HTTPDownstreamTest : public testing::Test {
   bool breakParseOutput_{false};
   typename C::Codec* rawCodec_{nullptr};
   HeaderIndexingStrategy testH2IndexingStrat_;
+  testing::NiceMock<proxygen::MockHTTPSessionInfoCallback> infoCb_;
+  uint64_t onTransactionSymmetricCounter{0};
 };
 
 // Uses TestAsyncTransport

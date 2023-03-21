@@ -79,8 +79,14 @@ class HQSessionTest
     folly::EventBaseManager::get()->clearEventBase();
     proxygen::HTTPSession::setDefaultWriteBufferLimit(65536);
     proxygen::HTTP2PriorityQueue::setNodeLifetime(std::chrono::milliseconds(2));
+    EXPECT_CALL(infoCb_, onTransactionAttached(testing::_))
+        .WillRepeatedly([this]() { onTransactionSymmetricCounter++; });
+    EXPECT_CALL(infoCb_, onTransactionAttached(testing::_))
+        .WillRepeatedly([this]() { onTransactionSymmetricCounter--; });
   }
+
   void TearDown() override {
+    EXPECT_EQ(onTransactionSymmetricCounter, 0);
   }
 
  protected:
@@ -408,4 +414,5 @@ class HQSessionTest
   // Egress Control Stream
   std::unique_ptr<proxygen::hq::HQControlCodec> egressControlCodec_;
   folly::F14FastMap<quic::StreamId, proxygen::hq::PushId> pushes_;
+  uint64_t onTransactionSymmetricCounter{0};
 };

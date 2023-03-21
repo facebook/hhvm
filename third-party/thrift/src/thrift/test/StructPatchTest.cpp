@@ -938,5 +938,41 @@ TEST(StructPatchTest, InternBox) {
            .value());
 }
 
+TEST(StructPatchTest, EnsureStructValPatchable) {
+  MyData data;
+  data.data3() = "";
+
+  MyStructPatch patch;
+  patch.patchIfSet<ident::structVal>().assign(data);
+
+  MyStruct foo;
+  patch.apply(foo);
+  EXPECT_EQ(foo.structVal()->data3(), "");
+
+  patch.patchIfSet<ident::structVal>().ensure<ident::data2>(42);
+  patch.apply(foo);
+  EXPECT_EQ(foo.structVal()->data2(), 42);
+  // FIXME: ensuring one field should not clear the other field
+  EXPECT_FALSE(foo.structVal()->data3().has_value());
+}
+
+TEST(StructPatchTest, EnsureOptStructValPatchable) {
+  MyData data;
+  data.data2() = 42;
+
+  MyStructPatch patch;
+  patch.patchIfSet<ident::optStructVal>().assign(data);
+
+  MyStruct foo;
+  foo.optStructVal().ensure();
+  patch.apply(foo);
+  EXPECT_EQ(foo.optStructVal()->data2(), 42);
+
+  patch.patchIfSet<ident::optStructVal>().ensure<ident::data2>(42);
+  patch.apply(foo);
+  // FIXME: ensuring one field should not clear the parent field
+  EXPECT_FALSE(foo.optStructVal().has_value());
+}
+
 } // namespace
 } // namespace apache::thrift

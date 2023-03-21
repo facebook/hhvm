@@ -26,6 +26,7 @@ namespace py3 thrift.test
 struct MyData {
   string data1;
   i32 data2;
+  optional string data3;
 }
 
 union MyInnerUnion {

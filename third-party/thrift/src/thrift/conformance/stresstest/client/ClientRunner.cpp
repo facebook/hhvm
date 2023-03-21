@@ -85,16 +85,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
     evb->runInEventBaseThreadAndWait([&]() {
       // capture baseline memory usage
       memoryStats_.threadStart = getThreadMemoryUsage();
-      for (size_t connectionIdx = 0;
-           connectionIdx < cfg.numConnectionsPerThread;
-           connectionIdx++) {
-        std::shared_ptr<StressTestAsyncClient> connection =
-            createClient(evb, cfg.connConfig);
-        for (size_t i = 0; i < cfg.numClientsPerConnection; i++) {
-          clients_.emplace_back(
-              std::make_unique<StressTestClient>(connection, rpcStats_));
-        }
-      }
+      clients_ = createClients(evb, cfg, rpcStats_);
       // capture memory usage after connections are established
       memoryStats_.connectionsEstablished = getThreadMemoryUsage();
       // start memory monitoring

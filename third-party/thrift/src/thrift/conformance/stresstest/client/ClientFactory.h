@@ -43,10 +43,11 @@ class ClientFactory {
 };
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    std::unique_ptr<Client<StressTest>>,
-    createClient,
+    std::vector<std::unique_ptr<StressTestClient>>,
+    createClients,
     folly::EventBase* /* the EVB running the test */,
-    const ClientConnectionConfig&);
+    const ClientConfig&,
+    ClientRpcStats&);
 
 } // namespace stress
 } // namespace thrift

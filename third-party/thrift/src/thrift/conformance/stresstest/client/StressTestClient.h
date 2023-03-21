@@ -36,36 +36,54 @@ struct ClientRpcStats {
 };
 
 /**
- * Wrapper around the generated StressTestAsyncClient to transparently collect
- * statistics of requests being sent
+ * Wrapper around the generated client to transparently collect statistics of
+ * requests being sent
  */
 class StressTestClient {
  public:
-  explicit StressTestClient(
-      std::shared_ptr<StressTestAsyncClient> client, ClientRpcStats& stats)
-      : client_(std::move(client)), stats_(stats) {}
+  explicit StressTestClient(ClientRpcStats& stats) : stats_(stats) {}
+  virtual ~StressTestClient() {}
 
-  folly::coro::Task<void> co_ping();
-
-  folly::coro::Task<std::string> co_echo(const std::string& x);
-
-  folly::coro::Task<void> co_requestResponseEb(const BasicRequest& req);
-
-  folly::coro::Task<void> co_requestResponseTm(const BasicRequest& req);
-
-  folly::coro::Task<void> co_streamTm(const StreamRequest& req);
-
-  folly::coro::Task<void> co_sinkTm(const StreamRequest& req);
+  virtual folly::coro::Task<void> co_ping() = 0;
+  virtual folly::coro::Task<std::string> co_echo(const std::string&) = 0;
+  virtual folly::coro::Task<void> co_requestResponseEb(const BasicRequest&) = 0;
+  virtual folly::coro::Task<void> co_requestResponseTm(const BasicRequest&) = 0;
+  virtual folly::coro::Task<void> co_streamTm(const StreamRequest&) = 0;
+  virtual folly::coro::Task<void> co_sinkTm(const StreamRequest&) = 0;
 
   bool connectionGood() const { return connectionGood_; }
+
+ protected:
+  ClientRpcStats& stats_;
+  bool connectionGood_{true};
+};
+
+/**
+ * Concrete class to collect statistics of requests sent from a Thrift/SR client
+ */
+class ThriftStressTestClient : public StressTestClient {
+ public:
+  explicit ThriftStressTestClient(
+      std::shared_ptr<StressTestAsyncClient> client, ClientRpcStats& stats)
+      : StressTestClient(stats), client_(std::move(client)) {}
+
+  folly::coro::Task<void> co_ping() override;
+
+  folly::coro::Task<std::string> co_echo(const std::string&) override;
+
+  folly::coro::Task<void> co_requestResponseEb(const BasicRequest&) override;
+
+  folly::coro::Task<void> co_requestResponseTm(const BasicRequest&) override;
+
+  folly::coro::Task<void> co_streamTm(const StreamRequest&) override;
+
+  folly::coro::Task<void> co_sinkTm(const StreamRequest&) override;
 
  private:
   template <class Fn>
   folly::coro::Task<void> timedExecute(Fn&& fn);
 
   std::shared_ptr<StressTestAsyncClient> client_;
-  ClientRpcStats& stats_;
-  bool connectionGood_{true};
 };
 
 } // namespace stress

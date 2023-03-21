@@ -40,28 +40,29 @@ void ClientRpcStats::combine(const ClientRpcStats& other) {
   numFailure += other.numFailure;
 }
 
-folly::coro::Task<void> StressTestClient::co_ping() {
+folly::coro::Task<void> ThriftStressTestClient::co_ping() {
   co_await timedExecute([&]() { return client_->co_ping(); });
 }
 
-folly::coro::Task<std::string> StressTestClient::co_echo(const std::string& x) {
+folly::coro::Task<std::string> ThriftStressTestClient::co_echo(
+    const std::string& x) {
   std::string ret;
   co_await timedExecute(
       [&]() -> folly::coro::Task<void> { ret = co_await client_->co_echo(x); });
   co_return ret;
 }
 
-folly::coro::Task<void> StressTestClient::co_requestResponseEb(
+folly::coro::Task<void> ThriftStressTestClient::co_requestResponseEb(
     const BasicRequest& req) {
   co_await timedExecute([&]() { return client_->co_requestResponseEb(req); });
 }
 
-folly::coro::Task<void> StressTestClient::co_requestResponseTm(
+folly::coro::Task<void> ThriftStressTestClient::co_requestResponseTm(
     const BasicRequest& req) {
   co_await timedExecute([&]() { return client_->co_requestResponseTm(req); });
 }
 
-folly::coro::Task<void> StressTestClient::co_streamTm(
+folly::coro::Task<void> ThriftStressTestClient::co_streamTm(
     const StreamRequest& req) {
   // time the entire stream from start to finish
   co_await timedExecute([&]() -> folly::coro::Task<void> {
@@ -73,7 +74,8 @@ folly::coro::Task<void> StressTestClient::co_streamTm(
   });
 }
 
-folly::coro::Task<void> StressTestClient::co_sinkTm(const StreamRequest& req) {
+folly::coro::Task<void> ThriftStressTestClient::co_sinkTm(
+    const StreamRequest& req) {
   // time the entire sink from start to finish
   co_await timedExecute([&]() -> folly::coro::Task<void> {
     auto result = co_await client_->co_sinkTm(req);
@@ -93,7 +95,7 @@ folly::coro::Task<void> StressTestClient::co_sinkTm(const StreamRequest& req) {
 }
 
 template <class Fn>
-folly::coro::Task<void> StressTestClient::timedExecute(Fn&& fn) {
+folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
   if (!connectionGood_) {
     co_return;
   }

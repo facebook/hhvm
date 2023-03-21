@@ -199,11 +199,22 @@ ClientFactory::createRocketClient(
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    std::unique_ptr<Client<StressTest>>,
-    createClient,
+    std::vector<std::unique_ptr<StressTestClient>>,
+    createClients,
     folly::EventBase* evb,
-    const ClientConnectionConfig& cfg) {
-  return ClientFactory::createRocketClient(evb, cfg);
+    const ClientConfig& cfg,
+    ClientRpcStats& stats) {
+  std::vector<std::unique_ptr<StressTestClient>> clients;
+  for (size_t connectionIdx = 0; connectionIdx < cfg.numConnectionsPerThread;
+       connectionIdx++) {
+    std::shared_ptr<StressTestAsyncClient> connection =
+        ClientFactory::createRocketClient(evb, cfg.connConfig);
+    for (size_t i = 0; i < cfg.numClientsPerConnection; i++) {
+      clients.emplace_back(
+          std::make_unique<ThriftStressTestClient>(connection, stats));
+    }
+  }
+  return clients;
 }
 
 /* static */ void ClientFactory::useCustomSslContext(

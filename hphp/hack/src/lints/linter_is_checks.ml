@@ -75,22 +75,35 @@ let handler =
             Lints_errors.invalid_null_check pos false ty)
           ~always_subtype:Lints_errors.is_always_true
           ~never_subtype:Lints_errors.is_always_false
-      | (_, p, As ((lhs_ty, _, _), hint, false)) ->
+      | (_, p, As ((lhs_ty, lhs_pos, lhs_expr), hint, false)) ->
         let hint_ty = Tast_env.hint_to_ty env hint in
         let (env, hint_ty) =
           Tast_env.localize_no_subst env ~ignore_errors:true hint_ty
+        in
+        let can_be_captured = Aast_utils.can_be_captured lhs_expr in
+        let always_nonnull p =
+          Lints_errors.redundant_nonnull_assertion
+            ~can_be_captured
+            ~as_pos:p
+            ~child_expr_pos:lhs_pos
+        in
+        let always_subtype p =
+          Lints_errors.as_always_succeeds
+            ~can_be_captured
+            ~as_pos:p
+            ~child_expr_pos:lhs_pos
         in
         trivial_check
           p
           env
           lhs_ty
           hint_ty
-          ~always_nonnull:Lints_errors.redundant_nonnull_assertion
+          ~always_nonnull
             (* D21997525: $x as null is not particularly interesting or common,
              * so we don't warn against it. Only $x is null seems useful.
              *)
           ~never_null:(fun _ _ -> ())
-          ~always_subtype:Lints_errors.as_always_succeeds
+          ~always_subtype
           ~never_subtype:Lints_errors.as_always_fails
       | _ -> ()
   end

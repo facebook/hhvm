@@ -1,0 +1,13 @@
+//// redundant_as2.php
+<?hh
+
+function redundant_as2(int $i): void {
+  $i; // redundant
+  $i = 1 === 2 ? $i : null;
+  $i as nonnull; // essential
+  $i; // redundant
+}
+
+
+There were input 2 patches for 1 files.
+Dropped patch count: 0 (0 overlapping, 0 original not found)

@@ -52,6 +52,7 @@ pub mod validate_method_private_final;
 pub mod validate_module;
 pub mod validate_php_lambda;
 pub mod validate_shape_name;
+pub mod validate_trait_internal;
 pub mod validate_user_attribute_arity;
 pub mod validate_user_attribute_deprecated_static;
 pub mod validate_user_attribute_dynamically_callable;

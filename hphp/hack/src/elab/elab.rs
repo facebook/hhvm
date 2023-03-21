@@ -336,6 +336,8 @@ fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
 
         passes::validate_method_private_final::ValidateMethodPrivateFinalPass::default(),
 
+        passes::validate_trait_internal::ValidateTraitInternalPass::default(),
+
     ];
 
     node.transform(&env, &mut passes);

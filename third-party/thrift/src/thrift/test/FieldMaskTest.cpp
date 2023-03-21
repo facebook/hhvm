@@ -164,32 +164,24 @@ TEST(FieldMaskTest, MaskRefGetMask) {
     Mask m;
     m.includes_ref().emplace()[5] = allMask();
     EXPECT_EQ(getFieldMask(m), &*m.includes_ref());
-    EXPECT_EQ(getFieldMask(m), &*m.includes_ref());
-    EXPECT_EQ(getMapMask(m), nullptr);
     EXPECT_EQ(getMapMask(m), nullptr);
   }
   {
     Mask m;
     m.excludes_ref().emplace()[5] = noneMask();
     EXPECT_EQ(getFieldMask(m), &*m.excludes_ref());
-    EXPECT_EQ(getFieldMask(m), &*m.excludes_ref());
-    EXPECT_EQ(getMapMask(m), nullptr);
     EXPECT_EQ(getMapMask(m), nullptr);
   }
   {
     Mask m;
     m.includes_map_ref().emplace()[5] = allMask();
     EXPECT_EQ(getMapMask(m), &*m.includes_map_ref());
-    EXPECT_EQ(getMapMask(m), &*m.includes_map_ref());
-    EXPECT_EQ(getFieldMask(m), nullptr);
     EXPECT_EQ(getFieldMask(m), nullptr);
   }
   {
     Mask m;
     m.excludes_map_ref().emplace()[5] = noneMask();
     EXPECT_EQ(getMapMask(m), &*m.excludes_map_ref());
-    EXPECT_EQ(getMapMask(m), &*m.excludes_map_ref());
-    EXPECT_EQ(getFieldMask(m), nullptr);
     EXPECT_EQ(getFieldMask(m), nullptr);
   }
 }

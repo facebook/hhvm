@@ -664,6 +664,34 @@ let rec select_non_intr read write exn timeout =
     in
     raise (Unix.Unix_error (Unix.EINVAL, fun_name, fun_params))
 
+let rec restart_on_EINTR f x =
+  try f x with
+  | Unix.Unix_error (Unix.EINTR, _, _) -> restart_on_EINTR f x
+
+let write_non_intr (fd : Unix.file_descr) (buf : bytes) (pos : int) (len : int)
+    : unit =
+  let pos = ref pos in
+  while !pos < len do
+    (* must use Unix.single_write, not Unix.write, because the latter does arbitrarily
+       many OS calls and we don't know which one got the EINTR *)
+    let n = restart_on_EINTR (Unix.single_write fd buf !pos) len in
+    pos := !pos + n
+  done
+
+let read_non_intr (fd : Unix.file_descr) (len : int) : bytes option =
+  let buf = Bytes.create len in
+  let pos = ref 0 in
+  let is_eof = ref false in
+  while !pos < len && not !is_eof do
+    let n = restart_on_EINTR (Unix.read fd buf !pos) len in
+    pos := !pos + n;
+    if n = 0 then is_eof := true
+  done;
+  if !is_eof then
+    None
+  else
+    Some buf
+
 let rec waitpid_non_intr flags pid =
   try Unix.waitpid flags pid with
   | Unix.Unix_error (Unix.EINTR, _, _) -> waitpid_non_intr flags pid

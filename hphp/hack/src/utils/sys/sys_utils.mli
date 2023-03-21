@@ -246,6 +246,18 @@ val select_non_intr :
   float ->
   Unix.file_descr list * Unix.file_descr list * Unix.file_descr list
 
+(** "restart_on_EINTR f x" will do "f x", but if it throws EINTR then it will retry.
+See https://ocaml.github.io/ocamlunix/ocamlunix.html#sec88 for explanation. *)
+val restart_on_EINTR : ('a -> 'b) -> 'a -> 'b
+
+(** Like Unix.write, but ignores EINTR. *)
+val write_non_intr : Unix.file_descr -> bytes -> int -> int -> unit
+
+(** Reads specified number of bytes from the file descriptor through repeated calls to Unix.read.
+Ignores EINTR. If ever a call to Unix.read returns 0 bytes (e.g. end of file),
+then this function will return None. *)
+val read_non_intr : Unix.file_descr -> int -> bytes option
+
 (** Flow uses lwt, which installs a sigchld handler. So the old pattern of
 fork & waitpid will hit an EINTR when the forked process dies and the parent
 gets a sigchld signal.

@@ -14,5 +14,5 @@ fs2 = "0.4"
 libc = "0.2.139"
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-tempfile = "3.3"
+tempfile = "3.4"
 thiserror = "1.0.36"

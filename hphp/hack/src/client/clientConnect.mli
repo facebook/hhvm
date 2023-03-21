@@ -8,7 +8,7 @@
 
 (** This callback is typically provided for env.progress_callback; it prints data with
 a spinner to stderr. *)
-val tty_progress_reporter : unit -> string option -> unit
+val tty_progress_reporter : angery_reaccs_only:bool -> string option -> unit
 
 (** Used solely as an argument to [connect] *)
 type env = {

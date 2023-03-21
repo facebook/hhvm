@@ -58,10 +58,8 @@ type conn = {
   from: string;
 }
 
-let tty_progress_reporter () =
-  let angery_reaccs_only =
-    Tty.supports_emoji () && ClientMessages.angery_reaccs_only ()
-  in
+let tty_progress_reporter ~(angery_reaccs_only : bool) : string option -> unit =
+  let angery_reaccs_only = angery_reaccs_only && Tty.supports_emoji () in
   fun (status : string option) : unit ->
     if Tty.spinner_used () then Tty.print_clear_line stderr;
     match status with

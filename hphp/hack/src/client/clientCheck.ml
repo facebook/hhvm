@@ -156,7 +156,10 @@ let connect ?(use_priority_pipe = false) args =
         log_inference_constraints;
         remote;
         progress_callback =
-          Option.some_if show_spinner (ClientConnect.tty_progress_reporter ());
+          Option.some_if
+            show_spinner
+            (ClientConnect.tty_progress_reporter
+               ~angery_reaccs_only:(ClientMessages.angery_reaccs_only ()));
         do_post_handoff_handshake = true;
         ignore_hh_version;
         save_64bit;

@@ -70,7 +70,7 @@ struct NamedValue {
 
 // A list of named values for the given thrift type.
 template <typename Tag>
-using NamedValues = std::vector<NamedValue<type::standard_type<Tag>>>;
+using NamedValues = std::vector<NamedValue<type::native_type<Tag>>>;
 
 // Adds all the values using the given inserter.
 template <typename C, typename I>
@@ -85,7 +85,7 @@ struct BaseValueGenerator {
   static_assert(type::is_concrete_v<Tag>, "not a concrete type");
 
   using thrift_type = Tag;
-  using standard_type = type::standard_type<Tag>;
+  using native_type = type::native_type<Tag>;
   using Values = NamedValues<Tag>;
 };
 
@@ -107,7 +107,7 @@ template <typename VTag>
 struct ValueGenerator<type::list<VTag>> : BaseValueGenerator<type::list<VTag>> {
   using Base = BaseValueGenerator<type::list<VTag>>;
   using Values = typename Base::Values;
-  using standard_type = typename Base::standard_type;
+  using native_type = typename Base::native_type;
 
   FOLLY_EXPORT static const Values& getKeyValues() {
     static auto* kValues =
@@ -125,12 +125,36 @@ struct ValueGenerator<type::list<VTag>> : BaseValueGenerator<type::list<VTag>> {
   static Values getValues(const typename ValueGenerator<VTag>::Values& values);
 };
 
+// The generator for a service of values.
+template <typename Adapter, typename VTag>
+struct ValueGenerator<type::adapted<Adapter, VTag>>
+    : BaseValueGenerator<type::adapted<Adapter, VTag>> {
+  using Base = BaseValueGenerator<type::adapted<Adapter, VTag>>;
+  using Values = typename Base::Values;
+  using native_type = typename Base::native_type;
+
+  FOLLY_EXPORT static const Values& getKeyValues() {
+    static auto* kValues =
+        new Values(getValues(ValueGenerator<VTag>::getKeyValues()));
+    return *kValues;
+  }
+
+  FOLLY_EXPORT static const Values& getInterestingValues() {
+    static auto* iValues =
+        new Values(getValues(ValueGenerator<VTag>::getInterestingValues()));
+    return *iValues;
+  }
+
+ private:
+  static Values getValues(const typename ValueGenerator<VTag>::Values& values);
+};
+
 // The generator for a set of values.
 template <typename VTag>
 struct ValueGenerator<type::set<VTag>> : BaseValueGenerator<type::set<VTag>> {
   using Base = BaseValueGenerator<type::set<VTag>>;
   using Values = typename Base::Values;
-  using standard_type = typename Base::standard_type;
+  using native_type = typename Base::native_type;
 
   FOLLY_EXPORT static const Values& getKeyValues() {
     static auto* kValues =
@@ -154,7 +178,7 @@ struct ValueGenerator<type::map<KTag, VTag>>
   using Values = typename Base::Values;
   using KeyValues = typename ValueGenerator<KTag>::Values;
   using MappedValues = typename ValueGenerator<VTag>::Values;
-  using standard_type = typename Base::standard_type;
+  using native_type = typename Base::native_type;
 
   FOLLY_EXPORT static const Values& getKeyValues() {
     // To be used as a 'key' all keys and values must also be usable
@@ -183,15 +207,15 @@ template <typename VTag>
 auto ValueGenerator<type::list<VTag>>::getValues(
     const typename ValueGenerator<VTag>::Values& values) -> Values {
   Values result;
-  result.emplace_back(standard_type{}, "empty");
+  result.emplace_back(native_type{}, "empty");
 
   { // All values.
-    standard_type all;
+    native_type all;
     addValues(values, std::back_inserter(all));
     result.emplace_back(std::move(all), "all");
   }
   { // All values x 2.
-    standard_type duplicate;
+    native_type duplicate;
     addValues(values, std::back_inserter(duplicate));
     addValues(values, std::back_inserter(duplicate));
     result.emplace_back(std::move(duplicate), "duplicate");
@@ -199,17 +223,27 @@ auto ValueGenerator<type::list<VTag>>::getValues(
 
   if (values.size() > 1) {
     // Reverse of all interesting values.
-    standard_type reverse;
+    native_type reverse;
     addValues(values, std::back_inserter(reverse));
     std::reverse(reverse.begin(), reverse.end());
     result.emplace_back(std::move(reverse), "reverse");
   }
 
   if (values.size() > 2) { // Otherwise would duplicate interesting or reverse.
-    standard_type frontSwap;
+    native_type frontSwap;
     addValues(values, std::back_inserter(frontSwap));
     std::swap(frontSwap[0], frontSwap[2]);
     result.emplace_back(std::move(frontSwap), "front swap");
+  }
+  return result;
+}
+
+template <typename Adapter, typename VTag>
+auto ValueGenerator<type::adapted<Adapter, VTag>>::getValues(
+    const typename ValueGenerator<VTag>::Values& values) -> Values {
+  Values result;
+  for (const auto& value : values) {
+    result.emplace_back(Adapter::fromThrift(value.value), value.name);
   }
   return result;
 }
@@ -218,14 +252,14 @@ template <typename VTag>
 auto ValueGenerator<type::set<VTag>>::getValues(
     const typename ValueGenerator<VTag>::Values& values) -> Values {
   Values result;
-  result.emplace_back(standard_type(), "empty");
+  result.emplace_back(native_type(), "empty");
 
-  standard_type all;
+  native_type all;
   addValues(values, std::inserter(all, all.begin()));
   result.emplace_back(std::move(all), "all");
 
   for (const auto& value : values) {
-    standard_type single;
+    native_type single;
     single.emplace(value.value);
     result.emplace_back(std::move(single), fmt::format("set({})", value.name));
   }
@@ -236,13 +270,13 @@ template <typename KTag, typename VTag>
 auto ValueGenerator<type::map<KTag, VTag>>::getValues(
     const KeyValues& keys, const MappedValues& values) -> Values {
   Values result;
-  result.emplace_back(standard_type(), "empty");
+  result.emplace_back(native_type(), "empty");
   for (const auto& value : values) {
-    standard_type allKeys;
+    native_type allKeys;
     for (const auto& key : keys) {
       allKeys.emplace(key.value, value.value);
 
-      standard_type single;
+      native_type single;
       single.emplace(key.value, value.value);
       result.emplace_back(std::move(single), key.name + " -> " + value.name);
     }

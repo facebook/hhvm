@@ -43,6 +43,8 @@ using PrimaryTypeTags = boost::mp11::mp_list<
     type::string_t,
     type::binary_t>;
 
+using KeyTypeTags = boost::mp11::mp_list<type::i64_t, type::string_t>;
+
 template <typename C>
 std::set<Protocol> toProtocols(const C& protocolCtorArgs) {
   std::set<Protocol> result;

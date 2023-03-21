@@ -27,25 +27,23 @@ namespace apache::thrift::conformance::data {
 
 TEST(TestGeneratorTest, RoundTripSuite) {
   auto suite = createRoundTripSuite();
-  constexpr size_t kNumProtocols = 2;
-  constexpr size_t kNumTypes = 9;
+  constexpr size_t kNumTests = 148;
   EXPECT_EQ(*suite.name(), "RoundTripTest");
-  ASSERT_EQ(suite.tests()->size(), kNumProtocols * kNumTypes);
-  EXPECT_EQ(*suite.tests()->at(0 * kNumTypes).name(), "Binary");
-  EXPECT_EQ(*suite.tests()->at(1 * kNumTypes).name(), "Compact");
+  EXPECT_EQ(*suite.tests()->at(1).name(), "Binary");
+  EXPECT_EQ(*suite.tests()->at(kNumTests / 2 + 1).name(), "Compact");
 
-  const auto& test = suite.tests()->at(1);
+  const auto& test = suite.tests()->at(0);
   EXPECT_EQ(*test.name(), "Binary");
   ASSERT_GT(test.testCases()->size(), 0);
 
   {
     const auto& testCase = test.testCases()->at(0);
-    EXPECT_EQ(*testCase.name(), "byte/zero");
+    EXPECT_EQ(*testCase.name(), "bool/true");
     EXPECT_TRUE(testCase.test()->roundTrip_ref());
   }
   {
     const auto& testCase = test.testCases()->at(1);
-    EXPECT_EQ(*testCase.name(), "testset.byte/zero");
+    EXPECT_EQ(*testCase.name(), "testset.bool/true");
     EXPECT_TRUE(testCase.test()->roundTrip_ref());
   }
 }

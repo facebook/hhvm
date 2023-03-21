@@ -127,7 +127,13 @@ void parsing_driver::parse_file() {
     // error message above is supposed to reference the parent file name.
     params_.allow_neg_field_keys = true;
     program = included_program;
-    parse_file();
+    try {
+      parse_file();
+    } catch (...) {
+      if (!params_.allow_missing_includes) {
+        throw;
+      }
+    }
 
     size_t num_removed = circular_deps_.erase(path);
     (void)num_removed;
@@ -548,7 +554,15 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
     return;
   }
 
-  std::string path = find_include_file(range.begin, name);
+  std::string path;
+  try {
+    path = find_include_file(range.begin, name);
+  } catch (...) {
+    if (!params_.allow_missing_includes) {
+      throw;
+    }
+    path = name;
+  }
   assert(!path.empty()); // Should have throw an exception if not found.
 
   if (program_cache.find(path) == program_cache.end()) {

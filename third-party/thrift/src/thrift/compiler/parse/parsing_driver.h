@@ -84,6 +84,14 @@ struct parsing_params {
   bool allow_64bit_consts = false;
 
   /**
+   * Whether or not a missing include file will end parsing.
+   *
+   * The resulting program won't be generatable, but this is
+   * useful for codemod tooling.
+   */
+  bool allow_missing_includes = false;
+
+  /**
    * Which experimental features should be allowed.
    *
    * 'all' can be used to enable all experimental features.

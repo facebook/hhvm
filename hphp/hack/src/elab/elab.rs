@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![feature(box_patterns)]
+#![feature(let_chains)]
 
 /// Used to combine multiple types implementing `Pass` into nested `Passes` types
 /// without requiring them to hand write it so :
@@ -326,6 +327,12 @@ fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
         passes::validate_php_lambda::ValidatePhpLambdaPass::default(),
 
         passes::validate_xhp_attribute::ValidateXhpAttributePass::default(),
+        passes::validate_user_attribute_arity::ValidateUserAttributeArityPass::default(),
+        passes::validate_user_attribute_deprecated_static::ValidateUserAttributeDeprecatedStaticPass::default(),
+        passes::validate_user_attribute_entry_point::ValidateUserAttributeEntryPointPass::default(),
+        passes::validate_user_attribute_infer_flows::ValidateUserAttributeInferFlowsPass::default(),
+        passes::validate_user_attribute_memoize::ValidateUserAttributeMemoizePass::default(),
+        passes::validate_user_attribute_soft_internal::ValidateUserAttributeSoftInternalPass::default(),
 
     ];
 

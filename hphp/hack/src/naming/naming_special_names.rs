@@ -270,6 +270,8 @@ pub mod user_attributes {
 
     pub const SOFT: &str = "__Soft";
 
+    pub const SOFT_INTERNAL: &str = "__SoftInternal";
+
     pub const WARN: &str = "__Warn";
 
     pub const MOCK_CLASS: &str = "__MockClass";

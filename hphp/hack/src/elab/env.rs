@@ -26,6 +26,7 @@ bitflags! {
         const CONST_STATIC_PROPS = 1 << 6;
         const ALLOW_MODULE_DECLARATIONS = 1 << 7;
         const ERROR_PHP_LAMBDAS = 1 << 9;
+        const INFER_FLOWS = 1 << 10;
     }
 }
 
@@ -48,6 +49,12 @@ impl Flags {
         flags.set(
             Self::ALLOW_MODULE_DECLARATIONS,
             pso.allow_module_declarations,
+        );
+
+        flags.set(
+            Self::INFER_FLOWS,
+            tco.tco_experimental_features
+                .contains(EXPERIMENTAL_INFER_FLOWS),
         );
 
         flags
@@ -122,4 +129,10 @@ impl Env {
     pub fn const_static_props(&self) -> bool {
         self.flags.contains(Flags::CONST_STATIC_PROPS)
     }
+
+    pub fn infer_flows(&self) -> bool {
+        self.flags.contains(Flags::INFER_FLOWS)
+    }
 }
+
+const EXPERIMENTAL_INFER_FLOWS: &str = "ifc_infer_flows";

@@ -38,31 +38,31 @@ auto find_by_id(const C& fields_id_order, int32_t id) {
 
 } // namespace
 
-bool t_structured::try_append_field(std::unique_ptr<t_field>&& elem) {
-  auto existing = find_by_id(fields_id_order_, elem->id());
+bool t_structured::try_append_field(std::unique_ptr<t_field>& field) {
+  auto existing = find_by_id(fields_id_order_, field->id());
   if (existing.second) {
     return false;
   }
 
-  if (!elem->name().empty()) {
-    fields_by_name_.put(*elem);
+  if (!field->name().empty()) {
+    fields_by_name_.put(*field);
   }
-  fields_id_order_.emplace(existing.first, elem.get());
+  fields_id_order_.emplace(existing.first, field.get());
 
-  fields_raw_.push_back(elem.get());
+  fields_raw_.push_back(field.get());
   fields_raw_id_order_.insert(
-      find_by_id(fields_raw_id_order_, elem->id()).first, elem.get());
+      find_by_id(fields_raw_id_order_, field->id()).first, field.get());
 
   // Take ownership.
-  fields_.push_back(std::move(elem));
+  fields_.push_back(std::move(field));
   return true;
 }
 
-void t_structured::append_field(std::unique_ptr<t_field> elem) {
-  if (!try_append_field(std::move(elem))) {
+void t_structured::append_field(std::unique_ptr<t_field> field) {
+  if (!try_append_field(field)) {
     throw std::runtime_error(
-        "Field identifier " + std::to_string(elem->get_key()) + " for \"" +
-        elem->get_name() + "\" has already been used");
+        "Field identifier " + std::to_string(field->get_key()) + " for \"" +
+        field->get_name() + "\" has already been used");
   }
 }
 
@@ -71,24 +71,24 @@ const t_field* t_structured::get_field_by_id(int32_t id) const {
   return existing.second ? *existing.first : nullptr;
 }
 
-void t_structured::append(std::unique_ptr<t_field> elem) {
-  if (try_append_field(std::move(elem))) {
+void t_structured::append(std::unique_ptr<t_field> field) {
+  if (try_append_field(field)) {
     return;
   }
 
-  if (elem->get_key() != 0) {
+  if (field->get_key() != 0) {
     throw std::runtime_error(
-        "Field identifier " + std::to_string(elem->get_key()) + " for \"" +
-        elem->get_name() + "\" has already been used");
+        "Field identifier " + std::to_string(field->get_key()) + " for \"" +
+        field->get_name() + "\" has already been used");
   }
 
   // TODO(afuller): Figure out why some code relies on adding multiple id:0
   // fields, fix the code, and remove this hack.
-  if (!elem->get_name().empty()) {
-    fields_by_name_.put(*elem);
+  if (!field->get_name().empty()) {
+    fields_by_name_.put(*field);
   }
-  fields_raw_.push_back(elem.get());
-  fields_.push_back(std::move(elem));
+  fields_raw_.push_back(field.get());
+  fields_.push_back(std::move(field));
 }
 
 } // namespace compiler

@@ -641,7 +641,7 @@ void parsing_driver::set_fields(t_structured& s, t_field_list&& fields) {
   t_field_id next_id = -1;
   for (auto& field : fields) {
     maybe_allocate_field_id(next_id, *field);
-    if (!s.try_append_field(std::move(field))) {
+    if (!s.try_append_field(field)) {
       diags_.error(
           *field,
           "Field id {} for `{}` has already been used.",

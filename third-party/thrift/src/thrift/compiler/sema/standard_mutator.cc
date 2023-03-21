@@ -160,7 +160,7 @@ void mutate_inject_metadata_fields(
     std::unique_ptr<t_field> cloned_field = field.clone_DO_NOT_USE();
     cloned_field->set_injected_id(injected_id);
     ctx.check(
-        node.try_append_field(std::move(cloned_field)),
+        node.try_append_field(cloned_field),
         "Field id `{}` is already used in `{}`.",
         field.id(),
         node.name());

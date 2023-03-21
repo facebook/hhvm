@@ -42,9 +42,11 @@ class t_structured : public t_type {
  public:
   // Appends the given field, throwing an std::runtime_error on a
   // conflict with an existing field.
-  void append_field(std::unique_ptr<t_field> elem);
-  // Tries to append the given field, the argument is untouched on failure.
-  bool try_append_field(std::unique_ptr<t_field>&& elem);
+  void append_field(std::unique_ptr<t_field> field);
+
+  // Tries to append the given field, moving the argument on success or
+  // leaving it as is on failure.
+  bool try_append_field(std::unique_ptr<t_field>& field);
 
   // Creates a new field using the given arguments, appends it, and returns a
   // mutable reference to the newly create (and internally owned) field

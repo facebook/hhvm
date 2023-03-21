@@ -70,7 +70,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
                     struct1=struct1,),
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="extend.ExtendTestService",
+                uriOrName="extend.ExtendTestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -106,7 +106,6 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_args(
                     struct1=struct1,),
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_result,
-                uri_or_name="extend.ExtendTestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

@@ -68,7 +68,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 s.thrift_types._fbthrift_TestService_test_args(),
                 s.thrift_types._fbthrift_TestService_test_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="s.TestService",
+                uriOrName="s.TestService",
                 rpc_options=rpc_options,
             )
             if _fbthrift_resp.ex is not None:
@@ -97,7 +97,6 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 "test",
                 s.thrift_types._fbthrift_TestService_test_args(),
                 s.thrift_types._fbthrift_TestService_test_result,
-                uri_or_name="s.TestService",
                 rpc_options=rpc_options,
             )
             if _fbthrift_resp.ex is not None:

@@ -27,7 +27,7 @@ from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
 from thrift.py3.common cimport cRpcOptions, RpcOptions
 
-cdef string blank_interaction = b""
+cdef string blank_interaction = "".encode('ascii')
 
 cdef class SyncClient:
     def __init__(SyncClient self, RequestChannel channel):
@@ -60,8 +60,6 @@ cdef class SyncClient:
         string function_name,
         args,
         response_cls,
-        *,
-        string uri_or_name = b"",
         RpcOptions rpc_options = None,
     ):
         if not self._omni_client:
@@ -80,7 +78,7 @@ cdef class SyncClient:
                     service_name,
                     function_name,
                     cmove(args_ciobuf),
-                    cmove(cData(function_name, FunctionQualifier.OneWay, uri_or_name, InteractionMethodPosition.None, blank_interaction)),
+                    cmove(cData(function_name, FunctionQualifier.OneWay, blank_interaction, InteractionMethodPosition.None, blank_interaction)),
                     self._persistent_headers,
                     cmove(c_rpc_options),
                 )
@@ -90,7 +88,6 @@ cdef class SyncClient:
                     service_name,
                     function_name,
                     cmove(args_ciobuf),
-                    cmove(cData(function_name, FunctionQualifier.Unspecified, uri_or_name, InteractionMethodPosition.None, blank_interaction)),
                     self._persistent_headers,
                     cmove(c_rpc_options),
                 )

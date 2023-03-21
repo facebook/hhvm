@@ -38,9 +38,7 @@ class SyncClient:
         function_name: str,
         args: TStruct,
         response_cls: typing.Optional[typing.Type[TStructOrUnion]],
-        *,
-        uri_or_name: str = ...,
-        rpc_options: typing.Optional[RpcOptions] = ...,
+        rpc_options: typing.Optional[RpcOptions],
     ) -> TStructOrUnion: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     def get_persistent_headers(self) -> typing.Mapping[str, str]: ...

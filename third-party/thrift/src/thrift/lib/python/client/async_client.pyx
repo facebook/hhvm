@@ -35,6 +35,8 @@ from thrift.python.serializer import serialize_iobuf, deserialize
 from thrift.python.stream cimport ClientBufferedStream
 from thrift.py3.common cimport cRpcOptions, RpcOptions
 
+blank_uri = "".encode('ascii')
+
 @cython.auto_pickle(False)
 cdef class AsyncClient:
     def __cinit__(AsyncClient self):
@@ -112,15 +114,15 @@ cdef class AsyncClient:
         *,
         FunctionQualifier qualifier = FunctionQualifier.Unspecified,
         InteractionMethodPosition interaction_position = InteractionMethodPosition.None,
-        string interaction_name = b"",
+        string interaction_name = "".encode('ascii'),
         AsyncClient created_interaction = None,
-        string uri_or_name = b"",
+        string uriOrName = "".encode('ascii'),
         RpcOptions rpc_options = None,
     ):
         # Required because the python async model means that we can't have an async function that returns a future
         if interaction_position == InteractionMethodPosition.Factory and created_interaction is not None:
             await asyncio.shield(created_interaction._connect_future)
-        return await self._send_request_inner(service_name, function_name, args, response_cls, qualifier, interaction_position, interaction_name, created_interaction, uri_or_name, rpc_options)
+        return await self._send_request_inner(service_name, function_name, args, response_cls, qualifier, interaction_position, interaction_name, created_interaction, uriOrName, rpc_options)
 
     def _send_request_inner(
         AsyncClient self,
@@ -130,9 +132,9 @@ cdef class AsyncClient:
         response_cls,
         FunctionQualifier qualifier = FunctionQualifier.Unspecified,
         InteractionMethodPosition interaction_position = InteractionMethodPosition.None,
-        string interaction_name = b"",
+        string interaction_name = "".encode('ascii'),
         AsyncClient created_interaction = None,
-        string uri_or_name = b"",
+        string uriOrName = "".encode('ascii'),
         RpcOptions rpc_options = None,
     ):
         protocol = deref(self._omni_client).getChannelProtocolId()
@@ -159,7 +161,7 @@ cdef class AsyncClient:
                 service_name,
                 function_name,
                 args_iobuf.c_clone(),
-                cmove(cData(function_name, FunctionQualifier.OneWay, uri_or_name, interaction_position, interaction_name)),
+                cmove(cData(function_name, FunctionQualifier.OneWay, uriOrName, interaction_position, interaction_name)),
                 self._persistent_headers,
                 cmove(c_rpc_options),
             )
@@ -175,7 +177,7 @@ cdef class AsyncClient:
                     service_name,
                     function_name,
                     args_iobuf.c_clone(),
-                    cmove(cData(function_name, qualifier, uri_or_name, interaction_position, interaction_name)),
+                    cmove(cData(function_name, qualifier, uriOrName, interaction_position, interaction_name)),
                     self._persistent_headers,
                     cmove(c_rpc_options),
                     rpc_kind,

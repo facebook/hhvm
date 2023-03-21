@@ -68,7 +68,7 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
                     int1=int1,),
                 python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="hsmodule.HsTestService",
+                uriOrName="hsmodule.HsTestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -104,7 +104,6 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
                 python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_args(
                     int1=int1,),
                 python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_result,
-                uri_or_name="hsmodule.HsTestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

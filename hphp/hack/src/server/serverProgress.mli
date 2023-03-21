@@ -7,18 +7,28 @@
  *
  *)
 
-(** These are human-readable messages, shown at command-line and within the editor. *)
+(** All functions in this file will throw unless you've already called set_root
+at the start of your process. *)
+val set_root : Path.t -> unit
+
+(** use this in tests, instead of set_root,
+to disable progress-logging and error-streaming. *)
+val disable : unit -> unit
+
+(** Progress is a file in /tmp/hh_server/<repo>.progress.json which is written
+by monitor+server. It lives from the moment the monitor starts up until the
+moment it finally dies or is killed. You should only read it by the `read`
+call, since that protects against races. Anyone at any time can read this
+file to learn the current state. The state is represented solely as a
+human-readable string to be shown to the user in the CLI or VSCode status bar.
+It specifically shouldn't be acted upon in code -- it's slightly handwavey
+in places (e.g. there's an interval from when a server dies until the monitor
+realizes that fact where attempting to read will say "unknown"). *)
 type t = {
   pid: int;
   message: string;  (** e.g. "typechecking 5/15 files" *)
   timestamp: float;
 }
-
-(** All other functions will throw until you've set root *)
-val set_root : Path.t -> unit
-
-(** use this in tests, instead of set_root, to disable progress-logging *)
-val disable : unit -> unit
 
 val read : unit -> t
 
@@ -33,5 +43,5 @@ val write_percentage :
   extra:string option ->
   unit
 
-(** Call this upon shutdown to delete the progress file *)
+(** Call this upon monitor shutdown to delete the progress file *)
 val try_delete : unit -> unit

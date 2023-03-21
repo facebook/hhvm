@@ -8,9 +8,11 @@
 
 #pragma once
 
+#include <folly/io/async/test/MockAsyncTransport.h>
 #include <folly/portability/GMock.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <proxygen/lib/transport/test/MockAsyncTransportCertificate.h>
 
 namespace proxygen {
 
@@ -267,7 +269,10 @@ class MockHTTPTransaction : public HTTPTransaction {
         .WillRepeatedly(testing::ReturnRef(mockCodec_));
     EXPECT_CALL(mockTransport_, getSetupTransportInfoNonConst())
         .WillRepeatedly(testing::ReturnRef(setupTransportInfo_));
-
+    EXPECT_CALL(mockTransport_, getUnderlyingTransportNonConst())
+        .WillRepeatedly(testing::Return(&mockAsyncTransport_));
+    EXPECT_CALL(mockAsyncTransport_, getPeerCertificate())
+        .WillRepeatedly(testing::Return(&mockPeerCertificate_));
     // Some tests unfortunately require a half-mocked HTTPTransaction.
     ON_CALL(*this, setHandler(testing::_))
         .WillByDefault(testing::Invoke([this](HTTPTransactionHandler* handler) {
@@ -387,6 +392,8 @@ class MockHTTPTransaction : public HTTPTransaction {
         .WillRepeatedly(testing::Return(protocol));
   }
   testing::NiceMock<MockHTTPTransactionTransport> mockTransport_;
+  testing::NiceMock<folly::test::MockAsyncTransport> mockAsyncTransport_;
+  testing::NiceMock<MockAsyncTransportCertificate> mockPeerCertificate_;
   const folly::SocketAddress defaultAddress_;
   MockHTTPCodec mockCodec_;
   wangle::TransportInfo setupTransportInfo_;

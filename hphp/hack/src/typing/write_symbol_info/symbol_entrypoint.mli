@@ -17,6 +17,7 @@ val index_files :
 val go :
   MultiWorker.worker list option ->
   Provider_context.t ->
+  referenced_file:string option ->
   namespace_map:(string * string) list ->
   gen_sym_hash:bool ->
   ownership:bool ->

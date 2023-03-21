@@ -42,7 +42,9 @@ let compute_sym_hash path symbols =
   let hash = List.fold ~init:(Md5.digest_string "") ~f symbols in
   concat hash path
 
-let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
+let create
+    ctx Indexable.{ path; fanout } ~gen_sym_hash ~sym_path ~root_path ~hhi_path
+    =
   let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
   let path_str =
     Relative_path.to_absolute_with_prefix
@@ -60,7 +62,8 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
   in
   let symbol_occs = IdentifySymbolService.all_symbols ctx tast in
   let symbols =
-    List.map symbol_occs ~f:(fun occ -> { occ; def = Sym_def.resolve ctx occ })
+    List.map symbol_occs ~f:(fun occ ->
+        { occ; def = Sym_def.resolve ctx occ ~sym_path })
   in
   let sym_hash =
     if gen_sym_hash then
@@ -69,3 +72,13 @@ let create ctx Indexable.{ path; fanout } ~gen_sym_hash ~root_path ~hhi_path =
       None
   in
   { path = path_str; tast; source_text; cst; symbols; sym_hash; fanout }
+
+let referenced t =
+  let path sym =
+    match sym.def with
+    | Some Sym_def.{ path = Some path; _ }
+      when Relative_path.(is_root (prefix path)) ->
+      Some (Relative_path.to_absolute path)
+    | _ -> None
+  in
+  List.filter_map t.symbols ~f:path |> SSet.of_list

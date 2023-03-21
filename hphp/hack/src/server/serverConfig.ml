@@ -419,6 +419,8 @@ let load ~silent options : t * ServerLocalConfig.t =
       ?symbol_write_include_hhi:(bool_opt "symbol_write_include_hhi" config)
       ?symbol_write_sym_hash_in:(string_opt "symbol_write_sym_hash_in" config)
       ?symbol_write_exclude_out:(string_opt "symbol_write_exclude_out" config)
+      ?symbol_write_referenced_out:
+        (string_opt "symbol_write_referenced_out" config)
       ?symbol_write_sym_hash_out:(bool_opt "symbol_write_sym_hash_out" config)
       ?po_disallow_func_ptrs_in_constants:
         (bool_opt "disallow_func_ptrs_in_constants" config)

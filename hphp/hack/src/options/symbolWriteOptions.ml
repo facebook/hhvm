@@ -30,6 +30,8 @@ let sym_hash_in t = t.GlobalOptions.symbol_write_sym_hash_in
 
 let sym_exclude_out t = t.GlobalOptions.symbol_write_exclude_out
 
+let referenced_out t = t.GlobalOptions.symbol_write_referenced_out
+
 let sym_hash_out t = t.GlobalOptions.symbol_write_sym_hash_out
 
 let default = GlobalOptions.default

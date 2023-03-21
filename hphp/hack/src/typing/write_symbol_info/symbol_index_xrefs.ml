@@ -128,7 +128,7 @@ let process_gconst_xref symbol_def pos (xrefs, prog) =
 
 let process_member_xref
     ctx member pos mem_decl_fun ref_fun ?receiver_type (xrefs, prog) =
-  let Sym_def.{ name; full_name; kind } = member in
+  let Sym_def.{ name; full_name; kind; _ } = member in
   match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, prog)
   | con_name :: _mem_name ->

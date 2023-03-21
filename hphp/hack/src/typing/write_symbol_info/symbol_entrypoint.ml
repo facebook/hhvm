@@ -19,22 +19,39 @@ module JobReturn = struct
     elapsed: float;
     hashes: Md5.Set.t;
     reindexed: SSet.t;
+    referenced: SSet.t; (* set of files referenced by the indexed files *)
   }
 
   let neutral =
-    { elapsed = 0.0; hashes = Md5.Set.empty; reindexed = SSet.empty }
+    {
+      elapsed = 0.0;
+      hashes = Md5.Set.empty;
+      reindexed = SSet.empty;
+      referenced = SSet.empty;
+    }
 
   let merge t1 t2 =
     {
       elapsed = t1.elapsed +. t2.elapsed;
       hashes = Md5.Set.union t1.hashes t2.hashes;
       reindexed = SSet.union t1.reindexed t2.reindexed;
+      referenced = SSet.union t1.referenced t2.referenced;
     }
 end
 
 let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
   Hh_logger.log "%s %dm%ds" s tm_min tm_sec
+
+let write_referenced referenced output_file =
+  let open Out_channel in
+  let oc = create output_file in
+  SSet.iter
+    (fun str ->
+      output_string oc str;
+      newline oc)
+    referenced;
+  close oc
 
 let write_file out_dir num_tasts json_chunks =
   let (_out_file, channel) =
@@ -96,7 +113,12 @@ let write_json
         file_info.File_info.sym_hash)
     |> Md5.Set.of_list
   in
-  JobReturn.{ elapsed; hashes; reindexed = SSet.empty }
+  JobReturn.{ elapsed; hashes; reindexed = SSet.empty; referenced = SSet.empty }
+
+let references_from_files_info files_info =
+  List.map files_info ~f:File_info.referenced
+  |> List.reduce ~f:SSet.union
+  |> Option.value ~default:SSet.empty
 
 let recheck_job
     (ctx : Provider_context.t)
@@ -106,6 +128,7 @@ let recheck_job
     ~(gen_sym_hash : bool)
     ~(incremental : Sym_hash.t option)
     (ownership : bool)
+    ~(gen_references : bool)
     (_ : JobReturn.t)
     (progress : Indexable.t list) : JobReturn.t =
   let start_time = Unix.gettimeofday () in
@@ -113,7 +136,13 @@ let recheck_job
   let files_info =
     List.map
       progress
-      ~f:(File_info.create ctx ~root_path ~hhi_path ~gen_sym_hash)
+      ~f:
+        (File_info.create
+           ctx
+           ~root_path
+           ~hhi_path
+           ~gen_sym_hash
+           ~sym_path:gen_references)
   in
   let reindex f =
     match (f.File_info.fanout, incremental, f.File_info.sym_hash) with
@@ -131,7 +160,13 @@ let recheck_job
     in
     List.filter_map to_reindex ~f |> SSet.of_list
   in
-  JobReturn.{ res with reindexed = fanout_reindexed }
+  let referenced =
+    if gen_references then
+      references_from_files_info files_info
+    else
+      SSet.empty
+  in
+  JobReturn.{ res with reindexed = fanout_reindexed; referenced }
 
 let index_files ctx ~out_dir ~files =
   let idx = List.map files ~f:Indexable.from_file in
@@ -142,6 +177,7 @@ let index_files ctx ~out_dir ~files =
     "hhi"
     ~gen_sym_hash:false
     ~incremental:None
+    ~gen_references:false
     false
     JobReturn.neutral
     idx
@@ -151,6 +187,7 @@ let index_files ctx ~out_dir ~files =
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
+    ~(referenced_file : string option)
     ~(namespace_map : (string * string) list)
     ~(gen_sym_hash : bool)
     ~(ownership : bool)
@@ -165,6 +202,7 @@ let go
     | None -> 1
   in
   let start_time = Unix.gettimeofday () in
+  let gen_references = Option.is_some referenced_file in
   let jobs =
     MultiWorker.call
       workers
@@ -176,6 +214,7 @@ let go
            hhi_path
            ~gen_sym_hash
            ~incremental
+           ~gen_references
            ownership)
       ~merge:JobReturn.merge
       ~next:(Bucket.make ~num_workers ~max_size:115 files)
@@ -189,7 +228,7 @@ let go
     gen_global_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
   in
   write_file out_dir 1 global_facts;
-  SSet.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
+  Option.iter referenced_file ~f:(write_referenced jobs.JobReturn.referenced);
   let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in

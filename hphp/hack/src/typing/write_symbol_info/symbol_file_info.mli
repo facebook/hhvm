@@ -30,10 +30,16 @@ type t = private {
   fanout: bool;
 }
 
+(** all the root (i.e. non-hhi) files referenced by t through xrefs. t
+   must have been created using [sym_path] set to [true], otherwise
+   the result set is empty *)
+val referenced : t -> SSet.t
+
 val create :
   Provider_context.t ->
   Indexable.t ->
   gen_sym_hash:bool ->
+  sym_path:bool ->
   root_path:string ->
   hhi_path:string ->
   t

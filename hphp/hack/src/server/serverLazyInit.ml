@@ -1006,6 +1006,7 @@ let write_symbol_info
   let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
   let paths = env.swriteopt.symbol_write_index_paths in
   let paths_file = env.swriteopt.symbol_write_index_paths_file in
+  let referenced_file = env.swriteopt.symbol_write_referenced_out in
   let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
   let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
   let incremental = env.swriteopt.symbol_write_sym_hash_in in
@@ -1068,6 +1069,7 @@ let write_symbol_info
     Symbol_entrypoint.go
       genv.workers
       ctx
+      ~referenced_file
       ~namespace_map
       ~gen_sym_hash
       ~ownership

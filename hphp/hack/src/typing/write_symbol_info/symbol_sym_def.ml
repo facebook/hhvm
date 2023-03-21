@@ -13,13 +13,20 @@ type t = {
   kind: SymbolDefinition.kind;
   name: string;
   full_name: string;
+  path: Relative_path.t option;
 }
 
-let resolve ctx occ =
+let resolve ctx occ ~sym_path =
   Option.map
     (ServerSymbolDefinition.go ctx None occ)
-    ~f:(fun SymbolDefinition.{ name; full_name; kind; _ } ->
-      { kind; name; full_name })
+    ~f:(fun SymbolDefinition.{ name; full_name; kind; pos; _ } ->
+      let path =
+        if sym_path then
+          Some (Pos.filename pos)
+        else
+          None
+      in
+      { kind; name; full_name; path })
 
 let get_class_by_name ctx class_ =
   match ServerSymbolDefinition.get_class_by_name ctx class_ with

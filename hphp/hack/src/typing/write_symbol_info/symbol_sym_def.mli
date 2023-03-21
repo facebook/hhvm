@@ -16,10 +16,14 @@ type t = {
   kind: SymbolDefinition.kind;
   name: string;
   full_name: string;
+  path: Relative_path.t option;
 }
 
 val resolve :
-  Provider_context.t -> Relative_path.t SymbolOccurrence.t -> t option
+  Provider_context.t ->
+  Relative_path.t SymbolOccurrence.t ->
+  sym_path:bool ->
+  t option
 
 val get_class_by_name :
   Provider_context.t -> string -> [ `None | `Enum | `Class of Nast.class_ ]

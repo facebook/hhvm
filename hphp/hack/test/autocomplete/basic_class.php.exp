@@ -1,2 +1,2 @@
 frob
-  (function(): void)
+  function(): void

@@ -283,8 +283,8 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) =
           fun r ->
             begin
               let open AutocompleteTypes in
-              Printf.printf "%s\n" r.res_name;
-              Printf.printf "  %s\n" r.res_ty;
+              Printf.printf "%s\n" r.res_label;
+              Printf.printf "  %s\n" r.res_detail;
               match r.res_documentation with
               | Some doc ->
                 List.iter (String.split_lines doc) ~f:(fun line ->

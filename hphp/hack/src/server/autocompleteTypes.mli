@@ -25,16 +25,19 @@ type func_details_result = {
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
   (* The position of the declaration we're returning. *)
-  res_pos: Pos.absolute;
-  (* The position in the opened file that we're replacing with res_name. *)
+  res_decl_pos: Pos.absolute;
+  (* The position in the opened file that we're replacing with res_insert_text. *)
   res_replace_pos: Ide_api_types.range;
   (* If we're autocompleting a method, store the class name of the variable
         we're calling the method on (for doc block fallback in autocomplete
         resolution). *)
   res_base_class: string option;
-  res_ty: string;
-  res_name: string;
-  (* Without trimming for namespaces *)
+  (* These strings correspond to the LSP fields in CompletionItem. *)
+  res_label: string;
+  res_insert_text: string;
+  res_detail: string;
+  res_filter_text: string option;
+  (* res_fullname is res_label without trimming the namespace. *)
   res_fullname: string;
   res_kind: SearchUtils.si_kind;
   func_details: func_details_result option;

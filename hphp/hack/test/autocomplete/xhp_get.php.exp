@@ -3,4 +3,4 @@
 :color
   ?string
 genRender
-  (function(): _)
+  function(): _

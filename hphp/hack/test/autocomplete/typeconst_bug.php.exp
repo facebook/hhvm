@@ -1,2 +1,2 @@
 test
-  (function(): C::Z)
+  function(): C::Z

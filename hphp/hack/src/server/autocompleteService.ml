@@ -131,9 +131,9 @@ let autocomplete_result_to_json res =
         ]
     | None -> Hh_json.JSON_Null
   in
-  let name = res.res_name in
-  let pos = res.res_pos in
-  let ty = res.res_ty in
+  let name = res.res_label in
+  let pos = res.res_decl_pos in
+  let ty = res.res_detail in
   Hh_json.JSON_Object
     [
       ("name", Hh_json.JSON_String name);
@@ -243,7 +243,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
       if (not have_prefix) || String.is_prefix code ~prefix then
         let ty = Phase.decl ty in
         let pos = get_pos_for env ty in
-        let res_name =
+        let res_insert_text =
           if autocomplete_context.is_before_apostrophe then
             rstrip code "'"
           else
@@ -251,15 +251,17 @@ let autocomplete_shape_key autocomplete_context env fields id =
         in
         let complete =
           {
-            res_pos = pos;
+            res_decl_pos = pos;
             res_replace_pos = replace_pos_of_id id;
             res_base_class = None;
-            res_ty = kind_to_string kind;
-            res_name;
+            res_detail = kind_to_string kind;
+            res_insert_text;
+            res_label = res_insert_text;
             res_fullname = code;
             res_kind = kind;
             func_details = get_func_details_for env ty;
             res_documentation = None;
+            res_filter_text = None;
           }
         in
         add_res complete
@@ -278,19 +280,28 @@ let autocomplete_member ~is_static env class_ cid id =
     in
 
     let add kind (name, ty) =
-      let res_ty = Tast_env.print_decl_ty env ty in
+      let res_detail =
+        match Typing_defs.get_node ty with
+        | Tfun _ ->
+          String_utils.rstrip
+            (String_utils.lstrip (Tast_env.print_decl_ty env ty) "(")
+            ")"
+        | _ -> Tast_env.print_decl_ty env ty
+      in
       let ty = Phase.decl ty in
       let complete =
         {
-          res_pos = get_pos_for env ty;
+          res_decl_pos = get_pos_for env ty;
           res_replace_pos = replace_pos_of_id id;
           res_base_class = Some (Cls.name class_);
-          res_ty;
-          res_name = name;
+          res_detail;
+          res_label = name;
+          res_insert_text = name;
           res_fullname = name;
           res_kind = kind;
           func_details = get_func_details_for env ty;
           res_documentation = None;
+          res_filter_text = None;
         }
       in
       add_res complete
@@ -387,19 +398,21 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
                existing_attr_names)
         then
           let kind = SearchUtils.SI_Property in
-          let res_ty = Tast_env.print_decl_ty env ty in
+          let res_detail = Tast_env.print_decl_ty env ty in
           let ty = Phase.decl ty in
           let complete =
             {
-              res_pos = get_pos_for env ty;
+              res_decl_pos = get_pos_for env ty;
               res_replace_pos = replace_pos_of_id id;
               res_base_class = Some (Cls.name class_);
-              res_ty;
-              res_name = lstrip name ":";
+              res_detail;
+              res_label = lstrip name ":";
+              res_insert_text = lstrip name ":";
               res_fullname = name;
               res_kind = kind;
               func_details = get_func_details_for env ty;
               res_documentation = None;
+              res_filter_text = None;
             }
           in
           add_res complete)
@@ -422,20 +435,28 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
       let ty = Phase.locl attr_ty in
       let complete =
         {
-          res_pos = get_pos_for env ty;
+          res_decl_pos = get_pos_for env ty;
           res_replace_pos = replace_pos_of_id id_id;
           res_base_class = None;
-          res_ty = kind_to_string kind;
-          res_name = "true";
+          res_detail = kind_to_string kind;
+          res_label = "true";
+          res_insert_text = "true";
           res_fullname = "true";
           res_kind = kind;
           func_details = None;
           res_documentation = None;
+          res_filter_text = None;
         }
       in
 
       add_res complete;
-      add_res { complete with res_name = "false"; res_fullname = "false" }
+      add_res
+        {
+          complete with
+          res_label = "false";
+          res_insert_text = "false";
+          res_fullname = "false";
+        }
     )
   end
 
@@ -470,15 +491,17 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
       let ty = Phase.locl ty in
       let complete =
         {
-          res_pos = get_pos_for env ty;
+          res_decl_pos = get_pos_for env ty;
           res_replace_pos = replace_pos_of_id id_id;
           res_base_class = None;
-          res_ty = kind_to_string kind;
-          res_name = name;
+          res_detail = kind_to_string kind;
+          res_label = name;
+          res_insert_text = name;
           res_fullname = name;
           res_kind = kind;
           func_details = get_func_details_for env ty;
           res_documentation = None;
+          res_filter_text = None;
         }
       in
       add_res complete
@@ -545,15 +568,17 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
 
                   let complete =
                     {
-                      res_pos = get_pos_for env dty;
+                      res_decl_pos = get_pos_for env dty;
                       res_replace_pos = replace_pos_of_id id_id;
                       res_base_class;
-                      res_ty = kind_to_string kind;
-                      res_name = name;
+                      res_detail = kind_to_string kind;
+                      res_label = name;
+                      res_insert_text = name;
                       res_fullname = name;
                       res_kind = kind;
                       func_details = get_func_details_for env dty;
                       res_documentation = None;
+                      res_filter_text = None;
                     }
                   in
                   add_res complete))
@@ -615,22 +640,24 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
     List.iter
       (compatible_enum_class_consts env cls expected_ty)
       ~f:(fun (name, cc) ->
-        let res_ty =
+        let res_detail =
           Tast_env.print_decl_ty env (unwrap_enum_memberof cc.cc_type)
         in
         let ty = Phase.decl cc.cc_type in
         let kind = SearchUtils.SI_ClassConstant in
         let complete =
           {
-            res_pos = get_pos_for env ty;
+            res_decl_pos = get_pos_for env ty;
             res_replace_pos = replace_pos_of_id pos_labelname;
             res_base_class = Some (Cls.name cls);
-            res_ty;
-            res_name = name;
+            res_detail;
+            res_label = name;
+            res_insert_text = name;
             res_fullname = name;
             res_kind = kind;
             func_details = get_func_details_for env ty;
             res_documentation = None;
+            res_filter_text = None;
           }
         in
         add_res complete)
@@ -733,15 +760,17 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
           if String.is_prefix ~prefix name then
             let complete =
               {
-                res_pos = Pos.to_absolute Pos.none;
+                res_decl_pos = Pos.to_absolute Pos.none;
                 res_replace_pos = replace_pos_of_id sid;
                 res_base_class = Some cc.cc_origin;
-                res_ty = "const type";
-                res_name = name;
+                res_detail = "const type";
+                res_label = name;
+                res_insert_text = name;
                 res_fullname = name;
                 res_kind = SI_ClassConstant;
                 func_details = None;
                 res_documentation = None;
+                res_filter_text = None;
               }
             in
             add_res complete)
@@ -781,15 +810,17 @@ let autocomplete_shape_literal_in_call
     let lty = Phase.locl ty in
     let complete =
       {
-        res_pos = get_pos_for env lty;
+        res_decl_pos = get_pos_for env lty;
         res_replace_pos = replace_pos_of_id (pos, key);
         res_base_class = None;
-        res_ty = kind_to_string kind;
-        res_name = key;
+        res_detail = kind_to_string kind;
+        res_label = key;
+        res_insert_text = key;
         res_fullname = key;
         res_kind = kind;
         func_details = get_func_details_for env lty;
         res_documentation = None;
+        res_filter_text = None;
       }
     in
     add_res complete
@@ -834,15 +865,17 @@ let autocomplete_shape_literal_in_call
 let add_builtin_attribute_result replace_pos ~doc ~name : unit =
   let complete =
     {
-      res_pos = Pos.to_absolute Pos.none;
+      res_decl_pos = Pos.to_absolute Pos.none;
       res_replace_pos = replace_pos;
       res_base_class = None;
-      res_ty = "built-in attribute";
-      res_name = name;
+      res_detail = "built-in attribute";
+      res_label = name;
+      res_insert_text = name;
       res_fullname = name;
       res_kind = SI_Class;
       func_details = None;
       res_documentation = Some doc;
+      res_filter_text = None;
     }
   in
   add_res complete
@@ -889,15 +922,17 @@ let autocomplete_overriding_method env m : unit =
         ~f:(fun (name, ce) ->
           let complete =
             {
-              res_pos = Pos.to_absolute Pos.none;
+              res_decl_pos = Pos.to_absolute Pos.none;
               res_replace_pos = replace_pos_of_id m.m_name;
               res_base_class = Some ce.ce_origin;
-              res_ty = "method name";
-              res_name = name;
+              res_detail = "method name";
+              res_label = name;
+              res_insert_text = name;
               res_fullname = name;
               res_kind = SI_ClassMethod;
               func_details = None;
               res_documentation = None;
+              res_filter_text = None;
             }
           in
           add_res complete)
@@ -958,15 +993,17 @@ let add_enum_const_result env pos replace_pos prefix const_name =
   let key = prefix ^ const_name in
   let complete =
     {
-      res_pos = get_pos_for env lty;
+      res_decl_pos = get_pos_for env lty;
       res_replace_pos = replace_pos;
       res_base_class = None;
-      res_ty = kind_to_string kind;
-      res_name = key;
+      res_detail = kind_to_string kind;
+      res_label = key;
+      res_insert_text = key;
       res_fullname = key;
       res_kind = kind;
       func_details = get_func_details_for env lty;
       res_documentation = None;
+      res_filter_text = None;
     }
   in
   add_res complete
@@ -1151,14 +1188,14 @@ let find_global_results
      * memory and performance.
      *)
     List.iter results ~f:(fun r ->
-        let (res_name, res_fullname) =
+        let (res_insert_text, res_fullname) =
           if strip_xhp_colon then
             (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
           else
             (r.si_name, r.si_fullname)
         in
         (* Only load func details if the flag sie_resolve_signatures is true *)
-        let (func_details, res_ty) =
+        let (func_details, res_detail) =
           if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
           then
             let fixed_name = ns ^ r.si_name in
@@ -1167,13 +1204,13 @@ let find_global_results
             | Some fe ->
               let ty = fe.fe_type in
               let details = get_func_details_for tast_env (DeclTy ty) in
-              let res_ty = Tast_env.print_decl_ty tast_env ty in
-              (details, res_ty)
+              let res_detail = Tast_env.print_decl_ty tast_env ty in
+              (details, res_detail)
           else
             (None, kind_to_string r.si_kind)
         in
         (* Only load exact positions if specially requested *)
-        let res_pos =
+        let res_decl_pos =
           if sienv.sie_resolve_positions then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
@@ -1188,15 +1225,17 @@ let find_global_results
         (* Figure out how to display them *)
         let complete =
           {
-            res_pos;
+            res_decl_pos;
             res_replace_pos = replace_pos_of_id ~strip_xhp_colon id;
             res_base_class = None;
-            res_ty;
-            res_name;
+            res_detail;
+            res_label = res_insert_text;
+            res_insert_text;
             res_fullname;
             res_kind = r.si_kind;
             func_details;
             res_documentation = None;
+            res_filter_text = None;
           }
         in
         add_res complete);
@@ -1214,15 +1253,17 @@ let find_global_results
              let documentation = SymbolOccurrence.built_in_type_hover hint in
              add_res
                {
-                 res_pos = absolute_none;
+                 res_decl_pos = absolute_none;
                  res_replace_pos = replace_pos_of_id id;
                  res_base_class = None;
-                 res_ty = "builtin";
-                 res_name = name;
+                 res_detail = "builtin";
+                 res_label = name;
+                 res_insert_text = name;
                  res_fullname = name;
                  res_kind = kind;
                  func_details = None;
                  res_documentation = Some documentation;
+                 res_filter_text = None;
                })
     | _ -> ()
 
@@ -1316,15 +1357,17 @@ let compute_complete_local ctx tast =
       if String.is_prefix name ~prefix:id_prefix then
         let complete =
           {
-            res_pos = pos;
+            res_decl_pos = pos;
             res_replace_pos = replace_pos;
             res_base_class = None;
-            res_ty = kind_to_string kind;
-            res_name = name;
+            res_detail = kind_to_string kind;
+            res_label = name;
+            res_insert_text = name;
             res_fullname = name;
             res_kind = kind;
             func_details;
             res_documentation = None;
+            res_filter_text = None;
           }
         in
         add_res complete)
@@ -1598,15 +1641,17 @@ let complete_keywords_at possible_keywords text pos : unit =
            let kind = SI_Keyword in
            let complete =
              {
-               res_pos = Pos.none |> Pos.to_absolute;
+               res_decl_pos = Pos.none |> Pos.to_absolute;
                res_replace_pos = replace_pos_of_id (pos, text);
                res_base_class = None;
-               res_ty = kind_to_string kind;
-               res_name = keyword;
+               res_detail = kind_to_string kind;
+               res_label = keyword;
+               res_insert_text = keyword;
                res_fullname = keyword;
                res_kind = kind;
                func_details = None;
                res_documentation = None;
+               res_filter_text = None;
              }
            in
            add_res complete)

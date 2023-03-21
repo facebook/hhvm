@@ -2509,16 +2509,6 @@ let make_ide_completion_response
   let is_caret_followed_by_lparen = Char.equal result.char_at_pos '(' in
   let p = initialize_params_exc () in
 
-  let hack_to_detail (completion : complete_autocomplete_result) : string =
-    (* TODO: retrieve the actual signature including name+modifiers     *)
-    (* For now we just return the type of the completion. In the case   *)
-    (* of functions, their function-types have parentheses around them  *)
-    (* which we want to strip. In other cases like tuples, no strip.    *)
-    match completion.func_details with
-    | None -> completion.res_ty
-    | Some _ ->
-      String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
-  in
   let hack_to_insert (completion : complete_autocomplete_result) :
       [ `InsertText of string | `TextEdit of TextEdit.t list ]
       * Completion.insertTextFormat =
@@ -2536,7 +2526,7 @@ let make_ide_completion_response
         Printf.sprintf "${%i:%s}" (i + 1) name
       in
       let params = String.concat ~sep:", " (List.mapi details.params ~f) in
-      ( `InsertText (Printf.sprintf "%s(%s)" completion.res_name params),
+      ( `InsertText (Printf.sprintf "%s(%s)" completion.res_insert_text params),
         SnippetFormat )
     | _ ->
       ( `TextEdit
@@ -2544,7 +2534,7 @@ let make_ide_completion_response
             TextEdit.
               {
                 range = ide_range_to_lsp completion.res_replace_pos;
-                newText = completion.res_name;
+                newText = completion.res_insert_text;
               };
           ],
         PlainText )
@@ -2557,10 +2547,10 @@ let make_ide_completion_response
       | (`TextEdit edits, format) -> (None, format, edits)
     in
     let pos =
-      if String.equal (Pos.filename completion.res_pos) "" then
-        Pos.set_file filename completion.res_pos
+      if String.equal (Pos.filename completion.res_decl_pos) "" then
+        Pos.set_file filename completion.res_decl_pos
       else
-        completion.res_pos
+        completion.res_decl_pos
     in
     let data =
       let (line, start, _) = Pos.info_pos pos in
@@ -2596,7 +2586,7 @@ let make_ide_completion_response
     in
     let hack_to_sort_text (completion : complete_autocomplete_result) :
         string option =
-      let label = completion.res_name in
+      let label = completion.res_label in
       let should_downrank label =
         String.length label > 2
         && String.equal (Str.string_before label 2) "__"
@@ -2609,23 +2599,15 @@ let make_ide_completion_response
         Some label
     in
     {
-      label =
-        (completion.res_name
-        ^
-        if
-          SearchUtils.equal_si_kind completion.res_kind SearchUtils.SI_Namespace
-        then
-          "\\"
-        else
-          "");
+      label = completion.res_label;
       kind = si_kind_to_completion_kind completion.AutocompleteTypes.res_kind;
-      detail = Some (hack_to_detail completion);
+      detail = Some completion.res_detail;
       documentation =
         Option.map completion.res_documentation ~f:(fun s ->
             MarkedStringsDocumentation [MarkedString s]);
       (* This will be filled in by completionItem/resolve. *)
       sortText = hack_to_sort_text completion;
-      filterText = None;
+      filterText = completion.res_filter_text;
       insertText;
       insertTextFormat = Some insertTextFormat;
       textEdits;

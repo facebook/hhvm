@@ -1,4 +1,4 @@
 class
   classname<this>
 bar
-  (function(): void)
+  function(): void

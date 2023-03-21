@@ -1,16 +1,16 @@
 valid
-  (function(): bool)
+  function(): bool
 send
-  (function(?Ts $v): void)
+  function(?Ts $v): void
 rewind
-  (function(): void)
+  function(): void
 raise
-  (function(Exception $e): void)
+  function(Exception $e): void
 next
-  (function(): void)
+  function(): void
 key
-  (function(): Tk)
+  function(): Tk
 getOrigFuncName
-  (function(): string)
+  function(): string
 current
-  (function(): Tv)
+  function(): Tv

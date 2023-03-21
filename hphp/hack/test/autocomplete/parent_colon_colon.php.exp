@@ -1,6 +1,6 @@
 fun_instance
-  (function(): void)
+  function(): void
 class
   classname<this>
 fun_method
-  (function(): void)
+  function(): void

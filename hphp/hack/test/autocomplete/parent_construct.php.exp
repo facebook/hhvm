@@ -1,4 +1,4 @@
 __construct
-  (function(): void)
+  function(): void
 class
   classname<this>

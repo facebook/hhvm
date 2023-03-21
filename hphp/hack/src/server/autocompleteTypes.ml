@@ -24,11 +24,13 @@ type func_details_result = {
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {
-  res_pos: Pos.absolute;
+  res_decl_pos: Pos.absolute;
   res_replace_pos: Ide_api_types.range;
   res_base_class: string option;
-  res_ty: string;
-  res_name: string;
+  res_label: string;
+  res_insert_text: string;
+  res_detail: string;
+  res_filter_text: string option;
   res_fullname: string;
   res_kind: SearchUtils.si_kind;
   func_details: func_details_result option;

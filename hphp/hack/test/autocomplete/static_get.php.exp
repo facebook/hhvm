@@ -5,4 +5,4 @@ X
 $x
   int
 f
-  (function(): _)
+  function(): _

@@ -826,7 +826,7 @@ let assert_autocomplete loop_output expected =
     | _ -> fail "Expected autocomplete response"
   in
   let results =
-    results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_name)
+    results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_label)
   in
   (* The autocomplete results out of hack are unsorted *)
   let results_as_string =
@@ -844,7 +844,7 @@ let assert_autocomplete_does_not_contain loop_output not_expected =
     | _ -> fail "Expected autocomplete response"
   in
   let results =
-    List.map results ~f:(fun x -> x.AutocompleteTypes.res_name) |> SSet.of_list
+    List.map results ~f:(fun x -> x.AutocompleteTypes.res_label) |> SSet.of_list
   in
   let not_expected = SSet.of_list not_expected in
   let occured = SSet.inter results not_expected in
@@ -864,7 +864,7 @@ let assert_ide_autocomplete loop_output expected =
   in
   let results =
     List.map results.AutocompleteTypes.completions ~f:(fun x ->
-        x.AutocompleteTypes.res_name)
+        x.AutocompleteTypes.res_label)
   in
   let results_as_string = list_to_string results in
   let expected_as_string = list_to_string expected in

@@ -46,6 +46,7 @@ pub mod validate_fun_params;
 pub mod validate_function_pointer;
 pub mod validate_global_const;
 pub mod validate_hint_habstr;
+pub mod validate_hint_hrefinement;
 pub mod validate_illegal_name;
 pub mod validate_interface;
 pub mod validate_method_private_final;

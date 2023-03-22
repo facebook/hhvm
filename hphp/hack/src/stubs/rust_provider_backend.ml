@@ -53,11 +53,11 @@ module Decl = struct
 
   let get_old_defs _ _ = failwith "unimplemented"
 
-  let oldify_defs _ _ = failwith "unimplemented"
+  let oldify_defs _ _ : unit = failwith "unimplemented"
 
-  let remove_defs _ _ = failwith "unimplemented"
+  let remove_defs _ _ : unit = failwith "unimplemented"
 
-  let remove_old_defs _ _ = failwith "unimplemented"
+  let remove_old_defs _ _ : unit = failwith "unimplemented"
 end
 
 module File = struct

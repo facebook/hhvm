@@ -538,13 +538,21 @@ let invalidate_folded_classes_for_shallow_fanout
     |> Typing_deps.add_extend_deps (Provider_context.get_deps_mode ctx)
     |> Shallow_class_fanout.class_names_from_deps ~ctx ~get_classes_in_file
   in
-  let get_elems n_classes =
-    get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
-  in
-  Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
-  Decl_class_elements.remove_all (get_elems invalidated ~old:false);
-  Decl_heap.Classes.remove_old_batch invalidated;
-  Decl_heap.Classes.remove_batch invalidated;
+  (match Provider_backend.get () with
+  | Provider_backend.Rust_provider_backend be ->
+    let names = FileInfo.{ empty_names with n_classes = invalidated } in
+    Rust_provider_backend.Decl.remove_old_defs be names;
+    Rust_provider_backend.Decl.remove_defs be names;
+    ()
+  | _ ->
+    let get_elems n_classes =
+      get_elems workers ~bucket_size FileInfo.{ empty_names with n_classes }
+    in
+    Decl_class_elements.remove_old_all (get_elems invalidated ~old:true);
+    Decl_class_elements.remove_all (get_elems invalidated ~old:false);
+    Decl_heap.Classes.remove_old_batch invalidated;
+    Decl_heap.Classes.remove_batch invalidated;
+    ());
   SharedMem.invalidate_local_caches ();
   SharedMem.GC.collect `gentle;
   ()

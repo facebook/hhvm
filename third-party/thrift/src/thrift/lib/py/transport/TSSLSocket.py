@@ -132,6 +132,10 @@ else:
         disable_weaker_versions=True,
     ):
         ctx = ssl.SSLContext(ssl_version)
+        # Some protocol versions, like PROTOCOL_TLS_CLIENT, automatically enable
+        # SSLContext.check_hostname. Disable it here, we don't want to perform
+        # hostname verification at this layer.
+        ctx.check_hostname = False
         ctx.verify_mode = cert_reqs
         if certfile is not None:
             ctx.load_cert_chain(

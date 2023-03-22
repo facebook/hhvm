@@ -136,7 +136,7 @@ libmcroutercore_a_SOURCES = \
   routes/FailoverRoute.h \
   routes/FailoverWithExptimeRouteFactory.h \
   routes/HostIdRouteFactory.h \
-  routes/KeySplitRoute.cpp \
+  routes/KeySplitRoute-inl.h \
   routes/KeySplitRoute.h \
   routes/L1L2CacheRouteFactory.h \
   routes/L1L2SizeSplitRoute-inl.h \

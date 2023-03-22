@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "KeySplitRoute.h"
+#pragma once
 
 #include <string>
 
@@ -20,10 +20,9 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-constexpr folly::StringPiece KeySplitRoute::kMemcacheReplicaSeparator;
-
-std::shared_ptr<MemcacheRouteHandleIf> makeKeySplitRoute(
-    RouteHandleFactory<MemcacheRouteHandleIf>& factory,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeKeySplitRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
     const folly::dynamic& json) {
   checkLogic(json.isObject(), "KeySplitRoute should be an object");
   checkLogic(json.count("destination"), "KeySplitRoute: no destination route");
@@ -44,13 +43,13 @@ std::shared_ptr<MemcacheRouteHandleIf> makeKeySplitRoute(
   size_t replicas = json["replicas"].getInt();
   bool all_sync = json["all_sync"].getBool();
   checkLogic(
-      replicas >= KeySplitRoute::kMinReplicaCount,
+      replicas >= KeySplitRoute<RouterInfo>::kMinReplicaCount,
       "KeySplitRoute: there should at least be 2 replicas");
   checkLogic(
-      replicas <= KeySplitRoute::kMaxReplicaCount,
+      replicas <= KeySplitRoute<RouterInfo>::kMaxReplicaCount,
       "KeySplitRoute: there should no more than 1000 replicas");
 
-  return std::make_shared<MemcacheRouteHandle<KeySplitRoute>>(
+  return makeRouteHandleWithInfo<RouterInfo, KeySplitRoute>(
       factory.create(json["destination"]),
       replicas,
       all_sync,

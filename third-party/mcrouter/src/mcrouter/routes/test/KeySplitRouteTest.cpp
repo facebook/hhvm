@@ -31,7 +31,7 @@ namespace memcache {
 namespace mcrouter {
 
 using TestHandle = TestHandleImpl<MemcacheRouteHandleIf>;
-using RouteHandle = McrouterRouteHandle<KeySplitRoute>;
+using RouteHandle = McrouterRouteHandle<KeySplitRoute<MemcacheRouterInfo>>;
 
 class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
  public:
@@ -51,7 +51,8 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
             folly::to<std::string>(static_cast<int>(numReplicas))),
         fmt::arg("allSync", allSync),
         fmt::arg("firstHit", firstHit));
-    return makeKeySplitRoute(rhFactory_, folly::parseJson(jsonStr));
+    return makeKeySplitRoute<MemcacheRouterInfo>(
+        rhFactory_, folly::parseJson(jsonStr));
   }
 
   // This helper function is used to test `makeKeySplitRoute` and that the route

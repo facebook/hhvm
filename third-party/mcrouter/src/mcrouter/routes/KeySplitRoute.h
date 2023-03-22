@@ -42,10 +42,15 @@ namespace mcrouter {
  * @param   firstHit  returns the result of the first hit. NOTE: This should NOT
  *                    be used for hot key routing
  */
+template <class RouterInfo>
 class KeySplitRoute {
+ private:
+  using RouteHandleIf = typename RouterInfo::RouteHandleIf;
+  using RouteHandlePtr = typename RouterInfo::RouteHandlePtr;
+
  public:
   KeySplitRoute(
-      std::shared_ptr<MemcacheRouteHandleIf> child,
+      RouteHandlePtr child,
       size_t replicas,
       bool allSync,
       bool firstHit = false)
@@ -74,7 +79,7 @@ class KeySplitRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<MemcacheRouteHandleIf>& t) const {
+      const RouteHandleTraverser<RouteHandleIf>& t) const {
     uint64_t replicaId = getReplicaId();
     if (shouldAugmentRequest(replicaId)) {
       return t(*child_, copyAndAugment(req, replicaId));
@@ -161,7 +166,7 @@ class KeySplitRoute {
       detail::numDigitsBase10(kMaxReplicaCount - 1);
 
   // route configuration
-  const std::shared_ptr<MemcacheRouteHandleIf> child_;
+  const std::shared_ptr<RouteHandleIf> child_;
   const size_t replicas_{2};
   const bool allSync_{false};
   const bool firstHit_{false};
@@ -265,10 +270,13 @@ class KeySplitRoute {
   }
 };
 
-std::shared_ptr<MemcacheRouteHandleIf> makeKeySplitRoute(
-    RouteHandleFactory<MemcacheRouteHandleIf>& factory,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeKeySplitRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
     const folly::dynamic& json);
 
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook
+
+#include "mcrouter/routes/KeySplitRoute-inl.h"

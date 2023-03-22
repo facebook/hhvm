@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <functional>
 #include <string_view>
 #include <type_traits>
 
@@ -353,9 +354,7 @@ void MaskRef::copy(
     const std::map<Value, Value>& src, std::map<Value, Value>& dst) const {
   throwIfNotMapMask();
   // Get all map keys that are possibly masked.
-  // TODO(dokwon): Avoid copying Value keys, as it is expensive to copy string
-  // keys.
-  std::set<Value> keys = getKeysToCopy(src, dst);
+  auto keys = getKeysToCopy(src, dst);
 
   if (keys.empty()) {
     return;
@@ -401,16 +400,17 @@ std::unordered_set<FieldId> MaskRef::getFieldsToCopy(
   return fieldIds;
 }
 
-std::set<Value> MaskRef::getKeysToCopy(
+std::set<std::reference_wrapper<const Value>, std::less<Value>>
+MaskRef::getKeysToCopy(
     const std::map<Value, Value>& src,
     const std::map<Value, Value>& dst) const {
   // cannot use unordered_set as Value doesn't have hash function.
   // TODO: check if all keys have the same type
-  std::set<Value> keys;
-  for (auto& [id, _] : src) {
+  std::set<std::reference_wrapper<const Value>, std::less<Value>> keys;
+  for (const auto& [id, _] : src) {
     keys.insert(id);
   }
-  for (auto& [id, _] : dst) {
+  for (const auto& [id, _] : dst) {
     keys.insert(id);
   }
   return keys;

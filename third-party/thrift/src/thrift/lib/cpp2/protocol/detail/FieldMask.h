@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string_view>
 
 #include <folly/CppAttributes.h>
@@ -123,7 +124,7 @@ class MaskRef {
   std::unordered_set<FieldId> getFieldsToCopy(
       const protocol::Object& src, const protocol::Object& dst) const;
 
-  std::set<Value> getKeysToCopy(
+  std::set<std::reference_wrapper<const Value>, std::less<Value>> getKeysToCopy(
       const std::map<Value, Value>& src,
       const std::map<Value, Value>& dst) const;
 

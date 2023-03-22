@@ -26,24 +26,21 @@ namespace apache::thrift::protocol::detail {
 // Gets the mask of the given field id if it exists in the map, otherwise,
 // returns noneMask.
 const Mask& getMask(const FieldIdToMask& map, FieldId id) {
-  auto fieldId = folly::to_underlying(id);
-  return map.find(fieldId) != map.end() ? map.at(fieldId)
-                                        : field_mask_constants::noneMask();
+  return folly::get_ref_default(
+      map, folly::to_underlying(id), field_mask_constants::noneMask());
 }
 
 // Gets the mask of the given map id if it exists in the map, otherwise,
 // returns noneMask.
 const Mask& getMask(const MapIdToMask& map, MapId id) {
-  auto mapId = folly::to_underlying(id);
-  return map.find(mapId) != map.end() ? map.at(mapId)
-                                      : field_mask_constants::noneMask();
+  return folly::get_ref_default(
+      map, folly::to_underlying(id), field_mask_constants::noneMask());
 }
 
 // Gets the mask of the given string if it exists in the string map, otherwise,
 // returns noneMask.
 const Mask& getMask(const MapStringToMask& map, std::string_view key) {
-  return map.find(key) != map.end() ? map.at(key)
-                                    : field_mask_constants::noneMask();
+  return folly::get_ref_default(map, key, field_mask_constants::noneMask());
 }
 
 const FieldIdToMask* FOLLY_NULLABLE getFieldMask(const Mask& mask) {

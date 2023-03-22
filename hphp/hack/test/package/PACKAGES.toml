@@ -10,3 +10,7 @@ includes = ["pkg1"]
 [packages.pkg3]
 uses = ["c"]
 includes = ["pkg2"]
+
+[packages.pkg4]
+uses = ["d", "d.*"]
+soft_includes = ["pkg2"]

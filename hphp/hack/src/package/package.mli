@@ -16,14 +16,19 @@ type package = {
 }
 [@@deriving eq, show]
 
+(* Represents how two packages are related *)
+type package_relationship =
+  | Unrelated
+  | Includes
+  | Soft_includes
+  | Equal
+
 val get_package_name : package -> string
 
 val get_package_pos : package -> Pos.t
 
 val get_package_for_module : string -> package option
 
-val includes : package -> package -> bool
-
 val initialize_packages_info : string -> Errors.t
 
-val soft_includes : package -> package -> bool
+val relationship : package -> package -> package_relationship

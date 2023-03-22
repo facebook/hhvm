@@ -201,6 +201,27 @@ let check_public_access env use_pos def_pos target =
                     Env.get_package_for_module env md
                     |> Option.map ~f:Package.get_package_name);
             }))
+  | `PackageSoftIncludes (package_pos, module_pos) ->
+    let current_module = Env.get_current_module env in
+    Some
+      (Typing_error.modules
+         (Module_soft_included_access
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              module_pos;
+              package_pos;
+              current_module_opt = current_module;
+              target_module_opt = target;
+              current_package_opt =
+                Option.bind current_module ~f:(fun md ->
+                    Env.get_package_for_module env md
+                    |> Option.map ~f:Package.get_package_name);
+              target_package_opt =
+                Option.bind target ~f:(fun md ->
+                    Env.get_package_for_module env md
+                    |> Option.map ~f:Package.get_package_name);
+            }))
 
 let is_visible_for_obj ~is_method env vis =
   let member_ty =

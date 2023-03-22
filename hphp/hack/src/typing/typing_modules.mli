@@ -32,6 +32,7 @@ val can_access_public :
   | `ImportsNotSatisfied of string * Pos_or_decl.t
   | `ExportsNotSatisfied of string * Pos_or_decl.t
   | `PackageNotSatisfied of Pos.t * Pos_or_decl.t
+  | `PackageSoftIncludes of Pos.t * Pos_or_decl.t
   ]
 
 val is_class_visible : Typing_env_types.env -> Decl_provider.class_decl -> bool

@@ -25,6 +25,12 @@ type package = {
 }
 [@@deriving eq, show]
 
+type package_relationship =
+  | Unrelated
+  | Includes
+  | Soft_includes
+  | Equal
+
 external extract_packages_from_text :
   string -> string -> (package list, errors) result
   = "extract_packages_from_text_ffi"
@@ -88,3 +94,13 @@ let soft_includes pkg1 pkg2 =
   List.exists
     (fun (_, name) -> String.equal name @@ get_package_name pkg2)
     pkg1.soft_includes
+
+let relationship pkg1 pkg2 =
+  if equal_package pkg1 pkg2 then
+    Equal
+  else if includes pkg1 pkg2 then
+    Includes
+  else if soft_includes pkg1 pkg2 then
+    Soft_includes
+  else
+    Unrelated

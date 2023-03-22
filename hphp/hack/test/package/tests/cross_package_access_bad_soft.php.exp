@@ -1,0 +1,58 @@
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg4' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'd.a' belongs to package 'pkg4' [3]
+-> And package 'pkg4' does not include package 'pkg1 [4]
+
+cross_package_access_bad_soft.php--c.php:6:13
+     4 | public function test(): void {
+     5 |    $b = new B1(); // error
+[1]  6 |    $a = new A(); // error
+     7 | }
+
+cross_package_access_bad_soft.php--a.php:3:14
+     1 | <?hh
+     2 | module a;
+[2]  3 | public class A {}
+
+cross_package_access_bad_soft.php--modules.php:4:12
+     2 | new module a {}     // package pkg1
+     3 | new module b.b1 {}  // package pkg2 (include pkg1)
+[3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
+
+../PACKAGES.toml:14:11
+    12 | includes = ["pkg2"]
+    13 | 
+[4] 14 | [packages.pkg4]
+    15 | uses = ["d", "d.*"]
+    16 | soft_includes = ["pkg2"]
+
+Typing[4473] Cannot access a public element from package 'pkg2' in package 'pkg4' [1]
+-> This is from module b.b1, which is in package pkg2 [2]
+-> Module 'd.a' belongs to package 'pkg4' [3]
+-> And package 'pkg4' only soft includes package 'pkg2 [4]
+
+cross_package_access_bad_soft.php--c.php:5:13
+     3 | public class D {}
+     4 | public function test(): void {
+[1]  5 |    $b = new B1(); // error
+     6 |    $a = new A(); // error
+     7 | }
+
+cross_package_access_bad_soft.php--b.php:3:14
+     1 | <?hh
+     2 | module b.b1;
+[2]  3 | public class B1 {}
+
+cross_package_access_bad_soft.php--modules.php:4:12
+     2 | new module a {}     // package pkg1
+     3 | new module b.b1 {}  // package pkg2 (include pkg1)
+[3]  4 | new module d.a {} // package pkg4 (soft include pkg2)
+
+../PACKAGES.toml:14:11
+    12 | includes = ["pkg2"]
+    13 | 
+[4] 14 | [packages.pkg4]
+    15 | uses = ["d", "d.*"]
+    16 | soft_includes = ["pkg2"]
+
+2 errors found.

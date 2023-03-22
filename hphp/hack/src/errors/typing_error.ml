@@ -1483,6 +1483,16 @@ module Primary = struct
           target_module_opt: string option;
           target_package_opt: string option;
         }
+      | Module_soft_included_access of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          package_pos: Pos.t;
+          current_module_opt: string option;
+          current_package_opt: string option;
+          target_module_opt: string option;
+          target_package_opt: string option;
+        }
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1580,13 +1590,20 @@ module Primary = struct
         (current_module_opt : string option)
         (current_package_opt : string option)
         (target_module_opt : string option)
-        (target_package_opt : string option) =
+        (target_package_opt : string option)
+        (soft : bool) =
       let current_module = Option.value current_module_opt ~default:"global" in
       let target_module = Option.value target_module_opt ~default:"global" in
       let current_package =
         Option.value current_package_opt ~default:"default"
       in
       let target_package = Option.value target_package_opt ~default:"default" in
+      let relationship =
+        if soft then
+          "only soft includes"
+        else
+          "does not include"
+      in
       let claim =
         lazy
           ( pos,
@@ -1609,12 +1626,19 @@ module Primary = struct
                 current_package );
             ( Pos_or_decl.of_raw_pos package_pos,
               Printf.sprintf
-                "And package '%s' does not include package '%s"
+                "And package '%s' %s package '%s"
                 current_package
+                relationship
                 target_package );
           ]
       in
-      (Error_code.ModuleError, claim, reason, [])
+      let error_code =
+        if soft then
+          Error_code.InvalidCrossPackageSoft
+        else
+          Error_code.InvalidCrossPackage
+      in
+      (error_code, claim, reason, [])
 
     let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
@@ -1658,6 +1682,28 @@ module Primary = struct
           current_package_opt
           target_module_opt
           target_package_opt
+          false (* Soft *)
+      | Module_soft_included_access
+          {
+            pos;
+            decl_pos;
+            module_pos;
+            package_pos;
+            current_module_opt;
+            current_package_opt;
+            target_module_opt;
+            target_package_opt;
+          } ->
+        module_cross_pkg_access
+          pos
+          decl_pos
+          module_pos
+          package_pos
+          current_module_opt
+          current_package_opt
+          target_module_opt
+          target_package_opt
+          true (* Soft *)
   end
 
   module Xhp = struct

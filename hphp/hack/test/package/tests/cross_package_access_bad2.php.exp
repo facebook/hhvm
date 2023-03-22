@@ -1,4 +1,4 @@
-Typing[4444] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
 -> This is from module a, which is in package pkg1 [2]
 -> Module 'c' belongs to package 'pkg3' [3]
 -> And package 'pkg3' does not include package 'pkg1 [4]

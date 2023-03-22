@@ -110,6 +110,8 @@ type subtype_env = {
           Note: this is a short-term solution to provide coeffects.pretty-printing of
           `locl_ty`s that represent coeffects, since there is no good way to
           tell apart coeffects from regular types *)
+  log_level: int;
+      (** Which level the recursive calls to simplify_subtype should be logged at *)
 }
 
 let coercing_from_dynamic se =
@@ -128,6 +130,7 @@ let make_subtype_env
     ?(no_top_bottom = false)
     ?(coerce = None)
     ?(is_coeffect = false)
+    ~(log_level : int)
     on_error =
   {
     require_soundness;
@@ -138,6 +141,7 @@ let make_subtype_env
     is_coeffect;
     on_error;
     tparam_constraints = [];
+    log_level;
   }
 
 let possibly_add_violated_constraint subtype_env ~r_sub ~r_super =
@@ -927,7 +931,7 @@ and simplify_subtype_i
     (ty_super : internal_type)
     env : env * TL.subtype_prop =
   log_subtype_i
-    ~level:2
+    ~level:subtype_env.log_level
     ~this_ty
     ~function_name:
       ("simplify_subtype"
@@ -4458,7 +4462,7 @@ and add_tyvar_upper_bound_and_close
           (fun lower_bound (env, prop1) ->
             let (env, prop2) =
               simplify_subtype_i
-                ~subtype_env:(make_subtype_env ~coerce on_error)
+                ~subtype_env:(make_subtype_env ~coerce ~log_level:2 on_error)
                 ~sub_supportdyn:None
                 lower_bound
                 upper_bound
@@ -4514,7 +4518,7 @@ and add_tyvar_lower_bound_and_close
           (fun upper_bound (env, prop1) ->
             let (env, prop2) =
               simplify_subtype_i
-                ~subtype_env:(make_subtype_env ~coerce on_error)
+                ~subtype_env:(make_subtype_env ~coerce ~log_level:2 on_error)
                 ~sub_supportdyn:None
                 lower_bound
                 upper_bound
@@ -4823,7 +4827,12 @@ and is_sub_type_alt_i
   let (_env, prop) =
     simplify_subtype_i
       ~subtype_env:
-        (make_subtype_env ~require_completeness ~no_top_bottom ~coerce None)
+        (make_subtype_env
+           ~require_completeness
+           ~no_top_bottom
+           ~coerce
+           ~log_level:3
+           None)
       ~sub_supportdyn
       ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
@@ -4989,7 +4998,7 @@ let sub_type
     (ty_super : locl_ty)
     on_error =
   sub_type_i
-    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce on_error)
+    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce ~log_level:2 on_error)
     env
     (LoclType ty_sub)
     (LoclType ty_super)
@@ -5286,6 +5295,7 @@ let rec decompose_subtype
         (make_subtype_env
            ~require_soundness:false
            ~require_completeness:true
+           ~log_level:2
            on_error)
       ~sub_supportdyn:None
       ~this_ty:None
@@ -5425,7 +5435,10 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
   let (env, prop) =
     simplify_subtype
       ~subtype_env:
-        (make_subtype_env ~coerce:(Some TL.CoerceFromDynamic) on_error)
+        (make_subtype_env
+           ~coerce:(Some TL.CoerceFromDynamic)
+           ~log_level:2
+           on_error)
       ~sub_supportdyn:None
       ~this_ty:None
       ty_sub
@@ -5443,7 +5456,8 @@ let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
 
 let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
   simplify_subtype_i
-    ~subtype_env:(make_subtype_env ~is_coeffect ~no_top_bottom:true on_error)
+    ~subtype_env:
+      (make_subtype_env ~is_coeffect ~no_top_bottom:true ~log_level:2 on_error)
     ~sub_supportdyn:None
     ty_sub
     ty_super
@@ -5455,7 +5469,8 @@ let simplify_subtype_i ?(is_coeffect = false) env ty_sub ty_super ~on_error =
 
 let sub_type_i env ?(is_coeffect = false) ty1 ty2 on_error =
   sub_type_i
-    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce:None on_error)
+    ~subtype_env:
+      (make_subtype_env ~log_level:2 ~is_coeffect ~coerce:None on_error)
     env
     ty1
     ty2
@@ -5476,7 +5491,7 @@ let subtype_funs
   let old_env = env in
   let (env, prop) =
     simplify_subtype_funs
-      ~subtype_env:(make_subtype_env ~coerce:None on_error)
+      ~subtype_env:(make_subtype_env ~log_level:2 ~coerce:None on_error)
       ~check_return
       ~for_override
       r_sub

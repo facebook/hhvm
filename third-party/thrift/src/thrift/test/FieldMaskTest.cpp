@@ -2513,6 +2513,20 @@ TEST(FieldMaskTest, ReverseMapMask) {
   EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);
 }
 
+TEST(FieldMaskTest, ReverseStringMapMask) {
+  Mask inclusiveMask;
+  auto& includes = inclusiveMask.includes_string_map_ref().emplace();
+  includes["1"] = allMask();
+  includes["2"].includes_ref().emplace()[3] = allMask();
+  Mask exclusiveMask;
+  auto& excludes = exclusiveMask.excludes_string_map_ref().emplace();
+  excludes["1"] = allMask();
+  excludes["2"].includes_ref().emplace()[3] = allMask();
+
+  EXPECT_EQ(reverseMask(inclusiveMask), exclusiveMask);
+  EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);
+}
+
 TEST(FieldMaskTest, Compare) {
   Bar2 original;
   Foo2 foo;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<daa6bb9f2b2c7acc4c46a84caeb8047d>>
+// @generated SignedSource<<5a0939720b7182490a51f6b42b5f6a7c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -831,11 +831,6 @@ pub enum Expr_<'a, Ex, En> {
     ArrayGet(&'a (&'a Expr<'a, Ex, En>, Option<&'a Expr<'a, Ex, En>>)),
     /// Instance property or method access.
     ///
-    /// prop_or_method is:
-    ///   - Is_prop for property access
-    ///   - Is_method for method call, only possible when the node is
-    ///   - the receiver in a Call node.
-    ///
     ///     $foo->bar      // OG_nullthrows, Is_prop: access named property
     ///     ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
     ///     $foo?->bar     // OG_nullsafe,   Is_prop
@@ -845,6 +840,10 @@ pub enum Expr_<'a, Ex, En> {
     ///     $foo->$bar()   // OG_nullthrows, Is_method: dynamic call, method name stored in local $bar
     ///     $foo?->bar()   // OG_nullsafe,   Is_method
     ///     $foo?->$bar()  // OG_nullsafe,   Is_method
+    ///
+    /// prop_or_method is:
+    ///   - Is_prop for property access
+    ///   - Is_method for method call, only possible when the node is the receiver in a Call node.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Obj_get")]
     #[rust_to_ocaml(inline_tuple)]

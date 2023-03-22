@@ -430,11 +430,6 @@ and ('ex, 'en) expr_ =
       * (prop_or_method[@transform.opaque])
       (** Instance property or method access.
        *
-       * prop_or_method is:
-       *   - Is_prop for property access
-       *   - Is_method for method call, only possible when the node is
-       *   - the receiver in a Call node.
-       *
        *     $foo->bar      // OG_nullthrows, Is_prop: access named property
        *     ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
        *     $foo?->bar     // OG_nullsafe,   Is_prop
@@ -444,6 +439,11 @@ and ('ex, 'en) expr_ =
        *     $foo->$bar()   // OG_nullthrows, Is_method: dynamic call, method name stored in local $bar
        *     $foo?->bar()   // OG_nullsafe,   Is_method
        *     $foo?->$bar()  // OG_nullsafe,   Is_method
+       *
+       * prop_or_method is:
+       *   - Is_prop for property access
+       *   - Is_method for method call, only possible when the node is the receiver in a Call node.
+       *
        *)
   | Class_get of
       ('ex, 'en) class_id

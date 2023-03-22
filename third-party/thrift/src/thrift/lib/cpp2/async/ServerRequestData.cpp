@@ -16,4 +16,21 @@
 
 #include <thrift/lib/cpp2/async/ServerRequestData.h>
 
-namespace apache::thrift {}
+namespace apache::thrift {
+
+void ServerRequestData::setRequestExecutionBegin(TimePoint now) {
+  requestExecutionBegin = now;
+}
+
+void ServerRequestData::setRequestExecutionEnd(TimePoint now) {
+  requestExecutionEnd = now;
+}
+
+ServerRequestData::Duration ServerRequestData::queuedDuration() const {
+  return requestExecutionBegin - queueBegin;
+}
+ServerRequestData::Duration ServerRequestData::requestExecutionDuration()
+    const {
+  return requestExecutionEnd - requestExecutionBegin;
+}
+} // namespace apache::thrift

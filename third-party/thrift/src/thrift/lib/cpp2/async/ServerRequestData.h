@@ -21,14 +21,22 @@
 
 namespace apache::thrift {
 
-// This struct serves as a appendix data carrier
-// that can store metadata about internal process
-// e.g. logging info, and also external user-facing
-// data, e.g. by adding a shared_ptr<void> to store user data
+// This struct serves as a appendix data carrier that can store metadata about
+// internal process e.g. logging info
 struct ServerRequestData {
-  // for thrift internal usage only
-  // user should not try to modify these members
-  std::chrono::steady_clock::time_point queueBegin;
+  using Clock = std::chrono::steady_clock;
+  using TimePoint = Clock::time_point;
+  using Duration = Clock::duration;
+
+  TimePoint queueBegin;
+  TimePoint requestExecutionBegin;
+  TimePoint requestExecutionEnd;
+
+  void setRequestExecutionBegin(TimePoint now = Clock::now());
+  void setRequestExecutionEnd(TimePoint now = Clock::now());
+
+  Duration queuedDuration() const;
+  Duration requestExecutionDuration() const;
 
   // user data
   intptr_t requestPileUserData = 0;

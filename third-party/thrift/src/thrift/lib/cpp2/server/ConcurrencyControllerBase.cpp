@@ -59,29 +59,15 @@ void ConcurrencyControllerBase::setObserver(std::unique_ptr<Observer> ob) {
   observer_ = std::move(ob);
 }
 
-std::optional<ConcurrencyControllerBase::PerRequestStats>
-ConcurrencyControllerBase::onExecute(ServerRequest& req) {
+void ConcurrencyControllerBase::notifyOnFinishExecution(
+    ServerRequest& request) {
   // use local observer
   if (observer_) {
-    return observer_->onExecute(req);
+    observer_->onFinishExecution(request);
   } else {
     // use global observer
     if (auto observer = getGlobalObserver()) {
-      return observer->onExecute(req);
-    }
-  }
-  return std::nullopt;
-}
-
-void ConcurrencyControllerBase::onFinishExecution(
-    folly::RequestContext* context, PerRequestStats& stats) {
-  // use local observer
-  if (observer_) {
-    observer_->onFinishExecution(context, stats);
-  } else {
-    // use global observer
-    if (auto observer = getGlobalObserver()) {
-      observer->onFinishExecution(context, stats);
+      observer->onFinishExecution(request);
     }
   }
 }

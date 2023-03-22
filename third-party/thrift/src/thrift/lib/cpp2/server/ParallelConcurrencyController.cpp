@@ -140,12 +140,12 @@ void ParallelConcurrencyController::executeRequest() {
     }
 
     serverRequest.setConcurrencyControllerNotification(this);
-    auto stats = ConcurrencyControllerBase::onExecute(serverRequest);
+
+    serverRequest.requestData().setRequestExecutionBegin();
     AsyncProcessorHelper::executeRequest(std::move(*req));
-    if (stats) {
-      ConcurrencyControllerBase::onFinishExecution(
-          serverRequest.follyRequestContext().get(), stats.value());
-    }
+    serverRequest.requestData().setRequestExecutionEnd();
+
+    notifyOnFinishExecution(serverRequest);
     return;
 
   } else {

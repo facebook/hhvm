@@ -27,44 +27,23 @@ namespace apache::thrift {
 // This class provides all the helper functionalities of ConcurrencyController
 class ConcurrencyControllerBase : public ConcurrencyControllerInterface {
  public:
-  struct PerRequestStats {
-    std::chrono::steady_clock::time_point queueBegin;
-    std::chrono::steady_clock::time_point workBegin;
-    std::chrono::steady_clock::time_point workEnd;
-  };
-
   class Observer {
    public:
     virtual ~Observer() {}
-
-    // callback right before request is executed
-    virtual PerRequestStats onExecute(ServerRequest& /* request  */) {
-      return PerRequestStats();
-    }
-
-    // callback right after the request is finished execution
-    // This is more of the handler code completion instead
-    // of the request hits its end of liftcycle
-    virtual void onFinishExecution(
-        folly::RequestContext* /* context  */, PerRequestStats& /* stats  */) {}
+    virtual void onFinishExecution(ServerRequest& request) = 0;
   };
 
-  std::optional<PerRequestStats> onExecute(ServerRequest& /* request */);
-
-  void onFinishExecution(
-      folly::RequestContext* /* context  */, PerRequestStats& /* stats */);
-
-  // not thread-safe
-  // Should be called up front
+  // not thread-safe, should be called up front
   void setObserver(std::unique_ptr<Observer> ob);
 
-  // set the global observer of the concurrency controller
-  // This method is not thread-safe and should only be called
-  // once from the main thread
+  // Not thread-safe and should only be called once from the main thread
   static void setGlobalObserver(std::shared_ptr<Observer> observer);
 
   // thread-safe. grab the current global observer if any
   static Observer* getGlobalObserver();
+
+ protected:
+  void notifyOnFinishExecution(ServerRequest& request);
 
  private:
   std::unique_ptr<Observer> observer_{nullptr};

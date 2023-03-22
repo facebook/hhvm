@@ -15,6 +15,8 @@
 */
 #include <folly/portability/GTest.h>
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/util/service-data.h"
@@ -30,17 +32,40 @@ int getVal(const char* key) {
 }
 
 TEST(COUNTERS, static_string) {
-    int ss = getVal("admin.static-strings");
+    const char* key = "admin.static-strings";
+    int ss = getVal(key);
     EXPECT_EQ(ss, makeStaticStringCount());
 
     makeStaticString("bananas");
     ++ss;
-    EXPECT_EQ(ss, getVal("admin.static-strings"));
+    EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, makeStaticStringCount());
 
     refineStaticStringTableSize();
-    EXPECT_EQ(ss, getVal("admin.static-strings"));
+    EXPECT_EQ(ss, getVal(key));
     EXPECT_EQ(ss, makeStaticStringCount());
+}
+
+TEST(COUNTERS, pcre_cache) {
+    const char* key = "admin.pcre-cache";
+    int ss = getVal(key);
+    EXPECT_EQ(ss, preg_pcre_cache_size());
+
+    preg_grep(String{"/.ba./"}, make_vec_array(String{"ababu"}, String{"bananas"}));
+    ++ss;
+    EXPECT_EQ(ss, getVal(key));
+    EXPECT_EQ(ss, preg_pcre_cache_size());
+
+    // confirm we're correctly skipping when hitting the cache
+    preg_grep(String{"/.ba./"}, make_vec_array(String{"ababu"}, String{"bananas"}));
+    EXPECT_EQ(ss, getVal(key));
+    EXPECT_EQ(ss, preg_pcre_cache_size());
+
+    // kill table
+    pcre_reinit();
+    EXPECT_EQ(0, getVal(key));
+    EXPECT_EQ(0, preg_pcre_cache_size());
+
 }
 
 }

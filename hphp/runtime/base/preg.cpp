@@ -244,6 +244,7 @@ private:
 RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 static PCRECache s_pcreCache;
+static auto pc_counter = ServiceData::createCounter("admin.pcre-cache");
 
 // The last pcre error code is available for the whole thread.
 static RDS_LOCAL(int, rl_last_error_code);
@@ -587,6 +588,7 @@ void pcre_reinit() {
                     "lru or scalable");
     kind = PCRECache::CacheKind::Scalable;
   }
+  pc_counter->setValue(0);
   s_pcreCache.reinit(kind);
 }
 
@@ -861,6 +863,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       }
     }
 
+    pc_counter->increment();
     s_pcreCache.insert(accessor, regex, tkc, new_entry);
     return true;
   };

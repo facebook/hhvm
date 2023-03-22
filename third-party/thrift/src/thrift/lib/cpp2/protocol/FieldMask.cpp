@@ -153,9 +153,9 @@ struct SubtractMaskImpl {
 };
 
 const MapIdToMask& toMapMask(const Mask& mask) {
-  using detail::getMapMask;
+  using detail::getIntegerMapMask;
 
-  if (const auto* mapMask = getMapMask(mask)) {
+  if (const auto* mapMask = getIntegerMapMask(mask)) {
     return *mapMask;
   }
 
@@ -172,8 +172,8 @@ const MapIdToMask& toMapMask(const Mask& mask) {
 template <class Func>
 Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   using detail::getFieldMask;
-  using detail::getMapMask;
   using detail::getStringMapMask;
+  using detail::getIntegerMapMask;
 
   Mask mask;
 
@@ -182,9 +182,10 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
     folly::throw_exception<std::runtime_error>("not implemented");
   }
 
-  // If one of them is map mask, the other one must be either map mask, or
-  // allMask/noneMask which either mask the whole map, or nothing.
-  if (getMapMask(lhs) || getMapMask(rhs)) {
+  // If one of them is an integer map mask, the other one must be either integer
+  // map mask, or allMask/noneMask which either mask the whole integer map, or
+  // nothing.
+  if (getIntegerMapMask(lhs) || getIntegerMapMask(rhs)) {
     mask.includes_map_ref() = func(toMapMask(lhs), toMapMask(rhs));
     return mask;
   }

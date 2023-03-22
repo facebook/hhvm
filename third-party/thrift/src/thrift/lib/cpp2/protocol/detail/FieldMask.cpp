@@ -58,7 +58,7 @@ const FieldIdToMask* FOLLY_NULLABLE getFieldMask(const Mask& mask) {
   return nullptr;
 }
 
-const MapIdToMask* FOLLY_NULLABLE getMapMask(const Mask& mask) {
+const MapIdToMask* FOLLY_NULLABLE getIntegerMapMask(const Mask& mask) {
   if (mask.includes_map_ref()) {
     return &*mask.includes_map_ref();
   }

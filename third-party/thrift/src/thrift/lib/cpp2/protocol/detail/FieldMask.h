@@ -47,8 +47,9 @@ inline bool isNoneMask(const Mask& mask) {
 [[nodiscard]] const FieldIdToMask* FOLLY_NULLABLE
 getFieldMask(const Mask& mask);
 
-// If mask is a map mask, return it, otherwise return nullptr
-[[nodiscard]] const MapIdToMask* FOLLY_NULLABLE getMapMask(const Mask& mask);
+// If mask is an integer map mask, return it, otherwise return nullptr
+[[nodiscard]] const MapIdToMask* FOLLY_NULLABLE
+getIntegerMapMask(const Mask& mask);
 
 // If mask is a string map mask, return it, otherwise return nullptr
 [[nodiscard]] const MapStringToMask* FOLLY_NULLABLE
@@ -197,7 +198,7 @@ bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
 
 template <typename Key, typename Value>
 bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
-  const auto* p = getMapMask(mask);
+  const auto* p = getIntegerMapMask(mask);
 
   if (p == nullptr) {
     return false;

@@ -4715,7 +4715,7 @@ let handle_client_message
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/references request *)
     | (_, Some _ide_service, RequestMessage (id, FindReferencesRequest params))
-      ->
+      when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result = do_findReferences_local params in
       respond_jsonrpc

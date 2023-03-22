@@ -522,4 +522,5 @@ service {
   };
   gen_client_tool: true;
   disable_fb303: true;
+  bucketization: true;
 };

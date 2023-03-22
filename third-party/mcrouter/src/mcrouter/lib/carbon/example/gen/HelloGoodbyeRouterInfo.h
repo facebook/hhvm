@@ -74,6 +74,7 @@ struct HelloGoodbyeRouterInfo {
   using RouteHandleAsyncClient = apache::thrift::Client<hellogoodbye::thrift::HelloGoodbye>;
 
   static constexpr const char* name = "HelloGoodbye";
+  static constexpr const bool bucketization = false;
 
   template <class Route>
   using RouteHandle = HelloGoodbyeRouteHandle<Route>;

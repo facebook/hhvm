@@ -80,6 +80,7 @@ struct CarbonThriftTestRouterInfo {
   using RouteHandleAsyncClient = apache::thrift::Client<carbon::test::thrift::CarbonThriftTest>;
 
   static constexpr const char* name = "CarbonThriftTest";
+  static constexpr const bool bucketization = false;
 
   template <class Route>
   using RouteHandle = CarbonThriftTestRouteHandle<Route>;

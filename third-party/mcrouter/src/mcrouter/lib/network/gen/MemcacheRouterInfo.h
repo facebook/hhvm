@@ -137,6 +137,7 @@ struct MemcacheRouterInfo {
   using RouteHandleAsyncClient = apache::thrift::Client<facebook::memcache::thrift::Memcache>;
 
   static constexpr const char* name = "Memcache";
+  static constexpr const bool bucketization = true;
 
   template <class Route>
   using RouteHandle = MemcacheRouteHandle<Route>;

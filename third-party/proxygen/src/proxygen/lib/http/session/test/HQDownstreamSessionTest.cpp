@@ -30,7 +30,6 @@
 using namespace proxygen;
 using namespace proxygen::hq;
 using namespace quic;
-using namespace folly;
 using namespace testing;
 using namespace std::chrono;
 
@@ -1723,7 +1722,7 @@ TEST_P(HQDownstreamSessionTest, GetAddressesAfterDropConnection) {
 
 TEST_P(HQDownstreamSessionTest, RstCancelled) {
   auto id = nextStreamId();
-  auto buf = IOBuf::create(3);
+  auto buf = folly::IOBuf::create(3);
   memcpy(buf->writableData(), "GET", 3);
   buf->append(3);
   socketDriver_->addReadEvent(id, std::move(buf), milliseconds(0));
@@ -1800,12 +1799,12 @@ TEST_P(HQDownstreamSessionTest, Connect) {
   auto id = sendRequest(req, /* eom */ false);
   auto& request = getStream(id);
 
-  auto buf1 = IOBuf::copyBuffer("12345");
+  auto buf1 = folly::IOBuf::copyBuffer("12345");
   request.codec->generateBody(
       request.buf, request.id, std::move(buf1), HTTPCodec::NoPadding, true);
   flushRequestsAndLoopN(1);
 
-  auto buf2 = IOBuf::copyBuffer("abcdefg");
+  auto buf2 = folly::IOBuf::copyBuffer("abcdefg");
   request.codec->generateBody(
       request.buf, request.id, std::move(buf2), HTTPCodec::NoPadding, true);
   flushRequestsAndLoopN(1);
@@ -1834,12 +1833,12 @@ TEST_P(HQDownstreamSessionTest, ConnectUDP) {
   auto id = sendRequest(req, /* eom */ false);
   auto& request = getStream(id);
 
-  auto buf1 = IOBuf::copyBuffer("12345");
+  auto buf1 = folly::IOBuf::copyBuffer("12345");
   request.codec->generateBody(
       request.buf, request.id, std::move(buf1), HTTPCodec::NoPadding, true);
   flushRequestsAndLoopN(1);
 
-  auto buf2 = IOBuf::copyBuffer("abcdefg");
+  auto buf2 = folly::IOBuf::copyBuffer("abcdefg");
   request.codec->generateBody(
       request.buf, request.id, std::move(buf2), HTTPCodec::NoPadding, true);
   flushRequestsAndLoopN(1);
@@ -2309,7 +2308,7 @@ TEST_P(HQDownstreamSessionFilterTestHQ, ControlStreamFilters) {
 }
 
 TEST_P(HQDownstreamSessionTest, onErrorEmptyEnqueued) {
-  IOBufQueue rst{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue rst{folly::IOBufQueue::cacheChainLength()};
   auto id1 = sendRequest();
 
   InSequence handlerSequence;
@@ -2336,7 +2335,7 @@ TEST_P(HQDownstreamSessionTest, onErrorEmptyEnqueued) {
 }
 
 TEST_P(HQDownstreamSessionTest, dropWhilePaused) {
-  IOBufQueue rst{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue rst{folly::IOBufQueue::cacheChainLength()};
   sendRequest();
 
   InSequence handlerSequence;

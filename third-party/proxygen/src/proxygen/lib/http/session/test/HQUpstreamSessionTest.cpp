@@ -32,7 +32,6 @@
 using namespace proxygen;
 using namespace proxygen::hq;
 using namespace quic;
-using namespace folly;
 using namespace testing;
 using namespace std::chrono;
 
@@ -1248,7 +1247,8 @@ class HQUpstreamSessionTestPush : public HQUpstreamSessionTest {
     return (pushId % 2) == 1;
   }
 
-  using WriteFunctor = std::function<folly::Optional<size_t>(IOBufQueue&)>;
+  using WriteFunctor =
+      std::function<folly::Optional<size_t>(folly::IOBufQueue&)>;
   folly::Optional<size_t> writeUpTo(quic::StreamId id,
                                     size_t maxlen,
                                     WriteFunctor functor) {
@@ -1258,7 +1258,7 @@ class HQUpstreamSessionTestPush : public HQUpstreamSessionTest {
       return folly::none;
     }
 
-    IOBufQueue tmpbuf{IOBufQueue::cacheChainLength()};
+    folly::IOBufQueue tmpbuf{folly::IOBufQueue::cacheChainLength()};
     auto funcres = functor(tmpbuf);
     if (!funcres) {
       return folly::none;
@@ -1274,7 +1274,7 @@ class HQUpstreamSessionTestPush : public HQUpstreamSessionTest {
   // Use the common facilities to write the quic integer
   folly::Optional<size_t> writePushStreamPreface(quic::StreamId id,
                                                  size_t maxlen) {
-    WriteFunctor f = [](IOBufQueue& outbuf) {
+    WriteFunctor f = [](folly::IOBufQueue& outbuf) {
       return generateStreamPreface(outbuf, hq::UnidirectionalStreamType::PUSH);
     };
 
@@ -1285,7 +1285,7 @@ class HQUpstreamSessionTestPush : public HQUpstreamSessionTest {
   folly::Optional<size_t> writeUnframedPushId(quic::StreamId id,
                                               size_t maxlen,
                                               hq::PushId pushId) {
-    WriteFunctor f = [=](IOBufQueue& outbuf) -> folly::Optional<size_t> {
+    WriteFunctor f = [=](folly::IOBufQueue& outbuf) -> folly::Optional<size_t> {
       folly::io::QueueAppender appender(&outbuf, 8);
       uint8_t size = 1 << (folly::Random::rand32() % 4);
       auto wlen = encodeQuicIntegerWithAtLeast(pushId, size, appender);

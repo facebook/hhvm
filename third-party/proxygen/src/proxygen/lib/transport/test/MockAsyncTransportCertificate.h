@@ -16,15 +16,14 @@ namespace proxygen {
 
 class MockAsyncTransportCertificate : public folly::AsyncTransportCertificate {
  public:
-  MOCK_METHOD(folly::ssl::X509UniquePtr, getX509, (), (const));
-  MOCK_METHOD(std::string, getIdentity, (), (const));
+  MOCK_METHOD(std::string, getIdentity, (), (const, override));
 };
 
 class MockOpenSSLTransportCertificate
     : public folly::OpenSSLTransportCertificate {
  public:
-  MOCK_METHOD(folly::ssl::X509UniquePtr, getX509, (), (const));
-  MOCK_METHOD(std::string, getIdentity, (), (const));
+  MOCK_METHOD(folly::ssl::X509UniquePtr, getX509, (), (const, override));
+  MOCK_METHOD(std::string, getIdentity, (), (const, override));
 };
 
 } // namespace proxygen

@@ -31,8 +31,6 @@
 #include <proxygen/lib/test/TestAsyncTransport.h>
 #include <wangle/acceptor/ConnectionManager.h>
 
-using namespace folly::io;
-using namespace folly;
 using namespace proxygen;
 using namespace std;
 using namespace testing;
@@ -71,7 +69,7 @@ class HTTPDownstreamTest : public testing::Test {
 
     httpSession_ = new HTTPDownstreamSession(
         transactionTimeouts_.get(),
-        std::move(AsyncTransport::UniquePtr(transport_)),
+        std::move(folly::AsyncTransport::UniquePtr(transport_)),
         localAddr,
         peerAddr,
         &mockController_,
@@ -129,8 +127,8 @@ class HTTPDownstreamTest : public testing::Test {
     return sendRequest("/", 0, false);
   }
 
-  Promise<Unit> sendRequestLater(HTTPMessage req, bool eof = false) {
-    Promise<Unit> reqp;
+  Promise<folly::Unit> sendRequestLater(HTTPMessage req, bool eof = false) {
+    Promise<folly::Unit> reqp;
     reqp.getSemiFuture().via(&eventBase_).thenValue([=](auto&&) {
       sendRequest(req);
       transport_->addReadEvent(requests_, milliseconds(0));
@@ -412,7 +410,7 @@ class HTTPDownstreamTest : public testing::Test {
         auto vec = event->getIoVec();
         for (size_t i = 0; i < event->getCount(); i++) {
           parseOutputStream_.append(
-              IOBuf::copyBuffer(vec[i].iov_base, vec[i].iov_len));
+              folly::IOBuf::copyBuffer(vec[i].iov_base, vec[i].iov_len));
         }
         writeEvents->pop_front();
       }
@@ -452,16 +450,16 @@ class HTTPDownstreamTest : public testing::Test {
   }
 
  protected:
-  EventBase eventBase_;
+  folly::EventBase eventBase_;
   TestAsyncTransport* transport_; // invalid once httpSession_ is destroyed
   folly::HHWheelTimer::UniquePtr transactionTimeouts_;
   std::vector<int64_t> flowControl_;
   StrictMock<MockController> mockController_;
   HTTPDownstreamSession* httpSession_;
-  IOBufQueue requests_{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue requests_{folly::IOBufQueue::cacheChainLength()};
   unique_ptr<HTTPCodec> clientCodec_;
   NiceMock<MockHTTPCodecCallback> callbacks_;
-  IOBufQueue parseOutputStream_{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue parseOutputStream_{folly::IOBufQueue::cacheChainLength()};
   bool breakParseOutput_{false};
   typename C::Codec* rawCodec_{nullptr};
   HeaderIndexingStrategy testH2IndexingStrat_;
@@ -802,10 +800,10 @@ TEST_F(HTTPDownstreamSessionTest, MovableBuffer) {
   onEOMTerminateHandlerExpectShutdown(*handler);
 
   transport_->addMovableReadEvent(
-      IOBuf::copyBuffer("GET /somepath.php?param=foo HTTP/1.1\r\n"
-                        "Host: example.com\r\n"
-                        "Connection: close\r\n"
-                        "\r\n"));
+      folly::IOBuf::copyBuffer("GET /somepath.php?param=foo HTTP/1.1\r\n"
+                               "Host: example.com\r\n"
+                               "Connection: close\r\n"
+                               "\r\n"));
   transport_->addReadEOF(milliseconds(0));
   transport_->startReadEvents();
   eventBase_.loop();
@@ -831,12 +829,12 @@ TEST_F(HTTPDownstreamSessionTest, MovableBufferChained) {
   });
   onEOMTerminateHandlerExpectShutdown(*handler);
 
-  auto buf = IOBuf::copyBuffer(
+  auto buf = folly::IOBuf::copyBuffer(
       "GET /somepath.php?param=foo HTTP/1.1\r\n"
       "Host: example.com\r\n");
   buf->prependChain(
-      IOBuf::copyBuffer("Connection: close\r\n"
-                        "\r\n"));
+      folly::IOBuf::copyBuffer("Connection: close\r\n"
+                               "\r\n"));
   transport_->addMovableReadEvent(std::move(buf));
   transport_->addReadEOF(milliseconds(0));
   transport_->startReadEvents();
@@ -864,11 +862,11 @@ TEST_F(HTTPDownstreamSessionTest, MovableBufferMultiple) {
   onEOMTerminateHandlerExpectShutdown(*handler);
 
   transport_->addMovableReadEvent(
-      IOBuf::copyBuffer("GET /somepath.php?param=foo HTTP/1.1\r\n"
-                        "Host: example.com\r\n"));
+      folly::IOBuf::copyBuffer("GET /somepath.php?param=foo HTTP/1.1\r\n"
+                               "Host: example.com\r\n"));
   transport_->addMovableReadEvent(
-      IOBuf::copyBuffer("Connection: close\r\n"
-                        "\r\n"));
+      folly::IOBuf::copyBuffer("Connection: close\r\n"
+                               "\r\n"));
   transport_->addReadEOF(milliseconds(0));
   transport_->startReadEvents();
   eventBase_.loop();
@@ -894,13 +892,13 @@ TEST_F(HTTPDownstreamSessionTest, MovableBufferChainedEmptyBuffer) {
   });
   onEOMTerminateHandlerExpectShutdown(*handler);
 
-  auto buf = IOBuf::copyBuffer(
+  auto buf = folly::IOBuf::copyBuffer(
       "GET /somepath.php?param=foo HTTP/1.1\r\n"
       "Host: example.com\r\n");
-  buf->prependChain(IOBuf::create(0));
+  buf->prependChain(folly::IOBuf::create(0));
   buf->prependChain(
-      IOBuf::copyBuffer("Connection: close\r\n"
-                        "\r\n"));
+      folly::IOBuf::copyBuffer("Connection: close\r\n"
+                               "\r\n"));
   transport_->addMovableReadEvent(std::move(buf));
   transport_->addReadEOF(milliseconds(0));
   transport_->startReadEvents();
@@ -1152,7 +1150,7 @@ TEST(HTTPDownstreamTest, ParseErrorNoTxn) {
   // 1) Get a parse error on SYN_STREAM for streamID == 1
   // 2) Expect that the codec should be asked to generate an abort on
   //    streamID==1
-  EventBase evb;
+  folly::EventBase evb;
 
   // Setup the controller and its expecations.
   NiceMock<MockController> mockController;
@@ -1172,20 +1170,22 @@ TEST(HTTPDownstreamTest, ParseErrorNoTxn) {
   EXPECT_CALL(*transport, closeNow())
       .WillRepeatedly(Assign(&transportGood, false));
   EXPECT_CALL(*transport, writeChain(_, _, _))
-      .WillRepeatedly(Invoke([&](folly::AsyncTransport::WriteCallback* callback,
-                                 const shared_ptr<IOBuf>&,
-                                 WriteFlags) { callback->writeSuccess(); }));
+      .WillRepeatedly(
+          Invoke([&](folly::AsyncTransport::WriteCallback* callback,
+                     const shared_ptr<folly::IOBuf>&,
+                     folly::WriteFlags) { callback->writeSuccess(); }));
 
   // Create the downstream session, thus initializing codecCallback
   auto transactionTimeouts = makeInternalTimeoutSet(&evb);
-  auto session = new HTTPDownstreamSession(transactionTimeouts.get(),
-                                           AsyncTransport::UniquePtr(transport),
-                                           localAddr,
-                                           peerAddr,
-                                           &mockController,
-                                           std::move(codec),
-                                           mockTransportInfo,
-                                           nullptr);
+  auto session =
+      new HTTPDownstreamSession(transactionTimeouts.get(),
+                                folly::AsyncTransport::UniquePtr(transport),
+                                localAddr,
+                                peerAddr,
+                                &mockController,
+                                std::move(codec),
+                                mockTransportInfo,
+                                nullptr);
   session->startNow();
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS, "foo");
   ex.setProxygenError(kErrorParseHeader);
@@ -1199,7 +1199,7 @@ TEST(HTTPDownstreamTest, ParseErrorNoTxn) {
 
 TEST(HTTPDownstreamTest, ByteEventsDrained) {
   // Test that byte events are drained before socket is closed
-  EventBase evb;
+  folly::EventBase evb;
 
   NiceMock<MockController> mockController;
   auto codec = makeDownstreamParallelCodec();
@@ -1208,14 +1208,15 @@ TEST(HTTPDownstreamTest, ByteEventsDrained) {
   auto transactionTimeouts = makeInternalTimeoutSet(&evb);
 
   // Create the downstream session
-  auto session = new HTTPDownstreamSession(transactionTimeouts.get(),
-                                           AsyncTransport::UniquePtr(transport),
-                                           localAddr,
-                                           peerAddr,
-                                           &mockController,
-                                           std::move(codec),
-                                           mockTransportInfo,
-                                           nullptr);
+  auto session =
+      new HTTPDownstreamSession(transactionTimeouts.get(),
+                                folly::AsyncTransport::UniquePtr(transport),
+                                localAddr,
+                                peerAddr,
+                                &mockController,
+                                std::move(codec),
+                                mockTransportInfo,
+                                nullptr);
   session->setByteEventTracker(
       std::unique_ptr<ByteEventTracker>(byteEventTracker));
 
@@ -1492,7 +1493,7 @@ TEST_F(HTTP2DownstreamSessionTest, TestPingWithPreSendSplit) {
     transport_->pauseWrites();
     handler->sendReplyWithBody(200, 100);
     eventBase_.runInLoop([this, pingData] {
-      IOBufQueue pingBuf{IOBufQueue::cacheChainLength()};
+      folly::IOBufQueue pingBuf{folly::IOBufQueue::cacheChainLength()};
       clientCodec_->generatePingRequest(pingBuf, pingData);
       transport_->addReadEvent(pingBuf, milliseconds(0));
       transport_->resumeWrites();
@@ -2204,7 +2205,7 @@ TEST_F(HTTP2DownstreamSessionTest, RateLimitRst) {
   // so we need to set it.
   folly::EventBaseManager::get()->setEventBase(&eventBase_, false);
 
-  IOBufQueue rst{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue rst{folly::IOBufQueue::cacheChainLength()};
   clientCodec_->getEgressSettings()->setSetting(SettingsId::INITIAL_WINDOW_SIZE,
                                                 100000);
   clientCodec_->generateSettings(requests_);
@@ -3156,7 +3157,7 @@ TEST_F(HTTP2DownstreamSessionTest, ZeroDeltaWindowUpdate) {
   // hack the frame so that delta=0 without modifying other checks
   clientCodec_->generateWindowUpdate(requests_, streamID, 1);
   requests_.trimEnd(http2::kFrameWindowUpdateSize);
-  QueueAppender appender(&requests_, http2::kFrameWindowUpdateSize);
+  folly::io::QueueAppender appender(&requests_, http2::kFrameWindowUpdateSize);
   appender.writeBE<uint32_t>(0);
 
   auto handler = addSimpleStrictHandler();

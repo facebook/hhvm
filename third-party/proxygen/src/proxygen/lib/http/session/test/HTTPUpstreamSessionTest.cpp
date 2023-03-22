@@ -27,7 +27,6 @@
 
 using folly::test::MockAsyncTransport;
 
-using namespace folly;
 using namespace proxygen;
 using namespace testing;
 
@@ -144,7 +143,7 @@ class HTTPUpstreamTest
             &eventBase_,
             std::chrono::milliseconds(
                 folly::HHWheelTimer::DEFAULT_TICK_INTERVAL),
-            TimeoutManager::InternalEnum::INTERNAL,
+            folly::TimeoutManager::InternalEnum::INTERNAL,
             std::chrono::milliseconds(500))),
         flowControl_(flowControl) {
   }
@@ -159,8 +158,8 @@ class HTTPUpstreamTest
   }
 
   virtual void onWriteChain(folly::AsyncTransport::WriteCallback* callback,
-                            std::shared_ptr<IOBuf> iob,
-                            WriteFlags) {
+                            std::shared_ptr<folly::IOBuf> iob,
+                            folly::WriteFlags) {
     if (pauseWrites_) {
       cbs_.push_back(callback);
       return; // let write requests timeout
@@ -173,7 +172,7 @@ class HTTPUpstreamTest
 
   void handleWrite(folly::AsyncTransport::WriteCallback* callback) {
     if (failWrites_) {
-      AsyncSocketException ex(AsyncSocketException::UNKNOWN, "");
+      folly::AsyncSocketException ex(folly::AsyncSocketException::UNKNOWN, "");
       callback->writeErr(0, ex);
     } else {
       if (writeInLoop_) {
@@ -189,7 +188,7 @@ class HTTPUpstreamTest
   }
 
   void TearDown() override {
-    AsyncSocketException ex(AsyncSocketException::UNKNOWN, "");
+    folly::AsyncSocketException ex(folly::AsyncSocketException::UNKNOWN, "");
     for (auto& cb : cbs_) {
       cb->writeErr(0, ex);
     }
@@ -226,7 +225,7 @@ class HTTPUpstreamTest
     }
     httpSession_ = new HTTPUpstreamSession(
         transactionTimeouts_.get(),
-        std::move(AsyncTransport::UniquePtr(transport_)),
+        std::move(folly::AsyncTransport::UniquePtr(transport_)),
         localAddr_,
         peerAddr_,
         std::move(codec),
@@ -251,7 +250,7 @@ class HTTPUpstreamTest
     }
 
     auto clientCodec = makeClientCodec<HTTP2Codec>(2);
-    folly::IOBufQueue c2s{IOBufQueue::cacheChainLength()};
+    folly::IOBufQueue c2s{folly::IOBufQueue::cacheChainLength()};
     clientCodec->getEgressSettings()->setSetting(SettingsId::ENABLE_EX_HEADERS,
                                                  1);
     clientCodec->generateConnectionPreface(c2s);
@@ -278,7 +277,7 @@ class HTTPUpstreamTest
     readAndLoop((const uint8_t*)input.data(), input.length());
   }
 
-  void readAndLoop(IOBuf* buf) {
+  void readAndLoop(folly::IOBuf* buf) {
     buf->coalesce();
     readAndLoop(buf->data(), buf->length());
   }
@@ -379,18 +378,18 @@ class HTTPUpstreamTest
   bool transactionsFull_{false};
   bool transportGood_{true};
 
-  EventBase eventBase_;
-  EventBase* eventBasePtr_{&eventBase_};
+  folly::EventBase eventBase_;
+  folly::EventBase* eventBasePtr_{&eventBase_};
   MockAsyncTransport* transport_; // invalid once httpSession_ is destroyed
   folly::AsyncTransport::ReadCallback* readCallback_{nullptr};
   folly::AsyncTransport::ReplaySafetyCallback* replaySafetyCallback_{nullptr};
   folly::HHWheelTimer::UniquePtr transactionTimeouts_;
   std::vector<int64_t> flowControl_;
   wangle::TransportInfo mockTransportInfo_;
-  SocketAddress localAddr_{"127.0.0.1", 80};
-  SocketAddress peerAddr_{"127.0.0.1", 12345};
+  folly::SocketAddress localAddr_{"127.0.0.1", 80};
+  folly::SocketAddress peerAddr_{"127.0.0.1", 12345};
   HTTPUpstreamSession* httpSession_{nullptr};
-  IOBufQueue writes_{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue writes_{folly::IOBufQueue::cacheChainLength()};
   std::vector<folly::AsyncTransport::WriteCallback*> cbs_;
   bool failWrites_{false};
   bool pauseWrites_{false};
@@ -421,7 +420,7 @@ TEST_F(HTTP2UpstreamSessionTest, IngressGoawayAbortUncreatedStreams) {
 
   // Create buf for GOAWAY with last good stream as 0 (no streams created)
   HTTP2Codec egressCodec(TransportDirection::DOWNSTREAM);
-  folly::IOBufQueue respBuf{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue respBuf{folly::IOBufQueue::cacheChainLength()};
   egressCodec.generateSettings(respBuf);
   egressCodec.generateGoaway(respBuf, 0, ErrorCode::NO_ERROR);
   std::unique_ptr<folly::IOBuf> goawayFrame = respBuf.move();
@@ -458,7 +457,7 @@ TEST_F(HTTP2UpstreamSessionTest, IngressGoawaySessionError) {
 
   // Create buf for GOAWAY with last good stream as 1
   HTTP2Codec egressCodec(TransportDirection::DOWNSTREAM);
-  folly::IOBufQueue respBuf{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue respBuf{folly::IOBufQueue::cacheChainLength()};
   egressCodec.generateSettings(respBuf);
   egressCodec.generateGoaway(respBuf, 1, ErrorCode::PROTOCOL_ERROR);
   std::unique_ptr<folly::IOBuf> goawayFrame = respBuf.move();
@@ -669,7 +668,7 @@ TEST_F(HTTP2UpstreamSessionTest, TestCircularPriority) {
 
 TEST_F(HTTP2UpstreamSessionTest, TestSettingsAck) {
   auto serverCodec = makeServerCodec();
-  folly::IOBufQueue buf{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue buf{folly::IOBufQueue::cacheChainLength()};
   serverCodec->generateSettings(buf);
   auto settingsFrame = buf.move();
   settingsFrame->coalesce();
@@ -690,11 +689,11 @@ TEST_F(HTTP2UpstreamSessionTest, TestSettingsAck) {
 TEST_F(HTTP2UpstreamSessionTest, TestSettingsInfoCallbacks) {
   auto serverCodec = makeServerCodec();
 
-  folly::IOBufQueue settingsBuf{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue settingsBuf{folly::IOBufQueue::cacheChainLength()};
   serverCodec->generateSettings(settingsBuf);
   auto settingsFrame = settingsBuf.move();
 
-  folly::IOBufQueue settingsAckBuf{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue settingsAckBuf{folly::IOBufQueue::cacheChainLength()};
   serverCodec->generateSettingsAck(settingsAckBuf);
   auto settingsAckFrame = settingsAckBuf.move();
 
@@ -748,7 +747,7 @@ TEST_F(HTTP2UpstreamSessionTest, TestSetControllerInitHeaderIndexingStrat) {
  */
 
 TEST_F(HTTP2UpstreamSessionTest, ExheaderFromServer) {
-  folly::IOBufQueue queue{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
 
   // generate enable_ex_headers setting
   auto serverCodec = makeServerCodec();
@@ -798,7 +797,7 @@ TEST_F(HTTP2UpstreamSessionTest, ExheaderFromServer) {
 }
 
 TEST_F(HTTP2UpstreamSessionTest, InvalidControlStream) {
-  folly::IOBufQueue queue{IOBufQueue::cacheChainLength()};
+  folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
 
   // generate enable_ex_headers setting
   auto serverCodec = makeServerCodec();
@@ -871,7 +870,7 @@ class HTTP2UpstreamSessionWithVirtualNodesTest
         .WillRepeatedly(ReturnPointee(&transportGood_));
     EXPECT_CALL(*transport_, closeNow())
         .WillRepeatedly(Assign(&transportGood_, false));
-    AsyncTransport::UniquePtr transportPtr(transport_);
+    folly::AsyncTransport::UniquePtr transportPtr(transport_);
     httpSession_ = new HTTPUpstreamSession(transactionTimeouts_.get(),
                                            std::move(transportPtr),
                                            localAddr_,
@@ -1755,8 +1754,8 @@ TEST_F(HTTPUpstreamRecvStreamTest, UpgradeFlowControl) {
 class NoFlushUpstreamSessionTest : public HTTPUpstreamTest<HTTP2CodecPair> {
  public:
   void onWriteChain(folly::AsyncTransport::WriteCallback* callback,
-                    std::shared_ptr<IOBuf>,
-                    WriteFlags) override {
+                    std::shared_ptr<folly::IOBuf>,
+                    folly::WriteFlags) override {
     if (!timesCalled_++) {
       callback->writeSuccess();
     } else {
@@ -1766,7 +1765,7 @@ class NoFlushUpstreamSessionTest : public HTTPUpstreamTest<HTTP2CodecPair> {
   }
 
   ~NoFlushUpstreamSessionTest() override {
-    AsyncSocketException ex(AsyncSocketException::UNKNOWN, "");
+    folly::AsyncSocketException ex(folly::AsyncSocketException::UNKNOWN, "");
     for (auto& cb : cbs_) {
       cb->writeErr(0, ex);
     }
@@ -1818,7 +1817,7 @@ class MockHTTPUpstreamTest : public HTTPUpstreamTest<MockHTTPCodecPair> {
     EXPECT_CALL(*codec, getProtocol())
         .WillRepeatedly(Return(CodecProtocol::HTTP_2));
     EXPECT_CALL(*codec, generateGoaway(_, _, _, _))
-        .WillRepeatedly(Invoke([&](IOBufQueue& writeBuf,
+        .WillRepeatedly(Invoke([&](folly::IOBufQueue& writeBuf,
                                    HTTPCodec::StreamID lastStream,
                                    ErrorCode,
                                    std::shared_ptr<folly::IOBuf>) {
@@ -2188,7 +2187,7 @@ TEST_F(MockHTTPUpstreamTest, GoawayPreHeaders) {
 
   handler.expectTransaction();
   EXPECT_CALL(*codecPtr_, generateHeader(_, _, _, _, _, _))
-      .WillOnce(Invoke([&](IOBufQueue& writeBuf,
+      .WillOnce(Invoke([&](folly::IOBufQueue& writeBuf,
                            HTTPCodec::StreamID /*stream*/,
                            const HTTPMessage& /*msg*/,
                            bool /*eom*/,
@@ -2858,7 +2857,7 @@ TEST_F(HTTP2UpstreamSessionTest, AttachDetach) {
   auto timer = folly::HHWheelTimer::newTimer(
       &base,
       std::chrono::milliseconds(folly::HHWheelTimer::DEFAULT_TICK_INTERVAL),
-      TimeoutManager::InternalEnum::INTERNAL,
+      folly::TimeoutManager::InternalEnum::INTERNAL,
       std::chrono::milliseconds(500));
   WheelTimerInstance timerInstance(timer.get());
   uint64_t filterCount = 0;
@@ -2908,7 +2907,7 @@ TEST_F(HTTP2UpstreamSessionTest, DetachFlowControlTimeout) {
   auto timer = folly::HHWheelTimer::newTimer(
       &base,
       std::chrono::milliseconds(folly::HHWheelTimer::DEFAULT_TICK_INTERVAL),
-      TimeoutManager::InternalEnum::INTERNAL,
+      folly::TimeoutManager::InternalEnum::INTERNAL,
       std::chrono::milliseconds(500));
   WheelTimerInstance timerInstance(timer.get());
   uint64_t filterCount = 0;

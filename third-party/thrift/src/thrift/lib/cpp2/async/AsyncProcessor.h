@@ -47,6 +47,7 @@
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/async/RpcTypes.h>
 #include <thrift/lib/cpp2/async/SchemaV1.h>
+#include <thrift/lib/cpp2/async/ServerRequestData.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
@@ -375,20 +376,6 @@ class AsyncProcessor : public TProcessorBase {
 namespace detail {
 class ServerRequestHelper;
 }
-
-// This struct serves as a appendix data carrier
-// that can store metadata about internal process
-// e.g. logging info, and also external user-facing
-// data, e.g. by adding a shared_ptr<void> to store user data
-struct ServerRequestData {
-  // for thrift internal usage only
-  // user should not try to modify these members
-  std::chrono::steady_clock::time_point queueBegin;
-
-  // user data
-  intptr_t requestPileUserData = 0;
-  intptr_t concurrencyControllerUserData = 0;
-};
 
 // The ServerRequest is used to hold all the information about a request that we
 // need to save when queueing it in order to execute the request later.

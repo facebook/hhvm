@@ -106,6 +106,12 @@ class McRouteHandleProvider
       folly::StringPiece,
       RouteHandleFactoryFuncWithProxy,
       folly::Hash>;
+  using RouteHandleFactoryFuncForWrapper = std::function<
+      RouteHandlePtr(RouteHandlePtr, ProxyBase&, const folly::dynamic&)>;
+  using RouteHandleFactoryMapForWrapper = std::unordered_map<
+      folly::StringPiece,
+      RouteHandleFactoryFuncForWrapper,
+      folly::Hash>;
 
   McRouteHandleProvider(ProxyBase& proxy, PoolFactory& poolFactory);
 
@@ -173,6 +179,7 @@ class McRouteHandleProvider
 
   const RouteHandleFactoryMap routeMap_;
   const RouteHandleFactoryMapWithProxy routeMapWithProxy_;
+  const RouteHandleFactoryMapForWrapper routeMapForWrapper_;
 
   const std::vector<RouteHandlePtr>& makePool(
       RouteHandleFactory<RouteHandleIf>& factory,
@@ -216,11 +223,13 @@ class McRouteHandleProvider
 
   RouteHandleFactoryMap buildRouteMap();
   RouteHandleFactoryMapWithProxy buildRouteMapWithProxy();
+  RouteHandleFactoryMapForWrapper buildRouteMapForWrapper();
 
   // This can be removed when the buildRouteMap specialization for
   // MemcacheRouterInfo is removed.
   RouteHandleFactoryMap buildCheckedRouteMap();
   RouteHandleFactoryMapWithProxy buildCheckedRouteMapWithProxy();
+  RouteHandleFactoryMapForWrapper buildCheckedRouteMapForWrapper();
 
   std::unique_ptr<ExtraRouteHandleProviderIf<RouterInfo>> buildExtraProvider();
 };

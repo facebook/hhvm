@@ -5,12 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "mcrouter/routes/McBucketRoute.h"
+#pragma once
 
 #include <folly/dynamic.h>
 
 #include "mcrouter/lib/fbi/cpp/ParsingUtil.h"
-#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 
 namespace facebook::memcache::mcrouter {
 
@@ -25,8 +24,9 @@ namespace facebook::memcache::mcrouter {
  *                            bucketization domains decoupled from each other,
  *                            e.g. one keyspace for each Memache pool.
  */
-std::shared_ptr<MemcacheRouteHandleIf> makeMcBucketRoute(
-    std::shared_ptr<MemcacheRouteHandleIf> rh,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeMcBucketRoute(
+    typename RouterInfo::RouteHandlePtr rh,
     const folly::dynamic& json) {
   McBucketRouteSettings settings;
   checkLogic(
@@ -56,7 +56,7 @@ std::shared_ptr<MemcacheRouteHandleIf> makeMcBucketRoute(
 
   settings.totalBuckets = totalBuckets;
   settings.bucketizeUntil = bucketizeUntil;
-  return std::make_shared<MemcacheRouteHandle<McBucketRoute>>(
+  return makeRouteHandleWithInfo<RouterInfo, McBucketRoute>(
       std::move(rh), settings);
 }
 } // namespace facebook::memcache::mcrouter

@@ -13,8 +13,6 @@
 #include "mcrouter/lib/Ch3HashFunc.h"
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/RouteHandleTraverser.h"
-#include "mcrouter/lib/network/gen/MemcacheRouteHandleIf.h"
-#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/routes/RoutingUtils.h"
 
 namespace facebook::memcache::mcrouter {
@@ -44,11 +42,14 @@ struct McBucketRouteSettings {
  * - bucketize_until(int) - enable the handle for buckets until (exclusive)
  *   this number. Must be less than total_buckets. Needed for gradual migration.
  */
+template <class RouterInfo>
 class McBucketRoute {
+ private:
+  using RouteHandleIf = typename RouterInfo::RouteHandleIf;
+  using RouteHandlePtr = typename RouterInfo::RouteHandlePtr;
+
  public:
-  McBucketRoute(
-      std::shared_ptr<MemcacheRouteHandleIf> rh,
-      McBucketRouteSettings& settings)
+  McBucketRoute(RouteHandlePtr rh, McBucketRouteSettings& settings)
       : rh_(std::move(rh)),
         totalBuckets_(settings.totalBuckets),
         bucketizeUntil_(settings.bucketizeUntil),
@@ -68,20 +69,20 @@ class McBucketRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<MemcacheRouteHandleIf>& t) const {
+      const RouteHandleTraverser<RouteHandleIf>& t) const {
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
       return ch3_(getRoutingKey<Request>(req, this->salt_));
     });
     if (bucketId < bucketizeUntil_) {
-      if (auto* ctx = fiber_local<MemcacheRouterInfo>::getTraverseCtx()) {
+      if (auto* ctx = fiber_local<RouterInfo>::getTraverseCtx()) {
         ctx->recordBucketizationData(
             req.key_ref()->keyWithoutRoute().str(),
             bucketId,
             bucketizationKeyspace_);
       }
-      return fiber_local<MemcacheRouterInfo>::runWithLocals(
+      return fiber_local<RouterInfo>::runWithLocals(
           [this, &req, &t, bucketId]() {
-            fiber_local<MemcacheRouterInfo>::setBucketId(bucketId);
+            fiber_local<RouterInfo>::setBucketId(bucketId);
             return t(*rh_, req);
           });
     }
@@ -93,7 +94,7 @@ class McBucketRoute {
     auto bucketId = folly::fibers::runInMainContext([this, &req]() {
       return ch3_(getRoutingKey<Request>(req, this->salt_));
     });
-    auto& ctx = fiber_local<MemcacheRouterInfo>::getSharedCtx();
+    auto& ctx = fiber_local<RouterInfo>::getSharedCtx();
 
     if (UNLIKELY(ctx->recordingBucketData())) {
       ctx->recordBucketizationData(
@@ -108,19 +109,18 @@ class McBucketRoute {
   template <class Request>
   ReplyT<Request> routeImpl(const Request& req, const size_t bucketId) const {
     if (bucketId < bucketizeUntil_) {
-      auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
+      auto proxy = &fiber_local<RouterInfo>::getSharedCtx()->proxy();
       proxy->stats().increment(bucketized_routing_stat);
-      return fiber_local<MemcacheRouterInfo>::runWithLocals(
-          [this, &req, bucketId]() {
-            fiber_local<MemcacheRouterInfo>::setBucketId(bucketId);
-            return rh_->route(req);
-          });
+      return fiber_local<RouterInfo>::runWithLocals([this, &req, bucketId]() {
+        fiber_local<RouterInfo>::setBucketId(bucketId);
+        return rh_->route(req);
+      });
     }
     return rh_->route(req);
   }
 
  private:
-  const std::shared_ptr<MemcacheRouteHandleIf> rh_;
+  const RouteHandlePtr rh_;
   const size_t totalBuckets_{0};
   const size_t bucketizeUntil_{0};
   const std::string salt_;
@@ -128,8 +128,11 @@ class McBucketRoute {
   const std::string bucketizationKeyspace_;
 };
 
-std::shared_ptr<MemcacheRouteHandleIf> makeMcBucketRoute(
-    std::shared_ptr<MemcacheRouteHandleIf> rh,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeMcBucketRoute(
+    typename RouterInfo::RouteHandlePtr rh,
     const folly::dynamic& json);
 
 } // namespace facebook::memcache::mcrouter
+
+#include "mcrouter/routes/McBucketRoute-inl.h"

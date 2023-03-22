@@ -105,8 +105,17 @@ struct CarbonThriftTestRouterInfo {
           facebook::memcache::mcrouter::ProxyBase&)>,
       folly::Hash>;
 
+  using RouteHandleFactoryMapForWrapper = std::unordered_map<
+      folly::StringPiece,
+      std::function<RouteHandlePtr(
+          RouteHandlePtr,
+          facebook::memcache::mcrouter::ProxyBase&,
+          const folly::dynamic&)>,
+      folly::Hash>;
+
   static RouteHandleFactoryMap buildRouteMap();
   static RouteHandleFactoryMapWithProxy buildRouteMapWithProxy();
+  static RouteHandleFactoryMapForWrapper buildRouteMapForWrapper();
 
   static std::unique_ptr<facebook::memcache::mcrouter::
                              ExtraRouteHandleProviderIf<CarbonThriftTestRouterInfo>>

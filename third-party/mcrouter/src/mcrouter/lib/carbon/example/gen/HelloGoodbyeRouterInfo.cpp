@@ -97,6 +97,11 @@ HelloGoodbyeRouterInfo::buildRouteMapWithProxy() {
   return RouteHandleFactoryMapWithProxy();
 }
 
+/* static */ HelloGoodbyeRouterInfo::RouteHandleFactoryMapForWrapper
+HelloGoodbyeRouterInfo::buildRouteMapForWrapper() {
+  return RouteHandleFactoryMapForWrapper();
+}
+
 /* static */
 std::unique_ptr<ExtraRouteHandleProviderIf<HelloGoodbyeRouterInfo>>
 HelloGoodbyeRouterInfo::buildExtraProvider() {

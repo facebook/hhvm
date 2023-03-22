@@ -93,6 +93,11 @@ CarbonTestRouterInfo::buildRouteMapWithProxy() {
   return RouteHandleFactoryMapWithProxy();
 }
 
+/* static */ CarbonTestRouterInfo::RouteHandleFactoryMapForWrapper
+CarbonTestRouterInfo::buildRouteMapForWrapper() {
+  return RouteHandleFactoryMapForWrapper();
+}
+
 /* static */
 std::unique_ptr<ExtraRouteHandleProviderIf<CarbonTestRouterInfo>>
 CarbonTestRouterInfo::buildExtraProvider() {

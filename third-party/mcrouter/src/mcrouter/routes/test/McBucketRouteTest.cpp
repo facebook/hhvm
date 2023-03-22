@@ -39,8 +39,8 @@ TEST(McBucketRouteTest, bucketIdShouldPropagate) {
   }
   )";
 
-  auto rh =
-      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   ASSERT_TRUE(rh);
   mockFiberContext();
   rh->route(McGetRequest("getReq")); // bucketId == 28
@@ -66,8 +66,8 @@ TEST(McBucketRouteTest, bucketIdShouldNotPropagate) {
   }
   )";
 
-  auto rh =
-      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   ASSERT_TRUE(rh);
   mockFiberContext();
   rh->route(McGetRequest("getReq")); // bucketId == 28
@@ -92,8 +92,8 @@ TEST(McBucketRouteTest, bucketIdShouldPropagateInTraverse) {
   }
   )";
 
-  auto rh =
-      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   mockFiberContext();
   RouteHandleTraverser<MemcacheRouterInfo::RouteHandleIf> t{};
   rh->traverse(McGetRequest("getReq"), t); // bucketId == 28
@@ -117,8 +117,8 @@ TEST(McBucketRouteTest, bucketIdShouldNotPropagateInTraverse) {
   }
   )";
 
-  auto rh =
-      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   mockFiberContext();
   RouteHandleTraverser<MemcacheRouterInfo::RouteHandleIf> t{};
   rh->traverse(McGetRequest("getReq"), t); // bucketId == 28
@@ -148,8 +148,8 @@ TEST(McBucketRouteTest, checkParams) {
       until,
       keyspace);
 
-  auto rh =
-      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   mockFiberContext();
   auto name = rh->routeName();
   std::vector<std::string> params;
@@ -179,8 +179,8 @@ TEST(McBucketRouteTest, recordBucketizationData) {
   }
   )";
 
-  auto rh =
-      makeMcBucketRoute(mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
+  auto rh = makeMcBucketRoute<MemcacheRouterInfo>(
+      mockSrHandle, folly::parseJson(kMcBucketRouteConfig));
   ASSERT_TRUE(rh);
   mockFiberContext();
   auto keyBucketPairs = std::vector<std::pair<std::string, std::string>>();

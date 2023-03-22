@@ -93,6 +93,11 @@ MemcacheRouterInfo::buildRouteMapWithProxy() {
   return RouteHandleFactoryMapWithProxy();
 }
 
+/* static */ MemcacheRouterInfo::RouteHandleFactoryMapForWrapper
+MemcacheRouterInfo::buildRouteMapForWrapper() {
+  return RouteHandleFactoryMapForWrapper();
+}
+
 /* static */
 std::unique_ptr<ExtraRouteHandleProviderIf<MemcacheRouterInfo>>
 MemcacheRouterInfo::buildExtraProvider() {

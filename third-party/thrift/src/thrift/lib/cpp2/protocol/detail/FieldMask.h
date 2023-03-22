@@ -124,7 +124,8 @@ class MaskRef {
       const protocol::Object& src, const protocol::Object& dst) const;
 
   std::set<Value> getKeysToCopy(
-      const std::map<Value, Value>& src, std::map<Value, Value>& dst) const;
+      const std::map<Value, Value>& src,
+      const std::map<Value, Value>& dst) const;
 
   void throwIfNotFieldMask() const;
   void throwIfNotMapMask() const;

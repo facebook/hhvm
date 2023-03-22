@@ -1000,6 +1000,38 @@ TEST(FieldMaskTest, SchemalessCopySimpleMap) {
   testCopy(mask, src, dst);
   EXPECT_EQ(dst, expected);
 }
+
+TEST(FieldMaskTest, SchemalessCopySimpleStringMap) {
+  protocol::Object src, dst, expected;
+  // src{1: map{"1": "1",
+  //            "2": "2"}}
+  {
+    std::map<std::string, std::string> map = {{"1", "1"}, {"2", "2"}};
+    src[FieldId{1}] =
+        asValueStruct<type::map<type::string_t, type::string_t>>(map);
+  }
+  // dst{1: map{"1": "3",
+  //            "2": "4"}}
+  {
+    std::map<std::string, std::string> map = {{"1", "3"}, {"2", "4"}};
+    dst[FieldId{1}] =
+        asValueStruct<type::map<type::string_t, type::string_t>>(map);
+  }
+  // expected{1: map{"1": "1",
+  //                 "2": "4"}}
+  {
+    std::map<std::string, std::string> map = {{"1", "1"}, {"2", "4"}};
+    expected[FieldId{1}] =
+        asValueStruct<type::map<type::string_t, type::string_t>>(map);
+  }
+
+  Mask mask;
+  mask.includes_ref().emplace()[1].includes_string_map_ref().emplace()["1"] =
+      allMask();
+  testCopy(mask, src, dst);
+  EXPECT_EQ(dst, expected);
+}
+
 TEST(FieldMaskTest, SchemalessCopyNestedMap) {
   protocol::Object src, dst, expected;
   // src{1: map{1: map{1: "1",
@@ -1030,6 +1062,54 @@ TEST(FieldMaskTest, SchemalessCopyNestedMap) {
   nestedIncludes[1].excludes_map_ref().emplace()[1] = allMask();
   nestedIncludes[2] = allMask();
   nestedIncludes[5].excludes_map_ref().emplace()[5] =
+      allMask(); // The object doesn't have this field.
+  // this copies src[1][1][2], src[1][1][3], and src[1][2]
+  testCopy(mask, src, dst);
+  EXPECT_EQ(dst, expected);
+}
+
+TEST(FieldMaskTest, SchemalessCopyNestedStringMap) {
+  protocol::Object src, dst, expected;
+  // src{1: map{"1": map{"1": "1",
+  //                     "2": "2"},
+  //            "2": map{"3": "3"}}}
+  {
+    std::map<std::string, std::map<std::string, std::string>> map = {
+        {"1", {{"1", "1"}, {"2", "2"}}}, {"2", {{"3", "3"}}}};
+    src[FieldId{1}] = asValueStruct<
+        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
+        map);
+  }
+  // dst{1: map{"1": map{"1": "5",
+  //                     "2": "6",
+  //                     "3": "7"}}}
+  {
+    std::map<std::string, std::map<std::string, std::string>> map = {
+        {"1", {{"1", "5"}, {"2", "6"}, {"3", "7"}}}};
+    dst[FieldId{1}] = asValueStruct<
+        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
+        map);
+  }
+  // expected{1: map{"1": map{"1": "1",
+  //                          "2": "6"}},
+  //                 "2": map{"3": "3"}}}
+  {
+    std::map<std::string, std::map<std::string, std::string>> map = {
+        {"1", {{"1", "5"}, {"2", "2"}}}, {"2", {{"3", "3"}}}};
+    expected[FieldId{1}] = asValueStruct<
+        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
+        map);
+  }
+
+  Mask mask;
+  // includes{1: includes_string_map{"1": excludes_string_map{"1": allMask()},
+  //                                 "2": allMask(),
+  //                                 "5": excludes_string_map{"5": allMask()}}}
+  auto& nestedIncludes =
+      mask.includes_ref().emplace()[1].includes_string_map_ref().emplace();
+  nestedIncludes["1"].excludes_string_map_ref().emplace()["1"] = allMask();
+  nestedIncludes["2"] = allMask();
+  nestedIncludes["5"].excludes_string_map_ref().emplace()["5"] =
       allMask(); // The object doesn't have this field.
   // this copies src[1][1][2], src[1][1][3], and src[1][2]
   testCopy(mask, src, dst);
@@ -1079,6 +1159,55 @@ TEST(FieldMaskTest, SchemalessCopyMapAddRemoveKey) {
   }
 }
 
+TEST(FieldMaskTest, SchemalessCopyStringMapAddRemoveKey) {
+  protocol::Object src;
+  // src{1: map{"1": map{"1": "1",
+  //                     "2": "2"},
+  //            "2": map{"3": "3"}}}
+  {
+    std::map<std::string, std::map<std::string, std::string>> map = {
+        {"1", {{"1", "1"}, {"2", "2"}}}, {"2", {{"3", "3"}}}};
+    src[FieldId{1}] = asValueStruct<
+        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
+        map);
+  }
+  {
+    Mask mask;
+    mask.includes_ref()
+        .emplace()[1]
+        .includes_string_map_ref()
+        .emplace()["1"]
+        .includes_string_map_ref()
+        .emplace()["1"] = allMask();
+
+    protocol::Object dst, expected;
+    std::map<std::string, std::map<std::string, std::string>> map = {
+        {"1", {{"1", "1"}}}};
+    expected[FieldId{1}] = asValueStruct<
+        type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
+        map);
+
+    // This creates a new map at dst[1]
+    testCopy(mask, src, dst);
+    EXPECT_EQ(dst, expected);
+  }
+  {
+    Mask mask;
+    mask.includes_ref()
+        .emplace()[1]
+        .includes_string_map_ref()
+        .emplace()["1"]
+        .includes_string_map_ref()
+        .emplace()["3"] = allMask();
+
+    protocol::Object dst, expected;
+
+    // This doesn't create a new map at dst[1]
+    testCopy(mask, src, dst);
+    EXPECT_EQ(dst, expected);
+  }
+}
+
 TEST(FieldMaskTest, SchemalessCopyExceptionMap) {
   protocol::Object barObject, bazObject;
   // bar{1: map{2: 20}, 2: "40"}
@@ -1089,8 +1218,31 @@ TEST(FieldMaskTest, SchemalessCopyExceptionMap) {
   bazObject[FieldId{2}] =
       asValueStruct<type::map<type::byte_t, type::i32_t>>({{3, 40}});
 
-  Mask m1; // bar[2] is not a map but has a map mask.
+  Mask m1; // bar[2] is not a map but has an integer map mask.
   m1.includes_ref().emplace()[2].includes_map_ref().emplace()[3] = allMask();
+  protocol::Object copy = barObject;
+  EXPECT_THROW(protocol::copy(m1, copy, barObject), std::runtime_error);
+  protocol::Object empty;
+  EXPECT_THROW(protocol::copy(m1, barObject, empty), std::runtime_error);
+  EXPECT_THROW(protocol::copy(m1, empty, barObject), std::runtime_error);
+  // baz[2] is a map, but since bar[2] is not, it still throws an error.
+  EXPECT_THROW(protocol::copy(m1, barObject, bazObject), std::runtime_error);
+  EXPECT_THROW(protocol::copy(m1, bazObject, barObject), std::runtime_error);
+}
+
+TEST(FieldMaskTest, SchemalessCopyExceptionStringMap) {
+  protocol::Object barObject, bazObject;
+  // bar{1: map{"2": 20}, 2: "40"}
+  barObject[FieldId{1}] =
+      asValueStruct<type::map<type::string_t, type::i32_t>>({{"2", 20}});
+  barObject[FieldId{2}].emplace_string() = "40";
+  // baz{2: map{"3": 40}}
+  bazObject[FieldId{2}] =
+      asValueStruct<type::map<type::string_t, type::i32_t>>({{"3", 40}});
+
+  Mask m1; // bar[2] is not a map but has a string map mask.
+  m1.includes_ref().emplace()[2].includes_string_map_ref().emplace()["3"] =
+      allMask();
   protocol::Object copy = barObject;
   EXPECT_THROW(protocol::copy(m1, copy, barObject), std::runtime_error);
   protocol::Object empty;

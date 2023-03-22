@@ -353,9 +353,24 @@ void MaskRef::copy(
     const std::map<Value, Value>& src, std::map<Value, Value>& dst) const {
   throwIfNotMapMask();
   // Get all map keys that are possibly masked.
-  for (Value key : getKeysToCopy(src, dst)) {
-    MaskRef ref = get(getMapIdFromValue(key));
-    copy_impl(ref, src, dst, key);
+  // TODO(dokwon): Avoid copying Value keys, as it is expensive to copy string
+  // keys.
+  std::set<Value> keys = getKeysToCopy(src, dst);
+
+  if (keys.empty()) {
+    return;
+  }
+
+  if (getArrayKeyFromValue(*keys.begin()) == ArrayKey::Integer) {
+    for (Value key : keys) {
+      MaskRef ref = get(getMapIdFromValue(key));
+      copy_impl(ref, src, dst, key);
+    }
+  } else {
+    for (Value key : keys) {
+      MaskRef ref = get(getStringFromValue(key));
+      copy_impl(ref, src, dst, key);
+    }
   }
 }
 
@@ -387,7 +402,8 @@ std::unordered_set<FieldId> MaskRef::getFieldsToCopy(
 }
 
 std::set<Value> MaskRef::getKeysToCopy(
-    const std::map<Value, Value>& src, std::map<Value, Value>& dst) const {
+    const std::map<Value, Value>& src,
+    const std::map<Value, Value>& dst) const {
   // cannot use unordered_set as Value doesn't have hash function.
   // TODO: check if all keys have the same type
   std::set<Value> keys;

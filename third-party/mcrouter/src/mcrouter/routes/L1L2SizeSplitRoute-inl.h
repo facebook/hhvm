@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "L1L2SizeSplitRoute.h"
+#pragma once
 
 #include <limits>
 #include <memory>
@@ -26,7 +26,9 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-McGetReply L1L2SizeSplitRoute::route(const McGetRequest& req) const {
+template <class RouterInfo>
+McGetReply L1L2SizeSplitRoute<RouterInfo>::route(
+    const McGetRequest& req) const {
   // Set flag on the read path. Server will only return back sentinel values
   // when this flag is present in order to accommodate old clients.
   // TODO It's probably fine to const_cast and avoid the copy here
@@ -69,7 +71,9 @@ McGetReply L1L2SizeSplitRoute::route(const McGetRequest& req) const {
   return reply;
 }
 
-McSetReply L1L2SizeSplitRoute::route(const McSetRequest& req) const {
+template <class RouterInfo>
+McSetReply L1L2SizeSplitRoute<RouterInfo>::route(
+    const McSetRequest& req) const {
   if (fullSetShouldGoToL1(req)) {
     return l1_->route(req);
   }
@@ -98,7 +102,8 @@ McSetReply L1L2SizeSplitRoute::route(const McSetRequest& req) const {
   }
 }
 
-folly::Optional<McLeaseGetReply> L1L2SizeSplitRoute::doFilter(
+template <class RouterInfo>
+folly::Optional<McLeaseGetReply> L1L2SizeSplitRoute<RouterInfo>::doFilter(
     const McLeaseGetReply& reply) const {
   folly::Optional<McLeaseGetReply> ret;
   constexpr uint64_t kHotMissToken = 1;
@@ -112,17 +117,20 @@ folly::Optional<McLeaseGetReply> L1L2SizeSplitRoute::doFilter(
   return ret;
 }
 
+template <class RouterInfo>
 template <class Reply>
-folly::Optional<Reply> L1L2SizeSplitRoute::doFilter(
+folly::Optional<Reply> L1L2SizeSplitRoute<RouterInfo>::doFilter(
     const Reply& /* unused */) const {
   return folly::none;
 }
 
+template <class RouterInfo>
 template <class Request>
 typename std::enable_if<
     folly::IsOneOf<Request, McLeaseGetRequest, McGetsRequest>::value,
     ReplyT<Request>>::type
-L1L2SizeSplitRoute::doRoute(const Request& req, size_t retriesLeft) const {
+L1L2SizeSplitRoute<RouterInfo>::doRoute(const Request& req, size_t retriesLeft)
+    const {
   // Set flag on the read path. Server will only return back sentinel values
   // when this flag is present in order to accommodate old clients.
   const auto l1ReqWithFlag = [&req]() {
@@ -170,7 +178,9 @@ L1L2SizeSplitRoute::doRoute(const Request& req, size_t retriesLeft) const {
   }
 }
 
-McLeaseSetReply L1L2SizeSplitRoute::route(const McLeaseSetRequest& req) const {
+template <class RouterInfo>
+McLeaseSetReply L1L2SizeSplitRoute<RouterInfo>::route(
+    const McLeaseSetRequest& req) const {
   if (fullSetShouldGoToL1(req)) {
     return l1_->route(req);
   }
@@ -233,8 +243,9 @@ McLeaseSetReply L1L2SizeSplitRoute::route(const McLeaseSetRequest& req) const {
   }
 }
 
-std::shared_ptr<MemcacheRouteHandleIf> makeL1L2SizeSplitRoute(
-    RouteHandleFactory<MemcacheRouteHandleIf>& factory,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeL1L2SizeSplitRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
     const folly::dynamic& json) {
   checkLogic(json.isObject(), "L1L2SizeSplitRoute should be an object");
   checkLogic(json.count("l1"), "L1L2SizeSplitRoute: no l1 route");
@@ -276,7 +287,7 @@ std::shared_ptr<MemcacheRouteHandleIf> makeL1L2SizeSplitRoute(
     bothFullSet = json["both_full_set"].getBool();
   }
 
-  uint32_t numRetries = L1L2SizeSplitRoute::kDefaultNumRetries;
+  uint32_t numRetries = L1L2SizeSplitRoute<RouterInfo>::kDefaultNumRetries;
   if (json.count("retries")) {
     checkLogic(
         json["retries"].isInt(),
@@ -285,12 +296,12 @@ std::shared_ptr<MemcacheRouteHandleIf> makeL1L2SizeSplitRoute(
     checkLogic(
         numRetries > 0, "L1L2SizeSplitRoute: number of retries must be > 0");
     checkLogic(
-        numRetries <= L1L2SizeSplitRoute::kMaxNumRetries,
+        numRetries <= L1L2SizeSplitRoute<RouterInfo>::kMaxNumRetries,
         "L1L2SizeSplitRoute: maximum number of retries is " +
-            std::to_string(L1L2SizeSplitRoute::kMaxNumRetries));
+            std::to_string(L1L2SizeSplitRoute<RouterInfo>::kMaxNumRetries));
   }
 
-  return std::make_shared<MemcacheRouteHandle<L1L2SizeSplitRoute>>(
+  return makeRouteHandleWithInfo<RouterInfo, L1L2SizeSplitRoute>(
       factory.create(json["l1"]),
       factory.create(json["l2"]),
       threshold,
@@ -299,8 +310,6 @@ std::shared_ptr<MemcacheRouteHandleIf> makeL1L2SizeSplitRoute(
       bothFullSet,
       numRetries);
 }
-
-constexpr folly::StringPiece L1L2SizeSplitRoute::kHashAlias;
 
 } // namespace mcrouter
 } // namespace memcache

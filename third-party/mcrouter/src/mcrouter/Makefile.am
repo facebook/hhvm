@@ -139,7 +139,7 @@ libmcroutercore_a_SOURCES = \
   routes/KeySplitRoute.cpp \
   routes/KeySplitRoute.h \
   routes/L1L2CacheRouteFactory.h \
-  routes/L1L2SizeSplitRoute.cpp \
+  routes/L1L2SizeSplitRoute-inl.h \
   routes/L1L2SizeSplitRoute.h \
   routes/LatencyInjectionRoute.h \
   routes/LatencyInjectionRoute.cpp \

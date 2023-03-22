@@ -48,7 +48,12 @@ namespace mcrouter {
  * All other operations will go to L1.
  *
  */
+template <class RouterInfo>
 class L1L2SizeSplitRoute {
+ private:
+  using RouteHandleIf = typename RouterInfo::RouteHandleIf;
+  using RouteHandlePtr = typename RouterInfo::RouteHandlePtr;
+
  public:
   static constexpr uint32_t kDefaultNumRetries = 1;
   static constexpr uint32_t kMaxNumRetries = 10;
@@ -59,7 +64,12 @@ class L1L2SizeSplitRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<MemcacheRouteHandleIf>& t) const {
+      const RouteHandleTraverser<RouteHandleIf>& t) const {
+    if constexpr (!carbon::ListContains<
+                      typename memcache::MemcacheRouterInfo::AllRequests,
+                      Request>::value) {
+      return false;
+    }
     if (t(*l1_, req)) {
       return true;
     }
@@ -67,8 +77,8 @@ class L1L2SizeSplitRoute {
   }
 
   L1L2SizeSplitRoute(
-      std::shared_ptr<MemcacheRouteHandleIf> l1,
-      std::shared_ptr<MemcacheRouteHandleIf> l2,
+      RouteHandlePtr l1,
+      RouteHandlePtr l2,
       size_t threshold,
       int32_t ttlThreshold,
       int32_t failureTtl,
@@ -116,6 +126,11 @@ class L1L2SizeSplitRoute {
       !folly::IsOneOf<Request, McLeaseGetRequest, McGetsRequest>::value,
       ReplyT<Request>>::type
   route(const Request& req) const {
+    if constexpr (!carbon::ListContains<
+                      typename memcache::MemcacheRouterInfo::AllRequests,
+                      Request>::value) {
+      return createReply<Request>(ErrorReply, "Unsupported request type");
+    }
     return l1_->route(req);
   }
 
@@ -131,8 +146,8 @@ class L1L2SizeSplitRoute {
   static constexpr size_t kExtraKeySpaceNeeded = kHashAlias.size() +
       detail::numDigitsBase10(std::numeric_limits<uint64_t>::max());
 
-  const std::shared_ptr<MemcacheRouteHandleIf> l1_;
-  const std::shared_ptr<MemcacheRouteHandleIf> l2_;
+  const std::shared_ptr<RouteHandleIf> l1_;
+  const std::shared_ptr<RouteHandleIf> l2_;
   const size_t threshold_{0};
   const int32_t ttlThreshold_{0};
   const int32_t failureTtl_{0};
@@ -185,10 +200,13 @@ class L1L2SizeSplitRoute {
   folly::Optional<Reply> doFilter(const Reply& reply) const;
 };
 
-std::shared_ptr<MemcacheRouteHandleIf> makeL1L2SizeSplitRoute(
-    RouteHandleFactory<MemcacheRouteHandleIf>& factory,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr makeL1L2SizeSplitRoute(
+    RouteHandleFactory<typename RouterInfo::RouteHandleIf>& factory,
     const folly::dynamic& json);
 
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook
+
+#include "mcrouter/routes/L1L2SizeSplitRoute-inl.h"

@@ -355,7 +355,7 @@ McRouteHandleProvider<MemcacheRouterInfo>::buildRouteMap() {
       {"HostIdRoute", &makeHostIdRoute<MemcacheRouterInfo>},
       {"LatencyInjectionRoute", &makeLatencyInjectionRoute<MemcacheRouterInfo>},
       {"L1L2CacheRoute", &makeL1L2CacheRoute<MemcacheRouterInfo>},
-      {"L1L2SizeSplitRoute", &makeL1L2SizeSplitRoute},
+      {"L1L2SizeSplitRoute", &makeL1L2SizeSplitRoute<MemcacheRouterInfo>},
       {"KeySplitRoute", &makeKeySplitRoute},
       {"LatestRoute", &makeLatestRoute<MemcacheRouterInfo>},
       {"LoadBalancerRoute", &makeLoadBalancerRoute<MemcacheRouterInfo>},

@@ -137,6 +137,11 @@ void t_ast_generator::generate_program() {
                      .definitions()
                      .ensure();
     for (auto& def : program->definitions()) {
+      // Thrift schematizer does not schematize generated definitions.
+      // TODO: Support schematize generated definitions.
+      if (def.generated()) {
+        continue;
+      }
       defs.push_back(definition_index.at(&def));
 
       resolved_location begin(def.src_range().begin, source_mgr_);

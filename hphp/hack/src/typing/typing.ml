@@ -6422,8 +6422,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (env, te, ty, val_ty_mismatch_opt)
     | (_, pos, Array_get (e1, Some e)) ->
-      let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (env, te, ty) = expr env e ~allow_awaitable in
+      let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let env = might_throw env in
       let (_, p1, _) = e1 in
       let ( env,

@@ -208,6 +208,13 @@ class ResourcePoolSet {
   // returned.
   std::string describe() const;
 
+  template <typename F>
+  void forEachResourcePool(F&& f) const {
+    for (auto& resourcePool : resourcePools_) {
+      std::forward<F>(f)(resourcePool.get());
+    }
+  }
+
  private:
   std::string describeExecutor(
       std::optional<std::reference_wrapper<folly::Executor>> executor) const;

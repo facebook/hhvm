@@ -27,20 +27,8 @@ namespace apache::thrift {
 // This class provides all the helper functionalities of ConcurrencyController
 class ConcurrencyControllerBase : public ConcurrencyControllerInterface {
  public:
-  class Observer {
-   public:
-    virtual ~Observer() {}
-    virtual void onFinishExecution(ServerRequest& request) = 0;
-  };
-
   // not thread-safe, should be called up front
-  void setObserver(std::unique_ptr<Observer> ob);
-
-  // Not thread-safe and should only be called once from the main thread
-  static void setGlobalObserver(std::shared_ptr<Observer> observer);
-
-  // thread-safe. grab the current global observer if any
-  static Observer* getGlobalObserver();
+  void setObserver(std::unique_ptr<Observer> ob) override;
 
  protected:
   void notifyOnFinishExecution(ServerRequest& request);

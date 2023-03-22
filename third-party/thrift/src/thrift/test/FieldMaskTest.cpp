@@ -45,6 +45,7 @@ TEST(FieldMaskTest, ExampleFieldMask) {
   nestedIncludes[6] = allMask();
   includes[8] = noneMask(); // not required
 }
+
 TEST(FieldMaskTest, ExampleMapMask) {
   // includes_map{7: excludes_map{},
   //              3: excludes{}}
@@ -52,6 +53,15 @@ TEST(FieldMaskTest, ExampleMapMask) {
   auto& includes_map = m.includes_map_ref().emplace();
   includes_map[7].excludes_map_ref().emplace();
   includes_map[3] = allMask();
+}
+
+TEST(FieldMaskTest, ExampleStringMapMask) {
+  // includes_string_map{"7": excludes_string_map{},
+  //                     "3": excludes{}}
+  Mask m;
+  auto& includes_string_map = m.includes_string_map_ref().emplace();
+  includes_string_map["7"].excludes_string_map_ref().emplace();
+  includes_string_map["3"] = allMask();
 }
 
 TEST(FieldMaskTest, Constant) {

@@ -32,6 +32,7 @@ namespace py thrift.lib.thrift.field_mask
 
 typedef map<i16, Mask> (cpp.template = "folly::F14VectorMap") FieldIdToMask
 typedef map<i64, Mask> (cpp.template = "folly::F14VectorMap") MapIdToMask
+typedef map<string, Mask> (cpp.template = "folly::F14VectorMap") MapStringToMask
 
 /**
  *  Overview
@@ -84,6 +85,9 @@ union Mask {
 
   3: MapIdToMask excludes_map; // Map fields that will be excluded.
   4: MapIdToMask includes_map; // Map fields that will be included.
+
+  5: MapStringToMask excludes_string_map; // String map fields that will be excluded.
+  6: MapStringToMask includes_string_map; // String map fields that will be included.
 }
 
 const Mask allMask = {"excludes": {}}; // Masks all fields.

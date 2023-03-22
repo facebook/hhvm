@@ -44,6 +44,10 @@ Mask reverseMask(Mask mask) {
       mask.includes_map_ref() = std::move(tmp);
       return mask;
     }
+    // TODO(dokwon): Add support for string map mask.
+    case Mask::Type::includes_string_map:
+    case Mask::Type::excludes_string_map:
+      folly::throw_exception<std::runtime_error>("not implemented");
     case Mask::Type::__EMPTY__:
       folly::throw_exception<std::runtime_error>("Can not reverse empty masks");
   }

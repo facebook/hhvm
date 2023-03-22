@@ -72,8 +72,10 @@ TRACE_SET_MOD(hhbc);
 
 UnitEmitter::UnitEmitter(const SHA1& sha1,
                          const SHA1& bcSha1,
-                         const Native::FuncTable& nativeFuncs)
+                         const Native::FuncTable& nativeFuncs,
+                         const PackageInfo& packageInfo)
   : m_nativeFuncs(nativeFuncs)
+  , m_packageInfo(packageInfo)
   , m_sha1(sha1)
   , m_bcSha1(bcSha1)
   , m_nextFuncSn(0)
@@ -571,6 +573,13 @@ void UnitEmitter::finish() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Package Info.
+
+const PackageInfo& UnitEmitter::getPackageInfo() const {
+  return m_packageInfo;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 
 ServiceData::ExportedCounter* g_hhbc_size =
@@ -849,6 +858,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       sd(m_metaData)
         (m_fileAttributes)
         (m_moduleName)
+        (m_packageInfo)
         (m_symbol_refs)
         (m_bcSha1)
         (m_fatalUnit)
@@ -1088,8 +1098,8 @@ template void UnitEmitter::serde<>(BlobEncoder&, bool);
 std::unique_ptr<UnitEmitter>
 createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
                 std::string err, Location::Range loc) {
-  auto ue =
-    std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
+                                          RepoOptions::defaults().packageInfo());
   ue->m_filepath = filename;
 
   ue->m_fatalUnit = true;

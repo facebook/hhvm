@@ -91,7 +91,8 @@ std::unique_ptr<UnitEmitter> parse(LazyUnitContentsLoader& loader,
       contents.size(),
       filename,
       loader.sha1(),
-      nativeFuncs
+      nativeFuncs,
+      RepoOptions::forFile(filename).packageInfo()
     );
   }
 

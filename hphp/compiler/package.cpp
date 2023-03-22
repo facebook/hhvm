@@ -218,6 +218,7 @@ createSymlinkWrapper(const std::string& fileName,
     fileName.c_str(),
     SHA1{string_sha1(content)},
     Native::s_noNativeFuncs,
+    origUE->m_packageInfo,
     false
   );
 }
@@ -341,7 +342,8 @@ Package::parseRun(const std::string& content,
         content.size(),
         fileName.c_str(),
         SHA1{string_sha1(content)},
-        Native::s_noNativeFuncs
+        Native::s_noNativeFuncs,
+        repoOptions.packageInfo()
       );
       if (meta.m_targetPath) {
         ue = createSymlinkWrapper(

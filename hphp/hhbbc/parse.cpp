@@ -1098,6 +1098,7 @@ ParsedUnit parse_unit(const UnitEmitter& ue) {
   ret.unit->metaData       = ue.m_metaData;
   ret.unit->fileAttributes = ue.m_fileAttributes;
   ret.unit->moduleName     = ue.m_moduleName;
+  ret.unit->packageInfo    = ue.m_packageInfo;
 
   if (RO::EvalAbortBuildOnVerifyError && !ue.check(false)) {
     // Record a FatalInfo without a location. This represents a

@@ -3353,6 +3353,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
+  const PackageInfo& packageInfo,
   bool swallowErrors
 ) {
   tracing::Block _{
@@ -3365,7 +3366,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   };
 
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
-  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, packageInfo);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

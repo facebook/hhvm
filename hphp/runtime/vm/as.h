@@ -52,6 +52,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* filename,
   const SHA1&,
   const Native::FuncTable&,
+  const PackageInfo&,
   bool swallowErrors = true
 );
 

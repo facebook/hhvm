@@ -198,6 +198,21 @@ TypeOrReduced builtin_trait_exists(ISS& env, const php::Func* func,
   return handle_oodecl_exists(env, func, fca, OODeclExistsOp::Trait);
 }
 
+TypeOrReduced builtin_package_exists(ISS& env, const php::Func* func,
+                                     const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto name = getArg(env, func, fca, 0);
+  if (!name.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const v = tv(name);
+  if (!v) return NoReduced{};
+  auto const packageName = v->m_data.pstr;
+  auto const unit = env.index.lookup_func_unit(*env.ctx.func);
+  if (!unit) return NoReduced{};
+  constprop(env);
+  return unit->packageInfo.isPackageInActiveDeployment(packageName)
+    ? TTrue : TFalse;
+}
+
 TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
                                      const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -529,6 +544,7 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \
   X(trait_exists, trait_exists)                                         \
+  X(package_exists, HH\\package_exists)                                 \
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_callable, is_callable)                                           \
   X(is_list_like, HH\\is_list_like)                                     \

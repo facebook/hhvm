@@ -107,7 +107,7 @@ void UnitEmitterSerdeWrapper::serde(SerDe& sd) {
       // Systemlib units are not currently deserialized from extern workers
       // so we never need to supply a native func table here.
       auto ue = std::make_unique<UnitEmitter>(
-        sha1, SHA1{}, Native::s_noNativeFuncs
+        sha1, SHA1{}, Native::s_noNativeFuncs, RepoOptions::defaults().packageInfo()
       );
       ue->m_filepath = makeStaticString(filepath);
       ue->serde(sd, false);

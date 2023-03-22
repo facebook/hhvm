@@ -69,7 +69,8 @@ struct UnitEmitter {
 
   explicit UnitEmitter(const SHA1& sha1,
                        const SHA1& bcSha1,
-                       const Native::FuncTable&);
+                       const Native::FuncTable&,
+                       const PackageInfo&);
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
@@ -265,6 +266,11 @@ struct UnitEmitter {
 
   Id getEntryPointId() const;
 
+  /////////////////////////////////////////////////////////////////////////////
+  // EntryPoint.
+
+  const PackageInfo& getPackageInfo() const;
+
 private:
   void calculateEntryPointId();
 
@@ -298,6 +304,7 @@ public:
   FatalOp m_fatalOp;
   std::string m_fatalMsg;
   const StringData* m_moduleName{nullptr};
+  PackageInfo m_packageInfo;
 
   /*
    * HackC may report a list of referenced symbols which either could not be

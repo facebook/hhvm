@@ -1044,7 +1044,8 @@ RepoFile::loadUnitEmitter(const StringData* path,
   );
 
   auto ue = std::make_unique<UnitEmitter>(SHA1{ (uint64_t)info->unitSn },
-                                          SHA1{}, nativeFuncs);
+                                          SHA1{}, nativeFuncs,
+                                          RepoOptions::defaults().packageInfo());
   ue->m_filepath = info->path;
   ue->m_sn = info->unitSn;
   ue->serde(blob.decoder, lazy);

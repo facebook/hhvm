@@ -33,7 +33,8 @@ std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
 	const SHA1& sha1,
   const SHA1& bcSha1,
   const Native::FuncTable& nativeFuncs,
-  bool swallowErrors
+  bool swallowErrors,
+  const PackageInfo&
 );
 
 }

@@ -231,7 +231,7 @@ struct RepoOptions {
   static const RepoOptions& defaults();
   static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
 
-  static const RepoOptions& forFile(const char* path);
+  static const RepoOptions& forFile(const std::string& path);
 private:
   RepoOptions() = default;
   RepoOptions(const char* str, const char* file);

@@ -368,7 +368,7 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.enable_xhp_class_modifier = EnableXHPClassModifier;
 }
 
-const RepoOptions& RepoOptions::forFile(const char* path) {
+const RepoOptions& RepoOptions::forFile(const std::string& path) {
   tracing::BlockNoTrace _{"repo-options"};
 
   std::string fpath{path};

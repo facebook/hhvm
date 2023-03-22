@@ -238,7 +238,8 @@ template <typename SerDe> void Unit::serde(SerDe& sd) {
     (srcLocs)
     (metaData)
     (fileAttributes)
-    (moduleName);
+    (moduleName)
+    (packageInfo);
 }
 
 //////////////////////////////////////////////////////////////////////

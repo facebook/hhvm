@@ -88,9 +88,11 @@ CompilerResult unitEmitterFromHackCUnitHandleErrors(const hackc::hhbc::Unit& uni
 	                                                  const SHA1& bcSha1,
                                                     const Native::FuncTable& nativeFuncs,
                                                     bool& internal_error,
-                                                    CompileAbortMode mode) {
+                                                    CompileAbortMode mode,
+                                                    const PackageInfo& packageInfo) {
   try {
-    return unitEmitterFromHackCUnit(unit, filename, sha1, bcSha1, nativeFuncs, false);
+    return unitEmitterFromHackCUnit(unit, filename, sha1, bcSha1,
+                                    nativeFuncs, false, packageInfo);
   } catch (const FatalErrorException&) {
     throw;
   } catch (const TranslationFatal& ex) {
@@ -108,13 +110,15 @@ CompilerResult assemble_string_handle_errors(const char* code,
                                              const SHA1& sha1,
                                              const Native::FuncTable& nativeFuncs,
                                              bool& internal_error,
-                                             CompileAbortMode mode) {
+                                             CompileAbortMode mode,
+                                             const PackageInfo& packageInfo) {
   try {
     return assemble_string(hhas.c_str(),
                            hhas.length(),
                            filename,
                            sha1,
                            nativeFuncs,
+                           packageInfo,
                            false);  /* swallow errors */
   } catch (const FatalErrorException&) {
     throw;
@@ -212,8 +216,9 @@ CompilerResult hackc_compile(
 
     auto const bcSha1 = SHA1(hash_unit(*unit_wrapped));
     const hackc::hhbc::Unit* unit = hackCUnitRaw(unit_wrapped);
-    auto hackCResult = unitEmitterFromHackCUnitHandleErrors
-      (*unit, filename, sha1, bcSha1, nativeFuncs, internal_error, mode
+    auto hackCResult = unitEmitterFromHackCUnitHandleErrors(
+      *unit, filename, sha1, bcSha1, nativeFuncs,
+      internal_error, mode, options.packageInfo()
     );
     return hackCResult;
   };
@@ -240,7 +245,8 @@ CompilerResult hackc_compile(
                                             sha1,
                                             nativeFuncs,
                                             internal_error,
-                                            mode);
+                                            mode,
+                                            options.packageInfo());
     return res;
   };
 

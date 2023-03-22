@@ -86,6 +86,15 @@ TEST(FieldMaskTest, IsAllMask) {
     EXPECT_FALSE((MaskRef{m, false}).isAllMask());
     EXPECT_FALSE((MaskRef{m, true}).isAllMask());
   }
+  {
+    Mask m;
+    m.includes_string_map_ref()
+        .emplace()["3"]
+        .includes_string_map_ref()
+        .emplace();
+    EXPECT_FALSE((MaskRef{m, false}).isAllMask());
+    EXPECT_FALSE((MaskRef{m, true}).isAllMask());
+  }
 }
 
 TEST(FieldMaskTest, IsNoneMask) {
@@ -102,6 +111,15 @@ TEST(FieldMaskTest, IsNoneMask) {
   {
     Mask m;
     m.includes_map_ref().emplace()[3].includes_map_ref().emplace();
+    EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
+    EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref()
+        .emplace()["3"]
+        .includes_string_map_ref()
+        .emplace();
     EXPECT_FALSE((MaskRef{m, false}).isNoneMask());
     EXPECT_FALSE((MaskRef{m, true}).isNoneMask());
   }
@@ -136,36 +154,76 @@ TEST(FieldMaskTest, IsExclusive) {
     EXPECT_TRUE((MaskRef{m, false}).isExclusive());
     EXPECT_FALSE((MaskRef{m, true}).isExclusive());
   }
+  {
+    Mask m;
+    m.includes_string_map_ref().emplace()["5"] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isExclusive());
+    EXPECT_TRUE((MaskRef{m, true}).isExclusive());
+  }
+  {
+    Mask m;
+    m.excludes_string_map_ref().emplace()["5"] = noneMask();
+    EXPECT_TRUE((MaskRef{m, false}).isExclusive());
+    EXPECT_FALSE((MaskRef{m, true}).isExclusive());
+  }
 }
 
 TEST(FieldMaskTest, MaskRefIsMask) {
   EXPECT_TRUE((MaskRef{allMask(), false}).isFieldMask());
   EXPECT_FALSE((MaskRef{allMask(), false}).isMapMask());
+  EXPECT_FALSE((MaskRef{allMask(), false}).isIntegerMapMask());
+  EXPECT_FALSE((MaskRef{allMask(), false}).isStringMapMask());
   EXPECT_TRUE((MaskRef{noneMask(), true}).isFieldMask());
   EXPECT_FALSE((MaskRef{noneMask(), true}).isMapMask());
+  EXPECT_FALSE((MaskRef{noneMask(), true}).isIntegerMapMask());
+  EXPECT_FALSE((MaskRef{noneMask(), true}).isStringMapMask());
   {
     Mask m;
     m.includes_ref().emplace()[5] = allMask();
     EXPECT_TRUE((MaskRef{m, false}).isFieldMask());
     EXPECT_FALSE((MaskRef{m, true}).isMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
   }
   {
     Mask m;
     m.excludes_ref().emplace()[5] = noneMask();
     EXPECT_TRUE((MaskRef{m, false}).isFieldMask());
     EXPECT_FALSE((MaskRef{m, true}).isMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
   }
   {
     Mask m;
     m.includes_map_ref().emplace()[5] = allMask();
     EXPECT_FALSE((MaskRef{m, false}).isFieldMask());
     EXPECT_TRUE((MaskRef{m, true}).isMapMask());
+    EXPECT_TRUE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
   }
   {
     Mask m;
     m.excludes_map_ref().emplace()[5] = noneMask();
     EXPECT_FALSE((MaskRef{m, false}).isFieldMask());
     EXPECT_TRUE((MaskRef{m, true}).isMapMask());
+    EXPECT_TRUE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isStringMapMask());
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref().emplace()["5"] = allMask();
+    EXPECT_FALSE((MaskRef{m, false}).isFieldMask());
+    EXPECT_TRUE((MaskRef{m, true}).isMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_TRUE((MaskRef{m, true}).isStringMapMask());
+  }
+  {
+    Mask m;
+    m.excludes_string_map_ref().emplace()["5"] = noneMask();
+    EXPECT_FALSE((MaskRef{m, false}).isFieldMask());
+    EXPECT_TRUE((MaskRef{m, true}).isMapMask());
+    EXPECT_FALSE((MaskRef{m, true}).isIntegerMapMask());
+    EXPECT_TRUE((MaskRef{m, true}).isStringMapMask());
   }
 }
 
@@ -175,24 +233,43 @@ TEST(FieldMaskTest, MaskRefGetMask) {
     m.includes_ref().emplace()[5] = allMask();
     EXPECT_EQ(getFieldMask(m), &*m.includes_ref());
     EXPECT_EQ(getMapMask(m), nullptr);
+    EXPECT_EQ(getStringMapMask(m), nullptr);
   }
   {
     Mask m;
     m.excludes_ref().emplace()[5] = noneMask();
     EXPECT_EQ(getFieldMask(m), &*m.excludes_ref());
     EXPECT_EQ(getMapMask(m), nullptr);
+    EXPECT_EQ(getStringMapMask(m), nullptr);
   }
   {
     Mask m;
     m.includes_map_ref().emplace()[5] = allMask();
-    EXPECT_EQ(getMapMask(m), &*m.includes_map_ref());
     EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getMapMask(m), &*m.includes_map_ref());
+    EXPECT_EQ(getStringMapMask(m), nullptr);
   }
   {
     Mask m;
     m.excludes_map_ref().emplace()[5] = noneMask();
-    EXPECT_EQ(getMapMask(m), &*m.excludes_map_ref());
     EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getMapMask(m), &*m.excludes_map_ref());
+    EXPECT_EQ(getStringMapMask(m), nullptr);
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref().emplace()["5"] = allMask();
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getMapMask(m), nullptr);
+    EXPECT_EQ(getStringMapMask(m), &*m.includes_string_map_ref());
+  }
+  {
+    Mask m;
+    m.excludes_string_map_ref().emplace()["5"] = noneMask();
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getMapMask(m), nullptr);
+    EXPECT_EQ(getStringMapMask(m), &*m.excludes_string_map_ref());
   }
 }
 
@@ -207,6 +284,16 @@ TEST(FieldMaskTest, ThrowIfContainsMapMask) {
   {
     Mask m;
     m.excludes_map_ref().emplace()[5] = allMask();
+    EXPECT_THROW(throwIfContainsMapMask(m), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref().emplace()["5"] = allMask();
+    EXPECT_THROW(throwIfContainsMapMask(m), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.excludes_string_map_ref().emplace()["5"] = allMask();
     EXPECT_THROW(throwIfContainsMapMask(m), std::runtime_error);
   }
   {
@@ -230,7 +317,32 @@ TEST(FieldMaskTest, ThrowIfContainsMapMask) {
     includes[2].excludes_map_ref().emplace()[5] = noneMask();
     EXPECT_THROW(throwIfContainsMapMask(m), std::runtime_error);
   }
+  {
+    Mask m;
+    auto& includes = m.includes_ref().emplace();
+    includes[1] = allMask();
+    includes[2].includes_string_map_ref().emplace()["5"] = noneMask();
+    EXPECT_THROW(throwIfContainsMapMask(m), std::runtime_error);
+  }
+  {
+    Mask m;
+    auto& includes = m.includes_ref().emplace();
+    includes[1] = allMask();
+    includes[2].excludes_string_map_ref().emplace()["5"] = noneMask();
+    EXPECT_THROW(throwIfContainsMapMask(m), std::runtime_error);
+  }
 }
+
+namespace {
+template <typename Id>
+auto getId(std::int16_t id) {
+  if constexpr (std::is_same_v<Id, std::string>) {
+    return std::to_string(id);
+  } else {
+    return Id{id};
+  }
+}
+} // namespace
 
 // test MaskRef get method with includes mask. nested is mask.includes[_map][9].
 template <typename Id>
@@ -238,17 +350,21 @@ void testMaskRefGetIncludes(const Mask& mask, const Mask& nested) {
   MaskRef ref{mask, false};
   MaskRef refExclusion{mask, true};
 
-  EXPECT_TRUE(ref.get(Id{7}).isNoneMask()); // doesn't exist
-  EXPECT_TRUE(refExclusion.get(Id{7}).isAllMask()); // doesn't exist
-  EXPECT_TRUE(ref.get(Id{8}).isAllMask());
-  EXPECT_TRUE(refExclusion.get(Id{8}).isNoneMask());
-  EXPECT_TRUE(literallyEqual(ref.get(Id{9}), (MaskRef{nested, false})));
-  EXPECT_TRUE(literallyEqual(refExclusion.get(Id{9}), (MaskRef{nested, true})));
+  EXPECT_TRUE(ref.get(getId<Id>(7)).isNoneMask()); // doesn't exist
+  EXPECT_TRUE(refExclusion.get(getId<Id>(7)).isAllMask()); // doesn't exist
+  EXPECT_TRUE(ref.get(getId<Id>(8)).isAllMask());
+  EXPECT_TRUE(refExclusion.get(getId<Id>(8)).isNoneMask());
+  EXPECT_TRUE(literallyEqual(ref.get(getId<Id>(9)), (MaskRef{nested, false})));
+  EXPECT_TRUE(
+      literallyEqual(refExclusion.get(getId<Id>(9)), (MaskRef{nested, true})));
   // recursive calls to MaskRef Get
-  EXPECT_TRUE(ref.get(Id{9}).get(Id{4}).isAllMask());
-  EXPECT_TRUE(refExclusion.get(Id{9}).get(Id{4}).isNoneMask());
-  EXPECT_TRUE(ref.get(Id{9}).get(Id{5}).isNoneMask()); // doesn't exist
-  EXPECT_TRUE(refExclusion.get(Id{9}).get(Id{5}).isAllMask()); // doesn't exist
+  EXPECT_TRUE(ref.get(getId<Id>(9)).get(getId<Id>(4)).isAllMask());
+  EXPECT_TRUE(refExclusion.get(getId<Id>(9)).get(getId<Id>(4)).isNoneMask());
+  EXPECT_TRUE(
+      ref.get(getId<Id>(9)).get(getId<Id>(5)).isNoneMask()); // doesn't exist
+  EXPECT_TRUE(refExclusion.get(getId<Id>(9))
+                  .get(getId<Id>(5))
+                  .isAllMask()); // doesn't exist
 }
 
 TEST(FieldMaskTest, MaskRefGetIncludes) {
@@ -273,24 +389,38 @@ TEST(FieldMaskTest, MaskRefGetIncludesMap) {
   testMaskRefGetIncludes<MapId>(mask, includes[9]);
 }
 
+TEST(FieldMaskTest, MaskRefGetIncludesStringMap) {
+  Mask mask;
+  // includes_string_map{"8": excludes{},
+  //                     "9": includes_string_map{"4": excludes{}}
+  auto& includes = mask.includes_string_map_ref().emplace();
+  includes["8"] = allMask();
+  includes["9"].includes_string_map_ref().emplace()["4"] = allMask();
+
+  testMaskRefGetIncludes<std::string>(mask, includes["9"]);
+}
+
 // test MaskRef get method with excludes mask. nested is mask.excludes[_map][9].
 template <typename Id>
 void testMaskRefGetExcludes(const Mask& mask, const Mask& nested) {
   MaskRef ref{mask, false};
   MaskRef refExclusion{mask, true};
 
-  EXPECT_TRUE(ref.get(Id{7}).isAllMask()); // doesn't exist
-  EXPECT_TRUE(refExclusion.get(Id{7}).isNoneMask()); // doesn't exist
-  EXPECT_TRUE(ref.get(Id{8}).isNoneMask());
-  EXPECT_TRUE(refExclusion.get(Id{8}).isAllMask());
-  EXPECT_TRUE(literallyEqual(ref.get(Id{9}), (MaskRef{nested, true})));
+  EXPECT_TRUE(ref.get(getId<Id>(7)).isAllMask()); // doesn't exist
+  EXPECT_TRUE(refExclusion.get(getId<Id>(7)).isNoneMask()); // doesn't exist
+  EXPECT_TRUE(ref.get(getId<Id>(8)).isNoneMask());
+  EXPECT_TRUE(refExclusion.get(getId<Id>(8)).isAllMask());
+  EXPECT_TRUE(literallyEqual(ref.get(getId<Id>(9)), (MaskRef{nested, true})));
   EXPECT_TRUE(
-      literallyEqual(refExclusion.get(Id{9}), (MaskRef{nested, false})));
+      literallyEqual(refExclusion.get(getId<Id>(9)), (MaskRef{nested, false})));
   // recursive calls to MaskRef Get
-  EXPECT_TRUE(ref.get(Id{9}).get(Id{4}).isNoneMask());
-  EXPECT_TRUE(refExclusion.get(Id{9}).get(Id{4}).isAllMask());
-  EXPECT_TRUE(ref.get(Id{9}).get(Id{5}).isAllMask()); // doesn't exist
-  EXPECT_TRUE(refExclusion.get(Id{9}).get(Id{5}).isNoneMask()); // doesn't exist
+  EXPECT_TRUE(ref.get(getId<Id>(9)).get(getId<Id>(4)).isNoneMask());
+  EXPECT_TRUE(refExclusion.get(getId<Id>(9)).get(getId<Id>(4)).isAllMask());
+  EXPECT_TRUE(
+      ref.get(getId<Id>(9)).get(getId<Id>(5)).isAllMask()); // doesn't exist
+  EXPECT_TRUE(refExclusion.get(getId<Id>(9))
+                  .get(getId<Id>(5))
+                  .isNoneMask()); // doesn't exist
 }
 
 TEST(FieldMaskTest, MaskRefGetExcludes) {
@@ -315,26 +445,41 @@ TEST(FieldMaskTest, MaskRefGetExcludesMap) {
   testMaskRefGetExcludes<MapId>(mask, excludes[9]);
 }
 
+TEST(FieldMaskTest, MaskRefGetExcludesStringMap) {
+  Mask mask;
+  // excludes_string_map{"8": excludes{},
+  //                     "9": includes_string_map{4: excludes{}}
+  auto& excludes = mask.excludes_string_map_ref().emplace();
+  excludes["8"] = allMask();
+  excludes["9"].includes_string_map_ref().emplace()["4"] = allMask();
+
+  testMaskRefGetExcludes<std::string>(mask, excludes["9"]);
+}
+
 TEST(FieldMaskTest, MaskRefGetAllMaskNoneMask) {
   {
     MaskRef ref{allMask(), false};
     EXPECT_TRUE(ref.get(FieldId{1}).isAllMask());
     EXPECT_TRUE(ref.get(MapId{1}).isAllMask());
+    EXPECT_TRUE(ref.get("1").isAllMask());
   }
   {
     MaskRef ref{allMask(), true};
     EXPECT_TRUE(ref.get(FieldId{1}).isNoneMask());
     EXPECT_TRUE(ref.get(MapId{1}).isNoneMask());
+    EXPECT_TRUE(ref.get("1").isNoneMask());
   }
   {
     MaskRef ref{noneMask(), false};
     EXPECT_TRUE(ref.get(FieldId{1}).isNoneMask());
     EXPECT_TRUE(ref.get(MapId{1}).isNoneMask());
+    EXPECT_TRUE(ref.get("1").isNoneMask());
   }
   {
     MaskRef ref{noneMask(), true};
     EXPECT_TRUE(ref.get(FieldId{1}).isAllMask());
     EXPECT_TRUE(ref.get(MapId{1}).isAllMask());
+    EXPECT_TRUE(ref.get("1").isAllMask());
   }
 }
 
@@ -345,28 +490,54 @@ TEST(FieldMaskTest, MaskRefGetException) {
     EXPECT_THROW((MaskRef{m, true}).get(FieldId{1}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, false}).get(MapId{1}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(MapId{1}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("1"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("1"), std::runtime_error);
   }
   {
     Mask m;
     m.includes_map_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(FieldId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(FieldId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
   }
   {
     Mask m;
     m.excludes_map_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(FieldId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(FieldId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
   }
   {
     Mask m;
     m.includes_ref().emplace()[4] = allMask();
     EXPECT_THROW((MaskRef{m, false}).get(MapId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(MapId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
   }
   {
     Mask m;
     m.excludes_ref().emplace()[4] = allMask();
+    EXPECT_THROW((MaskRef{m, false}).get(MapId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get(MapId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get("4"), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get("4"), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.includes_string_map_ref().emplace()["4"] = allMask();
+    EXPECT_THROW((MaskRef{m, false}).get(FieldId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get(FieldId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, false}).get(MapId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get(MapId{4}), std::runtime_error);
+  }
+  {
+    Mask m;
+    m.excludes_string_map_ref().emplace()["4"] = allMask();
+    EXPECT_THROW((MaskRef{m, false}).get(FieldId{4}), std::runtime_error);
+    EXPECT_THROW((MaskRef{m, true}).get(FieldId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, false}).get(MapId{4}), std::runtime_error);
     EXPECT_THROW((MaskRef{m, true}).get(MapId{4}), std::runtime_error);
   }

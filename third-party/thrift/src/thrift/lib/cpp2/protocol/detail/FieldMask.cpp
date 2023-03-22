@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include <string_view>
 #include <type_traits>
+
 #include <folly/Utility.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 
@@ -35,6 +37,13 @@ const Mask& getMask(const MapIdToMask& map, MapId id) {
   auto mapId = folly::to_underlying(id);
   return map.find(mapId) != map.end() ? map.at(mapId)
                                       : field_mask_constants::noneMask();
+}
+
+// Gets the mask of the given string if it exists in the string map, otherwise,
+// returns noneMask.
+const Mask& getMask(const MapStringToMask& map, std::string_view key) {
+  return map.find(key) != map.end() ? map.at(key)
+                                    : field_mask_constants::noneMask();
 }
 
 const FieldIdToMask* FOLLY_NULLABLE getFieldMask(const Mask& mask) {
@@ -61,6 +70,18 @@ const MapIdToMask* FOLLY_NULLABLE getMapMask(const Mask& mask) {
   return nullptr;
 }
 
+const MapStringToMask* FOLLY_NULLABLE getStringMapMask(const Mask& mask) {
+  if (mask.includes_string_map_ref()) {
+    return &*mask.includes_string_map_ref();
+  }
+
+  if (mask.excludes_string_map_ref()) {
+    return &*mask.excludes_string_map_ref();
+  }
+
+  return nullptr;
+}
+
 void MaskRef::throwIfNotFieldMask() const {
   if (!isFieldMask()) {
     folly::throw_exception<std::runtime_error>("not a field mask");
@@ -70,6 +91,18 @@ void MaskRef::throwIfNotFieldMask() const {
 void MaskRef::throwIfNotMapMask() const {
   if (!isMapMask()) {
     folly::throw_exception<std::runtime_error>("not a map mask");
+  }
+}
+
+void MaskRef::throwIfNotIntegerMapMask() const {
+  if (!isIntegerMapMask()) {
+    folly::throw_exception<std::runtime_error>("not an integer map mask");
+  }
+}
+
+void MaskRef::throwIfNotStringMapMask() const {
+  if (!isStringMapMask()) {
+    folly::throw_exception<std::runtime_error>("not a string map mask");
   }
 }
 
@@ -85,11 +118,24 @@ MaskRef MaskRef::get(MapId id) const {
   if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
     return *this;
   }
-  throwIfNotMapMask();
+  throwIfNotIntegerMapMask();
   if (mask.includes_map_ref()) {
     return MaskRef{getMask(mask.includes_map_ref().value(), id), is_exclusion};
   }
   return MaskRef{getMask(mask.excludes_map_ref().value(), id), !is_exclusion};
+}
+
+MaskRef MaskRef::get(std::string_view key) const {
+  if (isAllMask() || isNoneMask()) { // This whole map is included or excluded.
+    return *this;
+  }
+  throwIfNotStringMapMask();
+  if (mask.includes_string_map_ref()) {
+    return MaskRef{
+        getMask(mask.includes_string_map_ref().value(), key), is_exclusion};
+  }
+  return MaskRef{
+      getMask(mask.excludes_string_map_ref().value(), key), !is_exclusion};
 }
 
 bool MaskRef::isAllMask() const {
@@ -108,7 +154,9 @@ bool MaskRef::isExclusive() const {
   return (mask.includes_ref() && is_exclusion) ||
       (mask.excludes_ref() && !is_exclusion) ||
       (mask.includes_map_ref() && is_exclusion) ||
-      (mask.excludes_map_ref() && !is_exclusion);
+      (mask.excludes_map_ref() && !is_exclusion) ||
+      (mask.includes_string_map_ref() && is_exclusion) ||
+      (mask.excludes_string_map_ref() && !is_exclusion);
 }
 
 bool MaskRef::isFieldMask() const {
@@ -116,7 +164,15 @@ bool MaskRef::isFieldMask() const {
 }
 
 bool MaskRef::isMapMask() const {
+  return isIntegerMapMask() || isStringMapMask();
+}
+
+bool MaskRef::isIntegerMapMask() const {
   return mask.includes_map_ref() || mask.excludes_map_ref();
+}
+
+bool MaskRef::isStringMapMask() const {
+  return mask.includes_string_map_ref() || mask.excludes_string_map_ref();
 }
 
 int64_t getIntFromValue(Value v) {
@@ -317,7 +373,8 @@ std::set<Value> MaskRef::getKeysToCopy(
 }
 
 void throwIfContainsMapMask(const Mask& mask) {
-  if (mask.includes_map_ref() || mask.excludes_map_ref()) {
+  if (mask.includes_map_ref() || mask.excludes_map_ref() ||
+      mask.includes_string_map_ref() || mask.excludes_string_map_ref()) {
     folly::throw_exception<std::runtime_error>("map mask is not implemented");
   }
   const FieldIdToMask& map = mask.includes_ref() ? mask.includes_ref().value()

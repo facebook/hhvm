@@ -173,8 +173,14 @@ template <class Func>
 Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   using detail::getFieldMask;
   using detail::getMapMask;
+  using detail::getStringMapMask;
 
   Mask mask;
+
+  // TODO(dokwon): Add support for string map mask.
+  if (getStringMapMask(lhs) || getStringMapMask(rhs)) {
+    folly::throw_exception<std::runtime_error>("not implemented");
+  }
 
   // If one of them is map mask, the other one must be either map mask, or
   // allMask/noneMask which either mask the whole map, or nothing.

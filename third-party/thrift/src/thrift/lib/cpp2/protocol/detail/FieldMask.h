@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <folly/CppAttributes.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
@@ -48,6 +50,10 @@ getFieldMask(const Mask& mask);
 // If mask is a map mask, return it, otherwise return nullptr
 [[nodiscard]] const MapIdToMask* FOLLY_NULLABLE getMapMask(const Mask& mask);
 
+// If mask is a string map mask, return it, otherwise return nullptr
+[[nodiscard]] const MapStringToMask* FOLLY_NULLABLE
+getStringMapMask(const Mask& mask);
+
 // MaskRef struct represents the Field Mask and whether the mask is coming from
 // excludes mask. MaskRef is used for inputs and outputs for Field Mask
 // methods to determine the status of the mask, because if the mask is coming
@@ -69,6 +75,12 @@ class MaskRef {
   // Throws a runtime exception if the mask is not a map mask.
   MaskRef get(MapId id) const;
 
+  // Get nested MaskRef with the given string key. If the string key does not
+  // exist in the map, it returns noneMask or allMask depending on whether the
+  // field should be included. Throws a runtime exception if the mask is not a
+  // map mask.
+  MaskRef get(std::string_view key) const;
+
   // Returns whether the ref includes all fields.
   bool isAllMask() const;
 
@@ -83,6 +95,12 @@ class MaskRef {
 
   // Returns true if the mask is a map mask.
   bool isMapMask() const;
+
+  // Returns true if the mask is an integer map mask.
+  bool isIntegerMapMask() const;
+
+  // Returns true if the mask is a string map mask.
+  bool isStringMapMask() const;
 
   // Removes masked fields in schemaless Thrift Object (Protocol Object).
   // Throws a runtime exception if the mask and object are incompatible.
@@ -109,6 +127,8 @@ class MaskRef {
 
   void throwIfNotFieldMask() const;
   void throwIfNotMapMask() const;
+  void throwIfNotIntegerMapMask() const;
+  void throwIfNotStringMapMask() const;
 };
 
 // Validates the mask with the given Struct. Ensures that mask doesn't contain

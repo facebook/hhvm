@@ -39,6 +39,7 @@ pub mod validate_class_var_user_attribute_const;
 pub mod validate_class_var_user_attribute_lsb;
 pub mod validate_control_context;
 pub mod validate_coroutine;
+pub mod validate_enum_supertyping;
 pub mod validate_expr_call_echo;
 pub mod validate_expr_cast;
 pub mod validate_expr_function_pointer;

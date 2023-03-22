@@ -27,6 +27,7 @@ bitflags! {
         const ALLOW_MODULE_DECLARATIONS = 1 << 7;
         const ERROR_PHP_LAMBDAS = 1 << 9;
         const INFER_FLOWS = 1 << 10;
+        const ENABLE_ENUM_SUPERTYPING = 1 << 11;
     }
 }
 
@@ -38,6 +39,11 @@ impl Flags {
             Self::SOFT_AS_LIKE,
             tco.po_interpret_soft_types_as_like_types,
         );
+        flags.set(
+            Self::ENABLE_ENUM_SUPERTYPING,
+            tco.po_enable_enum_supertyping,
+        );
+
         flags.set(Self::HKT_ENABLED, tco.tco_higher_kinded_types);
         flags.set(Self::IS_SYSTEMLIB, tco.tco_is_systemlib);
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
@@ -100,6 +106,10 @@ impl Env {
 
     pub fn error_php_lambdas(&self) -> bool {
         self.flags.contains(Flags::ERROR_PHP_LAMBDAS)
+    }
+
+    pub fn enable_enum_supertyping(&self) -> bool {
+        self.flags.contains(Flags::ENABLE_ENUM_SUPERTYPING)
     }
 
     pub fn allow_module_declarations(&self) -> bool {

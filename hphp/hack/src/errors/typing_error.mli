@@ -212,7 +212,6 @@ module Primary : sig
           src_classish_name: string;
         }
       | Enum_classes_reserved_syntax of Pos.t
-      | Enum_supertyping_reserved_syntax of Pos.t
   end
 
   module Expr_tree : sig

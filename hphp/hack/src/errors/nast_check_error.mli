@@ -157,6 +157,7 @@ type t =
       pos: Pos.t;
       x: string;
     }
+  | Enum_supertyping_reserved_syntax of { pos: Pos.t }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

@@ -616,7 +616,6 @@ module Primary = struct
           src_classish_name: string;
         }
       | Enum_classes_reserved_syntax of Pos.t
-      | Enum_supertyping_reserved_syntax of Pos.t
 
     let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
       let claim = lazy (pos, "Enum class label/member mismatch")
@@ -820,16 +819,6 @@ module Primary = struct
         lazy [],
         [] )
 
-    let enum_supertyping_reserved_syntax pos =
-      ( Error_code.EnumSupertypingReservedSyntax,
-        lazy
-          ( pos,
-            "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
-            ^ "Enable it with the enable_enum_supertyping option in .hhconfig"
-          ),
-        lazy [],
-        [] )
-
     let to_error = function
       | Enum_type_bad { pos; is_enum_class; ty_name; trail } ->
         enum_type_bad pos is_enum_class ty_name trail
@@ -869,8 +858,6 @@ module Primary = struct
       | Enum_inclusion_not_enum { pos; classish_name; src_classish_name } ->
         enum_inclusion_not_enum pos classish_name src_classish_name
       | Enum_classes_reserved_syntax pos -> enum_classes_reserved_syntax pos
-      | Enum_supertyping_reserved_syntax pos ->
-        enum_supertyping_reserved_syntax pos
   end
 
   module Expr_tree = struct

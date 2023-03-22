@@ -198,19 +198,17 @@ bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
 
 template <typename Key, typename Value>
 bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
-  const auto* p = getIntegerMapMask(mask);
-
-  if (p == nullptr) {
-    return false;
+  // Map mask is compatible only if all nested masks are compatible with
+  // `Value`.
+  if (const auto* m = getIntegerMapMask(mask)) {
+    return std::all_of(m->begin(), m->end(), [](const auto& pair) {
+      return is_compatible_with<Value>(pair.second);
+    });
+  } else if (const auto* m = getStringMapMask(mask)) {
+    return std::all_of(m->begin(), m->end(), [](const auto& pair) {
+      return is_compatible_with<Value>(pair.second);
+    });
   }
-
-  // map mask is compatible only if all nested masks are compatible with `Value`
-  for (const auto& [_, v] : *p) {
-    if (!is_compatible_with<Value>(v)) {
-      return false;
-    }
-  }
-
   return true;
 }
 

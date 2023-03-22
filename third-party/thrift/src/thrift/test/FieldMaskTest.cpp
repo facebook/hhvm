@@ -1140,6 +1140,19 @@ TEST(FieldMaskTest, IsCompatibleWithMap) {
   EXPECT_FALSE(protocol::is_compatible_with<Tag>(m));
 }
 
+TEST(FieldMaskTest, IsCompatibleWithStringMap) {
+  Mask m;
+  auto& includes =
+      m.includes_string_map_ref().emplace()["1"].includes_ref().emplace();
+  includes[1] = allMask();
+  using Tag = type::map<type::string_t, type::struct_t<Foo>>;
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[3] = noneMask();
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[2] = allMask(); // field 2 doesn't exist in Foo
+  EXPECT_FALSE(protocol::is_compatible_with<Tag>(m));
+}
+
 TEST(FieldMaskTest, IsCompatibleWithNestedMap) {
   Mask m;
   auto& includes = m.includes_map_ref()
@@ -1151,6 +1164,24 @@ TEST(FieldMaskTest, IsCompatibleWithNestedMap) {
   includes[1] = allMask();
   using Tag =
       type::map<type::i32_t, type::map<type::i64_t, type::struct_t<Foo>>>;
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[3] = noneMask();
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[2] = allMask(); // field 2 doesn't exist in Foo
+  EXPECT_FALSE(protocol::is_compatible_with<Tag>(m));
+}
+
+TEST(FieldMaskTest, IsCompatibleWithNestedStringMap) {
+  Mask m;
+  auto& includes = m.includes_string_map_ref()
+                       .emplace()["1"]
+                       .includes_string_map_ref()
+                       .emplace()["1"]
+                       .includes_ref()
+                       .emplace();
+  includes[1] = allMask();
+  using Tag =
+      type::map<type::string_t, type::map<type::string_t, type::struct_t<Foo>>>;
   EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
   includes[3] = noneMask();
   EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));

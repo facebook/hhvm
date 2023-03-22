@@ -1,0 +1,14 @@
+[packages]
+
+[packages.a]
+uses = [".*"]
+includes = ["b"]
+
+[packages.b]
+uses = [".*"]
+includes = ["c"]
+
+[packages.c]
+uses = [".*"]
+includes = ["a"]
+soft_includes=["b"]

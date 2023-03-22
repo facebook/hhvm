@@ -23,6 +23,7 @@ struct Package {
     name: PosId,
     uses: Vec<PosId>,
     includes: Vec<PosId>,
+    soft_includes: Vec<PosId>,
 }
 
 ocaml_ffi! {
@@ -62,6 +63,7 @@ ocaml_ffi! {
                 let name = name.clone();
                 let uses = package.uses.clone().unwrap_or_default();
                 let includes = package.includes.clone().unwrap_or_default();
+                let soft_includes = package.soft_includes.clone().unwrap_or_default();
 
                 let convert = |x: Spanned<String>| -> PosId {
                     let pos = pos_from_span(x.span());
@@ -76,6 +78,7 @@ ocaml_ffi! {
                     name: convert(name),
                     uses: convert_many(uses),
                     includes: convert_many(includes),
+                    soft_includes: convert_many(soft_includes),
                 }
             })
             .collect();

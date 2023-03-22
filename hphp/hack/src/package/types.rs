@@ -18,6 +18,7 @@ pub type NameSet = IndexSet<Spanned<String>>;
 pub struct Package {
     pub uses: Option<NameSet>,
     pub includes: Option<NameSet>,
+    pub soft_includes: Option<NameSet>,
 }
 
 #[derive(Debug, Deserialize)]

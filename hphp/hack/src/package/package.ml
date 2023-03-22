@@ -21,6 +21,7 @@ type package = {
   name: pos_id;
   uses: pos_id list;
   includes: pos_id list;
+  soft_includes: pos_id list;
 }
 [@@deriving eq, show]
 
@@ -82,3 +83,8 @@ let includes pkg1 pkg2 =
   List.exists
     (fun (_, name) -> String.equal name @@ get_package_name pkg2)
     pkg1.includes
+
+let soft_includes pkg1 pkg2 =
+  List.exists
+    (fun (_, name) -> String.equal name @@ get_package_name pkg2)
+    pkg1.soft_includes

@@ -158,4 +158,14 @@ mod test {
             .collect::<std::collections::HashSet<_>>()
         );
     }
+
+    #[test]
+    fn test_soft_includes() {
+        let contents = include_str!("tests/package-5.toml");
+        let info = PackageInfo::from_text(contents).unwrap();
+
+        let c = &info.packages()["c"];
+        assert_eq!(c.includes.as_ref().unwrap()[0].get_ref(), "a");
+        assert_eq!(c.soft_includes.as_ref().unwrap()[0].get_ref(), "b");
+    }
 }

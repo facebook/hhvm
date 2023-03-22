@@ -30,7 +30,7 @@ namespace apache::thrift::protocol {
 //
 // TT: The thrift type to use, for example
 // apache::thrift::type::binary_t.
-template <typename TT, typename T>
+template <typename TT, typename T = type::native_type<TT>>
 Value asValueStruct(T&& value) {
   Value result;
   detail::ValueHelper<TT>::set(result, std::forward<T>(value));

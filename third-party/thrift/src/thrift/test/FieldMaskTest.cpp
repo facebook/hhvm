@@ -426,9 +426,8 @@ TEST(FieldMaskTest, SchemalessClearException) {
 
   {
     protocol::Object barObject;
-    std::map<int, std::string> map = {{1, "1"}};
     barObject[FieldId{1}] =
-        asValueStruct<type::map<type::i32_t, type::string_t>>(map);
+        asValueStruct<type::map<type::i32_t, type::string_t>>({{1, "1"}});
     Mask m; // object[1] is a map but has an object mask.
     m.includes_ref().emplace()[1].includes_ref().emplace()[1] = allMask();
     EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
@@ -442,10 +441,9 @@ TEST(FieldMaskTest, SchemalessClearMap) {
   //            2: map{3: "3"}},
   //     2: "40",
   //     3: 5}
-  std::map<int, std::map<int, std::string>> map = {
-      {1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}};
   barObject[FieldId{1}] = asValueStruct<
-      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(map);
+      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
+      {{1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}});
   barObject[FieldId{2}].emplace_string() = "40";
   barObject[FieldId{3}].emplace_i32() = 5;
 
@@ -717,25 +715,16 @@ TEST(FieldMaskTest, SchemalessCopySimpleMap) {
   protocol::Object src, dst, expected;
   // src{1: map{1: "1",
   //            2: "2"}}
-  {
-    std::map<int, std::string> map = {{1, "1"}, {2, "2"}};
-    src[FieldId{1}] =
-        asValueStruct<type::map<type::i64_t, type::string_t>>(map);
-  }
+  src[FieldId{1}] = asValueStruct<type::map<type::i64_t, type::string_t>>(
+      {{1, "1"}, {2, "2"}});
   // dst{1: map{1: "3",
   //            2: "4"}}
-  {
-    std::map<int, std::string> map = {{1, "3"}, {2, "4"}};
-    dst[FieldId{1}] =
-        asValueStruct<type::map<type::i64_t, type::string_t>>(map);
-  }
+  dst[FieldId{1}] = asValueStruct<type::map<type::i64_t, type::string_t>>(
+      {{1, "3"}, {2, "4"}});
   // expected{1: map{1: "1",
   //                 2: "4"}}
-  {
-    std::map<int, std::string> map = {{1, "1"}, {2, "4"}};
-    expected[FieldId{1}] =
-        asValueStruct<type::map<type::i64_t, type::string_t>>(map);
-  }
+  expected[FieldId{1}] = asValueStruct<type::map<type::i64_t, type::string_t>>(
+      {{1, "1"}, {2, "4"}});
 
   Mask mask;
   mask.includes_ref().emplace()[1].includes_map_ref().emplace()[1] = allMask();
@@ -747,30 +736,21 @@ TEST(FieldMaskTest, SchemalessCopyNestedMap) {
   // src{1: map{1: map{1: "1",
   //                   2: "2"},
   //            2: map{3: "3"}}}
-  {
-    std::map<int, std::map<int, std::string>> map = {
-        {1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}};
-    src[FieldId{1}] = asValueStruct<
-        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(map);
-  }
+  src[FieldId{1}] = asValueStruct<
+      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
+      {{1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}});
   // dst{1: map{1: map{1: "5",
   //                   2: "6",
   //                   3: "7"}}}
-  {
-    std::map<int, std::map<int, std::string>> map = {
-        {1, {{1, "5"}, {2, "6"}, {3, "7"}}}};
-    dst[FieldId{1}] = asValueStruct<
-        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(map);
-  }
+  dst[FieldId{1}] = asValueStruct<
+      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
+      {{1, {{1, "5"}, {2, "6"}, {3, "7"}}}});
   // expected{1: map{1: map{1: "1",
   //                        2: "6"}},
   //                 2: map{3: "3"}}}
-  {
-    std::map<int, std::map<int, std::string>> map = {
-        {1, {{1, "5"}, {2, "2"}}}, {2, {{3, "3"}}}};
-    expected[FieldId{1}] = asValueStruct<
-        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(map);
-  }
+  expected[FieldId{1}] = asValueStruct<
+      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
+      {{1, {{1, "5"}, {2, "2"}}}, {2, {{3, "3"}}}});
 
   Mask mask;
   // includes{1: includes_map{1: excludes_map{1: allMask()},
@@ -792,12 +772,9 @@ TEST(FieldMaskTest, SchemalessCopyMapAddRemoveKey) {
   // src{1: map{1: map{1: "1",
   //                   2: "2"},
   //            2: map{3: "3"}}}
-  {
-    std::map<int, std::map<int, std::string>> map = {
-        {1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}};
-    src[FieldId{1}] = asValueStruct<
-        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(map);
-  }
+  src[FieldId{1}] = asValueStruct<
+      type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
+      {{1, {{1, "1"}, {2, "2"}}}, {2, {{3, "3"}}}});
   {
     Mask mask;
     mask.includes_ref()
@@ -808,9 +785,9 @@ TEST(FieldMaskTest, SchemalessCopyMapAddRemoveKey) {
         .emplace()[1] = allMask();
 
     protocol::Object dst, expected;
-    std::map<int, std::map<int, std::string>> map = {{1, {{1, "1"}}}};
     expected[FieldId{1}] = asValueStruct<
-        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(map);
+        type::map<type::i64_t, type::map<type::i16_t, type::string_t>>>(
+        {{1, {{1, "1"}}}});
 
     // This creates a new map at dst[1]
     testCopy(mask, src, dst);
@@ -836,14 +813,12 @@ TEST(FieldMaskTest, SchemalessCopyMapAddRemoveKey) {
 TEST(FieldMaskTest, SchemalessCopyExceptionMap) {
   protocol::Object barObject, bazObject;
   // bar{1: map{2: 20}, 2: "40"}
-  std::map<int, int> map = {{2, 20}};
   barObject[FieldId{1}] =
-      asValueStruct<type::map<type::byte_t, type::i32_t>>(map);
+      asValueStruct<type::map<type::byte_t, type::i32_t>>({{2, 20}});
   barObject[FieldId{2}].emplace_string() = "40";
   // baz{2: map{3: 40}}
-  std::map<int, int> map2 = {{3, 40}};
   bazObject[FieldId{2}] =
-      asValueStruct<type::map<type::byte_t, type::i32_t>>(map2);
+      asValueStruct<type::map<type::byte_t, type::i32_t>>({{3, 40}});
 
   Mask m1; // bar[2] is not a map but has a map mask.
   m1.includes_ref().emplace()[2].includes_map_ref().emplace()[3] = allMask();

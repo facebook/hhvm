@@ -379,12 +379,10 @@ TEST_F(PatchTest, String) {
 }
 
 TEST_F(PatchTest, List) {
-  std::vector<std::string> data = {"test"}, patch = {"new value"}, empty = {};
-  auto value = asValueStruct<type::list<type::binary_t>>(data);
-  auto patchValue = asValueStruct<type::list<type::binary_t>>(patch);
-  auto emptyValue = asValueStruct<type::list<type::binary_t>>(empty);
-  auto emptySet =
-      asValueStruct<type::set<type::binary_t>>(std::set<std::string>{});
+  auto value = asValueStruct<type::list<type::binary_t>>({"test"});
+  auto patchValue = asValueStruct<type::list<type::binary_t>>({"new value"});
+  auto emptyValue = asValueStruct<type::list<type::binary_t>>({});
+  auto emptySet = asValueStruct<type::set<type::binary_t>>({});
 
   auto expectNoop = [&](auto& patchObj) {
     EXPECT_EQ(
@@ -425,7 +423,7 @@ TEST_F(PatchTest, List) {
 
   // PatchPrior
   {
-    auto elementPatchValue = asValueStruct<type::binary_t>(std::string{"best"});
+    auto elementPatchValue = asValueStruct<type::binary_t>("best");
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() =
         makePatch(op::PatchOp::Put, elementPatchValue);
@@ -447,8 +445,8 @@ TEST_F(PatchTest, List) {
     EXPECT_EQ(mask.begin()->second, allMask());
   }
   {
-    auto emptyMapValue = asValueStruct<type::map<type::i32_t, type::binary_t>>(
-        std::map<int32_t, std::string>{});
+    auto emptyMapValue =
+        asValueStruct<type::map<type::i32_t, type::binary_t>>({});
     Object patchObj = makePatch(op::PatchOp::PatchPrior, emptyMapValue);
     expectNoop(patchObj);
   }
@@ -565,11 +563,9 @@ TEST_F(PatchTest, GeneratedListPatch) {
 }
 
 TEST_F(PatchTest, Set) {
-  std::set<std::string> data = {"test"}, patch = {"new value"};
-  auto value = asValueStruct<type::set<type::binary_t>>(data);
-  auto patchValue = asValueStruct<type::set<type::binary_t>>(patch);
-  auto emptySet =
-      asValueStruct<type::set<type::binary_t>>(std::set<std::string>{});
+  auto value = asValueStruct<type::set<type::binary_t>>({"test"});
+  auto patchValue = asValueStruct<type::set<type::binary_t>>({"new value"});
+  auto emptySet = asValueStruct<type::set<type::binary_t>>({});
 
   auto expectNoop = [&](auto& patchObj) {
     EXPECT_EQ(
@@ -626,7 +622,7 @@ TEST_F(PatchTest, Set) {
   {
     Object patchObj = makePatch(
         op::PatchOp::Remove,
-        asValueStruct<type::set<type::binary_t>>(std::set{"test"}));
+        asValueStruct<type::set<type::binary_t>>({"test"}));
     EXPECT_EQ(
         std::set<Value>{},
         *applyContainerPatch(patchObj, value).setValue_ref());
@@ -646,8 +642,7 @@ TEST_F(PatchTest, Set) {
   // Add
   {
     Object patchObj = makePatch(
-        op::PatchOp::Add,
-        asValueStruct<type::set<type::binary_t>>(std::set{"test"}));
+        op::PatchOp::Add, asValueStruct<type::set<type::binary_t>>({"test"}));
     EXPECT_EQ(
         *value.setValue_ref(),
         *applyContainerPatch(patchObj, value).setValue_ref())
@@ -656,10 +651,10 @@ TEST_F(PatchTest, Set) {
   }
   {
     auto expected = *value.setValue_ref();
-    expected.insert(asValueStruct<type::binary_t>(std::string{"best test"}));
+    expected.insert(asValueStruct<type::binary_t>("best test"));
     Object patchObj = makePatch(
         op::PatchOp::Add,
-        asValueStruct<type::set<type::binary_t>>(std::set{"best test"}));
+        asValueStruct<type::set<type::binary_t>>({"best test"}));
     auto patchResult = *applyContainerPatch(patchObj, value).setValue_ref();
     EXPECT_EQ(expected, patchResult);
     EXPECT_TRUE(isMaskReadWriteOperation(patchObj));
@@ -675,14 +670,13 @@ TEST_F(PatchTest, Set) {
         patchAddOperation(
             makePatch(
                 op::PatchOp::Add,
-                asValueStruct<type::set<type::binary_t>>(std::set{"best"})),
+                asValueStruct<type::set<type::binary_t>>({"best"})),
             op::PatchOp::Remove,
-            asValueStruct<type::set<type::binary_t>>(std::set{"test"})),
+            asValueStruct<type::set<type::binary_t>>({"test"})),
         op::PatchOp::Put,
-        asValueStruct<type::set<type::binary_t>>(std::set{"rest"}));
+        asValueStruct<type::set<type::binary_t>>({"rest"}));
 
-    auto expected =
-        asValueStruct<type::set<type::binary_t>>(std::set{"best", "rest"});
+    auto expected = asValueStruct<type::set<type::binary_t>>({"best", "rest"});
     EXPECT_EQ(
         *expected.setValue_ref(),
         *applyContainerPatch(patchObj, value).setValue_ref());
@@ -708,16 +702,14 @@ TEST_F(PatchTest, GeneratedSetPatch) {
 }
 
 TEST_F(PatchTest, Map) {
-  std::map<std::string, std::string> data = {{"key", "test"}},
-                                     patch = {{"new key", "new value"}};
-  auto value = asValueStruct<type::map<type::binary_t, type::binary_t>>(data);
-  auto patchValue =
-      asValueStruct<type::map<type::binary_t, type::binary_t>>(patch);
+  auto value = asValueStruct<type::map<type::binary_t, type::binary_t>>(
+      {{"key", "test"}});
+  auto patchValue = asValueStruct<type::map<type::binary_t, type::binary_t>>(
+      {{"new key", "new value"}});
   auto emptyMap = std::map<Value, Value>{};
-  auto emptySet =
-      asValueStruct<type::set<type::binary_t>>(std::set<std::string>{});
-  auto emptyValue = asValueStruct<type::map<type::binary_t, type::binary_t>>(
-      std::map<std::string, std::string>{});
+  auto emptySet = asValueStruct<type::set<type::binary_t>>({});
+  auto emptyValue =
+      asValueStruct<type::map<type::binary_t, type::binary_t>>({});
 
   auto expectNoop = [&](auto&& patchObj) {
     EXPECT_EQ(
@@ -775,8 +767,7 @@ TEST_F(PatchTest, Map) {
   // Remove
   {
     Object patchObj = makePatch(
-        op::PatchOp::Remove,
-        asValueStruct<type::set<type::binary_t>>(std::set{"key"}));
+        op::PatchOp::Remove, asValueStruct<type::set<type::binary_t>>({"key"}));
     EXPECT_EQ(emptyMap, *applyContainerPatch(patchObj, value).mapValue_ref());
     checkMapMask(patchObj, {"key"});
   }
@@ -790,7 +781,7 @@ TEST_F(PatchTest, Map) {
     Object patchObj = makePatch(
         op::PatchOp::EnsureStruct,
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
-            std::map<std::string, std::string>{{"key", "test 42"}}));
+            {{"key", "test 42"}}));
     EXPECT_EQ(
         *value.mapValue_ref(),
         *applyContainerPatch(patchObj, value).mapValue_ref())
@@ -800,12 +791,12 @@ TEST_F(PatchTest, Map) {
   {
     auto expected = *value.mapValue_ref();
     expected.emplace(
-        asValueStruct<type::binary_t>(std::string{"new key"}),
-        asValueStruct<type::binary_t>(std::string{"new value"}));
+        asValueStruct<type::binary_t>("new key"),
+        asValueStruct<type::binary_t>("new value"));
     Object patchObj = makePatch(
         op::PatchOp::EnsureStruct,
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
-            std::map<std::string, std::string>{{"new key", "new value"}}));
+            {{"new key", "new value"}}));
     auto patchResult = *applyContainerPatch(patchObj, value).mapValue_ref();
     EXPECT_EQ(expected, patchResult);
     checkMapMask(patchObj, {"new key"});
@@ -818,12 +809,12 @@ TEST_F(PatchTest, Map) {
   // Put
   {
     auto expected = *value.mapValue_ref();
-    expected[asValueStruct<type::binary_t>(std::string{"key"})] =
-        asValueStruct<type::binary_t>(std::string{"key updated value"});
+    expected[asValueStruct<type::binary_t>("key")] =
+        asValueStruct<type::binary_t>("key updated value");
     Object patchObj = makePatch(
         op::PatchOp::Put,
         asValueStruct<type::map<type::binary_t, type::binary_t>>(
-            std::map<std::string, std::string>{{"key", "key updated value"}}));
+            {{"key", "key updated value"}}));
     EXPECT_EQ(expected, *applyContainerPatch(patchObj, value).mapValue_ref());
     checkMapMask(patchObj, {"key"});
   }
@@ -835,17 +826,15 @@ TEST_F(PatchTest, Map) {
   // Combination
   {
     auto expected = asValueStruct<type::map<type::binary_t, type::binary_t>>(
-        std::map<std::string, std::string>{
-            {"new key", "new value"}, {"added key", "overridden value"}});
+        {{"new key", "new value"}, {"added key", "overridden value"}});
     auto patchObj = patchAddOperation(
         patchAddOperation(
             makePatch(
                 op::PatchOp::EnsureStruct,
                 asValueStruct<type::map<type::binary_t, type::binary_t>>(
-                    std::map<std::string, std::string>{
-                        {"added key", "added value"}})),
+                    {{"added key", "added value"}})),
             op::PatchOp::Remove,
-            asValueStruct<type::set<type::binary_t>>(std::set{"key"})),
+            asValueStruct<type::set<type::binary_t>>({"key"})),
         op::PatchOp::Put,
         expected);
 
@@ -859,10 +848,8 @@ TEST_F(PatchTest, Map) {
   {
     auto value =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
-            std::map<std::string, std::vector<std::string>>{
-                {"key", std::vector<std::string>{"test"}}});
-    auto elementPatchValue = asValueStruct<type::list<type::binary_t>>(
-        std::vector<std::string>{"foo"});
+            {{"key", {"test"}}});
+    auto elementPatchValue = asValueStruct<type::list<type::binary_t>>({"foo"});
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() =
         makePatch(op::PatchOp::Put, elementPatchValue);
@@ -872,8 +859,7 @@ TEST_F(PatchTest, Map) {
     auto patchObj = makePatch(op::PatchOp::PatchPrior, mapPatch);
     auto expected =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
-            std::map<std::string, std::vector<std::string>>{
-                {"key", std::vector<std::string>{"test", "foo"}}});
+            {{"key", std::vector<std::string>{"test", "foo"}}});
     EXPECT_EQ(
         *expected.mapValue_ref(),
         *applyContainerPatch(patchObj, value).mapValue_ref());
@@ -889,13 +875,10 @@ TEST_F(PatchTest, Map) {
   {
     auto value =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
-            std::map<std::string, std::vector<std::string>>{
-                {"key", std::vector<std::string>{"test"}}});
+            {{"key", {"test"}}});
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() = makePatch(
-        op::PatchOp::Put,
-        asValueStruct<type::list<type::binary_t>>(
-            std::vector<std::string>{"foo"}));
+        op::PatchOp::Put, asValueStruct<type::list<type::binary_t>>({"foo"}));
     Value mapPatch;
     mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("new key")] =
         fieldPatchValue;
@@ -904,14 +887,12 @@ TEST_F(PatchTest, Map) {
         makePatch(op::PatchOp::PatchAfter, mapPatch),
         op::PatchOp::EnsureStruct,
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
-            std::map<std::string, std::vector<std::string>>{
-                {"new key", std::vector<std::string>{}}}));
+            {{"new key", std::vector<std::string>{}}}));
 
     auto expected =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
-            std::map<std::string, std::vector<std::string>>{
-                {"key", std::vector<std::string>{"test"}},
-                {"new key", std::vector<std::string>{"foo"}}});
+            {{"key", std::vector<std::string>{"test"}},
+             {"new key", std::vector<std::string>{"foo"}}});
     EXPECT_EQ(
         *expected.mapValue_ref(),
         *applyContainerPatch(patchObj, value).mapValue_ref());
@@ -1073,8 +1054,8 @@ TEST_F(PatchTest, Struct) {
   // PatchPrior
   auto applyFieldPatchTest = [&](auto op, auto expected) {
     Value fieldPatchValue;
-    fieldPatchValue.objectValue_ref() = makePatch(
-        op, asValueStruct<type::list<type::i32_t>>(std::vector<int>{3, 2, 1}));
+    fieldPatchValue.objectValue_ref() =
+        makePatch(op, asValueStruct<type::list<type::i32_t>>({3, 2, 1}));
     Value fieldPatch;
     fieldPatch.objectValue_ref().ensure().members().ensure()[1] =
         fieldPatchValue;
@@ -1099,8 +1080,7 @@ TEST_F(PatchTest, Struct) {
 
   applyFieldPatchTest(
       op::PatchOp::Put,
-      asValueStruct<type::list<type::i32_t>>(
-          std::vector<int>{1, 2, 3, 3, 2, 1}));
+      asValueStruct<type::list<type::i32_t>>({1, 2, 3, 3, 2, 1}));
 
   // Ensure and Patch
   {
@@ -1110,13 +1090,12 @@ TEST_F(PatchTest, Struct) {
     Value ensureValuePatch;
     Object ensureObject;
     ensureObject.members().ensure()[1] =
-        asValueStruct<type::list<type::i32_t>>(std::vector<int32_t>{});
+        asValueStruct<type::list<type::i32_t>>({});
     ensureValuePatch.objectValue_ref() = ensureObject;
 
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() = makePatch(
-        op::PatchOp::Put,
-        asValueStruct<type::list<type::i32_t>>(std::vector<int32_t>{42}));
+        op::PatchOp::Put, asValueStruct<type::list<type::i32_t>>({42}));
     Value fieldPatch;
     fieldPatch.objectValue_ref().ensure().members().ensure()[1] =
         fieldPatchValue;
@@ -1127,7 +1106,7 @@ TEST_F(PatchTest, Struct) {
         ensureValuePatch);
 
     EXPECT_EQ(
-        asValueStruct<type::list<type::i32_t>>(std::vector<int32_t>{42}),
+        asValueStruct<type::list<type::i32_t>>({42}),
         applyContainerPatch(patchObj, sourceValue)
             .objectValue_ref()
             ->members()
@@ -1487,7 +1466,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchEdgeCase) {
   patchObj = patchAddOperation(
       std::move(patchObj),
       op::PatchOp::Put,
-      asValueStruct<type::set<type::i32_t>>(std::set<int>{}));
+      asValueStruct<type::set<type::i32_t>>({}));
 
   auto masks = extractMaskFromPatch(patchObj);
   EXPECT_EQ(masks.read, masks.write);
@@ -1537,9 +1516,8 @@ TEST_F(PatchTest, ApplyPatchToSerializedData) {
   //            "foo": "bar"},
   //     2: 2}
   Object obj;
-  std::map<std::string, std::string> map = {{"key", "string"}, {"foo", "bar"}};
-  obj[FieldId{1}] =
-      asValueStruct<type::map<type::binary_t, type::binary_t>>(map);
+  obj[FieldId{1}] = asValueStruct<type::map<type::binary_t, type::binary_t>>(
+      {{"key", "string"}, {"foo", "bar"}});
   obj[FieldId{2}].i32Value_ref() = 2;
   Value value;
   value.objectValue_ref() = obj;

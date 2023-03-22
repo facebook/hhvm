@@ -831,13 +831,11 @@ TEST(Value, IsIntrinsicDefaultTrue) {
   EXPECT_TRUE(isIntrinsicDefault(asValueStruct<type::double_t>(0.0)));
   EXPECT_TRUE(isIntrinsicDefault(asValueStruct<type::string_t>("")));
   EXPECT_TRUE(isIntrinsicDefault(asValueStruct<type::binary_t>("")));
-  EXPECT_TRUE(isIntrinsicDefault(
-      asValueStruct<type::list<type::string_t>>(std::vector<std::string>{})));
-  EXPECT_TRUE(isIntrinsicDefault(
-      asValueStruct<type::set<type::i64_t>>(std::set<int>{})));
   EXPECT_TRUE(
-      isIntrinsicDefault(asValueStruct<type::map<type::i32_t, type::string_t>>(
-          std::map<int, std::string>{})));
+      isIntrinsicDefault(asValueStruct<type::list<type::string_t>>({})));
+  EXPECT_TRUE(isIntrinsicDefault(asValueStruct<type::set<type::i64_t>>({})));
+  EXPECT_TRUE(isIntrinsicDefault(
+      asValueStruct<type::map<type::i32_t, type::string_t>>({})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
   s.field_1_ref() = std::map<std::string, int>{};
   Value objectValue = asValueStruct<type::struct_c>(s);
@@ -856,13 +854,13 @@ TEST(Value, IsIntrinsicDefaultFalse) {
   EXPECT_FALSE(isIntrinsicDefault(asValueStruct<type::double_t>(0.5)));
   EXPECT_FALSE(isIntrinsicDefault(asValueStruct<type::string_t>("foo")));
   EXPECT_FALSE(isIntrinsicDefault(asValueStruct<type::binary_t>("foo")));
-  EXPECT_FALSE(isIntrinsicDefault(asValueStruct<type::list<type::string_t>>(
-      std::vector<std::string>{"foo"})));
-  EXPECT_FALSE(isIntrinsicDefault(
-      asValueStruct<type::set<type::i64_t>>(std::set<int>{1, 2, 3})));
+  EXPECT_FALSE(
+      isIntrinsicDefault(asValueStruct<type::list<type::string_t>>({"foo"})));
+  EXPECT_FALSE(
+      isIntrinsicDefault(asValueStruct<type::set<type::i64_t>>({1, 2, 3})));
   EXPECT_FALSE(
       isIntrinsicDefault(asValueStruct<type::map<type::i32_t, type::string_t>>(
-          std::map<int, std::string>{{1, "foo"}, {2, "bar"}})));
+          {{1, "foo"}, {2, "bar"}})));
   testset::struct_with<type::map<type::string_t, type::i32_t>> s;
   s.field_1_ref() = std::map<std::string, int>{{"foo", 1}, {"bar", 2}};
   Value objectValue = asValueStruct<type::struct_c>(s);
@@ -1086,21 +1084,17 @@ void testSerializeObjectWithMapMask(MaskedDecodeResult& result, Object& obj) {
     // modified{1: map{10: {},
     //                 30: {"foo": 1}}}
     // This tests when map is empty and types are determined from MaskedData.
-    std::map<int, std::map<std::string, int>> modifiedMap = {
-        {10, {}}, {30, {{"foo", 1}}}};
     modified[FieldId{1}] = asValueStruct<
         type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
-        modifiedMap);
+        {{10, {}}, {30, {{"foo", 1}}}});
 
     Object expected;
     // expected{1: map{10: {"bar": 2},
     //                 20: {"baz": 3},
     //                 30: {"foo": 1}}}
-    std::map<int, std::map<std::string, int>> expectedMap = {
-        {10, {{"bar", 2}}}, {20, {{"baz", 3}}}, {30, {{"foo", 1}}}};
     expected[FieldId{1}] = asValueStruct<
         type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
-        expectedMap);
+        {{10, {{"bar", 2}}}, {20, {{"baz", 3}}}, {30, {{"foo", 1}}}});
 
     auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
         modified, result.excluded);
@@ -1117,10 +1111,9 @@ void testParseObjectWithMapMask(bool testSerialize) {
   //                 "bar": 2},
   //            20: {"baz": 3}},
   //     2: set{1, 2, 3}}
-  std::map<int, std::map<std::string, int>> map = {
-      {10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}};
   obj[FieldId{1}] = asValueStruct<
-      type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(map);
+      type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
+      {{10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}});
   std::set<int> set = {1, 2, 3};
   obj[FieldId{2}] = asValueStruct<type::set<type::byte_t>>(set);
   auto serialized = protocol::serializeObject<protocol_writer_t<Protocol>>(obj);
@@ -1145,10 +1138,9 @@ void testParseObjectWithMapMask(bool testSerialize) {
   Object expected;
   // expected{1: map{10: {"foo": 1}},
   //          2: set{1, 2, 3}}
-  std::map<int, std::map<std::string, int>> expectedMap = {{10, {{"foo", 1}}}};
   expected[FieldId{1}] = asValueStruct<
       type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
-      expectedMap);
+      {{10, {{"foo", 1}}}});
   expected[FieldId{2}] = asValueStruct<type::set<type::byte_t>>(set);
 
   // serialize the object and deserialize with mask
@@ -1227,13 +1219,11 @@ TEST(ObjectTest, ToDynamic) {
   v = asValueStruct<type::list<type::i16_t>>(vec);
   EXPECT_EQ(toDynamic(v), folly::dynamic::array(1, 4, 2));
 
-  std::vector<int> s = {1, 4, 2};
-  v = asValueStruct<type::set<type::i16_t>>(s);
+  v = asValueStruct<type::set<type::i16_t>>({1, 4, 2});
   EXPECT_EQ(toDynamic(v), folly::dynamic::array(1, 2, 4));
 
-  std::map<std::string, std::string> m = {
-      {"1", "10"}, {"4", "40"}, {"2", "20"}};
-  v = asValueStruct<type::map<type::string_t, type::string_t>>(m);
+  v = asValueStruct<type::map<type::string_t, type::string_t>>(
+      {{"1", "10"}, {"4", "40"}, {"2", "20"}});
   EXPECT_EQ(
       toDynamic(v),
       folly::dynamic(folly::dynamic::object("4", "40")("1", "10")("2", "20")));
@@ -1263,8 +1253,8 @@ template <::apache::thrift::conformance::StandardProtocol Protocol>
 void testSerializeObjectWithMapMaskError() {
   Object obj;
   // obj{1: map{1: "foo"}}
-  std::map<int, std::string> map = {{1, "foo"}};
-  obj[FieldId{1}] = asValueStruct<type::map<type::i32_t, type::string_t>>(map);
+  obj[FieldId{1}] =
+      asValueStruct<type::map<type::i32_t, type::string_t>>({{1, "foo"}});
 
   {
     // MaskedData[1] is full, which should be values.
@@ -1334,10 +1324,9 @@ void testParseObjectWithTwoMasks() {
   obj[FieldId{1}].objectValue_ref() = foo;
   obj[FieldId{2}].i32Value_ref() = 2;
   obj[FieldId{3}].i32Value_ref() = 3;
-  std::map<int, std::map<std::string, int>> map = {
-      {10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}};
   obj[FieldId{4}] = asValueStruct<
-      type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(map);
+      type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
+      {{10, {{"foo", 1}, {"bar", 2}}}, {20, {{"baz", 3}}}});
 
   Value key10 = asValueStruct<type::i16_t>(10);
   Value key20 = asValueStruct<type::i16_t>(20);
@@ -1381,11 +1370,9 @@ void testParseObjectWithTwoMasks() {
     //                 20: {}}}
     expected[FieldId{1}].objectValue_ref().emplace();
     expected[FieldId{2}].i32Value_ref() = 2;
-    std::map<int, std::map<std::string, int>> expectedMap = {
-        {10, {{"foo", 1}}}, {20, {}}};
     expected[FieldId{4}] = asValueStruct<
         type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
-        expectedMap);
+        {{10, {{"foo", 1}}}, {20, {}}});
     EXPECT_EQ(result.included, expected);
   }
 
@@ -1399,11 +1386,9 @@ void testParseObjectWithTwoMasks() {
     bar[FieldId{2}].stringValue_ref() = "bar";
     expected[FieldId{1}].objectValue_ref() = bar;
     expected[FieldId{2}].i32Value_ref() = 2;
-    std::map<int, std::map<std::string, int>> expectedMap = {
-        {10, {{"foo", 1}}}, {20, {}}};
     expected[FieldId{4}] = asValueStruct<
         type::map<type::i16_t, type::map<type::string_t, type::i32_t>>>(
-        expectedMap);
+        {{10, {{"foo", 1}}}, {20, {}}});
     auto reserialized = protocol::serializeObject<protocol_writer_t<Protocol>>(
         result.included, result.excluded);
     Object finalObj =

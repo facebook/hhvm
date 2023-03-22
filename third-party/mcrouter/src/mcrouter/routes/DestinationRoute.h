@@ -102,8 +102,22 @@ class DestinationRoute {
   }
 
   memcache::McDeleteReply route(const memcache::McDeleteRequest& req) const {
+    auto& axonCtx = fiber_local<RouterInfo>::getAxonCtx();
+    auto bucketId = fiber_local<RouterInfo>::getBucketId();
+    // Axon invalidation only enabled when request is bucketized
+    if (UNLIKELY(bucketId && axonCtx && axonCtx->allDelete)) {
+      auto finalReq = addDeleteRequestSource(
+          req, memcache::McDeleteRequestSource::FAILED_INVALIDATION);
+      // Make sure bucket id is set in request
+      finalReq.bucketId_ref() = *bucketId;
+      spool(finalReq, axonCtx, bucketId);
+      auto reply = createReply(DefaultReply, finalReq);
+      reply.setDestination(destination_->accessPoint());
+      return reply;
+    }
     auto reply = routeWithDestination(req);
-    if (isFailoverErrorResult(*reply.result_ref()) && spool(req)) {
+    if (isFailoverErrorResult(*reply.result_ref()) &&
+        spool(req, axonCtx, bucketId)) {
       reply = createReply(DefaultReply, req);
       reply.setDestination(destination_->accessPoint());
     }
@@ -241,13 +255,14 @@ class DestinationRoute {
       const Request& req,
       ProxyRequestContextWithInfo<RouterInfo>& ctx) const {
     DestinationRequestCtx dctx(nowUs());
-    folly::Optional<Request> newReq;
+    std::optional<Request> newReq;
     folly::StringPiece strippedRoutingPrefix;
     if (!keepRoutingPrefix_ && !req.key_ref()->routingPrefix().empty()) {
       newReq.emplace(req);
       newReq->key_ref()->stripRoutingPrefix();
       strippedRoutingPrefix = req.key_ref()->routingPrefix();
     }
+    maybeAddBucketId(newReq, req);
 
     uint64_t remainingDeadlineTime = 0;
     uint64_t totalDestTimeout = 0;
@@ -286,13 +301,20 @@ class DestinationRoute {
     }
 
     const auto& reqToSend = newReq ? *newReq : req;
+    auto bucketIdOptional = getBucketId(newReq);
+    std::string_view bucketId;
+    if (bucketIdOptional.has_value()) {
+      bucketId = *bucketIdOptional;
+    }
+
     ctx.onBeforeRequestSent(
         poolName_,
         *destination_->accessPoint(),
         strippedRoutingPrefix,
         reqToSend,
         fiber_local<RouterInfo>::getRequestClass(),
-        dctx.startTime);
+        dctx.startTime,
+        bucketId);
     RpcStatsContext rpcContext;
     auto reply = destination_->send(reqToSend, dctx, timeout_, rpcContext);
     ctx.onReplyReceived(
@@ -308,12 +330,44 @@ class DestinationRoute {
         poolStatIndex_,
         rpcContext,
         fiber_local<RouterInfo>::getNetworkTransportTimeUs(),
-        fiber_local<RouterInfo>::getExtraDataCallbacks());
+        fiber_local<RouterInfo>::getExtraDataCallbacks(),
+        bucketId);
 
     fiber_local<RouterInfo>::incNetworkTransportTimeBy(
         dctx.endTime - dctx.startTime);
     fiber_local<RouterInfo>::setServerLoad(rpcContext.serverLoad);
     return reply;
+  }
+
+  template <class Request>
+  typename std::
+      enable_if_t<facebook::memcache::HasBucketIdTrait<Request>::value, void>
+      maybeAddBucketId(
+          std::optional<Request>& newReq,
+          const Request& originalReq) const {
+    auto bucketIdOptional = bucketIdOpt();
+    if (LIKELY(!bucketIdOptional.has_value())) {
+      return;
+    }
+    auto bucketId = *bucketIdOptional;
+    if (UNLIKELY(!newReq.has_value())) {
+      newReq.emplace(originalReq);
+    }
+    newReq->bucketId_ref() = bucketId;
+  }
+
+  template <class Request>
+  typename std::
+      enable_if_t<!facebook::memcache::HasBucketIdTrait<Request>::value, void>
+      maybeAddBucketId(std::optional<Request>, const Request&) const {}
+
+  FOLLY_ERASE std::optional<std::string> bucketIdOpt() const {
+    auto bucketIdOptional = fiber_local<RouterInfo>::getBucketId();
+    std::optional<std::string> bucketId = std::nullopt;
+    if (bucketIdOptional.has_value()) {
+      bucketId = folly::to<std::string>(*bucketIdOptional);
+    }
+    return bucketId;
   }
 
   template <class Request>
@@ -359,10 +413,11 @@ class DestinationRoute {
   }
 
   template <class Request>
-  FOLLY_NOINLINE bool spool(const Request& req) const {
+  FOLLY_NOINLINE bool spool(
+      const Request& req,
+      const std::shared_ptr<AxonContext>& axonCtx,
+      const std::optional<uint64_t>& bucketId) const {
     // return true if axonlog is enabled and appending to axon client succeed.
-    auto& axonCtx = fiber_local<RouterInfo>::getAxonCtx();
-    auto bucketId = fiber_local<RouterInfo>::getBucketId();
     auto axonLogRes = bucketId && axonCtx &&
         spoolAxonProxy(fiber_local<RouterInfo>::getSharedCtx()->proxy(),
                        req,

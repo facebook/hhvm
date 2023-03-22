@@ -17,6 +17,6 @@
     "axonlog": true,
     "axonlog_tier": "axon.dl_memcache",
     "axonlog_keyspace": 4,
-    "axonlog_all_delete": false
+    "axonlog_all_delete": true
   }
 }

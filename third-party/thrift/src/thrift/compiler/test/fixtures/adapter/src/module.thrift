@@ -28,7 +28,7 @@ include "thrift/annotation/rust.thrift"
 @thrift.Experimental
 package "facebook.com/thrift/test"
 
-@hack.Adapter{name = '\Adapter2'}
+@hack.Adapter{name = '\\Adapter2'}
 @cpp.Adapter{name = '::my::Adapter2'}
 @rust.Adapter{name = "::my::Adapter2"}
 typedef set<string> (py.adapter = 'my.Adapter2') SetWithAdapter

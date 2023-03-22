@@ -172,21 +172,50 @@ bool MaskRef::isStringMapMask() const {
   return mask.includes_string_map_ref() || mask.excludes_string_map_ref();
 }
 
-int64_t getIntFromValue(Value v) {
-  if (v.is_byte()) {
-    return v.byteValue_ref().value();
+// Thrift Map Mask supports integer and string key similar to
+// https://docs.hhvm.com/hack/built-in-types/arraykey.
+enum class ArrayKey {
+  Integer = 0,
+  String = 1,
+};
+
+ArrayKey getArrayKeyFromValue(const Value& v) {
+  if (v.is_byte() || v.is_i16() || v.is_i32() || v.is_i64()) {
+    return ArrayKey::Integer;
   }
-  if (v.is_i16()) {
-    return v.i16Value_ref().value();
-  }
-  if (v.is_i32()) {
-    return v.i32Value_ref().value();
-  }
-  if (v.is_i64()) {
-    return v.i64Value_ref().value();
+  if (v.is_binary() || v.is_string()) {
+    return ArrayKey::String;
   }
   folly::throw_exception<std::runtime_error>(
-      "mask map only works with an integer key.");
+      "Value contains a non-integer or non-string key.");
+}
+
+MapId getMapIdFromValue(const Value& v) {
+  if (v.is_byte()) {
+    return MapId{v.byteValue_ref().value()};
+  }
+  if (v.is_i16()) {
+    return MapId{v.i16Value_ref().value()};
+  }
+  if (v.is_i32()) {
+    return MapId{v.i32Value_ref().value()};
+  }
+  if (v.is_i64()) {
+    return MapId{v.i64Value_ref().value()};
+  }
+  folly::throw_exception<std::runtime_error>(
+      "Value contains a non-integer key.");
+}
+
+std::string getStringFromValue(const Value& v) {
+  if (v.is_binary()) {
+    return v.binaryValue_ref().value().to<std::string>();
+  }
+  if (v.is_string()) {
+    return v.stringValue_ref().value();
+  }
+  folly::throw_exception<std::runtime_error>(
+      "Value contains a non-string key.");
 }
 
 // call clear based on the type of the value.
@@ -228,7 +257,9 @@ void MaskRef::clear(protocol::Object& obj) const {
 void MaskRef::clear(std::map<Value, Value>& map) const {
   throwIfNotMapMask();
   for (auto& [key, value] : map) {
-    MaskRef ref = get(MapId{getIntFromValue(key)});
+    MaskRef ref = (getArrayKeyFromValue(key) == ArrayKey::Integer)
+        ? get(getMapIdFromValue(key))
+        : get(getStringFromValue(key));
     clear_impl(ref, map, key, value);
   }
 }
@@ -323,7 +354,7 @@ void MaskRef::copy(
   throwIfNotMapMask();
   // Get all map keys that are possibly masked.
   for (Value key : getKeysToCopy(src, dst)) {
-    MaskRef ref = get(MapId{getIntFromValue(key)});
+    MaskRef ref = get(getMapIdFromValue(key));
     copy_impl(ref, src, dst, key);
   }
 }

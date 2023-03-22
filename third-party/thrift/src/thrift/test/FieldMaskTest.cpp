@@ -654,15 +654,63 @@ TEST(FieldMaskTest, SchemalessClearMap) {
   EXPECT_EQ(barObject.at(FieldId{3}).as_i32(), 5);
 }
 
+TEST(FieldMaskTest, SchemalessClearStringMap) {
+  protocol::Object barObject;
+  // bar{1: map{"1": map{"1": "1",
+  //                     "2": "2"},
+  //            "2": map{"3": "3"}},
+  //     2: "40",
+  //     3: 5}
+  barObject[FieldId{1}] = asValueStruct<
+      type::map<type::string_t, type::map<type::string_t, type::string_t>>>(
+      {{"1", {{"1", "1"}, {"2", "2"}}}, {"2", {{"3", "3"}}}});
+  barObject[FieldId{2}].emplace_string() = "40";
+  barObject[FieldId{3}].emplace_i32() = 5;
+
+  Mask mask;
+  // includes{2: excludes{},
+  //          1: excludes_string_map{"5": excludes_string_map{"5": excludes{}},
+  //                                 "1": includes_string_map{"1": excludes{}}}}
+  auto& includes = mask.includes_ref().emplace();
+  includes[2] = allMask();
+  auto& nestedExcludes = includes[1].excludes_string_map_ref().emplace();
+  nestedExcludes["5"].excludes_string_map_ref().emplace()["5"] =
+      allMask(); // The object doesn't have this field.
+  nestedExcludes["1"].includes_string_map_ref().emplace()["1"] = allMask();
+  // This clears object[1][2], object[1][1][2], and object[2].
+  protocol::clear(mask, barObject);
+
+  ASSERT_TRUE(barObject.contains(FieldId{1}));
+  std::map<Value, Value>& m1 = barObject.at(FieldId{1}).mapValue_ref().value();
+  ASSERT_NE(m1.find(asValueStruct<type::string_t>("1")), m1.end());
+  EXPECT_EQ(m1.find(asValueStruct<type::string_t>("2")), m1.end());
+  std::map<Value, Value>& m2 =
+      m1[asValueStruct<type::string_t>("1")].mapValue_ref().value();
+  EXPECT_EQ(
+      m2[asValueStruct<type::string_t>("1")].stringValue_ref().value(), "1");
+  EXPECT_EQ(m2.find(asValueStruct<type::string_t>("2")), m2.end());
+  EXPECT_FALSE(barObject.contains(FieldId{2}));
+  ASSERT_TRUE(barObject.contains(FieldId{3}));
+  EXPECT_EQ(barObject.at(FieldId{3}).as_i32(), 5);
+}
+
 TEST(FieldMaskTest, SchemalessClearExceptionMap) {
   {
     protocol::Object barObject;
     // bar{2: "40"}
     barObject[FieldId{2}].emplace_string() = "40";
-    Mask m; // object[2] is not a map but has a map mask.
-    auto& includes = m.includes_ref().emplace();
-    includes[2].includes_map_ref().emplace()[4] = noneMask();
-    EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    {
+      Mask m; // object[2] is not a map but has an integer map mask.
+      auto& includes = m.includes_ref().emplace();
+      includes[2].includes_map_ref().emplace()[4] = noneMask();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
+    {
+      Mask m; // object[2] is not a map but has a string map mask.
+      auto& includes = m.includes_ref().emplace();
+      includes[2].includes_string_map_ref().emplace()["4"] = noneMask();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
   }
 
   {
@@ -671,20 +719,60 @@ TEST(FieldMaskTest, SchemalessClearExceptionMap) {
     fooObject[FieldId{2}].emplace_i32() = 20;
     barObject[FieldId{1}].emplace_object() = fooObject;
     barObject[FieldId{2}].emplace_string() = "40";
-    Mask m; // object[1][2] is not a map but has a map mask.
-    auto& includes = m.includes_ref().emplace();
-    includes[1].includes_ref().emplace()[2].excludes_map_ref().emplace()[5] =
-        allMask();
-    includes[2] = allMask();
-    EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    {
+      Mask m; // object[1][2] is not a map but has an integer map mask.
+      auto& includes = m.includes_ref().emplace();
+      includes[1].includes_ref().emplace()[2].excludes_map_ref().emplace()[5] =
+          allMask();
+      includes[2] = allMask();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
+    {
+      Mask m; // object[1][2] is not a map but has a string map mask.
+      auto& includes = m.includes_ref().emplace();
+      includes[1]
+          .includes_ref()
+          .emplace()[2]
+          .excludes_string_map_ref()
+          .emplace()["5"] = allMask();
+      includes[2] = allMask();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
   }
 
   {
     protocol::Object barObject, fooObject;
     barObject[FieldId{1}].emplace_object() = fooObject;
-    Mask m; // object[1] is an object but has a map mask.
-    m.includes_ref().emplace()[1].includes_map_ref().emplace()[1] = allMask();
-    EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    {
+      Mask m; // object[1] is an object but has an integer map mask.
+      m.includes_ref().emplace()[1].includes_map_ref().emplace()[1] = allMask();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
+    {
+      Mask m; // object[1] is an object but has a string map mask.
+      m.includes_ref().emplace()[1].includes_string_map_ref().emplace()["1"] =
+          allMask();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
+  }
+
+  // Invalid map key type.
+  {
+    protocol::Object barObject;
+    // bar{1: {[1]: [1]}}
+    barObject[FieldId{1}] = asValueStruct<
+        type::map<type::list<type::i32_t>, type::list<type::i32_t>>>(
+        {{{1}, {1}}});
+    {
+      Mask m; // object[1] has invalid map key.
+      m.includes_ref().emplace()[1].includes_map_ref().emplace();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
+    {
+      Mask m; // object[1] has invalid map key.
+      m.includes_ref().emplace()[1].includes_string_map_ref().emplace();
+      EXPECT_THROW(protocol::clear(m, barObject), std::runtime_error);
+    }
   }
 }
 

@@ -174,12 +174,11 @@ public final class IntrinsicDefaults {
   }
 
   public static boolean isDefault(byte[] bytes) {
-    return defaultByteArray() == EMPTY_BYTE_ARRAY || bytes != null && bytes.length == 0;
+    return defaultByteArray() == bytes || (bytes != null && bytes.length == 0);
   }
 
   public static boolean isDefault(ByteBuffer byteBuffer) {
-    return defaultByteBuffer() == EMPTY_BYTE_BUFFER
-        || byteBuffer != null && byteBuffer.remaining() == 0;
+    return defaultByteBuffer() == byteBuffer || (byteBuffer != null && byteBuffer.remaining() == 0);
   }
 
   public static boolean isDefault(ByteBuf byteBuf) {

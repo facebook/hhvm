@@ -29,4 +29,4 @@ def write_file(path, content):
 
 
 def run_binary(build_rule, path):
-    subprocess.call([build_rule, "--gen", "mstch_cpp2", path])
+    subprocess.call([build_rule, path])

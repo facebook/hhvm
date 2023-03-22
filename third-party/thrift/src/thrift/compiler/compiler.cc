@@ -149,7 +149,7 @@ std::string parse_args(
     diagnostic_params& dparams) {
   // Check for necessary arguments, you gotta have at least a filename and
   // an output language flag.
-  if (arguments.size() < 2) {
+  if (arguments.size() < 3 && gparams.targets.empty()) {
     usage();
     return {};
   }
@@ -502,13 +502,18 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
   parsing_params pparams;
   gen_params gparams;
   diagnostic_params dparams;
+  gparams.targets.push_back(""); // Avoid needing to pass --gen
   std::string filename = parse_args(arguments, pparams, gparams, dparams);
-
   if (filename.empty()) {
     return {};
   }
-  auto ctx = diagnostic_context::ignore_all(sm);
-  return parse_and_mutate_program(sm, ctx, filename, std::move(pparams));
+
+  diagnostic_context ctx(
+      sm,
+      [](const diagnostic& d) { fmt::print(stderr, "{}\n", d.str()); },
+      diagnostic_params::only_errors());
+  parsing_driver driver(sm, ctx, filename, std::move(pparams));
+  return driver.parse();
 }
 
 compile_result compile(const std::vector<std::string>& arguments) {

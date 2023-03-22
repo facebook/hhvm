@@ -29,7 +29,8 @@ std::shared_ptr<t_program> dedent_and_parse_to_program(
   auto temp_file = std::make_shared<const folly::test::TemporaryFile>();
   const auto path = temp_file->path().string();
   std::ofstream(path) << folly::stripLeftMargin(source);
+  auto ctx = diagnostic_context::ignore_all(sm);
   auto bundle = folly::to_shared_ptr(
-      parse_and_get_program(sm, {"UNNAMED", "--gen", "mstch_cpp2", path}));
+      apache::thrift::compiler::parse_and_mutate_program(sm, ctx, path, {}));
   return {bundle->root_program(), [bundle, temp_file](auto) {}};
 }

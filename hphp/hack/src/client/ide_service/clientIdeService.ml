@@ -314,15 +314,6 @@ let initialize_from_saved_state
   set_state t Uninitialized;
 
   try%lwt
-    (* We must be the first function called after [make].
-       This satisfies the invariant that Initialize_from_saved_state
-       is the first message sent to the daemon. *)
-    begin
-      match t.state with
-      | Uninitialized -> ()
-      | _ -> failwith "not in uninitialized state"
-    end;
-
     let message =
       {
         tracking_id = "init";

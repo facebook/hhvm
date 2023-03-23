@@ -31,7 +31,7 @@ impl Pass for ValidateExprCastPass {
             Expr_::Cast(box (Hint(_, box Hint_::Hany), _)) => Continue(()),
             Expr_::Cast(box (Hint(p, _), _)) => {
                 env.emit_error(NamingError::ObjectCast(p.clone()));
-                Break(())
+                Continue(())
             }
             _ => Continue(()),
         }

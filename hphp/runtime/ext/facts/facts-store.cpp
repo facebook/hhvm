@@ -997,6 +997,9 @@ struct FactsStoreImpl final
                   StructuredLogEntry ent;
                   ent.setInt("sample_rate", rate);
                   ent.setInt("duration_ms", dur);
+                  ent.setInt(
+                      "is_eden",
+                      std::filesystem::exists(m_root / ".eden" / "root"));
                   if (!results.hasException()) {
                     auto& v = results.value();
                     ent.setInt("fresh", v.m_fresh);

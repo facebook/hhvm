@@ -277,15 +277,15 @@ def rawptr(val: lldb.SBValue) -> typing.Optional[lldb.SBValue]:
         # This is a synthetic value, so we can just use its synthesized child.
         # We could also do utils.get(val.GetNonSyntheticValue(), "_M_t", "_M_t", "_M_head_impl")
         ptr = get(val, "pointer")
-    if name == "HPHP::req::ptr" or name == "HPHP::AtomicSharedPtrImpl":
+    elif name == "HPHP::req::ptr" or name == "HPHP::AtomicSharedPtrImpl":
         ptr = get(val, "m_px")
     elif name == "HPHP::LowPtr" or name == "HPHP::detail::LowPtrImpl":
         inner = val.type.GetTemplateArgumentType(0)
-        storage_type = template_type(val.type.GetTemplateArgumentType(1))
         ptr = get(val, "m_s")
-        # Unwrap the std::atomic in AtomicLowPtr. (LowPtr is templated on
-        # the m_s field's type, and for AtomicLowPtr, it's an atomic.)
-        if storage_type == "HPHP::detail::AtomicStorage":
+        if name == "HPHP::detail::LowPtrImpl":
+            storage_type = template_type(val.type.GetTemplateArgumentType(1))
+            # Currently only used by AtomicLowPtr alias
+            assert storage_type == "HPHP::detail::AtomicStorage"
             ptr = get(ptr, "_M_i")
         ptr = ptr.Cast(inner.GetPointerType())
     elif name == "HPHP::CompactTaggedPtr":
@@ -366,6 +366,8 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
     elif t == "HPHP::Class":
         pre_class = deref(get(val, "m_preClass"))
         sd = get(pre_class, "m_name")
+    elif t == "HPHP::LazyClassData":
+        sd = get(val, "className")
     elif t == "HPHP::ObjectData":
         cls = deref(get(val, "m_cls"))
         pre_class = deref(get(cls, "m_preClass"))
@@ -394,21 +396,27 @@ def string_data_val(val: lldb.SBValue, keep_case=True):
 
     if val.type.IsPointerType():
         val = deref(val)
+    assert val.type.name == "HPHP::StringData"
 
     addr = val.load_addr
     assert addr != lldb.LLDB_INVALID_ADDRESS, f"invalid string address {val.load_addr}"
     addr += val.size
     m_len = val.children[1].GetChildMemberWithName("m_len").unsigned
-    error = lldb.SBError()
+    err = None
 
-    # +1 for null terminator, it seems
-    cstring = val.process.ReadCStringFromMemory(addr, m_len + 1, error)
-    if error.Success():
-        return cstring
-    else:
-        print('error: ', error)
+    try:
+        error = lldb.SBError()
+        # +1 for null terminator, it seems
+        cstring = val.process.ReadCStringFromMemory(addr, m_len + 1, error)
+        if error.Success():
+            return cstring if keep_case else cstring.lower()
+        else:
+            err = error
+    except SystemError as error:
+        err = error
 
-    return cstring if keep_case else cstring.lower()
+    print(f"error while trying to get string: {err}")
+    return f"<invalid string with addr 0x{addr:0x} and length {m_len}>"
 
 
 #------------------------------------------------------------------------------
@@ -445,12 +453,41 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     elif typ.unsigned in (DT("String"), DT("PersistentString")):
         pstr = get(data, "pstr")
         val = '\"%s\"' % string_data_val(pstr)
+    elif typ.unsigned == DT("Object"):
+        val = get(data, "pobj")
+        name = nameof(val)
     elif typ.unsigned == DT("Resource"):
         val = get(data, "pres")
+    elif typ.unsigned == DT("Class"):
+        val = get(data, "pclass")
+        name = nameof(val)
+    elif typ.unsigned == DT("LazyClass"):
+        val = get(data, "plazyclass")
+        name = nameof(val)
+    elif typ.unsigned == DT("Func"):
+        val = get(data, "pfunc")
+        name = nameof(val)
+    elif typ.unsigned == DT("ClsMeth"):
+        # For non-lowptr, m_data is a pointer, so try and dereference first
+        val = referenced_value(get(data, "pclsmeth", "m_data"))
+        cls = get(val, "m_cls").Cast(Type("HPHP::Class", target).GetPointerType())
+        func = get(val, "m_func").Cast(Type("HPHP::Func", target).GetPointerType())
+        name = f"{nameof(cls)}::{nameof(func)}"
+    elif typ.unsigned == DT("RFunc"):
+        val = get(data, "prfunc")
+        func = get(val, "m_func")
+        #arr = get(val, "m_arr")  # TODO use to print array contents
+        name = nameof(func)
+    elif typ.unsigned == DT("RClsMeth"):
+        val = get(data, "prclsmeth")
+        cls = get(val, "m_cls")
+        func = get(val, "m_func")
+        #arr = get(val, "m_arr")  # TODO use to print array contents
+        name = f"{nameof(cls)}::{nameof(func)}"
     else:
         typ_as_int8_t = typ.Cast(Type("int8_t", target))
-        num = int(get(data, "num"))
-        typ = 'Invalid(%d)' % typ_as_int8_t
+        num = get(data, "num").signed
+        typ = 'Invalid Type (%d)' % typ_as_int8_t.signed
         val = '0x%x' % num
 
     if isinstance(typ, lldb.SBValue):

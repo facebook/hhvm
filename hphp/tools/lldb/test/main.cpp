@@ -24,6 +24,8 @@
 namespace HPHP {
 namespace lldb_test {
 
+Object TestObject;
+
 template <DataType DT>
 TypedValue createTestTypedValue() {
   switch (DT) {
@@ -54,30 +56,53 @@ TypedValue createTestTypedValue() {
       return make_tv<DataType::PersistentString>(StringData::MakeStatic("Hello, world!"));
     case DataType::String:
       return make_tv<DataType::String>(StringData::Make("Hello, world!"));
+    case DataType::Object:
+      return make_tv<DataType::Object>(TestObject.get());
     case DataType::Resource: {
       auto rsc = req::make<DummyResource>();
       return make_tv<DataType::Resource>(rsc->hdr());
     }
-      return make_tv<DataType::Null>();
+    // Note: the data used to build RFunc and RClsMeth here are totally contrived
+    // (i.e. the function used here really doesn't take reified generics).
+    case DataType::RFunc: {
+      auto func = TestObject->getVMClass()->getCtor();
+      auto arr = staticEmptyVec();
+      auto rfuncdata = RFuncData::newInstance(const_cast<Func *>(func), arr);
+      return make_tv<KindOfRFunc>(rfuncdata);
+    }
+    case DataType::RClsMeth: {
+      auto cls = TestObject->getVMClass();
+      auto func = cls->getCtor();
+      auto arr = staticEmptyVec();
+      auto rclsmethdata = RClsMethData::create(cls, const_cast<Func *>(func), arr);
+      return make_tv<KindOfRClsMeth>(rclsmethdata);
+    }
+    case DataType::ClsMeth: {
+      auto cls = TestObject->getVMClass();
+      auto func = cls->getCtor();
+      auto clsmethdata = ClsMethDataRef::create(cls, const_cast<Func*>(func));
+      return make_tv<KindOfClsMeth>(clsmethdata);
+    }
     case DataType::Boolean:
       return make_tv<DataType::Boolean>(true);
     case DataType::Int64:
       return make_tv<DataType::Int64>(42);
     case DataType::Double:
       return make_tv<DataType::Double>(3.1415);
-    case DataType::Uninit:
-      return make_tv<DataType::Uninit>();
-    case DataType::Null:
-      return make_tv<DataType::Null>();
-    case DataType::Object:
+    case DataType::Func: {
+      auto func = TestObject->getVMClass()->getCtor();
+      return make_tv<KindOfFunc>(const_cast<Func *>(func));
+    }
     case DataType::Class:
-    case DataType::LazyClass:
-    case DataType::Func:
-    case DataType::RFunc:
-    case DataType::RClsMeth:
-    case DataType::ClsMeth:
-      // TODO(michristensen)
-      return make_tv<DataType::Null>();
+      return make_tv<KindOfClass>(TestObject->getVMClass());
+    case DataType::LazyClass: {
+      auto lazy_cls = LazyClassData::create(StringData::MakeStatic("SpecialLazyClass"));
+      return make_tv<DataType::LazyClass>(lazy_cls);
+    }
+    case DataType::Uninit:
+      return make_tv<KindOfUninit>();
+    case DataType::Null:
+      return make_tv<KindOfNull>();
   }
   not_reached();
 }
@@ -89,7 +114,13 @@ DATATYPES
 
 void takeTypedValueRef(TypedValue& UNUSED tv) { return; }
 
+// TypedValue subtypes
+void takeVariant(Variant UNUSED v) { return; }
+void takeVarNR(VarNR UNUSED v) { return ; }
+
 void buildTypedValues() {
+  TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");
+
   #define DT(name, ...) \
   { \
       auto tv = createTestTypedValue<DataType::name>(); \
@@ -101,6 +132,8 @@ void buildTypedValues() {
     auto tv = createTestTypedValue<DataType::Int64>();
     takeTypedValueRef(tv);
   }
+  takeVariant(Variant(42));
+  takeVarNR(VarNR(2.718));
 }
 
 void takeStringData(StringData* UNUSED s) { return; }

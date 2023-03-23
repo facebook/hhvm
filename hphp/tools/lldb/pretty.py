@@ -54,7 +54,7 @@ def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]
     return utils.string_data_val(val_obj)
 
 
-@format("^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$", regex=True)
+@format("^HPHP::(TypedValue|Variant|VarNR)$", regex=True)
 def pp_TypedValue(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     """ Pretty print HPHP::TypedValue (and its subtypes)
 

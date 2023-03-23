@@ -1,0 +1,22 @@
+(rule
+ (alias ide_code_actions)
+ (deps
+  %{exe:../../src/hh_single_type_check.exe}
+  %{project_root}/hack/test/verify.py
+  %{project_root}/hack/test/review.sh
+  (glob_files %{project_root}/hack/test/ide_code_actions/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/*.php)
+  (glob_files %{project_root}/hack/test/ide_code_actions/*.exp))
+ (action
+  (run
+   %{project_root}/hack/test/verify.py
+   %{project_root}/hack/test/ide_code_actions
+   --program
+   %{exe:../../src/hh_single_type_check.exe}
+   --flags
+   --ide-code-actions)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias ide_code_actions)))

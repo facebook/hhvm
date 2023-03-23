@@ -56,6 +56,8 @@ val print_textEdits : Lsp.TextEdit.t list -> Hh_json.json
 
 val print_command : Lsp.Command.t -> Hh_json.json
 
+val print_command_or_action : Lsp.CodeAction.command_or_action -> Hh_json.json
+
 val parse_command : Hh_json.json option -> Lsp.Command.t
 
 val parse_formattingOptions :

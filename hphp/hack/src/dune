@@ -41,6 +41,7 @@
   server_color_file
   server_env
   server_env_build
+  server_code_actions_services
   server_file_outline
   server_find_refs
   server_global_inference

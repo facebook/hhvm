@@ -51,6 +51,7 @@ type mode =
   | Dump_dep_hashes
   | Get_some_file_deps of int
   | Identify_symbol of int * int
+  | Ide_code_actions
   | Find_local of int * int
   | Get_member of string
   | Outline
@@ -431,6 +432,10 @@ let parse_options () =
       ( "--get-some-file-deps",
         Arg.Int (fun depth -> set_mode (Get_some_file_deps depth) ()),
         " Print a list of files this file depends on. The provided integer is the depth of the traversal. Requires --root, --naming-table and --depth"
+      );
+      ( "--ide-code-actions",
+        Arg.Unit (set_mode Ide_code_actions),
+        " Apply a code action to the given file, where the code action is indicated with position markers (see tests)"
       );
       ( "--identify-symbol",
         (let line = ref 0 in
@@ -1615,6 +1620,39 @@ let hover_at_caret_pos (src : string) : int * int =
   | None ->
     failwith "Could not find any occurrence of ^ hover-at-caret in source code"
 
+(* Given source code containing the patterns [start_marker] and [end_marker], calculate the range between the markers *)
+let find_ide_range src : Ide_api_types.range =
+  let start_marker = "/*range-start*/" in
+  let end_marker = "/*range-end*/" in
+  let lines = String.split_lines src in
+  let find_line marker =
+    List.findi lines ~f:(fun _ line ->
+        String.is_substring line ~substring:marker)
+  in
+  let find_marker marker after_or_before =
+    let (line_zero_indexed, start_line_src) =
+      find_line marker
+      |> Option.value_exn
+           ~message:(Format.sprintf "couldn't find marker %s" marker)
+    in
+    let line = line_zero_indexed + 1 in
+    let column =
+      let marker_start =
+        Str.search_forward (Str.regexp_string marker) start_line_src 0
+      in
+      let column_adjustment =
+        match after_or_before with
+        | `After -> String.length marker + 1
+        | `Before -> 1
+      in
+      marker_start + column_adjustment
+    in
+    Ide_api_types.{ line; column }
+  in
+  let st = find_marker start_marker `After in
+  let ed = find_marker end_marker `Before in
+  Ide_api_types.{ st; ed }
+
 (**
  * Compute TASTs for some files, then expand all type variables.
  *)
@@ -2160,6 +2198,30 @@ let handle_mode
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
+  | Ide_code_actions ->
+    let path = expect_single_file () in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+    let src = Provider_context.read_file_contents_exn entry in
+    let range = find_ide_range src in
+    let commands_or_actions =
+      CodeActionsService.go
+        ~ctx
+        ~entry
+        ~path:(Relative_path.to_absolute path)
+        ~range
+    in
+    let hermeticize_paths =
+      Str.global_replace (Str.regexp "\".+?.php\"") "\"FILE.php\""
+    in
+    if List.is_empty commands_or_actions then
+      Format.printf "No commands or actions found\n"
+    else
+      List.(
+        commands_or_actions
+        >>| Lsp_fmt.print_command_or_action
+        >>| Hh_json.json_to_string ~sort_keys:true ~pretty:true
+        >>| hermeticize_paths
+        |> iter ~f:(Format.printf "%s\n"))
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

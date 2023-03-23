@@ -52,6 +52,15 @@ folly::coro::Task<std::string> ThriftStressTestClient::co_echo(
   co_return ret;
 }
 
+folly::coro::Task<std::string> ThriftStressTestClient::co_echoEb(
+    const std::string& x) {
+  std::string ret;
+  co_await timedExecute([&]() -> folly::coro::Task<void> {
+    ret = co_await client_->co_echoEb(x);
+  });
+  co_return ret;
+}
+
 folly::coro::Task<void> ThriftStressTestClient::co_requestResponseEb(
     const BasicRequest& req) {
   co_await timedExecute([&]() { return client_->co_requestResponseEb(req); });

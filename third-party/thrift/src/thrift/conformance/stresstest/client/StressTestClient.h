@@ -46,6 +46,7 @@ class StressTestClient {
 
   virtual folly::coro::Task<void> co_ping() = 0;
   virtual folly::coro::Task<std::string> co_echo(const std::string&) = 0;
+  virtual folly::coro::Task<std::string> co_echoEb(const std::string&) = 0;
   virtual folly::coro::Task<void> co_requestResponseEb(const BasicRequest&) = 0;
   virtual folly::coro::Task<void> co_requestResponseTm(const BasicRequest&) = 0;
   virtual folly::coro::Task<void> co_streamTm(const StreamRequest&) = 0;
@@ -70,6 +71,8 @@ class ThriftStressTestClient : public StressTestClient {
   folly::coro::Task<void> co_ping() override;
 
   folly::coro::Task<std::string> co_echo(const std::string&) override;
+
+  folly::coro::Task<std::string> co_echoEb(const std::string&) override;
 
   folly::coro::Task<void> co_requestResponseEb(const BasicRequest&) override;
 

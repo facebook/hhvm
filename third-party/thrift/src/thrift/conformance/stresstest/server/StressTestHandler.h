@@ -34,6 +34,12 @@ class StressTestHandler : public apache::thrift::ServiceHandler<StressTest> {
     callback->result(std::move(payload));
   }
 
+  void async_eb_echoEb(
+      std::unique_ptr<HandlerCallback<std::unique_ptr<std::string>>> callback,
+      std::unique_ptr<::std::string> payload) override {
+    callback->result(std::move(payload));
+  }
+
   void async_tm_requestResponseTm(
       std::unique_ptr<HandlerCallback<std::unique_ptr<BasicResponse>>> callback,
       std::unique_ptr<BasicRequest> request) override;

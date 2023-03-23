@@ -99,19 +99,13 @@ Values
 
 HHBC instructions may push and pop values on the current frame's evaluation
 stack and they may read and write values to the current frame's local
-variables. Values come in two flavors: cells and refs.
-
-A "cell" is a structure that contains a type identifier and either data (for
-non-refcounted types) or a pointer to data (for refcounted types). When a cell
-containing a pointer is duplicated, the new cell will point to the same data as
-the original cell. When a cell containing a pointer is duplicated or discarded,
-the execution engine is responsible for honoring the data's refcount logic.
-
-A "ref" is a structure that contains a pointer to a cell container. When a ref
-is duplicated, the new ref will point to the same container as the original
-ref. When a ref is duplicated or destroyed, the execution engine is responsible
-for honoring the container's refcount logic. When the container is destroyed,
-the cell it contains is also destroyed.
+variables. A value (or "cell") is a structure that contains a type identifier
+and either data (for non-refcounted types) or a pointer to data (for refcounted
+types). When a cell containing a pointer is duplicated, the new cell will point
+to the same data as the original cell. When a cell containing a pointer is
+duplicated or discarded, the execution engine is responsible for honoring the
+data's refcount logic. Throughout this document, we use "cell" and "value"
+interchangeably.
 
 Functions
 ---------
@@ -565,8 +559,7 @@ for each of the instruction's inputs.
 
 Here is a description of each flavor descriptor:
 
-  C - cell; specifies that the value must be a cell at run time
-  V - ref; specifies that the value must be a ref at run time
+  C - cell; specifies that the value must be a typed value at run time
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 

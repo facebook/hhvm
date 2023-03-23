@@ -1,9 +1,9 @@
 File "recursive_non_null_4.php", line 6, characters 3-16:
-  Map<_, _>
+  Map<(arraykey & _), _>
 File "recursive_non_null_4.php", line 13, characters 5-18:
-  Map<_, _>
+  Map<(arraykey & _), _>
 File "recursive_non_null_4.php", line 18, characters 3-16:
-  Map<_, _>
+  Map<(arraykey & _), _>
 File "recursive_non_null_4.php", line 23, characters 3-16:
-  Map<_, _>
+  Map<(arraykey & _), _>
 No errors

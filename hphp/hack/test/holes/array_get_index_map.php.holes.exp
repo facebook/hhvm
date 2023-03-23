@@ -23,7 +23,8 @@
             ([7:3-13],
              (Expr
                 ((nothing), [7:3-12],
-                 (Array_get (((Map<nothing, nothing>), [7:3-6], (Lvar ([7:3-6], $xs))), (Some ((mixed), [7:7-11], (Hole (((mixed), [7:7-11], (Lvar ([7:7-11], $idx))), (mixed), (nothing), Typing)))))))))
+                 (Array_get (((Map<nothing, nothing>), [7:3-6], (Lvar ([7:3-6], $xs))),
+                    (Some ((mixed), [7:7-11], (Hole (((mixed), [7:7-11], (Lvar ([7:7-11], $idx))), (mixed), ((arraykey & nothing)), Typing)))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

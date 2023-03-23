@@ -3,5 +3,5 @@ File "collections.php", line 8, characters 3-13:
 File "collections.php", line 10, characters 3-13:
   Vector<_>
 File "collections.php", line 12, characters 3-13:
-  Map<_, _>
+  Map<(arraykey & _), _>
 No errors

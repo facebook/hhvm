@@ -5,4 +5,4 @@ Invalid return type (Typing[4110])
   File "namespace_collections3.php", line 14, characters 15-28:
   Expected `Map<int, int>`
   File "namespace_collections3.php", line 15, characters 8-13:
-  But got `Map<_, _>`
+  But got `Map<(arraykey & _), _>`

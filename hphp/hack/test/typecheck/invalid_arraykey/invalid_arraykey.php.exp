@@ -67,12 +67,12 @@ This value is not a valid key type for this container (Typing[4371])
 File "invalid_arraykey.php", line 16, characters 3-14:
 This value is not a valid key type for this container (Typing[4371])
   File "invalid_arraykey.php", line 14, characters 8-12:
-  This container is an object of type Map<_, _>
+  This container is an object of type Map<(arraykey & _), _>
   File "invalid_arraykey.php", line 16, characters 6-9:
-  Null cannot be used as a key for an object of type Map<_, _>
+  Null cannot be used as a key for an object of type Map<(arraykey & _), _>
 File "invalid_arraykey.php", line 17, characters 3-13:
 This value is not a valid key type for this container (Typing[4371])
   File "invalid_arraykey.php", line 14, characters 8-12:
-  This container is an object of type Map<_, _>
+  This container is an object of type Map<(arraykey & _), _>
   File "invalid_arraykey.php", line 17, characters 6-8:
-  A float cannot be used as a key for an object of type Map<_, _>
+  A float cannot be used as a key for an object of type Map<(arraykey & _), _>

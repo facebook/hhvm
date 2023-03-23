@@ -5,14 +5,14 @@ Invalid index type for this darray (Typing[4110])
   File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 17-20:
   But got `bool`
 File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-30:
+Invalid return type (Typing[4110])
+  File "disallow_incompatible_type_parameters_for_darray.php", line 3, characters 33-35:
+  Expected `int`
+  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 25-29:
+  But got `bool`
+File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-30:
 The keys of this `darray` are incompatible (Typing[4110])
   File "disallow_incompatible_type_parameters_for_darray.php", line 3, characters 25-30:
   Expected `string`
   File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 17-20:
-  But got `bool`
-File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 10-30:
-The values of this `darray` are incompatible (Typing[4110])
-  File "disallow_incompatible_type_parameters_for_darray.php", line 3, characters 33-35:
-  Expected `int`
-  File "disallow_incompatible_type_parameters_for_darray.php", line 4, characters 25-29:
   But got `bool`

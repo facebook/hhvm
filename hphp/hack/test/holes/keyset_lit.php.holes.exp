@@ -15,10 +15,7 @@
                ((keyset<int>), [5:3-23],
                 (Binop
                    { bop = (Eq None); lhs = ((keyset<int>), [5:3-5], (Lvar ([5:3-5], $x)));
-                     rhs =
-                     ((keyset<int>), [5:8-23],
-                      (ValCollection (([5:8-14], Keyset), None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], (Hole (((bool), [5:18-22], True), (bool), (int), Typing)))])))
-                     }))))
+                     rhs = ((keyset<int>), [5:8-23], (ValCollection (([5:8-14], Keyset), None, [((int), [5:15-16], (Int "1")); ((bool), [5:18-22], True)]))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -44,11 +41,11 @@
          { fb_ast =
            [([10:3-19],
              (Expr
-                ((keyset<nothing>), [10:3-18],
+                ((keyset<string>), [10:3-18],
                  (Binop
-                    { bop = (Eq None); lhs = ((keyset<nothing>), [10:3-5], (Lvar ([10:3-5], $y)));
+                    { bop = (Eq None); lhs = ((keyset<string>), [10:3-5], (Lvar ([10:3-5], $y)));
                       rhs =
-                      ((keyset<nothing>), [10:8-18],
+                      ((keyset<string>), [10:8-18],
                        (ValCollection (([10:8-14], Keyset), None, [((?string), [10:15-17], (Hole (((?string), [10:15-17], (Lvar ([10:15-17], $x))), (?string), (string), Typing)))])))
                       }))))
              ]

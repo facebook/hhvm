@@ -1,6 +1,6 @@
 File "union_subtype_bad.php", line 5, characters 10-20:
-Some elements in this collection are incompatible (Typing[4110])
-File "union_subtype_bad.php", line 4, characters 39-41:
-Expected `num`
-File "union_subtype_bad.php", line 4, characters 23-28:
-But got `string`
+Invalid return type (Typing[4110])
+  File "union_subtype_bad.php", line 4, characters 39-41:
+  Expected `num`
+  File "union_subtype_bad.php", line 4, characters 23-28:
+  But got `string`

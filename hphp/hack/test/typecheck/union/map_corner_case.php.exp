@@ -5,7 +5,7 @@ Invalid assignment (Typing[4110])
   File "collections/Map.hhi", line 442, characters 36-37:
     via this generic `Tv`
   File "map_corner_case.php", line 14, characters 27-32:
-  But got `Map<_, _>`
+  But got `Map<(arraykey & _), _>`
 File "map_corner_case.php", line 25, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 5, characters 14-19:
@@ -13,7 +13,7 @@ Invalid assignment (Typing[4110])
   File "collections/Map.hhi", line 442, characters 36-37:
     via this generic `Tv`
   File "map_corner_case.php", line 13, characters 27-32:
-  But got `Map<_, nothing>`
+  But got `Map<(arraykey & _), nothing>`
 File "map_corner_case.php", line 25, characters 5-17:
 Invalid assignment (Typing[4110])
   File "map_corner_case.php", line 12, characters 27-32:
@@ -21,4 +21,4 @@ Invalid assignment (Typing[4110])
   File "collections/Map.hhi", line 442, characters 36-37:
     via this generic `Tv`
   File "map_corner_case.php", line 13, characters 27-32:
-  But got `Map<_, nothing>`
+  But got `Map<(arraykey & _), nothing>`

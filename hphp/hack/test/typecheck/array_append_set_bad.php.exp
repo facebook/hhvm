@@ -7,6 +7,6 @@ Invalid assignment (Typing[4110])
 File "array_append_set_bad.php", line 20, characters 3-12:
 Set values must be arraykeys (Typing[4324])
   File "array_append_set_bad.php", line 19, characters 8-12:
-  This container is an object of type Set<_>
+  This container is an object of type Set<(arraykey & _)>
   File "array_append_set_bad.php", line 20, characters 10-12:
   A float is not an arraykey

@@ -4,12 +4,6 @@ Invalid index type for this darray (Typing[4110])
   Expected `arraykey` because only array keys can be used to index into a `Map`, `dict`, `darray`, `Set`, or `keyset`
   File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
   But got `bool`
-File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-26:
-The keys of this `darray` are incompatible (Typing[4110])
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-26:
-  Expected `arraykey` because type parameter `Tk` of `darray` could not be determined. Please add explicit type parameters to the invocation of `darray`
-  File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
-  But got `bool`
 File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 9, characters 12-29:
 Invalid return type (Typing[4110])
   File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 7, characters 43-45:

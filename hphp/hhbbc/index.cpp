@@ -4197,7 +4197,287 @@ void compute_iface_vtables(IndexData& index,
 
 //////////////////////////////////////////////////////////////////////
 
-void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
+struct CheckClassInfoInvariantsJob {
+  static std::string name() { return "hhbbc-check-cinfo-invariants"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static void fini() {}
+
+  static bool run(std::unique_ptr<ClassInfo2> cinfo) {
+    // AttrNoOverride is a superset of AttrNoOverrideRegular
+    always_assert(
+      IMPLIES(!(cinfo->attrs & AttrNoOverrideRegular),
+              !(cinfo->attrs & AttrNoOverride))
+    );
+
+    // Override attrs and what we know about the subclasses should be in
+    // agreement.
+    if (cinfo->attrs & AttrNoOverride) {
+      always_assert(!cinfo->hasRegularSubclass);
+      always_assert(!cinfo->hasNonRegularSubclass);
+    } else if (cinfo->attrs & AttrNoOverrideRegular) {
+      always_assert(!cinfo->hasRegularSubclass);
+    }
+
+    if (cinfo->attrs & AttrNoMock) {
+      always_assert(!cinfo->isMocked);
+      always_assert(!cinfo->isSubMocked);
+    }
+
+    for (auto const& [name, mte] : cinfo->methods) {
+      // Interface method tables should only contain its own methods.
+      if (cinfo->attrs & AttrInterface) {
+        always_assert(mte.meth().cls->isame(cinfo->name));
+      }
+
+      // AttrNoOverride implies noOverrideRegular
+      always_assert(IMPLIES(mte.attrs & AttrNoOverride, mte.noOverrideRegular()));
+
+      if (!is_special_method_name(name)) {
+        // If the class isn't overridden, none of it's methods can be
+        // either.
+        always_assert(IMPLIES(cinfo->attrs & AttrNoOverride,
+                              mte.attrs & AttrNoOverride));
+      } else {
+        always_assert(!(mte.attrs & AttrNoOverride));
+        always_assert(!mte.noOverrideRegular());
+      }
+
+      if (cinfo->name->isame(s_Closure.get()) || is_closure_name(cinfo->name)) {
+        always_assert(mte.attrs & AttrNoOverride);
+      }
+
+      // Don't store method families for special methods.
+      auto const famIt = cinfo->methodFamilies.find(name);
+      if (is_special_method_name(name)) {
+        always_assert(famIt == end(cinfo->methodFamilies));
+        continue;
+      }
+      if (famIt == end(cinfo->methodFamilies)) {
+        always_assert(is_closure_name(cinfo->name));
+        continue;
+      }
+      auto const& entry = famIt->second;
+
+      // No override methods should always have a single entry.
+      if (mte.attrs & AttrNoOverride) {
+        always_assert(
+          boost::get<FuncFamilyEntry::BothSingle>(&entry.m_meths) ||
+          boost::get<FuncFamilyEntry::SingleAndNone>(&entry.m_meths)
+        );
+        continue;
+      }
+
+      if (cinfo->isRegularClass) {
+        // "all" should only be a func family. It can't be empty,
+        // because we know there's at least one method in it (the one in
+        // cinfo->methods). It can't be a single func, because one of
+        // the methods must be the cinfo->methods method, and we know it
+        // isn't AttrNoOverride, so there *must* be another method. So,
+        // it must be a func family.
+        always_assert(
+          boost::get<FuncFamilyEntry::BothFF>(&entry.m_meths) ||
+          boost::get<FuncFamilyEntry::FFAndSingle>(&entry.m_meths)
+        );
+        // This is a regular class, so we cannot have an incomplete
+        // entry (can only happen with interfaces).
+        always_assert(!entry.m_regularIncomplete);
+      }
+    }
+
+    // The subclassList is non-empty, contains this ClassInfo, and
+    // contains only unique elements.
+    if (!cinfo->name->isame(s_Closure.get())) {
+      always_assert(!cinfo->subclassList.empty());
+      always_assert(
+        std::find_if(
+          begin(cinfo->subclassList),
+          end(cinfo->subclassList),
+          [&] (SString s) { return s->isame(cinfo->name); }
+        ) != end(cinfo->subclassList)
+      );
+      auto cpy = cinfo->subclassList;
+      std::sort(begin(cpy), end(cpy), string_data_lti{});
+      cpy.erase(
+        std::unique(begin(cpy), end(cpy), string_data_isame{}),
+        end(cpy)
+      );
+      always_assert(cpy.size() == cinfo->subclassList.size());
+    } else if (is_closure_name(cinfo->name)) {
+      always_assert(cinfo->subclassList.size() == 2);
+      always_assert(cinfo->subclassList[0]->isame(s_Closure.get()));
+      always_assert(cinfo->subclassList[1]->isame(cinfo->name));
+    } else {
+      always_assert(cinfo->subclassList.empty());
+    }
+
+    // The baseList is non-empty, and the last element is this class.
+    always_assert(!cinfo->baseList.empty());
+    always_assert(cinfo->baseList.back()->isame(cinfo->name));
+
+    return true;
+  }
+};
+
+struct CheckFuncFamilyInvariantsJob {
+  static std::string name() { return "hhbbc-check-ff-invariants"; }
+  static void init(const Config& config) {
+    process_init(config.o, config.gd, false);
+  }
+  static void fini() {}
+
+  static bool run(FuncFamilyGroup group) {
+    for (auto const& ff : group.m_ffs) {
+      // FuncFamily should always have more than one func on it.
+      always_assert(
+        ff->m_regular.size() +
+        ff->m_nonRegularPrivate.size() +
+        ff->m_nonRegular.size()
+        > 1
+      );
+
+      // Every method should be sorted in its respective list. We
+      // should never see a method for the same Class more than once.
+      ISStringSet classes;
+      Optional<MethRef> lastReg;
+      Optional<MethRef> lastPrivate;
+      Optional<MethRef> lastNonReg;
+      for (auto const& meth : ff->m_regular) {
+        if (lastReg) always_assert(*lastReg < meth);
+        lastReg = meth;
+        always_assert(classes.emplace(meth.cls).second);
+      }
+      for (auto const& meth : ff->m_nonRegularPrivate) {
+        if (lastPrivate) always_assert(*lastPrivate < meth);
+        lastPrivate = meth;
+        always_assert(classes.emplace(meth.cls).second);
+      }
+      for (auto const& meth : ff->m_nonRegular) {
+        if (lastNonReg) always_assert(*lastNonReg < meth);
+        lastNonReg = meth;
+        always_assert(classes.emplace(meth.cls).second);
+      }
+
+      always_assert(ff->m_allStatic.has_value());
+      always_assert(
+        ff->m_regularStatic.has_value() ==
+        (!ff->m_regular.empty() || !ff->m_nonRegularPrivate.empty())
+      );
+    }
+    return true;
+  }
+};
+
+Job<CheckClassInfoInvariantsJob> s_checkCInfoInvariantsJob;
+Job<CheckFuncFamilyInvariantsJob> s_checkFuncFamilyInvariantsJob;
+
+void check_invariants(const IndexData& index) {
+  if (!debug) return;
+
+  trace_time trace{"check-invariants", index.sample};
+
+  constexpr size_t kCInfoBucketSize = 3000;
+  constexpr size_t kFFBucketSize = 500;
+
+  auto cinfoBuckets = consistently_bucketize(
+    [&] {
+      std::vector<SString> roots;
+      roots.reserve(index.classInfoRefs.size());
+      for (auto const& [name, _] : index.classInfoRefs) {
+        roots.emplace_back(name);
+      }
+      return roots;
+    }(),
+    kCInfoBucketSize
+  );
+
+  SStringToOneT<Ref<FuncFamilyGroup>> nameToFuncFamilyGroup;
+
+  auto ffBuckets = consistently_bucketize(
+    [&] {
+      std::vector<SString> roots;
+      roots.reserve(index.funcFamilyRefs.size());
+      for (auto const& [_, ref] : index.funcFamilyRefs) {
+        auto const name = makeStaticString(ref.id().toString());
+        if (nameToFuncFamilyGroup.emplace(name, ref).second) {
+          roots.emplace_back(name);
+        }
+      }
+      return roots;
+    }(),
+    kFFBucketSize
+  );
+
+  using namespace folly::gen;
+
+  auto const runCInfo = [&] (std::vector<SString> work) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (work.empty()) HPHP_CORO_RETURN_VOID;
+
+    auto inputs = from(work)
+      | map([&] (SString name) {
+          return std::make_tuple(index.classInfoRefs.at(name));
+        })
+      | as<std::vector>();
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("check cinfo invariants {}", work[0])
+    };
+    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+      s_checkCInfoInvariantsJob,
+      std::move(config),
+      std::move(inputs),
+      std::move(metadata)
+    ));
+    assertx(outputs.size() == work.size());
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  auto const runFF = [&] (std::vector<SString> work) -> coro::Task<void> {
+    HPHP_CORO_RESCHEDULE_ON_CURRENT_EXECUTOR;
+
+    if (work.empty()) HPHP_CORO_RETURN_VOID;
+
+    auto inputs = from(work)
+      | map([&] (SString name) {
+          return std::make_tuple(nameToFuncFamilyGroup.at(name));
+        })
+      | as<std::vector>();
+
+    Client::ExecMetadata metadata{
+      .job_key = folly::sformat("check func-family invariants {}", work[0])
+    };
+    auto config = HPHP_CORO_AWAIT(index.configRef->getCopy());
+    auto outputs = HPHP_CORO_AWAIT(index.client->exec(
+      s_checkFuncFamilyInvariantsJob,
+      std::move(config),
+      std::move(inputs),
+      std::move(metadata)
+    ));
+    assertx(outputs.size() == work.size());
+
+    HPHP_CORO_RETURN_VOID;
+  };
+
+  std::vector<coro::TaskWithExecutor<void>> tasks;
+  for (auto& work : cinfoBuckets) {
+    tasks.emplace_back(
+      runCInfo(std::move(work)).scheduleOn(index.executor->sticky())
+    );
+  }
+  for (auto& work : ffBuckets) {
+    tasks.emplace_back(
+      runFF(std::move(work)).scheduleOn(index.executor->sticky())
+    );
+  }
+  coro::wait(coro::collectRange(std::move(tasks)));
+}
+
+void check_local_invariants(const IndexData& index, const ClassInfo* cinfo) {
   // AttrNoOverride is a superset of AttrNoOverrideRegular
   always_assert(
     IMPLIES(!(cinfo->cls->attrs & AttrNoOverrideRegular),
@@ -4471,7 +4751,7 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
   always_assert(cinfo->baseList.back() == cinfo);
 }
 
-void check_invariants(const IndexData& data, const FuncFamily& ff) {
+void check_local_invariants(const IndexData& data, const FuncFamily& ff) {
   // FuncFamily should always have more than one func on it.
   always_assert(ff.possibleFuncs().size() > 1);
 
@@ -4513,15 +4793,15 @@ void check_invariants(const IndexData& data, const FuncFamily& ff) {
   }
 }
 
-void check_invariants(const IndexData& data) {
+void check_local_invariants(const IndexData& data) {
   if (!debug) return;
 
-  trace_time timer{"check-invariants"};
+  trace_time timer{"check-local-invariants"};
 
   parallel::for_each(
     data.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      check_invariants(data, cinfo.get());
+      check_local_invariants(data, cinfo.get());
     }
   );
 
@@ -4532,7 +4812,7 @@ void check_invariants(const IndexData& data) {
   }
   parallel::for_each(
     funcFamilies,
-    [&] (const FuncFamily* ff) { check_invariants(data, *ff); }
+    [&] (const FuncFamily* ff) { check_local_invariants(data, *ff); }
   );
 }
 
@@ -12745,10 +13025,9 @@ Index::Index(Input input,
   auto subclassMeta = flatten_classes(*m_data, std::move(flattenMeta));
   auto ifaceConflicts = build_subclass_lists(*m_data, std::move(subclassMeta));
   compute_iface_vtables(*m_data, std::move(ifaceConflicts));
-
-  make_local(*m_data);
-
   check_invariants(*m_data);
+  make_local(*m_data);
+  check_local_invariants(*m_data);
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr

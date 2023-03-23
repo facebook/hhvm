@@ -148,6 +148,8 @@ module Lost_env = struct
       (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t
       option;
         (** If a shell-out to "hh check --json" is currently underway *)
+    current_hh_shell: current_hh_shell option;
+        (** If a shell-out to, ex --ide-find-refs is currently underway *)
     lock_file: string;
   }
 
@@ -161,7 +163,22 @@ module Lost_env = struct
         (** reconnect if we receive any LSP request/notification *)
     trigger_on_lock_file: bool;  (** reconnect if lockfile is created *)
   }
+
+  and current_hh_shell = {
+    process:
+      (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) Lwt_result.t;
+    cancellation_token: unit Lwt.u;
+    shellable_type: shellable_type;
+  }
+
+  and shellable_type =
+    | FindRefs of lsp_id * string * int * int (* lsp_id, filename, line, col *)
+    | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
 end
+
+let get_lsp_id_of_shell_out = function
+  | Lost_env.FindRefs (lsp_id, _, _, _) -> lsp_id
+  | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
 
 type state =
   | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
@@ -345,8 +362,11 @@ type event =
   | Client_message of incoming_metadata * lsp_message
       (** Client_message stores raw json, and the parsed form of it *)
   | Client_ide_notification of ClientIdeMessage.notification
-  | Shell_out_hh_check of
+  | Shell_out_hh_check_complete of
       (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
+  | Shell_out_hh_feature_complete of
+      ((Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result
+      * Lost_env.shellable_type)
   | Tick  (** once per second, on idle *)
 
 let event_to_string (event : event) : string =
@@ -363,12 +383,14 @@ let event_to_string (event : event) : string =
       "Client_ide_notification(%s)"
       (ClientIdeMessage.notification_to_string n)
   | Tick -> "Tick"
-  | Shell_out_hh_check _ -> "Shell_out_hh_check"
+  | Shell_out_hh_check_complete _ -> "Shell_out_hh_check"
+  | Shell_out_hh_feature_complete _ -> "Shell_out_hh_feature"
 
 let is_tick (event : event) : bool =
   match event with
   | Tick -> true
-  | Shell_out_hh_check _
+  | Shell_out_hh_check_complete _
+  | Shell_out_hh_feature_complete _
   | Server_hello
   | Server_message _
   | Client_message _
@@ -852,7 +874,13 @@ let get_next_event
     when not (Lwt.is_sleeping promise) ->
     state := Lost_server { lenv with Lost_env.current_hh_check = None };
     let%lwt result = promise in
-    Lwt.return (Shell_out_hh_check result)
+    Lwt.return (Shell_out_hh_check_complete result)
+  | Lost_server ({ Lost_env.current_hh_shell = Some sh; _ } as lenv)
+    when not (Lwt.is_sleeping sh.Lost_env.process) ->
+    state := Lost_server { lenv with Lost_env.current_hh_shell = None };
+    let%lwt result = sh.Lost_env.process in
+    Lwt.return
+      (Shell_out_hh_feature_complete (result, sh.Lost_env.shellable_type))
   | Pre_init
   | Lost_server _
   | Post_shutdown ->
@@ -1561,6 +1589,7 @@ and do_lost_server
           uris_with_unsaved_changes;
           uris_with_standalone_diagnostics = UriMap.empty;
           current_hh_check = None;
+          current_hh_shell = None;
           lock_file;
           hh_server_status_diagnostic = None;
         }
@@ -1579,6 +1608,7 @@ and do_lost_server
            uris_with_unsaved_changes;
            uris_with_standalone_diagnostics = UriMap.empty;
            current_hh_check = None;
+           current_hh_shell = None;
            lock_file;
            hh_server_status_diagnostic = None;
          })
@@ -2109,6 +2139,51 @@ let ide_rpc
   match result with
   | Ok result -> Lwt.return result
   | Error error_data -> raise (Server_nonfatal_exception error_data)
+
+let kickoff_shell_out_and_maybe_cancel
+    (state : state) (shellable_type : Lost_env.shellable_type) : state =
+  match state with
+  | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
+    (* If there's an existing shell process, cancel it *)
+    Option.iter current_hh_shell ~f:(fun sh ->
+        Lwt.wakeup_later sh.Lost_env.cancellation_token ());
+
+    let (cancel, cancellation_token) = Lwt.wait () in
+    let cmd =
+      begin
+        match shellable_type with
+        | Lost_env.FindRefs (_, filename, line, col) ->
+          let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
+          [|
+            "--from";
+            "clientLsp:find-refs";
+            "--ide-find-refs";
+            file_line_col;
+            "--json";
+            "--prefer-stdout";
+          |]
+        | Lost_env.GoToImpl (_, filename, line, col) ->
+          let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
+          [|
+            "--from";
+            "clientLsp:go-to-impl";
+            "--ide-go-to-impl";
+            file_line_col;
+            "--json";
+            "--prefer-stdout";
+          |]
+      end
+    in
+    let process =
+      Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel
+    in
+    Lost_server
+      {
+        lenv with
+        Lost_env.current_hh_shell =
+          Some { Lost_env.process; cancellation_token; shellable_type };
+      }
+  | _ -> state
 
 (************************************************************************)
 (* Protocol                                                             *)
@@ -3058,7 +3133,8 @@ let do_findReferences
     Lwt.return
       (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
-let do_findReferences_local (params : FindReferences.params) =
+let do_findReferences_local
+    (state : state) (params : FindReferences.params) (lsp_id : lsp_id) : state =
   let { Ide_api_types.line; column } =
     lsp_position_to_ide
       params.FindReferences.loc.TextDocumentPositionParams.position
@@ -3067,37 +3143,22 @@ let do_findReferences_local (params : FindReferences.params) =
     Lsp_helpers.lsp_textDocumentIdentifier_to_filename
       params.FindReferences.loc.TextDocumentPositionParams.textDocument
   in
-  let formatted_cmd = Printf.sprintf "%s:%d,%d" filename line column in
-  let bin_path = Path.executable_name |> Path.to_string in
-  let exec_cmd =
-    Printf.sprintf
-      "%s --from 'clientLsp:ide-find-refs' --ide-find-refs %s --json"
-      bin_path
-      formatted_cmd
+  let shellable_type = Lost_env.FindRefs (lsp_id, filename, line, column) in
+  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  state
+
+let do_goToImplementation_local
+    (state : state) (params : Implementation.params) (lsp_id : lsp_id) : state =
+  let { Ide_api_types.line; column } =
+    lsp_position_to_ide params.TextDocumentPositionParams.position
   in
-  match Sys_utils.exec_try_read exec_cmd with
-  | Some resp ->
-    let json = Yojson.Safe.from_string resp in
-    begin
-      match json with
-      | `List positions ->
-        let lsp_locations =
-          List.map positions ~f:(fun pos ->
-              let open Yojson.Basic.Util in
-              let pos_json = Yojson.Safe.to_basic pos in
-              let filename = pos_json |> member "filename" |> to_string in
-              let line = pos_json |> member "line" |> to_int in
-              let char_start = pos_json |> member "char_start" |> to_int in
-              let char_end = pos_json |> member "char_end" |> to_int in
-              let pos = { filename; line; char_start; char_end } in
-              ide_find_refs_pos_to_lsp_location pos)
-        in
-        Lwt.return lsp_locations
-      | _ -> failwith "Expected a list of positions from --ide-find-refs"
-    end
-  | None ->
-    log "Failed to invoke --ide-find-references";
-    Lwt.return []
+  let filename =
+    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+      params.TextDocumentPositionParams.textDocument
+  in
+  let shellable_type = Lost_env.GoToImpl (lsp_id, filename, line, column) in
+  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  state
 
 let do_goToImplementation
     (conn : server_conn)
@@ -3787,6 +3848,97 @@ let handle_shell_out_hh_check
   in
   Lwt.return telemetry
 
+let handle_shell_out_hh_feature
+    (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
+    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
+  let parse_lsp_locations stdout : (Lsp.Location.t list, unit) result =
+    let json = Yojson.Safe.from_string stdout in
+    match json with
+    | `List positions ->
+      let lsp_locations =
+        List.map positions ~f:(fun pos ->
+            let open Yojson.Basic.Util in
+            let pos_json = Yojson.Safe.to_basic pos in
+            let filename = pos_json |> member "filename" |> to_string in
+            let line = pos_json |> member "line" |> to_int in
+            let char_start = pos_json |> member "char_start" |> to_int in
+            let char_end = pos_json |> member "char_end" |> to_int in
+            let pos = { filename; line; char_start; char_end } in
+            ide_find_refs_pos_to_lsp_location pos)
+      in
+      Ok lsp_locations
+    | _ -> Error ()
+  in
+  let respond_jsonrpc_for_shell shellable_type stdout =
+    let lsp_id = get_lsp_id_of_shell_out shellable_type in
+    match shellable_type with
+    | Lost_env.FindRefs _ -> begin
+      match parse_lsp_locations stdout with
+      | Ok lsp_locations ->
+        let _ =
+          respond_jsonrpc
+            ~powered_by:Serverless_ide
+            lsp_id
+            (FindReferencesResult lsp_locations)
+        in
+        Some lsp_locations
+      | Error _ -> None
+    end
+    | Lost_env.GoToImpl _ -> begin
+      match parse_lsp_locations stdout with
+      | Ok lsp_locations ->
+        let _ =
+          respond_jsonrpc
+            ~powered_by:Serverless_ide
+            lsp_id
+            (ImplementationResult lsp_locations)
+        in
+        Some lsp_locations
+      | Error _ -> None
+    end
+  in
+  let telemetry =
+    match result with
+    | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
+      match respond_jsonrpc_for_shell shellable_type stdout with
+      | Some resp ->
+        Some
+          {
+            result_count = List.length resp;
+            result_extra_telemetry =
+              Some
+                (Telemetry.create ()
+                |> Telemetry.float_
+                     ~key:"duration"
+                     ~value:(end_time -. start_time));
+          }
+      | None ->
+        Some
+          {
+            result_count = 0;
+            result_extra_telemetry =
+              Some
+                (Telemetry.create ()
+                |> Telemetry.float_
+                     ~key:"duration"
+                     ~value:(end_time -. start_time));
+          }
+    end
+    | Error ({ Lwt_utils.Process_failure.start_time; end_time; _ } as e) ->
+      Some
+        {
+          result_count = 0;
+          result_extra_telemetry =
+            Some
+              (Telemetry.create ()
+              |> Telemetry.float_ ~key:"duration" ~value:(end_time -. start_time)
+              |> Telemetry.string_
+                   ~key:"exn"
+                   ~value:(Lwt_utils.Process_failure.to_string e));
+        }
+  in
+  Lwt.return telemetry
+
 let do_initialize (local_config : ServerLocalConfig.t) : Initialize.result =
   Initialize.
     {
@@ -3976,7 +4128,7 @@ let log_response_if_necessary
         (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
-  | Shell_out_hh_check result ->
+  | Shell_out_hh_check_complete result ->
     let command_line =
       match result with
       | Ok Lwt_utils.Process_success.{ command_line; _ }
@@ -4450,6 +4602,7 @@ let handle_client_message
                 uris_with_unsaved_changes = UriSet.empty;
                 uris_with_standalone_diagnostics = UriMap.empty;
                 current_hh_check = None;
+                current_hh_shell = None;
                 lock_file = ServerFiles.lock_file (get_root_exn ());
                 hh_server_status_diagnostic = None;
               }
@@ -4717,13 +4870,14 @@ let handle_client_message
     | (_, Some _ide_service, RequestMessage (id, FindReferencesRequest params))
       when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt result = do_findReferences_local params in
-      respond_jsonrpc
-        ~powered_by:Serverless_ide
-        id
-        (FindReferencesResult result);
-      Lwt.return_some
-        { result_count = List.length result; result_extra_telemetry = None }
+      state := do_findReferences_local !state params id;
+      Lwt.return_none
+    (* textDocument/implementation request *)
+    | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
+      ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
+      state := do_goToImplementation_local !state params id;
+      Lwt.return_none
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, Some ide_service, RequestMessage (id, SignatureHelpRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
@@ -5415,7 +5569,10 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
           handle_client_ide_notification ~notification
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
-        | Shell_out_hh_check result -> handle_shell_out_hh_check ~state result
+        | Shell_out_hh_check_complete result ->
+          handle_shell_out_hh_check ~state result
+        | Shell_out_hh_feature_complete (result, shellable_type) ->
+          handle_shell_out_hh_feature result shellable_type
         | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.

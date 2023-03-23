@@ -447,7 +447,11 @@ let rec array_get
              || String.equal cn SN.Collections.cVec ->
         let (env, ty) =
           match argl with
-          | [ty] -> maybe_pessimise_type env ty
+          | [ty] ->
+            if String.equal cn SN.Collections.cVector then
+              maybe_pessimise_type env ty
+            else
+              (env, ty)
           | _ ->
             arity_error id;
             err_witness env expr_pos
@@ -963,12 +967,7 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         (env, (ty, Ok ty, val_err_res))
       | (r, Tclass (((_, n) as id), e, [tv]))
         when String.equal n SN.Collections.cVec ->
-        let (env, tv') =
-          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-            pessimised_vec_dict_assign expr_pos env tv ty2
-          else
-            Typing_union.union env tv ty2
-        in
+        let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tclass (id, e, [tv'])) in
         (env, (ty, Ok ty, Ok ty2))
       | (r, Tclass (((_, n) as id), e, [tv]))
@@ -1215,12 +1214,7 @@ let rec assign_array_get
         let ((env, ty_err1), idx_err) =
           type_index env expr_pos tkey tk (Reason.index_class cn)
         in
-        let (env, tv') =
-          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-            pessimised_vec_dict_assign expr_pos env tv ty2
-          else
-            Typing_union.union env tv ty2
-        in
+        let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tclass (id, e, [tv'])) in
         Option.iter ty_err1 ~f:Errors.add_typing_error;
         (env, (ty, Ok ty, idx_err, Ok ty2))

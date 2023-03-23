@@ -975,7 +975,7 @@ let requires_consistent_construct = function
  *)
 let expand_expected_and_get_node
     ?(strip_supportdyn = false)
-    ?(pessimisable_builtin = true)
+    ~pessimisable_builtin
     env
     (expected : ExpectedTy.t option) =
   let rec unbox ~under_supportdyn env ty =
@@ -3598,11 +3598,17 @@ and expr_
     make_result env p Aast.Omitted ty
   | Varray (th, el)
   | ValCollection (_, th, el) ->
-    let (get_expected_kind, name, subtype_val, make_expr, make_ty, key_bound) =
+    let ( get_expected_kind,
+          name,
+          subtype_val,
+          make_expr,
+          make_ty,
+          key_bound,
+          pessimisable_builtin ) =
       match e with
       | ValCollection ((kind_pos, kind), _, _) ->
         let class_name = Nast.vc_kind_to_name kind in
-        let (subtype_val, key_bound) =
+        let (subtype_val, key_bound, pessimisable_builtin) =
           match kind with
           | Set
           | ImmSet
@@ -3610,12 +3616,12 @@ and expr_
             ( arraykey_value p class_name true,
               Some
                 (MakeType.arraykey
-                   (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name)))
-            )
+                   (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name))),
+              true )
           | Vector
-          | ImmVector
-          | Vec ->
-            (array_value, None)
+          | ImmVector ->
+            (array_value, None, true)
+          | Vec -> (array_value, None, false)
         in
         ( get_vc_inst env p kind,
           class_name,
@@ -3624,14 +3630,16 @@ and expr_
             Aast.ValCollection ((kind_pos, kind), th, elements)),
           (fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty]),
-          key_bound )
+          key_bound,
+          pessimisable_builtin )
       | Varray _ ->
         ( get_vc_inst env p Vec,
           "varray",
           array_value,
           (fun th elements -> Aast.ValCollection ((p, Vec), th, elements)),
           (fun value_ty -> MakeType.vec (Reason.Rwitness p) value_ty),
-          None )
+          None,
+          true )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -3645,7 +3653,9 @@ and expr_
         let env = check_collection_tparams env name [fst tv] in
         (env, Some tv_expected, Some tv)
       | None -> begin
-        match expand_expected_and_get_node env expected with
+        match
+          expand_expected_and_get_node ~pessimisable_builtin env expected
+        with
         | (env, Some (pos, ur, _, ety, _)) -> begin
           match get_expected_kind ety with
           | Some (env, vty) -> (env, Some (ExpectedTy.make pos ur vty), None)
@@ -3660,7 +3670,7 @@ and expr_
         ~explicit:(Option.is_some th)
         ~use_pos:p
         ~reason:Reason.URvector
-        ~can_pessimise:true
+        ~can_pessimise:pessimisable_builtin
         ~bound:key_bound
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
@@ -3701,7 +3711,9 @@ and expr_
         (env, Some tk_expected, Some tv_expected, Some (tk, tv))
       | _ -> begin
         (* no explicit typehint, fallback to supplied expect *)
-        match expand_expected_and_get_node env expected with
+        match
+          expand_expected_and_get_node ~pessimisable_builtin:true env expected
+        with
         | (env, Some (pos, reason, _, ety, _)) -> begin
           match get_expected_kind ety with
           | Some (env, kty, vty) ->
@@ -4043,7 +4055,9 @@ and expr_
       | `lvalue_subexpr ->
         lvalues env el
       | `other ->
-        let (env, expected) = expand_expected_and_get_node env expected in
+        let (env, expected) =
+          expand_expected_and_get_node ~pessimisable_builtin:true env expected
+        in
         (match expected with
         | Some (pos, ur, _, _, Ttuple expected_tyl) ->
           exprs_expected (pos, ur, expected_tyl) env el
@@ -5129,7 +5143,11 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
     (env, tefun, ty)
   in
   let (env, eexpected) =
-    expand_expected_and_get_node ~strip_supportdyn:true env expected
+    expand_expected_and_get_node
+      ~strip_supportdyn:true
+      ~pessimisable_builtin:true
+      env
+      expected
   in
   match eexpected with
   | _

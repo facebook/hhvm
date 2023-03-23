@@ -1,0 +1,12 @@
+File "awaitall_2.php.pess", line 16, characters 5-37:
+Invalid assignment (Typing[4110])
+  File "awaitall_2.php.pess", line 13, characters 21-21:
+  Expected `int`
+  File "awaitall_2.php.pess", line 8, characters 48-51:
+  But got `dynamic`
+File "awaitall_2.php.pess", line 17, characters 5-37:
+Invalid assignment (Typing[4110])
+  File "awaitall_2.php.pess", line 13, characters 21-21:
+  Expected `int`
+  File "awaitall_2.php.pess", line 8, characters 48-51:
+  But got `dynamic`

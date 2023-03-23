@@ -329,7 +329,54 @@ fn is_prim(str: &str) -> bool {
 #[cfg(test)]
 mod tests {
 
+    use nast::ClassConcreteTypeconst;
+    use nast::ClassTypeconst;
+
     use super::*;
+
+    #[test]
+    fn test_int() {
+        let env = Env::default();
+
+        let mut pass = ElabHintHapplyPass::default();
+
+        let mut elem = Hint(
+            Pos::NONE,
+            Box::new(Hint_::Happly(
+                Id(Pos::NONE, sn::typehints::INT.to_string()),
+                vec![],
+            )),
+        );
+
+        elem.transform(&env, &mut pass);
+        let Hint(_, hint_) = elem;
+        assert!(matches!(&*hint_, Hint_::Hprim(Tprim::Tint)))
+    }
+
+    #[test]
+    fn test_typconst_int() {
+        let env = Env::default();
+
+        let mut pass = ElabHintHapplyPass::default();
+
+        let mut elem = ClassTypeconst::TCConcrete(ClassConcreteTypeconst {
+            c_tc_type: Hint(
+                Pos::NONE,
+                Box::new(Hint_::Happly(
+                    Id(Pos::NONE, sn::typehints::INT.to_string()),
+                    vec![],
+                )),
+            ),
+        });
+
+        elem.transform(&env, &mut pass);
+        assert!(matches!(
+            elem,
+            ClassTypeconst::TCConcrete(ClassConcreteTypeconst {
+                c_tc_type: Hint(_, box Hint_::Hprim(Tprim::Tint))
+            })
+        ))
+    }
 
     #[test]
     fn test_vec_or_dict_two_tyargs() {

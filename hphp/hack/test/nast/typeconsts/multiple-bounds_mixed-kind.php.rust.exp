@@ -8,20 +8,16 @@ Errors:
       c_where_constraints = []; c_consts = [];
       c_typeconsts =
       [{ c_tconst_user_attributes = []; c_tconst_name = ([4:23-25], "T1");
-         c_tconst_kind =
-         (TCAbstract
-            { c_atc_as_constraint = (Some ([4:29-37], (Happly (([4:29-37], "arraykey"), [])))); c_atc_super_constraint = (Some ([4:44-47], (Happly (([4:44-47], "int"), [])))); c_atc_default = None });
+         c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([4:29-37], (Hprim Tarraykey))); c_atc_super_constraint = (Some ([4:44-47], (Hprim Tint))); c_atc_default = None });
          c_tconst_span = [4:3-48]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([5:23-25], "T2");
-          c_tconst_kind =
-          (TCAbstract
-             { c_atc_as_constraint = (Some ([5:37-44], (Happly (([5:37-44], "nonnull"), [])))); c_atc_super_constraint = (Some ([5:32-33], (Happly (([5:32-33], "\\A"), [])))); c_atc_default = None });
+          c_tconst_kind = (TCAbstract { c_atc_as_constraint = (Some ([5:37-44], Hnonnull)); c_atc_super_constraint = (Some ([5:32-33], (Happly (([5:32-33], "\\A"), [])))); c_atc_default = None });
           c_tconst_span = [5:3-45]; c_tconst_doc_comment = None; c_tconst_is_ctx = false };
         { c_tconst_user_attributes = []; c_tconst_name = ([6:23-25], "T2");
           c_tconst_kind =
           (TCAbstract
-             { c_atc_as_constraint = (Some ([6:42-49], (Hintersection [([6:42-49], (Happly (([6:42-49], "nonnull"), []))); ([6:53-58], (Happly (([6:53-58], "mixed"), [])))])));
-               c_atc_super_constraint = (Some ([6:32-38], (Hunion [([6:32-38], (Happly (([6:32-38], "string"), []))); ([6:65-72], (Happly (([6:65-72], "nothing"), [])))]))); 
+             { c_atc_as_constraint = (Some ([6:42-49], (Hintersection [([6:42-49], Hnonnull); ([6:53-58], Hmixed)])));
+               c_atc_super_constraint = (Some ([6:32-38], (Hunion [([6:32-38], (Hprim Tstring)); ([6:65-72], Hnothing)]))); 
                c_atc_default = None });
           c_tconst_span = [6:3-73]; c_tconst_doc_comment = None; c_tconst_is_ctx = false }
         ];

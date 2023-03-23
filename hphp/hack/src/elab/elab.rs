@@ -280,7 +280,7 @@ fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
         // typechecker options
         passes::validate_module::ValidateModulePass::default(),
 
-        // -- Old 'NAST checks' ------------------------------------------------
+        // // -- Old 'NAST checks' ------------------------------------------------
 
         // Validate use of the `__Const` attribute on classes - depends on
         // `const_attribute` typechecker option

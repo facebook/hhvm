@@ -29,7 +29,7 @@ impl Pass for ValidateClassTparamsPass {
         _: &mut ClassTypeconstDef,
     ) -> ControlFlow<()> {
         self.in_typeconst_def = true;
-        Break(())
+        Continue(())
     }
 
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {

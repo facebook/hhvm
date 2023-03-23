@@ -15,6 +15,7 @@
  */
 
 #include <thrift/compiler/generate/json.h>
+#include <thrift/compiler/test/parser_test_helpers.h>
 
 #include <sstream>
 #include <folly/portability/GTest.h>
@@ -31,4 +32,53 @@ TEST(JsonTest, json_quote_ascii_stream) {
   json_quote_ascii(actual, "the\bquick\"brown\nfox\001jumps\201over");
   EXPECT_EQ(
       "\"the\\bquick\\\"brown\\nfox\\u0001jumps\\u0081over\"", actual.str());
+}
+
+TEST(JsonTest, to_json_t_const_value) {
+  auto source_mgr = source_manager();
+  auto program = dedent_and_parse_to_program(source_mgr, R"(
+    enum MyEnum {
+      FIRST = 1;
+      SECOND = 2;
+    }
+    struct Nested {
+      1: i32 nested_int;
+      2: MyEnum nested_enum;
+    }
+    struct MyAnnotation {
+      1: bool my_bool;
+      2: i64 my_int;
+      3: string my_string;
+      4: double my_double;
+      5: list<float> my_list;
+      6: Nested my_nested;
+    }
+    @MyAnnotation{
+      my_bool = true,
+      my_int = 1,
+      my_string = "hello",
+      my_double = 9.9,
+      my_list = [0.1, -0.2],
+      my_nested = Nested{
+        nested_int = 0,
+        nested_enum = MyEnum.SECOND,
+      },
+    }
+    struct MyStruct{}
+  )");
+
+  const std::vector<t_struct*>& structs = program->structs();
+  EXPECT_EQ(structs.size(), 3);
+
+  const t_struct* my_struct = structs[2];
+  const std::vector<const t_const*> annotations =
+      my_struct->structured_annotations();
+  EXPECT_EQ(annotations.size(), 1);
+
+  std::string to_json_result = to_json(annotations.at(0)->get_value());
+  EXPECT_EQ(
+      "{\"my_bool\": true, \"my_int\": 1, \"my_string\": \"hello\", "
+      "\"my_double\": 9.9, \"my_list\": [0.1, -0.2], "
+      "\"my_nested\": {\"nested_int\": 0, \"nested_enum\": 2}}",
+      to_json_result);
 }

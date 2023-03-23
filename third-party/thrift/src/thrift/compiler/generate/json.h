@@ -23,11 +23,31 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+class t_const_value;
+
 //  json_quote_ascii
 //
 //  Emits a json quoted-string given an input ascii string.
 std::string json_quote_ascii(const std::string& s);
 std::ostream& json_quote_ascii(std::ostream& o, const std::string& s);
+
+/**
+ * Serialize t_const_value to JSON string.
+ * The t_const_value is usually thrift annotation or metadata
+ *
+ * Example:
+ * @MyAnnotation{
+ *   my_bool = true,
+ *   my_string = "hello",
+ * }
+ * struct MyStruct{}
+ *
+ * The annotation above will be serialized to:
+ * "{\"my_bool\": true, \"my_string\": \"hello\"}"
+ *
+ * The output is a JSON string that may not contain newlines and indents.
+ */
+std::string to_json(const t_const_value* value);
 
 } // namespace compiler
 } // namespace thrift

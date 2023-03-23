@@ -343,58 +343,6 @@ class json_experimental_enum_value : public mstch_enum_value {
   source_manager& source_mgr_;
 };
 
-// Trim all white spaces and commas from end (in place).
-void rtrim(std::string& s) {
-  s.erase(
-      std::find_if(
-          s.rbegin(),
-          s.rend(),
-          [](int ch) { return !(ch == ' ' || ch == ','); })
-          .base(),
-      s.end());
-}
-
-std::string to_string(const t_const_value* value) {
-  auto stringify_list = [](const auto& value) {
-    std::string result;
-    for (const auto& v : value) {
-      result += to_string(v) + ", ";
-    }
-    rtrim(result);
-    return "[" + result + "]";
-  };
-
-  auto stringify_map = [](const auto& value) {
-    std::string result;
-    for (const auto& v : value) {
-      auto key = to_string(v.first);
-      if (v.first->get_type() != mstch_const_value::cv::CV_STRING) {
-        // map keys must be strings
-        key = json_quote_ascii(key);
-      }
-      result += key + ": " + to_string(v.second) + ", ";
-    }
-    rtrim(result);
-    return "{" + result + "}";
-  };
-
-  switch (value->get_type()) {
-    case mstch_const_value::cv::CV_BOOL:
-      return value->get_bool() ? "true" : "false";
-    case mstch_const_value::cv::CV_INTEGER:
-      return std::to_string(value->get_integer());
-    case mstch_const_value::cv::CV_DOUBLE:
-      return std::to_string(value->get_double());
-    case mstch_const_value::cv::CV_STRING:
-      return json_quote_ascii(value->get_string());
-    case mstch_const_value::cv::CV_LIST:
-      return stringify_list(value->get_list());
-    case mstch_const_value::cv::CV_MAP:
-      return stringify_map(value->get_map());
-  }
-  return "";
-}
-
 class json_experimental_const_value : public mstch_const_value {
  public:
   json_experimental_const_value(
@@ -434,7 +382,7 @@ class json_experimental_const_value : public mstch_const_value {
   mstch::node get_qualified_name() {
     return current_const_->get_type()->get_true_type()->get_scoped_name();
   }
-  mstch::node string_value_any() { return to_string(const_value_); }
+  mstch::node string_value_any() { return to_json(const_value_); }
 
  private:
   source_manager& source_mgr_;

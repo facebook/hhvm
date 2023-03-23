@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include <thrift/compiler/ast/t_const_value.h>
 #include <thrift/compiler/generate/json.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <ostream>
 #include <sstream>
@@ -23,6 +25,60 @@
 namespace apache {
 namespace thrift {
 namespace compiler {
+
+namespace {
+// Trim all white spaces and commas from end (in place).
+void rtrim(std::string& s) {
+  s.erase(
+      std::find_if(
+          s.rbegin(),
+          s.rend(),
+          [](int ch) { return !(ch == ' ' || ch == ','); })
+          .base(),
+      s.end());
+}
+} // namespace
+
+std::string to_json(const t_const_value* value) {
+  auto stringify_list = [](const auto& value) {
+    std::string result;
+    for (const auto& v : value) {
+      result += to_json(v) + ", ";
+    }
+    rtrim(result);
+    return "[" + result + "]";
+  };
+
+  auto stringify_map = [](const auto& value) {
+    std::string result;
+    for (const auto& v : value) {
+      auto key = to_json(v.first);
+      if (v.first->get_type() != t_const_value::CV_STRING) {
+        // map keys must be strings
+        key = json_quote_ascii(key);
+      }
+      result += key + ": " + to_json(v.second) + ", ";
+    }
+    rtrim(result);
+    return "{" + result + "}";
+  };
+
+  switch (value->get_type()) {
+    case t_const_value::CV_BOOL:
+      return value->get_bool() ? "true" : "false";
+    case t_const_value::CV_INTEGER:
+      return std::to_string(value->get_integer());
+    case t_const_value::CV_DOUBLE:
+      return fmt::format("{}", value->get_double());
+    case t_const_value::CV_STRING:
+      return json_quote_ascii(value->get_string());
+    case t_const_value::CV_LIST:
+      return stringify_list(value->get_list());
+    case t_const_value::CV_MAP:
+      return stringify_map(value->get_map());
+  }
+  return "";
+}
 
 std::string json_quote_ascii(const std::string& s) {
   std::ostringstream o;

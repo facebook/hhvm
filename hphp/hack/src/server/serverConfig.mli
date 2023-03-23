@@ -51,6 +51,8 @@ val version : t -> Config_file.version
 
 val warn_on_non_opt_build : t -> bool
 
+val ide_fall_back_to_full_index : t -> bool
+
 val convert_auto_namespace_to_map : string -> (string * string) list
 
 val make_sharedmem_config :

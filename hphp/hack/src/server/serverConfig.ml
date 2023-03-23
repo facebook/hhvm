@@ -35,6 +35,8 @@ type t = {
   (* A list of extra paths to search for declarations *)
   extra_paths: Path.t list;
   warn_on_non_opt_build: bool;
+  ide_fall_back_to_full_index: bool;
+      (** clientIdeDaemon will fall back to performing a full index of files to construct a naming table if it fails to load one. *)
 }
 [@@deriving show]
 
@@ -309,6 +311,9 @@ let load ~silent options : t * ServerLocalConfig.t =
   let warn_on_non_opt_build =
     bool_ "warn_on_non_opt_build" ~default:false config
   in
+  let ide_fall_back_to_full_index =
+    bool_ "ide_fall_back_to_full_index" ~default:false config
+  in
   let formatter_override =
     Option.map
       (Config_file.Getters.string_opt "formatter_override" config)
@@ -519,6 +524,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       ignored_paths;
       extra_paths;
       warn_on_non_opt_build;
+      ide_fall_back_to_full_index;
     },
     local_config )
 
@@ -538,6 +544,7 @@ let default_config =
     ignored_paths = [];
     extra_paths = [];
     warn_on_non_opt_build = false;
+    ide_fall_back_to_full_index = false;
   }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -572,3 +579,5 @@ let extra_paths config = config.extra_paths
 let version config = config.version
 
 let warn_on_non_opt_build config = config.warn_on_non_opt_build
+
+let ide_fall_back_to_full_index config = config.ide_fall_back_to_full_index

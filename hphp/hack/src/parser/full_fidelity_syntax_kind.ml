@@ -194,6 +194,7 @@ type t =
   | ModuleExports
   | ModuleImports
   | ModuleMembershipDeclaration
+  | PackageExpression
 [@@deriving show, eq]
 
 let to_string kind =
@@ -374,3 +375,4 @@ let to_string kind =
   | ModuleExports -> "module_exports"
   | ModuleImports -> "module_imports"
   | ModuleMembershipDeclaration -> "module_membership_declaration"
+  | PackageExpression -> "package_expression"

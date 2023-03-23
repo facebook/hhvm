@@ -199,6 +199,7 @@ type t =
   | Hash
   | Readonly
   | Internal
+  | Package
   (* Variable text tokens *)
   | ErrorToken
   | Name
@@ -409,6 +410,7 @@ let from_string keyword ~only_reserved =
   | "#" -> Some Hash
   | "readonly" -> Some Readonly
   | "internal" when not only_reserved -> Some Internal
+  | "package" -> Some Package
   | _ -> None
 
 let to_string kind =
@@ -594,6 +596,7 @@ let to_string kind =
   | Hash -> "#"
   | Readonly -> "readonly"
   | Internal -> "internal"
+  | Package -> "package"
   (* Variable text tokens *)
   | ErrorToken -> "error_token"
   | Name -> "name"

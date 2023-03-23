@@ -1581,6 +1581,13 @@ ss.serialize_field("module_membership_declaration_name", &self.with(name))?;
 ss.serialize_field("module_membership_declaration_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
+SyntaxVariant::PackageExpression (PackageExpressionChildren{keyword,name} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "package_expression")?;
+      ss.serialize_field("package_expression_keyword", &self.with(keyword))?;
+ss.serialize_field("package_expression_name", &self.with(name))?;
+      ss.end()
+} 
 
         }
     }

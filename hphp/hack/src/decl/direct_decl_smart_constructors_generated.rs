@@ -758,4 +758,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_module_membership_declaration(self, module_keyword, name, semicolon)
     }
 
+    fn make_package_expression(&mut self, keyword: Self::Output, name: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_package_expression(self, keyword, name)
+    }
+
 }

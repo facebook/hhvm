@@ -419,6 +419,7 @@ where
                 let qualifier = self.sc_mut().make_missing(pos);
                 self.parse_enum_class_label_expression(qualifier)
             }
+            TokenKind::Package => self.parse_package_expression(),
             TokenKind::Empty => self.parse_empty(),
             kind if self.expects(kind) => {
                 // ERROR RECOVERY: if we've prematurely found a token we're expecting
@@ -1108,6 +1109,21 @@ where
         let require = self.sc_mut().make_token(require);
         let filename = self.parse_expression_with_operator_precedence(operator);
         self.sc_mut().make_inclusion_expression(require, filename)
+    }
+
+    fn parse_package_expression(&mut self) -> S::Output {
+        // SPEC:
+        // package package-name
+        let package_kw = self.next_token();
+        let package_name = self.parse_expression_with_operator_precedence(
+            Operator::prefix_unary_from_token(package_kw.kind()),
+        );
+        if !package_name.is_name() {
+            self.with_error(Errors::error1004);
+        }
+        let package_kw = self.sc_mut().make_token(package_kw);
+        self.sc_mut()
+            .make_package_expression(package_kw, package_name)
     }
 
     fn peek_next_kind_if_operator(&self) -> Option<TokenKind> {

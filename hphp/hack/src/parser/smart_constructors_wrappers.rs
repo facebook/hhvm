@@ -593,6 +593,9 @@ where S: SmartConstructors<State = St>,
     fn make_module_membership_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ModuleMembershipDeclaration, self.s.make_module_membership_declaration(arg0.1, arg1.1, arg2.1))
     }
+    fn make_package_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::PackageExpression, self.s.make_package_expression(arg0.1, arg1.1))
+    }
 
 }
 

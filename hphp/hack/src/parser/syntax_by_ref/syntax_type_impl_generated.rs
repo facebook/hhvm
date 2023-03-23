@@ -1915,4 +1915,13 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_package_expression(ctx: &C, keyword: Self, name: Self) -> Self {
+        let syntax = SyntaxVariant::PackageExpression(ctx.get_arena().alloc(PackageExpressionChildren {
+            keyword,
+            name,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
  }

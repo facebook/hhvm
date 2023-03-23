@@ -1431,4 +1431,12 @@ pub trait FlattenSmartConstructors: SmartConstructors
         }
     }
 
+    fn make_package_expression(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          Self::zero(SyntaxKind::PackageExpression)
+        } else {
+          self.flatten(SyntaxKind::PackageExpression, vec!(arg0, arg1))
+        }
+    }
+
 }

@@ -254,6 +254,7 @@ let given_text_tokens =
     make_token_node "Hash" "#" ();
     make_token_node "Readonly" "readonly" ();
     make_token_node "Internal" "internal" ~allowed_as_identifier:true ();
+    make_token_node "Package" "package" ();
   ]
 
 let tokens = variable_text_tokens @ no_text_tokens @ given_text_tokens

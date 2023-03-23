@@ -199,6 +199,7 @@ pub enum SyntaxKind {
     ModuleExports,
     ModuleImports,
     ModuleMembershipDeclaration,
+    PackageExpression,
 
 }
 
@@ -381,6 +382,7 @@ impl SyntaxKind {
             SyntaxKind::ModuleExports                     => "module_exports",
             SyntaxKind::ModuleImports                     => "module_imports",
             SyntaxKind::ModuleMembershipDeclaration       => "module_membership_declaration",
+            SyntaxKind::PackageExpression                 => "package_expression",
         }
     }
 
@@ -562,6 +564,7 @@ impl SyntaxKind {
             SyntaxKind::ModuleExports => 172,
             SyntaxKind::ModuleImports => 173,
             SyntaxKind::ModuleMembershipDeclaration => 174,
+            SyntaxKind::PackageExpression => 175,
         }
     }
 }

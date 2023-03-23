@@ -2584,7 +2584,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           module_membership_declaration_name = name;
           module_membership_declaration_semicolon = semicolon;
         } ->
-      Concat [t env mod_kw; Space; t env name; t env semicolon; Newline])
+      Concat [t env mod_kw; Space; t env name; t env semicolon; Newline]
+    | Syntax.PackageExpression
+        { package_expression_keyword = pkg_kw; package_expression_name = name }
+      ->
+      Concat [t env pkg_kw; Space; t env name])
 
 and when_present node f =
   match Syntax.syntax node with

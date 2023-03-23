@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2022-09-29-0000",
+  "version" : "2023-03-22-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -375,6 +375,8 @@
       "token_text" : "readonly" },
     { "token_kind" : "Internal",
       "token_text" : "internal" },
+    { "token_kind" : "Package",
+      "token_text" : "package" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -2140,6 +2142,14 @@
         { "field_name" : "module_keyword" },
         { "field_name" : "name" },
         { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "PackageExpression",
+      "type_name" : "package_expression",
+      "description" : "package_expression",
+      "prefix" : "package_expression",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "name" }
       ] },
 
     { "kind_name" : "Token",

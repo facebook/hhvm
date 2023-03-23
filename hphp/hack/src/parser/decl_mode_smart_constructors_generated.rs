@@ -751,4 +751,8 @@ where
         <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_module_membership_declaration(self, arg0, arg1, arg2)
     }
 
+    fn make_package_expression(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output {
+        <Self as SyntaxSmartConstructors<Self::Output, Self::Factory, State<'_, '_, Self::Output>>>::make_package_expression(self, arg0, arg1)
+    }
+
 }

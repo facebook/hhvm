@@ -91,4 +91,5 @@ let operators =
     make_operator "Await";
     make_operator "Readonly";
     make_operator "EnumClassLabel";
+    make_operator "Package";
   ]

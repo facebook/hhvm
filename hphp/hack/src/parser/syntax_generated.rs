@@ -1909,6 +1909,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_package_expression(_: &C, package_expression_keyword: Self, package_expression_name: Self) -> Self {
+        let syntax = SyntaxVariant::PackageExpression(Box::new(PackageExpressionChildren {
+            package_expression_keyword,
+            package_expression_name,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
  }
 
 impl<T, V> Syntax<T, V>
@@ -3295,6 +3304,12 @@ where
                 let acc = f(module_membership_declaration_semicolon, acc);
                 acc
             },
+            SyntaxVariant::PackageExpression(x) => {
+                let PackageExpressionChildren { package_expression_keyword, package_expression_name } = *x;
+                let acc = f(package_expression_keyword, acc);
+                let acc = f(package_expression_name, acc);
+                acc
+            },
 
         }
     }
@@ -3477,6 +3492,7 @@ where
             SyntaxVariant::ModuleExports {..} => SyntaxKind::ModuleExports,
             SyntaxVariant::ModuleImports {..} => SyntaxKind::ModuleImports,
             SyntaxVariant::ModuleMembershipDeclaration {..} => SyntaxKind::ModuleMembershipDeclaration,
+            SyntaxVariant::PackageExpression {..} => SyntaxKind::PackageExpression,
         }
     }
 
@@ -4676,6 +4692,11 @@ where
                  module_membership_declaration_module_keyword: ts.pop().unwrap(),
                  
              })),
+             (SyntaxKind::PackageExpression, 2) => SyntaxVariant::PackageExpression(Box::new(PackageExpressionChildren {
+                 package_expression_name: ts.pop().unwrap(),
+                 package_expression_keyword: ts.pop().unwrap(),
+                 
+             })),
              _ => panic!("from_children called with wrong number of children"),
          }
     }
@@ -4858,6 +4879,7 @@ where
             SyntaxVariant::ModuleExports(x) => unsafe { std::slice::from_raw_parts(&x.module_exports_exports_keyword, 4) },
             SyntaxVariant::ModuleImports(x) => unsafe { std::slice::from_raw_parts(&x.module_imports_imports_keyword, 4) },
             SyntaxVariant::ModuleMembershipDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.module_membership_declaration_module_keyword, 3) },
+            SyntaxVariant::PackageExpression(x) => unsafe { std::slice::from_raw_parts(&x.package_expression_keyword, 2) },
         }
     }
 
@@ -5039,6 +5061,7 @@ where
             SyntaxVariant::ModuleExports(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_exports_exports_keyword, 4) },
             SyntaxVariant::ModuleImports(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_imports_imports_keyword, 4) },
             SyntaxVariant::ModuleMembershipDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_membership_declaration_module_keyword, 3) },
+            SyntaxVariant::PackageExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.package_expression_keyword, 2) },
         }
     }
 }
@@ -6581,6 +6604,13 @@ pub struct ModuleMembershipDeclarationChildren<T, V> {
     pub module_membership_declaration_semicolon: Syntax<T, V>,
 }
 
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct PackageExpressionChildren<T, V> {
+    pub package_expression_keyword: Syntax<T, V>,
+    pub package_expression_name: Syntax<T, V>,
+}
+
 
 #[derive(Debug, Clone)]
 pub enum SyntaxVariant<T, V> {
@@ -6760,6 +6790,7 @@ pub enum SyntaxVariant<T, V> {
     ModuleExports(Box<ModuleExportsChildren<T, V>>),
     ModuleImports(Box<ModuleImportsChildren<T, V>>),
     ModuleMembershipDeclaration(Box<ModuleMembershipDeclarationChildren<T, V>>),
+    PackageExpression(Box<PackageExpressionChildren<T, V>>),
 }
 
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
@@ -8489,6 +8520,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.module_membership_declaration_module_keyword),
                     1 => Some(&x.module_membership_declaration_name),
                     2 => Some(&x.module_membership_declaration_semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            PackageExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.package_expression_keyword),
+                    1 => Some(&x.package_expression_name),
                         _ => None,
                     }
                 })

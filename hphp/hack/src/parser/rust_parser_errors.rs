@@ -103,6 +103,7 @@ enum UnstableFeatures {
     EnumClassTypeConstants,
     NewtypeSuperBounds,
     ExpressionTreeBlocks,
+    Package,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -129,6 +130,7 @@ impl UnstableFeatures {
             UnstableFeatures::EnumClassTypeConstants => OngoingRelease,
             UnstableFeatures::NewtypeSuperBounds => Unstable,
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
+            UnstableFeatures::Package => Unstable,
         }
     }
 }
@@ -5323,6 +5325,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 for expr in syntax_to_list_no_separators(&x.variables) {
                     self.check_lvalue_and_inout(expr, LvalRoot::Unset);
                 }
+            }
+            PackageExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::Package);
             }
             _ => {}
         }

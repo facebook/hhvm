@@ -94,4 +94,5 @@ pub enum Operator {
     AwaitOperator,
     ReadonlyOperator,
     EnumClassLabelOperator,
+    PackageOperator,
 }

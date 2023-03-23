@@ -1753,6 +1753,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            PackageExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.name),
+                        _ => None,
+                    }
+                })
+            },
 
         };
         if res.is_some() {

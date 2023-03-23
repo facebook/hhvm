@@ -1164,5 +1164,9 @@ struct
         module_membership_declaration_name: t;
         module_membership_declaration_semicolon: t;
       }
+    | PackageExpression of {
+        package_expression_keyword: t;
+        package_expression_name: t;
+      }
   [@@deriving sexp_of]
 end

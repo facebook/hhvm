@@ -199,6 +199,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ModuleExports(&'a ModuleExportsChildren<'a, T, V>),
     ModuleImports(&'a ModuleImportsChildren<'a, T, V>),
     ModuleMembershipDeclaration(&'a ModuleMembershipDeclarationChildren<'a, T, V>),
+    PackageExpression(&'a PackageExpressionChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -1564,6 +1565,12 @@ pub struct ModuleMembershipDeclarationChildren<'a, T, V> {
     pub module_keyword: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct PackageExpressionChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
 }
 
 

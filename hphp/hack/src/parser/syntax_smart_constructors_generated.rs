@@ -915,4 +915,9 @@ where
         Self::Output::make_module_membership_declaration(self.state_mut(), arg0, arg1, arg2)
     }
 
+    fn make_package_expression(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::Output::make_package_expression(self.state_mut(), arg0, arg1)
+    }
+
 }

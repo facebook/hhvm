@@ -2440,6 +2440,15 @@ let schema : schema_node list =
           ("semicolon", Token);
         ];
     };
+    {
+      kind_name = "PackageExpression";
+      type_name = "package_expression";
+      func_name = "package_expression";
+      description = "package_expression";
+      prefix = "package_expression";
+      aggregates = [];
+      fields = [("keyword", Token); ("name", Aggregate Name)];
+    };
   ]
 
 (******************************************************************************(

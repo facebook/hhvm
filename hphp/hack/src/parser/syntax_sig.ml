@@ -1033,6 +1033,10 @@ module type Syntax_S = sig
         module_membership_declaration_name: t;
         module_membership_declaration_semicolon: t;
       }
+    | PackageExpression of {
+        package_expression_keyword: t;
+        package_expression_name: t;
+      }
   [@@deriving sexp_of]
 
   val rust_parse :
@@ -1445,6 +1449,8 @@ module type Syntax_S = sig
 
   val make_module_membership_declaration : t -> t -> t -> t
 
+  val make_package_expression : t -> t -> t
+
   val position : Relative_path.t -> t -> Pos.t option
 
   val offset : t -> int option
@@ -1798,6 +1804,8 @@ module type Syntax_S = sig
   val is_module_imports : t -> bool
 
   val is_module_membership_declaration : t -> bool
+
+  val is_package_expression : t -> bool
 
   val is_specific_token : TokenKind.t -> t -> bool
 

@@ -773,4 +773,8 @@ where
         Node(self.0.make_module_membership_declaration(module_keyword.0, name.0, semicolon.0), self.1.make_module_membership_declaration(module_keyword.1, name.1, semicolon.1))
     }
 
+    fn make_package_expression(&mut self, keyword: Self::Output, name: Self::Output) -> Self::Output {
+        Node(self.0.make_package_expression(keyword.0, name.0), self.1.make_package_expression(keyword.1, name.1))
+    }
+
 }

@@ -61,7 +61,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Ttuple args ->
     let args = List.map args ~f:of_decl_ty in
     Printf.sprintf "(%s)" (String.concat ~sep:", " args)
-  | Tshape (kind, fields) ->
+  | Tshape (_, kind, fields) ->
     let fields =
       TShapeMap.fold (fun key ty acc -> of_shape_field key ty :: acc) fields []
     in

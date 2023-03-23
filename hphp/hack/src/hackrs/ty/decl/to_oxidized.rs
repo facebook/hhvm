@@ -161,7 +161,12 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty_<R> {
                     let k = oxidize_shape_field_name(arena, *k, &v.field_name_pos);
                     shape_fields.insert_or_replace(TShapeField(k), v.to_oxidized(arena));
                 }
-                typing_defs::Ty_::Tshape(arena.alloc((*shape_kind, TShapeMap::from(shape_fields))))
+                let shape_origin = typing_defs::TypeOrigin::MissingOrigin;
+                typing_defs::Ty_::Tshape(arena.alloc((
+                    shape_origin,
+                    *shape_kind,
+                    TShapeMap::from(shape_fields),
+                )))
             }
             Ty_::Tvar(ident) => typing_defs::Ty_::Tvar((*ident).into()),
             Ty_::Tgeneric(x) => typing_defs::Ty_::Tgeneric(x.to_oxidized(arena)),

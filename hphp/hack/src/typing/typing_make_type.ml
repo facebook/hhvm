@@ -34,7 +34,7 @@ let keyed_traversable r kty vty =
 let keyed_container r kty vty =
   class_type r SN.Collections.cKeyedContainer [kty; vty]
 
-let shape r kind map = mk (r, Tshape (kind, map))
+let shape r kind map = mk (r, Tshape (Missing_origin, kind, map))
 
 let awaitable r ty = class_type r SN.Classes.cAwaitable [ty]
 

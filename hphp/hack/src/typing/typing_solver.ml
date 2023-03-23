@@ -104,9 +104,9 @@ let rec freshen_inside_ty env ty =
     let (env, tyl) = List.map_env env tyl ~f:freshen_ty in
     (env, mk (r, Ttuple tyl))
   (* Shape data is covariant *)
-  | Tshape (shape_kind, fdm) ->
+  | Tshape (_, shape_kind, fdm) ->
     let (env, fdm) = ShapeFieldMap.map_env freshen_ty env fdm in
-    (env, mk (r, Tshape (shape_kind, fdm)))
+    (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
   (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
     let (env, ft_ret) = freshen_possibly_enforced_ty env ft.ft_ret in
@@ -351,7 +351,7 @@ let ty_equal_shallow env ty1 ty2 =
       String.equal (snd x_sub) (snd x_super)
       && equal_exact exact_sub exact_super
     | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
-    | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
+    | (Tshape (_, shape_kind1, fdm1), Tshape (_, shape_kind2, fdm2)) ->
       equal_shape_kind shape_kind1 shape_kind2
       && List.equal
            (fun (k1, v1) (k2, v2) ->

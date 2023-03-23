@@ -364,7 +364,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   | Tintersection tyl
   | Ttuple tyl ->
     get_typarams_list tyl
-  | Tshape (_, m) ->
+  | Tshape (_, _, m) ->
     TShapeMap.fold
       (fun _ { sft_ty; _ } res -> get_typarams_union res sft_ty)
       m

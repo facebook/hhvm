@@ -110,7 +110,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_tclass env r x e tyl = (env, mk (r, Tclass (x, e, tyl)))
 
     method on_tshape env r shape_kind fdm =
-      (env, mk (r, Tshape (shape_kind, fdm)))
+      (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
 
     method on_tvec_or_dict env r ty1 ty2 = (env, mk (r, Tvec_or_dict (ty1, ty2)))
 
@@ -135,7 +135,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
-      | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
+      | Tshape (_, shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict env r ty1 ty2
       | Tunapplied_alias name -> this#on_tunapplied_alias env r name
       | Taccess (ty, id) -> this#on_taccess env r ty id
@@ -254,7 +254,7 @@ class ['env] deep_type_mapper =
 
     method! on_tshape env r shape_kind fdm =
       let (env, fdm) = ShapeFieldMap.map_env this#on_type env fdm in
-      (env, mk (r, Tshape (shape_kind, fdm)))
+      (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
 
     method private on_opt_type env x =
       match x with

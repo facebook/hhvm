@@ -274,6 +274,11 @@ module DependentKind : sig
   val is_generic_dep_ty : string -> bool
 end
 
+(** Returns [true] if both origins are available and identical.
+    If this function returns [true], the two types that have
+    the origins provided must be identical. *)
+val same_type_origin : type_origin -> type_origin -> bool
+
 module ShapeFieldMap : sig
   include module type of struct
     include TShapeMap

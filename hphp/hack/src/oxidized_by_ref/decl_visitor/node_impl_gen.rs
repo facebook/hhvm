@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7749df7d3484fae23cd88c213df5a692>>
+// @generated SignedSource<<77bd0e6ce95e2b7ae3735f6b731a3367>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -328,6 +328,17 @@ impl<'a> Node<'a> for IfcFunDecl<'a> {
         match self {
             IfcFunDecl::FDPolicied(ref __binding_0) => __binding_0.accept(v),
             IfcFunDecl::FDInferFlows => {}
+        }
+    }
+}
+impl<'a> Node<'a> for TypeOrigin<'a> {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_type_origin(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            TypeOrigin::MissingOrigin => {}
+            TypeOrigin::FromAlias(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }

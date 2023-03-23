@@ -4821,7 +4821,7 @@ and expr_
           env
           expected
       with
-      | (env, Some (pos, ur, _, _, Tshape (_, expected_fdm))) ->
+      | (env, Some (pos, ur, _, _, Tshape (_, _, expected_fdm))) ->
         List.map_env
           env
           ~f:(fun env ((k, _) as ke) ->
@@ -4850,7 +4850,7 @@ and expr_
       env
       p
       (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
-      (mk (Reason.Rshape_literal p, Tshape (Closed_shape, fdm)))
+      (mk (Reason.Rshape_literal p, Tshape (Missing_origin, Closed_shape, fdm)))
   | ET_Splice e ->
     Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
   | EnumClassLabel (None, s) ->

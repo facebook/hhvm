@@ -78,6 +78,7 @@ use oxidized_by_ref::typing_defs::Tparam;
 use oxidized_by_ref::typing_defs::TshapeFieldName;
 use oxidized_by_ref::typing_defs::Ty;
 use oxidized_by_ref::typing_defs::Ty_;
+use oxidized_by_ref::typing_defs::TypeOrigin;
 use oxidized_by_ref::typing_defs::Typeconst;
 use oxidized_by_ref::typing_defs::TypedefType;
 use oxidized_by_ref::typing_defs::WhereConstraint;
@@ -2212,7 +2213,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     ..*fun_type
                 }))
             }
-            Ty_::Tshape(&(kind, fields)) => {
+            Ty_::Tshape(&(_, kind, fields)) => {
                 let mut converted_fields = AssocListMut::with_capacity_in(fields.len(), self.arena);
                 for (&name, ty) in fields.iter() {
                     converted_fields.insert(
@@ -2223,7 +2224,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         }),
                     );
                 }
-                Ty_::Tshape(self.alloc((kind, converted_fields.into())))
+                let origin = TypeOrigin::MissingOrigin;
+                Ty_::Tshape(self.alloc((origin, kind, converted_fields.into())))
             }
             Ty_::TvecOrDict(&(tk, tv)) => Ty_::TvecOrDict(self.alloc((
                 self.convert_tapply_to_tgeneric(tk),
@@ -5183,7 +5185,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => (ShapeKind::ClosedShape, false),
         };
         let pos = self.merge_positions(shape, rparen);
-        let ty_ = Ty_::Tshape(self.alloc((kind, fields.into())));
+        let origin = TypeOrigin::MissingOrigin;
+        let ty_ = Ty_::Tshape(self.alloc((origin, kind, fields.into())));
         if is_open && self.implicit_sdt() {
             self.hint_ty(pos, self.make_supportdyn(pos, ty_))
         } else {

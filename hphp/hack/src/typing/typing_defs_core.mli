@@ -63,6 +63,20 @@ type shape_kind =
   | Open_shape
 [@@deriving eq, ord, show]
 
+(** The origin of a type is a succinct key that is unique to the
+    type containing it. Consequently, two types with the same
+    origin are necessarily identical. Any change to a type with
+    origin needs to come with a *reset* of its origin. For example,
+    all type mappers have to reset origins to [Missing_origin]. *)
+type type_origin =
+  | Missing_origin
+      (** When we do not have any origin for the type. It is always
+          correct to use [Missing_origin]; so when in doubt, use it. *)
+  | From_alias of string
+      (** A type with origin [From_alias orig] is equivalent to
+           the expansion of the alias [orig]. *)
+[@@deriving eq, ord, show]
+
 type pos_string = Pos_or_decl.t * string [@@deriving eq, ord, show]
 
 type pos_byte_string = Pos_or_decl.t * Ast_defs.byte_string
@@ -250,7 +264,9 @@ and _ ty_ =
   (* Whether all fields of this shape are known, types of each of the
    * known arms.
    *)
-  | Tshape : shape_kind * 'phase shape_field_type TShapeMap.t -> 'phase ty_
+  | Tshape :
+      type_origin * shape_kind * 'phase shape_field_type TShapeMap.t
+      -> 'phase ty_
   | Tvar : Ident.t -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which

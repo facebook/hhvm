@@ -174,12 +174,12 @@ let rec intersect env ~r ty1 ty2 =
               List.map2_env env tyl1 tyl2 ~f:(intersect ~r)
             in
             (env, mk (r, Ttuple inter_tyl))
-          | ((_, Tshape (shape_kind1, fdm1)), (_, Tshape (shape_kind2, fdm2)))
-            ->
+          | ( (_, Tshape (_, shape_kind1, fdm1)),
+              (_, Tshape (_, shape_kind2, fdm2)) ) ->
             let (env, shape_kind, fdm) =
               intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2)
             in
-            (env, mk (r, Tshape (shape_kind, fdm)))
+            (env, mk (r, Tshape (Missing_origin, shape_kind, fdm)))
           | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
             intersect_lists env r tyl1 tyl2
           (* Simplify `supportdyn<t> & u` to `supportdyn<t & u>`. Do not apply if `u` is

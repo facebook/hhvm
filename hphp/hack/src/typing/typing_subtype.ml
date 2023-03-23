@@ -2153,7 +2153,7 @@ and simplify_subtype_i
             | _ -> simplify_subtype ~subtype_env ~sub_supportdyn ty ty_super env)
           | (_, (Tdynamic | Tprim Tnull)) -> valid env
           | (_, Tnonnull)
-          | (_, Tshape (Open_shape, _))
+          | (_, Tshape (_, Open_shape, _))
           | (_, Tvar _)
           | (_, Tunapplied_alias _)
           | (_, Tnewtype _)
@@ -2201,7 +2201,7 @@ and simplify_subtype_i
                       ty_sub
                       ty_super)
               tyl
-          | (_, Tshape (Closed_shape, sftl)) ->
+          | (_, Tshape (_, Closed_shape, sftl)) ->
             List.fold_left
               ~init:(env, TL.valid)
               ~f:(fun res sft ->
@@ -2445,23 +2445,28 @@ and simplify_subtype_i
             tyl_sub
             tyl_super
         | _ -> default_subtype env))
-    | (r_super, Tshape (shape_kind_super, fdm_super)) ->
+    | (r_super, Tshape (origin_super, shape_kind_super, fdm_super)) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
         let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty in
         (match deref lty with
-        | (r_sub, Tshape (shape_kind_sub, fdm_sub)) ->
-          simplify_subtype_shape
-            ~subtype_env
-            ~env
-            ~this_ty
-            ~super_like
-            ( Option.is_some sub_supportdyn || sub_supportdyn',
-              r_sub,
-              shape_kind_sub,
-              fdm_sub )
-            (super_supportdyn, r_super, shape_kind_super, fdm_super)
+        | (r_sub, Tshape (origin_sub, shape_kind_sub, fdm_sub)) ->
+          if same_type_origin origin_super origin_sub then
+            (* Fast path for shape types: if they have the same origin,
+             * they are equal type. *)
+            valid env
+          else
+            simplify_subtype_shape
+              ~subtype_env
+              ~env
+              ~this_ty
+              ~super_like
+              ( Option.is_some sub_supportdyn || sub_supportdyn',
+                r_sub,
+                shape_kind_sub,
+                fdm_sub )
+              (super_supportdyn, r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
     | (_, Tvec_or_dict _) ->
       (match ety_sub with

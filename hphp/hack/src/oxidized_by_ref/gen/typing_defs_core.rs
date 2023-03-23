@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4db69954a41fdada75a8fcbec3c065b4>>
+// @generated SignedSource<<269bfa1f7b28728049cfb2b1ef5dcaac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -81,6 +81,34 @@ arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 pub use oxidized::typing_defs_core::FunTparamsKind;
 pub use oxidized::typing_defs_core::ShapeKind;
 pub use oxidized::typing_defs_core::ValKind;
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[repr(C, u8)]
+pub enum TypeOrigin<'a> {
+    #[rust_to_ocaml(name = "Missing_origin")]
+    MissingOrigin,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "From_alias")]
+    FromAlias(&'a str),
+}
+impl<'a> TrivialDrop for TypeOrigin<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(TypeOrigin<'arena>);
 
 #[derive(
     Clone,
@@ -459,6 +487,7 @@ pub enum Ty_<'a> {
     #[rust_to_ocaml(inline_tuple)]
     Tshape(
         &'a (
+            TypeOrigin<'a>,
             oxidized::typing_defs_core::ShapeKind,
             t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
         ),

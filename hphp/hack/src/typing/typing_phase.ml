@@ -103,6 +103,29 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let (env, ty) = Typing_log.log_localize ~level:1 ety_env dty (env, ty) in
     ((env, ty_err_opt), ty))
   @@
+  let rec find_origin dty =
+    match get_node dty with
+    | Taccess (root_ty, (_pos, id)) ->
+      Option.map ~f:(fun orig -> orig ^ "::" ^ id) (find_origin root_ty)
+    | Tapply ((_pos, cid), []) -> Some cid
+    | _ -> None
+  in
+  let set_type_origin lty =
+    (* When the type resulting from the localize call originates from a
+     * decl type with a succinct unambiguous form (e.g., Cls or Cls::T) we
+     * store a serialized version of the decl alias in an *origin* field
+     * of the locl type returned. Currently, only shape types have an
+     * origin field.
+     *)
+    match deref lty with
+    | (r, Tshape (_, shape_kind, shape_fields)) -> begin
+      match find_origin dty with
+      | None -> lty
+      | Some origin ->
+        mk (r, Tshape (From_alias origin, shape_kind, shape_fields))
+    end
+    | _ -> lty
+  in
   let tvar_or_localize ~ety_env env r ty ~i =
     if
       TypecheckerOptions.global_inference env.genv.tcopt
@@ -253,21 +276,25 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         arg
     in
     localize ~ety_env env decl_ty
-  | Tapply (((_p, cid) as cls), argl) -> begin
-    match Env.get_class_or_typedef env cid with
-    | Some (Env.ClassResult class_info) ->
-      localize_class_instantiation ~ety_env env r cls argl (Some class_info)
-    | Some (Env.TypedefResult typedef_info) ->
-      localize_typedef_instantiation
-        ~ety_env
-        env
-        r
-        (get_reason dty)
-        cid
-        argl
-        (Some typedef_info)
-    | None -> localize_class_instantiation ~ety_env env r cls argl None
-  end
+  | Tapply (((_p, cid) as cls), argl) ->
+    let ((env, ty_err_opt), lty) =
+      begin
+        match Env.get_class_or_typedef env cid with
+        | Some (Env.ClassResult class_info) ->
+          localize_class_instantiation ~ety_env env r cls argl (Some class_info)
+        | Some (Env.TypedefResult typedef_info) ->
+          localize_typedef_instantiation
+            ~ety_env
+            env
+            r
+            (get_reason dty)
+            cid
+            argl
+            (Some typedef_info)
+        | None -> localize_class_instantiation ~ety_env env r cls argl None
+      end
+    in
+    ((env, ty_err_opt), set_type_origin lty)
   | Ttuple tyl ->
     let (env, tyl) =
       List.map_env_ty_err_opt
@@ -345,8 +372,8 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     in
     let ty = map_reason ty ~f:elaborate_reason in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-    ((env, ty_err_opt), ty)
-  | Tshape (shape_kind, tym) ->
+    ((env, ty_err_opt), set_type_origin ty)
+  | Tshape (_, shape_kind, tym) ->
     let (env, tym) =
       ShapeFieldMap.map_env_ty_err_opt
         (localize ~ety_env)
@@ -354,7 +381,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         tym
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    (env, mk (r, Tshape (shape_kind, tym)))
+    (env, mk (r, Tshape (Missing_origin, shape_kind, tym)))
   | Tnewtype (name, tyl, ty) ->
     let td =
       Utils.unsafe_opt

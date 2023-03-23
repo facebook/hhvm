@@ -121,6 +121,7 @@ oxidized::typing_defs_core::Enforcement
 oxidized::typing_defs_core::FunTparamsKind
 oxidized::typing_defs_core::ParamMode
 oxidized::typing_defs_core::ShapeKind
+oxidized::typing_defs_core::TypeOrigin
 oxidized::typing_defs_core::ValKind
 oxidized::typing_reason::ArgPosition
 oxidized::typing_reason::BlameSource
@@ -172,6 +173,7 @@ typing_defs_core::RefinedConstBound
 typing_defs_core::ShapeKind
 typing_defs_core::TshapeFieldName
 typing_defs_core::Ty_
+typing_defs_core::TypeOrigin
 typing_defs_core::UserAttributeParam
 typing_defs_core::ValKind
 typing_defs_core::XhpAttr
@@ -203,6 +205,7 @@ typing_defs::ClassTypeRefinementBounds
 typing_defs::ShapeKind
 typing_defs::Ty_
 typing_defs::Typeconst
+typing_defs::TypeOrigin
 typing_defs::ValKind
 typing_defs::XhpAttr
 typing_inference_env::SolvingInfo

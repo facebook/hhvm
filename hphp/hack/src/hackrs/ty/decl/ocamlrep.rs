@@ -313,9 +313,10 @@ impl<R: Reason> ToOcamlRep for Ty_<R> {
                     map
                 };
 
-                let mut block = alloc.block_with_size_and_tag(2usize, 8u8);
-                alloc.set_field(&mut block, 0, alloc.add(shape_kind));
-                alloc.set_field(&mut block, 1, map);
+                let mut block = alloc.block_with_size_and_tag(3usize, 8u8);
+                alloc.set_field(&mut block, 0, ocamlrep::Value::int(0));
+                alloc.set_field(&mut block, 1, alloc.add(shape_kind));
+                alloc.set_field(&mut block, 2, map);
                 block.build()
             }
             Ty_::Tvar(ident) => {
@@ -409,10 +410,10 @@ impl<R: Reason> FromOcamlRep for Ty_<R> {
                     Ok(Ty_::Ttuple(ocamlrep::from::field(block, 0)?))
                 }
                 8 => {
-                    ocamlrep::from::expect_block_size(block, 2)?;
+                    ocamlrep::from::expect_block_size(block, 3)?;
                     Ok(Ty_::Tshape(Box::new((
-                        ocamlrep::from::field(block, 0)?,
-                        ocamlrep::vec_from_ocaml_map(block[1])?
+                        ocamlrep::from::field(block, 1)?,
+                        ocamlrep::vec_from_ocaml_map(block[2])?
                             .into_iter()
                             .map(|(k, (optional, ty))| match k {
                                 OcamlShapeFieldName::Int(pos_id) => (

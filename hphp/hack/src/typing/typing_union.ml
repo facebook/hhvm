@@ -320,7 +320,8 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
         (env, Some (mk (r, Ttuple tyl)))
       else
         (env, None)
-    | ((r1, Tshape (shape_kind1, fdm1)), (r2, Tshape (shape_kind2, fdm2))) ->
+    | ((r1, Tshape (_, shape_kind1, fdm1)), (r2, Tshape (_, shape_kind2, fdm2)))
+      ->
       let (env, ty) =
         union_shapes
           ~approx_cancel_neg
@@ -632,7 +633,7 @@ and union_shapes
           let (env, sft_ty) = union ~approx_cancel_neg env ty1 ty2 in
           ((env, shape_kind), Some { sft_optional; sft_ty }))
   in
-  (env, Tshape (shape_kind, fdm))
+  (env, Tshape (Missing_origin, shape_kind, fdm))
 
 and union_shape_kind shape_kind1 shape_kind2 =
   match (shape_kind1, shape_kind2) with

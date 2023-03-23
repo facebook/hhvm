@@ -601,7 +601,7 @@ module Full = struct
       let (fuel, tys_doc) = ttuple ~fuel k tyl in
       let intersection_doc = Concat [text "&"; tys_doc] in
       (fuel, intersection_doc)
-    | Tshape (shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+    | Tshape (_, shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
 
   (* TODO (T86471586): Display capabilities that are decls for functions *)
   and fun_decl_implicit_params ~fuel _to_doc _st _penv _implicit_param =
@@ -920,7 +920,7 @@ module Full = struct
     | Tintersection [] -> (fuel, text "mixed")
     | Tintersection tyl ->
       delimited_list ~fuel (Space ^^ text "&" ^^ Space) "(" k tyl ")"
-    | Tshape (shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+    | Tshape (_, shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
@@ -1424,7 +1424,7 @@ module Json = struct
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tclass ((_, cid), e, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys @ refs e
-    | (p, Tshape (shape_kind, fl)) ->
+    | (p, Tshape (_, shape_kind, fl)) ->
       let fields_known =
         match shape_kind with
         | Closed_shape -> true
@@ -1732,7 +1732,7 @@ module Json = struct
               List.fold fields ~init:TShapeMap.empty ~f:(fun shape_map (k, v) ->
                   TShapeMap.add k v shape_map)
             in
-            ty (Tshape (shape_kind, fields))
+            ty (Tshape (Missing_origin, shape_kind, fields))
         | "union" ->
           get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           aux_args args ~keytrace >>= fun tyl -> ty (Tunion tyl)

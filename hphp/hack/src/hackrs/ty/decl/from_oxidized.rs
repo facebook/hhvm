@@ -146,7 +146,7 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
             typing_defs_core::Ty_::Tprim(prim) => Tprim(*prim),
             typing_defs_core::Ty_::Tfun(ft) => Tfun(Box::new(ft.into())),
             typing_defs_core::Ty_::Ttuple(tys) => Ttuple(slice(tys)),
-            typing_defs_core::Ty_::Tshape(&(kind, fields)) => Tshape(Box::new((
+            typing_defs_core::Ty_::Tshape(&(_, kind, fields)) => Tshape(Box::new((
                 kind,
                 fields
                     .iter()

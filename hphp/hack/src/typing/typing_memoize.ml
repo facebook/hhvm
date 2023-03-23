@@ -72,7 +72,7 @@ let check_param : env -> Nast.fun_param -> unit =
         | Tintersection tyl ->
           List.iter tyl ~f:(check_memoizable env)
         | Tvec_or_dict (_, ty) -> check_memoizable env ty
-        | Tshape (_, fdm) ->
+        | Tshape (_, _, fdm) ->
           TShapeMap.iter
             begin
               (fun _ { sft_ty; _ } -> check_memoizable env sft_ty)

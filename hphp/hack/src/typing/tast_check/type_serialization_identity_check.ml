@@ -76,13 +76,13 @@ let rec strip_ty ty =
           ft_flags = 0;
           ft_ifc_decl = default_ifc_fun_decl;
         }
-    | Tshape (shape_kind, shape_fields) ->
+    | Tshape (_, shape_kind, shape_fields) ->
       let strip_field { sft_optional; sft_ty } =
         let sft_ty = strip_ty sft_ty in
         { sft_optional; sft_ty }
       in
       let shape_fields = TShapeMap.map strip_field shape_fields in
-      Tshape (shape_kind, shape_fields)
+      Tshape (Missing_origin, shape_kind, shape_fields)
     | Taccess _ -> ty
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()

@@ -29,14 +29,19 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
           env
           [Log_head ("widen_for_refine_shape", [Log_type ("ty", ty)])]));
   match deref ty with
-  | (r, Tshape (shape_kind, fields)) -> begin
+  | (r, Tshape (_, shape_kind, fields)) -> begin
     match TShapeMap.find_opt field_name fields with
     | None ->
       let (env, element_ty) = Env.fresh_type_invariant env expr_pos in
       let sft = { sft_optional = true; sft_ty = element_ty } in
       ( (env, None),
-        Some (mk (r, Tshape (shape_kind, TShapeMap.add field_name sft fields)))
-      )
+        Some
+          (mk
+             ( r,
+               Tshape
+                 ( Missing_origin,
+                   shape_kind,
+                   TShapeMap.add field_name sft fields ) )) )
     | Some _ -> ((env, None), Some ty)
   end
   | _ -> ((env, None), None)
@@ -66,7 +71,10 @@ let refine_shape field_name pos env shape =
     env
     ~r:(Reason.Rwitness pos)
     shape
-    (mk (Reason.Rnone, Tshape (Open_shape, TShapeMap.singleton field_name sft)))
+    (mk
+       ( Reason.Rnone,
+         Tshape (Missing_origin, Open_shape, TShapeMap.singleton field_name sft)
+       ))
 
 let make_locl_like_type env ty =
   if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
@@ -98,7 +106,7 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
   let (supportdyn2, env, stripped_shape) = TUtils.strip_supportdyn env shape in
   let supportdyn = supportdyn || supportdyn2 in
   match get_node stripped_shape with
-  | Tshape (shape_kind, fields) ->
+  | Tshape (_, shape_kind, fields) ->
     let fields =
       match shape_kind with
       | Closed_shape -> TShapeMap.remove field_name fields
@@ -112,7 +120,9 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
           { sft_ty = nothing; sft_optional = true }
           fields
     in
-    let result = mk (Reason.Rwitness pos, Tshape (shape_kind, fields)) in
+    let result =
+      mk (Reason.Rwitness pos, Tshape (Missing_origin, shape_kind, fields))
+    in
     ( (env, e1),
       if supportdyn then
         let r = get_reason result in
@@ -165,7 +175,7 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
         when String.equal n Naming_special_names.Classes.cSupportDyn ->
         let (env, ty) = refine_type env ty in
         TUtils.make_supportdyn r env ty
-      | (r, Tshape (shape_kind, ftm)) ->
+      | (r, Tshape (_, shape_kind, ftm)) ->
         let (env, field_type) =
           match TShapeMap.find_opt field ftm with
           | Some { sft_ty; _ } ->
@@ -181,7 +191,7 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
               } )
         in
         let ftm = TShapeMap.add field field_type ftm in
-        (env, mk (r, Tshape (shape_kind, ftm)))
+        (env, mk (r, Tshape (Missing_origin, shape_kind, ftm)))
       | _ ->
         (* This should be an error, but it is already raised when
            typechecking the call to Shapes::idx *)
@@ -206,7 +216,8 @@ let shapes_idx_not_null env shape_ty fld =
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   mk
     ( Reason.Rshape (shape_pos, fun_name),
-      Tshape (Open_shape, TShapeMap.singleton field_name field_ty) )
+      Tshape
+        (Missing_origin, Open_shape, TShapeMap.singleton field_name field_ty) )
 
 (* Typing rules for Shapes::idx
  *
@@ -557,7 +568,8 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
                (mk
                   ( Reason.Rwitness_from_decl param1.fp_pos,
                     Tshape
-                      ( Open_shape,
+                      ( Missing_origin,
+                        Open_shape,
                         TShapeMap.singleton
                           field_name
                           { sft_optional = true; sft_ty = field_ty } ) )) ))
@@ -614,7 +626,8 @@ let transform_at_fun_ty (field_name : tshape_field_name) fty =
         (mk
            ( Reason.Rwitness_from_decl param1.fp_pos,
              Tshape
-               ( Open_shape,
+               ( Missing_origin,
+                 Open_shape,
                  TShapeMap.singleton
                    field_name
                    { sft_optional = true; sft_ty = field_ty } ) ))

@@ -126,7 +126,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     | _ -> ((env, None), None)
   end
   (* Whatever the lower bound, construct an open, singleton shape type. *)
-  | (r, Tshape (_, fdm)) -> begin
+  | (r, Tshape (_, _, fdm)) -> begin
     match TUtils.shape_field_name env index_expr with
     | None -> ((env, None), None)
     | Some field ->
@@ -144,7 +144,9 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
             { sft_optional = lhs_of_null_coalesce; sft_ty = element_ty }
             TShapeMap.empty
         in
-        let upper_shape_ty = mk (r, Tshape (Open_shape, upper_fdm)) in
+        let upper_shape_ty =
+          mk (r, Tshape (Missing_origin, Open_shape, upper_fdm))
+        in
         ((env, None), Some upper_shape_ty))
   end
   | _ -> ((env, None), None)
@@ -649,7 +651,7 @@ let rec array_get
                    });
           let (env, ty) = err_witness env p in
           (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none))))
-      | Tshape (_, fdm) ->
+      | Tshape (_, _, fdm) ->
         let (_, p, _) = e2 in
         begin
           match TUtils.shape_field_name env e2 with
@@ -783,12 +785,12 @@ let rec array_get
         (env, (ty, err_res_arr, err_res_idx))
       | Tnewtype (ts, [ty], bound) -> begin
         match deref bound with
-        | (r, Tshape (shape_kind, fields))
+        | (r, Tshape (_, shape_kind, fields))
           when String.equal ts SN.FB.cTypeStructure ->
           let (env, fields) =
             Typing_structure.transform_shapemap env array_pos ty fields
           in
-          let ty = mk (r, Tshape (shape_kind, fields)) in
+          let ty = mk (r, Tshape (Missing_origin, shape_kind, fields)) in
           let (env, (ty, err_opt_arr, err_opt_idx)) =
             array_get
               ~array_pos
@@ -1453,7 +1455,7 @@ let rec assign_array_get
           | _ ->
             fail (Error (tkey, MakeType.int Reason.none)) Reason.URtuple_access
         end
-      | Tshape (shape_kind, fdm) -> begin
+      | Tshape (_, shape_kind, fdm) -> begin
         match TUtils.shape_field_name env key with
         | None -> (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
         | Some field ->
@@ -1461,7 +1463,7 @@ let rec assign_array_get
           let fdm' =
             TShapeMap.add field { sft_optional = false; sft_ty = ty2 } fdm
           in
-          let ty = mk (r, Tshape (shape_kind, fdm')) in
+          let ty = mk (r, Tshape (Missing_origin, shape_kind, fdm')) in
           (env, (ty, Ok ty, Ok tkey, Ok ty2))
       end
       | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->

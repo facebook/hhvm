@@ -65,6 +65,11 @@ type shape_kind =
   | Open_shape
 [@@deriving eq, ord, show]
 
+type type_origin =
+  | Missing_origin
+  | From_alias of string
+[@@deriving eq, ord, show]
+
 type pos_string = Pos_or_decl.t * string [@@deriving eq, ord, show]
 
 (* Trick the Rust generators to use a BStr, the same way it does for Ast_defs.shape_field_name. *)
@@ -277,7 +282,9 @@ and _ ty_ =
        * function, method, lambda, etc. *)
   | Ttuple : 'phase ty list -> 'phase ty_
       (** Tuple, with ordered list of the types of the elements of the tuple. *)
-  | Tshape : shape_kind * 'phase shape_field_type TShapeMap.t -> 'phase ty_
+  | Tshape :
+      type_origin * shape_kind * 'phase shape_field_type TShapeMap.t
+      -> 'phase ty_
       (** Whether all fields of this shape are known, types of each of the
        * known arms.
        *)
@@ -626,7 +633,7 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Ttuple@ ";
       pp_list pp_ty fmt a0;
       Format.fprintf fmt "@])"
-    | Tshape (a0, a1) ->
+    | Tshape (_, a0, a1) ->
       Format.fprintf fmt "(@[<2>Tshape (@,";
       pp_shape_kind fmt a0;
       Format.fprintf fmt ",@ ";

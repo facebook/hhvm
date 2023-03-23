@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6a5659add5f46c9fdc4636a39f7d52f1>>
+// @generated SignedSource<<eb8ef0a86f5581a07e8f0046c94fab66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -158,6 +158,30 @@ pub enum ShapeKind {
 }
 impl TrivialDrop for ShapeKind {}
 arena_deserializer::impl_deserialize_in_arena!(ShapeKind);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
+#[repr(C, u8)]
+pub enum TypeOrigin {
+    #[rust_to_ocaml(name = "Missing_origin")]
+    MissingOrigin,
+    #[rust_to_ocaml(name = "From_alias")]
+    FromAlias(String),
+}
 
 #[derive(
     Clone,
@@ -554,7 +578,11 @@ pub enum Ty_ {
     Ttuple(Vec<Ty>),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
-    Tshape(ShapeKind, t_shape_map::TShapeMap<ShapeFieldType>),
+    Tshape(
+        TypeOrigin,
+        ShapeKind,
+        t_shape_map::TShapeMap<ShapeFieldType>,
+    ),
     Tvar(ident::Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which

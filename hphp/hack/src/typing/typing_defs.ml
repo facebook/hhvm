@@ -526,7 +526,7 @@ let rec is_denotable ty =
     List.for_all ~f:is_denotable ts
   | Tvec_or_dict (tk, tv) -> is_denotable tk && is_denotable tv
   | Taccess (ty, _) -> is_denotable ty
-  | Tshape (_, sm) ->
+  | Tshape (_, _, sm) ->
     TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
   | Tfun { ft_params; ft_ret; _ } ->
     is_denotable ft_ret.et_type
@@ -545,6 +545,11 @@ let rec is_denotable ty =
   | Tdependent _
   | Tunapplied_alias _ ->
     false
+
+let same_type_origin orig1 orig2 =
+  match orig1 with
+  | Missing_origin -> false
+  | _ -> equal_type_origin orig1 orig2
 
 module ShapeFieldMap = struct
   include TShapeMap
@@ -715,18 +720,22 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       end
       | n -> n
     end
-    | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) -> begin
-      match compare_shape_kind shape_kind1 shape_kind2 with
-      | 0 ->
-        List.compare
-          (fun (k1, v1) (k2, v2) ->
-            match TShapeField.compare k1 k2 with
-            | 0 -> shape_field_type_compare v1 v2
-            | n -> n)
-          (TShapeMap.elements fields1)
-          (TShapeMap.elements fields2)
-      | n -> n
-    end
+    | ( Tshape (shape_origin1, shape_kind1, fields1),
+        Tshape (shape_origin2, shape_kind2, fields2) ) ->
+      if same_type_origin shape_origin1 shape_origin2 then
+        0
+      else begin
+        match compare_shape_kind shape_kind1 shape_kind2 with
+        | 0 ->
+          List.compare
+            (fun (k1, v1) (k2, v2) ->
+              match TShapeField.compare k1 k2 with
+              | 0 -> shape_field_type_compare v1 v2
+              | n -> n)
+            (TShapeMap.elements fields1)
+            (TShapeMap.elements fields2)
+        | n -> n
+      end
     | (Tvar v1, Tvar v2) -> compare v1 v2
     | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
     | (Taccess (ty1, id1), Taccess (ty2, id2)) -> begin

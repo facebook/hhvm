@@ -157,7 +157,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tshape (_, shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tnewtype (name, tyl, ty) -> this#on_tnewtype acc r name tyl ty
   end
 
@@ -323,7 +323,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
-      | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tshape (_, shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tvec_or_dict (ty1, ty2) -> this#on_tvec_or_dict acc r ty1 ty2
       | Tunapplied_alias n -> this#on_tunapplied_alias acc r n

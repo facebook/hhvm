@@ -268,7 +268,7 @@ and hint_ p env = function
         ~init:TShapeMap.empty
         nsi_field_map
     in
-    Tshape (shape_kind, fdm)
+    Tshape (Missing_origin, shape_kind, fdm)
   | Hsoft (p, h_) -> hint_ p env h_
   | Hfun_context _
   | Hvar _ ->

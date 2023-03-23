@@ -43,11 +43,11 @@ let rec wipe ty =
   | Taccess (ty, pos_id) ->
     let w = wipe ty in
     wp (Taccess (w, pos_id))
-  | Tshape (kind, map) ->
+  | Tshape (_, kind, map) ->
     let map =
       TShapeMap.map (fun sft -> { sft with sft_ty = wipe sft.sft_ty }) map
     in
-    wp (Tshape (kind, map))
+    wp (Tshape (Missing_origin, kind, map))
   | Tfun ft ->
     let wt_et et = { et with et_type = wipe et.et_type } in
     let wt_fp fp = { fp with fp_type = wt_et fp.fp_type } in

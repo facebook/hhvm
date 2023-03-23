@@ -174,9 +174,9 @@ and instantiate_ subst x =
   | Tapply (x, tyl) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     Tapply (x, tyl)
-  | Tshape (shape_kind, fdm) ->
+  | Tshape (_, shape_kind, fdm) ->
     let fdm = ShapeFieldMap.map (instantiate subst) fdm in
-    Tshape (shape_kind, fdm)
+    Tshape (Missing_origin, shape_kind, fdm)
   | Tnewtype (name, tyl, ty) ->
     let tyl = List.map tyl ~f:(instantiate subst) in
     let ty = instantiate subst ty in

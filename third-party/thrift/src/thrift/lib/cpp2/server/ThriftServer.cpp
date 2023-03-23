@@ -834,6 +834,12 @@ constexpr std::array<PoolNames, concurrency::N_PRIORITIES> kPoolNames = {
      {"IMPORTANT", "I"},
      {"NORMAL", "N"},
      {"BEST_EFFORT", "BE"}}};
+
+std::string getThreadNameForPriority(
+    const std::string& cpuWorkerThreadName, concurrency::PRIORITY priority) {
+  return fmt::format(
+      "{}.{}", cpuWorkerThreadName, kPoolNames.at(priority).suffix);
+}
 } // namespace
 
 void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
@@ -849,8 +855,8 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
       // We expect that at least the normal priority has been set up.
       CHECK_NE(i, concurrency::NORMAL);
 
-      std::string name = fmt::format(
-          "{}.{}", getCPUWorkerThreadName(), kPoolNames.at(i).suffix);
+      auto name = getThreadNameForPriority(
+          getCPUWorkerThreadName(), concurrency::PRIORITY(i));
       std::shared_ptr<folly::ThreadFactory> factory =
           std::make_shared<folly::NamedThreadFactory>(name);
       // 2 is the default for the priorities other than NORMAL.
@@ -987,6 +993,44 @@ void ThriftServer::ensureResourcePools() {
 
   // The user provided the resource pool. Use it as is.
   if (resourcePoolSupplied) {
+    if (!resourcePoolSet().hasResourcePool(
+            ResourcePoolHandle::defaultAsync())) {
+      auto threadFactory = [this]() -> std::shared_ptr<folly::ThreadFactory> {
+        auto prefix = getThreadNameForPriority(
+            getCPUWorkerThreadName(), concurrency::PRIORITY::NORMAL);
+        auto factory = std::make_shared<folly::PriorityThreadFactory>(
+            std::make_shared<folly::NamedThreadFactory>(prefix),
+            concurrency::PosixThreadFactory::Impl::toPthreadPriority(
+                concurrency::PosixThreadFactory::kDefaultPolicy,
+                concurrency::PosixThreadFactory::NORMAL_PRI));
+        if (threadInitializer_ || threadFinalizer_) {
+          return std::make_shared<folly::InitThreadFactory>(
+              std::move(factory),
+              std::move(threadInitializer_),
+              std::move(threadFinalizer_));
+        }
+        return factory;
+      };
+
+      auto requestPile = std::make_unique<RoundRobinRequestPile>(
+          RoundRobinRequestPile::Options());
+
+      auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
+          getNumCPUWorkerThreads(),
+          ResourcePool::kPreferredExecutorNumPriorities,
+          threadFactory());
+
+      auto concurrencyController =
+          std::make_unique<apache::thrift::ParallelConcurrencyController>(
+              *requestPile.get(), *executor.get());
+
+      resourcePoolSet().setResourcePool(
+          ResourcePoolHandle::defaultSync(),
+          std::move(requestPile),
+          executor,
+          std::move(concurrencyController));
+    }
+
     return;
   }
 
@@ -1104,10 +1148,8 @@ void ThriftServer::ensureResourcePools() {
       }
     }
     for (const auto& pool : pools) {
-      std::string name = fmt::format(
-          "{}.{}",
-          getCPUWorkerThreadName(),
-          kPoolNames.at(pool.thriftPriority).suffix);
+      auto name = getThreadNameForPriority(
+          getCPUWorkerThreadName(), pool.thriftPriority);
       std::shared_ptr<folly::ThreadFactory> factory =
           std::make_shared<folly::PriorityThreadFactory>(
               std::make_shared<folly::NamedThreadFactory>(name),

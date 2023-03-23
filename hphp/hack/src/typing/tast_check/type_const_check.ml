@@ -11,7 +11,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Cls = Decl_provider.Class
-module Env = Tast_env
 open Typing_const_reifiable
 
 let handler =

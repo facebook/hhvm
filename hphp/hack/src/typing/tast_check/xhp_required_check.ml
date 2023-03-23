@@ -10,7 +10,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
-module S = Core.Sequence
 module Cls = Decl_provider.Class
 module Env = Tast_env
 
@@ -100,7 +99,7 @@ let check_attrs pos env sid attrs =
                  { pos; attr = attr_name; ty_reason_msg }))
       missing_attrs
 
-let make_handler ctx =
+let create_handler ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base

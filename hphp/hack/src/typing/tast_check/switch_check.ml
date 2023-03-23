@@ -13,7 +13,6 @@ open Typing_defs
 open Utils
 module Env = Tast_env
 module Cls = Decl_provider.Class
-module MakeType = Typing_make_type
 module SN = Naming_special_names
 
 type kind =

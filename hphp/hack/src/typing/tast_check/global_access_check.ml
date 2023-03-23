@@ -44,7 +44,7 @@ type global_access_pattern =
   | SuperGlobalWrite (* Global write via super global functions *)
   | SuperGlobalRead (* Global read via super global functions *)
   | NoPattern (* No pattern above is recognized *)
-[@@deriving eq, ord, show { with_path = false }]
+[@@deriving ord, show { with_path = false }]
 
 module GlobalAccessPatternSet = Caml.Set.Make (struct
   type t = global_access_pattern
@@ -102,7 +102,7 @@ type data_source =
   | Literal (* Boolean, integer, floating-point, or string literals *)
   | NonSensitive (* E.g. timer, site var *)
   | Unknown (* Other sources that have not been identified yet *)
-[@@deriving eq, ord, show]
+[@@deriving ord, show]
 
 module DataSourceSet = Caml.Set.Make (struct
   type t = data_source
@@ -388,9 +388,6 @@ let replace_var_data_srcs_in_tbl tbl var srcs = Hashtbl.replace tbl var srcs
    table into the first one. *)
 let merge_var_data_srcs_tbls tbl1 tbl2 =
   Hashtbl.iter (add_var_data_srcs_to_tbl tbl1) tbl2
-
-(* Remove a set of variables from the var_refs_tbl table. *)
-let remove_vars_from_tbl tbl vars = SSet.iter (Hashtbl.remove tbl) vars
 
 (* For a hash table whose value is DataSourceSet, get its total cardinal. *)
 let get_tbl_total_cardinal tbl =

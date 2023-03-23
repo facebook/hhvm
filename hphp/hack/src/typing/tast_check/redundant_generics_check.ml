@@ -113,7 +113,7 @@ let get_tracing_info env =
     file = Tast_env.get_file env;
   }
 
-let make_handler ctx =
+let create_handler ctx =
   let handler =
     object
       inherit Tast_visitor.handler_base

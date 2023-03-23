@@ -48,8 +48,8 @@ let visitor ctx =
     @ List.filter_map
         ~f:Fn.id
         [
-          Xhp_required_check.make_handler ctx;
-          Redundant_generics_check.make_handler ctx;
+          Xhp_required_check.create_handler ctx;
+          Redundant_generics_check.create_handler ctx;
           Some Shape_field_check.handler;
           Some String_cast_check.handler;
           Some Tautology_check.handler;

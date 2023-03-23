@@ -11,7 +11,6 @@ open Shape_analysis_types
 module A = Aast
 module SA = Shape_analysis
 module SAC = Shape_analysis_codemod
-module Env = Tast_env
 
 let constraints_dir = "/tmp/shape_analysis_constraints"
 

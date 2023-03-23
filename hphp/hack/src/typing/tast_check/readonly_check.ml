@@ -8,7 +8,6 @@
  *)
 open Hh_prelude
 open Aast
-module Env = Tast_env
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
 module MakeType = Typing_make_type
@@ -26,16 +25,6 @@ let rec get_fty ty =
 type rty =
   | Readonly
   | Mut [@deriving show]
-
-let readonly_kind_to_rty = function
-  | Some Ast_defs.Readonly -> Readonly
-  | _ -> Mut
-
-let rty_to_str = function
-  | Readonly -> "readonly"
-  | Mut -> "mutable"
-
-let pp_rty fmt rty = Format.fprintf fmt "%s" (rty_to_str rty)
 
 (* Returns true if rty_sub is a subtype of rty_sup.
    TODO: Later, we'll have to consider the regular type as well, for example

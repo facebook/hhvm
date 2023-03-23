@@ -267,6 +267,7 @@ add_library(
   async/RpcOptions.cpp
   async/RpcTypes.cpp
   async/ServerGeneratorStream.cpp
+  async/ServerRequestData.cpp
   async/ServerSinkBridge.cpp
   async/ThreadBoundAdaptorChannel.cpp
   gen/module_metadata_cpp.cpp

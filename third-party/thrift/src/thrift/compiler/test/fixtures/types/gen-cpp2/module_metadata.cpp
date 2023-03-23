@@ -343,7 +343,7 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
   module_MinPaddingWithCustomType_fields = new std::array<EncodedThriftField, 5>{{
     {1, "small", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
     {2, "big", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }},
+    {3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter")}}).cv_struct_ref(), }},
     {4, "biggish", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
     {5, "tiny", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
   }};
@@ -706,7 +706,7 @@ StructMetadata<::apache::thrift::fixtures::types::detail::AdaptedListDep>::gen(T
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedListDep.fields()->push_back(std::move(field));
   }
-  module_AdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(IdentityAdapter<detail::AdaptedListDep>)")}, {"adaptedType", cvString(R"(detail::AdaptedListDep)")}}).cv_struct_ref());
+  module_AdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("IdentityAdapter<detail::AdaptedListDep>")}, {"adaptedType", cvString("detail::AdaptedListDep")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -755,7 +755,7 @@ StructMetadata<::apache::thrift::fixtures::types::detail::DependentAdaptedListDe
     field.structured_annotations() = f.structured_annotations;
     module_DependentAdaptedListDep.fields()->push_back(std::move(field));
   }
-  module_DependentAdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(IdentityAdapter<detail::DependentAdaptedListDep>)")}}).cv_struct_ref());
+  module_DependentAdaptedListDep.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("IdentityAdapter<detail::DependentAdaptedListDep>")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

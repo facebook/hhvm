@@ -77,7 +77,7 @@ StructMetadata<::cpp2::detail::YourUnion>::gen(ThriftMetadata& metadata) {
   ::apache::thrift::metadata::ThriftStruct& module_MyUnion = res.first->second;
   module_MyUnion.name() = "module.MyUnion";
   module_MyUnion.is_union() = true;
-  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::StaticCast)")}}).cv_struct_ref());
+  module_MyUnion.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::StaticCast")}}).cv_struct_ref());
   return res.first->second;
 }
 void StructMetadata<::cpp2::detail::YourException>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){
@@ -91,7 +91,7 @@ StructMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metadata) {
   ::apache::thrift::metadata::ThriftStruct& module_MyException = res.first->second;
   module_MyException.name() = "module.MyException";
   module_MyException.is_union() = false;
-  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::StaticCast)")}}).cv_struct_ref());
+  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::StaticCast")}}).cv_struct_ref());
   return res.first->second;
 }
 void StructMetadata<::cpp2::detail::YourStruct>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){
@@ -138,7 +138,7 @@ StructMetadata<::cpp2::detail::YourStruct>::gen(ThriftMetadata& metadata) {
     module_MyStruct.fields()->push_back(std::move(field));
   }
   StructMetadata::unstructured_annotations(module_MyStruct);
-  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::StaticCast)")}}).cv_struct_ref());
+  module_MyStruct.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::StaticCast")}}).cv_struct_ref());
   return res.first->second;
 }
 void StructMetadata<::cpp2::SecretStruct>::unstructured_annotations(FOLLY_MAYBE_UNUSED ::apache::thrift::metadata::ThriftStruct& thriftStruct){
@@ -179,7 +179,7 @@ void ExceptionMetadata<::cpp2::detail::YourException>::gen(ThriftMetadata& metad
   }
   ::apache::thrift::metadata::ThriftException& module_MyException = res.first->second;
   module_MyException.name() = "module.MyException";
-  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::StaticCast)")}}).cv_struct_ref());
+  module_MyException.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::StaticCast")}}).cv_struct_ref());
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_ping(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
@@ -252,7 +252,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::MyService>>::gen_p
   module_MyService_putDataById_data_2.name() = "data";
   module_MyService_putDataById_data_2.is_optional() = false;
   module_MyService_putDataById_data_2.structured_annotations() = {
-      *cvStruct("module.MyStructNestedAnnotation", {{"name", cvString(R"(argument)")}}).cv_struct_ref(),
+      *cvStruct("module.MyStructNestedAnnotation", {{"name", cvString("argument")}}).cv_struct_ref(),
   };
   auto module_MyService_putDataById_data_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE);
   module_MyService_putDataById_data_2_type->writeAndGenType(*module_MyService_putDataById_data_2.type(), metadata);

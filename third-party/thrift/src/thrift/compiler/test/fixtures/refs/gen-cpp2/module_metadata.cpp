@@ -340,10 +340,10 @@ StructMetadata<::cpp2::AdaptedStructWithInternBox>::gen(ThriftMetadata& metadata
   module_AdaptedStructWithInternBox.is_union() = false;
   static const auto* const
   module_AdaptedStructWithInternBox_fields = new std::array<EncodedThriftField, 4>{{
-    {1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-    {2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-    {3, "field3", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
-    {4, "field4", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter1)")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
+    {1, "field1", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {2, "field2", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {3, "field3", false, std::make_unique<Struct<::cpp2::Empty>>("module.Empty"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
+    {4, "field4", false, std::make_unique<Struct<::cpp2::MyField>>("module.MyField"), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter1")}}).cv_struct_ref(), *cvStruct("thrift.InternBox", {}).cv_struct_ref(), *cvStruct("thrift.TerseWrite", {}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_AdaptedStructWithInternBox_fields) {
     ::apache::thrift::metadata::ThriftField field;

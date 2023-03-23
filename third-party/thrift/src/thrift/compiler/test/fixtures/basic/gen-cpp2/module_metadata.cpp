@@ -48,7 +48,7 @@ void EnumMetadata<::test::fixtures::basic::HackEnum>::gen(ThriftMetadata& metada
   for (std::size_t i = 0; i != EnumTraits::size; ++i) {
     enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
-  enum_metadata.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString(R"(RenamedEnum)")}}).cv_struct_ref());
+  enum_metadata.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString("RenamedEnum")}}).cv_struct_ref());
 }
 
 const ::apache::thrift::metadata::ThriftStruct&
@@ -69,8 +69,8 @@ StructMetadata<::test::fixtures::basic::MyStruct>::gen(ThriftMetadata& metadata)
     {5, "oneway", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {6, "readonly", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {7, "idempotent", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-    {8, "floatSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("hack.SkipCodegen", {{"reason", cvString(R"(Invalid key type)")}}).cv_struct_ref(), }},
-    {9, "no_hack_codegen_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.SkipCodegen", {{"reason", cvString(R"(skip field codegen for deprecation)")}}).cv_struct_ref(), }},
+    {8, "floatSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("hack.SkipCodegen", {{"reason", cvString("Invalid key type")}}).cv_struct_ref(), }},
+    {9, "no_hack_codegen_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.SkipCodegen", {{"reason", cvString("skip field codegen for deprecation")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_MyStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -108,7 +108,7 @@ StructMetadata<::test::fixtures::basic::MyUnion>::gen(ThriftMetadata& metadata) 
     {1, "myEnum", false, std::make_unique<Enum<::test::fixtures::basic::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
     {2, "myStruct", false, std::make_unique<Struct<::test::fixtures::basic::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
     {3, "myDataItem", false, std::make_unique<Struct<::test::fixtures::basic::MyDataItem>>("module.MyDataItem"), std::vector<ThriftConstStruct>{}},
-    {4, "floatSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("hack.SkipCodegen", {{"reason", cvString(R"(Invalid key type)")}}).cv_struct_ref(), }},
+    {4, "floatSet", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE)), std::vector<ThriftConstStruct>{*cvStruct("hack.SkipCodegen", {{"reason", cvString("Invalid key type")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_MyUnion_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -132,7 +132,7 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
   module_ReservedKeyword.is_union() = false;
   static const auto* const
   module_ReservedKeyword_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "reserved_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Name", {{"name", cvString(R"(renamed_field)")}}).cv_struct_ref(), }},
+    {1, "reserved_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Name", {{"name", cvString("renamed_field")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_ReservedKeyword_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -143,7 +143,7 @@ StructMetadata<::test::fixtures::basic::ReservedKeyword>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_ReservedKeyword.fields()->push_back(std::move(field));
   }
-  module_ReservedKeyword.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString(R"(MyRenamedStruct)")}}).cv_struct_ref());
+  module_ReservedKeyword.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString("MyRenamedStruct")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -157,7 +157,7 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
   module_UnionToBeRenamed.is_union() = true;
   static const auto* const
   module_UnionToBeRenamed_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "reserved_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Name", {{"name", cvString(R"(renamed_field)")}}).cv_struct_ref(), }},
+    {1, "reserved_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Name", {{"name", cvString("renamed_field")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *module_UnionToBeRenamed_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -168,7 +168,7 @@ StructMetadata<::test::fixtures::basic::UnionToBeRenamed>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_UnionToBeRenamed.fields()->push_back(std::move(field));
   }
-  module_UnionToBeRenamed.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString(R"(MyRenamedUnion)")}}).cv_struct_ref());
+  module_UnionToBeRenamed.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString("MyRenamedUnion")}}).cv_struct_ref());
   return res.first->second;
 }
 
@@ -203,7 +203,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   // We need to keep the index around because a reference or iterator could be invalidated.
   auto selfIndex = services.size();
   services.emplace_back();
-  module_FooService.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString(R"(RenamedService)")}}).cv_struct_ref());
+  module_FooService.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString("RenamedService")}}).cv_struct_ref());
   ThriftServiceContextRef& context = services[selfIndex];
   metadata.services()->emplace("module.FooService", std::move(module_FooService));
   context.service_name() = "module.FooService";
@@ -222,13 +222,13 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::F
   module_FB303Service_simple_rpc_int_parameter_1.name() = "int_parameter";
   module_FB303Service_simple_rpc_int_parameter_1.is_optional() = false;
   module_FB303Service_simple_rpc_int_parameter_1.structured_annotations() = {
-      *cvStruct("hack.Name", {{"name", cvString(R"(renamed_parameter)")}}).cv_struct_ref(),
+      *cvStruct("hack.Name", {{"name", cvString("renamed_parameter")}}).cv_struct_ref(),
   };
   auto module_FB303Service_simple_rpc_int_parameter_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE);
   module_FB303Service_simple_rpc_int_parameter_1_type->writeAndGenType(*module_FB303Service_simple_rpc_int_parameter_1.type(), metadata);
   func.arguments()->push_back(std::move(module_FB303Service_simple_rpc_int_parameter_1));
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString(R"(renamed_rpc)")}}).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("hack.Name", {{"name", cvString("renamed_rpc")}}).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 
@@ -388,7 +388,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   auto func_ret_type = std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE));
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("hack.SkipCodegen", {{"reason", cvString(R"(Invalid key type)")}}).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("hack.SkipCodegen", {{"reason", cvString("Invalid key type")}}).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>>::gen_rpc_skipped_codegen(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
@@ -397,7 +397,7 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::test::fixtures::basic::M
   auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
   func_ret_type->writeAndGenType(*func.return_type(), metadata);
   func.is_oneway() = false;
-  func.structured_annotations()->push_back(*cvStruct("hack.SkipCodegen", {{"reason", cvString(R"(Skip function deprecation)")}}).cv_struct_ref());
+  func.structured_annotations()->push_back(*cvStruct("hack.SkipCodegen", {{"reason", cvString("Skip function deprecation")}}).cv_struct_ref());
   service.functions()->push_back(std::move(func));
 }
 

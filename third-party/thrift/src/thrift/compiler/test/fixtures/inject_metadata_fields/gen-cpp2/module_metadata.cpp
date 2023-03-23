@@ -72,7 +72,7 @@ StructMetadata<::cpp2::FieldsInjectedToEmptyStruct>::gen(ThriftMetadata& metadat
     field.structured_annotations() = f.structured_annotations;
     module_FieldsInjectedToEmptyStruct.fields()->push_back(std::move(field));
   }
-  module_FieldsInjectedToEmptyStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString(R"(Fields)")}}).cv_struct_ref());
+  module_FieldsInjectedToEmptyStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString("Fields")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -98,7 +98,7 @@ StructMetadata<::cpp2::FieldsInjectedToStruct>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_FieldsInjectedToStruct.fields()->push_back(std::move(field));
   }
-  module_FieldsInjectedToStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString(R"(Fields)")}}).cv_struct_ref());
+  module_FieldsInjectedToStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString("Fields")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -126,7 +126,7 @@ StructMetadata<::cpp2::FieldsInjectedWithIncludedStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_FieldsInjectedWithIncludedStruct.fields()->push_back(std::move(field));
   }
-  module_FieldsInjectedWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString(R"(foo.Fields)")}}).cv_struct_ref());
+  module_FieldsInjectedWithIncludedStruct.structured_annotations()->push_back(*cvStruct("internal.InjectMetadataFields", {{"type", cvString("foo.Fields")}}).cv_struct_ref());
   return res.first->second;
 }
 

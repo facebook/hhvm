@@ -114,7 +114,7 @@ StructMetadata<::some::ns::detail::DirectlyAdapted>::gen(ThriftMetadata& metadat
     field.structured_annotations() = f.structured_annotations;
     module_DirectlyAdapted.fields()->push_back(std::move(field));
   }
-  module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref());
+  module_DirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::my::Adapter")}}).cv_struct_ref());
   return res.first->second;
 }
 

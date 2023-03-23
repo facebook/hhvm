@@ -2301,6 +2301,8 @@ class cpp_mstch_const_value : public mstch_const_value {
              &cpp_mstch_const_value::default_construct},
             {"value:enum_value_cpp_name",
              &cpp_mstch_const_value::enum_value_cpp_name},
+            {"value:cpp_string_value",
+             &cpp_mstch_const_value::cpp_string_value},
         });
   }
 
@@ -2318,6 +2320,33 @@ class cpp_mstch_const_value : public mstch_const_value {
       return cpp2::get_name(const_value_->get_enum_value());
     }
     return mstch::node();
+  }
+
+  mstch::node cpp_string_value() {
+    if (type_ != cv::CV_STRING) {
+      return {};
+    }
+    const std::string& str = const_value_->get_string();
+    std::string result;
+    result.reserve(str.size());
+    for (size_t i = 0, n = str.size(); i < n; ++i) {
+      char c = str[i];
+      if (c == '\n') {
+        result.append("\\n");
+      } else if (c == '"') {
+        result.append("\\\"");
+      } else if (c == '\\') {
+        // Replace single \ with \\ to avoid invalid escape sequences.
+        // Once handling of \\ moves to the front end, all \ will be replaced.
+        if (i < str.size() && str[i + 1] == '\\') {
+          ++i;
+        }
+        result.append("\\\\");
+      } else {
+        result.push_back(c);
+      }
+    }
+    return result;
   }
 
   bool same_type_as_expected() const override {

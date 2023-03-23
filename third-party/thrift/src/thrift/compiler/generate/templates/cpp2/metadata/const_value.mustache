@@ -22,6 +22,6 @@
 %><%#value:bool?%>cvBool(<%value:bool_value%>)<%/value:bool?%><%!
 %><%#value:integer?%>cvInteger(<%value:integer_value%>)<%/value:integer?%><%!
 %><%#value:double?%>cvDouble(<%value:double_value%>)<%/value:double?%><%!
-%><%#value:string?%>cvString(R"(<%value:string_value%>)")<%/value:string?%><%!
+%><%#value:string?%>cvString("<%value:cpp_string_value%>")<%/value:string?%><%!
 %><%#value:map?%>cvMap({<%#value:map_elements%>cvPair(<%#element:key%><% > metadata/const_value%><%/element:key%>, <%#element:value%><% > metadata/const_value%><%/element:value%>)<%^last?%>, <%/last?%><%/value:map_elements%>})<%/value:map?%><%!
 %><%#value:list?%>cvList({<%#value:list_elements%><% > metadata/const_value%><%^last?%>, <%/last?%><%/value:list_elements%>})<%/value:list?%><%/value:const_struct?%>

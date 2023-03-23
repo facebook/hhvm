@@ -172,7 +172,7 @@ StructMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_ExceptionWithStructuredAnnotation.fields()->push_back(std::move(field));
   }
-  module_ExceptionWithStructuredAnnotation.structured_annotations()->push_back(*cvStruct("thrift.ExceptionMessage", {{"field", cvString(R"(message_field)")}}).cv_struct_ref());
+  module_ExceptionWithStructuredAnnotation.structured_annotations()->push_back(*cvStruct("thrift.ExceptionMessage", {{"field", cvString("message_field")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -310,7 +310,7 @@ void ExceptionMetadata<::cpp2::ExceptionWithStructuredAnnotation>::gen(ThriftMet
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     module_ExceptionWithStructuredAnnotation.fields()->push_back(std::move(field));
   }
-  module_ExceptionWithStructuredAnnotation.structured_annotations()->push_back(*cvStruct("thrift.ExceptionMessage", {{"field", cvString(R"(message_field)")}}).cv_struct_ref());
+  module_ExceptionWithStructuredAnnotation.structured_annotations()->push_back(*cvStruct("thrift.ExceptionMessage", {{"field", cvString("message_field")}}).cv_struct_ref());
 }
 void ExceptionMetadata<::cpp2::Banal>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("module.Banal", ::apache::thrift::metadata::ThriftException{});

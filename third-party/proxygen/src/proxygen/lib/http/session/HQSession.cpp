@@ -688,6 +688,7 @@ size_t HQSession::sendSettings() {
         case hq::SettingId::MAX_HEADER_LIST_SIZE:
           // TODO: qpackCodec_.setMaxUncompressed(setting.value)
           break;
+        case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
         case hq::SettingId::H3_DATAGRAM:
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
@@ -1461,6 +1462,9 @@ void HQSession::applySettings(const SettingsList& settings) {
         case hq::SettingId::MAX_HEADER_LIST_SIZE:
           // this setting is stored in ingressSettings_ and enforced in the
           // StreamCodec
+          break;
+        case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
+          // TODO
           break;
         case hq::SettingId::H3_DATAGRAM:
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:

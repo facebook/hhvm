@@ -85,6 +85,8 @@ folly::Optional<hq::SettingId> httpToHqSettingsId(proxygen::SettingsId id) {
       return hq::SettingId::HEADER_TABLE_SIZE;
     case proxygen::SettingsId::MAX_HEADER_LIST_SIZE:
       return hq::SettingId::MAX_HEADER_LIST_SIZE;
+    case proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL:
+      return hq::SettingId::ENABLE_CONNECT_PROTOCOL;
     case proxygen::SettingsId::_HQ_QPACK_BLOCKED_STREAMS:
       return hq::SettingId::QPACK_BLOCKED_STREAMS;
     case proxygen::SettingsId::_HQ_DATAGRAM:
@@ -105,6 +107,8 @@ folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id) {
       return proxygen::SettingsId::HEADER_TABLE_SIZE;
     case hq::SettingId::MAX_HEADER_LIST_SIZE:
       return proxygen::SettingsId::MAX_HEADER_LIST_SIZE;
+    case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
+      return proxygen::SettingsId::ENABLE_CONNECT_PROTOCOL;
     case hq::SettingId::QPACK_BLOCKED_STREAMS:
       return proxygen::SettingsId::_HQ_QPACK_BLOCKED_STREAMS;
     case hq::SettingId::H3_DATAGRAM:

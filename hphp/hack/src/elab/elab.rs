@@ -345,6 +345,8 @@ fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
         passes::validate_enum_supertyping::ValidateEnumSupertypingPass::default(),
 
         passes::validate_expr_array_get::ValidateExprArrayGetPass::default(),
+
+        passes::validate_expr_list::ValidateExprListPass::default(),
     ];
 
     node.transform(&env, &mut passes);

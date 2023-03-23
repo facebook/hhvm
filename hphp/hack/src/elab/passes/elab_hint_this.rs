@@ -126,7 +126,7 @@ impl Pass for ElabHintThisPass {
                     in_extends: self.in_extends(),
                     in_req_extends: self.in_req_extends(),
                 });
-                return Break(());
+                return Continue(());
             }
             // Otherwise, just update our state to reflect whether we are
             // at the top-level `Hint` inside an `Haccess`

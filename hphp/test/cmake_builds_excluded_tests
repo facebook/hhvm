@@ -17,6 +17,7 @@ server/http/tests/globalDocumentTest.php
 server/http/tests/hhvmconfig-update.php
 server/http/tests/method.php
 server/http/tests/package-exists-1.php
+server/http/tests/packages-1.php
 server/http/tests/reify-multifile.php
 server/http/tests/rename-multifile.php
 server/http/tests/requesIdTest.php

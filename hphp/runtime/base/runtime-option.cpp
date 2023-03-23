@@ -311,7 +311,9 @@ RepoOptionStats::RepoOptionStats(const std::string& configPath,
   auto const packagePath = repo / kPackagesToml;
   if (std::filesystem::exists(packagePath)) {
     struct stat package;
-    if (wrapped_stat(packagePath.string().data(), &package) == 0) m_packageStat = config;
+    if (wrapped_stat(packagePath.string().data(), &package) == 0) {
+      m_packageStat = package;
+    }
   }
 }
 
@@ -554,9 +556,9 @@ AUTOLOADFLAGS();
 #undef E
 
   filterNamespaces();
-  calcCacheKey();
   if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
+  calcCacheKey();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
@@ -573,8 +575,8 @@ AUTOLOADFLAGS()
 
   filterNamespaces();
   m_path.clear();
-  calcCacheKey();
   m_flags.m_packageInfo = PackageInfo::defaults();
+  calcCacheKey();
 }
 
 void RepoOptions::setDefaults(const Hdf& hdf, const IniSettingMap& ini) {

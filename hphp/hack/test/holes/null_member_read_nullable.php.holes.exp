@@ -27,8 +27,9 @@
            [([4:42-44],
              (Expr
                 ((int), [4:42-44],
-                 (Binop ((Eq None), ((int), [4:42-44], (Obj_get (((this), [4:42-44], This), ((int), [4:42-44], (Id ([4:42-44], "x"))), OG_nullthrows, Is_prop))),
-                    ((int), [4:42-44], (Lvar ([4:42-44], $x))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((int), [4:42-44], (Obj_get (((this), [4:42-44], This), ((int), [4:42-44], (Id ([4:42-44], "x"))), OG_nullthrows, Is_prop)));
+                      rhs = ((int), [4:42-44], (Lvar ([4:42-44], $x))) }))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -71,12 +72,14 @@
            [([9:3-38],
              (Expr
                 ((?MyVeryOwnC), [9:3-37],
-                 (Binop ((Eq None), ((?MyVeryOwnC), [9:3-5], (Lvar ([9:3-5], $c))),
-                    ((?MyVeryOwnC), [9:8-37],
-                     (Eif (((bool), [9:8-10], (Lvar ([9:8-10], $a))), (Some (
-                        (null), [9:13-17], Null)),
-                        ((MyVeryOwnC), [9:20-37], (New (((MyVeryOwnC), [9:24-34], (CI ([9:24-34], "\\MyVeryOwnC"))), [], [((int), [9:35-36], (Int "0"))], None, ((function(int $x): void))))))))
-                    )))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((?MyVeryOwnC), [9:3-5], (Lvar ([9:3-5], $c)));
+                      rhs =
+                      ((?MyVeryOwnC), [9:8-37],
+                       (Eif (((bool), [9:8-10], (Lvar ([9:8-10], $a))), (Some (
+                          (null), [9:13-17], Null)),
+                          ((MyVeryOwnC), [9:20-37], (New (((MyVeryOwnC), [9:24-34], (CI ([9:24-34], "\\MyVeryOwnC"))), [], [((int), [9:35-36], (Int "0"))], None, ((function(int $x): void))))))))
+                      }))));
              ([11:3-9],
               (Expr
                  ((nothing), [11:3-8],

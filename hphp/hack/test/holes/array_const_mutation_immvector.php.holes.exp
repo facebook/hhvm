@@ -19,10 +19,12 @@
           [([5:3-19],
             (Expr
                ((float), [5:3-18],
-                (Binop ((Eq None),
-                   ((float), [5:3-12],
-                    (Array_get (((ImmVector<int>), [5:3-5], (Hole (((ImmVector<int>), [5:3-5], (Lvar ([5:3-5], $x))), (ImmVector<int>), (Vector<int>), Typing))), (Some ((bool), [5:6-11], False))))),
-                   ((float), [5:15-18], (Float "1.0")))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs =
+                     ((float), [5:3-12],
+                      (Array_get (((ImmVector<int>), [5:3-5], (Hole (((ImmVector<int>), [5:3-5], (Lvar ([5:3-5], $x))), (ImmVector<int>), (Vector<int>), Typing))), (Some ((bool), [5:6-11], False)))));
+                     rhs = ((float), [5:15-18], (Float "1.0")) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -82,8 +82,9 @@
              ([18:3-26],
               (Expr
                  ((TestTuple), [18:3-25],
-                  (Binop ((Eq None), ((TestTuple), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     ((TestTuple), [18:10-25], (New (((TestTuple), [18:14-23], (CI ([18:14-23], "\\TestTuple"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestTuple), [18:3-7], (Lvar ([18:3-7], $foo)));
+                       rhs = ((TestTuple), [18:10-25], (New (((TestTuple), [18:14-23], (CI ([18:14-23], "\\TestTuple"))), [], [], None, ((function(): void))))) }))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
@@ -154,8 +155,9 @@
              ([35:3-26],
               (Expr
                  ((TestTuple), [35:3-25],
-                  (Binop ((Eq None), ((TestTuple), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     ((TestTuple), [35:10-25], (New (((TestTuple), [35:14-23], (CI ([35:14-23], "\\TestTuple"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestTuple), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((TestTuple), [35:10-25], (New (((TestTuple), [35:14-23], (CI ([35:14-23], "\\TestTuple"))), [], [], None, ((function(): void))))) }))));
              ([38:3-61],
               (Expr
                  ((void), [38:3-60],

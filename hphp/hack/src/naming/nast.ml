@@ -779,7 +779,7 @@ module Visitor_DEPRECATED = struct
         | Cast (hint, e) -> this#on_cast acc hint e
         | ExpressionTree et -> this#on_expression_tree acc et
         | Unop (uop, e) -> this#on_unop acc uop e
-        | Binop (bop, e1, e2) -> this#on_binop acc bop e1 e2
+        | Binop { bop; lhs; rhs } -> this#on_binop acc bop lhs rhs
         | Pipe (id, e1, e2) -> this#on_pipe acc id e1 e2
         | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
         | Is (e, h) -> this#on_is acc e h

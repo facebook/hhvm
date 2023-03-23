@@ -42,7 +42,11 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([8:3-22], (Expr ((), [8:3-21], (Binop ((Eq None), ((), [8:3-5], (Lplaceholder [8:3-5])), ((), [8:8-21], (Call (((), [8:8-19], (Id ([8:8-19], "\\returns_int"))), [], [], None))))))))] };
+           [([8:3-22],
+             (Expr
+                ((), [8:3-21], (Binop { bop = (Eq None); lhs = ((), [8:3-5], (Lplaceholder [8:3-5])); rhs = ((), [8:8-21], (Call (((), [8:8-19], (Id ([8:8-19], "\\returns_int"))), [], [], None))) }))))
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] });

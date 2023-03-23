@@ -5,6 +5,7 @@
 
 use std::ops::ControlFlow;
 
+use nast::Binop;
 use nast::Expr;
 use nast::Expr_;
 use nast::Fun_;
@@ -49,9 +50,13 @@ fn is_static_string(expr: &Expr) -> bool {
     let mut exprs = vec![expr];
     while let Some(expr) = exprs.pop() {
         match &expr.2 {
-            Expr_::Binop(box (Bop::Dot, e1, e2)) => {
-                exprs.push(e1);
-                exprs.push(e2);
+            Expr_::Binop(box Binop {
+                bop: Bop::Dot,
+                lhs,
+                rhs,
+            }) => {
+                exprs.push(lhs);
+                exprs.push(rhs);
             }
             Expr_::String(..) => (),
             _ => return false,

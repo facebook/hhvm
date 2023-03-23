@@ -152,12 +152,17 @@ fn emit_binop<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     e_: &ast::Expr,
     pos: &Pos,
-    bop: &(ast_defs::Bop, ast::Expr, ast::Expr),
+    bop: &ast::Binop,
 ) -> Result<InstrSeq<'arena>> {
-    if let (ast_defs::Bop::Eq(None), e_lhs, e_rhs) = bop {
-        if let Some(e_await) = e_rhs.2.as_await() {
-            let await_pos = &e_rhs.1;
-            if let Some(l) = e_lhs.2.as_list() {
+    if let ast::Binop {
+        bop: ast_defs::Bop::Eq(None),
+        lhs,
+        rhs,
+    } = bop
+    {
+        if let Some(e_await) = rhs.2.as_await() {
+            let await_pos = &rhs.1;
+            if let Some(l) = lhs.2.as_list() {
                 let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
                 let has_elements = l.iter().any(|e| !e.2.is_omitted());
                 if has_elements {
@@ -168,9 +173,9 @@ fn emit_binop<'a, 'arena, 'decl>(
                             pos,
                             Some(&temp),
                             &[],
-                            e_lhs,
+                            lhs,
                             false,
-                            is_readonly_expr(e_rhs),
+                            is_readonly_expr(rhs),
                         )?;
                         Ok((
                             InstrSeq::gather(vec![awaited_instrs, instr::pop_l(temp)]),
@@ -182,7 +187,7 @@ fn emit_binop<'a, 'arena, 'decl>(
                     Ok(InstrSeq::gather(vec![awaited_instrs, instr::pop_c()]))
                 }
             } else {
-                emit_await_assignment(e, env, await_pos, e_lhs, e_await)
+                emit_await_assignment(e, env, await_pos, lhs, e_await)
             }
         } else {
             emit_expr::emit_ignored_expr(e, env, pos, e_)
@@ -479,7 +484,7 @@ fn emit_using<'a, 'arena, 'decl>(
     } else {
         e.local_scope(|e| {
             let (local, preamble) = match &(using.exprs.1[0].2) {
-                ast::Expr_::Binop(x) => match (&x.0, (x.1).2.as_lvar()) {
+                ast::Expr_::Binop(binop) => match (&binop.bop, (binop.lhs).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(ast::Lid(_, id))) => (
                         e.named_local(local_id::get_name(id).into()),
                         InstrSeq::gather(vec![

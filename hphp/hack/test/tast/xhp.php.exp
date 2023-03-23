@@ -35,7 +35,7 @@
          { fb_ast =
            [([9:3-22],
              (Expr ((:foo), [9:3-21], (Xml (([9:4-7], "\\:foo"), [(Xhp_simple { xs_name = ([9:8-11], "bar"); xs_type = (?string); xs_expr = ((string), [9:12-18], (String "herp")) })], [])))));
-             ([10:3-18], (Expr ((string), [10:3-17], (Binop ((Eq None), ((string), [10:3-8], (Lvar ([10:3-8], $derp))), ((string), [10:11-17], (String "derp")))))));
+             ([10:3-18], (Expr ((string), [10:3-17], (Binop { bop = (Eq None); lhs = ((string), [10:3-8], (Lvar ([10:3-8], $derp))); rhs = ((string), [10:11-17], (String "derp")) }))));
              ([11:3-23],
               (Expr
                  ((:foo), [11:3-22],

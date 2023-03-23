@@ -73,9 +73,9 @@ let visitor =
 
     method! on_expr env ((ty, p, e) as te) =
       match e with
-      | Binop (Ast_defs.Eq None, e1, e2) ->
-        this#allow_non_returning (fun () -> this#on_expr env e1);
-        this#disallow_non_returning (fun () -> this#on_expr env e2)
+      | Binop { bop = Ast_defs.Eq None; lhs; rhs } ->
+        this#allow_non_returning (fun () -> this#on_expr env lhs);
+        this#disallow_non_returning (fun () -> this#on_expr env rhs)
       | Eif (e1, e2, e3) ->
         this#disallow_non_returning (fun () -> this#on_expr env e1);
         Option.iter e2 ~f:(this#on_expr env);

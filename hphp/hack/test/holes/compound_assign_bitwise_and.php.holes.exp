@@ -19,8 +19,9 @@
           [([5:3-17],
             (Expr
                ((int), [5:3-16],
-                (Binop ((Eq (Some Amp)), ((int), [5:3-9], (Array_get (((Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0")))))),
-                   ((float), [5:13-16], (Hole (((float), [5:13-16], (Float "1.0")), (float), (int), Typing))))))))
+                (Binop
+                   { bop = (Eq (Some Amp)); lhs = ((int), [5:3-9], (Array_get (((Vector<int>), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0"))))));
+                     rhs = ((float), [5:13-16], (Hole (((float), [5:13-16], (Float "1.0")), (float), (int), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

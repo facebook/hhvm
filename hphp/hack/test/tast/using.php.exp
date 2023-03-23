@@ -40,11 +40,13 @@
                   us_exprs =
                   ([8:10-46],
                    [((Handle), [8:10-27],
-                     (Binop ((Eq None), ((Handle), [8:10-12], (Lvar ([8:10-12], $x))),
-                        ((Handle), [8:15-27], (New (((Handle), [8:19-25], (CI ([8:19-25], "\\Handle"))), [], [], None, ((function(): void))))))));
+                     (Binop
+                        { bop = (Eq None); lhs = ((Handle), [8:10-12], (Lvar ([8:10-12], $x)));
+                          rhs = ((Handle), [8:15-27], (New (((Handle), [8:19-25], (CI ([8:19-25], "\\Handle"))), [], [], None, ((function(): void))))) }));
                      ((Handle), [8:29-46],
-                      (Binop ((Eq None), ((Handle), [8:29-31], (Lvar ([8:29-31], $y))),
-                         ((Handle), [8:34-46], (New (((Handle), [8:38-44], (CI ([8:38-44], "\\Handle"))), [], [], None, ((function(): void))))))))
+                      (Binop
+                         { bop = (Eq None); lhs = ((Handle), [8:29-31], (Lvar ([8:29-31], $y)));
+                           rhs = ((Handle), [8:34-46], (New (((Handle), [8:38-44], (CI ([8:38-44], "\\Handle"))), [], [], None, ((function(): void))))) }))
                      ]);
                   us_block =
                   [([9:5-33],
@@ -53,8 +55,9 @@
                          us_exprs =
                          ([9:12-29],
                           [((Handle), [9:12-29],
-                            (Binop ((Eq None), ((Handle), [9:12-14], (Lvar ([9:12-14], $z))),
-                               ((Handle), [9:17-29], (New (((Handle), [9:21-27], (CI ([9:21-27], "\\Handle"))), [], [], None, ((function(): void))))))))
+                            (Binop
+                               { bop = (Eq None); lhs = ((Handle), [9:12-14], (Lvar ([9:12-14], $z)));
+                                 rhs = ((Handle), [9:17-29], (New (((Handle), [9:21-27], (CI ([9:21-27], "\\Handle"))), [], [], None, ((function(): void))))) }))
                             ]);
                          us_block = [([Pos.none], Noop)] }))
                     ]

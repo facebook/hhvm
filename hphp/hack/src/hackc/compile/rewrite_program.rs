@@ -132,7 +132,7 @@ fn extract_debugger_main(
             hack_stmt!(
                 pos = p(),
                 r#"if (\__SystemLib\__debugger_is_uninit(#{lvar(clone(name))})) {
-                       #{lvar(name)} = new __uninitSentinel();
+                        #{lvar(name)} = new __uninitSentinel();
                      }
                 "#
             )

@@ -38,17 +38,19 @@ Errors:
                 [([10:5-21],
                   (Expr
                      ((Awaitable<int>), [10:5-20],
-                      (Binop ((Eq None), ((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2))),
-                         ((Awaitable<int>), [10:11-20], (Call ((((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))), [], [], None))))))));
-                  ([9:5-27], (Expr ((int), [9:5-26], (Binop ((Eq None), ((int), [9:5-8], (Lvar ([9:5-8], $v1))), ((int), [9:11-26], (Lvar ([9:11-26], __tmp$1))))))))]
+                      (Binop
+                         { bop = (Eq None); lhs = ((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2)));
+                           rhs = ((Awaitable<int>), [10:11-20], (Call ((((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))), [], [], None))) }))));
+                  ([9:5-27], (Expr ((int), [9:5-26], (Binop { bop = (Eq None); lhs = ((int), [9:5-8], (Lvar ([9:5-8], $v1))); rhs = ((int), [9:11-26], (Lvar ([9:11-26], __tmp$1))) }))))]
                 )));
              ([12:3-20],
               (Return
                  (Some ((num), [12:10-19],
                         (Hole (
                            ((num), [12:10-19],
-                            (Binop (Plus, ((int), [12:10-13], (Lvar ([12:10-13], $v1))),
-                               ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing)))))),
+                            (Binop
+                               { bop = Plus; lhs = ((int), [12:10-13], (Lvar ([12:10-13], $v1)));
+                                 rhs = ((Awaitable<int>), [12:16-19], (Hole (((Awaitable<int>), [12:16-19], (Lvar ([12:16-19], $v2))), (Awaitable<int>), (num), Typing))) })),
                            (num), (int), Typing))))))
              ]
            };

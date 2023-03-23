@@ -10,7 +10,7 @@
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-10], (Expr ((int), [4:3-9], (Binop ((Eq None), ((int), [4:3-5], (Lvar ([4:3-5], $x))), ((int), [4:8-9], (Int "3")))))));
+          [([4:3-10], (Expr ((int), [4:3-9], (Binop { bop = (Eq None); lhs = ((int), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((int), [4:8-9], (Int "3")) }))));
             ([5:3-10:4],
              (If (((bool), [5:6-10], True), [([7:5-15], (Return (Some ((int), [7:12-14], (Hole (((int), [7:12-14], (Lvar ([7:12-14], $x))), (int), (bool), Typing))))))],
                 [([9:5-15], (Return (Some ((nothing), [9:12-14], (Lvar ([9:12-14], $x))))))])))

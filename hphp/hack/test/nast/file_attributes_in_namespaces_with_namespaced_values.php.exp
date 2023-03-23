@@ -28,8 +28,9 @@
            [([5:47-58],
              (Expr
                 ((), [5:47-58],
-                 (Binop ((Eq None), ((), [5:47-58], (Obj_get (((), [5:47-58], This), ((), [5:47-58], (Id ([5:47-58], "attr_value"))), OG_nullthrows, Is_prop))),
-                    ((), [5:47-58], (Lvar ([5:47-58], $attr_value))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((), [5:47-58], (Obj_get (((), [5:47-58], This), ((), [5:47-58], (Id ([5:47-58], "attr_value"))), OG_nullthrows, Is_prop)));
+                      rhs = ((), [5:47-58], (Lvar ([5:47-58], $attr_value))) }))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

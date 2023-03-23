@@ -18,7 +18,7 @@ Errors:
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:5-13], (Expr ((int), [4:5-12], (Binop ((Eq None), ((int), [4:5-7], (Lvar ([4:5-7], $y))), ((int), [4:10-12], (Lvar ([4:10-12], $x))))))));
+          [([4:5-13], (Expr ((int), [4:5-12], (Binop { bop = (Eq None); lhs = ((int), [4:5-7], (Lvar ([4:5-7], $y))); rhs = ((int), [4:10-12], (Lvar ([4:10-12], $x))) }))));
             ([5:5-13], (Expr ((void), [5:5-12], (Call ((((function(int $_): void)), [5:5-8], (Id ([5:5-8], "\\bar"))), [], [(Pnormal, ((int), [5:9-11], (Lvar ([5:9-11], $y))))], None)))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

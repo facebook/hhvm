@@ -18,12 +18,14 @@
         { fb_ast =
           [([4:3-18],
             (Expr
-               ((keyset<nothing>), [4:3-17], (Binop ((Eq None), ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))))))));
+               ((keyset<nothing>), [4:3-17],
+                (Binop { bop = (Eq None); lhs = ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))) }))));
             ([6:3-14],
              (Expr
                 ((bool), [6:3-13],
-                 (Binop ((Eq None), ((bool), [6:3-8], (Array_get (((keyset<bool>), [6:3-6], (Lvar ([6:3-6], $xs))), None))),
-                    ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((bool), [6:3-8], (Array_get (((keyset<bool>), [6:3-6], (Lvar ([6:3-6], $xs))), None)));
+                      rhs = ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -50,12 +52,13 @@
            [([10:3-18],
              (Expr
                 ((keyset<nothing>), [10:3-17],
-                 (Binop ((Eq None), ((keyset<nothing>), [10:3-6], (Lvar ([10:3-6], $xs))), ((keyset<nothing>), [10:9-17], (ValCollection (([10:9-15], Keyset), None, []))))))));
+                 (Binop { bop = (Eq None); lhs = ((keyset<nothing>), [10:3-6], (Lvar ([10:3-6], $xs))); rhs = ((keyset<nothing>), [10:9-17], (ValCollection (([10:9-15], Keyset), None, []))) }))));
              ([12:3-14],
               (Expr
                  ((?string), [12:3-13],
-                  (Binop ((Eq None), ((?string), [12:3-8], (Array_get (((keyset<?string>), [12:3-6], (Lvar ([12:3-6], $xs))), None))),
-                     ((?string), [12:11-13], (Hole (((?string), [12:11-13], (Lvar ([12:11-13], $x))), (?string), (string), Typing))))))))
+                  (Binop
+                     { bop = (Eq None); lhs = ((?string), [12:3-8], (Array_get (((keyset<?string>), [12:3-6], (Lvar ([12:3-6], $xs))), None)));
+                       rhs = ((?string), [12:11-13], (Hole (((?string), [12:11-13], (Lvar ([12:11-13], $x))), (?string), (string), Typing))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

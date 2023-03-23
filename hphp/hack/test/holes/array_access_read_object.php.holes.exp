@@ -21,13 +21,15 @@ Errors:
           [([5:3-20],
             (Expr
                ((nothing), [5:3-19],
-                (Binop ((Eq None), ((nothing), [5:3-5], (Lvar ([5:3-5], $x))),
-                   ((nothing), [5:8-19],
-                    (New (
-                       ((nothing), [5:12-17],
-                        (CIexpr ((classname<_>), [5:12-17], (Hole (((classname<_>), [5:12-17], (Lvar ([5:12-17], $yolo))), (classname<_>), (classname<classname<nothing>>), Typing))))),
-                       [], [], None, (nothing))))
-                   )))));
+                (Binop
+                   { bop = (Eq None); lhs = ((nothing), [5:3-5], (Lvar ([5:3-5], $x)));
+                     rhs =
+                     ((nothing), [5:8-19],
+                      (New (
+                         ((nothing), [5:12-17],
+                          (CIexpr ((classname<_>), [5:12-17], (Hole (((classname<_>), [5:12-17], (Lvar ([5:12-17], $yolo))), (classname<_>), (classname<classname<nothing>>), Typing))))),
+                         [], [], None, (nothing))))
+                     }))));
             ([7:3-9], (Expr ((nothing), [7:3-8], (Array_get (((nothing), [7:3-5], (Lvar ([7:3-5], $x))), (Some ((int), [7:6-7], (Int "1"))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

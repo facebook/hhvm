@@ -32,7 +32,9 @@ Errors:
            [([6:5-19],
              (Expr
                 ((T), [6:5-18],
-                 (Binop ((Eq None), ((T), [6:5-13], (Obj_get (((this), [6:5-10], This), ((T), [6:12-13], (Id ([6:12-13], "y"))), OG_nullthrows, Is_prop))), ((T), [6:16-18], (Lvar ([6:16-18], $x))))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((T), [6:5-13], (Obj_get (((this), [6:5-10], This), ((T), [6:12-13], (Id ([6:12-13], "y"))), OG_nullthrows, Is_prop)));
+                      rhs = ((T), [6:16-18], (Lvar ([6:16-18], $x))) }))))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -68,8 +70,9 @@ Errors:
            [([11:3-13],
              (Expr
                 ((int), [11:3-12],
-                 (Binop ((Eq None), ((int), [11:3-8], (Obj_get (((C<int>), [11:3-5], (Lvar ([11:3-5], $x))), ((int), [11:7-8], (Id ([11:7-8], "y"))), OG_nullthrows, Is_prop))),
-                    ((int), [11:11-12], (Int "4")))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((int), [11:3-8], (Obj_get (((C<int>), [11:3-5], (Lvar ([11:3-5], $x))), ((int), [11:7-8], (Id ([11:7-8], "y"))), OG_nullthrows, Is_prop)));
+                      rhs = ((int), [11:11-12], (Int "4")) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

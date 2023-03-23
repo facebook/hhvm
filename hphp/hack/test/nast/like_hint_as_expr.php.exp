@@ -33,8 +33,9 @@
            [([5:3-17],
              (Expr
                 ((), [5:3-16],
-                 (Binop ((Eq None), ((), [5:3-5], (Lplaceholder [5:3-5])),
-                    ((), [5:8-16], (As (((), [5:8-10], (Lvar ([5:8-10], $x))), ([5:14-16], (Hlike ([5:15-16], (Happly (([5:15-16], "\\C"), []))))), false))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((), [5:3-5], (Lplaceholder [5:3-5]));
+                      rhs = ((), [5:8-16], (As (((), [5:8-10], (Lvar ([5:8-10], $x))), ([5:14-16], (Hlike ([5:15-16], (Happly (([5:15-16], "\\C"), []))))), false))) }))));
              ([6:3-16], (Return (Some ((), [6:10-15], False))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

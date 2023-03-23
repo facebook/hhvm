@@ -13,8 +13,9 @@
           [([4:3-25],
             (Expr
                ((Pair<int, string>), [4:3-24],
-                (Binop ((Eq None), ((Pair<int, string>), [4:3-5], (Lvar ([4:3-5], $x))),
-                   ((Pair<int, string>), [4:8-24], (Pair (None, ((int), [4:14-15], (Int "2")), ((string), [4:17-23], (String "true"))))))))));
+                (Binop
+                   { bop = (Eq None); lhs = ((Pair<int, string>), [4:3-5], (Lvar ([4:3-5], $x)));
+                     rhs = ((Pair<int, string>), [4:8-24], (Pair (None, ((int), [4:14-15], (Int "2")), ((string), [4:17-23], (String "true"))))) }))));
             ([6:3-13], (Return (Some ((Pair<int, string>), [6:10-12], (Hole (((Pair<int, string>), [6:10-12], (Lvar ([6:10-12], $x))), (Pair<int, string>), (Pair<int, bool>), Typing))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

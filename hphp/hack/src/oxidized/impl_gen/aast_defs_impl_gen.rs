@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<adf4a5e7b5797301e0d0f5e65ac3a151>>
+// @generated SignedSource<<703658411f762ce0db0e9ea94c5c4cec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -967,8 +967,8 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_unop(p0: ast_defs::Uop, p1: Expr<Ex, En>) -> Self {
         Expr_::Unop(Box::new((p0, p1)))
     }
-    pub fn mk_binop(p0: ast_defs::Bop, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
-        Expr_::Binop(Box::new((p0, p1, p2)))
+    pub fn mk_binop(p0: Binop<Ex, En>) -> Self {
+        Expr_::Binop(Box::new(p0))
     }
     pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         Expr_::Pipe(Box::new((p0, p1, p2)))
@@ -1536,9 +1536,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_binop(&self) -> Option<(&ast_defs::Bop, &Expr<Ex, En>, &Expr<Ex, En>)> {
+    pub fn as_binop(&self) -> Option<&Binop<Ex, En>> {
         match self {
-            Expr_::Binop(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            Expr_::Binop(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1871,11 +1871,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_binop_mut(
-        &mut self,
-    ) -> Option<(&mut ast_defs::Bop, &mut Expr<Ex, En>, &mut Expr<Ex, En>)> {
+    pub fn as_binop_mut(&mut self) -> Option<&mut Binop<Ex, En>> {
         match self {
-            Expr_::Binop(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            Expr_::Binop(p0) => Some(p0.as_mut()),
             _ => None,
         }
     }
@@ -2213,9 +2211,9 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_binop_into(self) -> Option<(ast_defs::Bop, Expr<Ex, En>, Expr<Ex, En>)> {
+    pub fn as_binop_into(self) -> Option<Binop<Ex, En>> {
         match self {
-            Expr_::Binop(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            Expr_::Binop(p0) => Some(*p0),
             _ => None,
         }
     }

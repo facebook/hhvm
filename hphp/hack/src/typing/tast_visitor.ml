@@ -50,13 +50,13 @@ class virtual iter =
       in
       super#on_class_var env cv
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
-        self#on_bop env op;
-        self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1;
-        self#on_expr env e2
-      | _ -> super#on_Binop env op e1 e2
+        self#on_bop env bop;
+        self#on_expr (Env.set_val_kind env Typing_defs.Lval) lhs;
+        self#on_expr env rhs
+      | _ -> super#on_Binop env binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -139,13 +139,13 @@ class virtual ['state] iter_with_state =
       in
       self#on_class_var_with_env (env, state) cv
 
-    method! on_Binop (env, state) op e1 e2 =
-      match op with
+    method! on_Binop (env, state) (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
-        self#on_bop (env, state) op;
-        self#on_expr (Env.set_val_kind env Typing_defs.Lval, state) e1;
-        self#on_expr (env, state) e2
-      | _ -> super#on_Binop (env, state) op e1 e2
+        self#on_bop (env, state) bop;
+        self#on_expr (Env.set_val_kind env Typing_defs.Lval, state) lhs;
+        self#on_expr (env, state) rhs
+      | _ -> super#on_Binop (env, state) binop
 
     method! on_Is (env, state) e h =
       let env = Env.set_allow_wildcards env in
@@ -220,14 +220,14 @@ class virtual ['a] reduce =
       in
       super#on_class_var env cv
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
-        let op = self#on_bop env op in
-        let e1 = self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1 in
-        let e2 = self#on_expr env e2 in
+        let op = self#on_bop env bop in
+        let e1 = self#on_expr (Env.set_val_kind env Typing_defs.Lval) lhs in
+        let e2 = self#on_expr env rhs in
         self#plus e1 (self#plus op e2)
-      | _ -> super#on_Binop env op e1 e2
+      | _ -> super#on_Binop env binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -313,14 +313,17 @@ class virtual map =
       in
       super#on_class_var env cv
 
-    method! on_Binop env op e1 e2 =
-      match op with
+    method! on_Binop env (Aast.{ bop; lhs; rhs } as binop) =
+      match bop with
       | Ast_defs.Eq _ ->
         Aast.Binop
-          ( self#on_bop env op,
-            self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1,
-            self#on_expr env e2 )
-      | _ -> super#on_Binop env op e1 e2
+          Aast.
+            {
+              bop = self#on_bop env bop;
+              lhs = self#on_expr (Env.set_val_kind env Typing_defs.Lval) lhs;
+              rhs = self#on_expr env rhs;
+            }
+      | _ -> super#on_Binop env binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in
@@ -411,7 +414,7 @@ class virtual endo =
       in
       super#on_class_var env cv
 
-    method! on_Binop env this op e1 e2 =
+    method! on_Binop env this (Aast.{ bop = op; lhs = e1; rhs = e2 } as binop) =
       match op with
       | Ast_defs.Eq _ ->
         let op' = self#on_bop env op in
@@ -421,8 +424,8 @@ class virtual endo =
         then
           this
         else
-          Aast.Binop (op', e1', e2')
-      | _ -> super#on_Binop env this op e1 e2
+          Aast.(Binop { bop = op'; lhs = e1'; rhs = e2' })
+      | _ -> super#on_Binop env this binop
 
     method! on_Is env e h =
       let env = Env.set_allow_wildcards env in

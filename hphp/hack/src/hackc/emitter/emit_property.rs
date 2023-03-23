@@ -225,7 +225,7 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
     use ast_defs::Uop;
     match expr {
         Expr_::Unop(e) if e.0 == Uop::Uplus || e.0 == Uop::Uminus => expr_requires_deep_init_(&e.1),
-        Expr_::Binop(e) => expr_requires_deep_init_(&e.1) || expr_requires_deep_init_(&e.2),
+        Expr_::Binop(e) => expr_requires_deep_init_(&e.lhs) || expr_requires_deep_init_(&e.rhs),
         Expr_::Lvar(_)
         | Expr_::Null
         | Expr_::False

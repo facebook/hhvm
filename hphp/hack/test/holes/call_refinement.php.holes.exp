@@ -83,7 +83,9 @@
            [([13:3-16],
              (Expr
                 ((dynamic), [13:3-15],
-                 (Binop ((Eq None), ((dynamic), [13:3-7], (Lvar ([13:3-7], $arr))), ((dynamic), [13:10-15], (Call ((((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))), [], [], None))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((dynamic), [13:3-7], (Lvar ([13:3-7], $arr)));
+                      rhs = ((dynamic), [13:10-15], (Call ((((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))), [], [], None))) }))));
              ([15:3-17:4],
               (If (
                  ((dynamic), [15:7-22],
@@ -94,12 +96,14 @@
              ([18:3-25],
               (Expr
                  ((nothing), [18:3-24],
-                  (Binop ((Eq None), ((nothing), [18:3-12], (Lvar ([18:3-12], $whatever))),
-                     ((nothing), [18:15-24],
-                      (Call ((((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
-                         [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
-                         [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))], None)))
-                     )))))
+                  (Binop
+                     { bop = (Eq None); lhs = ((nothing), [18:3-12], (Lvar ([18:3-12], $whatever)));
+                       rhs =
+                       ((nothing), [18:15-24],
+                        (Call ((((function<T as ?Container<nothing>, Tv>(nothing $arr): nothing)), [18:15-18], (Id ([18:15-18], "\\qux"))),
+                           [((nothing), ([18:15-18], (Happly (([Pos.none], "_"), [])))); ((nothing), ([18:15-18], (Happly (([Pos.none], "_"), []))))],
+                           [(Pnormal, ((nothing), [18:19-23], (Lvar ([18:19-23], $arr))))], None)))
+                       }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -1128,19 +1128,25 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
   | A.String _ ->
     (* literals are public *)
     (env, Tprim (Env.new_policy_var renv "lit"))
-  | A.Binop (Ast_defs.Eq None, e1, e2) ->
-    let (env, ty2) = expr env e2 in
-    let env = assign ~expr ~pos renv env e1 ty2 in
+  | A.(Binop { bop = Ast_defs.Eq None; lhs; rhs }) ->
+    let (env, ty2) = expr env rhs in
+    let env = assign ~expr ~pos renv env lhs ty2 in
     (env, ty2)
-  | A.Binop (Ast_defs.Eq (Some op), e1, e2) ->
-    (* it is simpler to create a fake expression e1 = e1 op e2 to
+  | A.(Binop { bop = Ast_defs.Eq (Some op); lhs; rhs }) ->
+    (* it is simpler to create a fake expression lhs = lhs op rhs to
        make sure all operations (e.g., ??) are handled correctly *)
     expr
       env
       ( ety,
         epos,
-        A.Binop (Ast_defs.Eq None, e1, (ety, epos, A.Binop (op, e1, e2))) )
-  | A.Binop (Ast_defs.QuestionQuestion, e1, e2)
+        A.(
+          Binop
+            {
+              bop = Ast_defs.Eq None;
+              lhs;
+              rhs = (ety, epos, Binop { bop = op; lhs; rhs });
+            }) )
+  | A.(Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 })
   | A.Eif (e1, None, e2) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr_with_deps env (object_policy ty1) e2 in
@@ -1162,12 +1168,16 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     let ty = Lift.ty ~prefix:"eif" renv ety in
     let env = Env.acc env (L.(subtype ty2 ty && subtype ty3 ty) ~pos) in
     (env, ty)
-  | A.Binop
-      ( Ast_defs.(
-          ( Plus | Minus | Star | Slash | Starstar | Percent | Ltlt | Gtgt | Xor
-          | Amp | Bar | Dot )),
-        e1,
-        e2 ) ->
+  | A.(
+      Binop
+        {
+          bop =
+            Ast_defs.(
+              ( Plus | Minus | Star | Slash | Starstar | Percent | Ltlt | Gtgt
+              | Xor | Amp | Bar | Dot ));
+          lhs = e1;
+          rhs = e2;
+        }) ->
     (* arithmetic and bitwise operations all take primitive types
        and return a primitive type; string concatenation (Dot) is
        also handled here although it might need special casing
@@ -1178,12 +1188,16 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
     let env = Env.acc env (subtype ~pos ty1 ty) in
     let env = Env.acc env (subtype ~pos ty2 ty) in
     (env, ty)
-  | A.Binop
-      ( (Ast_defs.(
-           ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
-           | Gte | Cmp )) as op),
-        e1,
-        e2 ) ->
+  | A.(
+      Binop
+        {
+          bop =
+            Ast_defs.(
+              ( Eqeqeq | Diff2 | Barbar | Ampamp | Eqeq | Diff | Lt | Lte | Gt
+              | Gte | Cmp )) as op;
+          lhs = e1;
+          rhs = e2;
+        }) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
     let deps =

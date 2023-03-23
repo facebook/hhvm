@@ -404,10 +404,10 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:nop pp_expr pp_unop) ppf (expr, unop)
   | Aast.Unop (unop, expr) ->
     Fmt.(pair ~sep:nop pp_unop pp_expr) ppf (unop, expr)
-  | Aast.Binop (op, e1, e2) ->
+  | Aast.(Binop { bop; lhs; rhs }) ->
     Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_binop pp_expr)
       ppf
-      (e1, (op, e2))
+      (lhs, (bop, rhs))
   | Aast.Pipe (_lid, e1, e2) ->
     Fmt.(pair ~sep:(const string " |> ") pp_expr pp_expr) ppf (e1, e2)
   | Aast.Eif (cond, Some texpr, fexpr) ->

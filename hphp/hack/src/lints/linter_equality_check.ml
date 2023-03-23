@@ -240,7 +240,8 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Binop (((Diff2 | Eqeqeq) as bop), e1, e2)) -> begin
+      | (_, p, Binop { bop = (Diff2 | Eqeqeq) as bop; lhs = e1; rhs = e2 }) ->
+      begin
         match (e1, e2) with
         | ((_, _, Null), e)
         | (e, (_, _, Null)) ->

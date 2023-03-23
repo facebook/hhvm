@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<339e3edae4da3aaecdeb8d2588876da7>>
+// @generated SignedSource<<4c81a637130d6e7be40f5daf65a5b34f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -197,6 +197,38 @@ pub trait Pass {
     }
     #[inline(always)]
     fn on_ty_hole_source_bottom_up(&mut self, env: &Env, elem: &mut HoleSource) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_binop_top_down(&mut self, env: &Env, elem: &mut Binop<Ex, En>) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_binop_bottom_up(&mut self, env: &Env, elem: &mut Binop<Ex, En>) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_binop_lhs_top_down(&mut self, env: &Env, elem: &mut Expr<Ex, En>) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_binop_lhs_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut Expr<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_binop_rhs_top_down(&mut self, env: &Env, elem: &mut Expr<Ex, En>) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_fld_binop_rhs_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut Expr<Ex, En>,
+    ) -> ControlFlow<()> {
         Continue(())
     }
     #[inline(always)]
@@ -1266,6 +1298,44 @@ where
     fn on_ty_hole_source_bottom_up(&mut self, env: &Env, elem: &mut HoleSource) -> ControlFlow<()> {
         self.fst.on_ty_hole_source_bottom_up(env, elem)?;
         self.snd.on_ty_hole_source_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_binop_top_down(&mut self, env: &Env, elem: &mut Binop<Ex, En>) -> ControlFlow<()> {
+        self.fst.on_ty_binop_top_down(env, elem)?;
+        self.snd.on_ty_binop_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_ty_binop_bottom_up(&mut self, env: &Env, elem: &mut Binop<Ex, En>) -> ControlFlow<()> {
+        self.fst.on_ty_binop_bottom_up(env, elem)?;
+        self.snd.on_ty_binop_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_fld_binop_lhs_top_down(&mut self, env: &Env, elem: &mut Expr<Ex, En>) -> ControlFlow<()> {
+        self.fst.on_fld_binop_lhs_top_down(env, elem)?;
+        self.snd.on_fld_binop_lhs_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_fld_binop_lhs_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut Expr<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_fld_binop_lhs_bottom_up(env, elem)?;
+        self.snd.on_fld_binop_lhs_bottom_up(env, elem)
+    }
+    #[inline(always)]
+    fn on_fld_binop_rhs_top_down(&mut self, env: &Env, elem: &mut Expr<Ex, En>) -> ControlFlow<()> {
+        self.fst.on_fld_binop_rhs_top_down(env, elem)?;
+        self.snd.on_fld_binop_rhs_top_down(env, elem)
+    }
+    #[inline(always)]
+    fn on_fld_binop_rhs_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut Expr<Ex, En>,
+    ) -> ControlFlow<()> {
+        self.fst.on_fld_binop_rhs_bottom_up(env, elem)?;
+        self.snd.on_fld_binop_rhs_bottom_up(env, elem)
     }
     #[inline(always)]
     fn on_ty_class_get_expr_top_down(

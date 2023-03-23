@@ -29,8 +29,9 @@ Errors:
            [([4:38-40],
              (Expr
                 ((int), [4:38-40],
-                 (Binop ((Eq None), ((int), [4:38-40], (Obj_get (((this), [4:38-40], This), ((int), [4:38-40], (Id ([4:38-40], "x"))), OG_nullthrows, Is_prop))),
-                    ((int), [4:38-40], (Lvar ([4:38-40], $x))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((int), [4:38-40], (Obj_get (((this), [4:38-40], This), ((int), [4:38-40], (Id ([4:38-40], "x"))), OG_nullthrows, Is_prop)));
+                      rhs = ((int), [4:38-40], (Lvar ([4:38-40], $x))) }))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -79,13 +80,15 @@ Errors:
            [([10:3-19],
              (Expr
                 ((A), [10:3-18],
-                 (Binop ((Eq None), ((A), [10:3-7], (Lvar ([10:3-7], $obj))),
-                    ((A), [10:10-18], (New (((A), [10:14-15], (CI ([10:14-15], "\\A"))), [], [((int), [10:16-17], (Int "1"))], None, ((function(int $x=_): void))))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((A), [10:3-7], (Lvar ([10:3-7], $obj)));
+                      rhs = ((A), [10:10-18], (New (((A), [10:14-15], (CI ([10:14-15], "\\A"))), [], [((int), [10:16-17], (Int "1"))], None, ((function(int $x=_): void))))) }))));
              ([11:3-16],
               (Expr
                  ((int), [11:3-15],
-                  (Binop ((Eq None), ((int), [11:3-5], (Lvar ([11:3-5], $x))),
-                     ((int), [11:8-15], (Obj_get (((A), [11:8-12], (Lvar ([11:8-12], $obj))), ((int), [11:14-15], (Id ([11:14-15], "x"))), OG_nullthrows, Is_prop))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((int), [11:3-5], (Lvar ([11:3-5], $x)));
+                       rhs = ((int), [11:8-15], (Obj_get (((A), [11:8-12], (Lvar ([11:8-12], $obj))), ((int), [11:14-15], (Id ([11:14-15], "x"))), OG_nullthrows, Is_prop))) }))));
              ([12:3-11], (Expr ((void), [12:3-10], (Call ((((function(int $_): void)), [12:3-6], (Id ([12:3-6], "\\foo"))), [], [(Pnormal, ((int), [12:7-9], (Lvar ([12:7-9], $x))))], None)))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -41,7 +41,9 @@
            [([8:3-18],
              (Expr
                 ((Sub), [8:3-17],
-                 (Binop ((Eq None), ((Sub), [8:3-5], (Lvar ([8:3-5], $b))), ((Sub), [8:8-17], (New (((Sub), [8:12-15], (CI ([8:12-15], "\\Sub"))), [], [], None, ((function(): void))))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((Sub), [8:3-5], (Lvar ([8:3-5], $b))); 
+                      rhs = ((Sub), [8:8-17], (New (((Sub), [8:12-15], (CI ([8:12-15], "\\Sub"))), [], [], None, ((function(): void))))) }))));
              ([10:3-47],
               (Return
                  (Some ((int), [10:10-46],

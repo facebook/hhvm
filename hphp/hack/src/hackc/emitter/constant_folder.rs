@@ -662,10 +662,10 @@ impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
                 .and_then(|v| unop_on_value(&e.0, v))
                 .map(value_to_expr_)
                 .ok(),
-            ast::Expr_::Binop(e) => expr_to_typed_value(self.emitter, &e.1)
+            ast::Expr_::Binop(binop) => expr_to_typed_value(self.emitter, &binop.lhs)
                 .and_then(|v1| {
-                    expr_to_typed_value(self.emitter, &e.2).and_then(|v2| {
-                        binop_on_values(self.emitter.alloc, &e.0, v1, v2).map(value_to_expr_)
+                    expr_to_typed_value(self.emitter, &binop.rhs).and_then(|v2| {
+                        binop_on_values(self.emitter.alloc, &binop.bop, v1, v2).map(value_to_expr_)
                     })
                 })
                 .ok(),

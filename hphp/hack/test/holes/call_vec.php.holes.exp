@@ -73,8 +73,9 @@
              ([15:3-24],
               (Expr
                  ((TestVec), [15:3-23],
-                  (Binop ((Eq None), ((TestVec), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestVec), [15:10-23], (New (((TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVec), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestVec), [15:10-23], (New (((TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -121,8 +122,9 @@
              ([27:3-24],
               (Expr
                  ((TestVec), [27:3-23],
-                  (Binop ((Eq None), ((TestVec), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestVec), [27:10-23], (New (((TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestVec), [27:10-23], (New (((TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
              ([30:3-59],
               (Expr
                  ((void), [30:3-58],

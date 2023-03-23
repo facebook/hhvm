@@ -340,7 +340,8 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in
     (env, entity)
-  | A.Binop (Ast_defs.Eq None, e1, ((ty_rhs, _, _) as e2)) ->
+  | A.(Binop { bop = Ast_defs.Eq None; lhs = e1; rhs = (ty_rhs, _, _) as e2 })
+    ->
     let (env, entity_rhs) = expr_ env e2 in
     let env = assign pos __LINE__ env e1 entity_rhs ty_rhs in
     (env, None)
@@ -517,15 +518,25 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (env, None)
   | A.Eif (cond, then_expr_opt, else_expr) ->
     eif ~pos env cond then_expr_opt else_expr
-  | A.Binop (Ast_defs.QuestionQuestion, nullable_expr, else_expr) ->
+  | A.(
+      Binop
+        {
+          bop = Ast_defs.QuestionQuestion;
+          lhs = nullable_expr;
+          rhs = else_expr;
+        }) ->
     eif ~pos env nullable_expr None else_expr
-  | A.Binop
-      ( Ast_defs.(
-          ( Plus | Minus | Star | Slash | Eqeq | Eqeqeq | Starstar | Diff
-          | Diff2 | Ampamp | Barbar | Lt | Lte | Gt | Gte | Dot | Amp | Bar
-          | Ltlt | Gtgt | Percent | Xor | Cmp )),
-        e1,
-        e2 ) ->
+  | A.(
+      Binop
+        {
+          bop =
+            Ast_defs.(
+              ( Plus | Minus | Star | Slash | Eqeq | Eqeqeq | Starstar | Diff
+              | Diff2 | Ampamp | Barbar | Lt | Lte | Gt | Gte | Dot | Amp | Bar
+              | Ltlt | Gtgt | Percent | Xor | Cmp ));
+          lhs = e1;
+          rhs = e2;
+        }) ->
     (* Adding support for binary operations. Currently not covering
        "Ast_defs.Eq Some _" *)
     let (env, _) = expr_ env e1 in

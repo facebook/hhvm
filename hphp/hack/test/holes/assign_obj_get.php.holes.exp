@@ -40,8 +40,9 @@
            [([9:3-20],
              (Expr
                 ((bool), [9:3-19],
-                 (Binop ((Eq None), ((arraykey), [9:3-11], (Obj_get (((C), [9:3-5], (Lvar ([9:3-5], $x))), ((arraykey), [9:7-11], (Id ([9:7-11], "prop"))), OG_nullthrows, Is_prop))),
-                    ((bool), [9:14-19], (Hole (((bool), [9:14-19], False), (bool), (arraykey), Typing))))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((arraykey), [9:3-11], (Obj_get (((C), [9:3-5], (Lvar ([9:3-5], $x))), ((arraykey), [9:7-11], (Id ([9:7-11], "prop"))), OG_nullthrows, Is_prop)));
+                      rhs = ((bool), [9:14-19], (Hole (((bool), [9:14-19], False), (bool), (arraykey), Typing))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

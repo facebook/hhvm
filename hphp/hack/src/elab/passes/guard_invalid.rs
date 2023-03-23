@@ -23,6 +23,7 @@ impl Pass for GuardInvalidPass {
 #[cfg(test)]
 mod tests {
 
+    use nast::Binop;
     use nast::Bop;
     use nast::Expr;
     use nast::Expr_;
@@ -48,9 +49,9 @@ mod tests {
 
         let mut pass = passes![GuardInvalidPass, RewriteZero];
 
-        let mut elem = Expr_::Binop(Box::new((
-            Bop::Lt,
-            Expr(
+        let mut elem = Expr_::Binop(Box::new(Binop {
+            bop: Bop::Lt,
+            lhs: Expr(
                 (),
                 Pos::NONE,
                 Expr_::Invalid(Box::new(Some(Expr(
@@ -59,19 +60,19 @@ mod tests {
                     Expr_::Int("42".to_string()),
                 )))),
             ),
-            Expr((), Pos::NONE, Expr_::Int("43".to_string())),
-        )));
+            rhs: Expr((), Pos::NONE, Expr_::Int("43".to_string())),
+        }));
 
         elem.transform(&env, &mut pass);
 
         assert!(matches!(
-            elem,
-            Expr_::Binop(box (
-                _,
-                Expr(_, _, Expr_::Invalid(box Some(Expr(_, _, Expr_::Int(n))))),
-                Expr(_, _, Expr_::Int(m)),
-            ))
-            if n == "42" && m == "0"
-        ));
+                elem,
+                Expr_::Binop(box Binop{
+                    lhs:Expr(_, _, Expr_::Invalid(box Some(Expr(_, _, Expr_::Int(n))))),
+                    rhs:Expr(_, _, Expr_::Int(m)),
+                    ..
+        })
+                if n == "42" && m == "0"
+            ));
     }
 }

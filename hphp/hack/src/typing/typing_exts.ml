@@ -193,9 +193,9 @@ let rec const_string_of (env : env) (e : Nast.expr) :
   | (_, p, String2 xs) ->
     let (env, xs) = mapM const_string_of env (List.rev xs) in
     (env, List.fold_right ~f:glue xs ~init:(Left p))
-  | (_, _, Binop (Ast_defs.Dot, a, b)) ->
-    let (env, stra) = const_string_of env a in
-    let (env, strb) = const_string_of env b in
+  | (_, _, Binop Aast.{ bop = Ast_defs.Dot; lhs; rhs }) ->
+    let (env, stra) = const_string_of env lhs in
+    let (env, strb) = const_string_of env rhs in
     (env, glue stra strb)
   | (_, p, _) -> (env, Left p)
 

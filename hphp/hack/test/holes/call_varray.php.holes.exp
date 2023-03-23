@@ -73,8 +73,9 @@
              ([15:3-27],
               (Expr
                  ((TestVarray), [15:3-26],
-                  (Binop ((Eq None), ((TestVarray), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestVarray), [15:10-26], (New (((TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVarray), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestVarray), [15:10-26], (New (((TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -121,8 +122,9 @@
              ([27:3-27],
               (Expr
                  ((TestVarray), [27:3-26],
-                  (Binop ((Eq None), ((TestVarray), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestVarray), [27:10-26], (New (((TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestVarray), [27:10-26], (New (((TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
              ([30:3-65],
               (Expr
                  ((void), [30:3-64],

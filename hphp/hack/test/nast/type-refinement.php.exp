@@ -32,7 +32,9 @@
            [([7:47-51],
              (Expr
                 ((), [7:47-51],
-                 (Binop ((Eq None), ((), [7:47-51], (Obj_get (((), [7:47-51], This), ((), [7:47-51], (Id ([7:47-51], "val"))), OG_nullthrows, Is_prop))), ((), [7:47-51], (Lvar ([7:47-51], $val))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((), [7:47-51], (Obj_get (((), [7:47-51], This), ((), [7:47-51], (Id ([7:47-51], "val"))), OG_nullthrows, Is_prop)));
+                      rhs = ((), [7:47-51], (Lvar ([7:47-51], $val))) }))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

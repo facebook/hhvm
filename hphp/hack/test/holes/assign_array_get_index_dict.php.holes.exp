@@ -19,14 +19,18 @@
           [([4:3-16],
             (Expr
                ((dict<nothing, nothing>), [4:3-15],
-                (Binop ((Eq None), ((dict<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((dict<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-13], Dict), None, []))))))));
+                (Binop
+                   { bop = (Eq None); lhs = ((dict<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((dict<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-13], Dict), None, []))) }))));
             ([6:3-17],
              (Expr
                 ((int), [6:3-16],
-                 (Binop ((Eq None),
-                    ((int), [6:3-12],
-                     (Array_get (((dict<mixed, int>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some ((mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing))))))),
-                    ((int), [6:15-16], (Int "1")))))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      ((int), [6:3-12],
+                       (Array_get (((dict<mixed, int>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some (
+                          (mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing)))))));
+                      rhs = ((int), [6:15-16], (Int "1")) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

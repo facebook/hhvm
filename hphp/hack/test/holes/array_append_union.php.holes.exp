@@ -21,10 +21,13 @@
           [([7:3-15],
             (Expr
                ((int), [7:3-14],
-                (Binop ((Eq None),
-                   ((int), [7:3-10],
-                    (Array_get ((((bool | Vector<string>)), [7:4-7], (Hole ((((bool | Vector<string>)), [7:4-7], (Lvar ([7:4-7], $xs))), ((bool | Vector<string>)), (Vector<string>), Typing))), None))),
-                   ((int), [7:13-14], (Hole (((int), [7:13-14], (Int "1")), (int), (string), Typing))))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs =
+                     ((int), [7:3-10],
+                      (Array_get ((((bool | Vector<string>)), [7:4-7], (Hole ((((bool | Vector<string>)), [7:4-7], (Lvar ([7:4-7], $xs))), ((bool | Vector<string>)), (Vector<string>), Typing))), None
+                         )));
+                     rhs = ((int), [7:13-14], (Hole (((int), [7:13-14], (Int "1")), (int), (string), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -53,13 +56,15 @@
            [([14:3-15],
              (Expr
                 ((int), [14:3-14],
-                 (Binop ((Eq None),
-                    ((int), [14:3-10],
-                     (Array_get (
-                        (((bool | vec<(int | string)>)), [14:4-7],
-                         (Hole ((((bool | vec<(int | string)>)), [14:4-7], (Lvar ([14:4-7], $xs))), ((bool | vec<(int | string)>)), (vec<(int | string)>), Typing))),
-                        None))),
-                    ((int), [14:13-14], (Int "1")))))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      ((int), [14:3-10],
+                       (Array_get (
+                          (((bool | vec<(int | string)>)), [14:4-7],
+                           (Hole ((((bool | vec<(int | string)>)), [14:4-7], (Lvar ([14:4-7], $xs))), ((bool | vec<(int | string)>)), (vec<(int | string)>), Typing))),
+                          None)));
+                      rhs = ((int), [14:13-14], (Int "1")) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

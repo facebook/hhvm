@@ -24,8 +24,11 @@
          f_body =
          { fb_ast =
            [([9:3-9], (Expr ((), [9:3-8], (FunctionPointer ((FP_id ([9:3-6], "\\Foo\\Bar\\qux")), [])))));
-             ([11:3-17], (Expr ((), [11:3-16], (Binop ((Eq None), ((), [11:3-5], (Lvar ([11:3-5], $x))), ((), [11:8-16], (FunctionPointer ((FP_id ([11:8-14], "\\HH\\is_vec")), []))))))));
-             ([13:3-14], (Expr ((), [13:3-13], (Binop ((Eq None), ((), [13:3-5], (Lvar ([13:3-5], $x))), ((), [13:8-13], (FunctionPointer ((FP_id ([13:8-11], "\\HH\\vec")), []))))))))]
+             ([11:3-17],
+              (Expr ((), [11:3-16], (Binop { bop = (Eq None); lhs = ((), [11:3-5], (Lvar ([11:3-5], $x))); rhs = ((), [11:8-16], (FunctionPointer ((FP_id ([11:8-14], "\\HH\\is_vec")), []))) }))));
+             ([13:3-14],
+              (Expr ((), [13:3-13], (Binop { bop = (Eq None); lhs = ((), [13:3-5], (Lvar ([13:3-5], $x))); rhs = ((), [13:8-13], (FunctionPointer ((FP_id ([13:8-11], "\\HH\\vec")), []))) }))))
+             ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };

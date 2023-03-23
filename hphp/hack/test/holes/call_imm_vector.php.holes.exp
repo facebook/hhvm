@@ -73,8 +73,9 @@
              ([15:3-30],
               (Expr
                  ((TestImmVector), [15:3-29],
-                  (Binop ((Eq None), ((TestImmVector), [15:3-7], (Lvar ([15:3-7], $foo))),
-                     ((TestImmVector), [15:10-29], (New (((TestImmVector), [15:14-27], (CI ([15:14-27], "\\TestImmVector"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestImmVector), [15:3-7], (Lvar ([15:3-7], $foo)));
+                       rhs = ((TestImmVector), [15:10-29], (New (((TestImmVector), [15:14-27], (CI ([15:14-27], "\\TestImmVector"))), [], [], None, ((function(): void))))) }))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -122,8 +123,9 @@
              ([27:3-30],
               (Expr
                  ((TestImmVector), [27:3-29],
-                  (Binop ((Eq None), ((TestImmVector), [27:3-7], (Lvar ([27:3-7], $foo))),
-                     ((TestImmVector), [27:10-29], (New (((TestImmVector), [27:14-27], (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestImmVector), [27:3-7], (Lvar ([27:3-7], $foo)));
+                       rhs = ((TestImmVector), [27:10-29], (New (((TestImmVector), [27:14-27], (CI ([27:14-27], "\\TestImmVector"))), [], [], None, ((function(): void))))) }))));
              ([30:3-71],
               (Expr
                  ((void), [30:3-70],

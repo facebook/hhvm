@@ -34,8 +34,9 @@ Errors:
            [([8:5-19],
              (Expr
                 ((string), [8:5-18],
-                 (Binop ((Eq None), ((string), [8:5-13], (Obj_get (((this), [8:5-10], This), ((string), [8:12-13], (Id ([8:12-13], "y"))), OG_nullthrows, Is_prop))),
-                    ((string), [8:16-18], (Lvar ([8:16-18], $y))))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((string), [8:5-13], (Obj_get (((this), [8:5-10], This), ((string), [8:12-13], (Id ([8:12-13], "y"))), OG_nullthrows, Is_prop)));
+                      rhs = ((string), [8:16-18], (Lvar ([8:16-18], $y))) }))))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -56,7 +57,9 @@ Errors:
             [([12:5-16],
               (Expr
                  ((int), [12:5-15],
-                  (Binop ((Eq None), ((int), [12:5-10], (Class_get (((A), [12:5-6], (CI ([12:5-6], "\\A"))), (CGstring ([12:8-10], "$x")), Is_prop))), ((int), [12:13-15], (Lvar ([12:13-15], $x))))))))
+                  (Binop
+                     { bop = (Eq None); lhs = ((int), [12:5-10], (Class_get (((A), [12:5-6], (CI ([12:5-6], "\\A"))), (CGstring ([12:8-10], "$x")), Is_prop)));
+                       rhs = ((int), [12:13-15], (Lvar ([12:13-15], $x))) }))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

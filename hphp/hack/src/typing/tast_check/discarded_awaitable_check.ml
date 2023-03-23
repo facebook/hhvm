@@ -122,22 +122,26 @@ let visitor =
     method! on_expr (env, ctx) ((ty, p, e) as te) =
       match e with
       | Unop (Ast_defs.Unot, e)
-      | Binop (Ast_defs.Eqeqeq, e, (_, _, Null))
-      | Binop (Ast_defs.Eqeqeq, (_, _, Null), e)
-      | Binop (Ast_defs.Diff2, e, (_, _, Null))
-      | Binop (Ast_defs.Diff2, (_, _, Null), e) ->
+      | Binop { bop = Ast_defs.Eqeqeq; lhs = e; rhs = (_, _, Null) }
+      | Binop { bop = Ast_defs.Eqeqeq; lhs = (_, _, Null); rhs = e }
+      | Binop { bop = Ast_defs.Diff2; lhs = e; rhs = (_, _, Null) }
+      | Binop { bop = Ast_defs.Diff2; lhs = (_, _, Null); rhs = e } ->
         this#on_expr (env, disallow_due_to_cast_with_explicit_nullcheck) e
-      | Binop (Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp), e1, e2)
-        ->
-        this#on_expr (env, disallow_due_to_cast ctx env) e1;
-        this#on_expr (env, disallow_due_to_cast ctx env) e2
-      | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
+      | Binop
+          {
+            bop = Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp);
+            lhs;
+            rhs;
+          } ->
+        this#on_expr (env, disallow_due_to_cast ctx env) lhs;
+        this#on_expr (env, disallow_due_to_cast ctx env) rhs
+      | Binop { bop = Ast_defs.QuestionQuestion; lhs; rhs } ->
         this#on_expr
           ( env,
             disallow_due_to_cast_with_explicit_nullcheck_and_return_nonnull ctx
           )
-          e1;
-        this#on_expr (env, ctx) e2
+          lhs;
+        this#on_expr (env, ctx) rhs
       | Eif (e1, e2, e3) ->
         this#on_expr (env, disallow_due_to_cast ctx env) e1;
         Option.iter e2 ~f:(this#on_expr (env, ctx));
@@ -177,7 +181,7 @@ let visitor =
 
     method! on_stmt (env, ctx) stmt =
       match snd stmt with
-      | Expr ((_, _, Binop (Ast_defs.Eq _, _, _)) as e) ->
+      | Expr ((_, _, Binop { bop = Ast_defs.Eq _; _ }) as e) ->
         this#on_expr (env, allow_awaitable) e
       | Expr e -> this#on_expr (env, disallow_awaitable) e
       | If (e, b1, b2) ->

@@ -395,7 +395,8 @@ Errors:
                      ((nothing), [135:3-29],
                       (Class_get (((Foo), [135:3-6], (CI ([135:3-6], "\\Foo"))),
                          (CGexpr
-                            ((nothing), [135:9-28], (Cast (([135:10-16], (Hprim Tstring)), ((int), [135:18-27], (Binop (Plus, ((int), [135:18-21], (Int "123")), ((int), [135:24-27], (Int "456"))))))))),
+                            ((nothing), [135:9-28],
+                             (Cast (([135:10-16], (Hprim Tstring)), ((int), [135:18-27], (Binop { bop = Plus; lhs = ((int), [135:18-21], (Int "123")); rhs = ((int), [135:24-27], (Int "456")) })))))),
                          Is_method))),
                      [], [], None)))));
              ([137:3-21],
@@ -404,7 +405,7 @@ Errors:
                   (Call (
                      ((nothing), [137:3-18],
                       (Class_get (((Foo), [137:3-6], (CI ([137:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [137:9-17], (Binop (Dot, ((string), [137:9-13], (String "ba")), ((string), [137:14-17], (String "r")))))), Is_method))),
+                         (CGexpr ((nothing), [137:9-17], (Binop { bop = Dot; lhs = ((string), [137:9-13], (String "ba")); rhs = ((string), [137:14-17], (String "r")) }))), Is_method))),
                      [], [], None)))));
              ([139:3-26],
               (Expr
@@ -412,7 +413,7 @@ Errors:
                   (Call (
                      ((nothing), [139:3-23],
                       (Class_get (((Foo), [139:3-6], (CI ([139:3-6], "\\Foo"))),
-                         (CGexpr ((nothing), [139:9-22], (Binop (Dot, ((string), [139:9-16], (String "bar\\")), ((string), [139:17-22], (String "baz")))))), Is_method))),
+                         (CGexpr ((nothing), [139:9-22], (Binop { bop = Dot; lhs = ((string), [139:9-16], (String "bar\\")); rhs = ((string), [139:17-22], (String "baz")) }))), Is_method))),
                      [], [], None)))));
              ([141:3-17],
               (Expr

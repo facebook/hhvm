@@ -19,8 +19,9 @@
           [([5:3-14],
             (Expr
                ((int), [5:3-13],
-                (Binop ((Eq None), ((int), [5:3-9], (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0")))))),
-                   ((int), [5:12-13], (Hole (((int), [5:12-13], (Int "1")), (int), (string), Typing))))))))
+                (Binop
+                   { bop = (Eq None); lhs = ((int), [5:3-9], (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((int), [5:7-8], (Int "0"))))));
+                     rhs = ((int), [5:12-13], (Hole (((int), [5:12-13], (Int "1")), (int), (string), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -47,9 +48,10 @@
            [([11:3-14],
              (Expr
                 ((int), [11:3-13],
-                 (Binop ((Eq None),
-                    ((int), [11:3-9], (Array_get (((int), [11:3-6], (Hole (((int), [11:3-6], (Lvar ([11:3-6], $xs))), (int), (nothing), Typing))), (Some ((int), [11:7-8], (Int "0")))))),
-                    ((int), [11:12-13], (Hole (((int), [11:12-13], (Int "1")), (int), (nothing), Typing))))))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs = ((int), [11:3-9], (Array_get (((int), [11:3-6], (Hole (((int), [11:3-6], (Lvar ([11:3-6], $xs))), (int), (nothing), Typing))), (Some ((int), [11:7-8], (Int "0"))))));
+                      rhs = ((int), [11:12-13], (Hole (((int), [11:12-13], (Int "1")), (int), (nothing), Typing))) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

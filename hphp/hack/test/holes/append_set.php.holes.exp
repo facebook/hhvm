@@ -16,12 +16,16 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-16], (Expr ((Set<nothing>), [4:3-15], (Binop ((Eq None), ((Set<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((Set<nothing>), [4:9-15], (ValCollection (([4:9-12], Set), None, []))))))));
+          [([4:3-16],
+            (Expr
+               ((Set<nothing>), [4:3-15],
+                (Binop { bop = (Eq None); lhs = ((Set<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((Set<nothing>), [4:9-15], (ValCollection (([4:9-12], Set), None, []))) }))));
             ([6:3-14],
              (Expr
                 ((bool), [6:3-13],
-                 (Binop ((Eq None), ((bool), [6:3-8], (Array_get (((Set<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), None))),
-                    ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((bool), [6:3-8], (Array_get (((Set<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), None)));
+                      rhs = ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

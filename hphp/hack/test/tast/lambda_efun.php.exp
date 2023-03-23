@@ -12,98 +12,119 @@ Errors:
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([13:3-10], (Expr ((int), [13:3-9], (Binop ((Eq None), ((int), [13:3-5], (Lvar ([13:3-5], $y))), ((int), [13:8-9], (Int "2")))))));
+          [([13:3-10], (Expr ((int), [13:3-9], (Binop { bop = (Eq None); lhs = ((int), [13:3-5], (Lvar ([13:3-5], $y))); rhs = ((int), [13:8-9], (Int "2")) }))));
             ([15:3-23],
              (Expr
                 (((function(int $z): int)), [15:3-22],
-                 (Binop ((Eq None), (((function(int $z): int)), [15:3-5], (Lvar ([15:3-5], $x))),
-                    (((function(int $z): int)), [15:8-22],
-                     (Lfun (
-                        { f_span = [15:8-22]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None);
-                          f_params =
-                          [{ param_annotation = (int); param_type_hint = ((int), None); 
-                             param_is_variadic = false; param_pos = [15:8-10]; 
-                             param_name = "$z"; param_expr = None; param_readonly = None; 
-                             param_callconv = Pnormal; param_user_attributes = []; 
-                             param_visibility = None }
-                            ];
-                          f_ctxs = None; f_unsafe_ctxs = None;
-                          f_body =
-                          { fb_ast = [([15:15-22], (Return (Some ((int), [15:15-22], (Binop (Plus, ((int), [15:15-17], (Lvar ([15:15-17], $y))), ((int), [15:20-22], (Lvar ([15:20-22], $z)))))))))] };
-                          f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
-                        [([15:15-17], $y)])))
-                    )))));
-            ([16:3-14],
-             (Expr
-                ((int), [16:3-13],
-                 (Binop ((Eq None), ((int), [16:3-5], (Lvar ([16:3-5], $l))),
-                    ((int), [16:8-13], (Call ((((function(int $z): int)), [16:8-10], (Lvar ([16:8-10], $x))), [], [(Pnormal, ((int), [16:11-12], (Int "2")))], None))))))));
-            ([18:3-20:4],
-             (Expr
-                (((function(int $z): int)), [18:3-20:4],
-                 (Binop ((Eq None), (((function(int $z): int)), [18:3-5], (Lvar ([18:3-5], $x))),
-                    (((function(int $z): int)), [18:8-20:4],
-                     (Efun
-                        { ef_fun =
-                          { f_span = [18:8-20:4]; f_readonly_this = None; 
+                 (Binop
+                    { bop = (Eq None); lhs = (((function(int $z): int)), [15:3-5], (Lvar ([15:3-5], $x)));
+                      rhs =
+                      (((function(int $z): int)), [15:8-22],
+                       (Lfun (
+                          { f_span = [15:8-22]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
                             f_ret = ((int), None);
                             f_params =
                             [{ param_annotation = (int); param_type_hint = ((int), None); 
-                               param_is_variadic = false; param_pos = [18:17-19]; 
+                               param_is_variadic = false; param_pos = [15:8-10]; 
                                param_name = "$z"; param_expr = None; 
                                param_readonly = None; param_callconv = Pnormal; 
                                param_user_attributes = []; param_visibility = None }
                               ];
                             f_ctxs = None; f_unsafe_ctxs = None;
                             f_body =
-                            { fb_ast = [([19:5-20], (Return (Some ((int), [19:12-19], (Binop (Plus, ((int), [19:12-14], (Lvar ([19:12-14], $y))), ((int), [19:17-19], (Lvar ([19:17-19], $z)))))))))] };
+                            { fb_ast =
+                              [([15:15-22],
+                                (Return (Some ((int), [15:15-22], (Binop { bop = Plus; lhs = ((int), [15:15-17], (Lvar ([15:15-17], $y))); rhs = ((int), [15:20-22], (Lvar ([15:20-22], $z))) })))))]
+                              };
                             f_fun_kind = FSync; f_user_attributes = []; 
-                            f_external = false; f_doc_comment = None };
-                          ef_use = [([18:26-28], $y)]; ef_closure_class_name = None }))
-                    )))));
+                            f_external = false; f_doc_comment = None },
+                          [([15:15-17], $y)])))
+                      }))));
+            ([16:3-14],
+             (Expr
+                ((int), [16:3-13],
+                 (Binop
+                    { bop = (Eq None); lhs = ((int), [16:3-5], (Lvar ([16:3-5], $l)));
+                      rhs = ((int), [16:8-13], (Call ((((function(int $z): int)), [16:8-10], (Lvar ([16:8-10], $x))), [], [(Pnormal, ((int), [16:11-12], (Int "2")))], None))) }))));
+            ([18:3-20:4],
+             (Expr
+                (((function(int $z): int)), [18:3-20:4],
+                 (Binop
+                    { bop = (Eq None); lhs = (((function(int $z): int)), [18:3-5], (Lvar ([18:3-5], $x)));
+                      rhs =
+                      (((function(int $z): int)), [18:8-20:4],
+                       (Efun
+                          { ef_fun =
+                            { f_span = [18:8-20:4]; f_readonly_this = None; 
+                              f_annotation = (); f_readonly_ret = None; 
+                              f_ret = ((int), None);
+                              f_params =
+                              [{ param_annotation = (int); param_type_hint = ((int), None); 
+                                 param_is_variadic = false; param_pos = [18:17-19]; 
+                                 param_name = "$z"; param_expr = None; 
+                                 param_readonly = None; param_callconv = Pnormal; 
+                                 param_user_attributes = []; param_visibility = None }
+                                ];
+                              f_ctxs = None; f_unsafe_ctxs = None;
+                              f_body =
+                              { fb_ast =
+                                [([19:5-20],
+                                  (Return (Some ((int), [19:12-19], (Binop { bop = Plus; lhs = ((int), [19:12-14], (Lvar ([19:12-14], $y))); rhs = ((int), [19:17-19], (Lvar ([19:17-19], $z))) })))))]
+                                };
+                              f_fun_kind = FSync; f_user_attributes = []; 
+                              f_external = false; f_doc_comment = None };
+                            ef_use = [([18:26-28], $y)]; ef_closure_class_name = None }))
+                      }))));
             ([21:3-14],
              (Expr
                 ((int), [21:3-13],
-                 (Binop ((Eq None), ((int), [21:3-5], (Lvar ([21:3-5], $l))),
-                    ((int), [21:8-13], (Call ((((function(int $z): int)), [21:8-10], (Lvar ([21:8-10], $x))), [], [(Pnormal, ((int), [21:11-12], (Int "2")))], None))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((int), [21:3-5], (Lvar ([21:3-5], $l)));
+                      rhs = ((int), [21:8-13], (Call ((((function(int $z): int)), [21:8-10], (Lvar ([21:8-10], $x))), [], [(Pnormal, ((int), [21:11-12], (Int "2")))], None))) }))));
             ([23:3-29],
              (Expr
                 (((function(int $a, int $b): int)), [23:3-28],
-                 (Binop ((Eq None), (((function(int $a, int $b): int)), [23:3-5], (Lvar ([23:3-5], $x))),
-                    (((function(int $a, int $b): int)), [23:8-28],
-                     (Lfun (
-                        { f_span = [23:8-28]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((int), None);
-                          f_params =
-                          [{ param_annotation = (int); param_type_hint = ((int), None); 
-                             param_is_variadic = false; param_pos = [23:9-11]; 
-                             param_name = "$a"; param_expr = None; param_readonly = None; 
-                             param_callconv = Pnormal; param_user_attributes = []; 
-                             param_visibility = None };
-                            { param_annotation = (int); param_type_hint = ((int), None); 
-                              param_is_variadic = false; param_pos = [23:13-15]; 
-                              param_name = "$b"; param_expr = None; param_readonly = None; 
-                              param_callconv = Pnormal; param_user_attributes = []; 
-                              param_visibility = None }
-                            ];
-                          f_ctxs = None; f_unsafe_ctxs = None;
-                          f_body =
-                          { fb_ast = [([23:21-28], (Return (Some ((int), [23:21-28], (Binop (Plus, ((int), [23:21-23], (Lvar ([23:21-23], $a))), ((int), [23:26-28], (Lvar ([23:26-28], $b)))))))))] };
-                          f_fun_kind = FSync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
-                        [])))
-                    )))));
+                 (Binop
+                    { bop = (Eq None); lhs = (((function(int $a, int $b): int)), [23:3-5], (Lvar ([23:3-5], $x)));
+                      rhs =
+                      (((function(int $a, int $b): int)), [23:8-28],
+                       (Lfun (
+                          { f_span = [23:8-28]; f_readonly_this = None; 
+                            f_annotation = (); f_readonly_ret = None; 
+                            f_ret = ((int), None);
+                            f_params =
+                            [{ param_annotation = (int); param_type_hint = ((int), None); 
+                               param_is_variadic = false; param_pos = [23:9-11]; 
+                               param_name = "$a"; param_expr = None; 
+                               param_readonly = None; param_callconv = Pnormal; 
+                               param_user_attributes = []; param_visibility = None };
+                              { param_annotation = (int); param_type_hint = ((int), None); 
+                                param_is_variadic = false; param_pos = [23:13-15]; 
+                                param_name = "$b"; param_expr = None; 
+                                param_readonly = None; param_callconv = Pnormal; 
+                                param_user_attributes = []; param_visibility = None }
+                              ];
+                            f_ctxs = None; f_unsafe_ctxs = None;
+                            f_body =
+                            { fb_ast =
+                              [([23:21-28],
+                                (Return (Some ((int), [23:21-28], (Binop { bop = Plus; lhs = ((int), [23:21-23], (Lvar ([23:21-23], $a))); rhs = ((int), [23:26-28], (Lvar ([23:26-28], $b))) })))))]
+                              };
+                            f_fun_kind = FSync; f_user_attributes = []; 
+                            f_external = false; f_doc_comment = None },
+                          [])))
+                      }))));
             ([24:3-17],
              (Expr
                 ((int), [24:3-17],
-                 (Binop ((Eq None), ((int), [24:3-5], (Lvar ([24:3-5], $l))),
-                    ((int), [24:8-17],
-                     (Call ((((function(int $a, int $b): int)), [24:8-10], (Lvar ([24:8-10], $x))), 
-                        [], [(Pnormal, ((int), [24:11-12], (Int "2"))); (Pnormal, ((int), [24:14-16], (Lvar ([24:14-16], $y))))], None)))
-                    )))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((int), [24:3-5], (Lvar ([24:3-5], $l)));
+                      rhs =
+                      ((int), [24:8-17],
+                       (Call ((((function(int $a, int $b): int)), [24:8-10], (Lvar ([24:8-10], $x))), 
+                          [], [(Pnormal, ((int), [24:11-12], (Int "2"))); (Pnormal, ((int), [24:14-16], (Lvar ([24:14-16], $y))))], None)))
+                      }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false;

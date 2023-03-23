@@ -585,8 +585,7 @@ and ('ex, 'en) expr_ =
        *     -$foo
        *     +$foo
        *     $foo++ *)
-  | Binop of
-      (Ast_defs.bop[@transform.opaque]) * ('ex, 'en) expr * ('ex, 'en) expr
+  | Binop of ('ex, 'en) binop
       (** Binary operator.
        *
        *     $foo + $bar *)
@@ -752,6 +751,12 @@ and hole_source =
   | UnsafeCast of hint list
   | UnsafeNonnullCast
   | EnforcedCast of hint list
+
+and ('ex, 'en) binop = {
+  bop: Ast_defs.bop; [@transform.opaque]
+  lhs: ('ex, 'en) expr; [@transform.explicit]
+  rhs: ('ex, 'en) expr; [@transform.explicit]
+}
 
 and ('ex, 'en) class_get_expr =
   | CGstring of (pstring[@transform.opaque])

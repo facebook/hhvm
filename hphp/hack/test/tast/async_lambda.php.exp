@@ -32,65 +32,74 @@
            [([6:3-8:5],
              (Expr
                 (((function(): Awaitable<void>)), [6:3-8:4],
-                 (Binop ((Eq None), (((function(): Awaitable<void>)), [6:3-6], (Lvar ([6:3-6], $f0))),
-                    (((function(): Awaitable<void>)), [6:9-8:4],
-                     (Lfun (
-                        { f_span = [6:9-8:4]; f_readonly_this = None; 
-                          f_annotation = (); f_readonly_ret = None; f_ret = ((Awaitable<void>), None); 
-                          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                          f_body =
-                          { fb_ast =
-                            [([7:5-35],
-                              (Expr
-                                 ((string), [7:5-34],
-                                  (Binop ((Eq None), ((string), [7:5-9], (Lvar ([7:5-9], $str))),
-                                     ((string), [7:12-34],
-                                      (Await
-                                         ((Awaitable<string>), [7:18-34],
-                                          (Call ((((function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))), 
-                                             [], [(Pnormal, ((string), [7:28-33], (String "foo")))], None)))))
-                                     )))))
-                              ]
-                            };
-                          f_fun_kind = FAsync; f_user_attributes = []; 
-                          f_external = false; f_doc_comment = None },
-                        [])))
-                    )))));
+                 (Binop
+                    { bop = (Eq None); lhs = (((function(): Awaitable<void>)), [6:3-6], (Lvar ([6:3-6], $f0)));
+                      rhs =
+                      (((function(): Awaitable<void>)), [6:9-8:4],
+                       (Lfun (
+                          { f_span = [6:9-8:4]; f_readonly_this = None; 
+                            f_annotation = (); f_readonly_ret = None; 
+                            f_ret = ((Awaitable<void>), None); f_params = []; 
+                            f_ctxs = None; f_unsafe_ctxs = None;
+                            f_body =
+                            { fb_ast =
+                              [([7:5-35],
+                                (Expr
+                                   ((string), [7:5-34],
+                                    (Binop
+                                       { bop = (Eq None); lhs = ((string), [7:5-9], (Lvar ([7:5-9], $str)));
+                                         rhs =
+                                         ((string), [7:12-34],
+                                          (Await
+                                             ((Awaitable<string>), [7:18-34],
+                                              (Call ((((function(string $s): Awaitable<string>)), [7:18-27], (Id ([7:18-27], "\\genString"))), 
+                                                 [], [(Pnormal, ((string), [7:28-33], (String "foo")))], None)))))
+                                         }))))
+                                ]
+                              };
+                            f_fun_kind = FAsync; f_user_attributes = []; 
+                            f_external = false; f_doc_comment = None },
+                          [])))
+                      }))));
              ([9:3-11:5],
               (Expr
                  (((function(string $x): Awaitable<void>)), [9:3-11:4],
-                  (Binop ((Eq None), (((function(string $x): Awaitable<void>)), [9:3-6], (Lvar ([9:3-6], $f1))),
-                     (((function(string $x): Awaitable<void>)), [9:9-11:4],
-                      (Lfun (
-                         { f_span = [9:9-11:4]; f_readonly_this = None; 
-                           f_annotation = (); f_readonly_ret = None; 
-                           f_ret = ((Awaitable<void>), None);
-                           f_params =
-                           [{ param_annotation = (string); param_type_hint = ((string), None); 
-                              param_is_variadic = false; param_pos = [9:15-17]; 
-                              param_name = "$x"; param_expr = None; param_readonly = None; 
-                              param_callconv = Pnormal; param_user_attributes = []; 
-                              param_visibility = None }
-                             ];
-                           f_ctxs = None; f_unsafe_ctxs = None;
-                           f_body =
-                           { fb_ast =
-                             [([10:5-32],
-                               (Expr
-                                  ((string), [10:5-31],
-                                   (Binop ((Eq None), ((string), [10:5-9], (Lvar ([10:5-9], $str))),
-                                      ((string), [10:12-31],
-                                       (Await
-                                          ((Awaitable<string>), [10:18-31],
-                                           (Call ((((function(string $s): Awaitable<string>)), [10:18-27], (Id ([10:18-27], "\\genString"))), 
-                                              [], [(Pnormal, ((string), [10:28-30], (Lvar ([10:28-30], $x))))], None)))))
-                                      )))))
-                               ]
-                             };
-                           f_fun_kind = FAsync; f_user_attributes = []; 
-                           f_external = false; f_doc_comment = None },
-                         [])))
-                     )))))
+                  (Binop
+                     { bop = (Eq None); lhs = (((function(string $x): Awaitable<void>)), [9:3-6], (Lvar ([9:3-6], $f1)));
+                       rhs =
+                       (((function(string $x): Awaitable<void>)), [9:9-11:4],
+                        (Lfun (
+                           { f_span = [9:9-11:4]; f_readonly_this = None; 
+                             f_annotation = (); f_readonly_ret = None; 
+                             f_ret = ((Awaitable<void>), None);
+                             f_params =
+                             [{ param_annotation = (string); param_type_hint = ((string), None); 
+                                param_is_variadic = false; param_pos = [9:15-17]; 
+                                param_name = "$x"; param_expr = None; 
+                                param_readonly = None; param_callconv = Pnormal; 
+                                param_user_attributes = []; param_visibility = None }
+                               ];
+                             f_ctxs = None; f_unsafe_ctxs = None;
+                             f_body =
+                             { fb_ast =
+                               [([10:5-32],
+                                 (Expr
+                                    ((string), [10:5-31],
+                                     (Binop
+                                        { bop = (Eq None); lhs = ((string), [10:5-9], (Lvar ([10:5-9], $str)));
+                                          rhs =
+                                          ((string), [10:12-31],
+                                           (Await
+                                              ((Awaitable<string>), [10:18-31],
+                                               (Call ((((function(string $s): Awaitable<string>)), [10:18-27], (Id ([10:18-27], "\\genString"))), 
+                                                  [], [(Pnormal, ((string), [10:28-30], (Lvar ([10:28-30], $x))))], None)))))
+                                          }))))
+                                 ]
+                               };
+                             f_fun_kind = FAsync; f_user_attributes = []; 
+                             f_external = false; f_doc_comment = None },
+                           [])))
+                       }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

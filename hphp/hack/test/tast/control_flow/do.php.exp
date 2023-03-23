@@ -23,7 +23,7 @@
           [([4:3-7:16],
             (Do (
                [([5:5-8], (Expr (((int | string)), [5:5-7], (Lvar ([5:5-7], $a)))));
-                 ([6:5-13], (Expr ((string), [6:5-12], (Binop ((Eq None), ((string), [6:5-7], (Lvar ([6:5-7], $a))), ((string), [6:10-12], (String "")))))))],
+                 ([6:5-13], (Expr ((string), [6:5-12], (Binop { bop = (Eq None); lhs = ((string), [6:5-7], (Lvar ([6:5-7], $a))); rhs = ((string), [6:10-12], (String "")) }))))],
                ((bool), [7:12-14], (Lvar ([7:12-14], $b))))));
             ([8:3-6], (Expr ((string), [8:3-5], (Lvar ([8:3-5], $a)))))]
           };

@@ -96,8 +96,9 @@
              ([18:3-37],
               (Expr
                  ((TestKeyedTraversable), [18:3-36],
-                  (Binop ((Eq None), ((TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     ((TestKeyedTraversable), [18:10-36], (New (((TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo)));
+                       rhs = ((TestKeyedTraversable), [18:10-36], (New (((TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))) }))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
@@ -184,8 +185,9 @@
              ([35:3-37],
               (Expr
                  ((TestKeyedTraversable), [35:3-36],
-                  (Binop ((Eq None), ((TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     ((TestKeyedTraversable), [35:10-36], (New (((TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((TestKeyedTraversable), [35:10-36], (New (((TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))) }))));
              ([38:3-95],
               (Expr
                  ((void), [38:3-94],

@@ -388,12 +388,12 @@ fn print_expr(
         }
         Expr_::Shape(fl) => print_expr_darray(ctx, w, env, print_shape_field_name, fl),
         Expr_::Binop(x) => {
-            let (bop, e1, e2) = &**x;
-            print_expr(ctx, w, env, e1)?;
+            let ast::Binop { bop, lhs, rhs } = &**x;
+            print_expr(ctx, w, env, lhs)?;
             w.write_all(b" ")?;
             print_bop(w, bop)?;
             w.write_all(b" ")?;
-            print_expr(ctx, w, env, e2)
+            print_expr(ctx, w, env, rhs)
         }
         Expr_::Call(c) => {
             let (e, _, es, unpacked_element) = &**c;

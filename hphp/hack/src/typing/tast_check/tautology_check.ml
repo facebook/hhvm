@@ -34,7 +34,7 @@ let handler =
 
     method! at_expr env =
       function
-      | (_, p, Binop (((Eqeqeq | Diff2) as bop), te1, te2)) ->
-        trivial_equality_check p bop env te1 te2
+      | (_, p, Binop { bop = (Eqeqeq | Diff2) as bop; lhs; rhs }) ->
+        trivial_equality_check p bop env lhs rhs
       | _ -> ()
   end

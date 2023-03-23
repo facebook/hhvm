@@ -98,29 +98,39 @@ let rec expr_
     (* unary operations won't return function pointrs, so we discard the entity. *)
     let (env, _) = expr_ upcasted_info env e in
     (env, None)
-  | A.Binop (Ast_defs.Eq None, e1, e2) ->
+  | A.(Binop { bop = Ast_defs.Eq None; lhs = e1; rhs = e2 }) ->
     let (env, entity_rhs) = expr_ upcasted_info env e2 in
     let env = assign env e1 entity_rhs in
     (env, None)
-  | A.Binop (Ast_defs.QuestionQuestion, e1, e2) ->
+  | A.(Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 }) ->
     let (env, entity1) = expr_ upcasted_info env e1 in
     let (env, entity2) = expr_ upcasted_info env e2 in
     join env entity1 entity2
-  | A.Binop (Ast_defs.Eq (Some Ast_defs.QuestionQuestion), e1, e2) ->
+  | A.(
+      Binop
+        {
+          bop = Ast_defs.Eq (Some Ast_defs.QuestionQuestion);
+          lhs = e1;
+          rhs = e2;
+        }) ->
     let (env, entity1) = expr_ upcasted_info env e1 in
     let (env, entity2) = expr_ upcasted_info env e2 in
     let (env, entity_rhs) = join env entity1 entity2 in
     let env = assign env e1 entity_rhs in
     (env, None)
-  | A.Binop
-      ( ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
-        | Ast_defs.Eqeq | Ast_defs.Eqeqeq | Ast_defs.Starstar | Ast_defs.Diff
-        | Ast_defs.Diff2 | Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.Lt
-        | Ast_defs.Lte | Ast_defs.Gt | Ast_defs.Gte | Ast_defs.Dot
-        | Ast_defs.Amp | Ast_defs.Bar | Ast_defs.Ltlt | Ast_defs.Gtgt
-        | Ast_defs.Percent | Ast_defs.Xor | Ast_defs.Cmp ),
-        e1,
-        e2 ) ->
+  | A.(
+      Binop
+        {
+          bop =
+            ( Ast_defs.Plus | Ast_defs.Minus | Ast_defs.Star | Ast_defs.Slash
+            | Ast_defs.Eqeq | Ast_defs.Eqeqeq | Ast_defs.Starstar
+            | Ast_defs.Diff | Ast_defs.Diff2 | Ast_defs.Ampamp | Ast_defs.Barbar
+            | Ast_defs.Lt | Ast_defs.Lte | Ast_defs.Gt | Ast_defs.Gte
+            | Ast_defs.Dot | Ast_defs.Amp | Ast_defs.Bar | Ast_defs.Ltlt
+            | Ast_defs.Gtgt | Ast_defs.Percent | Ast_defs.Xor | Ast_defs.Cmp );
+          lhs = e1;
+          rhs = e2;
+        }) ->
     (* most binary operations won't return function pointers, so we discard the entity. *)
     let (env, _) = expr_ upcasted_info env e1 in
     let (env, _) = expr_ upcasted_info env e2 in

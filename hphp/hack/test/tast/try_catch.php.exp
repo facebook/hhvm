@@ -26,17 +26,17 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([14:3-11], (Expr ((int), [14:3-10], (Binop ((Eq None), ((int), [14:3-5], (Lvar ([14:3-5], $a))), ((int), [14:8-10], (Int "23")))))));
+           [([14:3-11], (Expr ((int), [14:3-10], (Binop { bop = (Eq None); lhs = ((int), [14:3-5], (Lvar ([14:3-5], $a))); rhs = ((int), [14:8-10], (Int "23")) }))));
              ([15:3-28:4],
               (Try (
-                 [([16:5-14], (Expr ((int), [16:5-13], (Binop ((Eq None), ((int), [16:5-7], (Lvar ([16:5-7], $a))), ((int), [16:10-13], (Int "456")))))));
+                 [([16:5-14], (Expr ((int), [16:5-13], (Binop { bop = (Eq None); lhs = ((int), [16:5-7], (Lvar ([16:5-7], $a))); rhs = ((int), [16:10-13], (Int "456")) }))));
                    ([17:5-19], (Expr ((void), [17:5-18], (Call ((((function(): void)), [17:5-16], (Id ([17:5-16], "\\might_throw"))), [], [], None)))))],
                  [(([18:12-25], "\\YourException"), ([18:26-28], $e), [([19:5-15], (Return (Some ((int), [19:12-14], (Lvar ([19:12-14], $a))))))]);
                    (([20:12-23], "\\MyException"), ([20:24-26], $e),
-                    [([22:5-17], (Expr ((string), [22:5-16], (Binop ((Eq None), ((string), [22:5-7], (Lvar ([22:5-7], $a))), ((string), [22:10-16], (String "duck")))))));
+                    [([22:5-17], (Expr ((string), [22:5-16], (Binop { bop = (Eq None); lhs = ((string), [22:5-7], (Lvar ([22:5-7], $a))); rhs = ((string), [22:10-16], (String "duck")) }))));
                       ([23:5-18], (Return (Some ((int), [23:12-17], (Int "23904")))))]);
                    (([24:12-21], "\\Exception"), ([24:22-24], $e), [([25:5-15], (Return (Some ((int), [25:12-14], (Lvar ([25:12-14], $a))))))])],
-                 [([27:5-12], (Expr ((int), [27:5-11], (Binop ((Eq None), ((int), [27:5-7], (Lvar ([27:5-7], $a))), ((int), [27:10-11], (Int "4")))))))])));
+                 [([27:5-12], (Expr ((int), [27:5-11], (Binop { bop = (Eq None); lhs = ((int), [27:5-7], (Lvar ([27:5-7], $a))); rhs = ((int), [27:10-11], (Int "4")) }))))])));
              ([30:3-13], (Return (Some ((int), [30:10-12], (Lvar ([30:10-12], $a))))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a0939720b7182490a51f6b42b5f6a7c>>
+// @generated SignedSource<<f8b0d781d93c565cab56aff5a4d02e13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1024,14 +1024,7 @@ pub enum Expr_<'a, Ex, En> {
     ///
     ///     $foo + $bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(inline_tuple)]
-    Binop(
-        &'a (
-            ast_defs::Bop<'a>,
-            &'a Expr<'a, Ex, En>,
-            &'a Expr<'a, Ex, En>,
-        ),
-    ),
+    Binop(&'a Binop<'a, Ex, En>),
     /// Pipe expression. The lid is the ID of the $$ that is implicitly
     /// declared by this pipe.
     ///
@@ -1272,6 +1265,39 @@ pub enum HoleSource<'a> {
 }
 impl<'a> TrivialDrop for HoleSource<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(HoleSource<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct Binop<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub bop: ast_defs::Bop<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub lhs: &'a Expr<'a, Ex, En>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub rhs: &'a Expr<'a, Ex, En>,
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Binop<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(Binop<'arena, Ex, En>);
 
 #[derive(
     Clone,

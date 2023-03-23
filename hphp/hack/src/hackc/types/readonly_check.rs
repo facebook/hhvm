@@ -295,10 +295,10 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         // This is really just a statement, does not have a value
         Yield(_) => Rty::Mutable,
         Binop(b) => {
-            let (bop, e1, e2) = &**b;
+            let aast::Binop { bop, lhs, rhs } = &**b;
             match bop {
                 ast_defs::Bop::QuestionQuestion => {
-                    match (rty_expr(context, e1), rty_expr(context, e2)) {
+                    match (rty_expr(context, lhs), rty_expr(context, rhs)) {
                         (Rty::Readonly, _) | (_, Rty::Readonly) => Rty::Readonly,
                         (Rty::Mutable, Rty::Mutable) => Rty::Mutable,
                     }
@@ -685,9 +685,9 @@ impl<'ast> VisitorMut<'ast> for Checker {
         }
         match &mut p.2 {
             aast::Expr_::Binop(x) => {
-                let (bop, e_lhs, e_rhs) = x.as_mut();
+                let aast::Binop { bop, lhs, rhs } = x.as_mut();
                 if let Bop::Eq(_) = bop {
-                    check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
+                    check_assignment_validity(context, self, &p.1, lhs, rhs);
                 }
             }
             aast::Expr_::Call(x) => {

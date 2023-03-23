@@ -16,7 +16,7 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-12], (Expr ((int), [4:3-11], (Binop ((Eq (Some QuestionQuestion)), ((int), [4:3-5], (Lvar ([4:3-5], $x))), ((int), [4:10-11], (Int "0")))))));
+          [([4:3-12], (Expr ((int), [4:3-11], (Binop { bop = (Eq (Some QuestionQuestion)); lhs = ((int), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((int), [4:10-11], (Int "0")) }))));
             ([5:3-13], (Return (Some ((int), [5:10-12], (Lvar ([5:10-12], $x))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

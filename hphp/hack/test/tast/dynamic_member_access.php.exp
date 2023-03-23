@@ -29,7 +29,7 @@
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([6:3-16], (Expr ((string), [6:3-15], (Binop ((Eq None), ((string), [6:3-7], (Lvar ([6:3-7], $foo))), ((string), [6:10-15], (String "foo")))))));
+           [([6:3-16], (Expr ((string), [6:3-15], (Binop { bop = (Eq None); lhs = ((string), [6:3-7], (Lvar ([6:3-7], $foo))); rhs = ((string), [6:10-15], (String "foo")) }))));
              ([7:3-11], (Expr ((dynamic), [7:3-10], (Obj_get (((dynamic), [7:3-5], (Lvar ([7:3-5], $c))), ((dynamic), [7:7-10], (Id ([7:7-10], "foo"))), OG_nullthrows, Is_prop)))));
              ([8:3-12], (Expr ((dynamic), [8:3-11], (Obj_get (((dynamic), [8:3-5], (Lvar ([8:3-5], $c))), ((dynamic), [8:7-11], (Lvar ([8:7-11], $foo))), OG_nullthrows, Is_prop)))));
              ([9:3-31],

@@ -20,12 +20,14 @@
           [([5:3-13],
             (Expr
                ((int), [5:3-12],
-                (Binop ((Eq None),
-                   ((int), [5:3-8],
-                    (Array_get (
-                       ((KeyedContainer<arraykey, int>), [5:3-5], (Hole (((KeyedContainer<arraykey, int>), [5:3-5], (Lvar ([5:3-5], $x))), (KeyedContainer<arraykey, int>), (nothing), Typing))),
-                       (Some ((int), [5:6-7], (Int "1")))))),
-                   ((int), [5:11-12], (Int "2")))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs =
+                     ((int), [5:3-8],
+                      (Array_get (
+                         ((KeyedContainer<arraykey, int>), [5:3-5], (Hole (((KeyedContainer<arraykey, int>), [5:3-5], (Lvar ([5:3-5], $x))), (KeyedContainer<arraykey, int>), (nothing), Typing))),
+                         (Some ((int), [5:6-7], (Int "1"))))));
+                     rhs = ((int), [5:11-12], (Int "2")) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -38,15 +38,17 @@ Errors:
            [([6:2-25],
              (Expr
                 ((<expr#1> as C), [6:2-24],
-                 (Binop ((Eq None), ((<expr#1> as C), [6:2-4], (Lvar ([6:2-4], $x))),
-                    ((<expr#1> as C), [6:7-24],
-                     (New (
-                        (((nothing | C)), [6:11-22],
-                         (CIexpr
-                            (((int | classname<C>)), [6:11-22],
-                             (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<C> | classname<nothing>)), Typing))))),
-                        [], [], None, ((function(): void)))))
-                    )))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((<expr#1> as C), [6:2-4], (Lvar ([6:2-4], $x)));
+                      rhs =
+                      ((<expr#1> as C), [6:7-24],
+                       (New (
+                          (((nothing | C)), [6:11-22],
+                           (CIexpr
+                              (((int | classname<C>)), [6:11-22],
+                               (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<C> | classname<nothing>)), Typing))))),
+                          [], [], None, ((function(): void)))))
+                      }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

@@ -24,27 +24,35 @@ Errors:
           [([4:3-20],
             (Expr
                ((HH\Lib\Regex\Pattern<shape(0 => string)>), [4:3-19],
-                (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [4:3-5], (Lvar ([4:3-5], $x))),
-                   ((HH\Lib\Regex\Pattern<shape(0 => string)>), [4:8-19], (PrefixedString ("re", ((string), [4:10-19], (String "/Hello/"))))))))));
+                (Binop
+                   { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [4:3-5], (Lvar ([4:3-5], $x)));
+                     rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [4:8-19], (PrefixedString ("re", ((string), [4:10-19], (String "/Hello/"))))) }))));
             ([7:3-20],
              (Expr
                 ((shape(0 => string)), [7:3-19],
-                 (Binop ((Eq None), ((shape(0 => string)), [7:3-5], (Lvar ([7:3-5], $y))),
-                    ((shape(0 => string)), [7:8-19],
-                     (Call ((((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye"))),
-                        [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))], 
-                        [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))], None)))
-                    )))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((shape(0 => string)), [7:3-5], (Lvar ([7:3-5], $y)));
+                      rhs =
+                      ((shape(0 => string)), [7:8-19],
+                       (Call ((((function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))), [7:8-15], (Id ([7:8-15], "\\goodbye"))),
+                          [((shape(0 => string)), ([7:8-15], (Happly (([Pos.none], "_"), []))))], 
+                          [(Pnormal, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [7:16-18], (Lvar ([7:16-18], $x))))], None)))
+                      }))));
             ([12:3-16],
              (Expr
                 ((string), [12:3-15],
-                 (Binop ((Eq None), ((string), [12:3-7], (Lvar ([12:3-7], $y_0))),
-                    ((string), [12:10-15], (Array_get (((shape(0 => string)), [12:10-12], (Lvar ([12:10-12], $y))), (Some ((int), [12:13-14], (Int "0")))))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((string), [12:3-7], (Lvar ([12:3-7], $y_0)));
+                      rhs = ((string), [12:10-15], (Array_get (((shape(0 => string)), [12:10-12], (Lvar ([12:10-12], $y))), (Some ((int), [12:13-14], (Int "0")))))) }))));
             ([15:3-22],
              (Expr
                 ((string), [15:3-21],
-                 (Binop ((Eq None), ((string), [15:3-5], (Lvar ([15:3-5], $z))),
-                    ((string), [15:8-21], (Binop (Dot, ((HH\Lib\Regex\Pattern<shape(0 => string)>), [15:8-10], (Lvar ([15:8-10], $x))), ((string), [15:11-21], (String ", world!"))))))))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((string), [15:3-5], (Lvar ([15:3-5], $z)));
+                      rhs =
+                      ((string), [15:8-21],
+                       (Binop { bop = Dot; lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [15:8-10], (Lvar ([15:8-10], $x))); rhs = ((string), [15:11-21], (String ", world!")) }))
+                      }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -99,92 +107,117 @@ Errors:
            [([25:3-34],
              (Expr
                 ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:3-33],
-                 (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:3-9], (Lvar ([25:3-9], $good0))),
-                    ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:12-33], (PrefixedString ("re", ((string), [25:14-33], (String "/Hel(\\D)(?'o'\\D)/"))))))))));
-             ([26:3-37], (Expr ((nothing), [26:3-36], (Binop ((Eq None), ((nothing), [26:3-8], (Lvar ([26:3-8], $bad1))), ((nothing), [26:13-36], (String "/He(?'l'\\D)(?'l'\\D)o/")))))));
-             ([27:3-31], (Expr ((nothing), [27:3-30], (Binop ((Eq None), ((nothing), [27:3-8], (Lvar ([27:3-8], $bad2))), ((nothing), [27:13-30], (String "/He(?'42'\\D)lo/")))))));
-             ([28:3-20], (Expr ((nothing), [28:3-19], (Binop ((Eq None), ((nothing), [28:3-8], (Lvar ([28:3-8], $bad3))), ((nothing), [28:13-19], (String "/\\c/")))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:3-9], (Lvar ([25:3-9], $good0)));
+                      rhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'o' => string)>), [25:12-33], (PrefixedString ("re", ((string), [25:14-33], (String "/Hel(\\D)(?'o'\\D)/"))))) }))));
+             ([26:3-37],
+              (Expr ((nothing), [26:3-36], (Binop { bop = (Eq None); lhs = ((nothing), [26:3-8], (Lvar ([26:3-8], $bad1))); rhs = ((nothing), [26:13-36], (String "/He(?'l'\\D)(?'l'\\D)o/")) }))));
+             ([27:3-31], (Expr ((nothing), [27:3-30], (Binop { bop = (Eq None); lhs = ((nothing), [27:3-8], (Lvar ([27:3-8], $bad2))); rhs = ((nothing), [27:13-30], (String "/He(?'42'\\D)lo/")) }))));
+             ([28:3-20], (Expr ((nothing), [28:3-19], (Binop { bop = (Eq None); lhs = ((nothing), [28:3-8], (Lvar ([28:3-8], $bad3))); rhs = ((nothing), [28:13-19], (String "/\\c/")) }))));
              ([29:3-65],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>), [29:3-64],
-                  (Binop ((Eq None),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>), [29:3-9], (Lvar ([29:3-9], $good4))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>), [29:12-64],
-                      (PrefixedString ("re", ((string), [29:14-64], (String "/He(?'one'\\D)(\\D)(?'three'\\D)(\\D)(\\D)(?'six'\\D)/")))))
-                     )))));
+                  (Binop
+                     { bop = (Eq None);
+                       lhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>), [29:3-9], (Lvar ([29:3-9], $good4)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 4 => string, 5 => string, 'one' => string, 'six' => string, 'three' => string)>), [29:12-64],
+                        (PrefixedString ("re", ((string), [29:14-64], (String "/He(?'one'\\D)(\\D)(?'three'\\D)(\\D)(\\D)(?'six'\\D)/")))))
+                       }))));
              ([30:3-40],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 3 => string, 'c' => string, 'e' => string)>), [30:3-39],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 3 => string, 'c' => string, 'e' => string)>), [30:3-9], (Lvar ([30:3-9], $good5))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 3 => string, 'c' => string, 'e' => string)>), [30:12-39],
-                      (PrefixedString ("re", ((string), [30:14-39], (String "/a(b)(?<c>c)(d)(?<e>e)/")))))
-                     )))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 3 => string, 'c' => string, 'e' => string)>), [30:3-9], (Lvar ([30:3-9], $good5)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 3 => string, 'c' => string, 'e' => string)>), [30:12-39],
+                        (PrefixedString ("re", ((string), [30:14-39], (String "/a(b)(?<c>c)(d)(?<e>e)/")))))
+                       }))));
              ([31:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [31:3-23],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [31:3-9], (Lvar ([31:3-9], $good6))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [31:12-23], (PrefixedString ("re", ((string), [31:14-23], (String "/Hello/"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [31:3-9], (Lvar ([31:3-9], $good6)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [31:12-23], (PrefixedString ("re", ((string), [31:14-23], (String "/Hello/"))))) }))));
              ([32:3-48],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 'b' => string, 'c' => string, 'd' => string, 'e' => string)>), [32:3-47],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 'b' => string, 'c' => string, 'd' => string, 'e' => string)>), [32:3-9], (Lvar ([32:3-9], $good7))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 'b' => string, 'c' => string, 'd' => string, 'e' => string)>), [32:12-47],
-                      (PrefixedString ("re", ((string), [32:14-47], (String "/a(?<b>b)(?<c>c)(?<d>d)(?<e>e)/")))))
-                     )))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 'b' => string, 'c' => string, 'd' => string, 'e' => string)>), [32:3-9], (Lvar ([32:3-9], $good7)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 'b' => string, 'c' => string, 'd' => string, 'e' => string)>), [32:12-47],
+                        (PrefixedString ("re", ((string), [32:14-47], (String "/a(?<b>b)(?<c>c)(?<d>d)(?<e>e)/")))))
+                       }))));
              ([33:3-31],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 2 => string, 3 => string)>), [33:3-30],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 2 => string, 3 => string)>), [33:3-9], (Lvar ([33:3-9], $good8))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 2 => string, 3 => string)>), [33:12-30], (PrefixedString ("re", ((string), [33:14-30], (String "/a(b)(c)(d)?e/"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 2 => string, 3 => string)>), [33:3-9], (Lvar ([33:3-9], $good8)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 2 => string, 3 => string)>), [33:12-30], (PrefixedString ("re", ((string), [33:14-30], (String "/a(b)(c)(d)?e/"))))) }))));
              ([34:3-50],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string)>), [34:3-49],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string)>), [34:3-9], (Lvar ([34:3-9], $good9))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string)>), [34:12-49], (PrefixedString ("re", ((string), [34:14-49], (String "/WoS Action: .*Disable.+\\[(\\w+)/s"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string)>), [34:3-9], (Lvar ([34:3-9], $good9)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string)>), [34:12-49], (PrefixedString ("re", ((string), [34:14-49], (String "/WoS Action: .*Disable.+\\[(\\w+)/s"))))) }))));
              ([35:3-70],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [35:3-69],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [35:3-10], (Lvar ([35:3-10], $good10))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [35:13-69], (PrefixedString ("re", ((string), [35:15-69], (String "/User disabled for having at least \\d+ spam reports/"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [35:3-10], (Lvar ([35:3-10], $good10)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string)>), [35:13-69], (PrefixedString ("re", ((string), [35:15-69], (String "/User disabled for having at least \\d+ spam reports/"))))) }))));
              ([36:3-39],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [36:3-38],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [36:3-10], (Lvar ([36:3-10], $good11))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [36:13-38], (PrefixedString ("re", ((string), [36:15-38], (String "/(?<!\\w)youtube.com$/"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [36:3-10], (Lvar ([36:3-10], $good11)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [36:13-38], (PrefixedString ("re", ((string), [36:15-38], (String "/(?<!\\w)youtube.com$/"))))) }))));
              ([37:3-54],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 3 => string, 4 => string, 'version' => string)>), [37:3-53],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 3 => string, 4 => string, 'version' => string)>), [37:3-10], (Lvar ([37:3-10], $good12))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 3 => string, 4 => string, 'version' => string)>), [37:13-53],
-                      (PrefixedString ("re", ((string), [37:15-53], (String "/.+(?P<version>(:s(\\d)+)*:c(\\d)+)$/U")))))
-                     )))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 3 => string, 4 => string, 'version' => string)>), [37:3-10], (Lvar ([37:3-10], $good12)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 2 => string, 3 => string, 4 => string, 'version' => string)>), [37:13-53],
+                        (PrefixedString ("re", ((string), [37:15-53], (String "/.+(?P<version>(:s(\\d)+)*:c(\\d)+)$/U")))))
+                       }))));
              ([38:3-49],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'm' => string, 's' => string)>), [38:3-48],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'm' => string, 's' => string)>), [38:3-10], (Lvar ([38:3-10], $good13))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'm' => string, 's' => string)>), [38:13-48],
-                      (PrefixedString ("re", ((string), [38:15-48], (String "/^t=((?<m>\\d+)m)?(?<s>\\d+)s?$/i")))))
-                     )))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'm' => string, 's' => string)>), [38:3-10], (Lvar ([38:3-10], $good13)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 'm' => string, 's' => string)>), [38:13-48],
+                        (PrefixedString ("re", ((string), [38:15-48], (String "/^t=((?<m>\\d+)m)?(?<s>\\d+)s?$/i")))))
+                       }))));
              ([39:3-47],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [39:3-46],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [39:3-10], (Lvar ([39:3-10], $good14))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [39:13-46], (PrefixedString ("re", ((string), [39:15-46], (String "/(?<=\\(currently )[^)](?=\\))/"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [39:3-10], (Lvar ([39:3-10], $good14)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [39:13-46], (PrefixedString ("re", ((string), [39:15-46], (String "/(?<=\\(currently )[^)](?=\\))/"))))) }))));
              ([40:3-48],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [40:3-47],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [40:3-10], (Lvar ([40:3-10], $good15))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [40:13-47], (PrefixedString ("re", ((string), [40:15-47], (String "/(?<=\\(currently )[^)]+(?=\\))/"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [40:3-10], (Lvar ([40:3-10], $good15)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [40:13-47], (PrefixedString ("re", ((string), [40:15-47], (String "/(?<=\\(currently )[^)]+(?=\\))/"))))) }))));
              ([41:3-74],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 10 => string, 11 => string, 12 => string, 13 => string, 2 => string, 3 => string, 5 => string, 6 => string, 7 => string, 9 => string, 'd' => string, 'h' => string, 'n' => string)>),
                   [41:3-73],
-                  (Binop ((Eq None),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 10 => string, 11 => string, 12 => string, 13 => string, 2 => string, 3 => string, 5 => string, 6 => string, 7 => string, 9 => string, 'd' => string, 'h' => string, 'n' => string)>),
-                      [41:3-10], (Lvar ([41:3-10], $good16))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 10 => string, 11 => string, 12 => string, 13 => string, 2 => string, 3 => string, 5 => string, 6 => string, 7 => string, 9 => string, 'd' => string, 'h' => string, 'n' => string)>),
-                      [41:13-73], (PrefixedString ("re", ((string), [41:15-73], (String "/(a)(b)(c)(?<d>d)(e)(f)(g)(?<h>h)(i)(j)(k)(l)(m)(?<n>n)/")))))
-                     )))))
+                  (Binop
+                     { bop = (Eq None);
+                       lhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 10 => string, 11 => string, 12 => string, 13 => string, 2 => string, 3 => string, 5 => string, 6 => string, 7 => string, 9 => string, 'd' => string, 'h' => string, 'n' => string)>),
+                        [41:3-10], (Lvar ([41:3-10], $good16)));
+                       rhs =
+                       ((HH\Lib\Regex\Pattern<shape(0 => string, 1 => string, 10 => string, 11 => string, 12 => string, 13 => string, 2 => string, 3 => string, 5 => string, 6 => string, 7 => string, 9 => string, 'd' => string, 'h' => string, 'n' => string)>),
+                        [41:13-73], (PrefixedString ("re", ((string), [41:15-73], (String "/(a)(b)(c)(?<d>d)(e)(f)(g)(?<h>h)(i)(j)(k)(l)(m)(?<n>n)/")))))
+                       }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -202,38 +235,43 @@ Errors:
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([47:3-21], (Expr ((nothing), [47:3-20], (Binop ((Eq None), ((nothing), [47:3-8], (Lvar ([47:3-8], $bad0))), ((nothing), [47:13-20], (String "Hello")))))));
+           [([47:3-21], (Expr ((nothing), [47:3-20], (Binop { bop = (Eq None); lhs = ((nothing), [47:3-8], (Lvar ([47:3-8], $bad0))); rhs = ((nothing), [47:13-20], (String "Hello")) }))));
              ([48:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:3-23],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:3-9], (Lvar ([48:3-9], $good1))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:12-23], (PrefixedString ("re", ((string), [48:14-23], (String "/Hello/"))))))))));
-             ([49:3-22], (Expr ((nothing), [49:3-21], (Binop ((Eq None), ((nothing), [49:3-8], (Lvar ([49:3-8], $bad2))), ((nothing), [49:13-21], (String "/Hello")))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:3-9], (Lvar ([48:3-9], $good1)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [48:12-23], (PrefixedString ("re", ((string), [48:14-23], (String "/Hello/"))))) }))));
+             ([49:3-22], (Expr ((nothing), [49:3-21], (Binop { bop = (Eq None); lhs = ((nothing), [49:3-8], (Lvar ([49:3-8], $bad2))); rhs = ((nothing), [49:13-21], (String "/Hello")) }))));
              ([50:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:3-23],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:3-9], (Lvar ([50:3-9], $good3))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:12-23], (PrefixedString ("re", ((string), [50:14-23], (String "#Hello#"))))))))));
-             ([51:3-23], (Expr ((nothing), [51:3-22], (Binop ((Eq None), ((nothing), [51:3-8], (Lvar ([51:3-8], $bad4))), ((nothing), [51:13-22], (String "#Hello/")))))));
-             ([52:3-22], (Expr ((nothing), [52:3-21], (Binop ((Eq None), ((nothing), [52:3-8], (Lvar ([52:3-8], $bad5))), ((nothing), [52:13-21], (String "#Hello")))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:3-9], (Lvar ([50:3-9], $good3)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [50:12-23], (PrefixedString ("re", ((string), [50:14-23], (String "#Hello#"))))) }))));
+             ([51:3-23], (Expr ((nothing), [51:3-22], (Binop { bop = (Eq None); lhs = ((nothing), [51:3-8], (Lvar ([51:3-8], $bad4))); rhs = ((nothing), [51:13-22], (String "#Hello/")) }))));
+             ([52:3-22], (Expr ((nothing), [52:3-21], (Binop { bop = (Eq None); lhs = ((nothing), [52:3-8], (Lvar ([52:3-8], $bad5))); rhs = ((nothing), [52:13-21], (String "#Hello")) }))));
              ([53:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [53:3-23],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [53:3-9], (Lvar ([53:3-9], $good6))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [53:12-23], (PrefixedString ("re", ((string), [53:14-23], (String "(Hello)"))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [53:3-9], (Lvar ([53:3-9], $good6)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [53:12-23], (PrefixedString ("re", ((string), [53:14-23], (String "(Hello)"))))) }))));
              ([54:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:3-23],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:3-9], (Lvar ([54:3-9], $good7))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:12-23], (PrefixedString ("re", ((string), [54:14-23], (String ")Hello)"))))))))));
-             ([55:3-23], (Expr ((nothing), [55:3-22], (Binop ((Eq None), ((nothing), [55:3-8], (Lvar ([55:3-8], $bad8))), ((nothing), [55:13-22], (String "(Hello(")))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:3-9], (Lvar ([54:3-9], $good7)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [54:12-23], (PrefixedString ("re", ((string), [54:14-23], (String ")Hello)"))))) }))));
+             ([55:3-23], (Expr ((nothing), [55:3-22], (Binop { bop = (Eq None); lhs = ((nothing), [55:3-8], (Lvar ([55:3-8], $bad8))); rhs = ((nothing), [55:13-22], (String "(Hello(")) }))));
              ([56:3-24],
               (Expr
                  ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:3-23],
-                  (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:3-9], (Lvar ([56:3-9], $good9))),
-                     ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:12-23], (PrefixedString ("re", ((string), [56:14-23], (String "[Hello]"))))))))));
-             ([57:3-26], (Expr ((nothing), [57:3-25], (Binop ((Eq None), ((nothing), [57:3-9], (Lvar ([57:3-9], $bad10))), ((nothing), [57:14-25], (String "\\Hello\\")))))));
-             ([58:3-23], (Expr ((nothing), [58:3-22], (Binop ((Eq None), ((nothing), [58:3-9], (Lvar ([58:3-9], $bad11))), ((nothing), [58:14-22], (String "HelloH")))))))]
+                  (Binop
+                     { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:3-9], (Lvar ([56:3-9], $good9)));
+                       rhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [56:12-23], (PrefixedString ("re", ((string), [56:14-23], (String "[Hello]"))))) }))));
+             ([57:3-26], (Expr ((nothing), [57:3-25], (Binop { bop = (Eq None); lhs = ((nothing), [57:3-9], (Lvar ([57:3-9], $bad10))); rhs = ((nothing), [57:14-25], (String "\\Hello\\")) }))));
+             ([58:3-23], (Expr ((nothing), [58:3-22], (Binop { bop = (Eq None); lhs = ((nothing), [58:3-9], (Lvar ([58:3-9], $bad11))); rhs = ((nothing), [58:14-22], (String "HelloH")) }))))]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
@@ -253,10 +291,12 @@ Errors:
            [([64:3-77],
              (Expr
                 ((HH\Lib\Regex\Pattern<shape(0 => string)>), [64:3-76],
-                 (Binop ((Eq None), ((HH\Lib\Regex\Pattern<shape(0 => string)>), [64:3-9], (Lvar ([64:3-9], $good0))),
-                    ((HH\Lib\Regex\Pattern<shape(0 => string)>), [64:12-76],
-                     (PrefixedString ("re", ((string), [64:14-76], (String "(He\\(?'one'\\D\\)\\(\\D\\)\\(?'three'\\D\\)\\(\\D\\)\\(\\D\\)\\(?'six'\\D\\))")))))
-                    )))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((HH\Lib\Regex\Pattern<shape(0 => string)>), [64:3-9], (Lvar ([64:3-9], $good0)));
+                      rhs =
+                      ((HH\Lib\Regex\Pattern<shape(0 => string)>), [64:12-76],
+                       (PrefixedString ("re", ((string), [64:14-76], (String "(He\\(?'one'\\D\\)\\(\\D\\)\\(?'three'\\D\\)\\(\\D\\)\\(\\D\\)\\(?'six'\\D\\))")))))
+                      }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

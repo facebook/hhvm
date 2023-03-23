@@ -135,15 +135,32 @@ let resugar_binop expr =
       p,
       Aast.(
         Binop
-          ( _,
-            te1,
-            (_, _, Hole ((_, _, Binop (op, _, te2)), ty_have, ty_expect, source))
-          )) ) ->
+          {
+            bop = _;
+            lhs = te1;
+            rhs =
+              ( _,
+                _,
+                Hole
+                  ( (_, _, Binop { bop = op; lhs = _; rhs = te2 }),
+                    ty_have,
+                    ty_expect,
+                    source ) );
+          }) ) ->
     let hte2 = mk_hole te2 ~ty_have ~ty_expect ~source in
-    let te = Aast.Binop (Ast_defs.Eq (Some op), te1, hte2) in
+    let te =
+      Aast.Binop { bop = Ast_defs.Eq (Some op); lhs = te1; rhs = hte2 }
+    in
     Some (topt, p, te)
-  | (topt, p, Aast.Binop (_, te1, (_, _, Aast.Binop (op, _, te2)))) ->
-    let te = Aast.Binop (Ast_defs.Eq (Some op), te1, te2) in
+  | ( topt,
+      p,
+      Aast.Binop
+        {
+          bop = _;
+          lhs = te1;
+          rhs = (_, _, Aast.Binop { bop = op; lhs = _; rhs = te2 });
+        } ) ->
+    let te = Aast.Binop { bop = Ast_defs.Eq (Some op); lhs = te1; rhs = te2 } in
     Some (topt, p, te)
   | _ -> None
 
@@ -1552,7 +1569,7 @@ let refine_lvalue_type env ((ty, _, _) as te) ~refine =
 let rec condition_nullity ~nonnull (env : env) te =
   match te with
   (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
-  | (_, _, Aast.Binop (Ast_defs.Eq None, var, te)) ->
+  | (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs = var; rhs = te }) ->
     let (env, lset1) = condition_nullity ~nonnull env te in
     let (env, lset2) = condition_nullity ~nonnull env var in
     (env, Local_id.Set.union lset1 lset2)
@@ -2426,7 +2443,7 @@ and has_dispose_method env has_await p e ty =
 and check_using_expr has_await env ((_, pos, content) as using_clause) =
   match content with
   (* Simple assignment to local of form `$lvar = e` *)
-  | Binop (Ast_defs.Eq None, (_, lvar_pos, Lvar lvar), e) ->
+  | Binop { bop = Ast_defs.Eq None; lhs = (_, lvar_pos, Lvar lvar); rhs = e } ->
     let (env, te, ty) =
       expr ~is_using_clause:true env e ~allow_awaitable:(*?*) false
     in
@@ -2441,9 +2458,11 @@ and check_using_expr has_await env ((_, pos, content) as using_clause) =
           pos
           ty
           (Aast.Binop
-             ( Ast_defs.Eq None,
-               Tast.make_typed_expr lvar_pos ty (Aast.Lvar lvar),
-               te )),
+             {
+               bop = Ast_defs.Eq None;
+               lhs = Tast.make_typed_expr lvar_pos ty (Aast.Lvar lvar);
+               rhs = te;
+             }),
         [snd lvar] ) )
   (* Arbitrary expression. This will be assigned to a temporary *)
   | _ ->
@@ -4156,7 +4175,7 @@ and expr_
     (* All function pointers are readonly_this since they are always a toplevel function or static method *)
     let fty = set_readonly_this fty in
     make_result env p e fty
-  | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
+  | Binop { bop = Ast_defs.QuestionQuestion; lhs = e1; rhs = e2 } ->
     let (env, te1, ty1) =
       raw_expr ~lhs_of_null_coalesce:true env e1 ~allow_awaitable:true
     in
@@ -4172,8 +4191,12 @@ and expr_
       Inter.intersect env ~r:Reason.Rnone ty1 (MakeType.nonnull Reason.Rnone)
     in
     let (env, ty) = Union.union ~approx_cancel_neg:true env ty1 ty2 in
-    make_result env p (Aast.Binop (Ast_defs.QuestionQuestion, te1, te2)) ty
-  | Binop (Ast_defs.Eq op_opt, e1, e2) ->
+    make_result
+      env
+      p
+      (Aast.Binop { bop = Ast_defs.QuestionQuestion; lhs = te1; rhs = te2 })
+      ty
+  | Binop { bop = Ast_defs.Eq op_opt; lhs = e1; rhs = e2 } ->
     let make_result env p te ty =
       let (env, te, ty) = make_result env p te ty in
       let env = Typing_local_ops.check_assignment env te in
@@ -4194,7 +4217,14 @@ and expr_
         expr_error env p outer
       | _ ->
         let e_fake =
-          ((), p, Binop (Ast_defs.Eq None, e1, ((), p, Binop (op, e1, e2))))
+          ( (),
+            p,
+            Binop
+              {
+                bop = Ast_defs.Eq None;
+                lhs = e1;
+                rhs = ((), p, Binop { bop = op; lhs = e1; rhs = e2 });
+              } )
         in
         let (env, te_fake, ty) = raw_expr env e_fake in
         let te_opt = resugar_binop te_fake in
@@ -4209,10 +4239,16 @@ and expr_
       let (env, te1, ty, ty_mismatch_opt) = assign p env e1 pos2 ty2 in
       let te =
         Aast.Binop
-          (Ast_defs.Eq None, te1, hole_on_ty_mismatch ~ty_mismatch_opt te2)
+          {
+            bop = Ast_defs.Eq None;
+            lhs = te1;
+            rhs = hole_on_ty_mismatch ~ty_mismatch_opt te2;
+          }
       in
       make_result env p te ty)
-  | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
+  | Binop
+      { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
+    ->
     let c = Ast_defs.(equal_bop bop Ampamp) in
     let (env, te1, _) = expr env e1 in
     let lenv = env.lenv in
@@ -4222,9 +4258,9 @@ and expr_
     make_result
       env
       p
-      (Aast.Binop (bop, te1, te2))
+      (Aast.Binop { bop; lhs = te1; rhs = te2 })
       (MakeType.bool (Reason.Rlogic_ret p))
-  | Binop (bop, e1, e2) ->
+  | Binop { bop; lhs = e1; rhs = e2 } ->
     let (env, te1, ty1) = raw_expr env e1 in
     let (env, te2, ty2) = raw_expr env e2 in
     let env =
@@ -9349,30 +9385,45 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
   | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, te)], None)
     when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te
-  | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, _, Aast.Null), e)
-  | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), e, (_, _, Aast.Null)) ->
+  | Aast.Binop
+      {
+        bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
+        lhs = (_, _, Aast.Null);
+        rhs = e;
+      }
+  | Aast.Binop
+      {
+        bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
+        lhs = e;
+        rhs = (_, _, Aast.Null);
+      } ->
     condition_nullity ~nonnull:(not tparamet) env e
   | Aast.Lvar _
   | Aast.Obj_get _
   | Aast.Class_get _
-  | Aast.Binop (Ast_defs.Eq None, _, _) ->
+  | Aast.Binop { bop = Ast_defs.Eq None; _ } ->
     let (env, ety) = Env.expand_type env ty in
     (match get_node ety with
     | Tprim Tbool -> (env, Local_id.Set.empty)
     | _ -> condition_nullity ~nonnull:tparamet env te)
-  | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
+  | Aast.Binop
+      { bop = (Ast_defs.Diff | Ast_defs.Diff2) as op; lhs = e1; rhs = e2 } ->
     let op =
       if Ast_defs.(equal_bop op Diff) then
         Ast_defs.Eqeq
       else
         Ast_defs.Eqeqeq
     in
-    condition env (not tparamet) (ty, p, Aast.Binop (op, e1, e2))
+    condition
+      env
+      (not tparamet)
+      (ty, p, Aast.Binop { bop = op; lhs = e1; rhs = e2 })
   (* Conjunction of conditions. Matches the two following forms:
       if (cond1 && cond2)
       if (!(cond1 || cond2))
   *)
-  | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
+  | Aast.Binop
+      { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
     when Bool.equal tparamet Ast_defs.(equal_bop bop Ampamp) ->
     let (env, lset1) = condition env tparamet e1 in
     (* This is necessary in case there is an assignment in e2
@@ -9387,7 +9438,8 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
       if (cond1 || cond2)
       if (!(cond1 && cond2))
   *)
-  | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
+  | Aast.Binop
+      { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
     when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
     let (env, lset1, lset2) =
       branch

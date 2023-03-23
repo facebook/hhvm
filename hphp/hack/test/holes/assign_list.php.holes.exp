@@ -62,11 +62,14 @@ Errors:
            [([12:3-43],
              (Expr
                 (((int, int, int)), [12:3-42],
-                 (Binop ((Eq None),
-                    (((int, int, int)), [12:3-19], (List [((int), [12:8-10], (Lvar ([12:8-10], $u))); ((int), [12:12-14], (Lvar ([12:12-14], $v))); ((int), [12:16-18], (Lvar ([12:16-18], $w)))])),
-                    (((int, int, int)), [12:22-42],
-                     (Call ((((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))), [], [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))], None)))
-                    )))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      (((int, int, int)), [12:3-19], (List [((int), [12:8-10], (Lvar ([12:8-10], $u))); ((int), [12:12-14], (Lvar ([12:12-14], $v))); ((int), [12:16-18], (Lvar ([12:16-18], $w)))]));
+                      rhs =
+                      (((int, int, int)), [12:22-42],
+                       (Call ((((function(bool $x): (int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))), [], [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))], None)))
+                      }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -93,15 +96,18 @@ Errors:
            [([17:3-43],
              (Expr
                 (((int, int)), [17:3-42],
-                 (Binop ((Eq None),
-                    (((int, int)), [17:3-19],
-                     (List [((nothing), [17:8-10], (Lvar ([17:8-10], $u))); ((nothing), [17:12-14], (Lvar ([17:12-14], $v))); ((nothing), [17:16-18], (Lvar ([17:16-18], $w)))])),
-                    (((int, int)), [17:22-42],
-                     (Hole (
-                        (((int, int)), [17:22-42],
-                         (Call ((((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))), [], [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))], None))),
-                        ((int, int)), ({suggest:nothing}), Typing)))
-                    )))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      (((int, int)), [17:3-19],
+                       (List [((nothing), [17:8-10], (Lvar ([17:8-10], $u))); ((nothing), [17:12-14], (Lvar ([17:12-14], $v))); ((nothing), [17:16-18], (Lvar ([17:16-18], $w)))]));
+                      rhs =
+                      (((int, int)), [17:22-42],
+                       (Hole (
+                          (((int, int)), [17:22-42],
+                           (Call ((((function(bool $x): (int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))), [], [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))], None))),
+                          ((int, int)), ({suggest:nothing}), Typing)))
+                      }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

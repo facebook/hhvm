@@ -16,12 +16,12 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([5:3-10], (Expr ((int), [5:3-9], (Binop ((Eq None), ((int), [5:3-5], (Lvar ([5:3-5], $y))), ((int), [5:8-9], (Int "0")))))));
+          [([5:3-10], (Expr ((int), [5:3-9], (Binop { bop = (Eq None); lhs = ((int), [5:3-5], (Lvar ([5:3-5], $y))); rhs = ((int), [5:8-9], (Int "0")) }))));
             ([7:3-9:4],
              (Foreach (((?vec<int>), [7:11-14], (Hole (((?vec<int>), [7:11-14], (Lvar ([7:11-14], $xs))), (?vec<int>), (vec<int>), Typing))), (
                 As_v ((int), [7:18-20], (Lvar ([7:18-20], $x)))),
                 [([7:3-9:4], (AssertEnv (Join, {$#capability $#local_capability $xs $y})));
-                  ([8:5-14], (Expr ((int), [8:5-13], (Binop ((Eq (Some Plus)), ((int), [8:5-7], (Lvar ([8:5-7], $y))), ((int), [8:11-13], (Lvar ([8:11-13], $x))))))))]
+                  ([8:5-14], (Expr ((int), [8:5-13], (Binop { bop = (Eq (Some Plus)); lhs = ((int), [8:5-7], (Lvar ([8:5-7], $y))); rhs = ((int), [8:11-13], (Lvar ([8:11-13], $x))) }))))]
                 )))
             ]
           };

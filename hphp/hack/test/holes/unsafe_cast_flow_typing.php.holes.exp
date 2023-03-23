@@ -32,11 +32,13 @@
            [([8:3-9:4],
              (If (
                 ((bool), [8:7-72],
-                 (Binop (Barbar, ((bool), [8:7-14], (Binop (Diff2, ((int), [8:7-8], (Int "3")), ((int), [8:13-14], (Int "2"))))),
-                    ((bool), [8:18-72],
-                     (Call ((((function(int $_): bool)), [8:18-32], (Id ([8:18-32], "\\some_condition"))), 
-                        [], [(Pnormal, ((int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))])))))], None)))
-                    ))),
+                 (Binop
+                    { bop = Barbar; lhs = ((bool), [8:7-14], (Binop { bop = Diff2; lhs = ((int), [8:7-8], (Int "3")); rhs = ((int), [8:13-14], (Int "2")) }));
+                      rhs =
+                      ((bool), [8:18-72],
+                       (Call ((((function(int $_): bool)), [8:18-32], (Id ([8:18-32], "\\some_condition"))), 
+                          [], [(Pnormal, ((int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))])))))], None)))
+                      })),
                 [], [([Pos.none], Noop)])))
              ]
            };

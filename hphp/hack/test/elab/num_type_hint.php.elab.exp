@@ -195,9 +195,9 @@ Program(
                                                 (),
                                                 |num_type_hint.php(13:9-18),
                                                 Binop(
-                                                    (
-                                                        Slash,
-                                                        Expr(
+                                                    Binop {
+                                                        bop: Slash,
+                                                        lhs: Expr(
                                                             (),
                                                             |num_type_hint.php(13:9-12),
                                                             Lvar(
@@ -210,7 +210,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                        Expr(
+                                                        rhs: Expr(
                                                             (),
                                                             |num_type_hint.php(13:15-18),
                                                             Lvar(
@@ -223,7 +223,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                    ),
+                                                    },
                                                 ),
                                             ),
                                         ),
@@ -445,9 +445,9 @@ Program(
                                                 (),
                                                 |num_type_hint.php(17:9-18),
                                                 Binop(
-                                                    (
-                                                        Slash,
-                                                        Expr(
+                                                    Binop {
+                                                        bop: Slash,
+                                                        lhs: Expr(
                                                             (),
                                                             |num_type_hint.php(17:9-12),
                                                             Lvar(
@@ -460,7 +460,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                        Expr(
+                                                        rhs: Expr(
                                                             (),
                                                             |num_type_hint.php(17:15-18),
                                                             Lvar(
@@ -473,7 +473,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                    ),
+                                                    },
                                                 ),
                                             ),
                                         ),
@@ -980,14 +980,14 @@ Program(
                                                 (),
                                                 |num_type_hint.php(37:6-18),
                                                 Binop(
-                                                    (
-                                                        Eqeqeq,
-                                                        Expr(
+                                                    Binop {
+                                                        bop: Eqeqeq,
+                                                        lhs: Expr(
                                                             (),
                                                             |num_type_hint.php(37:6-10),
                                                             Null,
                                                         ),
-                                                        Expr(
+                                                        rhs: Expr(
                                                             (),
                                                             |num_type_hint.php(37:15-18),
                                                             Lvar(
@@ -1000,7 +1000,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                    ),
+                                                    },
                                                 ),
                                             ),
                                             Block(
@@ -1878,11 +1878,11 @@ Program(
                                             (),
                                             |num_type_hint.php(57:2-14),
                                             Binop(
-                                                (
-                                                    Eq(
+                                                Binop {
+                                                    bop: Eq(
                                                         None,
                                                     ),
-                                                    Expr(
+                                                    lhs: Expr(
                                                         (),
                                                         |num_type_hint.php(57:2-4),
                                                         Lvar(
@@ -1895,13 +1895,13 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    Expr(
+                                                    rhs: Expr(
                                                         (),
                                                         |num_type_hint.php(57:7-14),
                                                         Binop(
-                                                            (
-                                                                Slash,
-                                                                Expr(
+                                                            Binop {
+                                                                bop: Slash,
+                                                                lhs: Expr(
                                                                     (),
                                                                     |num_type_hint.php(57:7-9),
                                                                     Lvar(
@@ -1914,7 +1914,7 @@ Program(
                                                                         ),
                                                                     ),
                                                                 ),
-                                                                Expr(
+                                                                rhs: Expr(
                                                                     (),
                                                                     |num_type_hint.php(57:12-14),
                                                                     Lvar(
@@ -1927,10 +1927,10 @@ Program(
                                                                         ),
                                                                     ),
                                                                 ),
-                                                            ),
+                                                            },
                                                         ),
                                                     ),
-                                                ),
+                                                },
                                             ),
                                         ),
                                     ),
@@ -1985,11 +1985,11 @@ Program(
                                             (),
                                             |num_type_hint.php(59:2-10),
                                             Binop(
-                                                (
-                                                    Eq(
+                                                Binop {
+                                                    bop: Eq(
                                                         None,
                                                     ),
-                                                    Expr(
+                                                    lhs: Expr(
                                                         (),
                                                         |num_type_hint.php(59:2-4),
                                                         Lvar(
@@ -2002,14 +2002,14 @@ Program(
                                                             ),
                                                         ),
                                                     ),
-                                                    Expr(
+                                                    rhs: Expr(
                                                         (),
                                                         |num_type_hint.php(59:7-10),
                                                         Float(
                                                             "1.0",
                                                         ),
                                                     ),
-                                                ),
+                                                },
                                             ),
                                         ),
                                     ),
@@ -2022,9 +2022,9 @@ Program(
                                                 (),
                                                 |num_type_hint.php(60:6-14),
                                                 Binop(
-                                                    (
-                                                        Eqeq,
-                                                        Expr(
+                                                    Binop {
+                                                        bop: Eqeq,
+                                                        lhs: Expr(
                                                             (),
                                                             |num_type_hint.php(60:6-8),
                                                             Lvar(
@@ -2037,7 +2037,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                        Expr(
+                                                        rhs: Expr(
                                                             (),
                                                             |num_type_hint.php(60:12-14),
                                                             Lvar(
@@ -2050,7 +2050,7 @@ Program(
                                                                 ),
                                                             ),
                                                         ),
-                                                    ),
+                                                    },
                                                 ),
                                             ),
                                             Block(
@@ -2189,11 +2189,11 @@ Program(
                                                                         (),
                                                                         |num_type_hint.php(69:6-18),
                                                                         Binop(
-                                                                            (
-                                                                                Eq(
+                                                                            Binop {
+                                                                                bop: Eq(
                                                                                     None,
                                                                                 ),
-                                                                                Expr(
+                                                                                lhs: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(69:6-10),
                                                                                     Lvar(
@@ -2206,12 +2206,12 @@ Program(
                                                                                         ),
                                                                                     ),
                                                                                 ),
-                                                                                Expr(
+                                                                                rhs: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(69:13-18),
                                                                                     False,
                                                                                 ),
-                                                                            ),
+                                                                            },
                                                                         ),
                                                                     ),
                                                                 ),
@@ -2240,11 +2240,11 @@ Program(
                                                                         (),
                                                                         |num_type_hint.php(72:6-17),
                                                                         Binop(
-                                                                            (
-                                                                                Eq(
+                                                                            Binop {
+                                                                                bop: Eq(
                                                                                     None,
                                                                                 ),
-                                                                                Expr(
+                                                                                lhs: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(72:6-10),
                                                                                     Lvar(
@@ -2257,12 +2257,12 @@ Program(
                                                                                         ),
                                                                                     ),
                                                                                 ),
-                                                                                Expr(
+                                                                                rhs: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(72:13-17),
                                                                                     True,
                                                                                 ),
-                                                                            ),
+                                                                            },
                                                                         ),
                                                                     ),
                                                                 ),
@@ -2287,11 +2287,11 @@ Program(
                                                                         (),
                                                                         |num_type_hint.php(75:6-17),
                                                                         Binop(
-                                                                            (
-                                                                                Eq(
+                                                                            Binop {
+                                                                                bop: Eq(
                                                                                     None,
                                                                                 ),
-                                                                                Expr(
+                                                                                lhs: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(75:6-10),
                                                                                     Lvar(
@@ -2304,12 +2304,12 @@ Program(
                                                                                         ),
                                                                                     ),
                                                                                 ),
-                                                                                Expr(
+                                                                                rhs: Expr(
                                                                                     (),
                                                                                     |num_type_hint.php(75:13-17),
                                                                                     True,
                                                                                 ),
-                                                                            ),
+                                                                            },
                                                                         ),
                                                                     ),
                                                                 ),

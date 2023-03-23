@@ -86,8 +86,9 @@
              ([18:3-25],
               (Expr
                  ((TestDict), [18:3-24],
-                  (Binop ((Eq None), ((TestDict), [18:3-7], (Lvar ([18:3-7], $foo))),
-                     ((TestDict), [18:10-24], (New (((TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestDict), [18:3-7], (Lvar ([18:3-7], $foo)));
+                       rhs = ((TestDict), [18:10-24], (New (((TestDict), [18:14-22], (CI ([18:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
@@ -162,8 +163,9 @@
              ([35:3-25],
               (Expr
                  ((TestDict), [35:3-24],
-                  (Binop ((Eq None), ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo))),
-                     ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((TestDict), [35:3-7], (Lvar ([35:3-7], $foo)));
+                       rhs = ((TestDict), [35:10-24], (New (((TestDict), [35:14-22], (CI ([35:14-22], "\\TestDict"))), [], [], None, ((function(): void))))) }))));
              ([38:3-71],
               (Expr
                  ((void), [38:3-70],

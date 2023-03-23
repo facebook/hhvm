@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9918fcdb05c8d694202531c91e14eb56>>
+// @generated SignedSource<<d4602f4a1fb7bfaa1dfab17fab1837b7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -31,6 +31,7 @@ pub type CollectionTarg = aast_defs::CollectionTarg<Ex>;
 pub type FunctionPtrId = aast_defs::FunctionPtrId<Ex, En>;
 pub type ExpressionTree = aast_defs::ExpressionTree<Ex, En>;
 pub type Expr_ = aast_defs::Expr_<Ex, En>;
+pub type Binop = aast_defs::Binop<Ex, En>;
 pub type ClassGetExpr = aast_defs::ClassGetExpr<Ex, En>;
 pub type Case = aast_defs::Case<Ex, En>;
 pub type DefaultCase = aast_defs::DefaultCase<Ex, En>;

@@ -17,7 +17,10 @@
                    { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))); 
                      et_splices = [];
                      et_function_pointers =
-                     [([4:37-40], (Expr ((), [4:37-40], (Binop ((Eq None), ((), [4:37-40], (Lvar ([4:37-40], $0fp0))), ((), [4:37-40], (FunctionPointer ((FP_id ([4:37-40], "\\foo")), []))))))))];
+                     [([4:37-40],
+                       (Expr
+                          ((), [4:37-40], (Binop { bop = (Eq None); lhs = ((), [4:37-40], (Lvar ([4:37-40], $0fp0))); rhs = ((), [4:37-40], (FunctionPointer ((FP_id ([4:37-40], "\\foo")), []))) }))))
+                       ];
                      et_virtualized_expr =
                      ((), [4:14-47],
                       (Call (

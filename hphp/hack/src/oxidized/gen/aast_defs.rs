@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<85d209c1946035a98e44426fd5f16adc>>
+// @generated SignedSource<<e87d4a2c7a824451e201a4e720cdbb34>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -832,8 +832,7 @@ pub enum Expr_<Ex, En> {
     /// Binary operator.
     ///
     ///     $foo + $bar
-    #[rust_to_ocaml(inline_tuple)]
-    Binop(Box<(ast_defs::Bop, Expr<Ex, En>, Expr<Ex, En>)>),
+    Binop(Box<Binop<Ex, En>>),
     /// Pipe expression. The lid is the ID of the $$ that is implicitly
     /// declared by this pipe.
     ///
@@ -1024,6 +1023,31 @@ pub enum HoleSource {
     UnsafeCast(Vec<Hint>),
     UnsafeNonnullCast,
     EnforcedCast(Vec<Hint>),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct Binop<Ex, En> {
+    #[rust_to_ocaml(attr = "transform.opaque")]
+    pub bop: ast_defs::Bop,
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub lhs: Expr<Ex, En>,
+    #[rust_to_ocaml(attr = "transform.explicit")]
+    pub rhs: Expr<Ex, En>,
 }
 
 #[derive(

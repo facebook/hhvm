@@ -44,7 +44,7 @@ Errors:
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop (Plus, ((int), [11:10-12], (Lvar ([11:10-12], $x))), ((int), [11:15-16], (Int "4"))))))))] }; 
+         f_body = { fb_ast = [([11:3-17], (Return (Some ((int), [11:10-16], (Binop { bop = Plus; lhs = ((int), [11:10-12], (Lvar ([11:10-12], $x))); rhs = ((int), [11:15-16], (Int "4")) })))))] };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

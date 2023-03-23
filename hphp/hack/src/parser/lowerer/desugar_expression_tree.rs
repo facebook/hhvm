@@ -572,7 +572,11 @@ fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) ->
                 Stmt_::Expr(Box::new(Expr::new(
                     (),
                     expr.1.clone(),
-                    Expr_::Binop(Box::new((Bop::Eq(None), mk_lvar(&expr.1, i), expr))),
+                    Expr_::Binop(Box::new(aast::Binop {
+                        bop: Bop::Eq(None),
+                        lhs: mk_lvar(&expr.1, i),
+                        rhs: expr,
+                    })),
                 ))),
             )
         })
@@ -782,8 +786,8 @@ fn rewrite_expr(
                 desugar_expr,
             }
         }
-        Binop(bop) => {
-            let (op, lhs, rhs) = *bop;
+        Binop(binop) => {
+            let aast::Binop { bop, lhs, rhs } = *binop;
             let rewritten_lhs = rewrite_expr(
                 temps,
                 lhs,
@@ -799,7 +803,7 @@ fn rewrite_expr(
                 should_virtualize_functions,
             );
 
-            if op == Bop::Eq(None) {
+            if bop == Bop::Eq(None) {
                 // Source: MyDsl`$x = ...`
                 // Virtualized: $x = ...
                 // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
@@ -815,11 +819,11 @@ fn rewrite_expr(
                 let virtual_expr = Expr(
                     (),
                     pos,
-                    Binop(Box::new((
-                        op,
-                        rewritten_lhs.virtual_expr,
-                        rewritten_rhs.virtual_expr,
-                    ))),
+                    Binop(Box::new(aast::Binop {
+                        bop,
+                        lhs: rewritten_lhs.virtual_expr,
+                        rhs: rewritten_rhs.virtual_expr,
+                    })),
                 );
                 RewriteResult {
                     virtual_expr,
@@ -829,7 +833,7 @@ fn rewrite_expr(
                 // Source: MyDsl`... + ...`
                 // Virtualized: ...->__plus(...)
                 // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
-                let binop_str = match op {
+                let binop_str = match bop {
                     Bop::Plus => "__plus",
                     Bop::Minus => "__minus",
                     Bop::Star => "__star",

@@ -45,8 +45,10 @@
            [([10:3-33],
              (Expr
                 ((?int), [10:3-32],
-                 (Binop ((Eq None), ((?int), [10:3-5], (Lvar ([10:3-5], $x))),
-                    ((?int), [10:8-32], (Await ((Awaitable<?int>), [10:14-32], (Call ((((function(): Awaitable<?int>)), [10:14-30], (Id ([10:14-30], "\\async_get_an_int"))), [], [], None))))))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((?int), [10:3-5], (Lvar ([10:3-5], $x)));
+                      rhs = ((?int), [10:8-32], (Await ((Awaitable<?int>), [10:14-32], (Call ((((function(): Awaitable<?int>)), [10:14-30], (Id ([10:14-30], "\\async_get_an_int"))), [], [], None)))))
+                      }))));
              ([12:3-24],
               (Expr
                  ((void), [12:3-23],

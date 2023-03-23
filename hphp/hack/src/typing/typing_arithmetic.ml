@@ -174,7 +174,9 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         (env, ty)
     in
     let hte1 = hole_on_err te1 err_opt1 and hte2 = hole_on_err te2 err_opt2 in
-    (env, Tast.make_typed_expr p ty (Aast.Binop (bop, hte1, hte2)), ty)
+    ( env,
+      Tast.make_typed_expr p ty Aast.(Binop { bop; lhs = hte1; rhs = hte2 }),
+      ty )
   in
   let int_no_reason = MakeType.int Reason.none in
   let num_no_reason = MakeType.num Reason.none in

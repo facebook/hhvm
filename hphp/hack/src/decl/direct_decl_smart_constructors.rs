@@ -3192,7 +3192,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         Node::Expr(self.alloc(aast::Expr(
             (),
             pos,
-            aast::Expr_::Binop(self.alloc((op, lhs, rhs))),
+            aast::Expr_::Binop(self.alloc(aast::Binop { bop: op, lhs, rhs })),
         )))
     }
 
@@ -5425,9 +5425,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) {
                 match *expr {
                     aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
-                    aast::Expr(_, _, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
-                        fold_string_concat(e1, acc);
-                        fold_string_concat(e2, acc);
+                    aast::Expr(
+                        _,
+                        _,
+                        aast::Expr_::Binop(&aast::Binop {
+                            bop: Bop::Dot,
+                            lhs,
+                            rhs,
+                        }),
+                    ) => {
+                        fold_string_concat(lhs, acc);
+                        fold_string_concat(rhs, acc);
                     }
                     _ => {}
                 }

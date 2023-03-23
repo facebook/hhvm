@@ -167,21 +167,25 @@
            [([21:3-21],
              (Expr
                 ((<expr#1>::TX), [21:3-20],
-                 (Binop ((Eq None), ((<expr#1>::TX), [21:3-7], (Lvar ([21:3-7], $gen))),
-                    ((<expr#1>::TX), [21:10-20],
-                     (Call ((((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen"))),
-                        [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
-                        [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))], None)))
-                    )))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((<expr#1>::TX), [21:3-7], (Lvar ([21:3-7], $gen)));
+                      rhs =
+                      ((<expr#1>::TX), [21:10-20],
+                       (Call ((((function<T as WithTypeConstant, TR>(<expr#1> as WithTypeConstant $left): <expr#1>::TX)), [21:10-16], (Id ([21:10-16], "\\my_gen"))),
+                          [((<expr#1> as WithTypeConstant), ([21:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#1>::TX), ([21:10-16], (Happly (([Pos.none], "_"), []))))],
+                          [(Pnormal, ((WithTypeConstant), [21:17-19], (Lvar ([21:17-19], $x))))], None)))
+                      }))));
              ([22:3-21],
               (Expr
                  (((function(<expr#2>::TX): void)), [22:3-20],
-                  (Binop ((Eq None), (((function(<expr#2>::TX): void)), [22:3-7], (Lvar ([22:3-7], $log))),
-                     (((function(<expr#2>::TX): void)), [22:10-20],
-                      (Call ((((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log"))),
-                         [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
-                         [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))], None)))
-                     )))));
+                  (Binop
+                     { bop = (Eq None); lhs = (((function(<expr#2>::TX): void)), [22:3-7], (Lvar ([22:3-7], $log)));
+                       rhs =
+                       (((function(<expr#2>::TX): void)), [22:10-20],
+                        (Call ((((function<T as WithTypeConstant, TR>(<expr#2> as WithTypeConstant $left): (function(<expr#2>::TX): void))), [22:10-16], (Id ([22:10-16], "\\my_log"))),
+                           [((<expr#2> as WithTypeConstant), ([22:10-16], (Happly (([Pos.none], "_"), [])))); ((<expr#2>::TX), ([22:10-16], (Happly (([Pos.none], "_"), []))))],
+                           [(Pnormal, ((WithTypeConstant), [22:17-19], (Lvar ([22:17-19], $y))))], None)))
+                       }))));
              ([26:3-14],
               (Expr
                  ((void), [26:3-13],

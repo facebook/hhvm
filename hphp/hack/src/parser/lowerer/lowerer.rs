@@ -34,6 +34,7 @@ use ocaml_helper::parse_int;
 use ocaml_helper::ParseIntError;
 use ocamlrep::rc::RcOc;
 use oxidized::aast;
+use oxidized::aast::Binop;
 use oxidized::aast_defs::ClassReq;
 use oxidized::aast_defs::DocComment;
 use oxidized::aast_visitor::AstParams;
@@ -2614,8 +2615,14 @@ fn p_bop<'a>(
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
     use ast::Bop::*;
-    let mk = |op, l, r| Ok(Expr_::mk_binop(op, l, r));
-    let mk_eq = |op, l, r| Ok(Expr_::mk_binop(Eq(Some(Box::new(op))), l, r));
+    let mk = |bop, lhs, rhs| Ok(Expr_::mk_binop(Binop { bop, lhs, rhs }));
+    let mk_eq = |op, lhs, rhs| {
+        Ok(Expr_::mk_binop(Binop {
+            bop: Eq(Some(Box::new(op))),
+            lhs,
+            rhs,
+        }))
+    };
     match token_kind(node) {
         Some(TK::Equal) => mk(Eq(None), lhs, rhs),
         Some(TK::Bar) => mk(Bar, lhs, rhs),
@@ -3021,7 +3028,12 @@ fn p_concurrent_stmt<'a>(
                 if let Some(tv) = tmp_vars.next() {
                     if let Stmt(p1, S_::Expr(expr)) = n {
                         if let Expr(_, p2, Expr_::Binop(bop)) = *expr {
-                            if let (Eq(op), e1, e2) = *bop {
+                            if let Binop {
+                                bop: Eq(op),
+                                lhs: e1,
+                                rhs: e2,
+                            } = *bop
+                            {
                                 let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
                                 if tmp_n.lvar_name() != e2.lvar_name() {
                                     let new_n = new(
@@ -3029,7 +3041,11 @@ fn p_concurrent_stmt<'a>(
                                         S_::mk_expr(Expr::new(
                                             (),
                                             p2.clone(),
-                                            Expr_::mk_binop(Eq(None), tmp_n.clone(), e2.clone()),
+                                            Expr_::mk_binop(Binop {
+                                                bop: Eq(None),
+                                                lhs: tmp_n.clone(),
+                                                rhs: e2.clone(),
+                                            }),
                                         )),
                                     );
                                     body_stmts.push(new_n);
@@ -3039,7 +3055,11 @@ fn p_concurrent_stmt<'a>(
                                     S_::mk_expr(Expr::new(
                                         (),
                                         p2,
-                                        Expr_::mk_binop(Eq(op), e1, tmp_n),
+                                        Expr_::mk_binop(Binop {
+                                            bop: Eq(op),
+                                            lhs: e1,
+                                            rhs: tmp_n,
+                                        }),
                                     )),
                                 );
                                 assign_stmts.push(assign_stmt);
@@ -5056,16 +5076,16 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 (
                     ast::Stmt::new(
                         p.clone(),
-                        ast::Stmt_::mk_expr(e(Expr_::mk_binop(
-                            ast::Bop::Eq(None),
-                            e(Expr_::mk_obj_get(
+                        ast::Stmt_::mk_expr(e(Expr_::mk_binop(Binop {
+                            bop: ast::Bop::Eq(None),
+                            lhs: e(Expr_::mk_obj_get(
                                 e(Expr_::mk_lvar(lid(special_idents::THIS))),
                                 e(Expr_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                 ast::OgNullFlavor::OGNullthrows,
                                 ast::PropOrMethod::IsProp,
                             )),
-                            e(Expr_::mk_lvar(lid(&param.name))),
-                        ))),
+                            rhs: e(Expr_::mk_lvar(lid(&param.name))),
+                        }))),
                     ),
                     ast::ClassVar {
                         final_: false,

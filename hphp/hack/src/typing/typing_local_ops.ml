@@ -261,7 +261,7 @@ let rec check_assignment env (x, append_pos_opt, te_) =
   match te_ with
   | Aast.Hole ((_, _, e), _, _, _) -> check_assignment env (x, append_pos_opt, e)
   | Aast.Unop ((Uincr | Udecr | Upincr | Updecr), te1)
-  | Aast.Binop (Eq _, te1, _) ->
+  | Aast.(Binop { bop = Eq _; lhs = te1; _ }) ->
     check_local_capability
       Capabilities.(mk writeProperty)
       (check_assignment_or_unset_target

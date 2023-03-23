@@ -14,7 +14,8 @@
            param_user_attributes = [{ ua_name = ([3:40-46], "__Soft"); ua_params = [] }]; 
            param_visibility = None }
           ];
-        f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([4:3-17], (Return (Some ((), [4:10-16], (Binop (Plus, ((), [4:10-12], (Lvar ([4:10-12], $x))), ((), [4:15-16], (Int "1"))))))))] };
+        f_ctxs = None; f_unsafe_ctxs = None;
+        f_body = { fb_ast = [([4:3-17], (Return (Some ((), [4:10-16], (Binop { bop = Plus; lhs = ((), [4:10-12], (Lvar ([4:10-12], $x))); rhs = ((), [4:15-16], (Int "1")) })))))] };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = [] })

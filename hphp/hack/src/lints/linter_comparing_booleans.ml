@@ -33,19 +33,19 @@ let handler =
 
     method! at_expr _env (_, pos, expr_) =
       match expr_ with
-      | Aast.Binop (op, exp1, exp2) ->
-        (match op with
+      | Aast.(Binop { bop; lhs; rhs }) ->
+        (match bop with
         | Ast_defs.Eqeq
         | Ast_defs.Eqeqeq ->
-          (match checking_the_expression exp1 exp2 with
+          (match checking_the_expression lhs rhs with
           | Some (name, boolean_var) ->
-            (match exp1 with
+            (match lhs with
             | (_, pos_exp1, _) ->
               Lints_errors.comparing_booleans pos pos_exp1 name boolean_var)
           | None ->
-            (match checking_the_expression exp2 exp1 with
+            (match checking_the_expression rhs lhs with
             | Some (name, boolean_var) ->
-              (match exp2 with
+              (match rhs with
               | (_, pos_exp2, _) ->
                 Lints_errors.comparing_booleans pos pos_exp2 name boolean_var)
             | None -> ()))

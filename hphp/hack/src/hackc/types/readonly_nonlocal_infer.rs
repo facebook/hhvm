@@ -319,11 +319,11 @@ impl<'decl> Infer<'decl> {
                 (Unop(box_tup!(unop.clone(), e)), Tyx::Todo, ctx)
             }
             // Does not yet handle `list`
-            Binop(box (
-                eq @ Bop::Eq(bop_opt),
-                lhs @ ast::Expr(_, _, Lvar(box ast::Lid(_, (_, var_name)))),
+            Binop(box aast::Binop {
+                bop: eq @ Bop::Eq(bop_opt),
+                lhs: lhs @ ast::Expr(_, _, Lvar(box ast::Lid(_, (_, var_name)))),
                 rhs,
-            )) => {
+            }) => {
                 let (rhs, r_ty, ctx) = self.infer_expr(rhs, ctx, next_where);
                 let (lhs, _l_ty, mut ctx) = self.infer_expr(lhs, ctx, next_where);
                 match bop_opt {
@@ -339,19 +339,39 @@ impl<'decl> Infer<'decl> {
                             ctx.insert(var_name.clone(), ty_to_insert);
                         }
                         (
-                            Binop(box_tup!(eq.clone(), lhs, rhs,)),
+                            Binop(Box::new(aast::Binop {
+                                bop: eq.clone(),
+                                lhs,
+                                rhs,
+                            })),
                             Tyx::GiveUp, // hhvm doesn't actually allow assignments to be used as expressions
                             ctx,
                         )
                     }
                     // no special handling for `+=` etc. yet
-                    Some(_) => (Binop(box_tup!(eq.clone(), lhs, rhs,)), Tyx::GiveUp, ctx),
+                    Some(_) => (
+                        Binop(Box::new(aast::Binop {
+                            bop: eq.clone(),
+                            lhs,
+                            rhs,
+                        })),
+                        Tyx::GiveUp,
+                        ctx,
+                    ),
                 }
             }
-            Binop(box (bo, lhs, rhs)) => {
+            Binop(box ast::Binop { bop, lhs, rhs }) => {
                 let (lhs, _l_ty, ctx) = self.infer_expr(lhs, ctx, next_where);
                 let (rhs, _r_ty, ctx) = self.infer_expr(rhs, ctx, next_where);
-                (Binop(box_tup!(bo.clone(), lhs, rhs,)), Tyx::Todo, ctx)
+                (
+                    Binop(Box::new(ast::Binop {
+                        bop: bop.clone(),
+                        lhs,
+                        rhs,
+                    })),
+                    Tyx::Todo,
+                    ctx,
+                )
             }
             Pipe(box (lid, lhs, rhs)) => {
                 let (lhs, _l_ty, ctx) = self.infer_expr(lhs, ctx, next_where);

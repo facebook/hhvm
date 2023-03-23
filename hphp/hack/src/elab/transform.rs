@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a51e59411579a3e0c77c7bad8f31a752>>
+// @generated SignedSource<<f3f2e951d29883028f9812c1183cde9c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -568,6 +568,48 @@ impl Transform for HoleSource {
             HoleSource::UnsafeCast(ref mut __binding_0) => __binding_0.transform(env, pass),
             HoleSource::UnsafeNonnullCast => {}
             HoleSource::EnforcedCast(ref mut __binding_0) => __binding_0.transform(env, pass),
+        }
+    }
+}
+impl Transform for Binop {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_binop_top_down(env, self) {
+            return;
+        }
+        self.traverse(env, pass);
+        in_pass.on_ty_binop_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            Binop {
+                lhs: ref mut __binding_1,
+                rhs: ref mut __binding_2,
+                ..
+            } => {
+                {
+                    {
+                        let pass = &mut pass.clone();
+                        let mut in_pass = pass.clone();
+                        if let Break(..) = pass.on_fld_binop_lhs_top_down(env, __binding_1) {
+                            return;
+                        }
+                        __binding_1.transform(env, pass);
+                        in_pass.on_fld_binop_lhs_bottom_up(env, __binding_1);
+                    }
+                }
+                {
+                    {
+                        let pass = &mut pass.clone();
+                        let mut in_pass = pass.clone();
+                        if let Break(..) = pass.on_fld_binop_rhs_top_down(env, __binding_2) {
+                            return;
+                        }
+                        __binding_2.transform(env, pass);
+                        in_pass.on_fld_binop_rhs_bottom_up(env, __binding_2);
+                    }
+                }
+            }
         }
     }
 }

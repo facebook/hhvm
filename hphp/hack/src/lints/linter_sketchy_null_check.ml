@@ -54,12 +54,11 @@ let handler =
       match x with
       | Eif (e, None, _) -> sketchy_null_check env e `Coalesce
       | Unop (Unot, e)
-      | Binop (Eqeq, (_, _, Null), e)
-      | Binop (Eqeq, e, (_, _, Null)) ->
+      | Binop { bop = Eqeq; lhs = (_, _, Null); rhs = e }
+      | Binop { bop = Eqeq; lhs = e; rhs = (_, _, Null) } ->
         sketchy_null_check env e `Eq
       | Eif (e, Some _, _) -> sketchy_null_check env e `Neq
-      | Binop (Ampamp, e1, e2)
-      | Binop (Barbar, e1, e2) ->
+      | Binop { bop = Ampamp | Barbar; lhs = e1; rhs = e2 } ->
         sketchy_null_check env e1 `Neq;
         sketchy_null_check env e2 `Neq
       | _ -> ()

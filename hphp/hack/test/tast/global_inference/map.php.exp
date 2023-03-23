@@ -21,7 +21,9 @@ Errors:
           [([6:3-18],
             (Expr
                ((int), [6:3-17],
-                (Binop ((Eq None), ((int), [6:3-12], (Array_get (((Map<string, int>), [6:3-5], (Lvar ([6:3-5], $m))), (Some ((string), [6:6-11], (String "hey")))))), ((int), [6:15-17], (Int "40")))))));
+                (Binop
+                   { bop = (Eq None); lhs = ((int), [6:3-12], (Array_get (((Map<string, int>), [6:3-5], (Lvar ([6:3-5], $m))), (Some ((string), [6:6-11], (String "hey"))))));
+                     rhs = ((int), [6:15-17], (Int "40")) }))));
             ([8:3-19], (Return (Some ((int), [8:10-18], (Array_get (((Map<string, int>), [8:10-12], (Lvar ([8:10-12], $m))), (Some ((string), [8:13-17], (String "ho")))))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

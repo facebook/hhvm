@@ -19,7 +19,9 @@
                      [([4:25-31],
                        (Expr
                           ((), [4:25-31],
-                           (Binop ((Eq None), ((), [4:25-31], (Lvar ([4:25-31], $0splice0))), ((), [4:25-31], (Binop (Plus, ((), [4:25-27], (Lvar ([4:25-27], $x))), ((), [4:30-31], (Int "2"))))))))))
+                           (Binop
+                              { bop = (Eq None); lhs = ((), [4:25-31], (Lvar ([4:25-31], $0splice0)));
+                                rhs = ((), [4:25-31], (Binop { bop = Plus; lhs = ((), [4:25-27], (Lvar ([4:25-27], $x))); rhs = ((), [4:30-31], (Int "2")) })) }))))
                        ];
                      et_function_pointers = [];
                      et_virtualized_expr =

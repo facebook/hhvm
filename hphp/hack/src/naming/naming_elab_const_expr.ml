@@ -93,7 +93,7 @@ let on_expr_top_down
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);
         (ctx, Error (Err.invalid_expr expr))
     end
-    | Aast.(Binop (bop, _, _)) -> begin
+    | Aast.(Binop { bop; _ }) -> begin
       match bop with
       | Ast_defs.Eq _ ->
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);

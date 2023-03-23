@@ -20,11 +20,13 @@
           [([5:3-15],
             (Expr
                ((int), [5:3-14],
-                (Binop ((Eq None),
-                   ((int), [5:3-10],
-                    (Array_get (((ImmMap<string, int>), [5:3-5], (Hole (((ImmMap<string, int>), [5:3-5], (Lvar ([5:3-5], $x))), (ImmMap<string, int>), (Map<string, int>), Typing))),
-                       (Some ((string), [5:6-9], (String "a")))))),
-                   ((int), [5:13-14], (Int "1")))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs =
+                     ((int), [5:3-10],
+                      (Array_get (((ImmMap<string, int>), [5:3-5], (Hole (((ImmMap<string, int>), [5:3-5], (Lvar ([5:3-5], $x))), (ImmMap<string, int>), (Map<string, int>), Typing))),
+                         (Some ((string), [5:6-9], (String "a"))))));
+                     rhs = ((int), [5:13-14], (Int "1")) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -52,11 +54,13 @@
            [([10:3-15],
              (Expr
                 ((int), [10:3-14],
-                 (Binop ((Eq None),
-                    ((int), [10:3-10],
-                     (Array_get (((ConstMap<string, int>), [10:3-5], (Hole (((ConstMap<string, int>), [10:3-5], (Lvar ([10:3-5], $x))), (ConstMap<string, int>), (Map<string, int>), Typing))),
-                        (Some ((string), [10:6-9], (String "a")))))),
-                    ((int), [10:13-14], (Int "1")))))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      ((int), [10:3-10],
+                       (Array_get (((ConstMap<string, int>), [10:3-5], (Hole (((ConstMap<string, int>), [10:3-5], (Lvar ([10:3-5], $x))), (ConstMap<string, int>), (Map<string, int>), Typing))),
+                          (Some ((string), [10:6-9], (String "a"))))));
+                      rhs = ((int), [10:13-14], (Int "1")) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

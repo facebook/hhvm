@@ -63,7 +63,7 @@ module VisitorFunctor (Parent : BodyVisitorModule) : BodyVisitorModule = struct
       method! on_stmt () stmt =
         begin
           match snd stmt with
-          | Expr (_, _, Binop (Ast_defs.Eq _, e, _)) ->
+          | Expr (_, _, Binop { bop = Ast_defs.Eq _; lhs = e; _ }) ->
             this#extend_env (expr_lvars e)
           | _ -> ()
         end;

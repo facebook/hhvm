@@ -19,7 +19,8 @@
           [([4:3-16],
             (Expr
                ((dict<nothing, nothing>), [4:3-15],
-                (Binop ((Eq None), ((dict<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((dict<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-13], Dict), None, []))))))));
+                (Binop
+                   { bop = (Eq None); lhs = ((dict<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((dict<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-13], Dict), None, []))) }))));
             ([6:3-13],
              (Expr
                 ((nothing), [6:3-12],

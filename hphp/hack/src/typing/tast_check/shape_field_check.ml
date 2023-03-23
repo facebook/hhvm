@@ -159,9 +159,11 @@ let handler =
       | ( _,
           p,
           Binop
-            ( Ast_defs.QuestionQuestion,
-              (_, _, Array_get (shape, Some (_, pos, String field_name))),
-              _ ) ) ->
+            {
+              bop = Ast_defs.QuestionQuestion;
+              lhs = (_, _, Array_get (shape, Some (_, pos, String field_name)));
+              _;
+            } ) ->
         shape_access_with_non_existent_field
           p
           env

@@ -60,24 +60,28 @@
            [([7:38-49],
              (Expr
                 ((dict<string, dynamic>), [7:38-49],
-                 (Binop ((Eq None),
-                    ((dict<string, dynamic>), [7:38-49], (Obj_get (((this), [7:38-49], This), ((dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop))),
-                    ((dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
+                 (Binop
+                    { bop = (Eq None);
+                      lhs = ((dict<string, dynamic>), [7:38-49], (Obj_get (((this), [7:38-49], This), ((dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop)));
+                      rhs = ((dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))) }))));
              ([8:30-39],
               (Expr
                  ((vec<dynamic>), [8:30-39],
-                  (Binop ((Eq None), ((vec<dynamic>), [8:30-39], (Obj_get (((this), [8:30-39], This), ((vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop))),
-                     ((vec<dynamic>), [8:30-39], (Lvar ([8:30-39], $children))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((vec<dynamic>), [8:30-39], (Obj_get (((this), [8:30-39], This), ((vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop)));
+                       rhs = ((vec<dynamic>), [8:30-39], (Lvar ([8:30-39], $children))) }))));
              ([9:21-26],
               (Expr
                  ((string), [9:21-26],
-                  (Binop ((Eq None), ((string), [9:21-26], (Obj_get (((this), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop))),
-                     ((string), [9:21-26], (Lvar ([9:21-26], $file))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((string), [9:21-26], (Obj_get (((this), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop)));
+                       rhs = ((string), [9:21-26], (Lvar ([9:21-26], $file))) }))));
              ([10:18-23],
               (Expr
                  ((int), [10:18-23],
-                  (Binop ((Eq None), ((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop))),
-                     ((int), [10:18-23], (Lvar ([10:18-23], $line))))))));
+                  (Binop
+                     { bop = (Eq None); lhs = ((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop)));
+                       rhs = ((int), [10:18-23], (Lvar ([10:18-23], $line))) }))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -113,14 +117,17 @@
            [([16:5-38],
              (Expr
                 ((XhpSimple\:element), [16:5-37],
-                 (Binop ((Eq None), ((XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem))),
-                    ((XhpSimple\:element), [16:13-37],
-                     (Xml (([16:14-21], "\\XhpSimple\\:element"),
-                        [(Xhp_simple
-                            { xs_name = ([16:22-26], "prop"); xs_type = (int); xs_expr = ((string), [16:28-33], (Hole (((string), [16:28-33], (Lvar ([16:28-33], $prop))), (string), (int), Typing))) })
-                          ],
-                        [])))
-                    )))))
+                 (Binop
+                    { bop = (Eq None); lhs = ((XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem)));
+                      rhs =
+                      ((XhpSimple\:element), [16:13-37],
+                       (Xml (([16:14-21], "\\XhpSimple\\:element"),
+                          [(Xhp_simple
+                              { xs_name = ([16:22-26], "prop"); xs_type = (int); 
+                                xs_expr = ((string), [16:28-33], (Hole (((string), [16:28-33], (Lvar ([16:28-33], $prop))), (string), (int), Typing))) })
+                            ],
+                          [])))
+                      }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

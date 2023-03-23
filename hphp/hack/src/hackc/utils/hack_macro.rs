@@ -820,6 +820,15 @@ mod emit {
         }
     }
 
+    impl EmitTokens for ast::Binop {
+        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
+            let bop = self.bop.emit_tokens(e)?;
+            let lhs = self.lhs.emit_tokens(e)?;
+            let rhs = self.rhs.emit_tokens(e)?;
+            Ok(quote!(Binop{bop:#bop, lhs:#lhs, rhs:#rhs}))
+        }
+    }
+
     impl EmitTokens for ast::Bop {
         fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
             use ast::Bop;

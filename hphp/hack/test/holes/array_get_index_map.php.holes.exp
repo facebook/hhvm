@@ -19,7 +19,7 @@
           [([4:3-16],
             (Expr
                ((Map<nothing, nothing>), [4:3-15],
-                (Binop ((Eq None), ((Map<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((Map<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-12], Map), None, []))))))));
+                (Binop { bop = (Eq None); lhs = ((Map<nothing, nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((Map<nothing, nothing>), [4:9-15], (KeyValCollection (([4:9-12], Map), None, []))) }))));
             ([7:3-13],
              (Expr
                 ((nothing), [7:3-12],

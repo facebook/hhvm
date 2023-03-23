@@ -17,11 +17,18 @@
                    { et_hint = ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))); 
                      et_splices = [];
                      et_function_pointers =
-                     [([7:9-12], (Expr ((), [7:9-12], (Binop ((Eq None), ((), [7:9-12], (Lvar ([7:9-12], $0fp0))), ((), [7:9-12], (FunctionPointer ((FP_id ([7:9-12], "\\baz")), []))))))));
-                       ([8:9-12], (Expr ((), [8:9-12], (Binop ((Eq None), ((), [8:9-12], (Lvar ([8:9-12], $0fp1))), ((), [8:9-12], (FunctionPointer ((FP_id ([8:9-12], "\\qux")), []))))))));
-                       ([6:7-10], (Expr ((), [6:7-10], (Binop ((Eq None), ((), [6:7-10], (Lvar ([6:7-10], $0fp2))), ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\bar")), []))))))));
-                       ([10:7-11], (Expr ((), [10:7-11], (Binop ((Eq None), ((), [10:7-11], (Lvar ([10:7-11], $0fp3))), ((), [10:7-11], (FunctionPointer ((FP_id ([10:7-11], "\\qaal")), []))))))));
-                       ([5:5-8], (Expr ((), [5:5-8], (Binop ((Eq None), ((), [5:5-8], (Lvar ([5:5-8], $0fp4))), ((), [5:5-8], (FunctionPointer ((FP_id ([5:5-8], "\\foo")), []))))))))];
+                     [([7:9-12],
+                       (Expr ((), [7:9-12], (Binop { bop = (Eq None); lhs = ((), [7:9-12], (Lvar ([7:9-12], $0fp0))); rhs = ((), [7:9-12], (FunctionPointer ((FP_id ([7:9-12], "\\baz")), []))) }))));
+                       ([8:9-12],
+                        (Expr ((), [8:9-12], (Binop { bop = (Eq None); lhs = ((), [8:9-12], (Lvar ([8:9-12], $0fp1))); rhs = ((), [8:9-12], (FunctionPointer ((FP_id ([8:9-12], "\\qux")), []))) }))));
+                       ([6:7-10],
+                        (Expr ((), [6:7-10], (Binop { bop = (Eq None); lhs = ((), [6:7-10], (Lvar ([6:7-10], $0fp2))); rhs = ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\bar")), []))) }))));
+                       ([10:7-11],
+                        (Expr
+                           ((), [10:7-11], (Binop { bop = (Eq None); lhs = ((), [10:7-11], (Lvar ([10:7-11], $0fp3))); rhs = ((), [10:7-11], (FunctionPointer ((FP_id ([10:7-11], "\\qaal")), []))) }))));
+                       ([5:5-8],
+                        (Expr ((), [5:5-8], (Binop { bop = (Eq None); lhs = ((), [5:5-8], (Lvar ([5:5-8], $0fp4))); rhs = ((), [5:5-8], (FunctionPointer ((FP_id ([5:5-8], "\\foo")), []))) }))))
+                       ];
                      et_virtualized_expr =
                      ((), [5:5-11:4],
                       (Call (

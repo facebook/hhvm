@@ -16,24 +16,29 @@
         f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-11], (Expr ((int), [4:3-10], (Binop ((Eq (Some Minus)), ((int), [4:3-5], (Lvar ([4:3-5], $x))), ((int), [4:9-10], (Int "4")))))));
-            ([5:3-11], (Expr ((int), [5:3-10], (Binop ((Eq (Some Plus)), ((int), [5:3-5], (Lvar ([5:3-5], $x))), ((int), [5:9-10], (Int "4")))))));
-            ([6:3-11], (Expr ((int), [6:3-10], (Binop ((Eq (Some Star)), ((int), [6:3-5], (Lvar ([6:3-5], $x))), ((int), [6:9-10], (Int "4")))))));
+          [([4:3-11], (Expr ((int), [4:3-10], (Binop { bop = (Eq (Some Minus)); lhs = ((int), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((int), [4:9-10], (Int "4")) }))));
+            ([5:3-11], (Expr ((int), [5:3-10], (Binop { bop = (Eq (Some Plus)); lhs = ((int), [5:3-5], (Lvar ([5:3-5], $x))); rhs = ((int), [5:9-10], (Int "4")) }))));
+            ([6:3-11], (Expr ((int), [6:3-10], (Binop { bop = (Eq (Some Star)); lhs = ((int), [6:3-5], (Lvar ([6:3-5], $x))); rhs = ((int), [6:9-10], (Int "4")) }))));
             ([8:3-29],
              (Expr
                 ((vec<int>), [8:3-28],
-                 (Binop ((Eq None), ((vec<int>), [8:3-7], (Lvar ([8:3-7], $arr))),
-                    ((vec<int>), [8:10-28],
-                     (ValCollection (([8:10-28], Vec), None, [((int), [8:17-18], (Int "1")); ((int), [8:20-21], (Int "2")); ((int), [8:23-24], (Int "3")); ((int), [8:26-27], (Int "4"))])))
-                    )))));
-            ([8:30-37], (Expr ((int), [8:30-36], (Binop ((Eq None), ((int), [8:30-32], (Lvar ([8:30-32], $i))), ((int), [8:35-36], (Int "2")))))));
+                 (Binop
+                    { bop = (Eq None); lhs = ((vec<int>), [8:3-7], (Lvar ([8:3-7], $arr)));
+                      rhs =
+                      ((vec<int>), [8:10-28],
+                       (ValCollection (([8:10-28], Vec), None, [((int), [8:17-18], (Int "1")); ((int), [8:20-21], (Int "2")); ((int), [8:23-24], (Int "3")); ((int), [8:26-27], (Int "4"))])))
+                      }))));
+            ([8:30-37], (Expr ((int), [8:30-36], (Binop { bop = (Eq None); lhs = ((int), [8:30-32], (Lvar ([8:30-32], $i))); rhs = ((int), [8:35-36], (Int "2")) }))));
             ([9:3-21],
              (Expr
                 ((int), [9:3-20],
-                 (Binop ((Eq (Some Plus)),
-                    ((int), [9:3-15],
-                     (Array_get (((vec<int>), [9:3-7], (Lvar ([9:3-7], $arr))), (Some ((int), [9:8-14], (Binop (Minus, ((int), [9:8-10], (Lvar ([9:8-10], $i))), ((int), [9:13-14], (Int "1"))))))))),
-                    ((int), [9:19-20], (Int "4")))))));
+                 (Binop
+                    { bop = (Eq (Some Plus));
+                      lhs =
+                      ((int), [9:3-15],
+                       (Array_get (((vec<int>), [9:3-7], (Lvar ([9:3-7], $arr))),
+                          (Some ((int), [9:8-14], (Binop { bop = Minus; lhs = ((int), [9:8-10], (Lvar ([9:8-10], $i))); rhs = ((int), [9:13-14], (Int "1")) }))))));
+                      rhs = ((int), [9:19-20], (Int "4")) }))));
             ([11:3-13], (Return (Some ((int), [11:10-12], (Lvar ([11:10-12], $x))))))]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

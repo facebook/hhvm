@@ -23,10 +23,12 @@
           [([5:3-19],
             (Expr
                ((string), [5:3-18],
-                (Binop ((Eq None),
-                   ((string), [5:3-12],
-                    (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing))))))),
-                   ((string), [5:15-18], (String "a")))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs =
+                     ((string), [5:3-12],
+                      (Array_get (((string), [5:3-6], (Lvar ([5:3-6], $xs))), (Some ((mixed), [5:7-11], (Hole (((mixed), [5:7-11], (Lvar ([5:7-11], $idx))), (mixed), (int), Typing)))))));
+                     rhs = ((string), [5:15-18], (String "a")) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

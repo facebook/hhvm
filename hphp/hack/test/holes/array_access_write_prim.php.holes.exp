@@ -19,9 +19,10 @@
           [([5:3-17],
             (Expr
                ((bool), [5:3-16],
-                (Binop ((Eq None),
-                   ((bool), [5:3-9], (Array_get (((bool), [5:3-6], (Hole (((bool), [5:3-6], (Lvar ([5:3-6], $xs))), (bool), (nothing), Typing))), (Some ((int), [5:7-8], (Int "0")))))),
-                   ((bool), [5:12-16], (Hole (((bool), [5:12-16], True), (bool), (nothing), Typing))))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs = ((bool), [5:3-9], (Array_get (((bool), [5:3-6], (Hole (((bool), [5:3-6], (Lvar ([5:3-6], $xs))), (bool), (nothing), Typing))), (Some ((int), [5:7-8], (Int "0"))))));
+                     rhs = ((bool), [5:12-16], (Hole (((bool), [5:12-16], True), (bool), (nothing), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

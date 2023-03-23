@@ -21,11 +21,13 @@
           [([6:3-16],
             (Expr
                ((int), [6:3-15],
-                (Binop ((Eq None),
-                   ((int), [6:3-11],
-                    (Array_get ((((bool | Vector<string>)), [6:4-7], (Hole ((((bool | Vector<string>)), [6:4-7], (Lvar ([6:4-7], $xs))), ((bool | Vector<string>)), (Vector<string>), Typing))),
-                       (Some ((int), [6:9-10], (Int "0")))))),
-                   ((int), [6:14-15], (Hole (((int), [6:14-15], (Int "1")), (int), (string), Typing))))))))
+                (Binop
+                   { bop = (Eq None);
+                     lhs =
+                     ((int), [6:3-11],
+                      (Array_get ((((bool | Vector<string>)), [6:4-7], (Hole ((((bool | Vector<string>)), [6:4-7], (Lvar ([6:4-7], $xs))), ((bool | Vector<string>)), (Vector<string>), Typing))),
+                         (Some ((int), [6:9-10], (Int "0"))))));
+                     rhs = ((int), [6:14-15], (Hole (((int), [6:14-15], (Int "1")), (int), (string), Typing))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
@@ -53,13 +55,15 @@
            [([12:3-14],
              (Expr
                 ((int), [12:3-13],
-                 (Binop ((Eq None),
-                    ((int), [12:3-9],
-                     (Array_get (
-                        (((bool | vec<(int | string)>)), [12:3-6],
-                         (Hole ((((bool | vec<(int | string)>)), [12:3-6], (Lvar ([12:3-6], $xs))), ((bool | vec<(int | string)>)), (vec<(int | string)>), Typing))),
-                        (Some ((int), [12:7-8], (Int "0")))))),
-                    ((int), [12:12-13], (Int "1")))))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      ((int), [12:3-9],
+                       (Array_get (
+                          (((bool | vec<(int | string)>)), [12:3-6],
+                           (Hole ((((bool | vec<(int | string)>)), [12:3-6], (Lvar ([12:3-6], $xs))), ((bool | vec<(int | string)>)), (vec<(int | string)>), Typing))),
+                          (Some ((int), [12:7-8], (Int "0"))))));
+                      rhs = ((int), [12:12-13], (Int "1")) }))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

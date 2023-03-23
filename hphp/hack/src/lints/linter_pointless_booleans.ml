@@ -61,18 +61,18 @@ let handler =
 
     method! at_expr _env (_, pos, expr_) =
       match expr_ with
-      | Aast.Binop (op, exp1, exp2) ->
-        (match op with
+      | Aast.(Binop { bop; lhs; rhs }) ->
+        (match bop with
         | Ast_defs.Ampamp
         | Ast_defs.Barbar ->
           (* exp1 is the boolean literal (it is of the type true ||, false && etc)*)
           (* The original string for quickfix starts from the
              start of exp1 and ends at the start of exp2 *)
-          (match checking_the_expression exp1 exp2 with
+          (match checking_the_expression lhs rhs with
           | Some x ->
-            (match check_the_error op x with
+            (match check_the_error bop x with
             | Some str ->
-              (match (exp1, exp2) with
+              (match (lhs, rhs) with
               | ((_, pos_exp1, _), (_, pos_exp2, _)) ->
                 let (line1, bol1, start_col1) = Pos.line_beg_offset pos_exp1 in
                 let (line2, bol2, start_col2) = Pos.line_beg_offset pos_exp2 in
@@ -90,11 +90,11 @@ let handler =
             (* exp2 is the boolean literal (it is of the type && true, || false etc)*)
             (* The original string for quickfix starts from the
                end of exp1 and ends at the end of exp2 *)
-            (match checking_the_expression exp2 exp1 with
+            (match checking_the_expression rhs lhs with
             | Some x ->
-              (match check_the_error op x with
+              (match check_the_error bop x with
               | Some str ->
-                (match (exp1, exp2) with
+                (match (lhs, rhs) with
                 | ((_, pos_exp1, _), (_, pos_exp2, _)) ->
                   let (line1, bol1, end_col1) =
                     Pos.end_line_beg_offset pos_exp1

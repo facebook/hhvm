@@ -23,7 +23,8 @@
         { fb_ast =
           [([5:3-14],
             (Expr
-               ((nothing), [5:3-13], (Binop ((Eq None), ((nothing), [5:3-8], (Array_get (((Vector<nothing>), [5:3-6], (Lvar ([5:3-6], $xs))), None))), ((nothing), [5:11-13], (Lvar ([5:11-13], $x))))))))
+               ((nothing), [5:3-13],
+                (Binop { bop = (Eq None); lhs = ((nothing), [5:3-8], (Array_get (((Vector<nothing>), [5:3-6], (Lvar ([5:3-6], $xs))), None))); rhs = ((nothing), [5:11-13], (Lvar ([5:11-13], $x))) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

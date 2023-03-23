@@ -23,15 +23,17 @@ Errors:
           [([4:3-16],
             (Expr
                ((Map<nothing, int>), [4:3-15],
-                (Binop ((Eq None), ((Map<nothing, int>), [4:3-6], (Lvar ([4:3-6], $xs))), ((Map<nothing, int>), [4:9-15], (KeyValCollection (([4:9-12], Map), None, []))))))));
+                (Binop { bop = (Eq None); lhs = ((Map<nothing, int>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((Map<nothing, int>), [4:9-15], (KeyValCollection (([4:9-12], Map), None, []))) }))));
             ([6:3-17],
              (Expr
                 ((int), [6:3-16],
-                 (Binop ((Eq None),
-                    ((int), [6:3-12],
-                     (Array_get (((Map<nothing, int>), [6:3-6], (Lvar ([6:3-6], $xs))), (Some (
-                        (mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing))))))),
-                    ((int), [6:15-16], (Int "1")))))))
+                 (Binop
+                    { bop = (Eq None);
+                      lhs =
+                      ((int), [6:3-12],
+                       (Array_get (((Map<nothing, int>), [6:3-6], (Lvar ([6:3-6], $xs))),
+                          (Some ((mixed), [6:7-11], (Hole (((mixed), [6:7-11], (Lvar ([6:7-11], $idx))), (mixed), (arraykey), Typing)))))));
+                      rhs = ((int), [6:15-16], (Int "1")) }))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

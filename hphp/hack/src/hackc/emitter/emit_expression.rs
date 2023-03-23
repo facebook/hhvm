@@ -294,7 +294,7 @@ mod inout_locals {
                 Ok(match p {
                     // lhs op= _
                     ast::Expr_::Binop(expr) => {
-                        let (bop, left, _) = &**expr;
+                        let ast::Binop { bop, lhs: left, .. } = &**expr;
                         if let ast_defs::Bop::Eq(_) = bop {
                             collect_lvars_hs(c, left)
                         }
@@ -634,10 +634,10 @@ fn parse_include<'arena>(alloc: &'arena bumpalo::Bump, e: &ast::Expr) -> Include
     }
     fn split_var_lit(e: &ast::Expr) -> (String, String) {
         match &e.2 {
-            ast::Expr_::Binop(x) if x.0.is_dot() => {
-                let (v, l) = split_var_lit(&x.2);
+            ast::Expr_::Binop(x) if x.bop.is_dot() => {
+                let (v, l) = split_var_lit(&x.rhs);
                 if v.is_empty() {
-                    let (var, lit) = split_var_lit(&x.1);
+                    let (var, lit) = split_var_lit(&x.lhs);
                     (var, format!("{}{}", lit, l))
                 } else {
                     (v, String::new())
@@ -4911,7 +4911,11 @@ fn emit_binop<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let (op, e1, e2) = expr.2.as_binop().unwrap();
+    let ast::Binop {
+        bop: op,
+        lhs: e1,
+        rhs: e2,
+    } = expr.2.as_binop().unwrap();
     use ast_defs::Bop as B;
     match op {
         B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, expr),
@@ -5830,12 +5834,12 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::ClassConst(_) => true,
         Expr_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).2)?,
         Expr_::Binop(b) => {
-            if let ast_defs::Bop::Eq(None) = &b.0 {
-                if (b.1).2.is_list() {
-                    return can_use_as_rhs_in_list_assignment(&(b.2).2);
+            if let ast_defs::Bop::Eq(None) = &b.bop {
+                if (b.lhs).2.is_list() {
+                    return can_use_as_rhs_in_list_assignment(&(b.rhs).2);
                 }
             }
-            b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq()
+            b.bop.is_plus() || b.bop.is_question_question() || b.bop.is_any_eq()
         }
         _ => false,
     })
@@ -6613,10 +6617,10 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
             use ast_defs::Uop;
             match expr_ {
                 Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpz(e, env, &uo.1, label)?,
-                Expr_::Binop(bo) if bo.0.is_barbar() => {
-                    let r1 = emit_jmpnz(e, env, &bo.1, label)?;
+                Expr_::Binop(bo) if bo.bop.is_barbar() => {
+                    let r1 = emit_jmpnz(e, env, &bo.lhs, label)?;
                     if r1.is_fallthrough {
-                        let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6629,9 +6633,9 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                         r1
                     }
                 }
-                Expr_::Binop(bo) if bo.0.is_ampamp() => {
+                Expr_::Binop(bo) if bo.bop.is_ampamp() => {
                     let skip_label = e.label_gen_mut().next_regular();
-                    let r1 = emit_jmpz(e, env, &bo.1, skip_label)?;
+                    let r1 = emit_jmpz(e, env, &bo.lhs, skip_label)?;
                     if !r1.is_fallthrough {
                         EmitJmpResult {
                             instrs: emit_pos_then(
@@ -6646,7 +6650,7 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                             is_label_used: false,
                         }
                     } else {
-                        let r2 = emit_jmpnz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpnz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6662,10 +6666,19 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_eqeqeq() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_eqeqeq()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
@@ -6676,10 +6689,19 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_diff2() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_diff2()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
@@ -6734,9 +6756,9 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
             use ast_defs::Uop;
             match expr_ {
                 Expr_::Unop(uo) if uo.0 == Uop::Unot => emit_jmpnz(e, env, &uo.1, label)?,
-                Expr_::Binop(bo) if bo.0.is_barbar() => {
+                Expr_::Binop(bo) if bo.bop.is_barbar() => {
                     let skip_label = e.label_gen_mut().next_regular();
-                    let r1 = emit_jmpnz(e, env, &bo.1, skip_label)?;
+                    let r1 = emit_jmpnz(e, env, &bo.lhs, skip_label)?;
                     if !r1.is_fallthrough {
                         EmitJmpResult {
                             instrs: emit_pos_then(
@@ -6751,7 +6773,7 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                             is_label_used: false,
                         }
                     } else {
-                        let r2 = emit_jmpz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6766,10 +6788,10 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                         }
                     }
                 }
-                Expr_::Binop(bo) if bo.0.is_ampamp() => {
-                    let r1 = emit_jmpz(e, env, &bo.1, label)?;
+                Expr_::Binop(bo) if bo.bop.is_ampamp() => {
+                    let r1 = emit_jmpz(e, env, &bo.lhs, label)?;
                     if r1.is_fallthrough {
-                        let r2 = emit_jmpz(e, env, &bo.2, label)?;
+                        let r2 = emit_jmpz(e, env, &bo.rhs, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
                                 pos,
@@ -6787,10 +6809,19 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_eqeqeq() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_eqeqeq()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,
@@ -6801,10 +6832,19 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                     }
                 }
                 Expr_::Binop(bo)
-                    if bo.0.is_diff2() && ((bo.1).2.is_null() || (bo.2).2.is_null()) && opt =>
+                    if bo.bop.is_diff2()
+                        && ((bo.lhs).2.is_null() || (bo.rhs).2.is_null())
+                        && opt =>
                 {
-                    let is_null =
-                        emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
+                    let is_null = emit_is_null(
+                        e,
+                        env,
+                        if (bo.lhs).2.is_null() {
+                            &bo.rhs
+                        } else {
+                            &bo.lhs
+                        },
+                    )?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
                             pos,

@@ -31,7 +31,8 @@
                           param_visibility = None }
                          ];
                        f_ctxs = None; f_unsafe_ctxs = None;
-                       f_body = { fb_ast = [([4:23-37], (Return (Some ((int), [4:30-36], (Binop (Plus, ((int), [4:30-32], (Lvar ([4:30-32], $x))), ((int), [4:35-36], (Int "1"))))))))] };
+                       f_body =
+                       { fb_ast = [([4:23-37], (Return (Some ((int), [4:30-36], (Binop { bop = Plus; lhs = ((int), [4:30-32], (Lvar ([4:30-32], $x))); rhs = ((int), [4:35-36], (Int "1")) })))))] };
                        f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
                        f_doc_comment = None };
                      ef_use = []; ef_closure_class_name = None }))))

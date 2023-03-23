@@ -18,7 +18,8 @@
         { fb_ast =
           [([4:3-18],
             (Expr
-               ((keyset<nothing>), [4:3-17], (Binop ((Eq None), ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))))))));
+               ((keyset<nothing>), [4:3-17],
+                (Binop { bop = (Eq None); lhs = ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))) }))));
             ([6:3-13],
              (Expr
                 ((nothing), [6:3-12],

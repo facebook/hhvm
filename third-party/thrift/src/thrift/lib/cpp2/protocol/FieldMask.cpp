@@ -178,8 +178,8 @@ const MapIdToMask& toMapMask(const Mask& mask) {
 template <class Func>
 Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   using detail::getFieldMask;
-  using detail::getStringMapMask;
   using detail::getIntegerMapMask;
+  using detail::getStringMapMask;
 
   Mask mask;
 

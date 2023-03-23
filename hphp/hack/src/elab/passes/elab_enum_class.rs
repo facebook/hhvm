@@ -58,7 +58,7 @@ impl Pass for ElabEnumClassPass {
                 {
                     env.emit_error(NamingError::UsingInternalClass {
                         pos: pos.clone(),
-                        class_name: ty_name.clone(),
+                        class_name: core_utils_rust::strip_ns(ty_name).to_string(),
                     })
                 }
                 _ => (),

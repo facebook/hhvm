@@ -89,6 +89,10 @@ folly::Optional<hq::SettingId> httpToHqSettingsId(proxygen::SettingsId id) {
       return hq::SettingId::QPACK_BLOCKED_STREAMS;
     case proxygen::SettingsId::_HQ_DATAGRAM:
       return hq::SettingId::H3_DATAGRAM;
+    case proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8:
+      return hq::SettingId::H3_DATAGRAM_DRAFT_8;
+    case proxygen::SettingsId::_HQ_DATAGRAM_RFC:
+      return hq::SettingId::H3_DATAGRAM_RFC;
     default:
       return folly::none; // this setting has no meaning in HQ
   }
@@ -105,6 +109,10 @@ folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id) {
       return proxygen::SettingsId::_HQ_QPACK_BLOCKED_STREAMS;
     case hq::SettingId::H3_DATAGRAM:
       return proxygen::SettingsId::_HQ_DATAGRAM;
+    case hq::SettingId::H3_DATAGRAM_DRAFT_8:
+      return proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8;
+    case hq::SettingId::H3_DATAGRAM_RFC:
+      return proxygen::SettingsId::_HQ_DATAGRAM_RFC;
   }
   return folly::none;
 }

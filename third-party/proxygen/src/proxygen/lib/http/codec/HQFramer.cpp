@@ -95,6 +95,8 @@ decodeSettingValue(folly::io::Cursor& cursor,
     case SettingId::MAX_HEADER_LIST_SIZE:
     case SettingId::QPACK_BLOCKED_STREAMS:
     case SettingId::H3_DATAGRAM:
+    case SettingId::H3_DATAGRAM_DRAFT_8:
+    case SettingId::H3_DATAGRAM_RFC:
       return value;
   }
   return folly::none;

@@ -321,8 +321,14 @@ class HQSession
       });
     }
     auto datagramEnabled = egressSettings_.getSetting(SettingsId::_HQ_DATAGRAM);
+    auto datagramDraft8Enabled =
+        egressSettings_.getSetting(SettingsId::_HQ_DATAGRAM_DRAFT_8);
+    auto datagramRFCEnabled =
+        egressSettings_.getSetting(SettingsId::_HQ_DATAGRAM_RFC);
     // if enabling H3 datagrams check that the transport supports datagrams
-    if (datagramEnabled && datagramEnabled->value) {
+    if ((datagramEnabled && datagramEnabled->value) ||
+        (datagramDraft8Enabled && datagramDraft8Enabled->value) ||
+        (datagramRFCEnabled && datagramRFCEnabled->value)) {
       datagramEnabled_ = true;
     }
   }

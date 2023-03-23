@@ -69,7 +69,9 @@ enum class SettingId : uint64_t {
   HEADER_TABLE_SIZE = 0x01,
   MAX_HEADER_LIST_SIZE = 0x06,
   QPACK_BLOCKED_STREAMS = 0x07,
-  H3_DATAGRAM = 0x276,
+  H3_DATAGRAM = 0x276, // DRAFT_0
+  H3_DATAGRAM_DRAFT_8 = 0xffd277,
+  H3_DATAGRAM_RFC = 0x33,
 };
 
 using SettingValue = uint64_t;

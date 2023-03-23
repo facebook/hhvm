@@ -689,6 +689,8 @@ size_t HQSession::sendSettings() {
           // TODO: qpackCodec_.setMaxUncompressed(setting.value)
           break;
         case hq::SettingId::H3_DATAGRAM:
+        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
+        case hq::SettingId::H3_DATAGRAM_RFC:
           break;
       }
     }
@@ -1461,6 +1463,8 @@ void HQSession::applySettings(const SettingsList& settings) {
           // StreamCodec
           break;
         case hq::SettingId::H3_DATAGRAM:
+        case hq::SettingId::H3_DATAGRAM_DRAFT_8:
+        case hq::SettingId::H3_DATAGRAM_RFC:
           datagram = static_cast<bool>(setting.value);
           break;
       }
@@ -3528,6 +3532,7 @@ void HQSession::onDatagramsAvailable() noexcept {
           kErrorConnection);
       break;
     }
+    // TODO: draft 8 and rfc don't include context ID
     auto ctxId = quic::decodeQuicInteger(cursor);
     if (!ctxId) {
       dropConnectionAsync(

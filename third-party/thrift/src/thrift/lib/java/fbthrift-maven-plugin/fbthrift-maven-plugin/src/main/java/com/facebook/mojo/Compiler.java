@@ -85,11 +85,13 @@ public class Compiler {
     } else if (relativePath != null) {
       resolvedPath = relativePath;
     } else {
-      File fromPath = tryFromPath("thrift");
+      // When present, thrift1 should always be fbthrift.
+      File fromPath = tryFromPath("thrift1");
       if (fromPath != null) {
         resolvedPath = fromPath;
       } else {
-        fromPath = tryFromPath("thrift1");
+        // This can be Apache Thrift, depending on what's installed where.
+        fromPath = tryFromPath("thrift");
         if (fromPath != null) {
           resolvedPath = fromPath;
         } else {

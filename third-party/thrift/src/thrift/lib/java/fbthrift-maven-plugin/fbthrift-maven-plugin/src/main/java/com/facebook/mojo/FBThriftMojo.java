@@ -67,11 +67,8 @@ public class FBThriftMojo extends AbstractMojo {
   @Parameter(defaultValue = "${project}")
   private MavenProject project;
 
-  /**
-   * Ignored; present for compatibility.
-   *
-   * @parameter default-value=false
-   */
+  /** Ignored; present for compatibility. */
+  @Parameter(defaultValue = "false")
   @SuppressWarnings("unused")
   private boolean debug;
 

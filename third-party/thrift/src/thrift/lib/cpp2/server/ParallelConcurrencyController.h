@@ -85,6 +85,4 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
   std::string describe() const override;
 };
 
-using StandardConcurrencyController = ParallelConcurrencyController;
-
 } // namespace apache::thrift

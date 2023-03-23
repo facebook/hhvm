@@ -35,7 +35,7 @@ impl Pass for ElabExprLvarPass {
             }
             Expr_::Pipe(pipe) => {
                 let (Lid(_, lcl_id), _, _) = pipe as &mut (Lid, _, _);
-                *lcl_id = local_id::make_unscoped(sn::special_idents::PLACEHOLDER);
+                *lcl_id = local_id::make_unscoped(sn::special_idents::DOLLAR_DOLLAR);
                 Continue(())
             }
             _ => Continue(()),

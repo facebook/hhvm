@@ -51,14 +51,22 @@ folly::AsyncSocket::WriteResult TAsyncSocketIntercepted::performWrite(
   return writeRes;
 }
 
-folly::AsyncSocket::ReadResult TAsyncSocketIntercepted::performRead(
-    void** buf, size_t* buflen, size_t* offset) {
-  ReadResult res = folly::AsyncSocket::performRead(buf, buflen, offset);
+folly::AsyncSocket::ReadResult TAsyncSocketIntercepted::performReadMsg(
+    struct ::msghdr& msg, AsyncReader::ReadCallback::ReadMode readMode) {
+  ReadResult res = folly::AsyncSocket::performReadMsg(msg, readMode);
 
   if (params_.get() && params_->corruptLastReadByte_ && !res.exception &&
       res.readReturn > 0 &&
       res.readReturn >= params_->corruptLastReadByteMinSize_) {
-    static_cast<char*>(*buf)[res.readReturn - 1]++;
+    auto remaining = res.readReturn;
+    for (size_t i = 0; i < msg.msg_iovlen && remaining > 0; i++) {
+      if (static_cast<size_t>(remaining) > msg.msg_iov[i].iov_len) {
+        remaining -= msg.msg_iov[i].iov_len;
+        continue;
+      }
+      ++static_cast<char*>(msg.msg_iov[i].iov_base)[remaining - 1];
+      break;
+    }
   }
   totalBytesRead_ += res.readReturn;
   return res;

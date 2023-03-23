@@ -144,15 +144,16 @@ class AsyncKTLSSocket final : public folly::AsyncSocket {
   }
   void setZeroCopyEnableFunc(AsyncWriter::ZeroCopyEnableFunc) override {}
 
-  AsyncSocket::ReadResult
-  performRead(void** buf, size_t* buflen, size_t* offset) override;
+  AsyncSocket::ReadResult performReadMsg(
+      struct ::msghdr& msg,
+      AsyncReader::ReadCallback::ReadMode readMode) override;
 
   AsyncSocket::ReadResult handleNonApplicationData(
       uint8_t type,
-      folly::ByteRange payload);
+      folly::IOBufQueue);
 
-  AsyncSocket::ReadResult processAlert(folly::ByteRange payload);
-  AsyncSocket::ReadResult processHandshakeData(folly::ByteRange payload);
+  AsyncSocket::ReadResult processAlert(folly::IOBufQueue);
+  AsyncSocket::ReadResult processHandshakeData(folly::IOBufQueue);
 
   std::unique_ptr<TLSCallback> tlsCallback_;
   std::shared_ptr<const Cert> selfCert_;

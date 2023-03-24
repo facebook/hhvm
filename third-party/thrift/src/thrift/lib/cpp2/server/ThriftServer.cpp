@@ -981,8 +981,12 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
 
 void ThriftServer::ensureResourcePools() {
   auto resourcePoolSupplied = !resourcePoolSet().empty();
+  if (resourcePoolSupplied) {
+    LOG(INFO) << "Resource pools supplied: " << resourcePoolSet().size();
+  }
 
   if (!resourcePoolSet().hasResourcePool(ResourcePoolHandle::defaultSync())) {
+    LOG(INFO) << "Creating a default sync pool";
     // Ensure there is a sync resource pool.
     resourcePoolSet().setResourcePool(
         ResourcePoolHandle::defaultSync(),
@@ -995,6 +999,8 @@ void ThriftServer::ensureResourcePools() {
   if (resourcePoolSupplied) {
     if (!resourcePoolSet().hasResourcePool(
             ResourcePoolHandle::defaultAsync())) {
+      LOG(INFO)
+          << "Default async pool is NOT supplied, creating a default async pool";
       auto threadFactory = [this]() -> std::shared_ptr<folly::ThreadFactory> {
         auto prefix = getThreadNameForPriority(
             getCPUWorkerThreadName(), concurrency::PRIORITY::NORMAL);

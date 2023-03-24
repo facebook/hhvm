@@ -205,6 +205,8 @@ class ResourcePoolSet {
   // is called by the thrift server during shutdown.
   void stopAndJoin();
 
+  std::size_t size() const { return resourcePools_.size(); }
+
   // Returns a string with a human readable description of the setup of this
   // object. Do not encode any assumptions about the format of the string
   // returned.

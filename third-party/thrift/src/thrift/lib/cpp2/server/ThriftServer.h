@@ -504,7 +504,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   using IOObserverFactory =
       folly::Function<std::shared_ptr<folly::ThreadPoolExecutor::Observer>(
           std::string, folly::WorkerProvider*) const>;
-  static void addIOThreadPoolObserver(IOObserverFactory factory);
+  static void addIOThreadPoolObserverFactory(IOObserverFactory factory);
 
   /**
    * Set the prefix for naming the worker threads. "Cpp2Worker" by default.

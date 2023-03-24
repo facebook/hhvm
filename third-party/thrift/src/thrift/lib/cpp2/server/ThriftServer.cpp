@@ -1947,7 +1947,7 @@ folly::observer::CallbackHandle ThriftServer::getSSLCallbackHandle() {
   });
 }
 
-void ThriftServer::addIOThreadPoolObserver(
+void ThriftServer::addIOThreadPoolObserverFactory(
     ThriftServer::IOObserverFactory factory) {
   ioObserverFactories.wlock()->push_back(std::move(factory));
 }

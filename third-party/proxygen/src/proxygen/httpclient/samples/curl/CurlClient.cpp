@@ -81,7 +81,7 @@ bool CurlClient::saveResponseToFile(const std::string& outputFilename) {
 HTTPHeaders CurlClient::parseHeaders(const std::string& headersString) {
   vector<StringPiece> headersList;
   HTTPHeaders headers;
-  folly::split(",", headersString, headersList);
+  folly::split(',', headersString, headersList);
   for (const auto& headerPair : headersList) {
     vector<StringPiece> nv;
     folly::split('=', headerPair, nv);

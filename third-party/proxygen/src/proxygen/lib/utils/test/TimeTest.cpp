@@ -23,7 +23,7 @@ TEST(TimeTest, GetDateTimeStr) {
                                sys_tp - SystemClock::now());
   std::string time;
   std::string timeZone;
-  folly::split(" ", getDateTimeStr(tp), time, timezone);
+  folly::split(' ', getDateTimeStr(tp), time, timezone);
   // getDateTimeStr return value includes the local timezone:
   // e.g 1970-01-01T00:00:00 +0000
   // Do not compare the timezone

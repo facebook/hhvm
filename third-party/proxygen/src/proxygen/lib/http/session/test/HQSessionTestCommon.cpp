@@ -68,7 +68,7 @@ size_t generateStreamPreface(folly::IOBufQueue& writeBuf,
 
 std::string paramsToTestName(const testing::TestParamInfo<TestParams>& info) {
   std::vector<std::string> paramsV;
-  folly::split("-", info.param.alpn_, paramsV);
+  folly::split('-', info.param.alpn_, paramsV);
   if (info.param.numBytesOnPushStream < kUnlimited) {
     paramsV.push_back("_" +
                       folly::to<std::string>(info.param.numBytesOnPushStream));

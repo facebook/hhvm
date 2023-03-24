@@ -101,7 +101,7 @@ checkForProtocolUpgrade(const std::string& clientUpgrade,
 
   // Should be a comma separated list of protocols, like NPN
   std::vector<folly::StringPiece> clientProtocols;
-  folly::split(",", clientUpgrade, clientProtocols, true /* ignore empty */);
+  folly::split(',', clientUpgrade, clientProtocols, true /* ignore empty */);
   for (auto& clientProtocol : clientProtocols) {
     boost::algorithm::trim(clientProtocol);
   }
@@ -110,7 +110,7 @@ checkForProtocolUpgrade(const std::string& clientUpgrade,
   // only support one layer right now.  We just skip anything that
   // isn't an HTTP transport protocol
   std::vector<folly::StringPiece> serverProtocols;
-  folly::split(",", serverUpgrade, serverProtocols, true /* ignore empty */);
+  folly::split(',', serverUpgrade, serverProtocols, true /* ignore empty */);
 
   for (auto& testProtocol : serverProtocols) {
     // Get rid of leading/trailing LWS

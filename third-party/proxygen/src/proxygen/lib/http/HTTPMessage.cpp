@@ -852,7 +852,7 @@ bool HTTPMessage::doHeaderTokenCheck(const HTTPHeaders& headers,
                                      bool caseSensitive) const {
   return headers.forEachValueOfHeader(headerCode, [&](const string& value) {
     std::vector<folly::StringPiece> tokens;
-    folly::split(",", value, tokens);
+    folly::split(',', value, tokens);
     for (auto t : tokens) {
       t = trim(t);
       if (caseSensitive) {

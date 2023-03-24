@@ -34,7 +34,7 @@
 }
 
 .getStarted:hover {
-  --ifm-button-background-color: var(--ifm-color-primary-darkest);
+  --ifm-button-background-color: var(--ifm-color-primary-darker);
 }
 
 [data-theme='dark'] .getStarted {

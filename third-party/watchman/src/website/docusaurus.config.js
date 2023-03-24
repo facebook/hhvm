@@ -150,21 +150,22 @@ module.exports = {
         },
         items: [
           {
-            type: 'doc',
-            docId: 'install',
+            to: 'docs/install',
             position: 'left',
             label: 'Documentation',
+            activeBaseRegex: 'watchman/docs/install',
           },
           {
-            type: 'doc',
-            docId: 'troubleshooting',
+            to: 'support',
             position: 'left',
             label: 'Support',
+            activeBaseRegex: 'watchman/support',
           },
           {
             href: 'https://github.com/facebook/watchman',
-            label: 'GitHub',
             position: 'right',
+            className: 'header-github-link',
+            'aria-label': 'GitHub repository',
           },
         ],
       },

@@ -5470,6 +5470,7 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       ~silent:true
       ~current_version:(Config_file.parse_version None)
       ~current_rolled_out_flag_idx:Int.min_value
+      ~project_metadata_w_flags_www_ready:false
       (Config_file.of_list args.config)
   in
   let serverless_ide =

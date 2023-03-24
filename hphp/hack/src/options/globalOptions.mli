@@ -23,6 +23,7 @@ type saved_state = {
   loading: saved_state_loading;
   rollouts: Saved_state_rollouts.t;
   project_metadata_w_flags: bool;
+  project_metadata_w_flags_www_ready: bool;
 }
 [@@deriving show, eq]
 

@@ -279,10 +279,14 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~default:Int.min_value
         config
     in
+    let project_metadata_w_flags_www_ready =
+      bool_ "project_metadata_w_flags_www_ready" ~default:false config
+    in
     ServerLocalConfig.load
       ~silent
       ~current_version:version
       ~current_rolled_out_flag_idx
+      ~project_metadata_w_flags_www_ready
       command_line_overrides
   in
   let local_config =

@@ -40,6 +40,7 @@ type saved_state = {
   loading: saved_state_loading;
   rollouts: Saved_state_rollouts.t;
   project_metadata_w_flags: bool;
+  project_metadata_w_flags_www_ready: bool;
 }
 [@@deriving show, eq]
 
@@ -48,6 +49,7 @@ let default_saved_state =
     loading = default_saved_state_loading;
     rollouts = Saved_state_rollouts.default;
     project_metadata_w_flags = false;
+    project_metadata_w_flags_www_ready = false;
   }
 
 let with_saved_state_manifold_api_key saved_state_manifold_api_key ss =

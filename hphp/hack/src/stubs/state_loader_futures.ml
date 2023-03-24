@@ -10,10 +10,8 @@ let get_project_metadata
     ~progress_callback:_
     ~saved_state_type:_
     ~repo:_
-    ~saved_state_manifold_api_key:_
     ~ignore_hh_version:_
-    ~rollouts:_
-    ~project_metadata_w_flags:_ =
+    ~opts:_ =
   failwith "Not implemented"
 
 let load

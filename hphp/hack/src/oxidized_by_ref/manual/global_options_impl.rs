@@ -21,6 +21,7 @@ const DEFAULT_SAVED_STATE: SavedState<'_> = SavedState {
     loading: &DEFAULT_SAVED_STATE_LOADING,
     rollouts: &DEFAULT_SAVED_STATE_ROLLOUTS,
     project_metadata_w_flags: false,
+    project_metadata_w_flags_www_ready: false,
 };
 
 const DEFAULT: GlobalOptions<'_> = GlobalOptions {

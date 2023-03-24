@@ -3611,13 +3611,18 @@ and expr_
         let (subtype_val, key_bound, pessimisable_builtin) =
           match kind with
           | Set
-          | ImmSet
-          | Keyset ->
+          | ImmSet ->
             ( arraykey_value p class_name true,
               Some
                 (MakeType.arraykey
                    (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name))),
               true )
+          | Keyset ->
+            ( arraykey_value p class_name true,
+              Some
+                (MakeType.arraykey
+                   (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name))),
+              false )
           | Vector
           | ImmVector ->
             (array_value, None, true)

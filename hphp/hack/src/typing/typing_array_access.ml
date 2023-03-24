@@ -478,8 +478,7 @@ let rec array_get
         ) else
           let (k, (env, v)) =
             match argl with
-            | [t] when String.equal cn SN.Collections.cKeyset ->
-              (t, maybe_pessimise_type env t)
+            | [t] when String.equal cn SN.Collections.cKeyset -> (t, (env, t))
             | [k; v] when String.( <> ) cn SN.Collections.cKeyset ->
               (k, maybe_pessimise_type env v)
             | _ ->
@@ -974,31 +973,10 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         when String.equal n SN.Collections.cKeyset ->
         let (env, err_res) = check_keyset_value env expr_pos ty1 ty2 in
         let (env, tk') =
-          let ak_t =
-            MakeType.arraykey (Reason.Rkey_value_collection_key expr_pos)
-          in
-          if
-            (* TODO: Remove the test for sound dynamic. It is never ok to put
-               dynamic as the key to a dict since the key must be a
-               subtype of arraykey. *)
-            Typing_env_types.(
-              TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-            &&
-            match err_res with
-            | Ok _ -> not (Typing_utils.is_sub_type_for_union env ty2 ak_t)
-            | _ -> false
-          then
-            (* if there weren't any errors with the key then either it is dynamic
-               or a subtype of arraykey. If it's also a supertype of dynamic, then
-               set the keytype to arraykey, since that the only thing that hhvm won't
-               error on.
-            *)
-            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-              pessimised_vec_dict_assign expr_pos env tv ty2
-            else
-              (env, ak_t)
-          else
-            Typing_union.union env tv ty2
+          let r = Reason.Rkey_value_collection_key expr_pos in
+          let ak_t = MakeType.arraykey r in
+          let (env, ty2) = Typing_intersection.intersect env ~r ak_t ty2 in
+          Typing_union.union env tv ty2
         in
         let ty = mk (r, Tclass (id, e, [tk'])) in
         (env, (ty, Ok ty, err_res))

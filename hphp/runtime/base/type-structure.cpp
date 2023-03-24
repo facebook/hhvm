@@ -737,7 +737,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       if (!ts.empty()) {
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
           std::vector<std::string> typevars;
-          folly::split(",", ts[s_typevars].asCStrRef().data(), typevars);
+          folly::split(',', ts[s_typevars].asCStrRef().data(), typevars);
           ts.remove(s_typevars);
 
           auto generic_types = resolveGenerics(env, ctx, arr);

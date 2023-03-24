@@ -112,7 +112,7 @@ void readSymbolCntData(CallGraph& cg, std::ifstream& file) {
   while (std::getline(file, line)) {
     std::string caller, top;
     uint64_t count;
-    folly::split(" ", line, caller, top, count);
+    folly::split(' ', line, caller, top, count);
     TargetId idTop = cg.funcToTargetId(top);
     if (idTop == InvalidId) {
       HFTRACE(2, "Target func not found: %s\n", top.c_str());

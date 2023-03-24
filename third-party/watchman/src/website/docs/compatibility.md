@@ -27,11 +27,10 @@ releases and platforms.
 
 _Since 3.8._
 
-`watchman` introduces [capabilities](capabilities.html) to describe new or
-optional features. You can use the
-[expanded version command](/watchman/docs/cmd/version.html) to query
-capabilities and avoid building knowledge of version numbers in your client
-application(s).
+`watchman` introduces [capabilities](capabilities.md) to describe new or
+optional features. You can use the [expanded version command](./cmd/version.md)
+to query capabilities and avoid building knowledge of version numbers in your
+client application(s).
 
 _Since May 2020_
 

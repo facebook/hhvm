@@ -28,9 +28,8 @@ the protocol spec.
 
 The first argument to query is the path to the watched root. The second argument
 holds a JSON object describing the query to be run. The query object is
-processed by passing it to the query engine (see
-[File Queries](/watchman/docs/file-query.html)) which will generate a set of
-matching files.
+processed by passing it to the query engine (see [File Queries](file-query.md))
+which will generate a set of matching files.
 
 The query command will then consult the `fields` member of the query object; if
 it is not present it will default to:
@@ -132,7 +131,7 @@ simple array of values; ~~~"fields": ["name"]~~~ produces:
 _Since 3.1._
 
 - `type` - string: the file type. Has the the values listed in
-  [the type query expression](../expr/type.html)
+  [the type query expression](../expr/type.md)
 
 _Since 4.6._
 

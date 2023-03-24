@@ -61,13 +61,13 @@ Watchman may perform the above search procedure twice. The logic is:
 3. If the search terminates successfully, then the watch is established for the
    current value of the candidate directory.
 4. If the search terminates unsuccessfully, `root_files` is set to the global
-   configuration option [root_files](../config.html#root_files) and the search
+   configuration option [root_files](../config.md#root_files) and the search
    procedure is re-run.
 5. If the search terminates successfully, then the watch is established for the
    current value of the candidate directory.
 6. If the global configuration option
-   [enforce_root_files](../config.html#enforce_root_files) is set to true then
-   the watch attempt fails.
+   [enforce_root_files](../config.md#enforce_root_files) is set to true then the
+   watch attempt fails.
 7. Otherwise, the watch is established for the original argument to the
    `watch-project` command
 
@@ -147,6 +147,6 @@ extended period of time. A watch is considered to be idle if no watchman queries
 have been issued against the watch. If a watch is idle, and has no triggers
 registered or active subscriptions then it is a candidate for reaping.
 
-The [idle_reap_age_seconds](../config.html#idle-reap-age-seconds) configuration
+The [idle_reap_age_seconds](../config.md#idle-reap-age-seconds) configuration
 parameter controls the idle timeout for a watch. The default is 5 days. A reaped
 watch is cancelled and removed from the state file.

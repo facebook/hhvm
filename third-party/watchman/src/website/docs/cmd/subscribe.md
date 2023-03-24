@@ -146,10 +146,9 @@ of interest.
 
 The `defer` field specifies a list of state names for which the subscriber
 wishes to defer the notification stream. When a watchman client signals that a
-state has been entered via the
-[state-enter](/watchman/docs/cmd/state-enter.html) command, if the state name
-matches any in the `defer` list then the subscription will emit a unilateral
-subscription PDU like this:
+state has been entered via the [state-enter](cmd/state-enter.md) command, if the
+state name matches any in the `defer` list then the subscription will emit a
+unilateral subscription PDU like this:
 
 ```json
 {
@@ -162,9 +161,8 @@ subscription PDU like this:
 ```
 
 Watchman will then defer sending any subscription PDUs with `files` payloads
-until the state is vacated either by a
-[state-leave](/watchman/docs/cmd/state-leave.html) command or by the client that
-entered the state disconnecting from the watchman service.
+until the state is vacated either by a [state-leave](cmd/state-leave.md) command
+or by the client that entered the state disconnecting from the watchman service.
 
 Once the state is vacated, watchman will emit a unilateral subscription PDU like
 this:
@@ -202,4 +200,4 @@ the `state-leave` commands.
 
 _Since 4.9_
 
-[Read more about these here](/watchman/docs/scm-query.html)
+[Read more about these here](scm-query.md)

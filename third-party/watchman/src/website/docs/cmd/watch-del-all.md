@@ -22,4 +22,4 @@ JSON:
 Analogous to the `watch-del` this command will remove all watches and associated
 triggers from the running process, and the state file ( unless watchman service
 was started with
-[--no-save-state server option](/watchman/docs/cli-options.html#server-options)).
+[--no-save-state server option](cli-options.md#server-options)).

@@ -84,8 +84,8 @@ the output:
 - `--fields NAME,NAME` - specifies the list of fields to be printed for each
   event. The default is `--fields name` which will print just the `name` of the
   file that was changed. You may use any of the available fields listed in
-  [available fields](/watchman/docs/cmd/query.html#available-fields). The fields
-  will be printed in the order you list them.
+  [available fields](cmd/query.md#available-fields). The fields will be printed
+  in the order you list them.
 - `--relative DIR` - the `name` field will be adjusted to be relative to `DIR`
   before it is printed out. The default for `DIR` is the current working
   directory when `watchman-wait` is started.

@@ -33,8 +33,7 @@ make it easier to check whether the server implements functionality based on the
 name of that function rather than by having the client build up knowledge about
 when those functions were introduced.
 
-You can read more about the
-[available capability names](/watchman/docs/capabilities.html).
+You can read more about the [available capability names](capabilities.md).
 
 To check whether the `relative_root` capability is supported:
 

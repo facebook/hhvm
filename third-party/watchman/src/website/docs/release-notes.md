@@ -7,7 +7,7 @@ Watchman is continuously deployed inside Facebook, which means that we don't
 explicitly maintain version numbers. We have automation that cuts a weekly tag
 with a named derived from the date. You can learn more about how to reason about
 supported _capabilities_ and our backwards compatibility guidelines in the
-[Compatibility Rules](compatibility.html) docs.
+[Compatibility Rules](compatibility.md) docs.
 
 We focus on the highlights only in these release notes. For a full history that
 includes all of the gory details, please see
@@ -21,7 +21,7 @@ includes all of the gory details, please see
 - Added support for suffix sets in suffix expressions. You now can specify
   multiple suffixes to match against by setting the second argument to a list of
   suffixes. See `suffix-set` documentation for
-  [more details](/watchman/docs/expr/suffix.html#suffix-set)
+  [more details](expr/suffix.md#suffix-set)
 - pywatchman: introduced new pywatchman_aio client for python
 - Windows: we no longer trust environment variables to locate the state
   directory which should result in a better experience for users that mix
@@ -240,7 +240,7 @@ Whoops, we never got around to tagging this beyond a release candidate tag!
   average (improvement can be up to 5x for dirs with up to 64 entries on
   average). You may now tune the `hint_num_files_per_dir` setting in your
   `.watchmanconfig` to better match your tree.
-  [More details](/watchman/docs/config.html#hint_num_files_per_dir)
+  [More details](config.md#hint_num_files_per_dir)
 - Improved (re)crawl speed on OS X 10.10 and later by using `getattrlistbulk`.
   This allows us to improve the data:syscall ratio during crawling and can
   improve throughput by up to 40% for larger trees.
@@ -269,9 +269,9 @@ Whoops, we never got around to tagging this beyond a release candidate tag!
 - Disabled the IO-throttling-during-crawl that we added in 3.7. It proved to be
   more harmful than beneficial.
 - `-j` CLI option now accepts either JSON or BSER encoded command on stdin
-- Added [capabilities](/watchman/docs/capabilities.html) to the server, and
-  added the [capabilityCheck](/watchman/docs/cmd/version.html#capabilityCheck)
-  method to the python and node clients.
+- Added [capabilities](capabilities.md) to the server, and added the
+  [capabilityCheck](cmd/version.md#capabilityCheck) method to the python and
+  node clients.
 
 ### pywatchman 1.2.0 (2015-08-15)
 
@@ -281,8 +281,7 @@ Whoops, we never got around to tagging this beyond a release candidate tag!
 
 ### fb-watchman 1.3.0 for node (2015-08-15)
 
-- Added the
-  [capabilityCheck](/watchman/docs/nodejs.html#checking-for-watchman-availability)
+- Added the [capabilityCheck](nodejs.md#checking-for-watchman-availability)
   method.
 
 ### pywatchman 1.0.0 (2015-08-06)
@@ -302,8 +301,7 @@ Whoops, we never got around to tagging this beyond a release candidate tag!
   start with `.`.
 - Added `noescape` option to `query match` to make `\` match literal `\`.
 - We'll now automatically age out and stop watches. See
-  [idle_reap_age_seconds](/watchman/docs/config.html#idle_reap_age_seconds) for
-  more information.
+  [idle_reap_age_seconds](config.md#idle_reap_age_seconds) for more information.
 - `watch-project` will now try harder to re-use an existing watch and avoid
   creating an overlapping watch.
 - Reduce I/O priority during crawling on systems that support this
@@ -323,7 +321,7 @@ Whoops, we never got around to tagging this beyond a release candidate tag!
 
 - `trigger` now supports an optional `relative_root` argument. The trigger is
   evaluated with respect to this subdirectory. See
-  [trigger](/watchman/docs/cmd/trigger.html#relative-roots) for more.
+  [trigger](cmd/trigger.md#relative-roots) for more.
 
 ### fb-watchman 1.1.0 for node (2015-06-25)
 
@@ -334,12 +332,12 @@ Whoops, we never got around to tagging this beyond a release candidate tag!
 
 ### fb-watchman 1.0.0 for node (2015-06-23)
 
-- Updated the node client to support [BSER](/watchman/docs/bser.html) encoding,
-  fixing a quadratic performance issue in the JSON stream decoder that was used
+- Updated the node client to support [BSER](bser.md) encoding, fixing a
+  quadratic performance issue in the JSON stream decoder that was used
   previously.
 
 ### Watchman 3.3.0 (2015-06-22)
 
 - `query` and `subscribe` now support an optional `relative_root` argument.
   Inputs and outputs are evaluated with respect to this subdirectory. See
-  [File Queries](/watchman/docs/file-query.html#relative-roots) for more.
+  [File Queries](file-query.md#relative-roots) for more.

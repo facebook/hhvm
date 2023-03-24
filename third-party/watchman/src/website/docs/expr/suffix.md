@@ -27,5 +27,5 @@ but the set form has a more efficient and thus faster runtime:
 
     ["suffix", ["php", "html"]]
 
-The [capability](/watchman/docs/capabilities.html) name associated with this
-enhanced functionality is `suffix-set`.
+The [capability](capabilities.md) name associated with this enhanced
+functionality is `suffix-set`.

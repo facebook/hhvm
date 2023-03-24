@@ -25,7 +25,7 @@ is contained in a direct child directory of the specified dirname, `depth == 2`
 if it is contained in a grand-child directory and so on.
 
 The relational expression accepts the same relational operators as described in
-the [size term](size.html).
+the [size term](size.md).
 
 If you wanted to match only files that were directly in the `foo/bar` dir:
 

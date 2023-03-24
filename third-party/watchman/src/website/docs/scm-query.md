@@ -9,8 +9,8 @@ _Since 2021.08.30_
 
 _Since 4.9._
 
-_The [capability](/watchman/docs/capabilities.html) name associated with this
-enhanced functionality is `scm-since`._
+_The [capability](capabilities.md) name associated with this enhanced
+functionality is `scm-since`._
 
 The capability name for this is `scm-hg`. The internal architecture allows
 supporting other source control systems quite easily; it just needs someone to

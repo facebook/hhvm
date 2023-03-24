@@ -176,7 +176,7 @@ module.exports = {
             items: [
               {
                 label: 'Documentation',
-                to: 'docs/',
+                to: 'docs/install',
               },
               {
                 label: 'GitHub',
@@ -184,7 +184,7 @@ module.exports = {
               },
               {
                 label: 'Getting Support',
-                to: 'https://github.com/facebook/watchman',
+                to: 'docs/troubleshooting',
               },
             ],
           },

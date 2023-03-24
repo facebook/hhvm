@@ -99,17 +99,17 @@ file:
 }
 ```
 
-See the [watch-project](cmd/watch-project.html) command for more information.
+See the [watch-project](cmd/watch-project.md) command for more information.
 
 ### enforce_root_files
 
 _Since 3.1._
 
 This is a boolean option that defaults to `false`. If it is set to `true` then
-the [watch](cmd/watch.html) command will only succeed if the requested directory
+the [watch](cmd/watch.md) command will only succeed if the requested directory
 contains one of the files listed by the [root_files](#root_files) configuration
-option, and the [watch-project](cmd/watch-project.html) command will only
-succeed if a valid project root is found.
+option, and the [watch-project](cmd/watch-project.md) command will only succeed
+if a valid project root is found.
 
 If left unspecified, to aid in transitioning between versions, watchman will
 check to see if the now deprecated [root_restrict_files](#root_restrict_files)
@@ -198,8 +198,8 @@ the busy build dirs out of the tree for more optimal performance.
 Since version 2.9.9, if you list a dir in `ignore_dirs` that is also listed in
 `ignore_vcs`, the `ignore_dirs` placement will take precedence. This may not
 sound like a big deal, but since `ignore_vcs` is used as a hint to for the
-placement of [cookie files](/watchman/docs/cookies.html), having these two
-options overlap in earlier versions would break watchman queries.
+placement of [cookie files](cookies.md), having these two options overlap in
+earlier versions would break watchman queries.
 
 _Since 4.6._
 

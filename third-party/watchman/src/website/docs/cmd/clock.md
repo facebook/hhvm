@@ -7,8 +7,8 @@ Returns the current clock value for a watched root.
 
 _Since 3.9._
 
-_The [capability](/watchman/docs/capabilities.html) name associated with this
-enhanced functionality is `clock-sync-timeout`._
+_The [capability](capabilities.md) name associated with this enhanced
+functionality is `clock-sync-timeout`._
 
 `sync_timeout` specifies the number of milliseconds that you want to wait to
 observe a synchronization cookie. The synchronization cookie is created at the

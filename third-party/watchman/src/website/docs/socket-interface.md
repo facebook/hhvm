@@ -49,8 +49,7 @@ representation of strings.
 
 When you make a request using BSER, the server will respond in BSER encoding.
 
-You can
-[read more about BSER in the BSER specification](/watchman/docs/bser.html).
+You can [read more about BSER in the BSER specification](bser.md).
 
 ### Reporting Errors and Warnings
 

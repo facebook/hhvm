@@ -24,12 +24,11 @@ the `fb-watchman` package published to the npm repository.
 
 The client can be installed without requiring that the service is installed. It
 is important to handle lack of availability and also to test whether the
-installed service supports the [capabilities](/watchman/docs/capabilities.html)
-required by your application.
+installed service supports the [capabilities](capabilities.md) required by your
+application.
 
-The `capabilityCheck` method issues a
-[version](/watchman/docs/cmds/version.html) command to query the capabilities of
-the server.
+The `capabilityCheck` method issues a [version](cmd/version.md) command to query
+the capabilities of the server.
 
 ```js
 var watchman = require('fb-watchman');
@@ -98,9 +97,9 @@ client.capabilityCheck({optional:[], required:['relative_root']},
 
 Most node applications are interested in subscribing to live file change
 notifications. In watchman these are configured by issuing a
-[subscribe](/watchman/docs/cmd/subscribe.html) command. A subscription is valid
-for the duration of your client connection, or until you cancel the subscription
-using the [unsubscribe](/watchman/docs/cmd/unsubscribe.html) command.
+[subscribe](cmd/subscribe.md) command. A subscription is valid for the duration
+of your client connection, or until you cancel the subscription using the
+[unsubscribe](cmd/unsubscribe.md) command.
 
 The following will generate subscription results for all files in the tree that
 match the query expression and then generate subscription results as files
@@ -162,10 +161,9 @@ The example above will generate results for existing (and deleted!) files at the
 time that the subscription is established. In some applications this can be
 undesirable. The following example shows how to add a logical time constraint.
 
-watchman tracks changes using an
-[abstract clock](/watchman/docs/clockspec.html). We'll determine the current
-clock at the time that we initiate the watch and then add that as a constraint
-in our subscription.
+watchman tracks changes using an [abstract clock](clockspec.md). We'll determine
+the current clock at the time that we initiate the watch and then add that as a
+constraint in our subscription.
 
 ```js
 function make_time_constrained_subscription(client, watch, relative_path) {
@@ -202,9 +200,8 @@ function make_time_constrained_subscription(client, watch, relative_path) {
 
 ### client.capabilityCheck(options, done)
 
-The `capabilityCheck` method issues a
-[version](/watchman/docs/cmds/version.html) command to query the capabilities of
-the server.
+The `capabilityCheck` method issues a [version](cmd/version.md) command to query
+the capabilities of the server.
 
 If the server doesn't support capabilities, `capabilityCheck` will emulate the
 capability response for a handful of significant capabilities based on the

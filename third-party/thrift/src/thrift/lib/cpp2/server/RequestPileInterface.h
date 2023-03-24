@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <string>
 
 #include <thrift/lib/cpp2/server/RequestCompletionCallback.h>
 
@@ -69,7 +70,7 @@ class RequestPileInterface : public RequestCompletionCallback {
   // has finished.
   void onRequestFinished(ServerRequestData&) override;
 
-  virtual std::string describe() const;
+  virtual std::string describe() const = 0;
 };
 
 } // namespace apache::thrift

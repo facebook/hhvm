@@ -54,6 +54,8 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
     return counters_.load().pendingDequeCalls;
   }
 
+  std::string describe() const override;
+
  private:
   struct Counters {
     constexpr Counters() noexcept = default;
@@ -81,8 +83,6 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
   bool isRequestActive(const ServerRequest& req);
 
   void onExecuteFinish(bool dequeueSuccess);
-
-  std::string describe() const override;
 };
 
 } // namespace apache::thrift

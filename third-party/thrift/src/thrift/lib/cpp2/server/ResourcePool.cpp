@@ -21,6 +21,24 @@
 #include <thrift/lib/cpp2/server/ResourcePool.h>
 
 namespace apache::thrift {
+namespace {
+std::string describeExecutor(std::shared_ptr<folly::Executor> executor) {
+  if (auto ex = executor.get()) {
+    auto& exref = *ex;
+    auto executorName = folly::demangle(typeid(exref)).toStdString();
+    if (auto* cpuThreadPoolExecutor =
+            dynamic_cast<folly::CPUThreadPoolExecutor*>(executor.get())) {
+      return fmt::format(
+          "{{{} numThreads={}}}",
+          executorName,
+          cpuThreadPoolExecutor->numThreads());
+    }
+    return fmt::format("{{{}}}", executorName);
+  } else {
+    return "None";
+  }
+}
+} // namespace
 
 // ResourcePool
 
@@ -87,6 +105,15 @@ std::optional<ServerRequestRejection> ResourcePool::accept(
     AsyncProcessorHelper::executeRequest(std::move(request));
     return {std::nullopt};
   }
+}
+
+std::string ResourcePool::describe() const {
+  return fmt::format(
+      "{{ResourcePool name={}, requestPile={}, concurrencyController={}, executor={}}}",
+      name_,
+      requestPile_ ? requestPile_->describe() : "None",
+      concurrencyController_ ? concurrencyController_->describe() : "None",
+      describeExecutor(executor_));
 }
 
 // ResourcePoolSet
@@ -309,52 +336,46 @@ std::string ResourcePoolSet::describe() const {
   std::string result;
   auto guard = locked_ ? std::unique_lock<std::mutex>()
                        : std::unique_lock<std::mutex>(mutex_);
-  if (resourcePools_.size() == 0) {
-    return "none";
-  }
 
-  for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
-    if (resourcePools_.at(i)) {
-      auto& rp = resourcePools_.at(i);
-      result += fmt::format(
-          "{{{} {} ReqPile:[{}] CC:[{}] Exe:[{}] Pri:{}}} ",
-          i,
-          rp->name(),
-          rp->requestPile() ? rp->requestPile().value().get().describe()
-                            : "None",
-          rp->concurrencyController()
-              ? rp->concurrencyController().value().get().describe()
-              : "None",
-          describeExecutor(rp->executor()),
-          priorities_[i] ? std::to_string(priorities_[i].value()) : "None");
+  auto resourcePoolsString = [this]() -> std::string {
+    if (resourcePools_.size() == 0) {
+      return "None";
     }
-  }
-  if (!resourcePools_.empty()) {
-    result += "{Priority map";
-    for (auto i = 0; i < concurrency::N_PRIORITIES; ++i) {
-      result += fmt::format(
-          " Pri:{}={}", i, resourcePools_[poolByPriority_[i]]->name());
-    }
-    result += " }";
-  }
-  return result;
-}
 
-std::string ResourcePoolSet::describeExecutor(
-    std::optional<std::reference_wrapper<folly::Executor>> executor) const {
-  if (executor) {
-    auto& exe = executor.value().get();
-    std::string result = fmt::format("{}", folly::demangle(typeid(exe)));
-    if (auto* executorAsCPUThreadPool =
-            dynamic_cast<folly::CPUThreadPoolExecutor*>(
-                &executor.value().get())) {
-      result +=
-          fmt::format(" threads:{}", executorAsCPUThreadPool->numThreads());
+    std::string result;
+    for (std::size_t i = 0; i < resourcePools_.size(); i++) {
+      if (resourcePools_.at(i)) {
+        auto& rp = resourcePools_.at(i);
+        result += fmt::format(
+            "{{{} {} priority={}}} ",
+            i,
+            rp->describe(),
+            priorities_[i] ? std::to_string(priorities_[i].value()) : "None");
+      } else {
+        result += fmt::format("{{{} None}}", i);
+      }
     }
     return result;
-  } else {
-    return "None";
-  }
+  };
+
+  auto priorityMapString = [this]() -> std::string {
+    if (resourcePools_.size() == 0) {
+      return "None";
+    }
+
+    std::string result;
+    for (auto i = 0; i < concurrency::N_PRIORITIES; ++i) {
+      result +=
+          fmt::format(" {}={}", i, resourcePools_[poolByPriority_[i]]->name());
+    }
+    return result;
+  };
+
+  return fmt::format(
+      "{{ResourcePoolSet resourcePools={}, locked={}, priorityMap={}}}",
+      resourcePoolsString(),
+      locked_,
+      priorityMapString());
 }
 
 void ResourcePoolSet::calculatePriorityMapping() {

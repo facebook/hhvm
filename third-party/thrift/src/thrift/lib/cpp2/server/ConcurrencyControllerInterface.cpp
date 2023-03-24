@@ -24,7 +24,4 @@ void ConcurrencyControllerInterface::onRequestFinished(ServerRequestData&) {
   LOG(FATAL) << "Unimplemented onRequestFinished called";
 }
 
-std::string ConcurrencyControllerInterface::describe() const {
-  return typeid(*this).name();
-}
 } // namespace apache::thrift

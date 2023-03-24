@@ -68,7 +68,7 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   // in ParallelConcurrencyController
   virtual uint64_t numPendingDequeRequest() const { return 0; }
 
-  virtual std::string describe() const;
+  virtual std::string describe() const = 0;
 };
 
 } // namespace apache::thrift

@@ -99,6 +99,8 @@ class ResourcePool {
   // have completed.
   void stop();
 
+  std::string describe() const;
+
  private:
   friend class ResourcePoolSet;
   ResourcePool(
@@ -209,8 +211,6 @@ class ResourcePoolSet {
   std::string describe() const;
 
  private:
-  std::string describeExecutor(
-      std::optional<std::reference_wrapper<folly::Executor>> executor) const;
   void calculatePriorityMapping();
 
   std::vector<std::unique_ptr<ResourcePool>> resourcePools_;

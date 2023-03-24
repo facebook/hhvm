@@ -160,7 +160,8 @@ void ParallelConcurrencyController::executeRequest() {
 void ParallelConcurrencyController::stop() {}
 
 std::string ParallelConcurrencyController::describe() const {
-  return fmt::format("ParallelConcurrencyController limit:{}", executionLimit_);
+  return fmt::format(
+      "{{ParallelConcurrencyController executionLimit={}}}", executionLimit_);
 }
 
 } // namespace apache::thrift

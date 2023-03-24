@@ -65,6 +65,7 @@ class MockAsyncProcessor : public AsyncProcessor {
   Func executeRequestFunc_;
 };
 
+// TODO(sazonovk): Extract into its own file as its useful for other tests too
 class FIFORequestPile : public RequestPileInterface {
  public:
   std::optional<ServerRequestRejection> enqueue(
@@ -86,13 +87,14 @@ class FIFORequestPile : public RequestPileInterface {
 
   uint64_t requestCount() const override { return queue_.size(); }
 
+  virtual std::string describe() const override { return "{FIFORequestPile}"; }
+
  private:
-  using Queue = folly::UMPMCQueue<
+  folly::UMPMCQueue<
       ServerRequest,
       /* MayBlock */ false,
-      /* LgSegmentSize  */ 5>;
-
-  Queue queue_;
+      /* LgSegmentSize  */ 5>
+      queue_;
 };
 
 class ResourcePoolMock {

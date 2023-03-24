@@ -74,12 +74,11 @@ class FIFORequestPile : public RequestPileInterface {
     return std::nullopt;
   }
 
-  std::pair<std::optional<ServerRequest>, std::optional<intptr_t>> dequeue()
-      override {
+  std::optional<ServerRequest> dequeue() override {
     if (auto res = queue_.try_dequeue()) {
-      return std::make_pair(std::move(*res), std::nullopt);
+      return std::move(*res);
     } else {
-      return {std::nullopt, std::nullopt};
+      return std::nullopt;
     }
   }
 

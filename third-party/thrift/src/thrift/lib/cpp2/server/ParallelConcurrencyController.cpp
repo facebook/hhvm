@@ -119,7 +119,7 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
 }
 
 void ParallelConcurrencyController::executeRequest() {
-  auto [req, userdata] = pile_.dequeue();
+  auto req = pile_.dequeue();
   if (req) {
     ServerRequest& serverRequest = req.value();
     // Only continue when the request has not
@@ -132,11 +132,6 @@ void ParallelConcurrencyController::executeRequest() {
           /*FIXME:roddym tile*/);
       onExecuteFinish(true);
       return;
-    }
-
-    if (userdata) {
-      serverRequest.requestData().requestPileUserData = *userdata;
-      serverRequest.setRequestPileNotification(&pile_);
     }
 
     serverRequest.setConcurrencyControllerNotification(this);

@@ -1315,7 +1315,7 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyStructWrapper",
+                "name" => "\\MyStructWrapper",
               )
             ),
           ],
@@ -1325,7 +1325,7 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftStructMetadata
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyTypeIntWrapper",
+                "name" => "\\MyTypeIntWrapper",
                 "extraNamespace" => "detail",
               )
             ),
@@ -1486,7 +1486,7 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult implements \ITh
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyTypeIntWrapper",
+                "name" => "\\MyTypeIntWrapper",
                 "extraNamespace" => "detail",
               )
             ),

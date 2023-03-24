@@ -511,7 +511,7 @@ class structured_annotation_recursive implements \IThriftAsyncStruct, \IThriftSt
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyTypeIntWrapper",
+                "name" => "\\MyTypeIntWrapper",
               )
             ),
           ],

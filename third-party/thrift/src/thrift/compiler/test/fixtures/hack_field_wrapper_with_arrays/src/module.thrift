@@ -23,7 +23,7 @@ struct MyStruct {
 union MyUnion {
   @include.AnnotationStruct
   1: i64 union_annotated_field;
-  @hack.Adapter{name = "\AdapterTestIntToString"}
+  @hack.Adapter{name = "\\AdapterTestIntToString"}
   3: i64 union_adapted_type;
 }
 

@@ -72,7 +72,7 @@ class AnnotationStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \I
         ),
         '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
           shape(
-            "name" => "\MyFieldWrapper",
+            "name" => "\\MyFieldWrapper",
           )
         ),
       ],
@@ -761,7 +761,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],
@@ -780,7 +780,7 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\MyAdapter1",
+                "name" => "\\MyAdapter1",
               )
             ),
           ],
@@ -790,12 +790,12 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\MyAdapter1",
+                "name" => "\\MyAdapter1",
               )
             ),
           ],
@@ -805,14 +805,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],
           'type' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\MyAdapterInt",
+                "name" => "\\MyAdapterInt",
               )
             ),
           ],
@@ -821,14 +821,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyTypeIntWrapper",
+                "name" => "\\MyTypeIntWrapper",
                 "extraNamespace" => "detail",
               )
             ),
@@ -838,14 +838,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyStructWrapper",
+                "name" => "\\MyStructWrapper",
               )
             ),
           ],
@@ -854,14 +854,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],
           'type' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\MyAdapter1",
+                "name" => "\\MyAdapter1",
               )
             ),
           ],
@@ -870,14 +870,14 @@ class MyNestedStruct implements \IThriftAsyncStruct, \IThriftStructMetadata, \IT
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],
           'type' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\MyAdapter1",
+                "name" => "\\MyAdapter1",
               )
             ),
           ],

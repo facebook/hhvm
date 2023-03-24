@@ -213,7 +213,7 @@ final class TimestampToTimeAdapter implements IThriftAdapter {
 ```thrift
 // In thrift file
 include "thrift/annotation/hack.thrift"
-@hack.Adapter {name = '\TimestampToTimeAdapter'}
+@hack.Adapter {name = '\\TimestampToTimeAdapter'}
 typedef i32 i32_withAdapter;
 
 struct Document {
@@ -242,7 +242,7 @@ Similar to typedef, adapter can be added to fields directly. It should implement
 ```thrift
 // In thrift file
 struct Document {
-  @hack.Adapter{name = '\TimestampToTimeAdapter'}
+  @hack.Adapter{name = '\\TimestampToTimeAdapter'}
   1: i32 created_time;
 }
 // Thrift compiler will generate this for you:
@@ -312,7 +312,7 @@ final class FooOnlyAllowOwnerToAccess<TThriftType, TStructType>
 ```thrift
 // In thrift file
 struct Document {
-  @hack.Wrapper{name = '\FooOnlyAllowOwnerToAccess'}
+  @hack.Wrapper{name = '\\FooOnlyAllowOwnerToAccess'}
   1: i32 created_time;
 }
 ```

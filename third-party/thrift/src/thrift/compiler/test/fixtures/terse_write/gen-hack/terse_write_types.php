@@ -4179,7 +4179,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
           'type' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\Adapter1",
+                "name" => "\\Adapter1",
               )
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
@@ -4193,7 +4193,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
           'field' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\Adapter1",
+                "name" => "\\Adapter1",
               )
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
@@ -4215,7 +4215,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftStructMetadata, \IThr
           'type' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\Adapter1",
+                "name" => "\\Adapter1",
               )
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
@@ -4387,7 +4387,7 @@ class WrappedFields implements \IThriftAsyncStruct, \IThriftStructMetadata, \ITh
           'field' => dict[
             '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
               shape(
-                "name" => "\MyFieldWrapper",
+                "name" => "\\MyFieldWrapper",
               )
             ),
           ],

@@ -18,46 +18,46 @@ include "thrift/annotation/hack.thrift"
 include "thrift/annotation/scope.thrift"
 
 @scope.Transitive
-@hack.Wrapper{name = "\MyFieldWrapper"}
+@hack.Wrapper{name = "\\MyFieldWrapper"}
 struct AnnotationStruct {}
 
 struct MyStruct {
   1: MyNestedStruct nested_struct;
 }
-@hack.Adapter{name = "\MyAdapterInt"}
+@hack.Adapter{name = "\\MyAdapterInt"}
 typedef i64 i64WithAdapter
 
-@hack.Wrapper{name = "\MyTypeIntWrapper", extraNamespace = "detail"}
+@hack.Wrapper{name = "\\MyTypeIntWrapper", extraNamespace = "detail"}
 typedef i64 i64WithWrapper
 
-@hack.Adapter{name = "\MyAdapter1"}
+@hack.Adapter{name = "\\MyAdapter1"}
 typedef map<string, MyStruct> AdaptedMap
 
-@hack.Adapter{name = "\MyAdapter1"}
+@hack.Adapter{name = "\\MyAdapter1"}
 typedef MyStruct AdaptedStruct
 
 struct MyNestedStruct {
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   1: i64 wrapped_field;
   @AnnotationStruct
   2: i64 annotated_field;
-  @hack.Adapter{name = "\MyAdapter1"}
+  @hack.Adapter{name = "\\MyAdapter1"}
   3: i64 adapted_type;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
-  @hack.Adapter{name = "\MyAdapter1"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
+  @hack.Adapter{name = "\\MyAdapter1"}
   4: i64 adapted__and_wrapped_type;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   5: optional i64WithAdapter optional_adapted_and_wrapped_type;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   @hack.SkipCodegen{reason = "invalid map key"}
   6: optional map<MyStruct, string> invalid_key_map;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   7: i64WithWrapper wrapped_type_int;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   8: StructWithWrapper double_wrapped_struct;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   9: optional AdaptedMap optional_adapted_and_wrapped_type_map;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   10: optional AdaptedStruct optional_adapted_and_wrapped_type_struct;
 }
 
@@ -84,7 +84,7 @@ service Service1 {
   i64WithWrapper func2(1: StructWithWrapper arg1, 2: i64WithWrapper arg2);
 }
 
-@hack.Wrapper{name = "\MyStructWrapper"}
+@hack.Wrapper{name = "\\MyStructWrapper"}
 struct StructWithWrapper {
   1: i64 int_field;
 }

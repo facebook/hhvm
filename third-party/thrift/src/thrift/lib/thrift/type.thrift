@@ -90,7 +90,7 @@ typedef type_rep.ProtocolUnion Protocol (thrift.uri = "")
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Type>",
 }
-@hack.Adapter{name = "\ThriftTypeStructAdapter"}
+@hack.Adapter{name = "\\ThriftTypeStructAdapter"}
 typedef type_rep.TypeStruct Type (thrift.uri = "")
 
 /** A list of Types, accessible by `TypeId`. */

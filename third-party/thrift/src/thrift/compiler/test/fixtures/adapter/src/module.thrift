@@ -32,12 +32,12 @@ package "facebook.com/thrift/test"
 @cpp.Adapter{name = '::my::Adapter2'}
 @rust.Adapter{name = "::my::Adapter2"}
 typedef set<string> (py.adapter = 'my.Adapter2') SetWithAdapter
-@hack.Adapter{name = '\Adapter1'}
+@hack.Adapter{name = '\\Adapter1'}
 @cpp.Adapter{name = '::my::Adapter1'}
 @rust.Adapter{name = "::my::Adapter1"}
 typedef string (py.adapter = 'my.Adapter1') StringWithAdapter
 typedef list<StringWithAdapter> ListWithElemAdapter
-@hack.Adapter{name = '\Adapter2'}
+@hack.Adapter{name = '\\Adapter2'}
 @cpp.Adapter{name = '::my::Adapter2'}
 @rust.Adapter{name = "::my::Adapter2"}
 typedef ListWithElemAdapter ListWithElemAdapter_withAdapter
@@ -66,40 +66,40 @@ typedef i64 MyI64
 
 typedef MyI64 DoubleTypedefI64
 
-@hack.Adapter{name = '\Adapter1'}
+@hack.Adapter{name = '\\Adapter1'}
 @cpp.Adapter{name = '::my::Adapter1'}
 @rust.Adapter{name = "::my::Adapter1"}
 typedef i32 MyI32
 
 struct Foo {
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
   1: i32 (py.adapter = 'my.Adapter1') intField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
   2: optional i32 (py.adapter = 'my.Adapter1') optionalIntField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
   3: i32 (py.adapter = 'my.Adapter1') intFieldWithDefault = 13;
   4: SetWithAdapter setField;
   5: optional SetWithAdapter optionalSetField;
-  @hack.Adapter{name = '\Adapter3'}
+  @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
   6: map<string, ListWithElemAdapter_withAdapter (py.adapter = 'my.Adapter2')> (
     py.adapter = 'my.Adapter3',
   ) mapField;
-  @hack.Adapter{name = '\Adapter3'}
+  @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
   7: optional map<
     string,
     ListWithElemAdapter_withAdapter (py.adapter = 'my.Adapter2')
   > (py.adapter = 'my.Adapter3') optionalMapField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
   8: binary (py.adapter = 'my.Adapter1') binaryField;
@@ -114,44 +114,44 @@ struct Foo {
 )
 
 union Baz {
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
   1: i32 (py.adapter = 'my.Adapter1') intField;
   4: SetWithAdapter setField;
-  @hack.Adapter{name = '\Adapter3'}
+  @hack.Adapter{name = '\\Adapter3'}
   @cpp.Adapter{name = '::my::Adapter3'}
   @rust.Adapter{name = "::my::Adapter3"}
   6: map<string, ListWithElemAdapter_withAdapter (py.adapter = 'my.Adapter2')> (
     py.adapter = 'my.Adapter3',
   ) mapField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   @rust.Adapter{name = "::my::Adapter1"}
   8: binary (py.adapter = 'my.Adapter1') binaryField;
   9: MyI64 longField;
 }
 
-@hack.Adapter{name = '\Adapter1'}
+@hack.Adapter{name = '\\Adapter1'}
 @cpp.Adapter{name = '::my::Adapter1'}
 @rust.Adapter{name = "::my::Adapter1"}
 typedef Foo FooWithAdapter
 
 struct Bar {
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1', adaptedType = '::my::Cpp::Type1'}
   1: Foo (py.adapter = '::my.Adapter1') structField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   2: optional Foo (py.adapter = 'my.Adapter1') optionalStructField;
   3: list<FooWithAdapter (py.adapter = 'my.Adapter1')> structListField;
   4: optional list<
     FooWithAdapter (py.adapter = 'my.Adapter1')
   > optionalStructListField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   5: Baz (py.adapter = 'my.Adapter1') unionField;
-  @hack.Adapter{name = '\Adapter1'}
+  @hack.Adapter{name = '\\Adapter1'}
   @cpp.Adapter{name = '::my::Adapter1'}
   6: optional Baz (py.adapter = 'my.Adapter1') optionalUnionField;
   7: DirectlyAdapted adaptedStructField;
@@ -200,11 +200,11 @@ struct TerseAdaptedFields {
   3: set<i32> set_field;
 }
 
-@hack.Adapter{name = '\Adapter2'}
+@hack.Adapter{name = '\\Adapter2'}
 @cpp.Adapter{name = '::my::Adapter2'}
 typedef Bar (py.adapter = 'my.Adapter2') StructWithAdapter
 
-@hack.Adapter{name = '\Adapter2'}
+@hack.Adapter{name = '\\Adapter2'}
 @cpp.Adapter{name = '::my::Adapter2'}
 typedef Baz (py.adapter = 'my.Adapter2') UnionWithAdapter
 

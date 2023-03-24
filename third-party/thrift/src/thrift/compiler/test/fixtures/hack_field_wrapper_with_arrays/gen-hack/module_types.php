@@ -333,7 +333,7 @@ class MyUnion implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThriftUn
           'field' => dict[
             '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
               shape(
-                "name" => "\AdapterTestIntToString",
+                "name" => "\\AdapterTestIntToString",
               )
             ),
           ],

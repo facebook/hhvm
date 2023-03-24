@@ -96,7 +96,7 @@ class StructWithWrapper implements \IThriftSyncStruct, \IThriftStructMetadata, \
         'struct' => dict[
           '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
             shape(
-              "name" => "\MyStructWrapper",
+              "name" => "\\MyStructWrapper",
             )
           ),
         ],

@@ -18,7 +18,7 @@ include "thrift/annotation/hack.thrift"
 include "thrift/annotation/scope.thrift"
 
 @scope.Transitive
-@hack.FieldWrapper{name = "\MyFieldWrapper"}
+@hack.FieldWrapper{name = "\\MyFieldWrapper"}
 struct AnnotationStruct {}
 
 struct MyStruct {
@@ -26,17 +26,17 @@ struct MyStruct {
 }
 
 struct MyNestedStruct {
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   1: i64 wrapped_field;
   @AnnotationStruct
   2: i64 annotated_field;
-  @hack.Adapter{name = "\MyAdapter"}
+  @hack.Adapter{name = "\\MyAdapter"}
   3: i64 adapted_type;
 }
 
 struct MyComplexStruct {
   1: map<string, MyStruct> map_of_string_to_MyStruct;
-  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  @hack.FieldWrapper{name = "\\MyFieldWrapper"}
   2: map<string, list<MyStruct>> map_of_string_to_list_of_MyStruct;
   3: map<string, map<string, i32>> map_of_string_to_map_of_string_to_i32;
   4: map<

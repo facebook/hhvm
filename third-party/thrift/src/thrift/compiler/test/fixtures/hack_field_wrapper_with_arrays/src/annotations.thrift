@@ -16,12 +16,12 @@
 
 include "thrift/annotation/hack.thrift"
 
-@hack.Wrapper{name = "\MyStructWrapper"}
+@hack.Wrapper{name = "\\MyStructWrapper"}
 struct StructWithWrapper {
   1: i64 int_field;
 }
 
-@hack.Wrapper{name = "\MyTypeIntWrapper"}
+@hack.Wrapper{name = "\\MyTypeIntWrapper"}
 typedef i64 i64WithWrapper
 
 struct structured_annotation_with_default {

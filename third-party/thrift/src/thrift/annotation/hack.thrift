@@ -63,7 +63,7 @@ struct Wrapper {
 } (thrift.uri = "facebook.com/thrift/annotation/hack/Wrapper")
 
 // An annotation that applies a Hack adapter to types. For example:
-// @hack.Adapter{name="\TimestampAdapter"}
+// @hack.Adapter{name="\\TimestampAdapter"}
 // typedef i64 Timestamp;
 //
 //   struct User {

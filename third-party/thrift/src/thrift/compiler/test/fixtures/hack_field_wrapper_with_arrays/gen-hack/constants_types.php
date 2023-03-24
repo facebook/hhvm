@@ -339,7 +339,7 @@ class Internship implements \IThriftAsyncStruct, \IThriftStructMetadata, \IThrif
           'type' => dict[
             '\thrift\annotation\hack\Wrapper' => \thrift\annotation\hack\Wrapper::fromShape(
               shape(
-                "name" => "\MyTypeIntWrapper",
+                "name" => "\\MyTypeIntWrapper",
                 "extraNamespace" => "detail",
               )
             ),

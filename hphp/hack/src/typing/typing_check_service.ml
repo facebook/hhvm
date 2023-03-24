@@ -722,7 +722,6 @@ let next
     (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
     (telemetry : Telemetry.t) : unit -> job_progress Bucket.bucket =
-  let max_size = Bucket.max_size () in
   let num_workers =
     match workers with
     | Some w -> List.length w
@@ -827,7 +826,7 @@ let next
               Bucket.calculate_bucket_size
                 ~num_jobs:workitems_to_process_length
                 ~num_workers
-                ~max_size
+                ()
             in
             let (current_bucket, remaining_jobs) =
               BigList.split_n jobs bucket_size

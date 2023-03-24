@@ -367,8 +367,6 @@ type t = {
 
       If this is set to a negative value, eviction is disabled. *)
   max_workers: int option;
-  max_bucket_size: int;
-      (** max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
   use_dummy_informant: bool;  (** See Informant. *)
   informant_min_distance_restart: int;
   use_full_fidelity_parser: bool;
@@ -544,7 +542,6 @@ let default =
     shm_use_sharded_hashtbl = false;
     shm_cache_size = -1;
     max_workers = None;
-    max_bucket_size = Bucket.max_size ();
     use_dummy_informant = true;
     informant_min_distance_restart = 100;
     use_full_fidelity_parser = true;
@@ -895,9 +892,6 @@ let load_
     int_ "shm_cache_size" ~default:default.shm_cache_size config
   in
   let max_workers = int_opt "max_workers" config in
-  let max_bucket_size =
-    int_ "max_bucket_size" ~default:default.max_bucket_size config
-  in
   let interrupt_on_watchman =
     bool_if_min_version
       "interrupt_on_watchman"
@@ -1430,7 +1424,6 @@ let load_
     shm_use_sharded_hashtbl;
     shm_cache_size;
     max_workers;
-    max_bucket_size;
     use_dummy_informant;
     informant_min_distance_restart;
     use_full_fidelity_parser;
@@ -1539,7 +1532,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;
-      max_bucket_size = options.max_bucket_size;
       max_workers = Option.value options.max_workers ~default:(-1);
       max_typechecker_worker_memory_mb =
         Option.value options.max_typechecker_worker_memory_mb ~default:(-1);

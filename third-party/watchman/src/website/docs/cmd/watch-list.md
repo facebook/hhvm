@@ -7,23 +7,23 @@ Returns a list of watched dirs.
 
 From the command line:
 
-~~~bash
+```bash
 $ watchman watch-list
-~~~
+```
 
 JSON:
 
-~~~json
+```json
 ["watch-list"]
-~~~
+```
 
 Result:
 
-~~~json
+```json
 {
     "version": "1.9",
     "roots": [
         "/home/wez/watchman"
     ]
 }
-~~~
+```

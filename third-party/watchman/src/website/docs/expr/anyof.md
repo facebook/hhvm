@@ -4,7 +4,7 @@ section: Expression Terms
 ---
 
 The `anyof` expression term evaluates as true if any of the grouped expressions
-also evaluated as true.  The following expression matches files whose name ends
+also evaluated as true. The following expression matches files whose name ends
 with either `.txt` or `.md`:
 
     ["anyof", ["match", "*.txt"], ["match", "*.md"]]

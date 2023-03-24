@@ -5,5 +5,14 @@
   "printWidth": 80,
   "proseWrap": "never",
   "singleQuote": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": {
+        "proseWrap": "always",
+        "embeddedLanguageFormatting": "off"
+      }
+    }
+  ]
 }

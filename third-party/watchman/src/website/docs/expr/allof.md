@@ -4,7 +4,7 @@ section: Expression Terms
 ---
 
 The `allof` expression term evaluates as true if all of the grouped expressions
-also evaluated as true.  For example, this expression matches only files whose
+also evaluated as true. For example, this expression matches only files whose
 name ends with `.txt` and that are not empty files:
 
     ["allof", ["match", "*.txt"], ["not", "empty"]]

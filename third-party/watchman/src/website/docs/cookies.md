@@ -3,37 +3,36 @@ title: Query Synchronization
 category: Internals
 ---
 
-A file system monitor needs to make sure that queries see up-to-date
-views. Watchman ensures that by creating a unique *cookie* for each query made
-to it.
+A file system monitor needs to make sure that queries see up-to-date views.
+Watchman ensures that by creating a unique _cookie_ for each query made to it.
 
 ## Background
 
 Consider a directory tree traversal to gather file status, such as the one
 performed by `hg status` or `git status`. The traversal will race with any
-operations happening concurrently, and this is impossible to fix. However, we
-do get some weaker guarantees:
+operations happening concurrently, and this is impossible to fix. However, we do
+get some weaker guarantees:
 
 1. Every file operation that happens before the traversal is started will be
-observed.
+   observed.
 2. File operations that happen after the traversal is started may or may not be
-observed.
+   observed.
 
 For watchman, cookies enable us to provide similar guarantees. For a given
 watchman query:
 
 1. Every file operation that happens before the query is started will be
-observed.
+   observed.
 2. File operations that happen after the query is started may or may not be
-observed.
+   observed.
 
 ## How cookies work
 
-A *cookie* is a temporary file that is created inside a directory observed by
-watchman. The cookie is created in a directory that is expected not to go
-away. The obvious location is the root itself, but we'd like cookies not to show
-up in VCS operations. So if a VCS directory (`.git`, `.hg` or `.svn`) is found,
-that's where cookies are created instead.
+A _cookie_ is a temporary file that is created inside a directory observed by
+watchman. The cookie is created in a directory that is expected not to go away.
+The obvious location is the root itself, but we'd like cookies not to show up in
+VCS operations. So if a VCS directory (`.git`, `.hg` or `.svn`) is found, that's
+where cookies are created instead.
 
 The cookie is created while the root is locked, so watchman won't find the
 cookie by accident while processing events from a prior run.
@@ -48,22 +47,22 @@ thread up immediately: since the notify thread still holds the root lock, the
 calling thread will only be able to proceed once the notify thread releases the
 lock.
 
-*What do cookies get us?*
+_What do cookies get us?_
 
 File monitoring systems like `inotify` typically provide an ordering guarantee:
 notifications arrive in the order they happen. Any events happening before the
 cookie is created will appear before the event for the cookie does, which means
 they will be processed by the time the query is answered.
 
-*How well do cookies work?*
+_How well do cookies work?_
 
-The Mercurial test suite has proved to be a good stress test for
-watchman. Before cookies were implemented, if 16 or more tests from the suite
-were run in parallel, watchman would start falling behind and often produce
-outdated answers. Cookies have successfully eradicated that.
+The Mercurial test suite has proved to be a good stress test for watchman.
+Before cookies were implemented, if 16 or more tests from the suite were run in
+parallel, watchman would start falling behind and often produce outdated
+answers. Cookies have successfully eradicated that.
 
-*Can watchman find a cookie even if not all events leading to its appearance
- have been processed?*
+_Can watchman find a cookie even if not all events leading to its appearance
+have been processed?_
 
 Consider this situation when cookies are created inside `.hg`:
 
@@ -96,10 +95,10 @@ host, we have observed that FSEvents from the `git checkout` may be received
 after the cookie file notification and FSEventStreamFlushSync returning.
 
 It turns out that FSEvents provides no guarantees here, and relying on it for
-query synchronization is unsupported on any current Apple platform.  Their
-suggested workaround is to implement a watcher with [Endpoint
-Security](https://developer.apple.com/documentation/endpointsecurity).  Nobody
-has evaluated the feasibility of this yet.
+query synchronization is unsupported on any current Apple platform. Their
+suggested workaround is to implement a watcher with
+[Endpoint Security](https://developer.apple.com/documentation/endpointsecurity).
+Nobody has evaluated the feasibility of this yet.
 
 In the meantime, you can set a `settle_period` and `settle_timeout` on the
 query. Both are integer milliseconds, and `settle_period` specifies the required

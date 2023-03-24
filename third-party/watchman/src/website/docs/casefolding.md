@@ -8,9 +8,9 @@ and does not attempt to do any case-folding of file names. On a case-insensitive
 file system like macOS's [HFS+](https://en.wikipedia.org/wiki/HFS_Plus), this
 can manifest itself in different ways:
 
-* If a file `foo.txt` is renamed to `FOO.txt`, Watchman will report `FOO.txt` as
+- If a file `foo.txt` is renamed to `FOO.txt`, Watchman will report `FOO.txt` as
   created and `foo.txt` separately as changed.
-* If a file `foo.txt` is removed and another file `FOO.txt` is later added,
+- If a file `foo.txt` is removed and another file `FOO.txt` is later added,
   Watchman will report `FOO.txt` as added, but it might report `foo.txt` as
   either removed or changed.
 
@@ -26,8 +26,8 @@ levels of correctness here:
 - handle ASCII + accented ASCII case-folding only (98%)
 - full handling of current Unicode spec using a Unicode database (99%)
 - using the special folding table written to a hidden file on disk at file
-system creation time that matches Apple's interpretation of Unicode at the time
-of the OS release + their own quirks (100%)
+  system creation time that matches Apple's interpretation of Unicode at the
+  time of the OS release + their own quirks (100%)
 
 Clients of Watchman might have their own idea of case-folding, which might or
 might not be compatible with Watchman's idea of it. So far, clients have managed
@@ -59,9 +59,9 @@ case-folding that might or might not match up with the operating system's. You
 perform case-folding against an internal data structure, so that if the data
 structure has `foo.txt` and the file system has `FOO.txt` you make `foo.txt`
 take precedence. In that case, Watchman will tell you about both `FOO.txt` and
-`foo.txt`, and it's up to you to perform
-normalization. [hgwatchman](https://bitbucket.org/facebook/hgwatchman) just
-consults the file system in the rare case that a file changes case.
+`foo.txt`, and it's up to you to perform normalization.
+[hgwatchman](https://bitbucket.org/facebook/hgwatchman) just consults the file
+system in the rare case that a file changes case.
 
 ## Credits
 

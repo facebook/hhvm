@@ -143,12 +143,6 @@ let symbol_to_lsp_call_item
     selectionRange = selectionRange_;
   }
 
-let position_to_lsp_range (pos : 'a Pos.pos) : range =
-  let (start_line, end_line, start_col, end_col) = Pos.info_pos_extended pos in
-  let start_pos = { line = start_line; character = start_col } in
-  let end_pos = { line = end_line; character = end_col } in
-  { start = start_pos; end_ = end_pos }
-
 (************************************************************************)
 (* Range calculations                                                   *)
 (************************************************************************)

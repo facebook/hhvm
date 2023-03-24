@@ -57,8 +57,6 @@ val symbol_to_lsp_call_item :
   Relative_path.t SymbolDefinition.t option ->
   Lsp.CallHierarchyItem.t
 
-val position_to_lsp_range : 'a Pos.pos -> Lsp.range
-
 val pos_compare : Lsp.position -> Lsp.position -> int
 
 type range_overlap =

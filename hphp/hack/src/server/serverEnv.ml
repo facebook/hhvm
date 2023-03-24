@@ -97,20 +97,9 @@ type genv = {
   config: ServerConfig.t;
   local_config: ServerLocalConfig.t;
   workers: MultiWorker.worker list option;
-      (** Early-initialized workers to be used in MultiWorker jobs
-          They are initialized early to keep their heaps as empty as possible. *)
+  notifier: ServerNotifier.t;
   indexer: (string -> bool) -> unit -> string list;
       (** Returns the list of files under .hhconfig, subject to a filter *)
-  notifier_async: unit -> ServerNotifierTypes.notifier_changes;
-      (** Each time this is called, it should return the files that have changed
-          since the last invocation *)
-  notifier_async_reader: unit -> Buffered_line_reader.t option;
-      (** If this FD is readable, next call to notifier_async () should read
-          something from it. *)
-  notifier: unit -> SSet.t;
-  wait_until_ready: unit -> unit;
-      (** If daemons are spawned as part of the init process, wait for them here
-          e.g. wait until dfindlib is ready (in the case that watchman is absent) *)
   mutable debug_channels: (Timeout.in_channel * Out_channel.t) option;
 }
 

@@ -46,7 +46,7 @@
  (name server_revision_tracker)
  (wrapped false)
  (modules serverRevisionTracker)
- (libraries hg server_env watchman_utils)
+ (libraries hg server_config watchman_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -160,39 +160,52 @@
 )
 
 (library
+ (name server_notifier)
+ (wrapped false)
+ (modules serverNotifier)
+ (libraries
+   server_command_types
+   server_files
+   server_revision_tracker
+   dfind
+   watchman)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name server_config)
+  (wrapped false)
+  (modules serverConfig serverLocalConfig)
+  (libraries
+   server_args
+   errors
+   experiments_config_file
+   heap_shared_mem
+   typechecker_options
+   glean_options
+   ai_options
+   build_options
+   symbol_write_options
+   parser_options
+   procs_bucket
+   server_local_config_knobs_stubs
+   utils_config_file)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+
+(library
  (name server_env)
  (wrapped false)
- (modules serverConfig serverEnv serverLocalConfig)
+ (modules serverEnv )
  (libraries
-  ai_options
-  build_options
   ci_util
-  cli_args
   diagnostic_pusher
-  disk
-  errors
-  experiments_config_file
-  file_info
-  glean_options
-  server_args
-  server_local_config_knobs_stubs
-  symbol_write_options
-  package
-  parser_options
-  pos
-  procs_bucket
-  saved_state_rollouts
   server_client_provider
-  server_command_types
-  state_loader
-  typechecker_options
+  server_config
+  server_notifier
   typing_service_api
-  typing_service_delegate
-  typing_service_delegate_types
-  utils_config_file
-  utils_core
-  utils_www_root
-  version)
+  typing_service_delegate_types)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 
@@ -241,7 +254,6 @@
   serverGlobalInferenceTypes
   serverHighlightRefsTypes
   serverLintTypes
-  serverNotifierTypes
   serverRageTypes
   serverRefactorTypes
   tastHolesService)

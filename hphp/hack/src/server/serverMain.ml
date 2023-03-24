@@ -181,7 +181,6 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
 
 (** Query the notifier of changed files. *)
 let query_notifier genv env query_kind start_time =
-  let open ServerNotifierTypes in
   let telemetry =
     Telemetry.create () |> Telemetry.duration ~key:"start" ~start_time
   in
@@ -189,28 +188,28 @@ let query_notifier genv env query_kind start_time =
     match query_kind with
     | `Sync ->
       ( env,
-        begin
-          try Notifier_synchronous_changes (genv.notifier ()) with
-          | Watchman.Timeout -> Notifier_unavailable
-        end )
+        (try ServerNotifier.get_changes_sync genv.notifier with
+        | Watchman.Timeout -> ServerNotifier.Unavailable) )
     | `Async ->
       ( { env with last_notifier_check_time = start_time },
-        genv.notifier_async () )
-    | `Skip -> (env, Notifier_async_changes SSet.empty)
+        ServerNotifier.get_changes_async genv.notifier )
+    | `Skip -> (env, ServerNotifier.AsyncChanges SSet.empty)
   in
   let telemetry = Telemetry.duration telemetry ~key:"notified" ~start_time in
   let unpack_updates = function
-    | Notifier_unavailable -> (true, SSet.empty)
-    | Notifier_state_enter _ -> (true, SSet.empty)
-    | Notifier_state_leave _ -> (true, SSet.empty)
-    | Notifier_async_changes updates -> (true, updates)
-    | Notifier_synchronous_changes updates -> (false, updates)
+    | ServerNotifier.Unavailable -> (true, SSet.empty)
+    | ServerNotifier.StateEnter _ -> (true, SSet.empty)
+    | ServerNotifier.StateLeave _ -> (true, SSet.empty)
+    | ServerNotifier.AsyncChanges updates -> (true, updates)
+    | ServerNotifier.SyncChanges updates -> (false, updates)
   in
   let (updates_stale, raw_updates) = unpack_updates raw_updates in
   let rec pump_async_updates acc =
-    match genv.notifier_async_reader () with
+    match ServerNotifier.async_reader_opt genv.notifier with
     | Some reader when Buffered_line_reader.is_readable reader ->
-      let (_, raw_updates) = unpack_updates (genv.notifier_async ()) in
+      let (_, raw_updates) =
+        unpack_updates (ServerNotifier.get_changes_async genv.notifier)
+      in
       pump_async_updates (SSet.union acc raw_updates)
     | _ -> acc
   in
@@ -1033,7 +1032,7 @@ let setup_interrupts env client_provider =
           let interrupt_on_watchman =
             interrupt_on_watchman && env.can_interrupt
           in
-          match genv.notifier_async_reader () with
+          match ServerNotifier.async_reader_opt genv.notifier with
           | Some reader when interrupt_on_watchman ->
             (Buffered_line_reader.get_fd reader, watchman_interrupt_handler genv)
             :: handlers
@@ -1218,7 +1217,7 @@ let program_init genv env =
   in
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   ServerProgress.write "wrapping up init...";
-  genv.wait_until_ready ();
+  ServerNotifier.wait_until_ready genv.notifier;
   ServerStamp.touch_stamp ();
   EventLogger.set_init_type init_type;
   let telemetry =
@@ -1436,8 +1435,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let worker_logging_init () =
     logging_init (init_id ^ "." ^ Random_id.short_string ()) ~is_worker:true
   in
+  let gc_control = ServerConfig.gc_control config in
   let workers =
-    let gc_control = ServerConfig.gc_control config in
     ServerWorker.make
       ~longlived_workers:local_config.ServerLocalConfig.longlived_workers
       ~nbr_procs:num_workers
@@ -1445,11 +1444,11 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       handle
       ~logging_init:worker_logging_init
   in
-  let genv = ServerEnvBuild.make_genv options config local_config workers in
-  (genv, ServerEnvBuild.make_env genv.config ~init_id ~deps_mode)
+  (workers, ServerEnvBuild.make_env config ~init_id ~deps_mode)
 
 let run_once options config local_config =
-  let (genv, env) =
+  assert (ServerArgs.check_mode options);
+  let (workers, env) =
     setup_server
       options
       config
@@ -1457,10 +1456,7 @@ let run_once options config local_config =
       ~informant_managed:false
       ~monitor_pid:None
   in
-  if not (ServerArgs.check_mode genv.options) then (
-    Hh_logger.log "ServerMain run_once only supported in check mode.";
-    Exit.exit Exit_status.Input_error
-  );
+  let genv = ServerEnvBuild.make_genv options config local_config workers in
 
   (* The type-checking happens here *)
   let env = program_init genv env in
@@ -1503,13 +1499,14 @@ let run_once options config local_config =
  * via ic.
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
+  assert (not (ServerArgs.check_mode options));
   Folly.ensure_folly_init ();
-
   Printexc.record_backtrace true;
+
   let (config, local_config) = ServerConfig.load ~silent:false options in
   Option.iter local_config.ServerLocalConfig.memtrace_dir ~f:(fun dir ->
       Daemon.start_memtracing (Filename.concat dir "memtrace.server.ctf"));
-  let (genv, env) =
+  let (workers, env) =
     setup_server
       options
       config
@@ -1517,10 +1514,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
       ~informant_managed
       ~monitor_pid:(Some monitor_pid)
   in
-  if ServerArgs.check_mode genv.options then (
-    Hh_logger.log "Invalid program args - can't run daemon in check mode.";
-    Exit.exit Exit_status.Input_error
-  );
+  let genv = ServerEnvBuild.make_genv options config local_config workers in
   HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
   let env = MainInit.go genv options (fun () -> program_init genv env) in
   serve genv env in_fds

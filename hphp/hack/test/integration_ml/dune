@@ -162,7 +162,7 @@
 ;         "//hphp/hack/src/deps:deps",
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/naming:naming",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils:relative_path",
 ;         "//hphp/hack/src/utils/collections:collections",
@@ -182,7 +182,7 @@
 ;         "//hphp/hack/src/options:tc_options",
 ;         "//hphp/hack/src/server:server",
 ;         "//hphp/hack/src/server:server_command_types",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing",
 ;         "//hphp/hack/src/typing:typing_ast",
@@ -221,7 +221,7 @@
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/errors:errors",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 
 (rule
  (alias gconst_file)
@@ -235,7 +235,7 @@
 ;         "//hphp/hack/src/errors:errors",
 ;         "//hphp/hack/src/heap:heap",
 ;         "//hphp/hack/src/options:tc_options",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing",
 ;         "//hphp/hack/src/typing:typing_ast",
@@ -250,7 +250,7 @@
 
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/errors:errors",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 
 (rule
  (alias decl_decl)
@@ -261,7 +261,7 @@
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
 ;         "//hphp/hack/src/errors:errors",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/utils/core:core",
 ;         "//hphp/hack/src/utils/collections:collections",
 
@@ -279,7 +279,7 @@
 ;         "//hphp/hack/src/options:global_options",
 ;         "//hphp/hack/src/options:parser_options",
 ;         "//hphp/hack/src/options:tc_options",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
 ;         "//hphp/hack/src/utils/core:core",
@@ -303,7 +303,7 @@
 ;         "//hphp/hack/src/options:tc_options",
 ;         "//hphp/hack/src/procs:procs",
 ;         "//hphp/hack/src/server:server",
-;         "//hphp/hack/src/server:server_env",
+;         "//hphp/hack/src/server:server_env", "//hphp/hack/src/server:server_config",
 ;         "//hphp/hack/src/server:server_services",
 ;         "//hphp/hack/src/typing:typing_check_service",
 ;         "//hphp/hack/src/utils/core:core",

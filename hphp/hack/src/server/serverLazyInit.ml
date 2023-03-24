@@ -917,22 +917,21 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
     Relative_path.Set.t =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Getting files changed while parsing...";
+  ServerNotifier.wait_until_ready genv.notifier;
   let files_changed_while_parsing =
-    ServerNotifierTypes.(
-      genv.wait_until_ready ();
-      match genv.notifier_async () with
-      | Notifier_state_enter _
-      | Notifier_state_leave _
-      | Notifier_unavailable ->
-        Relative_path.Set.empty
-      | Notifier_synchronous_changes updates
-      | Notifier_async_changes updates ->
-        let root = Path.to_string root in
-        let filter p =
-          String.is_prefix p ~prefix:root && FindUtils.file_filter p
-        in
-        SSet.filter updates ~f:filter
-        |> Relative_path.relativize_set Relative_path.Root)
+    match ServerNotifier.get_changes_async genv.notifier with
+    | ServerNotifier.StateEnter _
+    | ServerNotifier.StateLeave _
+    | ServerNotifier.Unavailable ->
+      Relative_path.Set.empty
+    | ServerNotifier.SyncChanges updates
+    | ServerNotifier.AsyncChanges updates ->
+      let root = Path.to_string root in
+      let filter p =
+        String.is_prefix p ~prefix:root && FindUtils.file_filter p
+      in
+      SSet.filter updates ~f:filter
+      |> Relative_path.relativize_set Relative_path.Root
   in
   ignore
     (Hh_logger.log_duration

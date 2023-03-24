@@ -26,7 +26,7 @@ val is_hg_updating : bool (* use_tracker_v2 *) -> bool
 
 val check_blocking : unit -> unit
 
-val check_non_blocking : ServerEnv.env -> unit
+val check_non_blocking : is_full_check_done:bool -> unit
 
 (* This module tracks changes to mergebase, and is also informed (by functions below)
  * about the sizes of jobs that are being processed. If we are in "mergebase changed"

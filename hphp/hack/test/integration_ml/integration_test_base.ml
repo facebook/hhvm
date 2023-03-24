@@ -159,20 +159,20 @@ let run_loop_once :
   List.iter disk_changes ~f:(fun (path, contents) -> TestDisk.set path contents);
 
   let did_read_disk_changes_ref = ref false in
-  let notifier () =
-    if not !did_read_disk_changes_ref then (
-      did_read_disk_changes_ref := true;
-      SSet.of_list (List.map disk_changes ~f:fst)
-    ) else
-      SSet.empty
+  let get_changes_sync () =
+    ServerNotifier.SyncChanges
+      (if not !did_read_disk_changes_ref then (
+        did_read_disk_changes_ref := true;
+        SSet.of_list (List.map disk_changes ~f:fst)
+      ) else
+        SSet.empty)
   in
+  let get_changes_async () = get_changes_sync () in
   let genv =
     {
       !genv with
-      ServerEnv.notifier_async =
-        (fun () ->
-          ServerNotifierTypes.Notifier_synchronous_changes (notifier ()));
-      ServerEnv.notifier;
+      ServerEnv.notifier =
+        ServerNotifier.init_mock ~get_changes_sync ~get_changes_async;
     }
   in
   (* Always pick up disk changes in tests immediately *)

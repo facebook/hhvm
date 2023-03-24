@@ -40,4 +40,4 @@ val setup_server :
   ServerArgs.options ->
   ServerConfig.t ->
   ServerLocalConfig.t ->
-  ServerEnv.genv * ServerEnv.env
+  MultiWorker.worker list * ServerEnv.env

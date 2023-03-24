@@ -313,12 +313,9 @@ let check_blocking () =
     in
     ()
 
-let rec check_non_blocking env =
+let rec check_non_blocking ~is_full_check_done =
   if Queue.is_empty tracker_state.pending_queries then (
-    if
-      ServerEnv.(is_full_check_done env.full_check_status)
-      && tracker_state.did_change_mergebase
-    then (
+    if is_full_check_done && tracker_state.did_change_mergebase then (
       Hh_logger.log
         "ServerRevisionTracker: Full check completed despite mergebase changes";
 
@@ -333,7 +330,7 @@ let rec check_non_blocking env =
     if Future.is_ready future then (
       let (_ : Hg.hg_rev) = Queue.dequeue_exn tracker_state.pending_queries in
       check_query future ~timeout:30 ~current_t:(Unix.gettimeofday ());
-      check_non_blocking env
+      check_non_blocking ~is_full_check_done
     )
 
 let make_decision threshold count name =

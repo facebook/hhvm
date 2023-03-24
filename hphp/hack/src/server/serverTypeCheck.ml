@@ -1433,7 +1433,8 @@ functor
 
       (* We might have completed a full check, which might mean that a rebase was
        * successfully processed. *)
-      ServerRevisionTracker.check_non_blocking env;
+      ServerRevisionTracker.check_non_blocking
+        ~is_full_check_done:ServerEnv.(is_full_check_done env.full_check_status);
       let telemetry =
         Telemetry.duration
           telemetry

@@ -521,24 +521,36 @@ struct MapEncode {
 template <typename Key, typename Value>
 struct Encode<type::map<Key, Value>> : MapEncode<Key, Value> {};
 
-template <typename T, typename Tag>
-struct Encode<type::cpp_type<T, Tag>> : Encode<Tag> {
+template <
+    typename T,
+    typename Tag,
+    template <class...> class EncodeImpl = Encode>
+struct CppTypeEncode {
   template <class Protocol, class U>
   uint32_t operator()(Protocol& prot, const U& m) const {
     auto f = folly::if_constexpr<kIsStrongType<U, Tag>>(
         [](auto& v) { return static_cast<type::native_type<Tag>>(v); },
         folly::identity);
-    return Encode<Tag>::operator()(prot, f(m));
+    return EncodeImpl<Tag>{}(prot, f(m));
+  }
+};
+
+template <typename T, typename Tag>
+struct Encode<type::cpp_type<T, Tag>> : CppTypeEncode<T, Tag> {};
+
+template <
+    typename Adapter,
+    typename Tag,
+    template <class...> class EncodeImpl = Encode>
+struct AdaptedEncode {
+  template <typename Protocol, typename U>
+  uint32_t operator()(Protocol& prot, const U& m) const {
+    return EncodeImpl<Tag>{}(prot, Adapter::toThrift(m));
   }
 };
 
 template <typename Adapter, typename Tag>
-struct Encode<type::adapted<Adapter, Tag>> {
-  template <typename Protocol, typename U>
-  uint32_t operator()(Protocol& prot, const U& m) const {
-    return Encode<Tag>{}(prot, Adapter::toThrift(m));
-  }
-};
+struct Encode<type::adapted<Adapter, Tag>> : AdaptedEncode<Adapter, Tag> {};
 
 template <typename>
 struct Decode;
@@ -926,6 +938,18 @@ struct RecursiveEncode<type::struct_t<T>> {
 template <class T>
 struct RecursiveEncode<type::union_t<T>> : RecursiveEncode<type::struct_t<T>> {
 };
+
+template <class T>
+struct RecursiveEncode<type::exception_t<T>>
+    : RecursiveEncode<type::struct_t<T>> {};
+
+template <typename T, typename Tag>
+struct RecursiveEncode<type::cpp_type<T, Tag>>
+    : CppTypeEncode<T, Tag, RecursiveEncode> {};
+
+template <typename Adapter, typename Tag>
+struct RecursiveEncode<type::adapted<Adapter, Tag>>
+    : AdaptedEncode<Adapter, Tag, RecursiveEncode> {};
 
 template <typename T>
 FOLLY_INLINE_VARIABLE constexpr RecursiveEncode<type::infer_tag<T>>

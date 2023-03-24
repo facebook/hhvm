@@ -17,11 +17,21 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/test/gen-cpp2/RecursiveEncode_types.h>
 #include <thrift/test/testset/Populator.h>
 
 namespace apache::thrift::test {
 
 namespace {
+template <typename SerializerT, typename T>
+void roundTripTest(T obj) {
+  folly::IOBufQueue buffer;
+  typename SerializerT::ProtocolWriter writer;
+  writer.setOutput(&buffer);
+  op::detail::recursive_encode<T>(writer, obj);
+  T obj2 = SerializerT::template deserialize<T>(buffer.move().get());
+  EXPECT_EQ(obj, obj2);
+}
 
 template <typename T>
 class RecursiveEncodeTest : public testing::Test {
@@ -29,17 +39,9 @@ class RecursiveEncodeTest : public testing::Test {
   std::mt19937 rng_;
 
  protected:
-  T populated() { return populated_if_not_adapted<T>(rng_); }
-
   template <typename SerializerT>
   void testSerializer() {
-    T obj = this->populated();
-    folly::IOBufQueue buffer;
-    typename SerializerT::ProtocolWriter writer;
-    writer.setOutput(&buffer);
-    op::detail::recursive_encode<T>(writer, obj);
-    T obj2 = SerializerT::template deserialize<T>(buffer.move().get());
-    EXPECT_EQ(obj, obj2);
+    roundTripTest<SerializerT>(populated_if_not_adapted<T>(rng_));
   }
 };
 
@@ -60,6 +62,24 @@ TYPED_TEST_P(RecursiveEncodeTest, SimpleJson) {
 REGISTER_TYPED_TEST_CASE_P(RecursiveEncodeTest, Compact, Binary, SimpleJson);
 
 THRIFT_INST_TESTSET_ALL(RecursiveEncodeTest);
+
+TEST(RecursiveEncode, TestCustomType) {
+  Baz baz;
+  baz.field() = 10;
+  auto& bar = baz.bar()->value.value;
+  bar.field() = 20;
+
+  Foo foo1, foo2;
+  foo1.field() = 30;
+  foo2.field() = 40;
+
+  bar.foos()->push_back(foo1);
+  bar.foos()->push_back(foo2);
+
+  roundTripTest<CompactSerializer>(baz);
+  roundTripTest<BinarySerializer>(baz);
+  roundTripTest<SimpleJSONSerializer>(baz);
+}
 
 } // namespace
 } // namespace apache::thrift::test

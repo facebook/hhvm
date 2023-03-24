@@ -303,8 +303,7 @@ class parsing_driver : public parser_actions {
   std::unique_ptr<t_const_value> on_integer(
       source_location loc, int64_t value) override;
   std::unique_ptr<t_const_value> on_float(double value) override;
-  std::unique_ptr<t_const_value> on_string_literal(
-      fmt::string_view value) override;
+  std::unique_ptr<t_const_value> on_string_literal(std::string value) override;
   std::unique_ptr<t_const_value> on_bool_literal(bool value) override;
   std::unique_ptr<t_const_value> on_list_literal() override;
   std::unique_ptr<t_const_value> on_map_literal() override;

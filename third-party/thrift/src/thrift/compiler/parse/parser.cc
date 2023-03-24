@@ -214,7 +214,7 @@ class parser {
     if (token_.kind != tok::string_literal) {
       report_expected("string literal");
     }
-    auto str = token_.string_value();
+    auto str = lexer::lex_string_literal(token_);
     consume_token();
     switch (kind) {
       case tok::kw_package:
@@ -242,8 +242,8 @@ class parser {
     consume_token();
     auto language = parse_identifier();
     auto ns = token_.kind == tok::string_literal
-        ? consume_token().string_value()
-        : parse_identifier().str;
+        ? lexer::lex_string_literal(consume_token())
+        : fmt::to_string(parse_identifier().str);
     return actions_.on_namespace(language, ns);
   }
 
@@ -304,7 +304,7 @@ class parser {
       auto value = std::string("1");
       if (try_consume_token('=')) {
         if (token_.kind == tok::string_literal) {
-          value = fmt::to_string(consume_token().string_value());
+          value = lexer::lex_string_literal(consume_token());
         } else if (token_.kind == tok::bool_literal) {
           value = fmt::to_string(consume_token().bool_value() ? 1 : 0);
         } else if (auto integer = try_parse_integer()) {
@@ -781,7 +781,8 @@ class parser {
       case tok::float_literal:
         return actions_.on_float(parse_float());
       case tok::string_literal:
-        return actions_.on_string_literal(consume_token().string_value());
+        return actions_.on_string_literal(
+            lexer::lex_string_literal(consume_token()));
       case to_tok('['):
         return parse_list_literal();
       case to_tok('{'):
@@ -844,7 +845,8 @@ class parser {
     expect_and_consume('{');
     auto map = actions_.on_struct_literal({id.loc, id_end}, id.str);
     while (token_.kind != '}') {
-      auto key = actions_.on_string_literal(parse_identifier().str);
+      auto key =
+          actions_.on_string_literal(fmt::to_string(parse_identifier().str));
       expect_and_consume('=');
       auto value = parse_const_value();
       map->add_map(std::move(key), std::move(value));

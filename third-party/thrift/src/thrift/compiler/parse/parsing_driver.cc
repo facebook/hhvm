@@ -1088,8 +1088,8 @@ std::unique_ptr<t_const_value> parsing_driver::on_float(double value) {
 }
 
 std::unique_ptr<t_const_value> parsing_driver::on_string_literal(
-    fmt::string_view value) {
-  return std::make_unique<t_const_value>(fmt::to_string(value));
+    std::string value) {
+  return std::make_unique<t_const_value>(std::move(value));
 }
 
 std::unique_ptr<t_const_value> parsing_driver::on_bool_literal(bool value) {

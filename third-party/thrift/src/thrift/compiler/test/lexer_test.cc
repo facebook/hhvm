@@ -107,7 +107,7 @@ TEST_F(LexerTest, float_literal) {
 
 TEST_F(LexerTest, string_literal) {
   auto lexer = make_lexer("\"foo\" 'bar' \"multi\nline\nstring\"");
-  const std::string values[] = {"foo", "bar", "multi\nline\nstring"};
+  const std::string values[] = {"\"foo\"", "'bar'", "\"multi\nline\nstring\""};
   for (auto value : values) {
     auto token = lexer.get_next_token();
     EXPECT_EQ(token.kind, tok::string_literal);

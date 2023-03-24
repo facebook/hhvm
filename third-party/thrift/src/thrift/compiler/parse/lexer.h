@@ -84,6 +84,9 @@ class lexer {
  public:
   lexer(source src, lex_handler& handler, diagnostics_engine& diags);
 
+  // Lexes the content of a string literal.
+  static std::string lex_string_literal(token literal);
+
   // Lexes and returns the next token.
   token get_next_token();
 };

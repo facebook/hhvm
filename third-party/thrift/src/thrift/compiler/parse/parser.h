@@ -216,7 +216,7 @@ class parser_actions {
       source_location loc, int64_t value) = 0;
   virtual std::unique_ptr<t_const_value> on_float(double value) = 0;
   virtual std::unique_ptr<t_const_value> on_string_literal(
-      fmt::string_view value) = 0;
+      std::string value) = 0;
   virtual std::unique_ptr<t_const_value> on_bool_literal(bool value) = 0;
   virtual std::unique_ptr<t_const_value> on_list_literal() = 0;
   virtual std::unique_ptr<t_const_value> on_map_literal() = 0;

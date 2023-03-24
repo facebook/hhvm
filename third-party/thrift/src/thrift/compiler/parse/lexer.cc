@@ -297,6 +297,55 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
   }
 }
 
+std::string lexer::lex_string_literal(token literal) {
+  auto str = literal.string_value();
+  auto size = str.size();
+  assert(size >= 2);
+
+  char c = str[0];
+  assert((c == '"' || c == '\'') && c == str[size - 1]);
+
+  std::string result;
+  result.reserve(size - 2);
+
+  auto begin = str.data() + 1, end = begin + (size - 2);
+  for (;;) {
+    auto p = std::find(begin, end, '\\');
+    result.append(begin, p);
+    if (p == end) {
+      break;
+    }
+    // Lex escape sequences.
+    c = '\\';
+    switch (*++p) {
+      case 'a':
+        c = '\a';
+        break;
+      case 'b':
+        c = '\b';
+        break;
+      case 'f':
+        c = '\f';
+        break;
+      case 't':
+        c = '\t';
+        break;
+      case 'v':
+        c = '\v';
+        break;
+      case '\\':
+        result.push_back(c);
+        break;
+      default:
+        --p;
+        break;
+    }
+    result.push_back(c);
+    begin = p + 1;
+  }
+  return result;
+}
+
 token lexer::get_next_token() {
   if (lex_whitespace_or_comment() == comment_lex_result::doc_comment) {
     return token::make_inline_doc(token_source_range(), token_text());
@@ -389,9 +438,9 @@ token lexer::get_next_token() {
     const char* p = std::find(ptr_, end(), c);
     if (*p) {
       ptr_ = p + 1;
-      const char* begin = token_start_ + 1;
       return token::make_string_literal(
-          token_source_range(), {begin, static_cast<size_t>(p - begin)});
+          token_source_range(),
+          {token_start_, static_cast<size_t>(ptr_ - token_start_)});
     }
   } else if (!c && ptr_ > end()) {
     --ptr_; // Put '\0' back in case get_next_token() is called again.

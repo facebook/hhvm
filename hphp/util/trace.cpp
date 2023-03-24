@@ -114,12 +114,12 @@ public:
 
   static void InitFromSpec(folly::StringPiece spec, int* levels) {
     std::vector<folly::StringPiece> pieces;
-    folly::split(",", spec, pieces);
+    folly::split(',', spec, pieces);
     for (auto piece : pieces) {
       folly::StringPiece moduleName;
       int level;
       try {
-        if (!folly::split(":", piece, moduleName, level)) {
+        if (!folly::split(':', piece, moduleName, level)) {
           moduleName = piece;
           level = 1;
         }

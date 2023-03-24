@@ -258,7 +258,7 @@ generateCertValidationCallback(
     const std::string& serverCertExtNames,
     const std::string& extensionValues) {
   std::vector<std::string> extNames;
-  folly::split(",", serverCertExtNames, extNames);
+  folly::split(',', serverCertExtNames, extNames);
   if (extensionValues.empty()) {
     return [extNames = std::move(extNames)] (
           X509* server_cert, const void* context, folly::StringPiece& errMsg) {
@@ -266,7 +266,7 @@ generateCertValidationCallback(
     };
   } else {
     std::vector<std::string> extValues;
-    folly::split(",", extensionValues, extValues);
+    folly::split(',', extensionValues, extValues);
     return [extNames = std::move(extNames), extValues = std::move(extValues)] (
           X509* server_cert, const void* context, folly::StringPiece& errMsg) {
         return serverCertValidationCallback(

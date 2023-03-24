@@ -448,7 +448,7 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
       sample->nr
     );
     auto frames = std::vector<folly::StringPiece>{};
-    folly::split("\n", st.toString(), frames);
+    folly::split('\n', st.toString(), frames);
     record.setVec("stacktrace", frames);
 
     FTRACE(1, "perf_mem_event: {}\n", show(record).c_str());

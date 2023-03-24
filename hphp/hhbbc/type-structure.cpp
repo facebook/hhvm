@@ -767,7 +767,7 @@ Resolution resolve_unresolved(ResolveCtx& ctx, SArray ts) {
       ts->exists(s_generic_types)) {
     std::vector<std::string> typevars;
     folly::split(
-      ",",
+      ',',
       typeAlias->typeStructure[s_typevars].asCStrRef().data(),
       typevars
     );

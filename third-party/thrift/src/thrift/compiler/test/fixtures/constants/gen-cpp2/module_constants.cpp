@@ -189,27 +189,27 @@ constexpr char const * const module_constants::escaped_a_;
   static folly::Indestructible<::std::map<::std::string, ::std::int32_t>> const instance{std::initializer_list<std::pair<const ::std::string, ::std::int32_t>>{{apache::thrift::StringTraits<std::string>::fromStringLiteral("'"), static_cast<::std::int32_t>(39)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("\""), static_cast<::std::int32_t>(34)},
   {apache::thrift::StringTraits<std::string>::fromStringLiteral("\\"), static_cast<::std::int32_t>(92)},
-  {apache::thrift::StringTraits<std::string>::fromStringLiteral("\x61"), static_cast<::std::int32_t>(97)}}};
+  {apache::thrift::StringTraits<std::string>::fromStringLiteral("a"), static_cast<::std::int32_t>(97)}}};
   return *instance;
 }
 
 ::std::vector<::std::string> const& module_constants::escaped_strings() {
-  static folly::Indestructible<::std::vector<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("\x61"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\xab"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\x6a"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\xa6"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\x61yyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\xabyyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\x6ayyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("\xa6yyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\x61"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\xab"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\x6a"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\xa6"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\x61yyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\xabyyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\x6ayyy"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\xa6yyy")}};
+  static folly::Indestructible<::std::vector<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("a"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\253"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("j"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\246"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("ayyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\253yyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("jyyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\246yyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzza"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\253"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzzj"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\246"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzzayyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\253yyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzzjyyy"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("zzz\302\246yyy")}};
   return *instance;
 }
 

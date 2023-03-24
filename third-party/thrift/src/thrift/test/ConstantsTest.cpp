@@ -149,3 +149,8 @@ TEST(constants, examples) {
   EXPECT_EQ(test_constants::minNDub(), -2.2250738585072014e-308);
   EXPECT_EQ(test_constants::minNSDub(), -4.9406564584124654e-324);
 }
+
+TEST(constants, escapes) {
+  EXPECT_EQ(
+      test_constants::escapes(), (std::vector<std::string>{"Bcafes", "café"}));
+}

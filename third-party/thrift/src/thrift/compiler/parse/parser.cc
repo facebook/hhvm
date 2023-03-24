@@ -86,6 +86,14 @@ class parser {
     return true;
   }
 
+  std::string lex_string_literal(token literal) {
+    auto str = lexer_.lex_string_literal(literal);
+    if (!str) {
+      actions_.on_error();
+    }
+    return *str;
+  }
+
   [[noreturn]] void report_expected(fmt::string_view expected) {
     diags_.error(token_.range.begin, "expected {}", expected);
     throw parse_error();
@@ -214,7 +222,7 @@ class parser {
     if (token_.kind != tok::string_literal) {
       report_expected("string literal");
     }
-    auto str = lexer::lex_string_literal(token_);
+    auto str = lex_string_literal(token_);
     consume_token();
     switch (kind) {
       case tok::kw_package:
@@ -242,7 +250,7 @@ class parser {
     consume_token();
     auto language = parse_identifier();
     auto ns = token_.kind == tok::string_literal
-        ? lexer::lex_string_literal(consume_token())
+        ? lex_string_literal(consume_token())
         : fmt::to_string(parse_identifier().str);
     return actions_.on_namespace(language, ns);
   }
@@ -304,7 +312,7 @@ class parser {
       auto value = std::string("1");
       if (try_consume_token('=')) {
         if (token_.kind == tok::string_literal) {
-          value = lexer::lex_string_literal(consume_token());
+          value = lex_string_literal(consume_token());
         } else if (token_.kind == tok::bool_literal) {
           value = fmt::to_string(consume_token().bool_value() ? 1 : 0);
         } else if (auto integer = try_parse_integer()) {
@@ -781,8 +789,7 @@ class parser {
       case tok::float_literal:
         return actions_.on_float(parse_float());
       case tok::string_literal:
-        return actions_.on_string_literal(
-            lexer::lex_string_literal(consume_token()));
+        return actions_.on_string_literal(lex_string_literal(consume_token()));
       case to_tok('['):
         return parse_list_literal();
       case to_tok('{'):

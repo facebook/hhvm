@@ -56,6 +56,17 @@ bool is_hex_digit(char c) {
       (c >= 'A' && c <= 'F');
 }
 
+unsigned char lex_hex_digit(char c) {
+  if (c >= '0' && c <= '9') {
+    return c - '0';
+  }
+  if (c >= 'a' && c <= 'f') {
+    return 10 + (c - 'a');
+  }
+  assert(c >= 'A' && c <= 'F');
+  return 10 + (c - 'A');
+}
+
 bool is_id_start(char c) {
   return is_letter(c) || c == '_';
 }
@@ -297,7 +308,7 @@ lexer::comment_lex_result lexer::lex_whitespace_or_comment() {
   }
 }
 
-std::string lexer::lex_string_literal(token literal) {
+boost::optional<std::string> lexer::lex_string_literal(token literal) {
   auto str = literal.string_value();
   auto size = str.size();
   assert(size >= 2);
@@ -316,8 +327,9 @@ std::string lexer::lex_string_literal(token literal) {
       break;
     }
     // Lex escape sequences.
+    ++p;
     c = '\\';
-    switch (*++p) {
+    switch (*p++) {
       case 'a':
         c = '\a';
         break;
@@ -336,12 +348,21 @@ std::string lexer::lex_string_literal(token literal) {
       case '\\':
         result.push_back(c);
         break;
+      case 'x':
+        if (end - p >= 2 && is_hex_digit(p[0]) && is_hex_digit(p[1])) {
+          c = (lex_hex_digit(p[0]) << 4) | lex_hex_digit(p[1]);
+          p += 2;
+        } else {
+          diags_->error(literal.range.begin, "invalid hex escape sequence");
+          return {};
+        }
+        break;
       default:
-        --p;
+        --p; // Put an unparsed character back.
         break;
     }
     result.push_back(c);
-    begin = p + 1;
+    begin = p;
   }
   return result;
 }

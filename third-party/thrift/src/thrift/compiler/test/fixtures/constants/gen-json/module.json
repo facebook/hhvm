@@ -644,7 +644,7 @@
     },
     "escaped_a" : {
       "lineno" : 200,
-      "value" : "\\x61",
+      "value" : "a",
       "type_enum" : "STRING",
       "spec_args" : null,
       "source_range" : {
@@ -660,7 +660,7 @@
     },
     "char2ascii" : {
       "lineno" : 202,
-      "value" : { "'" : 39, "\"" : 34, "\\\\" : 92, "\\x61" : 97 },
+      "value" : { "'" : 39, "\"" : 34, "\\\\" : 92, "a" : 97 },
       "type_enum" : "MAP",
       "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
       "source_range" : {
@@ -676,7 +676,7 @@
     },
     "escaped_strings" : {
       "lineno" : 204,
-      "value" : [ "\\x61", "\\xab", "\\x6a", "\\xa6", "\\x61yyy", "\\xabyyy", "\\x6ayyy", "\\xa6yyy", "zzz\\x61", "zzz\\xab", "zzz\\x6a", "zzz\\xa6", "zzz\\x61yyy", "zzz\\xabyyy", "zzz\\x6ayyy", "zzz\\xa6yyy" ],
+      "value" : [ "a", "\u00c2\u00ab", "j", "\u00c2\u00a6", "ayyy", "\u00c2\u00abyyy", "jyyy", "\u00c2\u00a6yyy", "zzza", "zzz\u00c2\u00ab", "zzzj", "zzz\u00c2\u00a6", "zzzayyy", "zzz\u00c2\u00abyyy", "zzzjyyy", "zzz\u00c2\u00a6yyy" ],
       "type_enum" : "LIST",
       "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
       "source_range" : {

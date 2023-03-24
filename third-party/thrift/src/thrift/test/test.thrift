@@ -36,6 +36,7 @@ const string str_4 = '"foo"';
 const string str_5 = "line 1
 line 2
 ";
+const list<string> escapes = ["\x42cafes", "caf\xc3\xa9"];
 
 const list<string> l_e = [];
 const list<i32> l_1 = [23, 42, 56];
@@ -114,9 +115,6 @@ const union2 u_2_6 = {"u": {}};
 const i64 maxIntDec = 9223372036854775807;
 const i64 maxIntOct = 0777777777777777777777;
 const i64 maxIntHex = 0x7FFFFFFFFFFFFFFF;
-// Truncated to avoid bug in double<->string logic in c++
-// TODO(afuller): Update logic to detect this case and output a
-// valid float literal for this case.
 const double maxDub = 1.79769313486231E308;
 const double minDub = 2.2250738585072014e-308;
 const double minSDub = 4.9406564584124654e-324;

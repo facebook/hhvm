@@ -59,7 +59,7 @@ const Apostrophe = "'"
 const TripleApostrophe = "'''"
 const QuotationMark = "\""
 const Backslash = "\\\\"
-const EscapedA = "\\x61"
+const EscapedA = "a"
 var Char2ascii map[string]int32
 var EscapedStrings []string
 const FalseC = false
@@ -322,26 +322,26 @@ Char2ascii = map[string]int32{
   "'": 39,
   "\"": 34,
   "\\\\": 92,
-  "\\x61": 97,
+  "a": 97,
 }
 
 EscapedStrings = []string{
-  "\\x61",
-  "\\xab",
-  "\\x6a",
-  "\\xa6",
-  "\\x61yyy",
-  "\\xabyyy",
-  "\\x6ayyy",
-  "\\xa6yyy",
-  "zzz\\x61",
-  "zzz\\xab",
-  "zzz\\x6a",
-  "zzz\\xa6",
-  "zzz\\x61yyy",
-  "zzz\\xabyyy",
-  "zzz\\x6ayyy",
-  "zzz\\xa6yyy",
+  "a",
+  "«",
+  "j",
+  "¦",
+  "ayyy",
+  "«yyy",
+  "jyyy",
+  "¦yyy",
+  "zzza",
+  "zzz«",
+  "zzzj",
+  "zzz¦",
+  "zzzayyy",
+  "zzz«yyy",
+  "zzzjyyy",
+  "zzz¦yyy",
 }
 
 EmptyIntList = []int32{

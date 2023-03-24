@@ -162,7 +162,7 @@ class module_CONSTANTS implements \IThriftConstants {
    * Original thrift constant:-
    * string escaped_a
    */
-  const string escaped_a = "\x61";
+  const string escaped_a = "a";
 
   /**
    * Original thrift constant:-
@@ -172,7 +172,7 @@ class module_CONSTANTS implements \IThriftConstants {
     "'" => 39,
     "\"" => 34,
     "\\" => 92,
-    "\x61" => 97,
+    "a" => 97,
   ];
 
 

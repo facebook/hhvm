@@ -193,30 +193,30 @@ const Apostrophe string = "'"
 const TripleApostrophe string = "'''"
 const QuotationMark string = "\""
 const Backslash string = "\\\\"
-const EscapedA string = "\\x61"
+const EscapedA string = "a"
 var Char2ascii map[string]int32 = map[string]int32{
       "'": 39,
       "\"": 34,
       "\\\\": 92,
-      "\\x61": 97,
+      "a": 97,
   }
 var EscapedStrings []string = []string{
-    "\\x61",
-    "\\xab",
-    "\\x6a",
-    "\\xa6",
-    "\\x61yyy",
-    "\\xabyyy",
-    "\\x6ayyy",
-    "\\xa6yyy",
-    "zzz\\x61",
-    "zzz\\xab",
-    "zzz\\x6a",
-    "zzz\\xa6",
-    "zzz\\x61yyy",
-    "zzz\\xabyyy",
-    "zzz\\x6ayyy",
-    "zzz\\xa6yyy",
+    "a",
+    "«",
+    "j",
+    "¦",
+    "ayyy",
+    "«yyy",
+    "jyyy",
+    "¦yyy",
+    "zzza",
+    "zzz«",
+    "zzzj",
+    "zzz¦",
+    "zzzayyy",
+    "zzz«yyy",
+    "zzzjyyy",
+    "zzz¦yyy",
 }
 const FalseC bool = false
 const TrueC bool = true

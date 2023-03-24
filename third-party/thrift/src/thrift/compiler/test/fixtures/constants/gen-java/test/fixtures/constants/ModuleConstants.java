@@ -136,32 +136,32 @@ multi line string.
 
     public static final String BACKSLASH = "\\";
 
-    public static final String ESCAPED_A = "\u0061";
+    public static final String ESCAPED_A = "a";
 
     public static final Map<String, Integer> CHAR2ASCII = ImmutableMap.<String, Integer>builder()
         .put("'", 39)
         .put("\"", 34)
         .put("\\", 92)
-        .put("\u0061", 97)
+        .put("a", 97)
         .build();
 
     public static final List<String> ESCAPED_STRINGS = ImmutableList.<String>builder()
-        .add("\u0061")
-        .add("\u00ab")
-        .add("\u006a")
-        .add("\u00a6")
-        .add("\u0061yyy")
-        .add("\u00abyyy")
-        .add("\u006ayyy")
-        .add("\u00a6yyy")
-        .add("zzz\u0061")
-        .add("zzz\u00ab")
-        .add("zzz\u006a")
-        .add("zzz\u00a6")
-        .add("zzz\u0061yyy")
-        .add("zzz\u00abyyy")
-        .add("zzz\u006ayyy")
-        .add("zzz\u00a6yyy")
+        .add("a")
+        .add("«")
+        .add("j")
+        .add("¦")
+        .add("ayyy")
+        .add("«yyy")
+        .add("jyyy")
+        .add("¦yyy")
+        .add("zzza")
+        .add("zzz«")
+        .add("zzzj")
+        .add("zzz¦")
+        .add("zzzayyy")
+        .add("zzz«yyy")
+        .add("zzzjyyy")
+        .add("zzz¦yyy")
         .build();
 
     public static final boolean FALSE_C = false;

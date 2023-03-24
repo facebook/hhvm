@@ -1066,17 +1066,24 @@ void t_py_generator::generate_const(const t_const* tconst) {
 }
 
 string t_py_generator::render_string(string value, EscapeFlag flag) {
-  std::ostringstream out;
-  if (flag & EscapeBackslash) {
-    boost::algorithm::replace_all(value, "\\", "\\\\");
+  std::string escaped;
+  escaped.reserve(value.size());
+  for (unsigned char c : value) {
+    if (c >= 0xf8) {
+      escaped.append(fmt::format("\\x{:02x}", c));
+    } else if (c == '"' && (flag & EscapeQuote) != 0) {
+      escaped.append("\\\"");
+    } else if (c == '\\' && (flag & EscapeBackslash) != 0) {
+      escaped.append("\\\\");
+    } else {
+      escaped.push_back(c);
+    }
   }
-  if (flag & EscapeQuote) {
-    boost::algorithm::replace_all(value, "\"", "\\\"");
-  }
-  // If string contains multiple lines, then wrap it in triple quotes """
-  std::string wrap(value.find("\n") == std::string::npos ? "\"" : "\"\"\"");
 
-  out << wrap << value << wrap;
+  std::ostringstream out;
+  // If string contains multiple lines, then wrap it in triple quotes """
+  std::string wrap(escaped.find("\n") == std::string::npos ? "\"" : "\"\"\"");
+  out << wrap << escaped << wrap;
   return out.str();
 }
 

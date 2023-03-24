@@ -48,13 +48,6 @@ TEST_F(JavaUtilTest, test_escape_java_string) {
   EXPECT_EQ(java::quote_java_string("foo"), "\"foo\"");
   EXPECT_EQ(java::quote_java_string("\""), "\"\\\"\"");
   EXPECT_EQ(java::quote_java_string("\\\\"), "\"\\\\\"");
-  EXPECT_EQ(java::quote_java_string("\x61"), "\"\u0061\"");
-  EXPECT_EQ(java::quote_java_string("\x3foo"), "\"\u003foo\"");
-  EXPECT_EQ(java::quote_java_string("\xatpm"), "\"\u000atpm\"");
-  EXPECT_EQ(java::quote_java_string("\xaz"), "\"\u000az\"");
-  EXPECT_EQ( // "HELLO WORLD"
-      java::quote_java_string("\x48\x45\x4C\x4C\x4F\x20\x57\x47\x52\x4C\x44"),
-      "\"\u0048\u0045\u004C\u004C\u004F\u0020\u0057\u0047\u0052\u004C\u0044\"");
 }
 
 TEST_F(JavaUtilTest, test_package_to_path) {

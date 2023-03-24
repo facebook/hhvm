@@ -300,17 +300,26 @@ mstch::node mstch_const_value::enum_name() {
 }
 
 mstch::node mstch_const_value::string_value() {
-  if (type_ == cv::CV_STRING) {
-    std::string string_val = const_value_->get_string();
-    for (auto itr = string_val.begin(); itr != string_val.end(); ++itr) {
-      if (*itr == '"') {
-        itr = string_val.insert(itr, '\\');
-        ++itr;
-      }
-    }
-    return string_val;
+  if (type_ != cv::CV_STRING) {
+    return {};
   }
-  return mstch::node();
+
+  const std::string& str = const_value_->get_string();
+  std::string escaped;
+  escaped.reserve(str.size());
+  for (unsigned char c : str) {
+    if (c >= 0x80) {
+      // Use octal escape sequences because they are the most portable across
+      // languages. Hexadecimal ones have a problem of consuming all hex digits
+      // after \x in C++, e.g. \xcafefe is a single escape sequence.
+      escaped.append(fmt::format("\\{:03o}", c));
+    } else if (c == '"') {
+      escaped.append("\\\"");
+    } else {
+      escaped.push_back(c);
+    }
+  }
+  return escaped;
 }
 
 mstch::node mstch_const_value::list_elems() {

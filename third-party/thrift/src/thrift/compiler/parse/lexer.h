@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <boost/optional.hpp>
 #include <fmt/core.h>
 #include <thrift/compiler/parse/token.h>
 #include <thrift/compiler/source_location.h>
@@ -84,8 +85,9 @@ class lexer {
  public:
   lexer(source src, lex_handler& handler, diagnostics_engine& diags);
 
-  // Lexes the content of a string literal.
-  static std::string lex_string_literal(token literal);
+  // Lexes the content of a string literal and returns its value with escape
+  // sequences translated or an empty optional on error.
+  boost::optional<std::string> lex_string_literal(token literal);
 
   // Lexes and returns the next token.
   token get_next_token();

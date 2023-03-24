@@ -142,7 +142,7 @@ multi line string.
     return backslash_;
   }
 
-  static constexpr char const * const escaped_a_ = "\x61";
+  static constexpr char const * const escaped_a_ = "a";
   static constexpr char const * escaped_a() {
     return escaped_a_;
   }

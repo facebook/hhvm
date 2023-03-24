@@ -668,11 +668,11 @@ quotationMark = '"'
 
 backslash = "\\"
 
-escaped_a = "\x61"
+escaped_a = "a"
 
-char2ascii = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, {"'": 39, '"': 34, "\\": 92, "\x61": 97})
+char2ascii = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, {"'": 39, '"': 34, "\\": 92, "a": 97})
 
-escaped_strings = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("\x61", "\xab", "\x6a", "\xa6", "\x61yyy", "\xabyyy", "\x6ayyy", "\xa6yyy", "zzz\x61", "zzz\xab", "zzz\x6a", "zzz\xa6", "zzz\x61yyy", "zzz\xabyyy", "zzz\x6ayyy", "zzz\xa6yyy", ))
+escaped_strings = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("a", "«", "j", "¦", "ayyy", "«yyy", "jyyy", "¦yyy", "zzza", "zzz«", "zzzj", "zzz¦", "zzzayyy", "zzz«yyy", "zzzjyyy", "zzz¦yyy", ))
 
 false_c = False
 

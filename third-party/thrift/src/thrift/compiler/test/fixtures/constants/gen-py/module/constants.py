@@ -243,32 +243,32 @@ quotationMark = "\""
 
 backslash = "\\"
 
-escaped_a = "\x61"
+escaped_a = "a"
 
 char2ascii = {
   "'" : 39,
   "\"" : 34,
   "\\" : 92,
-  "\x61" : 97,
+  "a" : 97,
 }
 
 escaped_strings = [
-  "\x61",
-  "\xab",
-  "\x6a",
-  "\xa6",
-  "\x61yyy",
-  "\xabyyy",
-  "\x6ayyy",
-  "\xa6yyy",
-  "zzz\x61",
-  "zzz\xab",
-  "zzz\x6a",
-  "zzz\xa6",
-  "zzz\x61yyy",
-  "zzz\xabyyy",
-  "zzz\x6ayyy",
-  "zzz\xa6yyy",
+  "a",
+  "«",
+  "j",
+  "¦",
+  "ayyy",
+  "«yyy",
+  "jyyy",
+  "¦yyy",
+  "zzza",
+  "zzz«",
+  "zzzj",
+  "zzz¦",
+  "zzzayyy",
+  "zzz«yyy",
+  "zzzjyyy",
+  "zzz¦yyy",
 ]
 
 false_c = False

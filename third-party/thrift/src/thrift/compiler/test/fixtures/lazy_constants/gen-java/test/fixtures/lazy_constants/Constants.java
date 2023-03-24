@@ -67,12 +67,12 @@ public final class Constants {
 
     public static final String BACKSLASH = "\\";
 
-    public static final String ESCAPED_A = "\u0061";
+    public static final String ESCAPED_A = "a";
 
     public static final Map<String, Integer> CHAR2ASCII = ImmutableMap.<String, Integer>builder()
         .put("'", 39)
         .put("\"", 34)
         .put("\\", 92)
-        .put("\u0061", 97)
+        .put("a", 97)
         .build();
 }

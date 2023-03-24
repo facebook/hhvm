@@ -2504,3 +2504,9 @@ class CompilerFailureTest(unittest.TestCase):
             err,
             "[ERROR:foo.thrift:1] Cyclic dependency: A -> B -> A\n",
         )
+
+    def test_invalid_hex_escape(self):
+        write_file("foo.thrift", 'const string foo = "\\x"')
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(err, "[ERROR:foo.thrift:1] invalid hex escape sequence\n")

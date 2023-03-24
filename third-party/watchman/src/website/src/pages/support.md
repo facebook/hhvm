@@ -5,7 +5,7 @@ title: Need help?
 # Need help?
 
 If you're having trouble or otherwise have questions about Watchman, and
-[the troubleshooting guide](/watchman/docs/troubleshooting.html) didn't resolve
+[the troubleshooting guide](./docs/troubleshooting) didn't resolve
 your issue, you can try reaching out to the maintainers in one of the following
 ways:
 

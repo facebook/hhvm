@@ -234,6 +234,11 @@ module.exports = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
       },
+      algolia: {
+        appId: '6E2EXVACEQ',
+        apiKey: '739597f672974b121d44f4c6aebe13d3',
+        indexName: 'watchman',
+      },
     },
 
   customFields: {

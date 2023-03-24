@@ -1,6 +1,6 @@
 ---
 title: Contributing
-section: Internals
+category: Internals
 ---
 
 If you're thinking of hacking on watchman we'd love to hear from you! Feel free

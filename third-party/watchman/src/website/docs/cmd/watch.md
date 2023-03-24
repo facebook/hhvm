@@ -1,6 +1,6 @@
 ---
 title: watch
-section: Commands
+category: Commands
 ---
 
 Deprecated starting in version 3.1. We recommend that clients adopt the

@@ -1,6 +1,6 @@
 ---
 title: version
-section: Commands
+category: Commands
 ---
 
 The version command will tell you the version and build information for the

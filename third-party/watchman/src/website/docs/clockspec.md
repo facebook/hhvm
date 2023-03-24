@@ -1,6 +1,6 @@
 ---
 title: Clockspec
-section: Queries
+category: Queries
 ---
 
 For commands that query based on time, watchman offers a couple of different

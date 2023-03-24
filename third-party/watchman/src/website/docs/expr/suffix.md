@@ -1,6 +1,6 @@
 ---
 title: suffix
-section: Expression Terms
+category: Expression Terms
 ---
 
 The `suffix` expression evaluates true if the file suffix matches the second

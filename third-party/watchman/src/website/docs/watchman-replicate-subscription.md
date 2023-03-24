@@ -1,6 +1,7 @@
 ---
 title: watchman-replicate-subscription
 category: Invocation
+sidebar_position: 4
 ---
 
 _Since 5.0_

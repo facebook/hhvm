@@ -1,6 +1,6 @@
 ---
 title: name & iname
-section: Expression Terms
+category: Expression Terms
 ---
 
 The `name` expression performs exact matches against file names. By default it

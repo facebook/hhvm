@@ -1,6 +1,6 @@
 ---
 title: shutdown-server
-section: Commands
+category: Commands
 ---
 
 This command causes your watchman service to exit with a normal status code.

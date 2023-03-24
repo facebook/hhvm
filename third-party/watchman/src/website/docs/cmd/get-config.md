@@ -1,6 +1,6 @@
 ---
 title: get-config
-section: Commands
+category: Commands
 ---
 
 The `get-config` command returns the `.watchmanconfig` for the root. If there is

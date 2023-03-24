@@ -1,6 +1,6 @@
 ---
 title: exists
-section: Expression Terms
+category: Expression Terms
 ---
 
 Evaluates as true if the file exists

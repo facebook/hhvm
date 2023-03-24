@@ -1,6 +1,6 @@
 ---
 title: query
-section: Commands
+category: Commands
 ---
 
 _Since 1.6._

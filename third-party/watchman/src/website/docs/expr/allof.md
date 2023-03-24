@@ -1,6 +1,6 @@
 ---
 title: allof
-section: Expression Terms
+category: Expression Terms
 ---
 
 The `allof` expression term evaluates as true if all of the grouped expressions

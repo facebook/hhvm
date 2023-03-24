@@ -1,6 +1,6 @@
 ---
 title: get-sockname
-section: Commands
+category: Commands
 ---
 
 If you're integrating against watchman using the unix socket and either the JSON

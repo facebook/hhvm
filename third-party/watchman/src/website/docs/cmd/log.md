@@ -1,6 +1,6 @@
 ---
 title: log
-section: Commands
+category: Commands
 ---
 
 Generates a log line in the watchman log.

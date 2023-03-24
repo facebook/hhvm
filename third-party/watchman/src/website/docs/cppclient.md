@@ -1,6 +1,7 @@
 ---
 title: C++ Client
-section: Invocation
+category: Invocation
+sidebar_position: 5
 ---
 
 _Since 4.8._

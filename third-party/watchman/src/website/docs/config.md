@@ -1,6 +1,7 @@
 ---
 title: Configuration Files
 category: Invocation
+sidebar_position: 7
 ---
 
 Watchman looks for configuration files in two places:

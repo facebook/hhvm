@@ -1,6 +1,7 @@
 ---
 title: NodeJS
-section: Invocation
+category: Invocation
+sidebar_position: 6
 ---
 
 To install the nodejs client:

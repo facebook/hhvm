@@ -1,6 +1,6 @@
 ---
 title: pcre & ipcre
-section: Expression Terms
+category: Expression Terms
 ---
 
 _To use this feature, you must configure watchman `--with-pcre`!_

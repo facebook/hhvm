@@ -1,6 +1,6 @@
 ---
 title: log-level
-section: Commands
+category: Commands
 ---
 
 Changes the log level of your connection to the watchman service.

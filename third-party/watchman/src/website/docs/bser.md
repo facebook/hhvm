@@ -1,6 +1,6 @@
 ---
 title: BSER Binary Protocol
-section: Internals
+category: Internals
 ---
 
 The basic JSON protocol in watchman allows quick and easy integration.

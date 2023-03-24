@@ -1,6 +1,6 @@
 ---
 title: trigger
-section: Commands
+category: Commands
 ---
 
 The trigger command will create or replace a trigger.

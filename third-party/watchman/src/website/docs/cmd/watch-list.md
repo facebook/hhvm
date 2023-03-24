@@ -1,6 +1,6 @@
 ---
 title: watch-list
-section: Commands
+category: Commands
 ---
 
 Returns a list of watched dirs.

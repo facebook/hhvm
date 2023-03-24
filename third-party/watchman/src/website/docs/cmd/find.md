@@ -1,6 +1,6 @@
 ---
 title: find
-section: Commands
+category: Commands
 ---
 
 Finds all files that match the optional list of patterns under the specified

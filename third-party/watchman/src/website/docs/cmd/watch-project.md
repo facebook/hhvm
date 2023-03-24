@@ -1,6 +1,6 @@
 ---
 title: watch-project
-section: Commands
+category: Commands
 ---
 
 _Since 3.1._

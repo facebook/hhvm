@@ -1,6 +1,6 @@
 ---
 title: since
-section: Expression Terms
+category: Expression Terms
 ---
 
 Evaluates as true if the specified time property of the file is greater than the

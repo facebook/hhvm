@@ -1,6 +1,6 @@
 ---
 title: Source Control Aware Queries
-section: Queries
+category: Queries
 ---
 
 _Since 2021.08.30_

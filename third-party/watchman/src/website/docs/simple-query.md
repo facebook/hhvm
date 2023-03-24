@@ -1,6 +1,6 @@
 ---
 title: Simple Pattern Syntax
-section: Queries
+category: Queries
 ---
 
 Simple patterns follow a more traditional UNIX command line approach of using

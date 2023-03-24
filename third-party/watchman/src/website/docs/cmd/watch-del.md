@@ -1,6 +1,6 @@
 ---
 title: watch-del
-section: Commands
+category: Commands
 ---
 
 Removes a watch and any associated triggers.

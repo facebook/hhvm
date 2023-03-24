@@ -1,6 +1,6 @@
 ---
 title: trigger-list
-section: Commands
+category: Commands
 ---
 
 Returns the set of registered triggers associated with a root directory.

@@ -1,6 +1,6 @@
 ---
 title: Installation
-section: Installation
+category: Installation
 ---
 
 ## System Requirements

@@ -1,6 +1,6 @@
 ---
 title: match & imatch
-section: Expression Terms
+category: Expression Terms
 ---
 
 The `match` expression performs a glob-style match against the basename of the

@@ -1,6 +1,6 @@
 ---
 title: flush-subscriptions
-section: Commands
+category: Commands
 ---
 
 _Since 4.8._

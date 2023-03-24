@@ -1,6 +1,5 @@
 ---
 title: Troubleshooting
-section: Troubleshooting
 ---
 
 We try to give directed advice in Watchman error diagnostics, which means that

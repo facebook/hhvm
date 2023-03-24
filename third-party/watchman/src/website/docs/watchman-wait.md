@@ -1,6 +1,7 @@
 ---
 title: watchman-wait
 category: Invocation
+sidebar_position: 3
 ---
 
 `watchman-wait` waits for changes to files. It uses the watchman service to

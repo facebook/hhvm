@@ -1,6 +1,6 @@
 ---
 title: anyof
-section: Expression Terms
+category: Expression Terms
 ---
 
 The `anyof` expression term evaluates as true if any of the grouped expressions

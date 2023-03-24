@@ -1,6 +1,7 @@
 ---
 title: Socket Interface
-section: Invocation
+category: Invocation
+sidebar_position: 8
 ---
 
 Most simple uses of Watchman will invoke the watchman binary and process its

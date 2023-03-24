@@ -1,6 +1,6 @@
 ---
 title: clock
-section: Commands
+category: Commands
 ---
 
 Returns the current clock value for a watched root.

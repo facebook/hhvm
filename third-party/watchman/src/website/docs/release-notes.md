@@ -1,6 +1,6 @@
 ---
 title: Release Notes
-section: Installation
+category: Installation
 ---
 
 Watchman is continuously deployed inside Facebook, which means that we don't

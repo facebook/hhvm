@@ -1,6 +1,6 @@
 ---
 title: dirname & idirname
-section: Expression Terms
+category: Expression Terms
 ---
 
 _Since version 3.1_

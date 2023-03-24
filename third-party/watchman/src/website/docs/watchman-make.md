@@ -1,6 +1,7 @@
 ---
 title: watchman-make
 category: Invocation
+sidebar_position: 2
 ---
 
 `watchman-make` is a convenience tool to help automatically invoke a build tool

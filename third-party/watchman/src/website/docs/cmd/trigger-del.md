@@ -1,6 +1,6 @@
 ---
 title: trigger-del
-section: Commands
+category: Commands
 ---
 
 Deletes a named trigger from the list of registered triggers. This disables and

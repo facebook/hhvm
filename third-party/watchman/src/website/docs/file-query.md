@@ -1,6 +1,6 @@
 ---
 title: File Queries
-section: Queries
+category: Queries
 ---
 
 Watchman file queries consist of 1 or more _generators_ that feed files through

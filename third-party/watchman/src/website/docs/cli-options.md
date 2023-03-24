@@ -1,6 +1,7 @@
 ---
 title: Command Line
-section: Invocation
+category: Invocation
+sidebar_position: 1
 ---
 
 The `watchman` executable contains both the client and the server components of

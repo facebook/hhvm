@@ -1,6 +1,6 @@
 ---
 title: unsubscribe
-section: Commands
+category: Commands
 ---
 
 Available starting in version 1.6

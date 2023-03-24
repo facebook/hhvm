@@ -1,6 +1,6 @@
 ---
 title: state-leave
-section: Commands
+category: Commands
 ---
 
 _Since 4.4_

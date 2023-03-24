@@ -1,6 +1,6 @@
 ---
 title: Case-Insensitivity
-section: Internals
+category: Internals
 ---
 
 Watchman is currently completely unaware of case-insensitivity in file systems,

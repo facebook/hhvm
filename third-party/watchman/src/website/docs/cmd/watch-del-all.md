@@ -1,6 +1,6 @@
 ---
 title: watch-del-all
-section: Commands
+category: Commands
 ---
 
 Available since version 3.1.1.

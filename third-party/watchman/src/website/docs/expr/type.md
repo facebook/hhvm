@@ -1,6 +1,6 @@
 ---
 title: type
-section: Expression Terms
+category: Expression Terms
 ---
 
 Evaluates as true if the type of the file matches that specified by the second

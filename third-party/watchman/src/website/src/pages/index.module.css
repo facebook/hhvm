@@ -17,14 +17,46 @@
   overflow: hidden;
 }
 
-@media screen and (max-width: 966px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.logo {
+  width: 200px;
 }
 
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.getStarted {
+  color: white;
+  --ifm-button-background-color: var(--ifm-color-primary-dark);
+  --ifm-button-border-color: transparent;
+}
+
+.getStarted:hover {
+  --ifm-button-background-color: var(--ifm-color-primary-darkest);
+}
+
+[data-theme='dark'] .getStarted {
+  color: black;
+}
+
+[data-theme='dark'] .getStarted:hover {
+  --ifm-button-background-color: var(--ifm-color-primary-darker);
+}
+
+.introduction {
+  width: 996px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+
+  .introduction {
+    width: 100%;
+  }
 }

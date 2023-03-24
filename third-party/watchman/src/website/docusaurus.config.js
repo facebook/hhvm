@@ -59,7 +59,13 @@ module.exports = {
             type: 'doc',
             docId: 'intro',
             position: 'left',
-            label: 'Tutorial',
+            label: 'Documentation',
+          },
+          {
+            type: 'doc',
+            docId: 'intro',
+            position: 'left',
+            label: 'Support',
           },
           {
             href: 'https://github.com/facebook/watchman',

@@ -24,12 +24,20 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
+#include <thrift/lib/cpp2/type/NativeType.h>
 
 FOLLY_GFLAGS_DECLARE_bool(thrift_cpp2_debug_skip_list_indices);
 FOLLY_GFLAGS_DECLARE_int64(thrift_cpp2_debug_string_limit);
 
 namespace apache {
 namespace thrift {
+
+namespace op {
+namespace detail {
+template <class T>
+struct RecursiveEncode;
+}
+} // namespace op
 
 class DebugProtocolWriter {
  public:
@@ -176,6 +184,24 @@ std::string debugString(
       options);
   proto.setOutput(&queue);
   Cpp2Ops<T>::write(&proto, &obj);
+  auto buf = queue.move();
+  auto br = buf->coalesce();
+  return std::string(reinterpret_cast<const char*>(br.data()), br.size());
+}
+
+// TODO: Replace `debugString()` with this function
+template <
+    class T,
+    class...,
+    template <class> class Encode = op::detail::RecursiveEncode>
+std::string debugStringViaRecursiveEncode(
+    const T& obj, DebugProtocolWriter::Options options = {}) {
+  folly::IOBufQueue queue;
+  DebugProtocolWriter proto(
+      COPY_EXTERNAL_BUFFER, // Ignored by constructor.
+      options);
+  proto.setOutput(&queue);
+  Encode<type::infer_tag<T>>{}(proto, obj);
   auto buf = queue.move();
   auto br = buf->coalesce();
   return std::string(reinterpret_cast<const char*>(br.data()), br.size());

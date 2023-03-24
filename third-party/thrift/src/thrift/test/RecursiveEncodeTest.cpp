@@ -16,6 +16,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/op/Encode.h>
+#include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/test/gen-cpp2/RecursiveEncode_types.h>
 #include <thrift/test/testset/Populator.h>
@@ -79,6 +80,21 @@ TEST(RecursiveEncode, TestCustomType) {
   roundTripTest<CompactSerializer>(baz);
   roundTripTest<BinarySerializer>(baz);
   roundTripTest<SimpleJSONSerializer>(baz);
+
+  EXPECT_EQ(debugStringViaRecursiveEncode(baz), R"( {
+  1: field (i32) = 10,
+  2: bar (struct) =  {
+    1: field (i32) = 20,
+    2: foos (list) = list<struct>[2] {
+      [0] =  {
+        1: field (i32) = 30,
+      },
+      [1] =  {
+        1: field (i32) = 40,
+      },
+    },
+  },
+})");
 }
 
 } // namespace

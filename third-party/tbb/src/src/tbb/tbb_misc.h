@@ -49,7 +49,9 @@ const size_t MByte = 1024*1024;
 // So here we set the default value to match the platform's default of 1MB.
 const size_t ThreadStackSize = 1*MByte;
 #else
-const size_t ThreadStackSize = (sizeof(uintptr_t) <= 4 ? 2 : 4 )*MByte;
+// FB: Some larger builds pull in big TLS objects that push up required stack
+// size, so just set `0` so that we use the configured `RLIMIT_STACK` value.
+const size_t ThreadStackSize = 0;
 #endif
 
 #ifndef __TBB_HardwareConcurrency

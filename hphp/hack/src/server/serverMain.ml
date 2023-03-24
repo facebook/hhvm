@@ -184,16 +184,16 @@ let query_notifier genv env query_kind start_time =
   let telemetry =
     Telemetry.create () |> Telemetry.duration ~key:"start" ~start_time
   in
-  let (env, raw_updates) =
+  let (env, (raw_updates, clock)) =
     match query_kind with
     | `Sync ->
       ( env,
         (try ServerNotifier.get_changes_sync genv.notifier with
-        | Watchman.Timeout -> ServerNotifier.Unavailable) )
+        | Watchman.Timeout -> (ServerNotifier.Unavailable, None)) )
     | `Async ->
       ( { env with last_notifier_check_time = start_time },
         ServerNotifier.get_changes_async genv.notifier )
-    | `Skip -> (env, ServerNotifier.AsyncChanges SSet.empty)
+    | `Skip -> (env, (ServerNotifier.AsyncChanges SSet.empty, None))
   in
   let telemetry = Telemetry.duration telemetry ~key:"notified" ~start_time in
   let unpack_updates = function
@@ -204,16 +204,15 @@ let query_notifier genv env query_kind start_time =
     | ServerNotifier.SyncChanges updates -> (false, updates)
   in
   let (updates_stale, raw_updates) = unpack_updates raw_updates in
-  let rec pump_async_updates acc =
+  let rec pump_async_updates acc acc_clock =
     match ServerNotifier.async_reader_opt genv.notifier with
     | Some reader when Buffered_line_reader.is_readable reader ->
-      let (_, raw_updates) =
-        unpack_updates (ServerNotifier.get_changes_async genv.notifier)
-      in
-      pump_async_updates (SSet.union acc raw_updates)
-    | _ -> acc
+      let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
+      let (_, raw_updates) = unpack_updates changes in
+      pump_async_updates (SSet.union acc raw_updates) clock
+    | _ -> (acc, acc_clock)
   in
-  let raw_updates = pump_async_updates raw_updates in
+  let (raw_updates, clock) = pump_async_updates raw_updates clock in
   let telemetry = Telemetry.duration telemetry ~key:"pumped" ~start_time in
   let updates = Program.process_updates genv raw_updates in
   let telemetry =
@@ -224,7 +223,7 @@ let query_notifier genv env query_kind start_time =
   in
   if not @@ Relative_path.Set.is_empty updates then
     HackEventLogger.notifier_returned start_time (SSet.cardinal raw_updates);
-  (env, updates, updates_stale, telemetry)
+  (env, updates, clock, updates_stale, telemetry)
 
 let update_stats_after_recheck :
     RecheckLoopStats.t ->
@@ -315,7 +314,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
        * do analysis on mid-edit state of the world *)
       `Skip
   in
-  let (env, updates, updates_stale, query_telemetry) =
+  let (env, updates, clock, updates_stale, query_telemetry) =
     query_notifier genv env query_kind start_time
   in
   let telemetry =
@@ -333,6 +332,9 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     Float.(start_time - env.last_command_time > 0.3)
   in
   (* saving any file is our trigger to start full recheck *)
+  if not (Option.equal String.equal clock env.clock) then
+    Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
+  let env = { env with clock } in
   let env =
     if Relative_path.Set.is_empty updates then
       env
@@ -843,18 +845,22 @@ let serve_one_iteration genv env client_provider =
 let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
  fun env ->
   let start_time = Unix.gettimeofday () in
-  let (env, updates, updates_stale, _telemetry) =
+  let (env, updates, clock, updates_stale, _telemetry) =
     query_notifier genv env `Async start_time
   in
   (* Async updates can always be stale, so we don't care *)
   ignore updates_stale;
   let size = Relative_path.Set.cardinal updates in
   if size > 0 then (
-    Hh_logger.log "Interrupted by Watchman message: %d files changed" size;
+    Hh_logger.log
+      "Interrupted by Watchman message: %d files changed at watchclock %s"
+      size
+      (ServerEnv.show_clock clock);
     ( {
         env with
         disk_needs_parsing =
           Relative_path.Set.union env.disk_needs_parsing updates;
+        clock;
       },
       MultiThreadedCall.Cancel )
   ) else
@@ -872,16 +878,20 @@ let priority_client_interrupt_handler genv client_provider :
    * this file contents. Async notifications are not always fast enough to
    * guarantee it, so we need an additional sync query before accepting such
    * client *)
-  let (env, updates, _updates_stale, _telemetry) =
+  let (env, updates, clock, _updates_stale, _telemetry) =
     query_notifier genv env `Sync t
   in
   let size = Relative_path.Set.cardinal updates in
   if size > 0 then (
-    Hh_logger.log "Interrupted by Watchman sync query: %d files changed" size;
+    Hh_logger.log
+      "Interrupted by Watchman sync query: %d files changed at watchclock %s"
+      size
+      (ServerEnv.show_clock clock);
     ( {
         env with
         disk_needs_parsing =
           Relative_path.Set.union env.disk_needs_parsing updates;
+        clock;
       },
       MultiThreadedCall.Cancel )
   ) else

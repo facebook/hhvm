@@ -267,6 +267,9 @@ type env = {
       (** Files which parse trees were invalidated (because they changed on disk
           or in editor) and need to be re-parsed *)
   disk_needs_parsing: Relative_path.Set.t;
+  clock: Watchman.clock option;
+      (** This is the clock as of when disk_needs_parsing was last updated.
+      None if not using Watchman. *)
   needs_phase2_redecl: Relative_path.Set.t;
       (** Declarations that became invalidated and moved to "old" part of the heap.
           We keep them there to be used in "determining changes" step of recheck.
@@ -331,3 +334,5 @@ val is_full_check_started : full_check_status -> bool
 val list_files : env -> string list
 
 val add_changed_files : env -> Relative_path.Set.t -> env
+
+val show_clock : Watchman.clock option -> string

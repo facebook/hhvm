@@ -914,12 +914,13 @@ let type_check_dirty
     result
 
 let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
-    Relative_path.Set.t =
+    Relative_path.Set.t * Watchman.clock option =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Getting files changed while parsing...";
   ServerNotifier.wait_until_ready genv.notifier;
+  let (changes, clock) = ServerNotifier.get_changes_async genv.notifier in
   let files_changed_while_parsing =
-    match ServerNotifier.get_changes_async genv.notifier with
+    match changes with
     | ServerNotifier.StateEnter _
     | ServerNotifier.StateLeave _
     | ServerNotifier.Unavailable ->
@@ -938,8 +939,9 @@ let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
        "Finished getting files changed while parsing"
        start_t
       : float);
+  Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
   HackEventLogger.changed_while_parsing_end start_t;
-  files_changed_while_parsing
+  (files_changed_while_parsing, clock)
 
 let initialize_naming_table
     (progress_message : string)
@@ -1179,9 +1181,10 @@ let post_saved_state_initialization
     ~(do_indexing : bool)
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
-    ~(state_result : loaded_info * Relative_path.Set.t)
+    ~(state_result : loaded_info * Relative_path.Set.t * Watchman.clock option)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing) =
+  let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing, clock)
+      =
     state_result
   in
   let trace = genv.local_config.SLC.trace_parsing in
@@ -1343,6 +1346,7 @@ let post_saved_state_initialization
         env with
         disk_needs_parsing =
           Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+        clock;
       }
     in
     (* Separate the dirty files from the files whose decl only changed *)
@@ -1440,8 +1444,8 @@ let saved_state_init
       match do_ () with
       | Error error -> Error error
       | Ok loaded_info ->
-        let changed_while_parsing = get_updates_exn ~genv ~root in
-        Ok (loaded_info, changed_while_parsing)
+        let (changed_while_parsing, clock) = get_updates_exn ~genv ~root in
+        Ok (loaded_info, changed_while_parsing, clock)
     with
     | exn ->
       let e = Exception.wrap exn in
@@ -1453,18 +1457,19 @@ let saved_state_init
     ~state_result:
       (match state_result with
       | Error _ -> None
-      | Ok (i, _) -> Some (show_loaded_info i))
+      | Ok (i, _, _) -> Some (show_loaded_info i))
     t;
   match state_result with
   | Error err -> Error err
-  | Ok state_result ->
+  | Ok (loaded_info, changed_while_parsing, clock) ->
     ServerProgress.write "loading saved state succeeded";
+    Hh_logger.log "Watchclock: %s" (ServerEnv.show_clock clock);
     let (env, t) =
       post_saved_state_initialization
         ~do_indexing
-        ~state_result
+        ~state_result:(loaded_info, changed_while_parsing, clock)
         ~env
         ~genv
         cgroup_steps
     in
-    Ok ((env, t), state_result)
+    Ok ((env, t), (loaded_info, changed_while_parsing))

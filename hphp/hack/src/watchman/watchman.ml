@@ -1045,6 +1045,11 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           | J.Not_found ->
             (env, Files_changed (set_of_list @@ extract_file_names env data)))))
 
+  let get_clock instance =
+    match instance with
+    | Watchman_alive { clockspec; _ } -> clockspec
+    | Watchman_dead { prior_clockspec; _ } -> prior_clockspec
+
   let get_changes ?deadline instance =
     call_on_instance instance "get_changes" @@ fun env ->
     let timeout =
@@ -1285,6 +1290,8 @@ module Watchman_mock = struct
     let result = !Mocking.changes_synchronously in
     Mocking.changes_synchronously := [];
     (instance, result)
+
+  let get_clock _instance = ""
 
   let get_reader _ = None
 

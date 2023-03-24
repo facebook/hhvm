@@ -66,6 +66,7 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
     editor_open_files = Relative_path.Set.empty;
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
+    clock = None;
     needs_phase2_redecl = Relative_path.Set.empty;
     needs_recheck = Relative_path.Set.empty;
     full_recheck_on_file_changes = Not_paused;

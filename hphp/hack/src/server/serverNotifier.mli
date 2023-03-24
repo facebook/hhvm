@@ -33,9 +33,9 @@ val wait_until_ready : t -> unit
 
 (** This might return AsyncChanges the ones that we happen to have received by now,
 or SyncChanges, depending on the underlying notifier's state *)
-val get_changes_async : t -> changes
+val get_changes_async : t -> changes * Watchman.clock option
 
 (** This will always return SyncChanges, all changes up to the point this was invoked. *)
-val get_changes_sync : t -> changes
+val get_changes_sync : t -> changes * Watchman.clock option
 
 val async_reader_opt : t -> Buffered_line_reader.t option

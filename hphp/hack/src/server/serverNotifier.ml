@@ -198,10 +198,10 @@ let sync_changes_from_watchman_changes_list
   in
   SyncChanges set
 
-let get_changes_sync (t : t) : changes =
+let get_changes_sync (t : t) : changes * Watchman.clock option =
   match t with
-  | IndexOnly _ -> SyncChanges SSet.empty
-  | MockChanges { get_changes_sync; _ } -> get_changes_sync ()
+  | IndexOnly _ -> (SyncChanges SSet.empty, None)
+  | MockChanges { get_changes_sync; _ } -> (get_changes_sync (), None)
   | Dfind { dfind; _ } ->
     let set =
       try
@@ -213,7 +213,7 @@ let get_changes_sync (t : t) : changes =
       with
       | _ -> Exit.exit Exit_status.Dfind_died
     in
-    SyncChanges set
+    (SyncChanges set, None)
   | Watchman { local_config; watchman; root; _ } ->
     let (watchman', changes) =
       Watchman.get_changes_synchronously
@@ -223,22 +223,30 @@ let get_changes_sync (t : t) : changes =
         !watchman
     in
     watchman := watchman';
-    sync_changes_from_watchman_changes_list ~root ~local_config changes
+    let changes =
+      sync_changes_from_watchman_changes_list ~root ~local_config changes
+    in
+    let clock = Watchman.get_clock !watchman in
+    (changes, Some clock)
 
-let get_changes_async (t : t) : changes =
+let get_changes_async (t : t) : changes * Watchman.clock option =
   match t with
-  | IndexOnly _ -> SyncChanges SSet.empty
-  | MockChanges { get_changes_async; _ } -> get_changes_async ()
+  | IndexOnly _ -> (SyncChanges SSet.empty, None)
+  | MockChanges { get_changes_async; _ } -> (get_changes_async (), None)
   | Dfind _ -> get_changes_sync t
   | Watchman { watchman; root; local_config; _ } ->
     let (watchman', changes) = Watchman.get_changes !watchman in
     watchman := watchman';
-    (match changes with
-    | Watchman.Watchman_unavailable -> Unavailable
-    | Watchman.Watchman_pushed changes ->
-      async_changes_from_watchman_changes ~root ~local_config changes
-    | Watchman.Watchman_synchronous changes ->
-      sync_changes_from_watchman_changes_list ~root ~local_config changes)
+    let changes =
+      match changes with
+      | Watchman.Watchman_unavailable -> Unavailable
+      | Watchman.Watchman_pushed changes ->
+        async_changes_from_watchman_changes ~root ~local_config changes
+      | Watchman.Watchman_synchronous changes ->
+        sync_changes_from_watchman_changes_list ~root ~local_config changes
+    in
+    let clock = Watchman.get_clock !watchman in
+    (changes, Some clock)
 
 let async_reader_opt (t : t) : Buffered_line_reader.t option =
   match t with

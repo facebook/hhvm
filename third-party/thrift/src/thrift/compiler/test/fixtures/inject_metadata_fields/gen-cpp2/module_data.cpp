@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Fields>::name = "Fields";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Fields>::fields_names = {{
   "injected_field",
 }};
@@ -49,6 +50,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Fields>::
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::name = "FieldsInjectedToEmptyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::FieldsInjectedToEmptyStruct>::fields_names = {{
   "injected_field",
 }};
@@ -65,6 +67,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::FieldsInj
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::FieldsInjectedToStruct>::name = "FieldsInjectedToStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::FieldsInjectedToStruct>::fields_names = {{
   "string_field",
   "injected_field",
@@ -86,6 +89,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::FieldsInj
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::name = "FieldsInjectedWithIncludedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::FieldsInjectedWithIncludedStruct>::fields_names = {{
   "string_field",
   "injected_field",

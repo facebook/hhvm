@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::MyAnnotation>::name = "MyAnnotation";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::MyAnnotation>::fields_names = {{
   "signature",
   "color",
@@ -54,6 +55,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrif
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = {{
   "intField",
   "optionalIntField",
@@ -120,6 +122,7 @@ THRIFT_DATA_MEMBER const std::array<int, 11> TStructDataStorage<::facebook::thri
   10,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = {{
   "intField",
   "setField",
@@ -156,6 +159,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::facebook::thrif
   4,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = {{
   "structField",
   "optionalStructField",
@@ -202,6 +206,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::facebook::thrif
   6,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::name = "DirectlyAdapted";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted>::fields_names = {{
   "field",
 }};
@@ -218,6 +223,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::name = "IndependentDirectlyAdapted";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::fields_names = {{
   "field",
 }};
@@ -234,6 +240,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::name = "StructWithFieldAdapter";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_names = {{
   "field",
   "shared_field",
@@ -265,6 +272,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::name = "TerseAdaptedFields";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::thrift::test::TerseAdaptedFields>::fields_names = {{
   "int_field",
   "string_field",
@@ -291,6 +299,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::B>::name = "B";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::B>::fields_names = {{
   "a",
 }};
@@ -307,6 +316,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::A>::name = "A";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::A>::fields_ids = {{
@@ -318,6 +328,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::A>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Config>::name = "Config";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Config>::fields_names = {{
   "path",
 }};
@@ -334,6 +345,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::MyStruct>::fields_names = {{
   "field",
   "set_string",
@@ -355,6 +367,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrif
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::name = "AdaptTestStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 10> TStructDataStorage<::facebook::thrift::test::AdaptTestStruct>::fields_names = {{
   "delay",
   "custom",
@@ -416,6 +429,7 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::facebook::thri
   9,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::name = "AdaptTemplatedTestStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 22> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedTestStruct>::fields_names = {{
   "adaptedBool",
   "adaptedByte",
@@ -537,6 +551,7 @@ THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::facebook::thri
   21,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::name = "AdaptTemplatedNestedTestStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::AdaptTemplatedNestedTestStruct>::fields_names = {{
   "adaptedStruct",
 }};
@@ -553,6 +568,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::name = "AdaptTestUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::ThriftAdaptTestUnion>::fields_names = {{
   "delay",
   "custom",
@@ -574,6 +590,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrif
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::name = "AdaptedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::ThriftAdaptedStruct>::fields_names = {{
   "data",
 }};
@@ -590,6 +607,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::name = "DirectlyAdaptedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::fields_names = {{
   "data",
 }};
@@ -606,6 +624,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::name = "StructFieldAdaptedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::thrift::test::StructFieldAdaptedStruct>::fields_names = {{
   "adaptedStruct",
   "adaptedTypedef",
@@ -637,6 +656,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::facebook::thrif
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::name = "CircularAdaptee";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::CircularAdaptee>::fields_names = {{
   "field",
 }};
@@ -653,6 +673,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::CircularStruct>::name = "CircularStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::CircularStruct>::fields_names = {{
   "field",
 }};
@@ -669,6 +690,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::name = "ReorderedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::ReorderedStruct>::fields_names = {{
   "reordered_dependent_adapted",
 }};
@@ -685,6 +707,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::name = "DeclaredAfterStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::fields_ids = {{
@@ -696,6 +719,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::DeclaredAfterStruct>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::name = "RenamedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingRenamedStruct>::fields_names = {{
   "data",
 }};
@@ -712,6 +736,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::name = "SameNamespaceStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::UnderlyingSameNamespaceStruct>::fields_names = {{
   "data",
 }};
@@ -728,6 +753,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::name = "HeapAllocated";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::fields_ids = {{
@@ -739,6 +765,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::HeapAllocated>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::MoveOnly>::name = "MoveOnly";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::MoveOnly>::fields_names = {{
   "ptr",
 }};
@@ -755,6 +782,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::name = "AlsoMoveOnly";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::AlsoMoveOnly>::fields_names = {{
   "ptr",
 }};
@@ -771,6 +799,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::name = "ApplyAdapter";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::fields_ids = {{
@@ -782,6 +811,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::ApplyAdapter>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::name = "TransitiveAdapted";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::fields_ids = {{
@@ -793,6 +823,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::detail::TransitiveAdapted>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::CountingStruct>::name = "CountingStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::thrift::test::CountingStruct>::fields_names = {{
   "regularInt",
   "countingInt",
@@ -819,6 +850,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::facebook::thrif
   2,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Person>::name = "Person";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Person>::fields_names = {{
   "name",
 }};
@@ -835,6 +867,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Person2>::name = "Person2";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Person2>::fields_names = {{
   "name",
 }};

@@ -27,6 +27,7 @@ template <> struct TEnumDataStorage<::apache::thrift::test::MyEnum> {
 
 template <> struct TStructDataStorage<::apache::thrift::test::StructWithDefaultStruct> {
   static constexpr const std::size_t fields_size = 13;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

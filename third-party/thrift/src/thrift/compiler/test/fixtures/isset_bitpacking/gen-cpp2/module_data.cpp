@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Default>::name = "Default";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Default>::fields_names = {{
   "field1",
   "field2",
@@ -64,6 +65,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::Default>:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::NonAtomic>::name = "NonAtomic";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::NonAtomic>::fields_names = {{
   "field1",
   "field2",
@@ -95,6 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::NonAtomic
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Atomic>::name = "Atomic";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Atomic>::fields_names = {{
   "field1",
   "field2",
@@ -126,6 +129,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::Atomic>::
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::AtomicFoo>::name = "AtomicFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::AtomicFoo>::fields_names = {{
   "field1",
   "field2",

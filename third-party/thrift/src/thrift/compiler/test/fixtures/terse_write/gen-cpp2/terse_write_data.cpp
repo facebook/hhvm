@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::fields_ids = {{
@@ -44,6 +45,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::terse_write::MyStruct>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::MyUnion>::fields_names = {{
   "bool_field",
   "byte_field",
@@ -125,6 +127,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thri
   13,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::name = "MyStructWithCustomDefault";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::MyStructWithCustomDefault>::fields_names = {{
   "field1",
 }};
@@ -141,6 +144,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::name = "StructLevelTerseStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 15> TStructDataStorage<::facebook::thrift::test::terse_write::StructLevelTerseStruct>::fields_names = {{
   "bool_field",
   "byte_field",
@@ -227,6 +231,7 @@ THRIFT_DATA_MEMBER const std::array<int, 15> TStructDataStorage<::facebook::thri
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::name = "FieldLevelTerseStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 30> TStructDataStorage<::facebook::thrift::test::terse_write::FieldLevelTerseStruct>::fields_names = {{
   "terse_bool_field",
   "terse_byte_field",
@@ -388,6 +393,7 @@ THRIFT_DATA_MEMBER const std::array<int, 30> TStructDataStorage<::facebook::thri
   14,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::name = "TerseStructWithCustomDefault";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::TerseStructWithCustomDefault>::fields_names = {{
   "bool_field",
   "byte_field",
@@ -469,6 +475,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thri
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields>::name = "AdaptedFields";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::facebook::thrift::test::terse_write::AdaptedFields>::fields_names = {{
   "field1",
   "field2",
@@ -495,6 +502,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::name = "WrappedFields";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::fields_names = {{
   "field1",
 }};
@@ -511,6 +519,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::name = "TerseException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::fields_names = {{
   "msg",
 }};

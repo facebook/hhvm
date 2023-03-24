@@ -53,6 +53,9 @@ const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::Fi
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyUnion>::name;
+}
 
 void MyUnion::__fbthrift_clear() {
   // clear all fields

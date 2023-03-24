@@ -71,6 +71,7 @@ template <> struct TEnumDataStorage<::cpp2::MyUnionFloatFieldThrowExp::Type> {
 
 template <> struct TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -86,6 +87,7 @@ template <> struct TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp> {
 
 template <> struct TStructDataStorage<::cpp2::MyStructMapFloatThrowExp> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -101,6 +103,7 @@ template <> struct TStructDataStorage<::cpp2::MyStructMapFloatThrowExp> {
 
 template <> struct TStructDataStorage<::cpp2::MyStruct> {
   static constexpr const std::size_t fields_size = 28;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -116,6 +119,7 @@ template <> struct TStructDataStorage<::cpp2::MyStruct> {
 
 template <> struct TStructDataStorage<::cpp2::SimpleStruct> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -131,6 +135,7 @@ template <> struct TStructDataStorage<::cpp2::SimpleStruct> {
 
 template <> struct TStructDataStorage<::cpp2::defaultStruct> {
   static constexpr const std::size_t fields_size = 22;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -146,6 +151,7 @@ template <> struct TStructDataStorage<::cpp2::defaultStruct> {
 
 template <> struct TStructDataStorage<::cpp2::MyStructTypeDef> {
   static constexpr const std::size_t fields_size = 9;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -161,6 +167,7 @@ template <> struct TStructDataStorage<::cpp2::MyStructTypeDef> {
 
 template <> struct TStructDataStorage<::cpp2::MyDataItem> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -176,6 +183,7 @@ template <> struct TStructDataStorage<::cpp2::MyDataItem> {
 
 template <> struct TStructDataStorage<::cpp2::MyUnion> {
   static constexpr const std::size_t fields_size = 6;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -191,6 +199,7 @@ template <> struct TStructDataStorage<::cpp2::MyUnion> {
 
 template <> struct TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -206,6 +215,7 @@ template <> struct TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp> {
 
 template <> struct TStructDataStorage<::cpp2::ComplexNestedStruct> {
   static constexpr const std::size_t fields_size = 18;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -221,6 +231,7 @@ template <> struct TStructDataStorage<::cpp2::ComplexNestedStruct> {
 
 template <> struct TStructDataStorage<::cpp2::TypeRemapped> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -236,6 +247,7 @@ template <> struct TStructDataStorage<::cpp2::TypeRemapped> {
 
 template <> struct TStructDataStorage<::cpp2::emptyXcep> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -251,6 +263,7 @@ template <> struct TStructDataStorage<::cpp2::emptyXcep> {
 
 template <> struct TStructDataStorage<::cpp2::reqXcep> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -266,6 +279,7 @@ template <> struct TStructDataStorage<::cpp2::reqXcep> {
 
 template <> struct TStructDataStorage<::cpp2::optXcep> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -281,6 +295,7 @@ template <> struct TStructDataStorage<::cpp2::optXcep> {
 
 template <> struct TStructDataStorage<::cpp2::complexException> {
   static constexpr const std::size_t fields_size = 6;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

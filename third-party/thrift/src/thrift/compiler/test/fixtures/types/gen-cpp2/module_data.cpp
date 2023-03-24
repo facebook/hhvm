@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::name = "empty_struct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::fields_ids = {{
@@ -44,6 +45,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::empty_struct>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::name = "decorated_struct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct>::fields_names = {{
   "field",
 }};
@@ -60,6 +62,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::name = "ContainerStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct>::fields_names = {{
   "fieldA",
   "fieldB",
@@ -111,6 +114,7 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::apache::thrift:
   7,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::name = "CppTypeStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct>::fields_names = {{
   "fieldA",
 }};
@@ -127,6 +131,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::name = "VirtualStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct>::fields_names = {{
   "MyIntField",
 }};
@@ -143,6 +148,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::name = "MyStructWithForwardRefEnum";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum>::fields_names = {{
   "a",
   "b",
@@ -164,6 +170,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::name = "TrivialNumeric";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric>::fields_names = {{
   "a",
   "b",
@@ -185,6 +192,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::name = "TrivialNestedWithDefault";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault>::fields_names = {{
   "z",
   "n",
@@ -206,6 +214,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::name = "ComplexString";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexString>::fields_names = {{
   "a",
   "b",
@@ -227,6 +236,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::name = "ComplexNestedWithDefault";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault>::fields_names = {{
   "z",
   "n",
@@ -248,6 +258,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::name = "MinPadding";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPadding>::fields_names = {{
   "small",
   "big",
@@ -284,6 +295,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::name = "MinPaddingWithCustomType";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = {{
   "small",
   "big",
@@ -320,6 +332,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -351,6 +364,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::name = "MyDataItem";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = {{
@@ -362,6 +376,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::name = "Renaming";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_names = {{
   "foo",
 }};
@@ -378,6 +393,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::name = "AnnotatedTypes";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes>::fields_names = {{
   "binary_field",
   "list_field",
@@ -399,6 +415,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::name = "ForwardUsageRoot";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_names = {{
   "ForwardUsageStruct",
   "ForwardUsageByRef",
@@ -420,6 +437,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::name = "ForwardUsageStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = {{
   "foo",
 }};
@@ -436,6 +454,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::name = "ForwardUsageByRef";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = {{
   "foo",
 }};
@@ -452,6 +471,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::name = "IncompleteMap";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap>::fields_names = {{
   "field",
 }};
@@ -468,6 +488,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::name = "IncompleteMapDep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::fields_ids = {{
@@ -479,6 +500,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::name = "CompleteMap";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap>::fields_names = {{
   "field",
 }};
@@ -495,6 +517,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::name = "CompleteMapDep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::fields_ids = {{
@@ -506,6 +529,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::name = "IncompleteList";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList>::fields_names = {{
   "field",
 }};
@@ -522,6 +546,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::name = "IncompleteListDep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::fields_ids = {{
@@ -533,6 +558,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::name = "CompleteList";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::CompleteList>::fields_names = {{
   "field",
 }};
@@ -549,6 +575,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::name = "CompleteListDep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::fields_ids = {{
@@ -560,6 +587,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::name = "AdaptedList";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList>::fields_names = {{
   "field",
 }};
@@ -576,6 +604,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::name = "AdaptedListDep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep>::fields_names = {{
   "field",
 }};
@@ -592,6 +621,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::name = "DependentAdaptedList";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList>::fields_names = {{
   "field",
 }};
@@ -608,6 +638,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::name = "DependentAdaptedListDep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep>::fields_names = {{
   "field",
 }};
@@ -624,6 +655,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::name = "AllocatorAware";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::fields_names = {{
   "aa_list",
   "aa_set",
@@ -670,6 +702,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::name = "AllocatorAware2";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2>::fields_names = {{
   "not_a_container",
   "box_field",
@@ -691,6 +724,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::name = "TypedefStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct>::fields_names = {{
   "i32_field",
   "IntTypedef_field",
@@ -717,6 +751,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::apache::thrift:
   2,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::name = "StructWithDoubleUnderscores";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores>::fields_names = {{
   "__field",
 }};

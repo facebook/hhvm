@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Fiery>::name = "Fiery";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Fiery>::fields_names = {{
   "message",
 }};
@@ -49,6 +50,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Fiery>::i
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Serious>::name = "Serious";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::Serious>::fields_names = {{
   "sonnet",
 }};
@@ -65,6 +67,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Serious>:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ComplexFieldNames>::name = "ComplexFieldNames";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ComplexFieldNames>::fields_names = {{
   "error_message",
   "internal_error_message",
@@ -86,6 +89,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::ComplexFi
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::CustomFieldNames>::name = "CustomFieldNames";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::CustomFieldNames>::fields_names = {{
   "error_message",
   "internal_error_message",
@@ -107,6 +111,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::CustomFie
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ExceptionWithPrimitiveField>::name = "ExceptionWithPrimitiveField";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ExceptionWithPrimitiveField>::fields_names = {{
   "message",
   "error_code",
@@ -128,6 +133,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::Exception
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ExceptionWithStructuredAnnotation>::name = "ExceptionWithStructuredAnnotation";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ExceptionWithStructuredAnnotation>::fields_names = {{
   "message_field",
   "error_code",
@@ -149,6 +155,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::Exception
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Banal>::name = "Banal";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::Banal>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::Banal>::fields_ids = {{

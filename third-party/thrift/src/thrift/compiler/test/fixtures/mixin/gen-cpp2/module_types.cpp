@@ -39,6 +39,9 @@ const folly::StringPiece Mixin1::__fbthrift_get_field_name(::apache::thrift::Fie
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Mixin1>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Mixin1::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Mixin1>::name;
+}
 
 Mixin1::Mixin1(const Mixin1&) = default;
 Mixin1& Mixin1::operator=(const Mixin1&) = default;
@@ -134,6 +137,9 @@ namespace cpp2 {
 const folly::StringPiece Mixin2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Mixin2>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Mixin2::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Mixin2>::name;
 }
 
 Mixin2::Mixin2(const Mixin2&) = default;
@@ -257,6 +263,9 @@ const folly::StringPiece Mixin3Base::__fbthrift_get_field_name(::apache::thrift:
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Mixin3Base>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Mixin3Base::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Mixin3Base>::name;
+}
 
 Mixin3Base::Mixin3Base(const Mixin3Base&) = default;
 Mixin3Base& Mixin3Base::operator=(const Mixin3Base&) = default;
@@ -352,6 +361,9 @@ namespace cpp2 {
 const folly::StringPiece Foo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Foo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Foo>::name;
 }
 
 Foo::Foo(const Foo&) = default;

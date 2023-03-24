@@ -334,4 +334,14 @@ TEST(FieldsTest, HelperAPIs) {
 TEST(FieldsTest, GetFieldNameCppName) {
   EXPECT_EQ((op::get_name_v<test_cpp2::cpp_reflection::struct_with_renamed_field, field_ordinal<1>>), "fancy.idl.name");
 }
+
+TEST(FieldsTest, GetClassName) {
+  using namespace test_cpp2::cpp_reflection;
+  EXPECT_EQ(op::get_class_name_v<MyStruct>, "MyStruct");
+  EXPECT_EQ(op::get_class_name_v<MyUnion>, "MyUnion");
+  EXPECT_EQ(op::get_class_name_v<MyException>, "MyException");
+  EXPECT_EQ(op::get_class_name_v<RenamedMyStruct>, "MyStruct2");
+  EXPECT_EQ(op::get_class_name_v<RenamedMyUnion>, "MyUnion2");
+  EXPECT_EQ(op::get_class_name_v<RenamedMyException>, "MyException2");
+}
 } // namespace apache::thrift::type

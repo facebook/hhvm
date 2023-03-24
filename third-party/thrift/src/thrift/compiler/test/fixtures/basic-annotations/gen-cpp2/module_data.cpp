@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStructNestedAnnotation>::name = "MyStructNestedAnnotation";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::MyStructNestedAnnotation>::fields_names = {{
   "name",
 }};
@@ -49,6 +50,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::MyStructN
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourUnion>::fields_ids = {{
@@ -60,6 +62,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourUnion>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourException>::name = "MyException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::detail::YourException>::fields_ids = {{
@@ -71,6 +74,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::detail::YourException>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::detail::YourStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::detail::YourStruct>::fields_names = {{
   "major",
   "package",
@@ -132,6 +136,7 @@ THRIFT_DATA_MEMBER const std::array<int, 10> TStructDataStorage<::cpp2::detail::
   9,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::SecretStruct>::name = "SecretStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SecretStruct>::fields_names = {{
   "id",
   "password",

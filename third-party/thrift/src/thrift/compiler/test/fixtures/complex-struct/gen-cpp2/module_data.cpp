@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp>::name = "MyStructFloatFieldThrowExp";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::MyStructFloatFieldThrowExp>::fields_names = {{
   "myLongField",
   "MyByteField",
@@ -64,6 +65,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::MyStructF
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStructMapFloatThrowExp>::name = "MyStructMapFloatThrowExp";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::MyStructMapFloatThrowExp>::fields_names = {{
   "myLongField",
   "mapListOfFloats",
@@ -85,6 +87,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::MyStructM
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -236,6 +239,7 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::cpp2::MyStruct
   27,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::SimpleStruct>::name = "SimpleStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SimpleStruct>::fields_names = {{
   "age",
   "name",
@@ -257,6 +261,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::SimpleStr
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::defaultStruct>::name = "defaultStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 22> TStructDataStorage<::cpp2::defaultStruct>::fields_names = {{
   "myLongDFset",
   "myLongDF",
@@ -378,6 +383,7 @@ THRIFT_DATA_MEMBER const std::array<int, 22> TStructDataStorage<::cpp2::defaultS
   21,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStructTypeDef>::name = "MyStructTypeDef";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::MyStructTypeDef>::fields_names = {{
   "myLongField",
   "myLongTypeDef",
@@ -434,6 +440,7 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::MyStructT
   8,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyDataItem>::name = "MyDataItem";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = {{
@@ -445,6 +452,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
   "myEnum",
   "myStruct",
@@ -486,6 +494,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::cpp2::MyUnion>:
   5,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp>::name = "MyUnionFloatFieldThrowExp";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp>::fields_names = {{
   "myEnum",
   "setFloat",
@@ -517,6 +526,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::MyUnionFl
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ComplexNestedStruct>::name = "ComplexNestedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_names = {{
   "setOfSetOfInt",
   "listofListOfListOfListOfEnum",
@@ -618,6 +628,7 @@ THRIFT_DATA_MEMBER const std::array<int, 18> TStructDataStorage<::cpp2::ComplexN
   17,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::TypeRemapped>::name = "TypeRemapped";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::TypeRemapped>::fields_names = {{
   "lsMap",
   "ioMap",
@@ -649,6 +660,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::TypeRemap
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::emptyXcep>::name = "emptyXcep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::emptyXcep>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::emptyXcep>::fields_ids = {{
@@ -660,6 +672,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::emptyXcep>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::reqXcep>::name = "reqXcep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::reqXcep>::fields_names = {{
   "message",
   "errorCode",
@@ -681,6 +694,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::reqXcep>:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::optXcep>::name = "optXcep";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::optXcep>::fields_names = {{
   "message",
   "errorCode",
@@ -702,6 +716,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::optXcep>:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::complexException>::name = "complexException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::complexException>::fields_names = {{
   "message",
   "listStrings",

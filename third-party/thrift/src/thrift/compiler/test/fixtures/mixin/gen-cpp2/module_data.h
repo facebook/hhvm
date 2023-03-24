@@ -14,6 +14,7 @@ namespace apache { namespace thrift {
 
 template <> struct TStructDataStorage<::cpp2::Mixin1> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -29,6 +30,7 @@ template <> struct TStructDataStorage<::cpp2::Mixin1> {
 
 template <> struct TStructDataStorage<::cpp2::Mixin2> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -44,6 +46,7 @@ template <> struct TStructDataStorage<::cpp2::Mixin2> {
 
 template <> struct TStructDataStorage<::cpp2::Mixin3Base> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -59,6 +62,7 @@ template <> struct TStructDataStorage<::cpp2::Mixin3Base> {
 
 template <> struct TStructDataStorage<::cpp2::Foo> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

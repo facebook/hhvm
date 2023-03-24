@@ -68,6 +68,9 @@ const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStruct>::name;
+}
 
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor) {}
@@ -154,6 +157,9 @@ const char* MyUnion::__fbthrift_thrift_uri() {
 const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyUnion>::name;
 }
 
 void MyUnion::__fbthrift_clear() {
@@ -310,6 +316,9 @@ const folly::StringPiece MyStructWithCustomDefault::__fbthrift_get_field_name(::
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStructWithCustomDefault>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyStructWithCustomDefault::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStructWithCustomDefault>::name;
+}
 
 
 MyStructWithCustomDefault::MyStructWithCustomDefault(apache::thrift::FragileConstructor, ::std::int64_t field1__arg) :
@@ -392,6 +401,9 @@ const char* StructLevelTerseStruct::__fbthrift_thrift_uri() {
 const folly::StringPiece StructLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructLevelTerseStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructLevelTerseStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructLevelTerseStruct>::name;
 }
 
 StructLevelTerseStruct::StructLevelTerseStruct(const StructLevelTerseStruct&) = default;
@@ -688,6 +700,9 @@ const char* FieldLevelTerseStruct::__fbthrift_thrift_uri() {
 const folly::StringPiece FieldLevelTerseStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FieldLevelTerseStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece FieldLevelTerseStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FieldLevelTerseStruct>::name;
 }
 
 FieldLevelTerseStruct::FieldLevelTerseStruct(const FieldLevelTerseStruct&) = default;
@@ -1169,6 +1184,9 @@ const folly::StringPiece TerseStructWithCustomDefault::__fbthrift_get_field_name
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseStructWithCustomDefault>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece TerseStructWithCustomDefault::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TerseStructWithCustomDefault>::name;
+}
 
 TerseStructWithCustomDefault::TerseStructWithCustomDefault(const TerseStructWithCustomDefault&) = default;
 TerseStructWithCustomDefault& TerseStructWithCustomDefault::operator=(const TerseStructWithCustomDefault&) = default;
@@ -1448,6 +1466,9 @@ const folly::StringPiece AdaptedFields::__fbthrift_get_field_name(::apache::thri
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedFields>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece AdaptedFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<AdaptedFields>::name;
+}
 
 AdaptedFields::AdaptedFields(const AdaptedFields& srcObj) :
     __fbthrift_field_field1(srcObj.__fbthrift_field_field1),
@@ -1579,6 +1600,9 @@ const folly::StringPiece WrappedFields::__fbthrift_get_field_name(::apache::thri
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<WrappedFields>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece WrappedFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<WrappedFields>::name;
+}
 
 
 WrappedFields::WrappedFields(apache::thrift::FragileConstructor, ::std::int32_t field1__arg) :
@@ -1659,6 +1683,9 @@ const char* TerseException::__fbthrift_thrift_uri() {
 const folly::StringPiece TerseException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseException>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece TerseException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TerseException>::name;
 }
 
 TerseException::TerseException(const TerseException&) = default;

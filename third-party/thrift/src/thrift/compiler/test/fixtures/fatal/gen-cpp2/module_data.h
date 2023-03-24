@@ -268,6 +268,7 @@ template <> struct TEnumDataStorage<::test_cpp2::cpp_reflection::UnionWithTypede
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union1> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -283,6 +284,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union1> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union2> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -298,6 +300,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union2> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union3> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -313,6 +316,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union3> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::structA> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -328,6 +332,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::structA> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::unionA> {
   static constexpr const std::size_t fields_size = 5;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -343,6 +348,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::unionA> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::structB> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -358,6 +364,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::structB> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::structC> {
   static constexpr const std::size_t fields_size = 30;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -373,6 +380,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::structC> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct1> {
   static constexpr const std::size_t fields_size = 6;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -388,6 +396,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct1> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct2> {
   static constexpr const std::size_t fields_size = 7;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -403,6 +412,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct2> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct3> {
   static constexpr const std::size_t fields_size = 18;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -418,6 +428,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct3> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct4> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -433,6 +444,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct4> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct5> {
   static constexpr const std::size_t fields_size = 5;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -448,6 +460,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct5> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -463,6 +476,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -478,6 +492,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -493,6 +508,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::annotated> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -508,6 +524,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::annotated> {
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names> {
   static constexpr const std::size_t fields_size = 28;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -523,6 +540,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::union_with_sp
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names> {
   static constexpr const std::size_t fields_size = 28;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -538,6 +556,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_s
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections> {
   static constexpr const std::size_t fields_size = 5;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -553,6 +572,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_i
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::StructWithFieldAdapter> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -568,6 +588,7 @@ template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::StructWithFie
 
 template <> struct TStructDataStorage<::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

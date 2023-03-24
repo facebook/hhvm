@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = {{
   "field",
 }};
@@ -49,6 +50,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Bar>::name = "Bar";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::Bar>::fields_names = {{
   "list_field",
 }};
@@ -65,6 +67,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::facebook::thrif
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::facebook::thrift::test::Baz>::fields_names = {{
   "list_field",
   "nested_list_field",
@@ -86,6 +89,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrif
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::name = "OpEncodeStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::test::OpEncodeStruct>::fields_names = {{
   "int_field",
   "enum_field",

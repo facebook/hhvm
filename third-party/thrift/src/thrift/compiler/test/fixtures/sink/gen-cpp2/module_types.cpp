@@ -39,6 +39,9 @@ const folly::StringPiece InitialResponse::__fbthrift_get_field_name(::apache::th
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<InitialResponse>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece InitialResponse::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<InitialResponse>::name;
+}
 
 InitialResponse::InitialResponse(const InitialResponse&) = default;
 InitialResponse& InitialResponse::operator=(const InitialResponse&) = default;
@@ -134,6 +137,9 @@ namespace cpp2 {
 const folly::StringPiece FinalResponse::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FinalResponse>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece FinalResponse::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FinalResponse>::name;
 }
 
 FinalResponse::FinalResponse(const FinalResponse&) = default;
@@ -231,6 +237,9 @@ const folly::StringPiece SinkPayload::__fbthrift_get_field_name(::apache::thrift
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SinkPayload>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece SinkPayload::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SinkPayload>::name;
+}
 
 SinkPayload::SinkPayload(const SinkPayload&) = default;
 SinkPayload& SinkPayload::operator=(const SinkPayload&) = default;
@@ -327,6 +336,9 @@ const folly::StringPiece CompatibleWithKeywordSink::__fbthrift_get_field_name(::
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CompatibleWithKeywordSink>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece CompatibleWithKeywordSink::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<CompatibleWithKeywordSink>::name;
+}
 
 CompatibleWithKeywordSink::CompatibleWithKeywordSink(const CompatibleWithKeywordSink&) = default;
 CompatibleWithKeywordSink& CompatibleWithKeywordSink::operator=(const CompatibleWithKeywordSink&) = default;
@@ -422,6 +434,9 @@ namespace cpp2 {
 const folly::StringPiece InitialException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<InitialException>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece InitialException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<InitialException>::name;
 }
 
 InitialException::InitialException(const InitialException&) = default;
@@ -525,6 +540,9 @@ const folly::StringPiece SinkException1::__fbthrift_get_field_name(::apache::thr
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SinkException1>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece SinkException1::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SinkException1>::name;
+}
 
 SinkException1::SinkException1(const SinkException1&) = default;
 SinkException1& SinkException1::operator=(const SinkException1&) = default;
@@ -626,6 +644,9 @@ namespace cpp2 {
 const folly::StringPiece SinkException2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SinkException2>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece SinkException2::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SinkException2>::name;
 }
 
 SinkException2::SinkException2(const SinkException2&) = default;

@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::fields_ids = {{
@@ -44,6 +45,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::apache::thrift::test::MyStruct>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::EmptiableStruct>::name = "EmptiableStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::EmptiableStruct>::fields_names = {{
   "bool_field",
   "byte_field",
@@ -125,6 +127,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::apache::thrift
   13,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::name = "NotEmptiableStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::apache::thrift::test::NotEmptiableStruct>::fields_names = {{
   "bool_field",
   "byte_field",

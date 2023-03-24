@@ -39,6 +39,9 @@ const folly::StringPiece Foo::__fbthrift_get_field_name(::apache::thrift::FieldO
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Foo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Foo>::name;
+}
 
 Foo::Foo(const Foo& srcObj) :
     __fbthrift_field_foo(::apache::thrift::detail::st::copy_field<

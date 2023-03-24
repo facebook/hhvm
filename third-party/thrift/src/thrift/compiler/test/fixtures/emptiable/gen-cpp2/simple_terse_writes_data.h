@@ -27,6 +27,7 @@ template <> struct TEnumDataStorage<::apache::thrift::test::MyEnum> {
 
 template <> struct TStructDataStorage<::apache::thrift::test::MyStruct> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -42,6 +43,7 @@ template <> struct TStructDataStorage<::apache::thrift::test::MyStruct> {
 
 template <> struct TStructDataStorage<::apache::thrift::test::EmptiableStruct> {
   static constexpr const std::size_t fields_size = 14;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -57,6 +59,7 @@ template <> struct TStructDataStorage<::apache::thrift::test::EmptiableStruct> {
 
 template <> struct TStructDataStorage<::apache::thrift::test::NotEmptiableStruct> {
   static constexpr const std::size_t fields_size = 14;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

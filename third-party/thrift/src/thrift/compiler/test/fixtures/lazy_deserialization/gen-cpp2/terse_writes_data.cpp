@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::TerseFoo>::name = "TerseFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::TerseFoo>::fields_names = {{
   "field1",
   "field2",
@@ -64,6 +65,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::name = "TerseLazyFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::TerseLazyFoo>::fields_names = {{
   "field1",
   "field2",
@@ -95,6 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::name = "TerseOptionalFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalFoo>::fields_names = {{
   "field1",
   "field2",
@@ -126,6 +129,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::name = "TerseOptionalLazyFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::TerseOptionalLazyFoo>::fields_names = {{
   "field1",
   "field2",

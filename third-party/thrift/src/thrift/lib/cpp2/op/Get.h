@@ -137,6 +137,14 @@ template <typename T, typename Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
     detail::pa::__fbthrift_get_field_name<T, get_ordinal<T, Id>>();
 
+/// Gets the thrift class name, for example:
+///
+/// * op::get_class_name_v<MyStruct> == "MyStruct"
+///
+template <typename T>
+FOLLY_INLINE_VARIABLE const folly::StringPiece get_class_name_v =
+    detail::pa::__fbthrift_get_class_name<T>();
+
 /// Gets the Thrift field, for example:
 ///
 ///   op::get<type::field_id<7>>(myStruct) = 4;

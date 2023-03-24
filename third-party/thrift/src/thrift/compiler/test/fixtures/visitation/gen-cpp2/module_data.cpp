@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::union1>::name = "union1";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_names = {{
   "ui",
   "ud",
@@ -64,6 +65,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::union2>::name = "union2";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_names = {{
   "ui_2",
   "ud_2",
@@ -95,6 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::union3>::name = "union3";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_names = {{
   "ui_3",
   "ud_3",
@@ -126,6 +129,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::structA>::name = "structA";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_names = {{
   "a",
   "b",
@@ -147,6 +151,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test_cpp2::cpp_
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::name = "unionA";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_names = {{
   "i",
   "d",
@@ -183,6 +188,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_
   4,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::structB>::name = "structB";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_names = {{
   "c",
   "d",
@@ -204,6 +210,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test_cpp2::cpp_
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::structC>::name = "structC";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_names = {{
   "a",
   "b",
@@ -365,6 +372,7 @@ THRIFT_DATA_MEMBER const std::array<int, 30> TStructDataStorage<::test_cpp2::cpp
   29,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::name = "struct1";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_names = {{
   "field0",
   "field1",
@@ -406,6 +414,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::test_cpp2::cpp_
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::name = "struct2";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_names = {{
   "fieldA",
   "fieldB",
@@ -452,6 +461,7 @@ THRIFT_DATA_MEMBER const std::array<int, 7> TStructDataStorage<::test_cpp2::cpp_
   6,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::name = "struct3";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_names = {{
   "fieldA",
   "fieldB",
@@ -553,6 +563,7 @@ THRIFT_DATA_MEMBER const std::array<int, 18> TStructDataStorage<::test_cpp2::cpp
   17,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::name = "struct4";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_names = {{
   "field0",
   "field1",
@@ -584,6 +595,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::name = "struct5";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_names = {{
   "field0",
   "field1",
@@ -620,6 +632,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::name = "struct_binary";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_names = {{
   "bi",
 }};
@@ -636,6 +649,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test_cpp2::cpp_
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::name = "dep_A_struct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_names = {{
   "b",
   "c",
@@ -662,6 +676,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test_cpp2::cpp_
   2,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::name = "dep_B_struct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_names = {{
   "b",
   "c",
@@ -688,6 +703,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test_cpp2::cpp_
   2,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::name = "annotated";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_names = {{
   "a",
 }};
@@ -704,6 +720,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test_cpp2::cpp_
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::name = "union_with_special_names";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_names = {{
   "get",
   "getter",
@@ -855,6 +872,7 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp
   27,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::name = "struct_with_special_names";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_names = {{
   "get",
   "getter",
@@ -1006,6 +1024,7 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp
   27,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::name = "struct_with_indirections";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_names = {{
   "real",
   "fake",

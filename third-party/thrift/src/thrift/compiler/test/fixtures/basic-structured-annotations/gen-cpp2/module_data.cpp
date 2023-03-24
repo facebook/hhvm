@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::name = "structured_annotation_inline";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline>::fields_names = {{
   "count",
   "name",
@@ -54,6 +55,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::name = "structured_annotation_with_default";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default>::fields_names = {{
   "name",
 }};
@@ -70,6 +72,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::name = "structured_annotation_recursive";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_names = {{
   "name",
   "recurse",
@@ -96,6 +99,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::test::fixtures:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::name = "structured_annotation_forward";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_names = {{
   "count",
 }};
@@ -112,6 +116,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::name = "structured_annotation_nested";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_names = {{
   "name",
   "nest",
@@ -133,6 +138,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::test::fixtures:
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct>::fields_names = {{
   "annotated_field",
   "annotated_type",
@@ -164,6 +170,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::name = "MyException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException>::fields_names = {{
   "context",
 }};
@@ -180,6 +187,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion>::fields_names = {{
   "first",
   "second",

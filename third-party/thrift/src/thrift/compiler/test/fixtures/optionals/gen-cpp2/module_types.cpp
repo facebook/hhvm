@@ -64,6 +64,9 @@ const folly::StringPiece Color::__fbthrift_get_field_name(::apache::thrift::Fiel
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Color>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Color::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Color>::name;
+}
 
 
 Color::Color(apache::thrift::FragileConstructor, double red__arg, double green__arg, double blue__arg, double alpha__arg) :
@@ -176,6 +179,9 @@ namespace cpp2 {
 const folly::StringPiece Vehicle::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Vehicle>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Vehicle::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Vehicle>::name;
 }
 
 Vehicle::Vehicle(const Vehicle&) = default;
@@ -341,6 +347,9 @@ namespace cpp2 {
 const folly::StringPiece Person::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Person>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Person::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Person>::name;
 }
 
 Person::Person(const Person&) = default;

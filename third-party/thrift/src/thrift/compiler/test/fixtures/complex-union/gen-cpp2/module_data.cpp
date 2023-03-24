@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ComplexUnion>::name = "ComplexUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_names = {{
   "intValue",
   "stringValue",
@@ -74,6 +75,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::cpp2::ComplexUn
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ListUnion>::name = "ListUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ListUnion>::fields_names = {{
   "intListValue",
   "stringListValue",
@@ -95,6 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::ListUnion
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::DataUnion>::name = "DataUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::DataUnion>::fields_names = {{
   "binaryData",
   "stringData",
@@ -116,6 +119,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::DataUnion
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Val>::name = "Val";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Val>::fields_names = {{
   "strVal",
   "intVal",
@@ -142,6 +146,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::Val>::iss
   2,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::ValUnion>::name = "ValUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ValUnion>::fields_names = {{
   "v1",
   "v2",
@@ -163,6 +168,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::ValUnion>
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::VirtualComplexUnion>::name = "VirtualComplexUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_names = {{
   "thingOne",
   "thingTwo",
@@ -184,6 +190,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::VirtualCo
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::NonCopyableStruct>::name = "NonCopyableStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_names = {{
   "num",
 }};
@@ -200,6 +207,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::NonCopyab
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::NonCopyableUnion>::name = "NonCopyableUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_names = {{
   "s",
 }};

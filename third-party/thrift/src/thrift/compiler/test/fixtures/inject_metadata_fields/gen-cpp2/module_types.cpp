@@ -39,6 +39,9 @@ const folly::StringPiece Fields::__fbthrift_get_field_name(::apache::thrift::Fie
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Fields>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Fields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Fields>::name;
+}
 
 Fields::Fields(const Fields&) = default;
 Fields& Fields::operator=(const Fields&) = default;
@@ -135,6 +138,9 @@ const folly::StringPiece FieldsInjectedToEmptyStruct::__fbthrift_get_field_name(
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FieldsInjectedToEmptyStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece FieldsInjectedToEmptyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FieldsInjectedToEmptyStruct>::name;
+}
 
 FieldsInjectedToEmptyStruct::FieldsInjectedToEmptyStruct(const FieldsInjectedToEmptyStruct&) = default;
 FieldsInjectedToEmptyStruct& FieldsInjectedToEmptyStruct::operator=(const FieldsInjectedToEmptyStruct&) = default;
@@ -230,6 +236,9 @@ namespace cpp2 {
 const folly::StringPiece FieldsInjectedToStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FieldsInjectedToStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece FieldsInjectedToStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FieldsInjectedToStruct>::name;
 }
 
 FieldsInjectedToStruct::FieldsInjectedToStruct(const FieldsInjectedToStruct&) = default;
@@ -338,6 +347,9 @@ namespace cpp2 {
 const folly::StringPiece FieldsInjectedWithIncludedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FieldsInjectedWithIncludedStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece FieldsInjectedWithIncludedStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FieldsInjectedWithIncludedStruct>::name;
 }
 
 FieldsInjectedWithIncludedStruct::FieldsInjectedWithIncludedStruct(const FieldsInjectedWithIncludedStruct&) = default;

@@ -59,6 +59,7 @@ template <> struct TEnumDataStorage<::apache::thrift::fixtures::types::MyForward
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::empty_struct> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -74,6 +75,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::empty_s
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::decorated_struct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -89,6 +91,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::decorat
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ContainerStruct> {
   static constexpr const std::size_t fields_size = 8;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -104,6 +107,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Contain
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CppTypeStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -119,6 +123,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CppType
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::VirtualStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -134,6 +139,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Virtual
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStructWithForwardRefEnum> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -149,6 +155,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStruc
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::TrivialNumeric> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -164,6 +171,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Trivial
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::TrivialNestedWithDefault> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -179,6 +187,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Trivial
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ComplexString> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -194,6 +203,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complex
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ComplexNestedWithDefault> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -209,6 +219,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complex
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPadding> {
   static constexpr const std::size_t fields_size = 5;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -224,6 +235,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPadd
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType> {
   static constexpr const std::size_t fields_size = 5;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -239,6 +251,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MinPadd
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStruct> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -254,6 +267,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyStruc
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -269,6 +283,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::MyDataI
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Renamed> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -284,6 +299,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Renamed
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AnnotatedTypes> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -299,6 +315,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Annotat
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -314,6 +331,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Forward
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -329,6 +347,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Forward
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -344,6 +363,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Forward
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMap> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -359,6 +379,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteMapDep> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -374,6 +395,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteMap> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -389,6 +411,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteMapDep> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -404,6 +427,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteList> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -419,6 +443,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::IncompleteListDep> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -434,6 +459,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Incompl
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteList> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -449,6 +475,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::CompleteListDep> {
   static constexpr const std::size_t fields_size = 0;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -464,6 +491,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Complet
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AdaptedList> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -479,6 +507,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Adapted
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail::AdaptedListDep> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -494,6 +523,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail:
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::DependentAdaptedList> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -509,6 +539,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Depende
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail::DependentAdaptedListDep> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -524,6 +555,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::detail:
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware> {
   static constexpr const std::size_t fields_size = 7;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -539,6 +571,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Allocat
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware2> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -554,6 +587,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Allocat
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::TypedefStruct> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -569,6 +603,7 @@ template <> struct TStructDataStorage<::apache::thrift::fixtures::types::Typedef
 
 template <> struct TStructDataStorage<::apache::thrift::fixtures::types::StructWithDoubleUnderscores> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

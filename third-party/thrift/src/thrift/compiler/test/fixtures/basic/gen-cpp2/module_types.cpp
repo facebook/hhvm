@@ -93,6 +93,9 @@ const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStruct>::name;
+}
 
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
@@ -293,6 +296,9 @@ const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift:
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyDataItem::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyDataItem>::name;
+}
 
 
 MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
@@ -379,6 +385,9 @@ const char* MyUnion::__fbthrift_thrift_uri() {
 const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyUnion>::name;
 }
 
 void MyUnion::__fbthrift_clear() {
@@ -489,6 +498,9 @@ const folly::StringPiece ReservedKeyword::__fbthrift_get_field_name(::apache::th
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ReservedKeyword>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ReservedKeyword::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ReservedKeyword>::name;
+}
 
 
 ReservedKeyword::ReservedKeyword(apache::thrift::FragileConstructor, ::std::int32_t reserved_field__arg) :
@@ -585,6 +597,9 @@ const char* UnionToBeRenamed::__fbthrift_thrift_uri() {
 const folly::StringPiece UnionToBeRenamed::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<UnionToBeRenamed>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece UnionToBeRenamed::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<UnionToBeRenamed>::name;
 }
 
 void UnionToBeRenamed::__fbthrift_clear() {

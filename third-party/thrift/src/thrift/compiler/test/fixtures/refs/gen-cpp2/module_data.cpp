@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
   "anInteger",
   "aString",
@@ -54,6 +55,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::cpp2::MyUnion>:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyField>::name = "MyField";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::MyField>::fields_names = {{
   "opt_value",
   "value",
@@ -110,6 +112,7 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::cpp2::MyField>:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "opt_ref",
   "ref",
@@ -136,6 +139,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::MyStruct>
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithUnion>::name = "StructWithUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithUnion>::fields_names = {{
   "u",
   "aDouble",
@@ -162,6 +166,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::RecursiveStruct>::name = "RecursiveStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::RecursiveStruct>::fields_names = {{
   "mes",
 }};
@@ -178,6 +183,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::Recursive
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithContainers>::name = "StructWithContainers";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::StructWithContainers>::fields_names = {{
   "list_ref",
   "set_ref",
@@ -219,6 +225,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithSharedConst>::name = "StructWithSharedConst";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithSharedConst>::fields_names = {{
   "opt_shared_const",
   "shared_const",
@@ -245,6 +252,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::Empty>::name = "Empty";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::Empty>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::cpp2::Empty>::fields_ids = {{
@@ -256,6 +264,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::cpp2::Empty>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithRef>::name = "StructWithRef";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRef>::fields_names = {{
   "def_field",
   "opt_field",
@@ -282,6 +291,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithBox>::name = "StructWithBox";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithBox>::fields_names = {{
   "a",
   "b",
@@ -308,6 +318,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithInternBox>::name = "StructWithInternBox";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::StructWithInternBox>::fields_names = {{
   "field1",
   "field2",
@@ -339,6 +350,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::name = "AdaptedStructWithInternBox";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::AdaptedStructWithInternBox>::fields_names = {{
   "field1",
   "field2",
@@ -370,6 +382,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::cpp2::AdaptedSt
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithRefTypeUnique>::name = "StructWithRefTypeUnique";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::fields_names = {{
   "def_field",
   "opt_field",
@@ -396,6 +409,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithRefTypeShared>::name = "StructWithRefTypeShared";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeShared>::fields_names = {{
   "def_field",
   "opt_field",
@@ -422,6 +436,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::name = "StructWithRefTypeSharedConst";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::fields_names = {{
   "def_field",
   "opt_field",
@@ -448,6 +463,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::name = "StructWithRefAndAnnotCppNoexceptMoveCtor";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::fields_names = {{
   "def_field",
 }};
@@ -464,6 +480,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::cpp2::StructWit
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::cpp2::StructWithString>::name = "StructWithString";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::StructWithString>::fields_names = {{
   "def_unique_string_ref",
   "def_shared_string_ref",

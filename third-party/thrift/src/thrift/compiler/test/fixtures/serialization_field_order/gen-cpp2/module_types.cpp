@@ -39,6 +39,9 @@ const folly::StringPiece Foo::__fbthrift_get_field_name(::apache::thrift::FieldO
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Foo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Foo>::name;
+}
 
 
 Foo::Foo(apache::thrift::FragileConstructor, ::std::int32_t field1__arg, ::std::int32_t field2__arg, ::std::int32_t field3__arg) :
@@ -141,6 +144,9 @@ namespace cpp2 {
 const folly::StringPiece Foo2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo2>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Foo2::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Foo2>::name;
 }
 
 

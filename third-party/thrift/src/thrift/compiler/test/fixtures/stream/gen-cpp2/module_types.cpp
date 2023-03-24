@@ -39,6 +39,9 @@ const folly::StringPiece FooStreamEx::__fbthrift_get_field_name(::apache::thrift
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FooStreamEx>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece FooStreamEx::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FooStreamEx>::name;
+}
 
 FooStreamEx::FooStreamEx(const FooStreamEx&) = default;
 FooStreamEx& FooStreamEx::operator=(const FooStreamEx&) = default;
@@ -122,6 +125,9 @@ const folly::StringPiece FooEx::__fbthrift_get_field_name(::apache::thrift::Fiel
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FooEx>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece FooEx::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FooEx>::name;
+}
 
 FooEx::FooEx(const FooEx&) = default;
 FooEx& FooEx::operator=(const FooEx&) = default;
@@ -204,6 +210,9 @@ namespace cpp2 {
 const folly::StringPiece FooEx2::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<FooEx2>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece FooEx2::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<FooEx2>::name;
 }
 
 FooEx2::FooEx2(const FooEx2&) = default;

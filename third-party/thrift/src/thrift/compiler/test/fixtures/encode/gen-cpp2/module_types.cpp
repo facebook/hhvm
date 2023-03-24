@@ -68,6 +68,9 @@ const folly::StringPiece Foo::__fbthrift_get_field_name(::apache::thrift::FieldO
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Foo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Foo>::name;
+}
 
 
 Foo::Foo(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
@@ -150,6 +153,9 @@ const char* Bar::__fbthrift_thrift_uri() {
 const folly::StringPiece Bar::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Bar>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Bar::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Bar>::name;
 }
 
 Bar::Bar(const Bar&) = default;
@@ -254,6 +260,9 @@ const char* Baz::__fbthrift_thrift_uri() {
 const folly::StringPiece Baz::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Baz>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Baz::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Baz>::name;
 }
 
 Baz::Baz(const Baz&) = default;
@@ -375,6 +384,9 @@ const char* OpEncodeStruct::__fbthrift_thrift_uri() {
 const folly::StringPiece OpEncodeStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<OpEncodeStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece OpEncodeStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<OpEncodeStruct>::name;
 }
 
 OpEncodeStruct::OpEncodeStruct(const OpEncodeStruct& srcObj) :

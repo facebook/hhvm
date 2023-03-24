@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::ns::ModuleA>::name = "ModuleA";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::some::ns::ModuleA>::fields_names = {{
   "i32Field",
   "strField",
@@ -74,6 +75,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::some::ns::Modul
   5,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::ns::ModuleB>::name = "ModuleB";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::some::ns::ModuleB>::fields_names = {{
   "i32Field",
   "inclEnumB",
@@ -95,6 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::ns::Modul
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::ns::detail::DirectlyAdapted>::name = "DirectlyAdapted";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::some::ns::detail::DirectlyAdapted>::fields_names = {{
   "field",
 }};

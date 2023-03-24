@@ -68,6 +68,9 @@ const folly::StringPiece structured_annotation_inline::__fbthrift_get_field_name
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_inline>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece structured_annotation_inline::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<structured_annotation_inline>::name;
+}
 
 structured_annotation_inline::structured_annotation_inline(const structured_annotation_inline&) = default;
 structured_annotation_inline& structured_annotation_inline::operator=(const structured_annotation_inline&) = default;
@@ -173,6 +176,9 @@ const folly::StringPiece structured_annotation_with_default::__fbthrift_get_fiel
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_with_default>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece structured_annotation_with_default::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<structured_annotation_with_default>::name;
+}
 
 structured_annotation_with_default::structured_annotation_with_default(const structured_annotation_with_default&) = default;
 structured_annotation_with_default& structured_annotation_with_default::operator=(const structured_annotation_with_default&) = default;
@@ -268,6 +274,9 @@ const char* structured_annotation_recursive::__fbthrift_thrift_uri() {
 const folly::StringPiece structured_annotation_recursive::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_recursive>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece structured_annotation_recursive::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<structured_annotation_recursive>::name;
 }
 
 structured_annotation_recursive::structured_annotation_recursive(const structured_annotation_recursive& srcObj) :
@@ -414,6 +423,9 @@ const folly::StringPiece structured_annotation_forward::__fbthrift_get_field_nam
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_forward>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece structured_annotation_forward::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<structured_annotation_forward>::name;
+}
 
 
 structured_annotation_forward::structured_annotation_forward(apache::thrift::FragileConstructor, ::std::int64_t count__arg) :
@@ -496,6 +508,9 @@ const char* structured_annotation_nested::__fbthrift_thrift_uri() {
 const folly::StringPiece structured_annotation_nested::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<structured_annotation_nested>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece structured_annotation_nested::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<structured_annotation_nested>::name;
 }
 
 structured_annotation_nested::structured_annotation_nested(const structured_annotation_nested&) = default;
@@ -615,6 +630,9 @@ const char* MyStruct::__fbthrift_thrift_uri() {
 const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStruct>::name;
 }
 
 MyStruct::MyStruct(const MyStruct&) = default;
@@ -739,6 +757,9 @@ const folly::StringPiece MyException::__fbthrift_get_field_name(::apache::thrift
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyException>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyException>::name;
+}
 
 MyException::MyException(const MyException&) = default;
 MyException& MyException::operator=(const MyException&) = default;
@@ -854,6 +875,9 @@ const char* MyUnion::__fbthrift_thrift_uri() {
 const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyUnion>::name;
 }
 
 void MyUnion::__fbthrift_clear() {

@@ -39,6 +39,9 @@ const folly::StringPiece A::__fbthrift_get_field_name(::apache::thrift::FieldOrd
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<A>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece A::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<A>::name;
+}
 
 A::A(const A&) = default;
 A& A::operator=(const A&) = default;
@@ -134,6 +137,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece B::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<B>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece B::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<B>::name;
 }
 
 

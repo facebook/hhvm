@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::name = "TrivialTypesStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::fields_names = {{
   "fieldA",
   "fieldB",
@@ -69,6 +70,7 @@ THRIFT_DATA_MEMBER const std::array<int, 5> TStructDataStorage<::test::fixtures:
   4,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::name = "ContainerStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::test::fixtures::tablebased::ContainerStruct>::fields_names = {{
   "fieldA",
   "fieldB",
@@ -120,6 +122,7 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::test::fixtures:
   7,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::name = "ExampleUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::tablebased::ExampleUnion>::fields_names = {{
   "fieldA",
   "fieldB",

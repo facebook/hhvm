@@ -43,6 +43,9 @@ const folly::StringPiece InterceptedFields::__fbthrift_get_field_name(::apache::
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<InterceptedFields>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece InterceptedFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<InterceptedFields>::name;
+}
 
 InterceptedFields::InterceptedFields(const InterceptedFields&) = default;
 InterceptedFields& InterceptedFields::operator=(const InterceptedFields&) = default;

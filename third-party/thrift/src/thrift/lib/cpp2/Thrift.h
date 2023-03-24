@@ -100,6 +100,11 @@ struct struct_private_access {
   }
 
   template <typename T>
+  static const folly::StringPiece __fbthrift_get_class_name() {
+    return T::__fbthrift_get_class_name();
+  }
+
+  template <typename T>
   static constexpr ExceptionSafety __fbthrift_cpp2_gen_exception_safety() {
     return T::__fbthrift_cpp2_gen_exception_safety;
   }

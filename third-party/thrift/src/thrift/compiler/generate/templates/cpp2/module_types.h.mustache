@@ -105,6 +105,7 @@ class <%#struct:exception?%>FOLLY_EXPORT <%/struct:exception?%><%struct:cpp_unde
   using __fbthrift_patch_struct = <%struct:cpp_underlying_name%>PatchStruct;
   <%/struct:patch?%>
   static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
 <% > module_types_h/reflection%>
 
   void __fbthrift_clear();

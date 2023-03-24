@@ -39,6 +39,9 @@ const folly::StringPiece Fiery::__fbthrift_get_field_name(::apache::thrift::Fiel
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Fiery>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Fiery::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Fiery>::name;
+}
 
 Fiery::Fiery(const Fiery&) = default;
 Fiery& Fiery::operator=(const Fiery&) = default;
@@ -139,6 +142,9 @@ namespace cpp2 {
 const folly::StringPiece Serious::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Serious>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Serious::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Serious>::name;
 }
 
 Serious::Serious(const Serious&) = default;
@@ -245,6 +251,9 @@ namespace cpp2 {
 const folly::StringPiece ComplexFieldNames::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ComplexFieldNames>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece ComplexFieldNames::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ComplexFieldNames>::name;
 }
 
 ComplexFieldNames::ComplexFieldNames(const ComplexFieldNames&) = default;
@@ -364,6 +373,9 @@ const folly::StringPiece CustomFieldNames::__fbthrift_get_field_name(::apache::t
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<CustomFieldNames>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece CustomFieldNames::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<CustomFieldNames>::name;
+}
 
 CustomFieldNames::CustomFieldNames(const CustomFieldNames&) = default;
 CustomFieldNames& CustomFieldNames::operator=(const CustomFieldNames&) = default;
@@ -481,6 +493,9 @@ namespace cpp2 {
 const folly::StringPiece ExceptionWithPrimitiveField::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ExceptionWithPrimitiveField>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece ExceptionWithPrimitiveField::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ExceptionWithPrimitiveField>::name;
 }
 
 ExceptionWithPrimitiveField::ExceptionWithPrimitiveField(const ExceptionWithPrimitiveField&) = default;
@@ -601,6 +616,9 @@ const folly::StringPiece ExceptionWithStructuredAnnotation::__fbthrift_get_field
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ExceptionWithStructuredAnnotation>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ExceptionWithStructuredAnnotation::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ExceptionWithStructuredAnnotation>::name;
+}
 
 ExceptionWithStructuredAnnotation::ExceptionWithStructuredAnnotation(const ExceptionWithStructuredAnnotation&) = default;
 ExceptionWithStructuredAnnotation& ExceptionWithStructuredAnnotation::operator=(const ExceptionWithStructuredAnnotation&) = default;
@@ -715,6 +733,9 @@ namespace cpp2 {
 const folly::StringPiece Banal::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Banal>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Banal::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Banal>::name;
 }
 
 Banal::Banal(const Banal&) = default;

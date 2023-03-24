@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::Foo>::name = "Foo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::Foo>::fields_names = {{
   "field1",
   "field2",
@@ -64,6 +65,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::LazyFoo>::name = "LazyFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyFoo>::fields_names = {{
   "field1",
   "field2",
@@ -95,6 +97,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::OptionalFoo>::name = "OptionalFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalFoo>::fields_names = {{
   "field1",
   "field2",
@@ -126,6 +129,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::OptionalLazyFoo>::name = "OptionalLazyFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::OptionalLazyFoo>::fields_names = {{
   "field1",
   "field2",
@@ -157,6 +161,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::LazyCppRef>::name = "LazyCppRef";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::test::LazyCppRef>::fields_names = {{
   "field1",
   "field2",
@@ -188,6 +193,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::apache::thrift:
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::IndexedFoo>::name = "IndexedFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::test::IndexedFoo>::fields_names = {{
   "serialized_data_size",
   "field1",
@@ -229,6 +235,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::apache::thrift:
   5,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::OptionalIndexedFoo>::name = "OptionalIndexedFoo";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::apache::thrift::test::OptionalIndexedFoo>::fields_names = {{
   "serialized_data_size",
   "field1",
@@ -270,6 +277,7 @@ THRIFT_DATA_MEMBER const std::array<int, 6> TStructDataStorage<::apache::thrift:
   5,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::apache::thrift::test::Empty>::name = "Empty";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::test::Empty>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::test::Empty>::fields_ids = {{

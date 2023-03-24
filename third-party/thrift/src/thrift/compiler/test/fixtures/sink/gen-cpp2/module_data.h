@@ -14,6 +14,7 @@ namespace apache { namespace thrift {
 
 template <> struct TStructDataStorage<::cpp2::InitialResponse> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -29,6 +30,7 @@ template <> struct TStructDataStorage<::cpp2::InitialResponse> {
 
 template <> struct TStructDataStorage<::cpp2::FinalResponse> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -44,6 +46,7 @@ template <> struct TStructDataStorage<::cpp2::FinalResponse> {
 
 template <> struct TStructDataStorage<::cpp2::SinkPayload> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -59,6 +62,7 @@ template <> struct TStructDataStorage<::cpp2::SinkPayload> {
 
 template <> struct TStructDataStorage<::cpp2::CompatibleWithKeywordSink> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -74,6 +78,7 @@ template <> struct TStructDataStorage<::cpp2::CompatibleWithKeywordSink> {
 
 template <> struct TStructDataStorage<::cpp2::InitialException> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -89,6 +94,7 @@ template <> struct TStructDataStorage<::cpp2::InitialException> {
 
 template <> struct TStructDataStorage<::cpp2::SinkException1> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -104,6 +110,7 @@ template <> struct TStructDataStorage<::cpp2::SinkException1> {
 
 template <> struct TStructDataStorage<::cpp2::SinkException2> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

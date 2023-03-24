@@ -39,6 +39,9 @@ const folly::StringPiece Struct::__fbthrift_get_field_name(::apache::thrift::Fie
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Struct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Struct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Struct>::name;
+}
 
 Struct::Struct(const Struct&) = default;
 Struct& Struct::operator=(const Struct&) = default;
@@ -174,6 +177,9 @@ namespace module2 {
 const folly::StringPiece BigStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<BigStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece BigStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<BigStruct>::name;
 }
 
 BigStruct::BigStruct(const BigStruct&) = default;

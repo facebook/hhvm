@@ -39,6 +39,9 @@ const folly::StringPiece Default::__fbthrift_get_field_name(::apache::thrift::Fi
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Default>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Default::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Default>::name;
+}
 
 Default::Default(const Default&) = default;
 Default& Default::operator=(const Default&) = default;
@@ -173,6 +176,9 @@ namespace cpp2 {
 const folly::StringPiece NonAtomic::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<NonAtomic>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece NonAtomic::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<NonAtomic>::name;
 }
 
 NonAtomic::NonAtomic(const NonAtomic&) = default;
@@ -309,6 +315,9 @@ const folly::StringPiece Atomic::__fbthrift_get_field_name(::apache::thrift::Fie
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Atomic>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Atomic::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Atomic>::name;
+}
 
 Atomic::Atomic(const Atomic&) = default;
 Atomic& Atomic::operator=(const Atomic&) = default;
@@ -443,6 +452,9 @@ namespace cpp2 {
 const folly::StringPiece AtomicFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AtomicFoo>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece AtomicFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<AtomicFoo>::name;
 }
 
 AtomicFoo::AtomicFoo(const AtomicFoo&) = default;

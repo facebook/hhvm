@@ -40,6 +40,7 @@ template <> struct TEnumDataStorage<::test::fixtures::basic-structured-annotatio
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_inline> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -55,6 +56,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_with_default> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -70,6 +72,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -85,6 +88,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -100,6 +104,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -115,6 +120,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::MyStruct> {
   static constexpr const std::size_t fields_size = 4;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -130,6 +136,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::MyException> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -145,6 +152,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
 
 template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::MyUnion> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::SimpleException>::name = "SimpleException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = {{
   "err_code",
 }};
@@ -49,6 +50,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::Si
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::OptionalRefStruct>::name = "OptionalRefStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_names = {{
   "optional_blob",
 }};
@@ -65,6 +67,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::Op
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::SimpleStruct>::name = "SimpleStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_names = {{
   "is_on",
   "tiny_int",
@@ -116,6 +119,7 @@ THRIFT_DATA_MEMBER const std::array<int, 8> TStructDataStorage<::py3::simple::Si
   7,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::name = "HiddenTypeFieldsStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct>::fields_names = {{
   "field1",
   "field2",
@@ -142,6 +146,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::py3::simple::Hi
   2,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::GeneratedStruct>::name = "GeneratedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::GeneratedStruct>::fields_names = {{
   "the",
 }};
@@ -158,6 +163,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::Ge
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::detail::AdaptedUnion>::name = "AdaptedUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::detail::AdaptedUnion>::fields_names = {{
   "best",
 }};
@@ -174,6 +180,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::de
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::HiddenException>::name = "HiddenException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::HiddenException>::fields_names = {{
   "test",
 }};
@@ -190,6 +197,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::Hi
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::ComplexStruct>::name = "ComplexStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_names = {{
   "structOne",
   "structTwo",
@@ -246,6 +254,7 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::Co
   8,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::BinaryUnion>::name = "BinaryUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_names = {{
   "iobuf_val",
 }};
@@ -262,6 +271,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::Bi
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::py3::simple::BinaryUnionStruct>::name = "BinaryUnionStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_names = {{
   "u",
 }};

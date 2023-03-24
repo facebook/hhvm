@@ -39,6 +39,9 @@ const folly::StringPiece containerStruct2::__fbthrift_get_field_name(::apache::t
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<containerStruct2>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece containerStruct2::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<containerStruct2>::name;
+}
 
 containerStruct2::containerStruct2(const containerStruct2&) = default;
 containerStruct2& containerStruct2::operator=(const containerStruct2&) = default;

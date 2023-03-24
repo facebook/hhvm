@@ -39,6 +39,9 @@ const folly::StringPiece Foo::__fbthrift_get_field_name(::apache::thrift::FieldO
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Foo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Foo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Foo>::name;
+}
 
 Foo::Foo(const Foo&) = default;
 Foo& Foo::operator=(const Foo&) = default;
@@ -202,6 +205,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece LazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<LazyFoo>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece LazyFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<LazyFoo>::name;
 }
 
 LazyFoo::LazyFoo(const LazyFoo& srcObj) :
@@ -494,6 +500,9 @@ const folly::StringPiece OptionalFoo::__fbthrift_get_field_name(::apache::thrift
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<OptionalFoo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece OptionalFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<OptionalFoo>::name;
+}
 
 OptionalFoo::OptionalFoo(const OptionalFoo&) = default;
 OptionalFoo& OptionalFoo::operator=(const OptionalFoo&) = default;
@@ -660,6 +669,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece OptionalLazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<OptionalLazyFoo>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece OptionalLazyFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<OptionalLazyFoo>::name;
 }
 
 OptionalLazyFoo::OptionalLazyFoo(const OptionalLazyFoo& srcObj) :
@@ -952,6 +964,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece LazyCppRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<LazyCppRef>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece LazyCppRef::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<LazyCppRef>::name;
 }
 
 LazyCppRef::LazyCppRef(const LazyCppRef& srcObj) :
@@ -1333,6 +1348,9 @@ const folly::StringPiece IndexedFoo::__fbthrift_get_field_name(::apache::thrift:
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<IndexedFoo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece IndexedFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<IndexedFoo>::name;
+}
 
 IndexedFoo::IndexedFoo(const IndexedFoo&) = default;
 IndexedFoo& IndexedFoo::operator=(const IndexedFoo&) = default;
@@ -1536,6 +1554,9 @@ const folly::StringPiece OptionalIndexedFoo::__fbthrift_get_field_name(::apache:
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<OptionalIndexedFoo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece OptionalIndexedFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<OptionalIndexedFoo>::name;
+}
 
 OptionalIndexedFoo::OptionalIndexedFoo(const OptionalIndexedFoo&) = default;
 OptionalIndexedFoo& OptionalIndexedFoo::operator=(const OptionalIndexedFoo&) = default;
@@ -1738,6 +1759,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece Empty::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Empty>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Empty::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Empty>::name;
 }
 
 

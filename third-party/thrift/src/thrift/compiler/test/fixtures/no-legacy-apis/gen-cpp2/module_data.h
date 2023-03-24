@@ -40,6 +40,7 @@ template <> struct TEnumDataStorage<::test::fixtures::basic::MyUnion::Type> {
 
 template <> struct TStructDataStorage<::test::fixtures::basic::MyStruct> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -55,6 +56,7 @@ template <> struct TStructDataStorage<::test::fixtures::basic::MyStruct> {
 
 template <> struct TStructDataStorage<::test::fixtures::basic::MyUnion> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

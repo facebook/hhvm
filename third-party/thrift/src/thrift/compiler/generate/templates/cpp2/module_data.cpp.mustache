@@ -45,6 +45,7 @@ namespace apache {
 namespace thrift {
 <%#program:structs%>
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<<%struct:cpp_fullname%>>::name = "<%struct:name%>";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
   <%#struct:fields%>
   "<%field:name%>",

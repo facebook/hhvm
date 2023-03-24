@@ -74,6 +74,9 @@ const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStruct>::name;
+}
 
 MyStruct::MyStruct(const MyStruct&) = default;
 MyStruct& MyStruct::operator=(const MyStruct&) = default;
@@ -184,6 +187,9 @@ const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::Fi
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyUnion>::name;
+}
 
 void MyUnion::__fbthrift_clear() {
   // clear all fields
@@ -265,6 +271,9 @@ const char* MyException::__fbthrift_thrift_uri() {
 const folly::StringPiece MyException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyException>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyException>::name;
 }
 
 MyException::MyException(const MyException&) = default;

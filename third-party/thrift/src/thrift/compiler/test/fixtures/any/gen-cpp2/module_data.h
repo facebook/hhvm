@@ -25,6 +25,7 @@ template <> struct TEnumDataStorage<::cpp2::MyUnion::Type> {
 
 template <> struct TStructDataStorage<::cpp2::MyStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -40,6 +41,7 @@ template <> struct TStructDataStorage<::cpp2::MyStruct> {
 
 template <> struct TStructDataStorage<::cpp2::MyUnion> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -55,6 +57,7 @@ template <> struct TStructDataStorage<::cpp2::MyUnion> {
 
 template <> struct TStructDataStorage<::cpp2::MyException> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

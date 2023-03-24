@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::InterceptedFields>::name = "InterceptedFields";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 6> TStructDataStorage<::facebook::thrift::test::InterceptedFields>::fields_names = {{
   "access_field",
   "access_shared_field",

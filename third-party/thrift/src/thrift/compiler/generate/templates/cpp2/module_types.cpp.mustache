@@ -116,6 +116,9 @@ const folly::StringPiece <%struct:cpp_underlying_name%>::__fbthrift_get_field_na
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<<%struct:cpp_underlying_name%>>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece <%struct:cpp_underlying_name%>::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<<%struct:cpp_underlying_name%>>::name;
+}
 
 <%^struct:union?%>
 <%^struct:cpp_noncopyable%>

@@ -14,6 +14,7 @@ namespace apache { namespace thrift {
 
 template <> struct TStructDataStorage<::test::namespace_from_package_without_module_name::Foo> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

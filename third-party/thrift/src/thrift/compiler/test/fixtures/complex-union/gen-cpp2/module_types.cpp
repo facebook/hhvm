@@ -53,6 +53,9 @@ const folly::StringPiece ComplexUnion::__fbthrift_get_field_name(::apache::thrif
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ComplexUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ComplexUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ComplexUnion>::name;
+}
 
 void ComplexUnion::__fbthrift_clear() {
   // clear all fields
@@ -189,6 +192,9 @@ const folly::StringPiece ListUnion::__fbthrift_get_field_name(::apache::thrift::
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ListUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ListUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ListUnion>::name;
+}
 
 void ListUnion::__fbthrift_clear() {
   // clear all fields
@@ -297,6 +303,9 @@ const folly::StringPiece DataUnion::__fbthrift_get_field_name(::apache::thrift::
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DataUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece DataUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<DataUnion>::name;
+}
 
 void DataUnion::__fbthrift_clear() {
   // clear all fields
@@ -393,6 +402,9 @@ namespace cpp2 {
 const folly::StringPiece Val::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Val>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece Val::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Val>::name;
 }
 
 Val::Val(const Val&) = default;
@@ -536,6 +548,9 @@ const folly::StringPiece ValUnion::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ValUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ValUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ValUnion>::name;
+}
 
 void ValUnion::__fbthrift_clear() {
   // clear all fields
@@ -656,6 +671,9 @@ const folly::StringPiece VirtualComplexUnion::__fbthrift_get_field_name(::apache
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<VirtualComplexUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece VirtualComplexUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<VirtualComplexUnion>::name;
+}
 
 void VirtualComplexUnion::__fbthrift_clear() {
   // clear all fields
@@ -749,6 +767,9 @@ namespace cpp2 {
 const folly::StringPiece NonCopyableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<NonCopyableStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece NonCopyableStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<NonCopyableStruct>::name;
 }
 
 
@@ -846,6 +867,9 @@ namespace cpp2 {
 const folly::StringPiece NonCopyableUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<NonCopyableUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece NonCopyableUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<NonCopyableUnion>::name;
 }
 
 void NonCopyableUnion::__fbthrift_clear() {

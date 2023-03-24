@@ -114,6 +114,9 @@ const folly::StringPiece SimpleException::__fbthrift_get_field_name(::apache::th
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SimpleException>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece SimpleException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SimpleException>::name;
+}
 
 SimpleException::SimpleException(const SimpleException&) = default;
 SimpleException& SimpleException::operator=(const SimpleException&) = default;
@@ -216,6 +219,9 @@ namespace py3 { namespace simple {
 const folly::StringPiece OptionalRefStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<OptionalRefStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece OptionalRefStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<OptionalRefStruct>::name;
 }
 
 OptionalRefStruct::OptionalRefStruct(const OptionalRefStruct& srcObj) :
@@ -322,6 +328,9 @@ namespace py3 { namespace simple {
 const folly::StringPiece SimpleStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<SimpleStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece SimpleStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<SimpleStruct>::name;
 }
 
 SimpleStruct::SimpleStruct(const SimpleStruct&) = default;
@@ -503,6 +512,9 @@ const folly::StringPiece HiddenTypeFieldsStruct::__fbthrift_get_field_name(::apa
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<HiddenTypeFieldsStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece HiddenTypeFieldsStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<HiddenTypeFieldsStruct>::name;
+}
 
 HiddenTypeFieldsStruct::HiddenTypeFieldsStruct(const HiddenTypeFieldsStruct& srcObj) :
     __fbthrift_field_field1(srcObj.__fbthrift_field_field1),
@@ -645,6 +657,9 @@ const folly::StringPiece GeneratedStruct::__fbthrift_get_field_name(::apache::th
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<GeneratedStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece GeneratedStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<GeneratedStruct>::name;
+}
 
 
 GeneratedStruct::GeneratedStruct(apache::thrift::FragileConstructor, ::std::int16_t the__arg) :
@@ -743,6 +758,9 @@ const folly::StringPiece AdaptedUnion::__fbthrift_get_field_name(::apache::thrif
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece AdaptedUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<AdaptedUnion>::name;
+}
 
 void AdaptedUnion::__fbthrift_clear() {
   // clear all fields
@@ -830,6 +848,9 @@ namespace py3 { namespace simple {
 const folly::StringPiece HiddenException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<HiddenException>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece HiddenException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<HiddenException>::name;
 }
 
 HiddenException::HiddenException(const HiddenException&) = default;
@@ -933,6 +954,9 @@ namespace py3 { namespace simple {
 const folly::StringPiece ComplexStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ComplexStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece ComplexStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ComplexStruct>::name;
 }
 
 ComplexStruct::ComplexStruct(const ComplexStruct&) = default;
@@ -1176,6 +1200,9 @@ const folly::StringPiece BinaryUnion::__fbthrift_get_field_name(::apache::thrift
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<BinaryUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece BinaryUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<BinaryUnion>::name;
+}
 
 void BinaryUnion::__fbthrift_clear() {
   // clear all fields
@@ -1240,6 +1267,9 @@ namespace py3 { namespace simple {
 const folly::StringPiece BinaryUnionStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<BinaryUnionStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece BinaryUnionStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<BinaryUnionStruct>::name;
 }
 
 BinaryUnionStruct::BinaryUnionStruct(const BinaryUnionStruct&) = default;

@@ -87,6 +87,7 @@ template <> struct TEnumDataStorage<::py3::simple::BinaryUnion::Type> {
 
 template <> struct TStructDataStorage<::py3::simple::SimpleException> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -102,6 +103,7 @@ template <> struct TStructDataStorage<::py3::simple::SimpleException> {
 
 template <> struct TStructDataStorage<::py3::simple::OptionalRefStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -117,6 +119,7 @@ template <> struct TStructDataStorage<::py3::simple::OptionalRefStruct> {
 
 template <> struct TStructDataStorage<::py3::simple::SimpleStruct> {
   static constexpr const std::size_t fields_size = 8;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -132,6 +135,7 @@ template <> struct TStructDataStorage<::py3::simple::SimpleStruct> {
 
 template <> struct TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -147,6 +151,7 @@ template <> struct TStructDataStorage<::py3::simple::HiddenTypeFieldsStruct> {
 
 template <> struct TStructDataStorage<::py3::simple::GeneratedStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -162,6 +167,7 @@ template <> struct TStructDataStorage<::py3::simple::GeneratedStruct> {
 
 template <> struct TStructDataStorage<::py3::simple::detail::AdaptedUnion> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -177,6 +183,7 @@ template <> struct TStructDataStorage<::py3::simple::detail::AdaptedUnion> {
 
 template <> struct TStructDataStorage<::py3::simple::HiddenException> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -192,6 +199,7 @@ template <> struct TStructDataStorage<::py3::simple::HiddenException> {
 
 template <> struct TStructDataStorage<::py3::simple::ComplexStruct> {
   static constexpr const std::size_t fields_size = 9;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -207,6 +215,7 @@ template <> struct TStructDataStorage<::py3::simple::ComplexStruct> {
 
 template <> struct TStructDataStorage<::py3::simple::BinaryUnion> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -222,6 +231,7 @@ template <> struct TStructDataStorage<::py3::simple::BinaryUnion> {
 
 template <> struct TStructDataStorage<::py3::simple::BinaryUnionStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

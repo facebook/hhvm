@@ -25,6 +25,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
@@ -917,6 +918,19 @@ TEST(VariableAdapterTest, Integer) {
       "DefaultName 2");
   EXPECT_EQ(basic::adapter_constants::person_no_transitive().name, "");
   EXPECT_EQ(basic::adapter_constants::person_no_transitive().uri, "");
+}
+
+TEST_F(AdapterTest, GetClassName) {
+  EXPECT_EQ(op::get_class_name_v<basic::MyStruct>, "MyStruct");
+  EXPECT_EQ(
+      op::get_class_name_v<basic::detail::DirectlyAdaptedStruct>,
+      "DirectlyAdaptedStruct");
+  EXPECT_EQ(
+      op::get_class_name_v<basic::UnderlyingSameNamespaceStruct>,
+      "SameNamespaceStruct");
+  EXPECT_EQ(
+      op::get_class_name_v<basic::detail::UnderlyingRenamedStruct>,
+      "RenamedStruct");
 }
 
 } // namespace apache::thrift::test

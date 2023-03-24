@@ -103,6 +103,9 @@ const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::Fi
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyUnion>::name;
+}
 
 void MyUnion::__fbthrift_clear() {
   // clear all fields
@@ -196,6 +199,9 @@ namespace cpp2 {
 const folly::StringPiece MyField::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyField>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece MyField::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyField>::name;
 }
 
 MyField::MyField(const MyField& srcObj) :
@@ -413,6 +419,9 @@ const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStruct>::name;
+}
 
 MyStruct::MyStruct(const MyStruct& srcObj) :
     __fbthrift_field_opt_ref(::apache::thrift::detail::st::copy_field<
@@ -556,6 +565,9 @@ namespace cpp2 {
 const folly::StringPiece StructWithUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructWithUnion::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithUnion>::name;
 }
 
 StructWithUnion::StructWithUnion(const StructWithUnion& srcObj) :
@@ -708,6 +720,9 @@ const folly::StringPiece RecursiveStruct::__fbthrift_get_field_name(::apache::th
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<RecursiveStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece RecursiveStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<RecursiveStruct>::name;
+}
 
 RecursiveStruct::RecursiveStruct(const RecursiveStruct&) = default;
 RecursiveStruct& RecursiveStruct::operator=(const RecursiveStruct&) = default;
@@ -811,6 +826,9 @@ namespace cpp2 {
 const folly::StringPiece StructWithContainers::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithContainers>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructWithContainers::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithContainers>::name;
 }
 
 StructWithContainers::StructWithContainers(const StructWithContainers& srcObj) :
@@ -987,6 +1005,9 @@ const folly::StringPiece StructWithSharedConst::__fbthrift_get_field_name(::apac
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithSharedConst>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece StructWithSharedConst::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithSharedConst>::name;
+}
 
 StructWithSharedConst::StructWithSharedConst(const StructWithSharedConst&) = default;
 StructWithSharedConst& StructWithSharedConst::operator=(const StructWithSharedConst&) = default;
@@ -1118,6 +1139,9 @@ const folly::StringPiece Empty::__fbthrift_get_field_name(::apache::thrift::Fiel
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<Empty>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece Empty::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Empty>::name;
+}
 
 
 Empty::Empty(apache::thrift::FragileConstructor) {}
@@ -1187,6 +1211,9 @@ namespace cpp2 {
 const folly::StringPiece StructWithRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithRef>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructWithRef::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithRef>::name;
 }
 
 StructWithRef::StructWithRef(const StructWithRef& srcObj) :
@@ -1329,6 +1356,9 @@ const folly::StringPiece StructWithBox::__fbthrift_get_field_name(::apache::thri
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithBox>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece StructWithBox::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithBox>::name;
+}
 
 StructWithBox::StructWithBox(const StructWithBox&) = default;
 StructWithBox& StructWithBox::operator=(const StructWithBox&) = default;
@@ -1449,6 +1479,9 @@ namespace cpp2 {
 const folly::StringPiece StructWithInternBox::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithInternBox>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructWithInternBox::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithInternBox>::name;
 }
 
 StructWithInternBox::StructWithInternBox(const StructWithInternBox&) = default;
@@ -1602,6 +1635,9 @@ namespace cpp2 {
 const folly::StringPiece AdaptedStructWithInternBox::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<AdaptedStructWithInternBox>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece AdaptedStructWithInternBox::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<AdaptedStructWithInternBox>::name;
 }
 
 AdaptedStructWithInternBox::AdaptedStructWithInternBox(const AdaptedStructWithInternBox& srcObj) :
@@ -1780,6 +1816,9 @@ const folly::StringPiece StructWithRefTypeUnique::__fbthrift_get_field_name(::ap
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithRefTypeUnique>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece StructWithRefTypeUnique::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithRefTypeUnique>::name;
+}
 
 StructWithRefTypeUnique::StructWithRefTypeUnique(const StructWithRefTypeUnique& srcObj) :
     __fbthrift_field_def_field(::apache::thrift::detail::st::copy_field<
@@ -1921,6 +1960,9 @@ const folly::StringPiece StructWithRefTypeShared::__fbthrift_get_field_name(::ap
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithRefTypeShared>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece StructWithRefTypeShared::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithRefTypeShared>::name;
+}
 
 StructWithRefTypeShared::StructWithRefTypeShared(const StructWithRefTypeShared&) = default;
 StructWithRefTypeShared& StructWithRefTypeShared::operator=(const StructWithRefTypeShared&) = default;
@@ -2048,6 +2090,9 @@ namespace cpp2 {
 const folly::StringPiece StructWithRefTypeSharedConst::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithRefTypeSharedConst>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructWithRefTypeSharedConst::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithRefTypeSharedConst>::name;
 }
 
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(const StructWithRefTypeSharedConst&) = default;
@@ -2177,6 +2222,9 @@ const folly::StringPiece StructWithRefAndAnnotCppNoexceptMoveCtor::__fbthrift_ge
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithRefAndAnnotCppNoexceptMoveCtor>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece StructWithRefAndAnnotCppNoexceptMoveCtor::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithRefAndAnnotCppNoexceptMoveCtor>::name;
+}
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor(const StructWithRefAndAnnotCppNoexceptMoveCtor& srcObj) :
     __fbthrift_field_def_field(::apache::thrift::detail::st::copy_field<
@@ -2281,6 +2329,9 @@ namespace cpp2 {
 const folly::StringPiece StructWithString::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<StructWithString>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece StructWithString::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<StructWithString>::name;
 }
 
 StructWithString::StructWithString(const StructWithString& srcObj) :

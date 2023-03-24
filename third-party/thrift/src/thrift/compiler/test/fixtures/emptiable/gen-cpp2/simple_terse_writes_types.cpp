@@ -64,6 +64,9 @@ const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<MyStruct>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece MyStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<MyStruct>::name;
+}
 
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor) {}
@@ -133,6 +136,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece EmptiableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<EmptiableStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece EmptiableStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<EmptiableStruct>::name;
 }
 
 EmptiableStruct::EmptiableStruct(const EmptiableStruct&) = default;
@@ -449,6 +455,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece NotEmptiableStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<NotEmptiableStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece NotEmptiableStruct::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<NotEmptiableStruct>::name;
 }
 
 NotEmptiableStruct::NotEmptiableStruct(const NotEmptiableStruct&) = default;

@@ -29,6 +29,7 @@ template <> struct TEnumDataStorage<::cpp2::MyEnumA> {
 
 template <> struct TStructDataStorage<::cpp2::SmallStruct> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -44,6 +45,7 @@ template <> struct TStructDataStorage<::cpp2::SmallStruct> {
 
 template <> struct TStructDataStorage<::cpp2::containerStruct> {
   static constexpr const std::size_t fields_size = 22;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

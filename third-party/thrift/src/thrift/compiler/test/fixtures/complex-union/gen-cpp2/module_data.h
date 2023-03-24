@@ -98,6 +98,7 @@ template <> struct TEnumDataStorage<::cpp2::NonCopyableUnion::Type> {
 
 template <> struct TStructDataStorage<::cpp2::ComplexUnion> {
   static constexpr const std::size_t fields_size = 6;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -113,6 +114,7 @@ template <> struct TStructDataStorage<::cpp2::ComplexUnion> {
 
 template <> struct TStructDataStorage<::cpp2::ListUnion> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -128,6 +130,7 @@ template <> struct TStructDataStorage<::cpp2::ListUnion> {
 
 template <> struct TStructDataStorage<::cpp2::DataUnion> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -143,6 +146,7 @@ template <> struct TStructDataStorage<::cpp2::DataUnion> {
 
 template <> struct TStructDataStorage<::cpp2::Val> {
   static constexpr const std::size_t fields_size = 3;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -158,6 +162,7 @@ template <> struct TStructDataStorage<::cpp2::Val> {
 
 template <> struct TStructDataStorage<::cpp2::ValUnion> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -173,6 +178,7 @@ template <> struct TStructDataStorage<::cpp2::ValUnion> {
 
 template <> struct TStructDataStorage<::cpp2::VirtualComplexUnion> {
   static constexpr const std::size_t fields_size = 2;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -188,6 +194,7 @@ template <> struct TStructDataStorage<::cpp2::VirtualComplexUnion> {
 
 template <> struct TStructDataStorage<::cpp2::NonCopyableStruct> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -203,6 +210,7 @@ template <> struct TStructDataStorage<::cpp2::NonCopyableStruct> {
 
 template <> struct TStructDataStorage<::cpp2::NonCopyableUnion> {
   static constexpr const std::size_t fields_size = 1;
+  static const folly::StringPiece name;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

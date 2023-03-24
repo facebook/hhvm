@@ -64,6 +64,9 @@ const folly::StringPiece ModuleA::__fbthrift_get_field_name(::apache::thrift::Fi
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ModuleA>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ModuleA::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ModuleA>::name;
+}
 
 ModuleA::ModuleA(const ModuleA&) = default;
 ModuleA& ModuleA::operator=(const ModuleA&) = default;
@@ -271,6 +274,9 @@ const folly::StringPiece ModuleB::__fbthrift_get_field_name(::apache::thrift::Fi
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<ModuleB>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece ModuleB::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<ModuleB>::name;
+}
 
 
 ModuleB::ModuleB(apache::thrift::FragileConstructor, ::std::int32_t i32Field__arg, ::some::ns::EnumB inclEnumB__arg) :
@@ -364,6 +370,9 @@ namespace some { namespace ns {namespace detail {
 const folly::StringPiece DirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<DirectlyAdapted>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece DirectlyAdapted::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<DirectlyAdapted>::name;
 }
 
 

@@ -39,6 +39,9 @@ const folly::StringPiece TerseFoo::__fbthrift_get_field_name(::apache::thrift::F
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseFoo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece TerseFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TerseFoo>::name;
+}
 
 TerseFoo::TerseFoo(const TerseFoo&) = default;
 TerseFoo& TerseFoo::operator=(const TerseFoo&) = default;
@@ -205,6 +208,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece TerseLazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseLazyFoo>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece TerseLazyFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TerseLazyFoo>::name;
 }
 
 TerseLazyFoo::TerseLazyFoo(const TerseLazyFoo& srcObj) :
@@ -498,6 +504,9 @@ const folly::StringPiece TerseOptionalFoo::__fbthrift_get_field_name(::apache::t
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseOptionalFoo>::fields_names[folly::to_underlying(ord) - 1];
 }
+const folly::StringPiece TerseOptionalFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TerseOptionalFoo>::name;
+}
 
 TerseOptionalFoo::TerseOptionalFoo(const TerseOptionalFoo&) = default;
 TerseOptionalFoo& TerseOptionalFoo::operator=(const TerseOptionalFoo&) = default;
@@ -664,6 +673,9 @@ namespace apache { namespace thrift { namespace test {
 const folly::StringPiece TerseOptionalLazyFoo::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
   return apache::thrift::TStructDataStorage<TerseOptionalLazyFoo>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece TerseOptionalLazyFoo::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<TerseOptionalLazyFoo>::name;
 }
 
 TerseOptionalLazyFoo::TerseOptionalLazyFoo(const TerseOptionalLazyFoo& srcObj) :

@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::Empty>::name = "Empty";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::some::valid::ns::Empty>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::some::valid::ns::Empty>::fields_ids = {{
@@ -44,6 +45,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::some::valid::ns::Empty>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::ASimpleStruct>::name = "ASimpleStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::ASimpleStruct>::fields_names = {{
   "boolField",
 }};
@@ -60,6 +62,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::some::valid::ns
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::ASimpleStructNoexcept>::name = "ASimpleStructNoexcept";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::ASimpleStructNoexcept>::fields_names = {{
   "boolField",
 }};
@@ -76,6 +79,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::some::valid::ns
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 11> TStructDataStorage<::some::valid::ns::MyStruct>::fields_names = {{
   "MyBoolField",
   "MyIntField",
@@ -142,6 +146,7 @@ THRIFT_DATA_MEMBER const std::array<int, 11> TStructDataStorage<::some::valid::n
   9,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::SimpleUnion>::name = "SimpleUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::SimpleUnion>::fields_names = {{
   "intValue",
   "stringValue",
@@ -163,6 +168,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::valid::ns
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::ComplexUnion>::name = "ComplexUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::some::valid::ns::ComplexUnion>::fields_names = {{
   "intValue",
   "opt_intValue",
@@ -314,6 +320,7 @@ THRIFT_DATA_MEMBER const std::array<int, 28> TStructDataStorage<::some::valid::n
   25,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::AnException>::name = "AnException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 17> TStructDataStorage<::some::valid::ns::AnException>::fields_names = {{
   "code",
   "req_code",
@@ -410,6 +417,7 @@ THRIFT_DATA_MEMBER const std::array<int, 17> TStructDataStorage<::some::valid::n
   13,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::AnotherException>::name = "AnotherException";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 3> TStructDataStorage<::some::valid::ns::AnotherException>::fields_names = {{
   "code",
   "req_code",
@@ -436,6 +444,7 @@ THRIFT_DATA_MEMBER const std::array<int, 3> TStructDataStorage<::some::valid::ns
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::containerStruct>::name = "containerStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 46> TStructDataStorage<::some::valid::ns::containerStruct>::fields_names = {{
   "fieldA",
   "req_fieldA",
@@ -677,6 +686,7 @@ THRIFT_DATA_MEMBER const std::array<int, 46> TStructDataStorage<::some::valid::n
   38,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::MyIncludedStruct>::name = "MyIncludedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::some::valid::ns::MyIncludedStruct>::fields_names = {{
   "MyIncludedInt",
   "MyIncludedStruct",
@@ -708,6 +718,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::some::valid::ns
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::AnnotatedStruct>::name = "AnnotatedStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 40> TStructDataStorage<::some::valid::ns::AnnotatedStruct>::fields_names = {{
   "no_annotation",
   "cpp_unique_ref",
@@ -919,6 +930,7 @@ THRIFT_DATA_MEMBER const std::array<int, 40> TStructDataStorage<::some::valid::n
   21,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::name = "ComplexContainerStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::ComplexContainerStruct>::fields_names = {{
   "map_of_iobufs",
   "map_of_iobuf_ptrs",
@@ -940,6 +952,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::valid::ns
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::FloatStruct>::name = "FloatStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::FloatStruct>::fields_names = {{
   "floatField",
   "doubleField",
@@ -961,6 +974,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::valid::ns
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::FloatUnion>::name = "FloatUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 2> TStructDataStorage<::some::valid::ns::FloatUnion>::fields_names = {{
   "floatSide",
   "doubleSide",
@@ -982,6 +996,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::some::valid::ns
   1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::name = "AllRequiredNoExceptMoveCtrStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::some::valid::ns::AllRequiredNoExceptMoveCtrStruct>::fields_names = {{
   "intField",
 }};

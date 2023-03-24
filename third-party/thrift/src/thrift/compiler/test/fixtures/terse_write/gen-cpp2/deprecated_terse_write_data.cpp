@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::fields_ids = {{
@@ -44,6 +45,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::MyStruct>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::name = "StructLevelTerseStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 14> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::StructLevelTerseStruct>::fields_names = {{
   "bool_field",
   "byte_field",
@@ -125,6 +127,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thri
   -1,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::name = "FieldLevelTerseStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 28> TStructDataStorage<::facebook::thrift::test::terse_write::deprecated::FieldLevelTerseStruct>::fields_names = {{
   "terse_bool_field",
   "terse_byte_field",

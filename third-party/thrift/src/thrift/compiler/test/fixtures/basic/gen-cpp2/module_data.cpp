@@ -33,6 +33,7 @@ FOLLY_CLANG_DISABLE_WARNING("-Wunused-macros")
 namespace apache {
 namespace thrift {
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic::MyStruct>::name = "MyStruct";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -89,6 +90,7 @@ THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::test::fixtures:
   8,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic::MyDataItem>::name = "MyDataItem";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = {{
 }};
 THRIFT_DATA_MEMBER const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = {{
@@ -100,6 +102,7 @@ THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 0> TStructDataStorage<::
 THRIFT_DATA_MEMBER const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = {{
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic::MyUnion>::name = "MyUnion";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = {{
   "myEnum",
   "myStruct",
@@ -131,6 +134,7 @@ THRIFT_DATA_MEMBER const std::array<int, 4> TStructDataStorage<::test::fixtures:
   3,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::name = "ReservedKeyword";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = {{
   "reserved_field",
 }};
@@ -147,6 +151,7 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::test::fixtures:
   0,
 }};
 
+THRIFT_DATA_MEMBER const folly::StringPiece TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::name = "UnionToBeRenamed";
 THRIFT_DATA_MEMBER const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_names = {{
   "reserved_field",
 }};

@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <string>
 
@@ -46,7 +47,7 @@ class PthreadThread : public Thread {
   STATE state_;
   int policy_;
   int priority_;
-  int stackSize_;
+  std::optional<int> stackSize_;
   std::weak_ptr<PthreadThread> self_;
   bool detached_;
   std::mutex stateLock_;
@@ -59,7 +60,7 @@ class PthreadThread : public Thread {
   PthreadThread(
       int policy,
       int priority,
-      int stackSize,
+      std::optional<int> stackSize,
       bool detached,
       std::shared_ptr<Runnable> runnable);
   ~PthreadThread() override;
@@ -113,7 +114,6 @@ class PosixThreadFactory : public ThreadFactory {
 
   static const POLICY kDefaultPolicy = OTHER;
   static const THREAD_PRIORITY kDefaultPriority = NORMAL_PRI;
-  static const int kDefaultStackSizeMB = 1;
 
   /**
    * Posix thread (pthread) factory.  All threads created by a factory are
@@ -132,7 +132,7 @@ class PosixThreadFactory : public ThreadFactory {
   explicit PosixThreadFactory(
       POLICY policy = kDefaultPolicy,
       THREAD_PRIORITY priority = kDefaultPriority,
-      int stackSize = kDefaultStackSizeMB,
+      std::optional<int> stackSize = std::nullopt,
       bool detached = true);
 
   explicit PosixThreadFactory(DetachState detached);
@@ -146,13 +146,6 @@ class PosixThreadFactory : public ThreadFactory {
 
   // From ThreadFactory;
   Thread::id_t getCurrentThreadId() const override;
-
-  /**
-   * Gets stack size for created threads
-   *
-   * @return int size in megabytes
-   */
-  virtual int getStackSize() const;
 
   /**
    * Sets stack size for created threads
@@ -186,7 +179,7 @@ class PosixThreadFactory : public ThreadFactory {
    protected:
     POLICY policy_;
     THREAD_PRIORITY priority_;
-    int stackSize_;
+    std::optional<int> stackSize_;
     DetachState detached_;
 
     /**
@@ -209,7 +202,7 @@ class PosixThreadFactory : public ThreadFactory {
     Impl(
         POLICY policy,
         THREAD_PRIORITY priority,
-        int stackSize,
+        std::optional<int> stackSize,
         DetachState detached);
     virtual ~Impl() {}
 
@@ -222,7 +215,6 @@ class PosixThreadFactory : public ThreadFactory {
         const std::shared_ptr<Runnable>& runnable,
         DetachState detachState) const;
 
-    int getStackSize() const;
     void setStackSize(int value);
     THREAD_PRIORITY getPriority() const;
 

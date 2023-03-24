@@ -40,7 +40,6 @@ using std::weak_ptr;
 
 const PosixThreadFactory::POLICY PosixThreadFactory::kDefaultPolicy;
 const PosixThreadFactory::THREAD_PRIORITY PosixThreadFactory::kDefaultPriority;
-const int PosixThreadFactory::kDefaultStackSizeMB;
 
 // push our given name upstream into pthreads
 bool PthreadThread::updateName() {
@@ -53,7 +52,7 @@ bool PthreadThread::updateName() {
 PthreadThread::PthreadThread(
     int policy,
     int priority,
-    int stackSize,
+    std::optional<int> stackSize,
     bool detached,
     shared_ptr<Runnable> runnable)
     : pthread_(),
@@ -97,7 +96,8 @@ void PthreadThread::start() {
   }
 
   // Set thread stack size
-  if (pthread_attr_setstacksize(&thread_attr, MB * stackSize_) != 0) {
+  if (stackSize_ &&
+      pthread_attr_setstacksize(&thread_attr, MB * *stackSize_) != 0) {
     throw SystemResourceException("pthread_attr_setstacksize failed");
   }
 
@@ -273,7 +273,7 @@ int PosixThreadFactory::Impl::toPthreadPriority(
 PosixThreadFactory::Impl::Impl(
     POLICY policy,
     THREAD_PRIORITY priority,
-    int stackSize,
+    std::optional<int> stackSize,
     DetachState detached)
     : policy_(policy),
       priority_(priority),
@@ -293,10 +293,6 @@ shared_ptr<Thread> PosixThreadFactory::Impl::newThread(
   result->weakRef(result);
   runnable->thread(result);
   return result;
-}
-
-int PosixThreadFactory::Impl::getStackSize() const {
-  return stackSize_;
 }
 
 void PosixThreadFactory::Impl::setStackSize(int value) {
@@ -332,13 +328,16 @@ Thread::id_t PosixThreadFactory::Impl::getCurrentThreadId() const {
 }
 
 PosixThreadFactory::PosixThreadFactory(
-    POLICY policy, THREAD_PRIORITY priority, int stackSize, bool detached)
+    POLICY policy,
+    THREAD_PRIORITY priority,
+    std::optional<int> stackSize,
+    bool detached)
     : impl_(new PosixThreadFactory::Impl(
           policy, priority, stackSize, detached ? DETACHED : ATTACHED)) {}
 
 PosixThreadFactory::PosixThreadFactory(DetachState detached)
     : impl_(new PosixThreadFactory::Impl(
-          kDefaultPolicy, kDefaultPriority, kDefaultStackSizeMB, detached)) {}
+          kDefaultPolicy, kDefaultPriority, std::nullopt, detached)) {}
 
 shared_ptr<Thread> PosixThreadFactory::newThread(
     const shared_ptr<Runnable>& runnable) const {
@@ -348,10 +347,6 @@ shared_ptr<Thread> PosixThreadFactory::newThread(
 shared_ptr<Thread> PosixThreadFactory::newThread(
     const shared_ptr<Runnable>& runnable, DetachState detachState) const {
   return impl_->newThread(runnable, detachState);
-}
-
-int PosixThreadFactory::getStackSize() const {
-  return impl_->getStackSize();
 }
 
 void PosixThreadFactory::setStackSize(int value) {

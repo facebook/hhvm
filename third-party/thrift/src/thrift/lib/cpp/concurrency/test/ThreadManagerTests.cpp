@@ -612,7 +612,7 @@ class FailThread : public PthreadThread {
   FailThread(
       int policy,
       int priority,
-      int stackSize,
+      std::optional<int> stackSize,
       bool detached,
       std::shared_ptr<Runnable> runnable)
       : PthreadThread(policy, priority, stackSize, detached, runnable) {}
@@ -627,7 +627,7 @@ class FailThreadFactory : public PosixThreadFactory {
     FakeImpl(
         POLICY policy,
         PosixThreadFactory::THREAD_PRIORITY priority,
-        int stackSize,
+        std::optional<int> stackSize,
         DetachState detached)
         : Impl(policy, priority, stackSize, detached) {}
 
@@ -649,12 +649,12 @@ class FailThreadFactory : public PosixThreadFactory {
   explicit FailThreadFactory(
       POLICY /*policy*/ = kDefaultPolicy,
       THREAD_PRIORITY /*priority*/ = kDefaultPriority,
-      int /*stackSize*/ = kDefaultStackSizeMB,
+      std::optional<int> /*stackSize*/ = std::nullopt,
       bool detached = true) {
     impl_ = std::make_shared<FailThreadFactory::FakeImpl>(
         kDefaultPolicy,
         kDefaultPriority,
-        kDefaultStackSizeMB,
+        std::nullopt,
         detached ? DETACHED : ATTACHED);
   }
 };

@@ -30,6 +30,7 @@ type autocomplete_item = {
   res_insert_text: string;
   res_detail: string;
   res_filter_text: string option;
+  res_additional_edits: (string * Ide_api_types.range) list;
   res_fullname: string;
   res_kind: SearchUtils.si_kind;
   func_details: func_details_result option;

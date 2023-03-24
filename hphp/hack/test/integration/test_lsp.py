@@ -430,10 +430,16 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(int $x, int $y=_): void",
                             "sortText": "doStuff",
-                            # We don't want to require the user to provide optional arguments, so
-                            # only insert $x, not $y.
-                            "insertText": "doStuff(${1:\\$x})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                # We don't want to require the user to provide optional arguments, so
+                                # only insert $x, not $y.
+                                "newText": "doStuff(${1:\\$x})",
+                            },
                             "data": {
                                 "fullname": "doStuff",
                                 "filename": "${root_path}/optional_param_completion.php",
@@ -502,8 +508,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(int $x=_, int $y=_): void",
                             "sortText": "doStuff",
-                            "insertText": "doStuff()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 4, "character": 6},
+                                    "end": {"line": 4, "character": 10},
+                                },
+                                "newText": "doStuff()",
+                            },
                             "data": {
                                 "fullname": "doStuff",
                                 "filename": "${root_path}/all_optional_params_completion.php",
@@ -1654,8 +1666,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "isValid(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1669,8 +1687,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertText": "getValues()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getValues()",
+                            },
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1684,8 +1708,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertText": "getNames()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getNames()",
+                            },
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1699,8 +1729,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "coerce(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1714,8 +1750,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assertAll(${1:\\$values})",
+                            },
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1729,8 +1771,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assert(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -1894,8 +1942,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "interfaceDocBlockMethod",
-                            "insertText": "interfaceDocBlockMethod()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 34},
+                                    "end": {"line": 3, "character": 41},
+                                },
+                                "newText": "interfaceDocBlockMethod()",
+                            },
                             "data": {
                                 "fullname": "interfaceDocBlockMethod",
                                 "filename": "${root_path}/completion.php",
@@ -2003,8 +2057,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~test_do_not_use",
-                            "insertText": "test_do_not_use()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "test_do_not_use()",
+                            },
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2018,8 +2078,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "getName",
-                            "insertText": "getName()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getName()",
+                            },
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2033,8 +2099,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertText": "getAttributes_DO_NOT_USE()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getAttributes_DO_NOT_USE()",
+                            },
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -2048,8 +2120,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~__getLoader",
-                            "insertText": "__getLoader()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "__getLoader()",
+                            },
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3288,8 +3366,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(mixed $value): bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "isValid(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "isValid",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3303,8 +3387,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<string, Elsa>",
                             "sortText": "getValues",
-                            "insertText": "getValues()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getValues()",
+                            },
                             "data": {
                                 "fullname": "getValues",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3318,8 +3408,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): dict<Elsa, string>",
                             "sortText": "getNames",
-                            "insertText": "getNames()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "getNames()",
+                            },
                             "data": {
                                 "fullname": "getNames",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3333,8 +3429,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(mixed $value): ?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "coerce(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "coerce",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3348,8 +3450,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(Traversable<mixed> $values): Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assertAll(${1:\\$values})",
+                            },
                             "data": {
                                 "fullname": "assertAll",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3363,8 +3471,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(mixed $value): Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 35},
+                                    "end": {"line": 3, "character": 35},
+                                },
+                                "newText": "assert(${1:\\$value})",
+                            },
                             "data": {
                                 "fullname": "assert",
                                 "filename": "${hhi_path}/BuiltinEnum.hhi",
@@ -3457,8 +3571,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~test_do_not_use",
-                            "insertText": "test_do_not_use()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "test_do_not_use()",
+                            },
                             "data": {
                                 "fullname": "test_do_not_use",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3472,8 +3592,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "getName",
-                            "insertText": "getName()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getName()",
+                            },
                             "data": {
                                 "fullname": "getName",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3487,8 +3613,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~getAttributes_DO_NOT_USE",
-                            "insertText": "getAttributes_DO_NOT_USE()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "getAttributes_DO_NOT_USE()",
+                            },
                             "data": {
                                 "fullname": "getAttributes_DO_NOT_USE",
                                 "filename": "${root_path}/completion_extras.php",
@@ -3502,8 +3634,14 @@ class TestLsp(TestCase[LspTestDriver]):
                             "kind": 2,
                             "detail": "function(): void",
                             "sortText": "~__getLoader",
-                            "insertText": "__getLoader()",
                             "insertTextFormat": 2,
+                            "textEdit": {
+                                "range": {
+                                    "start": {"line": 3, "character": 17},
+                                    "end": {"line": 3, "character": 17},
+                                },
+                                "newText": "__getLoader()",
+                            },
                             "data": {
                                 "fullname": "__getLoader",
                                 "filename": "${root_path}/completion_extras.php",

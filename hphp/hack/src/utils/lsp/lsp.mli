@@ -651,7 +651,8 @@ module Completion : sig
     insertText: string option;
     (* used for inserting; if absent, uses label *)
     insertTextFormat: insertTextFormat option;
-    textEdits: TextEdit.t list;
+    textEdit: TextEdit.t option;
+    additionalTextEdits: TextEdit.t list;
     (* wire: split into hd and tl *)
     command: Command.t option;
     (* if present, is executed after completion *)

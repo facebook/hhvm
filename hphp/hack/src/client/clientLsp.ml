@@ -2585,8 +2585,11 @@ let make_ide_completion_response
   let p = initialize_params_exc () in
 
   let hack_to_insert (completion : autocomplete_item) :
-      [ `InsertText of string | `TextEdit of TextEdit.t list ]
-      * Completion.insertTextFormat =
+      TextEdit.t * Completion.insertTextFormat * TextEdit.t list =
+    let additional_edits =
+      List.map completion.res_additional_edits ~f:(fun (text, range) ->
+          TextEdit.{ range = ide_range_to_lsp range; newText = text })
+    in
     match completion.func_details with
     | Some details
       when Lsp_helpers.supports_snippets p
@@ -2601,25 +2604,26 @@ let make_ide_completion_response
         Printf.sprintf "${%i:%s}" (i + 1) name
       in
       let params = String.concat ~sep:", " (List.mapi details.params ~f) in
-      ( `InsertText (Printf.sprintf "%s(%s)" completion.res_insert_text params),
-        SnippetFormat )
+      ( TextEdit.
+          {
+            range = ide_range_to_lsp completion.res_replace_pos;
+            newText = Printf.sprintf "%s(%s)" completion.res_insert_text params;
+          },
+        SnippetFormat,
+        additional_edits )
     | _ ->
-      ( `TextEdit
-          [
-            TextEdit.
-              {
-                range = ide_range_to_lsp completion.res_replace_pos;
-                newText = completion.res_insert_text;
-              };
-          ],
-        PlainText )
+      ( TextEdit.
+          {
+            range = ide_range_to_lsp completion.res_replace_pos;
+            newText = completion.res_insert_text;
+          },
+        PlainText,
+        additional_edits )
   in
   let hack_completion_to_lsp (completion : autocomplete_item) :
       Completion.completionItem =
-    let (insertText, insertTextFormat, textEdits) =
-      match hack_to_insert completion with
-      | (`InsertText text, format) -> (Some text, format, [])
-      | (`TextEdit edits, format) -> (None, format, edits)
+    let (textEdit, insertTextFormat, additionalTextEdits) =
+      hack_to_insert completion
     in
     let pos =
       if String.equal (Pos.filename completion.res_decl_pos) "" then
@@ -2682,9 +2686,10 @@ let make_ide_completion_response
       (* This will be filled in by completionItem/resolve. *)
       sortText = hack_to_sort_text completion;
       filterText = completion.res_filter_text;
-      insertText;
+      insertText = None;
       insertTextFormat = Some insertTextFormat;
-      textEdits;
+      textEdit = Some textEdit;
+      additionalTextEdits;
       command = None;
       data;
     }

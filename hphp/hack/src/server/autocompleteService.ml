@@ -262,6 +262,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
             func_details = get_func_details_for env ty;
             res_documentation = None;
             res_filter_text = None;
+            res_additional_edits = [];
           }
         in
         add_res complete
@@ -302,6 +303,7 @@ let autocomplete_member ~is_static env class_ cid id =
           func_details = get_func_details_for env ty;
           res_documentation = None;
           res_filter_text = None;
+          res_additional_edits = [];
         }
       in
       add_res complete
@@ -413,6 +415,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               func_details = get_func_details_for env ty;
               res_documentation = None;
               res_filter_text = None;
+              res_additional_edits = [];
             }
           in
           add_res complete)
@@ -446,6 +449,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
           func_details = None;
           res_documentation = None;
           res_filter_text = None;
+          res_additional_edits = [];
         }
       in
 
@@ -502,6 +506,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           func_details = get_func_details_for env ty;
           res_documentation = None;
           res_filter_text = None;
+          res_additional_edits = [];
         }
       in
       add_res complete
@@ -579,6 +584,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       func_details = get_func_details_for env dty;
                       res_documentation = None;
                       res_filter_text = None;
+                      res_additional_edits = [];
                     }
                   in
                   add_res complete))
@@ -658,6 +664,7 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
             func_details = get_func_details_for env ty;
             res_documentation = None;
             res_filter_text = None;
+            res_additional_edits = [];
           }
         in
         add_res complete)
@@ -771,6 +778,7 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
                 func_details = None;
                 res_documentation = None;
                 res_filter_text = None;
+                res_additional_edits = [];
               }
             in
             add_res complete)
@@ -821,6 +829,7 @@ let autocomplete_shape_literal_in_call
         func_details = get_func_details_for env lty;
         res_documentation = None;
         res_filter_text = None;
+        res_additional_edits = [];
       }
     in
     add_res complete
@@ -876,6 +885,7 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       func_details = None;
       res_documentation = Some doc;
       res_filter_text = None;
+      res_additional_edits = [];
     }
   in
   add_res complete
@@ -933,6 +943,7 @@ let autocomplete_overriding_method env m : unit =
               func_details = None;
               res_documentation = None;
               res_filter_text = None;
+              res_additional_edits = [];
             }
           in
           add_res complete)
@@ -1004,6 +1015,7 @@ let add_enum_const_result env pos replace_pos prefix const_name =
       func_details = get_func_details_for env lty;
       res_documentation = None;
       res_filter_text = None;
+      res_additional_edits = [];
     }
   in
   add_res complete
@@ -1236,6 +1248,7 @@ let find_global_results
             func_details;
             res_documentation = None;
             res_filter_text = None;
+            res_additional_edits = [];
           }
         in
         add_res complete);
@@ -1264,6 +1277,7 @@ let find_global_results
                  func_details = None;
                  res_documentation = Some documentation;
                  res_filter_text = None;
+                 res_additional_edits = [];
                })
     | _ -> ()
 
@@ -1368,6 +1382,7 @@ let compute_complete_local ctx tast =
             func_details;
             res_documentation = None;
             res_filter_text = None;
+            res_additional_edits = [];
           }
         in
         add_res complete)
@@ -1652,6 +1667,7 @@ let complete_keywords_at possible_keywords text pos : unit =
                func_details = None;
                res_documentation = None;
                res_filter_text = None;
+               res_additional_edits = [];
              }
            in
            add_res complete)

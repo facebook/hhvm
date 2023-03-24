@@ -884,8 +884,8 @@ module Completion = struct
     insertText: string option;
     (* used for inserting; if absent, uses label *)
     insertTextFormat: insertTextFormat option;
-    textEdits: TextEdit.t list;
-    (* wire: split into hd and tl *)
+    textEdit: TextEdit.t option;
+    additionalTextEdits: TextEdit.t list;
     command: Command.t option;
     (* if present, is executed after completion *)
     data: Hh_json.json option;

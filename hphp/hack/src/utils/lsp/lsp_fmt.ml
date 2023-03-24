@@ -662,9 +662,9 @@ let print_hover (r : Hover.result) : json =
 
 let parse_completionItem (params : json option) : CompletionItemResolve.params =
   Completion.(
-    let textEdits =
-      Jget.obj_opt params "textEdit"
-      :: Jget.array_d params "additionalTextEdits" ~default:[]
+    let textEdit = Jget.obj_opt params "textEdit" |> parse_textEdit in
+    let additionalTextEdits =
+      Jget.array_d params "additionalTextEdits" ~default:[]
       |> List.filter_map ~f:parse_textEdit
     in
     let command =
@@ -690,7 +690,8 @@ let parse_completionItem (params : json option) : CompletionItemResolve.params =
         Option.bind
           (Jget.int_opt params "insertTextFormat")
           ~f:insertTextFormat_of_enum;
-      textEdits;
+      textEdit;
+      additionalTextEdits;
       command;
       data = Jget.obj_opt params "data";
     })
@@ -729,13 +730,11 @@ let print_completionItem (item : Completion.completionItem) : json =
         ( "insertTextFormat",
           Option.map item.insertTextFormat ~f:(fun x ->
               int_ @@ insertTextFormat_to_enum x) );
-        ("textEdit", Option.map (List.hd item.textEdits) ~f:print_textEdit);
+        ("textEdit", Option.map item.textEdit ~f:print_textEdit);
         ( "additionalTextEdits",
-          match List.tl item.textEdits with
-          | None
-          | Some [] ->
-            None
-          | Some l -> Some (print_textEdits l) );
+          match item.additionalTextEdits with
+          | [] -> None
+          | text_edits -> Some (print_textEdits text_edits) );
         ("command", Option.map item.command ~f:print_command);
         ("data", item.data);
       ])

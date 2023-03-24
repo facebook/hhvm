@@ -14,9 +14,9 @@ use nast::Visibility;
 use crate::prelude::*;
 
 #[derive(Copy, Clone, Default)]
-pub struct ValidaetUserAttributeDynamicallyCallable;
+pub struct ValidateUserAttributeDynamicallyCallable;
 
-impl Pass for ValidaetUserAttributeDynamicallyCallable {
+impl Pass for ValidateUserAttributeDynamicallyCallable {
     fn on_ty_fun_def_top_down(&mut self, env: &Env, elem: &mut FunDef) -> ControlFlow<()> {
         dynamically_callable_attr_pos(&elem.fun.user_attributes)
             .into_iter()

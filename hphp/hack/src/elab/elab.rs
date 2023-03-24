@@ -310,7 +310,7 @@ fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
 
         passes::validate_class_tparams::ValidateClassTparamsPass::default(),
 
-        passes::validate_user_attribute_dynamically_callable::ValidaetUserAttributeDynamicallyCallable::default(),
+        passes::validate_user_attribute_dynamically_callable::ValidateUserAttributeDynamicallyCallable::default(),
 
         passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
 

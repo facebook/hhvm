@@ -38,4 +38,3 @@ to `iname`.
 
 You can override the case sensitivity of all name matching operations used
 in the query by setting the `case_sensitive` field in your query.
-

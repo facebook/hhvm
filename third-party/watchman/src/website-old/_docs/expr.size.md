@@ -30,5 +30,3 @@ Operator | Meaning | Result
 `ge`     | Greater Than Or Equal | `true` if file exists and `size >= operand`
 `lt`     | Less Than             | `true` if file exists and `size < operand`
 `le`     | Less Than Or Equal    | `true` if file exists and `size <= operand`
-
-

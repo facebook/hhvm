@@ -18,4 +18,3 @@ Each array element after the term name is evaluated as an expression of its own:
     ["allof", expr1, expr2, ... exprN]
 
 Evaluation of the subexpressions stops at the first one that returns false.
-

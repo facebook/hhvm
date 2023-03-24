@@ -12,5 +12,3 @@ directory.
 
     "empty"
     ["empty"]
-
-

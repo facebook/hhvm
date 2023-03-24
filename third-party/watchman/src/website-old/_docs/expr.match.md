@@ -71,4 +71,3 @@ in the flags dictionary. (Note that `\\` is a literal `\` in JSON notation):
 ```
 
 matches `a\b.txt`.
-

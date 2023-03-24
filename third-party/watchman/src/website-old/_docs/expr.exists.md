@@ -11,5 +11,3 @@ Evaluates as true if the file exists
 
     "exists"
     ["exists"]
-
-

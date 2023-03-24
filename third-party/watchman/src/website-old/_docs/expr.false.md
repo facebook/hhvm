@@ -11,5 +11,3 @@ The `false` expression always evaluates as false.
 
     "false"
     ["false"]
-
-

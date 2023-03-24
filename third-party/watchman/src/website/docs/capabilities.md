@@ -1,10 +1,6 @@
 ---
-pageid: capabilities
 title: Capabilities
-layout: docs
 category: Compatibility
-permalink: docs/capabilities.html
-redirect_from: docs/capabilities/
 ---
 
 *Since 3.8*

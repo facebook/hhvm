@@ -1,10 +1,6 @@
 ---
-pageid: expr.match
 title: match & imatch
-layout: docs
 section: Expression Terms
-permalink: docs/expr/match.html
-redirect_from: docs/expr/match/
 ---
 
 The `match` expression performs a glob-style match against the basename of

@@ -1,10 +1,6 @@
 ---
-pageid: cmd.state-leave
 title: state-leave
-layout: docs
 section: Commands
-permalink: docs/cmd/state-leave.html
-redirect_from: docs/cmd/state-leave/
 ---
 
 *Since 4.4*

@@ -1,10 +1,6 @@
 ---
-pageid: cmd.get-config
 title: get-config
-layout: docs
 section: Commands
-permalink: docs/cmd/get-config.html
-redirect_from: docs/cmd/get-config/
 ---
 
 The `get-config` command returns the `.watchmanconfig` for the root.

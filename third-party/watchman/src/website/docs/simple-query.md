@@ -1,10 +1,6 @@
 ---
-pageid: simple-query
 title: Simple Pattern Syntax
-layout: docs
 section: Queries
-permalink: docs/simple-query.html
-redirect_from: docs/simple-query/
 ---
 
 Simple patterns follow a more traditional UNIX command line approach of

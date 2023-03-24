@@ -1,10 +1,6 @@
 ---
-pageid: install
 title: Installation
-layout: docs
 section: Installation
-permalink: docs/install.html
-redirect_from: docs/install/index.html
 ---
 
 ## System Requirements

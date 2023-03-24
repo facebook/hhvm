@@ -1,10 +1,6 @@
 ---
-pageid: socket-interface
 title: Socket Interface
-layout: docs
 section: Invocation
-permalink: docs/socket-interface.html
-redirect_from: docs/socket-interface/
 ---
 
 Most simple uses of Watchman will invoke the watchman binary and process its

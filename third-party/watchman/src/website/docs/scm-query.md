@@ -1,10 +1,6 @@
 ---
-pageid: scm-query
 title: Source Control Aware Queries
-layout: docs
 section: Queries
-permalink: docs/scm-query.html
-redirect_from: docs/scm-query/
 ---
 
 *Since 2021.08.30*

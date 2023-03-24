@@ -1,10 +1,6 @@
 ---
-pageid: cmd.state-enter
 title: state-enter
-layout: docs
 section: Commands
-permalink: docs/cmd/state-enter.html
-redirect_from: docs/cmd/state-enter/
 ---
 
 *Since 4.4*

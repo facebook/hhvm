@@ -1,10 +1,6 @@
 ---
-pageid: expr.since
 title: since
-layout: docs
 section: Expression Terms
-permalink: docs/expr/since.html
-redirect_from: docs/expr/since/
 ---
 
 Evaluates as true if the specified time property of the file is greater than

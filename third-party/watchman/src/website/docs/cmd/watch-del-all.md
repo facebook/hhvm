@@ -1,10 +1,6 @@
 ---
-pageid: cmd.watch-del-all
 title: watch-del-all
-layout: docs
 section: Commands
-permalink: docs/cmd/watch-del-all.html
-redirect_from: docs/cmd/watch-del-all/
 ---
 
 Available since version 3.1.1.

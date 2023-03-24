@@ -1,10 +1,6 @@
 ---
-pageid: troubleshooting
 title: Troubleshooting
-layout: docs
 section: Troubleshooting
-permalink: docs/troubleshooting.html
-redirect_from: docs/troubleshooting/
 ---
 
 We try to give directed advice in Watchman error diagnostics, which means that

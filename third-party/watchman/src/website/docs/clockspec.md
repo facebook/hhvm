@@ -1,10 +1,6 @@
 ---
-pageid: clockspec
 title: Clockspec
-layout: docs
 section: Queries
-permalink: docs/clockspec.html
-redirect_from: docs/clockspec/
 ---
 
 For commands that query based on time, watchman offers a couple of different

@@ -1,10 +1,6 @@
 ---
-pageid: file-query
 title: File Queries
-layout: docs
 section: Queries
-permalink: docs/file-query.html
-redirect_from: docs/file-query/
 ---
 
 Watchman file queries consist of 1 or more *generators* that feed files through

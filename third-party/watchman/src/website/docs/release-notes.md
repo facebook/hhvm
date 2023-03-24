@@ -1,10 +1,6 @@
 ---
-pageid: release-notes
 title: Release Notes
-layout: docs
 section: Installation
-permalink: docs/release-notes.html
-redirect_from: docs/release-notes/
 ---
 
 Watchman is continuously deployed inside Facebook, which means that we don't

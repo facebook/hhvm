@@ -1,10 +1,6 @@
 ---
-pageid: cmd.get-sockname
 title: get-sockname
-layout: docs
 section: Commands
-permalink: docs/cmd/get-sockname.html
-redirect_from: docs/cmd/get-sockname/
 ---
 
 If you're integrating against watchman using the unix socket and either the

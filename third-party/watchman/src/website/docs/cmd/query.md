@@ -1,10 +1,6 @@
 ---
-pageid: cmd.query
 title: query
-layout: docs
 section: Commands
-permalink: docs/cmd/query.html
-redirect_from: docs/cmd/query/
 ---
 
 *Since 1.6.*

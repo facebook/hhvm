@@ -1,9 +1,5 @@
 ---
-pageid: contributing
 title: Contributing
-layout: docs
-permalink: contributing.html
-redirect_from: contributing/
 section: Internals
 ---
 

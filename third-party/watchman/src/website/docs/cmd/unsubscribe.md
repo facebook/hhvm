@@ -1,10 +1,6 @@
 ---
-pageid: cmd.unsubscribe
 title: unsubscribe
-layout: docs
 section: Commands
-permalink: docs/cmd/unsubscribe.html
-redirect_from: docs/cmd/unsubscribe/
 ---
 
 Available starting in version 1.6

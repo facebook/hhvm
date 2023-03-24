@@ -1,10 +1,6 @@
 ---
-pageid: watchman-replicate-subscription
 title: watchman-replicate-subscription
-layout: docs
 category: Invocation
-permalink: docs/watchman-replicate-subscription.html
-redirect_from: docs/watchman-replicate-subscription/
 ---
 
 *Since 5.0*

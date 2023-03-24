@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
+use std::collections::BTreeMap;
 use std::num::NonZeroI64;
 
 use adapters::CustomString;
 use adapters::SortedVec;
 use fbthrift::simplejson_protocol;
+use thrift_test::consts;
+use thrift_test::types::Asset;
 use thrift_test::types::Bar;
 use thrift_test::types::Foo;
 use thrift_test::types::WrappedAdaptedBytes;
+use thrift_test::types::WrappedAdaptedString;
 use thrift_test::types::WrappedAdaptedWrappedAdaptedBytes;
+use thrift_test::AdaptedListNewType;
+use thrift_test::AssetType;
 
 #[test]
 fn test_foo_default() {
@@ -81,6 +87,52 @@ fn test_foo_default() {
             default_foo.field_adapted_adapted_string_list,
             vec![CustomString("zucc".to_string()),]
         );
+        assert_eq!(
+            default_foo.adapted_struct,
+            Asset {
+                type_: AssetType::Unknown,
+                id: 0
+            }
+        );
+        assert_eq!(
+            default_foo.double_adapted_struct,
+            Asset {
+                type_: AssetType::Unknown,
+                id: 0
+            }
+        );
+        assert_eq!(
+            default_foo.adapted_struct_list,
+            vec![Asset {
+                type_: AssetType::Laptop,
+                id: 10
+            }]
+        );
+        assert_eq!(
+            default_foo.adapted_list_new_type,
+            AdaptedListNewType(vec![
+                CustomString("hi".to_string()),
+                CustomString("there".to_string())
+            ])
+        );
+        assert_eq!(default_foo.map_with_adapted_key_val, {
+            let mut map = BTreeMap::new();
+            map.insert(
+                CustomString("what".to_string()),
+                WrappedAdaptedWrappedAdaptedBytes(WrappedAdaptedBytes("are those?".into())),
+            );
+
+            map
+        });
+        assert_eq!(default_foo.map_with_adapted_wrapped_key_val, {
+            let mut map = BTreeMap::new();
+            map.insert(
+                WrappedAdaptedString(CustomString("marco".to_string())),
+                WrappedAdaptedWrappedAdaptedBytes(WrappedAdaptedBytes("polo".into())),
+            );
+
+            map
+        });
 
         assert_eq!(
             r#"{
@@ -102,7 +154,13 @@ fn test_foo_default() {
             "hello": [[[1, 2, 3], [4, 5, 6]]],
             "world": [[[7, 8, 9]]]
           },
-          "field_adapted_adapted_string_list": ["zucc"]
+          "field_adapted_adapted_string_list": ["zucc"],
+          "adapted_struct": {"type_": 0, "id": 0, "id1": 1, "id2": 2, "id3": 3, "comment": ""},
+          "double_adapted_struct": {"type_": 0, "id": 0, "id1": 1, "id2": 2, "id3": 3, "comment": ""},
+          "adapted_struct_list": [{"type_": 1, "id": 10, "id1": 1, "id2": 2, "id3": 3, "comment": ""}],
+          "adapted_list_new_type": ["hi", "there"],
+          "map_with_adapted_key_val": {"what": "YXJlIHRob3NlPw"},
+          "map_with_adapted_wrapped_key_val": {"marco": "cG9sbw"}
         }"#
             .replace(['\n', ' '], ""),
             String::from_utf8(simplejson_protocol::serialize(default_foo).into()).unwrap()
@@ -215,7 +273,13 @@ fn test_foo_ser() {
             "hello": [[[1, 2, 3], [4, 5, 6]]],
             "world": [[[7, 8, 9]]]
           },
-          "field_adapted_adapted_string_list": ["zucc"]
+          "field_adapted_adapted_string_list": ["zucc"],
+          "adapted_struct": {"type_": 0, "id": 0, "id1": 1, "id2": 2, "id3": 3, "comment": ""},
+          "double_adapted_struct": {"type_": 0, "id": 0, "id1": 1, "id2": 2, "id3": 3, "comment": ""},
+          "adapted_struct_list": [{"type_": 1, "id": 10, "id1": 1, "id2": 2, "id3": 3, "comment": ""}],
+          "adapted_list_new_type": ["hi", "there"],
+          "map_with_adapted_key_val": {"what": "YXJlIHRob3NlPw"},
+          "map_with_adapted_wrapped_key_val": {"marco": "cG9sbw"}
         }"#
         .replace(['\n', ' '], ""),
         std::string::String::from_utf8(simplejson_protocol::serialize(foo).into()).unwrap()
@@ -340,4 +404,31 @@ fn test_newtype() {
         simplejson_protocol::deserialize(r#""aGVsbG8gd29ybGQ=""#).unwrap();
 
     assert_eq!(wrapped, deser);
+}
+
+#[test]
+fn test_consts() {
+    assert_eq!(*consts::adapted_int, NonZeroI64::new(5).unwrap());
+    assert_eq!(
+        *consts::pass_through_adapted_int,
+        NonZeroI64::new(6).unwrap()
+    );
+    assert_eq!(
+        *consts::adapted_bytes_const,
+        WrappedAdaptedWrappedAdaptedBytes(WrappedAdaptedBytes("some_bytes".into()))
+    );
+    assert_eq!(
+        *consts::adapted_list_const,
+        AdaptedListNewType(vec![
+            CustomString("hello".to_string()),
+            CustomString("world".to_string())
+        ])
+    );
+    assert_eq!(
+        *consts::adapted_struct_const,
+        Asset {
+            type_: AssetType::Server,
+            id: 42,
+        }
+    );
 }

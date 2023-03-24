@@ -173,7 +173,6 @@ where
     }
 }
 
-
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Color {
     fn default() -> Self {

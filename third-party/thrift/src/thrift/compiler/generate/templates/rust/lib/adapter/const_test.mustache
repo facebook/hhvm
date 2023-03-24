@@ -16,20 +16,15 @@
 
 }}
 
-/// These are here to ensure the `from_thrift_default` methods on adapters don't panic.
+/// These are here to ensure adapted consts do not panic with `from_thrift`.
 #[cfg(test)]
 mod tests {
-    {{#program:structs_for_default_test}}
+    {{#program:consts_for_test}}
     #[test]
-    fn test_struct_{{struct:rust_name}}_default_does_not_panic() {
-        {{#struct:has_adapter?}}
-        let _ = super::unadapted::{{struct:rust_name}}::default();
-        {{/struct:has_adapter?}}
-        {{^struct:has_adapter?}}
-        let _ = super::{{struct:rust_name}}::default();
-        {{/struct:has_adapter?}}
+    fn test_const_{{.}}_force_does_not_panic() {
+        let _ = ::once_cell::sync::Lazy::force(&super::{{.}});
     }
-    {{/program:structs_for_default_test}}
+    {{/program:consts_for_test}}
 }
 
 // This is here to ensure you enable unittests on your Thrift library.

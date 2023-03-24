@@ -41,7 +41,13 @@ impl ::std::default::Default for self::{{struct:rust_name}} {
             }},{{!
         }}{{/struct:fields}}{{!
         }}{{^struct:exhaustive?}}
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),{{!
+            _dot_dot_Default_default: {{!
+                }}{{#struct:has_adapter?}}{{!
+                }}super::dot_dot::OtherFields(()),{{!
+                }}{{/struct:has_adapter?}}{{!
+                }}{{^struct:has_adapter?}}{{!
+                }}self::dot_dot::OtherFields(()),{{!
+                }}{{/struct:has_adapter?}}{{!
         }}{{/struct:exhaustive?}}
         }
     }
@@ -178,7 +184,13 @@ where
             }},{{!
             }}{{/struct:fields}}{{!
             }}{{^struct:exhaustive?}}
-            _dot_dot_Default_default: self::dot_dot::OtherFields(()),{{!
+            _dot_dot_Default_default: {{!
+                }}{{#struct:has_adapter?}}{{!
+                }}super::dot_dot::OtherFields(()),{{!
+                }}{{/struct:has_adapter?}}{{!
+                }}{{^struct:has_adapter?}}{{!
+                }}self::dot_dot::OtherFields(()),{{!
+                }}{{/struct:has_adapter?}}{{!
             }}{{/struct:exhaustive?}}
         })
     }

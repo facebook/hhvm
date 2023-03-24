@@ -16,12 +16,12 @@ pub mod consts {
 
     pub static var3: ::once_cell::sync::Lazy<crate::types::MyStruct> = ::once_cell::sync::Lazy::new(|| crate::types::MyStruct {
             field: 30,
-            set_string: {
+            set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default({
                 let mut set = ::std::collections::BTreeSet::new();
                 set.insert("10".to_owned());
                 set.insert("20".to_owned());
                 set
-            },
+            }, 2, ::std::any::TypeId::of::<crate::types::MyStruct>()),
             ..::std::default::Default::default()
         });
 
@@ -31,12 +31,12 @@ pub mod consts {
 
     pub static var6: ::once_cell::sync::Lazy<crate::types::MyStruct> = ::once_cell::sync::Lazy::new(|| crate::types::MyStruct {
             field: 60,
-            set_string: {
+            set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default({
                 let mut set = ::std::collections::BTreeSet::new();
                 set.insert("30".to_owned());
                 set.insert("40".to_owned());
                 set
-            },
+            }, 2, ::std::any::TypeId::of::<crate::types::MyStruct>()),
             ..::std::default::Default::default()
         });
 
@@ -72,6 +72,7 @@ pub mod consts {
             2,
             3,
         ]);
+
 }
 
 pub mod types;
@@ -1274,7 +1275,7 @@ pub mod server {
     }
 
     struct Args_Service_func {
-        arg1: <crate::types::StringWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+        arg1: <crate::types::adapters::StringWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
         arg2: ::std::string::String,
         arg3: crate::types::Foo,
     }

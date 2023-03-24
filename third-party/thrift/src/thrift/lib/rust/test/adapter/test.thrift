@@ -19,6 +19,8 @@ include "thrift/annotation/rust.thrift"
 @rust.Adapter{name = "::adapters::StringAdapter"}
 typedef string AdaptedString
 
+typedef AdaptedString WrappedAdaptedString (rust.newtype, rust.ord)
+
 @rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
 typedef i64 AdaptedI64
 
@@ -43,6 +45,35 @@ typedef AdaptedWrappedAdaptedBytes PassThroughAdaptedWrappedAdaptedBytes
 typedef PassThroughAdaptedWrappedAdaptedBytes WrappedAdaptedWrappedAdaptedBytes (
   rust.newtype,
 )
+
+const AdaptedI64 adapted_int = 5;
+const PassThroughAdaptedI64 pass_through_adapted_int = 6;
+const WrappedAdaptedWrappedAdaptedBytes adapted_bytes_const = "some_bytes";
+const AdaptedListNewType adapted_list_const = ["hello", "world"];
+
+enum AssetType {
+  UNKNOWN = 0,
+  LAPTOP = 1,
+  SERVER = 2,
+} (rust.name = "ThriftAssetType")
+
+@rust.Adapter{name = "crate::AssetAdapter"}
+struct Asset {
+  1: AssetType type_;
+  2: i64 id;
+  @rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
+  3: i64 id1 = 1;
+  4: AdaptedI64 id2 = 2;
+  @rust.Adapter{name = "::adapters::IdentityAdapter<>"}
+  5: AdaptedI64 id3 = 3;
+  6: string comment;
+}
+
+const Asset adapted_struct_const = {
+  "type_": AssetType.SERVER,
+  "id": 42,
+  "comment": "foobar",
+};
 
 struct Foo {
   1: string str_val;
@@ -79,6 +110,19 @@ struct Foo {
   };
   @rust.Adapter{name = "crate::AdaptedStringListIdentityAdapter"}
   17: list<AdaptedString> field_adapted_adapted_string_list = ["zucc"];
+  18: Asset adapted_struct;
+  @rust.Adapter{name = "crate::AdaptedAssetIdentityAdapter"}
+  19: Asset double_adapted_struct;
+  20: list<Asset> adapted_struct_list = [{"type_": AssetType.LAPTOP, "id": 10}];
+  21: AdaptedListNewType adapted_list_new_type = ["hi", "there"];
+  22: map<
+    AdaptedString,
+    WrappedAdaptedWrappedAdaptedBytes
+  > map_with_adapted_key_val = {"what": "are those?"};
+  23: map<
+    WrappedAdaptedString,
+    WrappedAdaptedWrappedAdaptedBytes
+  > map_with_adapted_wrapped_key_val = {"marco": "polo"};
 }
 
 union Bar {

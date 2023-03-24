@@ -23,6 +23,7 @@ pub mod consts {
             my_id: ::std::default::Default::default(),
             ..::std::default::Default::default()
         });
+
 }
 
 pub mod types;

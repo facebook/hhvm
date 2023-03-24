@@ -53,7 +53,13 @@ pub struct {{struct:rust_name}} {{>lib/block}}{{!
     }}{{#struct:serde?}}
     #[serde(skip, default = "self::dot_dot::default_for_serde_deserialize")]{{!
     }}{{/struct:serde?}}
-    pub _dot_dot_Default_default: self::dot_dot::OtherFields,{{!
+    pub _dot_dot_Default_default: {{!
+      }}{{#struct:has_adapter?}}{{!
+      }}super::dot_dot::OtherFields,{{!
+      }}{{/struct:has_adapter?}}{{!
+      }}{{^struct:has_adapter?}}{{!
+      }}self::dot_dot::OtherFields,{{!
+      }}{{/struct:has_adapter?}}{{!
 }}{{/struct:exhaustive?}}
 }
 {{#struct:exception?}}

@@ -18,6 +18,7 @@ pub mod consts {
             map.insert(crate::types::MyEnum::TWO, "two".to_owned());
             map
         });
+
 }
 
 pub mod types;

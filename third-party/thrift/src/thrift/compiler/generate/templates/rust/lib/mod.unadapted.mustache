@@ -15,9 +15,13 @@
   limitations under the License.
 
 }}
-{{#program:constants}}{{>lib/const}}{{/program:constants}}
-{{#program:has_const_tests?}}
-    {{>lib/adapter/const_test}}
-{{/program:has_const_tests?}}
 
+/// Contains the unadapted version of any adapted Thrift structs.
+pub mod unadapted {
+  {{#program:adapted_structs}}
+  {{>lib/struct}}
+  {{>lib/structimpl}}
+  {{/program:adapted_structs}}
+
+}
 {{!newline}}

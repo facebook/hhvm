@@ -12,7 +12,7 @@ pub type StringWithAdapter = <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapt
 
 pub type ListWithElemAdapter = ::std::vec::Vec<crate::types::StringWithAdapter>;
 
-pub type ListWithElemAdapter_withAdapter = <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, ::fbthrift::adapter::ListMapAdapter<crate::types::StringWithAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType;
+pub type ListWithElemAdapter_withAdapter = <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, ::fbthrift::adapter::ListMapAdapter<crate::types::adapters::StringWithAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType;
 
 pub type MyI64 = <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType;
 
@@ -77,14 +77,14 @@ pub struct Foo {
     pub intField: <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
     pub optionalIntField: ::std::option::Option<<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
     pub intFieldWithDefault: <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub setField: <crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub optionalSetField: ::std::option::Option<<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
-    pub mapField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub optionalMapField: ::std::option::Option<<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
+    pub setField: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub optionalSetField: ::std::option::Option<<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
+    pub mapField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub optionalMapField: ::std::option::Option<<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
     pub binaryField: <::my::Adapter3 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub longField: <crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub adaptedLongField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::MyI64TypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub doubleAdaptedField: <crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub longField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub adaptedLongField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub doubleAdaptedField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -96,10 +96,10 @@ pub struct Foo {
 #[derive(Clone, PartialEq, Debug)]
 pub enum Baz {
     intField(<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
-    setField(<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
-    mapField(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
+    setField(<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
+    mapField(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
     binaryField(<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
-    longField(<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
+    longField(<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType),
     UnknownField(::std::primitive::i32),
 }
 
@@ -107,8 +107,8 @@ pub enum Baz {
 pub struct Bar {
     pub structField: crate::types::Foo,
     pub optionalStructField: ::std::option::Option<crate::types::Foo>,
-    pub structListField: <::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
-    pub optionalStructListField: ::std::option::Option<<::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
+    pub structListField: <::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub optionalStructListField: ::std::option::Option<<::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType>,
     pub unionField: crate::types::Baz,
     pub optionalUnionField: ::std::option::Option<crate::types::Baz>,
     pub adaptedStructField: crate::types::DirectlyAdapted,
@@ -204,7 +204,7 @@ pub struct Config {
 #[derive(Clone, PartialEq)]
 pub struct MyStruct {
     pub field: ::std::primitive::i32,
-    pub set_string: <crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -715,41 +715,6 @@ where
     }
 }
 
-pub type SetWithAdapterTypedefThriftAdapter = ::my::Adapter2;
-
-pub type StringWithAdapterTypedefThriftAdapter = ::my::Adapter1;
-
-pub type ListWithElemAdapterTypedefThriftAdapter = ::fbthrift::adapter::ListMapAdapter<crate::types::StringWithAdapterTypedefThriftAdapter>;
-
-pub type ListWithElemAdapter_withAdapterTypedefThriftAdapter = ::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, ::fbthrift::adapter::ListMapAdapter<crate::types::StringWithAdapterTypedefThriftAdapter>>;
-
-pub type MyI64TypedefThriftAdapter = ::my::Adapter1;
-
-pub type DoubleTypedefI64TypedefThriftAdapter = crate::types::MyI64TypedefThriftAdapter;
-
-pub type MyI32TypedefThriftAdapter = ::my::Adapter1;
-
-pub type FooWithAdapterTypedefThriftAdapter = ::my::Adapter1;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyAnnotation {
     fn default() -> Self {
@@ -841,14 +806,14 @@ impl ::std::default::Default for self::Foo {
             intField: <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::Foo>()),
             optionalIntField: ::std::option::Option::None,
             intFieldWithDefault: <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(13, 3, ::std::any::TypeId::of::<self::Foo>()),
-            setField: <crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 4, ::std::any::TypeId::of::<self::Foo>()),
+            setField: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 4, ::std::any::TypeId::of::<self::Foo>()),
             optionalSetField: ::std::option::Option::None,
-            mapField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 6, ::std::any::TypeId::of::<self::Foo>()),
+            mapField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 6, ::std::any::TypeId::of::<self::Foo>()),
             optionalMapField: ::std::option::Option::None,
             binaryField: <::my::Adapter3 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 8, ::std::any::TypeId::of::<self::Foo>()),
-            longField: <crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 9, ::std::any::TypeId::of::<self::Foo>()),
-            adaptedLongField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::MyI64TypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 10, ::std::any::TypeId::of::<self::Foo>()),
-            doubleAdaptedField: <crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 11, ::std::any::TypeId::of::<self::Foo>()),
+            longField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 9, ::std::any::TypeId::of::<self::Foo>()),
+            adaptedLongField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 10, ::std::any::TypeId::of::<self::Foo>()),
+            doubleAdaptedField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 11, ::std::any::TypeId::of::<self::Foo>()),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -905,32 +870,32 @@ where
         ::fbthrift::Serialize::write(&<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.intFieldWithDefault, 3, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         p.write_field_begin("setField", ::fbthrift::TType::Set, 4);
-        ::fbthrift::Serialize::write(&<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.setField, 4, ::std::any::TypeId::of::<self::Foo>()), p);
+        ::fbthrift::Serialize::write(&<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.setField, 4, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.optionalSetField {
             p.write_field_begin("optionalSetField", ::fbthrift::TType::Set, 5);
-            ::fbthrift::Serialize::write(&<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(some, 5, ::std::any::TypeId::of::<self::Foo>()), p);
+            ::fbthrift::Serialize::write(&<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(some, 5, ::std::any::TypeId::of::<self::Foo>()), p);
             p.write_field_end();
         }
         p.write_field_begin("mapField", ::fbthrift::TType::Map, 6);
-        ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.mapField, 6, ::std::any::TypeId::of::<self::Foo>()), p);
+        ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.mapField, 6, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.optionalMapField {
             p.write_field_begin("optionalMapField", ::fbthrift::TType::Map, 7);
-            ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(some, 7, ::std::any::TypeId::of::<self::Foo>()), p);
+            ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(some, 7, ::std::any::TypeId::of::<self::Foo>()), p);
             p.write_field_end();
         }
         p.write_field_begin("binaryField", ::fbthrift::TType::String, 8);
         ::fbthrift::Serialize::write(&<::my::Adapter3 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.binaryField, 8, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         p.write_field_begin("longField", ::fbthrift::TType::I64, 9);
-        ::fbthrift::Serialize::write(&<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.longField, 9, ::std::any::TypeId::of::<self::Foo>()), p);
+        ::fbthrift::Serialize::write(&<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.longField, 9, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         p.write_field_begin("adaptedLongField", ::fbthrift::TType::I64, 10);
-        ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::MyI64TypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.adaptedLongField, 10, ::std::any::TypeId::of::<self::Foo>()), p);
+        ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.adaptedLongField, 10, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         p.write_field_begin("doubleAdaptedField", ::fbthrift::TType::I64, 11);
-        ::fbthrift::Serialize::write(&<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.doubleAdaptedField, 11, ::std::any::TypeId::of::<self::Foo>()), p);
+        ::fbthrift::Serialize::write(&<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.doubleAdaptedField, 11, ::std::any::TypeId::of::<self::Foo>()), p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -974,14 +939,14 @@ where
                 (::fbthrift::TType::I32, 1) => field_intField = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 1, ::std::any::TypeId::of::<self::Foo>())?),
                 (::fbthrift::TType::I32, 2) => field_optionalIntField = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 2, ::std::any::TypeId::of::<self::Foo>())?),
                 (::fbthrift::TType::I32, 3) => field_intFieldWithDefault = ::std::option::Option::Some(<::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 3, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::Set, 4) => field_setField = ::std::option::Option::Some(<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 4, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::Set, 5) => field_optionalSetField = ::std::option::Option::Some(<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 5, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::Map, 6) => field_mapField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 6, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::Map, 7) => field_optionalMapField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 7, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::Set, 4) => field_setField = ::std::option::Option::Some(<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 4, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::Set, 5) => field_optionalSetField = ::std::option::Option::Some(<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 5, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::Map, 6) => field_mapField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 6, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::Map, 7) => field_optionalMapField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 7, ::std::any::TypeId::of::<self::Foo>())?),
                 (::fbthrift::TType::String, 8) => field_binaryField = ::std::option::Option::Some(<::my::Adapter3 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 8, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::I64, 9) => field_longField = ::std::option::Option::Some(<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 9, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::I64, 10) => field_adaptedLongField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::MyI64TypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 10, ::std::any::TypeId::of::<self::Foo>())?),
-                (::fbthrift::TType::I64, 11) => field_doubleAdaptedField = ::std::option::Option::Some(<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 11, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::I64, 9) => field_longField = ::std::option::Option::Some(<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 9, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::I64, 10) => field_adaptedLongField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 10, ::std::any::TypeId::of::<self::Foo>())?),
+                (::fbthrift::TType::I64, 11) => field_doubleAdaptedField = ::std::option::Option::Some(<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 11, ::std::any::TypeId::of::<self::Foo>())?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -991,14 +956,14 @@ where
             intField: field_intField.unwrap_or_else(|| <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 1, ::std::any::TypeId::of::<self::Foo>())),
             optionalIntField: field_optionalIntField,
             intFieldWithDefault: field_intFieldWithDefault.unwrap_or_else(|| <::my::Adapter1 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(13, 3, ::std::any::TypeId::of::<self::Foo>())),
-            setField: field_setField.unwrap_or_else(|| <crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 4, ::std::any::TypeId::of::<self::Foo>())),
+            setField: field_setField.unwrap_or_else(|| <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 4, ::std::any::TypeId::of::<self::Foo>())),
             optionalSetField: field_optionalSetField,
-            mapField: field_mapField.unwrap_or_else(|| <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 6, ::std::any::TypeId::of::<self::Foo>())),
+            mapField: field_mapField.unwrap_or_else(|| <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 6, ::std::any::TypeId::of::<self::Foo>())),
             optionalMapField: field_optionalMapField,
             binaryField: field_binaryField.unwrap_or_else(|| <::my::Adapter3 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 8, ::std::any::TypeId::of::<self::Foo>())),
-            longField: field_longField.unwrap_or_else(|| <crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 9, ::std::any::TypeId::of::<self::Foo>())),
-            adaptedLongField: field_adaptedLongField.unwrap_or_else(|| <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::MyI64TypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 10, ::std::any::TypeId::of::<self::Foo>())),
-            doubleAdaptedField: field_doubleAdaptedField.unwrap_or_else(|| <crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 11, ::std::any::TypeId::of::<self::Foo>())),
+            longField: field_longField.unwrap_or_else(|| <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 9, ::std::any::TypeId::of::<self::Foo>())),
+            adaptedLongField: field_adaptedLongField.unwrap_or_else(|| <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 10, ::std::any::TypeId::of::<self::Foo>())),
+            doubleAdaptedField: field_doubleAdaptedField.unwrap_or_else(|| <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 11, ::std::any::TypeId::of::<self::Foo>())),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -1036,12 +1001,12 @@ where
             }
             Self::setField(inner) => {
                 p.write_field_begin("setField", ::fbthrift::TType::Set, 4);
-                ::fbthrift::Serialize::write(&<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&inner, 4, ::std::any::TypeId::of::<self::Baz>()), p);
+                ::fbthrift::Serialize::write(&<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&inner, 4, ::std::any::TypeId::of::<self::Baz>()), p);
                 p.write_field_end();
             }
             Self::mapField(inner) => {
                 p.write_field_begin("mapField", ::fbthrift::TType::Map, 6);
-                ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&inner, 6, ::std::any::TypeId::of::<self::Baz>()), p);
+                ::fbthrift::Serialize::write(&<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&inner, 6, ::std::any::TypeId::of::<self::Baz>()), p);
                 p.write_field_end();
             }
             Self::binaryField(inner) => {
@@ -1051,7 +1016,7 @@ where
             }
             Self::longField(inner) => {
                 p.write_field_begin("longField", ::fbthrift::TType::I64, 9);
-                ::fbthrift::Serialize::write(&<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&inner, 9, ::std::any::TypeId::of::<self::Baz>()), p);
+                ::fbthrift::Serialize::write(&<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&inner, 9, ::std::any::TypeId::of::<self::Baz>()), p);
                 p.write_field_end();
             }
             Self::UnknownField(_) => {}
@@ -1086,11 +1051,11 @@ where
                 }
                 (::fbthrift::TType::Set, 4, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::setField(<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 4, ::std::any::TypeId::of::<self::Baz>())?));
+                    alt = ::std::option::Option::Some(Self::setField(<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 4, ::std::any::TypeId::of::<self::Baz>())?));
                 }
                 (::fbthrift::TType::Map, 6, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::mapField(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::ListWithElemAdapter_withAdapterTypedefThriftAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 6, ::std::any::TypeId::of::<self::Baz>())?));
+                    alt = ::std::option::Option::Some(Self::mapField(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter3, ::fbthrift::adapter::MapMapAdapter<::fbthrift::adapter::IdentityAdapter<::std::string::String>, crate::types::adapters::ListWithElemAdapter_withAdapter>> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 6, ::std::any::TypeId::of::<self::Baz>())?));
                 }
                 (::fbthrift::TType::String, 8, false) => {
                     once = true;
@@ -1098,7 +1063,7 @@ where
                 }
                 (::fbthrift::TType::I64, 9, false) => {
                     once = true;
-                    alt = ::std::option::Option::Some(Self::longField(<crate::types::MyI64TypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 9, ::std::any::TypeId::of::<self::Baz>())?));
+                    alt = ::std::option::Option::Some(Self::longField(<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 9, ::std::any::TypeId::of::<self::Baz>())?));
                 }
                 (fty, _, false) => p.skip(fty)?,
                 (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
@@ -1124,7 +1089,7 @@ impl ::std::default::Default for self::Bar {
         Self {
             structField: ::std::default::Default::default(),
             optionalStructField: ::std::option::Option::None,
-            structListField: <::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 3, ::std::any::TypeId::of::<self::Bar>()),
+            structListField: <::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 3, ::std::any::TypeId::of::<self::Bar>()),
             optionalStructListField: ::std::option::Option::None,
             unionField: ::std::default::Default::default(),
             optionalUnionField: ::std::option::Option::None,
@@ -1178,11 +1143,11 @@ where
             p.write_field_end();
         }
         p.write_field_begin("structListField", ::fbthrift::TType::List, 3);
-        ::fbthrift::Serialize::write(&<::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.structListField, 3, ::std::any::TypeId::of::<self::Bar>()), p);
+        ::fbthrift::Serialize::write(&<::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.structListField, 3, ::std::any::TypeId::of::<self::Bar>()), p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.optionalStructListField {
             p.write_field_begin("optionalStructListField", ::fbthrift::TType::List, 4);
-            ::fbthrift::Serialize::write(&<::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(some, 4, ::std::any::TypeId::of::<self::Bar>()), p);
+            ::fbthrift::Serialize::write(&<::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(some, 4, ::std::any::TypeId::of::<self::Bar>()), p);
             p.write_field_end();
         }
         p.write_field_begin("unionField", ::fbthrift::TType::Struct, 5);
@@ -1229,8 +1194,8 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::Struct, 1) => field_structField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 2) => field_optionalStructField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 3) => field_structListField = ::std::option::Option::Some(<::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 3, ::std::any::TypeId::of::<self::Bar>())?),
-                (::fbthrift::TType::List, 4) => field_optionalStructListField = ::std::option::Option::Some(<::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 4, ::std::any::TypeId::of::<self::Bar>())?),
+                (::fbthrift::TType::List, 3) => field_structListField = ::std::option::Option::Some(<::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 3, ::std::any::TypeId::of::<self::Bar>())?),
+                (::fbthrift::TType::List, 4) => field_optionalStructListField = ::std::option::Option::Some(<::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 4, ::std::any::TypeId::of::<self::Bar>())?),
                 (::fbthrift::TType::Struct, 5) => field_unionField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 6) => field_optionalUnionField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Struct, 7) => field_adaptedStructField = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -1242,7 +1207,7 @@ where
         ::std::result::Result::Ok(Self {
             structField: field_structField.unwrap_or_default(),
             optionalStructField: field_optionalStructField,
-            structListField: field_structListField.unwrap_or_else(|| <::fbthrift::adapter::ListMapAdapter<crate::types::FooWithAdapterTypedefThriftAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 3, ::std::any::TypeId::of::<self::Bar>())),
+            structListField: field_structListField.unwrap_or_else(|| <::fbthrift::adapter::ListMapAdapter<crate::types::adapters::FooWithAdapter> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 3, ::std::any::TypeId::of::<self::Bar>())),
             optionalStructListField: field_optionalStructListField,
             unionField: field_unionField.unwrap_or_default(),
             optionalUnionField: field_optionalUnionField,
@@ -1823,7 +1788,7 @@ impl ::std::default::Default for self::MyStruct {
     fn default() -> Self {
         Self {
             field: ::std::default::Default::default(),
-            set_string: <crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 2, ::std::any::TypeId::of::<self::MyStruct>()),
+            set_string: <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 2, ::std::any::TypeId::of::<self::MyStruct>()),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -1863,7 +1828,7 @@ where
         ::fbthrift::Serialize::write(&self.field, p);
         p.write_field_end();
         p.write_field_begin("set_string", ::fbthrift::TType::Set, 2);
-        ::fbthrift::Serialize::write(&<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.set_string, 2, ::std::any::TypeId::of::<self::MyStruct>()), p);
+        ::fbthrift::Serialize::write(&<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field(&self.set_string, 2, ::std::any::TypeId::of::<self::MyStruct>()), p);
         p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
@@ -1887,7 +1852,7 @@ where
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::I32, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 2) => field_set_string = ::std::option::Option::Some(<crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 2, ::std::any::TypeId::of::<self::MyStruct>())?),
+                (::fbthrift::TType::Set, 2) => field_set_string = ::std::option::Option::Some(<crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field(::fbthrift::Deserialize::read(p)?, 2, ::std::any::TypeId::of::<self::MyStruct>())?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1895,7 +1860,7 @@ where
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
             field: field_field.unwrap_or_default(),
-            set_string: field_set_string.unwrap_or_else(|| <crate::types::SetWithAdapterTypedefThriftAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 2, ::std::any::TypeId::of::<self::MyStruct>())),
+            set_string: field_set_string.unwrap_or_else(|| <crate::types::adapters::SetWithAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default(::std::default::Default::default(), 2, ::std::any::TypeId::of::<self::MyStruct>())),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -3789,6 +3754,17 @@ where
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
+}
+
+
+/// Type aliases for the adapter used on an adapted typedef or struct.
+pub mod adapters {
+  pub type SetWithAdapter = ::my::Adapter2;
+  pub type StringWithAdapter = ::my::Adapter1;
+  pub type ListWithElemAdapter_withAdapter = ::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, ::fbthrift::adapter::ListMapAdapter<crate::types::adapters::StringWithAdapter>>;
+  pub type MyI64 = ::my::Adapter1;
+  pub type MyI32 = ::my::Adapter1;
+  pub type FooWithAdapter = ::my::Adapter1;
 }
 
 /// These are here to ensure the `from_thrift_default` methods on adapters don't panic.

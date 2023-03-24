@@ -17,7 +17,13 @@
 }}{{#value:type}}{{!
 }}{{#value:newtype?}}{{!
     }}{{type:package}}::types::{{type:rust_name}}({{!
+        }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
+        }}{{>lib/adapter/qualified}}::from_thrift({{!
+        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
         }}{{#value:inner}}{{>lib/value}}{{/value:inner}}{{!
+        }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
+        }}).expect("constant Thrift value should adapt without error"){{!
+        }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
     }}){{!
 }}{{/value:newtype?}}{{!
 }}{{#value:bool?}}{{value:bool_value}}{{/value:bool?}}{{!
@@ -99,8 +105,19 @@
     }}{{>lib/type}} {{>lib/block}}{{!
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
+            }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default({{/field:has_adapter?}}{{!
             }}{{#field:value}}{{>lib/fieldvalue}}{{/field:value}}{{!
             }}{{^field:value}}::std::default::Default::default(){{/field:value}}{{!
+            }}{{#field:has_adapter?}}, {{field:key}}, ::std::any::TypeId::of::<{{!
+                }}{{#value:type}}{{#type:struct}}{{!
+                    }}{{#struct:has_adapter?}}{{!
+                        }}{{type:package}}::types::unadapted::{{struct:rust_name}}{{!
+                    }}{{/struct:has_adapter?}}{{!
+                    }}{{^struct:has_adapter?}}{{!
+                        }}{{type:package}}::types::{{struct:rust_name}}{{!
+                    }}{{/struct:has_adapter?}}{{!
+                }}{{/type:struct}}{{/value:type}}{{!
+            }}>()){{/field:has_adapter?}}{{!
             }},{{!
         }}{{/value:structFields}}{{!
         }}{{^value:exhaustive?}}
@@ -119,7 +136,10 @@
     }}{{/value:unionVariant}}{{!
 }}{{/value:union?}}{{!
 }}{{#value:enum?}}{{!
-    }}{{value:enumPackage}}::types::{{value:enumName}}{{!
+    }}{{value:enumPackage}}::types::{{!
+    }}{{#value:type}}{{#type:enum}}{{!
+    }}{{enum:rust_name}}{{!
+    }}{{/type:enum}}{{/value:type}}{{!
     }}{{#value:enumVariant}}::{{value:enumVariant}}{{/value:enumVariant}}{{!
     }}{{^value:enumVariant}}({{value:integer_value}}){{/value:enumVariant}}{{!
 }}{{/value:enum?}}{{!

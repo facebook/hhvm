@@ -15,9 +15,20 @@
   limitations under the License.
 
 }}
-{{#program:constants}}{{>lib/const}}{{/program:constants}}
-{{#program:has_const_tests?}}
-    {{>lib/adapter/const_test}}
-{{/program:has_const_tests?}}
 
+/// Type aliases for the adapter used on an adapted typedef or struct.
+pub mod adapters {
+  {{#program:adapters}}
+  pub type {{type:rust_name}} = {{!
+      }}{{#type:typedef}}{{!
+        }}{{#typedef:has_adapter?}}{{>lib/adapter/name}}{{/typedef:has_adapter?}}{{!
+      }}{{/type:typedef}}{{!
+      }}{{^type:typedef}}{{!
+          }}{{#type:struct}}{{!
+              }}{{#struct:has_adapter?}}{{>lib/adapter/name}}{{/struct:has_adapter?}}{{!
+          }}{{/type:struct}}{{!
+      }}{{/type:typedef}}{{!
+  }};
+  {{/program:adapters}}
+}
 {{!newline}}

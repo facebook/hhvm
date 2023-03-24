@@ -23,15 +23,26 @@
 
 {{#program:typedefs}}{{>lib/typedef}}{{/program:typedefs}}{{!
 
-}}{{#program:structs}}{{>lib/struct}}{{/program:structs}}{{!
+}}{{#program:structs}}{{!
+    }}{{#struct:has_adapter?}}{{!
+    }}{{>lib/adapter/struct}}{{!
+    }}{{/struct:has_adapter?}}{{!
+    }}{{^struct:has_adapter?}}{{!
+    }}{{>lib/struct}}{{!
+    }}{{/struct:has_adapter?}}{{!
+}}{{/program:structs}}{{!
 
 }}{{#program:enums}}{{>lib/enum}}{{/program:enums}}{{!
 
 }}{{#program:typedefs}}{{>lib/typedefimpl}}{{/program:typedefs}}{{!
 
-}}{{#program:structs}}{{>lib/structimpl}}{{>lib/unionimpl}}{{/program:structs}}{{!
+}}{{#program:structs}}{{^struct:has_adapter?}}{{>lib/structimpl}}{{>lib/unionimpl}}{{/struct:has_adapter?}}{{/program:structs}}{{!
 
-}}{{#program:has_structs_with_adapters?}}{{>lib/adapter/default_test}}{{/program:has_structs_with_adapters?}}{{!
+}}{{#program:has_adapted_structs?}}{{>lib/mod.unadapted}}{{/program:has_adapted_structs?}}{{!
+
+}}{{#program:has_adapters?}}{{>lib/mod.adapters}}{{/program:has_adapters?}}{{!
+
+}}{{#program:has_default_tests?}}{{>lib/adapter/default_test}}{{/program:has_default_tests?}}{{!
 
 }}{{#program:nonexhaustiveStructs?}}
 

@@ -16,8 +16,10 @@
 
 // If you want an adapter to refer to a Thrift struct defined in the Thrift file using the adapter,
 // you have to use `rust_include_srcs` to avoid the target circular dependency.
+use anyhow::Context;
 use fbthrift::adapter::ThriftAdapter;
 
+use crate::types as crate_types;
 use crate::types::AdaptedString;
 use crate::types::Foo;
 use crate::types::WrappedAdaptedBytes;
@@ -102,6 +104,71 @@ impl ThriftAdapter for AdaptedStringListIdentityAdapter {
     type Error = std::convert::Infallible;
 
     type AdaptedType = Vec<AdaptedString>;
+
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
+        Ok(value)
+    }
+
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        value.clone()
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq)]
+pub enum AssetType {
+    #[default]
+    Unknown,
+    Laptop,
+    Server,
+}
+
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct Asset {
+    pub type_: AssetType,
+    pub id: u32,
+}
+
+pub struct AssetAdapter {}
+
+impl ThriftAdapter for AssetAdapter {
+    type StandardType = crate_types::unadapted::Asset;
+    type Error = anyhow::Error;
+
+    type AdaptedType = Asset;
+
+    fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
+        Ok(Asset {
+            type_: match value.type_ {
+                crate_types::ThriftAssetType::LAPTOP => AssetType::Laptop,
+                crate_types::ThriftAssetType::SERVER => AssetType::Server,
+                // Rust Thrift will NOT use 0 as the default enum value by default, but instead
+                // will use i32::MIN.
+                _ => AssetType::Unknown,
+            },
+            id: value.id.try_into().context("invalid i64 for id")?,
+        })
+    }
+
+    fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType {
+        crate_types::unadapted::Asset {
+            type_: match value.type_ {
+                AssetType::Unknown => crate_types::ThriftAssetType::UNKNOWN,
+                AssetType::Laptop => crate_types::ThriftAssetType::LAPTOP,
+                AssetType::Server => crate_types::ThriftAssetType::SERVER,
+            },
+            id: value.id.into(),
+            ..Default::default()
+        }
+    }
+}
+
+pub struct AdaptedAssetIdentityAdapter;
+
+impl ThriftAdapter for AdaptedAssetIdentityAdapter {
+    type StandardType = Asset;
+    type Error = std::convert::Infallible;
+
+    type AdaptedType = Asset;
 
     fn from_thrift(value: Self::StandardType) -> Result<Self::AdaptedType, Self::Error> {
         Ok(value)

@@ -35,7 +35,9 @@ pub type {{typedef:rust_name}} = {{!
 {{/typedef:newtype?}}
 {{#typedef:newtype?}}
 #[derive({{!
+    }}{{^typedef:has_adapter?}}{{!
     }}Default, {{!
+    }}{{/typedef:has_adapter?}}{{!
     }}{{#typedef:copy?}}Copy, {{/typedef:copy?}}{{!
     }}Clone, Debug, PartialEq{{!
     }}{{#typedef:ord?}}, Eq, PartialOrd, Ord, Hash{{/typedef:ord?}}{{!

@@ -29,7 +29,6 @@ pub struct MyStruct {
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
-
 impl ::fbthrift::GetTType for MapType {
     const TTYPE: ::fbthrift::TType = <::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32> as ::fbthrift::GetTType>::TTYPE;
 }
@@ -51,7 +50,6 @@ where
     }
 }
 
-
 impl ::fbthrift::GetTType for BinType {
     const TTYPE: ::fbthrift::TType = <::std::vec::Vec<::std::primitive::u8> as ::fbthrift::GetTType>::TTYPE;
 }
@@ -72,7 +70,6 @@ where
         super::r#impl::read(p).map(BinType)
     }
 }
-
 
 impl ::fbthrift::GetTType for BytesType {
     const TTYPE: ::fbthrift::TType = <::std::vec::Vec<::std::primitive::u8> as ::fbthrift::GetTType>::TTYPE;

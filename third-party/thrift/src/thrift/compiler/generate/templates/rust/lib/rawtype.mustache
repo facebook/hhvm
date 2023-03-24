@@ -32,7 +32,12 @@
 }}{{#type:double?}}::std::primitive::f64{{/type:double?}}{{!
 }}{{#type:float?}}::std::primitive::f32{{/type:float?}}{{!
 }}{{#type:struct}}{{!
-    }}{{struct:package}}::types::{{struct:rust_name}}{{!
+    }}{{#struct:has_adapter?}}{{!
+        }}{{struct:package}}::types::unadapted::{{struct:rust_name}}{{!
+    }}{{/struct:has_adapter?}}{{!
+    }}{{^struct:has_adapter?}}{{!
+        }}{{struct:package}}::types::{{struct:rust_name}}{{!
+    }}{{/struct:has_adapter?}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:enum}}{{!
     }}{{enum:package}}::types::{{enum:rust_name}}{{!

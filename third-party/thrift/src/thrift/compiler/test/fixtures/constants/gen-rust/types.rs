@@ -451,10 +451,6 @@ where
     }
 }
 
-
-
-
-
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Internship {
     fn default() -> Self {

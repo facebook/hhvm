@@ -358,6 +358,7 @@ pub mod consts {
     pub const minNDub: ::std::primitive::f64 = -2.2250738585072014e-308;
 
     pub const minNSDub: ::std::primitive::f64 = -5e-324;
+
 }
 
 pub mod types;

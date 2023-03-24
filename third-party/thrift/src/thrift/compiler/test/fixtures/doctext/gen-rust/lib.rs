@@ -20,6 +20,7 @@ pub mod consts {
     pub const BIFF: ::std::primitive::i32 = 0;
 
     pub const SHOUTY: ::std::primitive::i32 = 11;
+
 }
 
 pub mod types;

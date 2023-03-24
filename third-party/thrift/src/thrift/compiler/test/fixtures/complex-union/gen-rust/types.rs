@@ -78,7 +78,6 @@ pub enum NonCopyableUnion {
 }
 
 
-
 impl ::std::default::Default for ComplexUnion {
     fn default() -> Self {
         Self::UnknownField(-1)

@@ -20,7 +20,7 @@ use std::num::NonZeroI64;
 
 use fbthrift::adapter::ThriftAdapter;
 
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct CustomString(pub String);
 
 pub struct StringAdapter {}

@@ -15,9 +15,6 @@
   limitations under the License.
 
 }}
-{{#program:constants}}{{>lib/const}}{{/program:constants}}
-{{#program:has_const_tests?}}
-    {{>lib/adapter/const_test}}
-{{/program:has_const_tests?}}
 
+pub type {{struct:rust_name}} = {{>lib/adapter/qualified}}::AdaptedType;
 {{!newline}}

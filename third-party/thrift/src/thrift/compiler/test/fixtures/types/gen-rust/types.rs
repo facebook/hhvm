@@ -791,9 +791,6 @@ where
     }
 }
 
-
-
-
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::empty_struct {
     fn default() -> Self {

@@ -171,8 +171,6 @@ where
         ::std::result::Result::Ok(Self::from(p.read_i32()?))
     }
 }
-
-
 impl ::fbthrift::GetTType for number {
     const TTYPE: ::fbthrift::TType = <::std::primitive::i32 as ::fbthrift::GetTType>::TTYPE;
 }

@@ -38,6 +38,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 
+#include <fcntl.h>
 #include <signal.h>
 #ifdef __x86_64__
 #include <ucontext.h>
@@ -129,6 +130,9 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
   static int sig = sigin;
   static Optional<StackTraceNoHeap> st;
   static void* sig_addr = info ? info->si_addr : nullptr;
+
+  static FILE* stacktraceFile = nullptr;
+
 #ifdef __x86_64__
   static uintptr_t sig_rip = ((ucontext_t*) args)->uc_mcontext.gregs[REG_RIP];
 #endif
@@ -339,6 +343,19 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       Logger::FError("Core dumped: {}", strsignal(sig));
       Logger::FError("Stack trace in {}", RuntimeOption::StackTraceFilename);
+
+      if (RO::EvalDumpStacktraceToErrorLogOnCrash) {
+        stacktraceFile = fopen(RuntimeOption::StackTraceFilename.c_str(), "r");
+        if (stacktraceFile) {
+          char line[256];
+          while (fgets(line, sizeof(line), stacktraceFile)) {
+            // Strip the newline, or just truncate the line if it's larger than
+            // 256 characters.
+            line[MIN(strcspn(line, "\n"), 255)] = 0;
+            Logger::FError("{}", line);
+          }
+        }
+      }
 
       // Flush whatever access logs are still pending
       Logger::FlushAll();

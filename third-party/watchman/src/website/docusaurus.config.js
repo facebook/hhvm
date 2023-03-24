@@ -18,7 +18,7 @@ module.exports = {
   baseUrl: '/watchman/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
-  trailingSlash: true,
+  trailingSlash: false,
   favicon: 'img/favicon.png',
   organizationName: 'facebook',
   projectName: 'watchman',
@@ -57,13 +57,13 @@ module.exports = {
         items: [
           {
             type: 'doc',
-            docId: 'intro',
+            docId: 'install',
             position: 'left',
             label: 'Documentation',
           },
           {
             type: 'doc',
-            docId: 'intro',
+            docId: 'troubleshooting',
             position: 'left',
             label: 'Support',
           },

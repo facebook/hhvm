@@ -1591,17 +1591,17 @@ TEST_F(PatchTest, PrettyPrintPatch) {
   test::patch::MyStructPatch patch;
   patch.patchIfSet<ident::stringVal>().append("|");
   patch.patch<ident::stringVal>().append("ITEM");
-  EXPECT_EQ(op::pretty_print_patch(patch), R"( {
-  patchPrior =  {
-    stringVal =  {
+  EXPECT_EQ(op::pretty_print_patch(patch), R"(MyStructPatch {
+  patchPrior = MyStructFieldPatch {
+    stringVal = StringPatch {
       append = "|",
     },
   },
-  ensure =  {
+  ensure = MyStructEnsureStruct {
     stringVal = "",
   },
-  patch =  {
-    stringVal =  {
+  patch = MyStructFieldPatch {
+    stringVal = StringPatch {
       append = "ITEM",
     },
   },

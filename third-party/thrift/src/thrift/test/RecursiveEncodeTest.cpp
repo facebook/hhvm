@@ -81,15 +81,15 @@ TEST(RecursiveEncode, TestCustomType) {
   roundTripTest<BinarySerializer>(baz);
   roundTripTest<SimpleJSONSerializer>(baz);
 
-  EXPECT_EQ(debugStringViaRecursiveEncode(baz), R"( {
+  EXPECT_EQ(debugStringViaRecursiveEncode(baz), R"(Baz {
   1: field (i32) = 10,
-  2: bar (struct) =  {
+  2: bar (struct) = Bar {
     1: field (i32) = 20,
     2: foos (list) = list<struct>[2] {
-      [0] =  {
+      [0] = Foo {
         1: field (i32) = 30,
       },
-      [1] =  {
+      [1] = Foo {
         1: field (i32) = 40,
       },
     },
@@ -98,15 +98,15 @@ TEST(RecursiveEncode, TestCustomType) {
   EXPECT_EQ(
       debugStringViaRecursiveEncode(
           baz, apache::thrift::DebugProtocolWriter::Options::simple()),
-      R"( {
+      R"(Baz {
   field = 10,
-  bar =  {
+  bar = Bar {
     field = 20,
     foos = list<struct>[2] {
-       {
+      Foo {
         field = 30,
       },
-       {
+      Foo {
         field = 40,
       },
     },

@@ -913,7 +913,7 @@ struct RecursiveEncode<type::struct_t<T>> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const T& t) const {
     uint32_t s = 0;
-    s += prot.writeStructBegin("");
+    s += prot.writeStructBegin(op::get_class_name_v<T>.data());
     op::for_each_ordinal<T>([&](auto id) {
       using Id = decltype(id);
       using Tag = op::get_type_tag<T, Id>;

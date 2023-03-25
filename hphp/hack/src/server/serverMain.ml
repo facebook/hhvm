@@ -332,9 +332,14 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     Float.(start_time - env.last_command_time > 0.3)
   in
   (* saving any file is our trigger to start full recheck *)
-  if not (Option.equal String.equal clock env.clock) then
-    Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
-  let env = { env with clock } in
+  let env =
+    match query_kind with
+    | `Skip -> env
+    | _ ->
+      if not (Option.equal String.equal clock env.clock) then
+        Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
+      { env with clock }
+  in
   let env =
     if Relative_path.Set.is_empty updates then
       env

@@ -1582,5 +1582,31 @@ TEST(Patch, ManuallyConstruct) {
   EXPECT_EQ(s[FieldId{1}].as_string(), "(hi)");
 }
 
+TEST_F(PatchTest, PrettyPrintPatch) {
+  test::patch::MyStruct original;
+  original.boolVal() = true;
+  original.byteVal() = 42;
+  original.stringVal() = "test";
+
+  test::patch::MyStructPatch patch;
+  patch.patchIfSet<ident::stringVal>().append("|");
+  patch.patch<ident::stringVal>().append("ITEM");
+  EXPECT_EQ(op::pretty_print_patch(patch), R"( {
+  patchPrior =  {
+    stringVal =  {
+      append = "|",
+    },
+  },
+  ensure =  {
+    stringVal = "",
+  },
+  patch =  {
+    stringVal =  {
+      append = "ITEM",
+    },
+  },
+})");
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

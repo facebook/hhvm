@@ -199,7 +199,8 @@ impl Pass for ElabConstExprPass {
                 | Expr_::ReadonlyExpr(..)
                 | Expr_::String2(..)
                 | Expr_::Yield(..)
-                | Expr_::Xml(..) => {
+                | Expr_::Xml(..)
+                | Expr_::Package(..) => {
                     env.emit_error(NamingError::IllegalConstant(pos.clone()));
                     invalid(expr_)
                 }

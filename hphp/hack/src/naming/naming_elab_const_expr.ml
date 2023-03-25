@@ -64,7 +64,7 @@ let on_expr_top_down
     | Aast.(
         ( Id _ | Null | True | False | Int _ | Float _ | String _
         | FunctionPointer _ | Eif _ | Darray _ | Varray _ | Tuple _ | Shape _
-        | Upcast _ )) ->
+        | Upcast _ | Package _ )) ->
       (ctx, Ok expr)
     (* -- Markers ----------------------------------------------------------- *)
     | Aast.(Invalid _ | Hole _) -> (ctx, Ok expr)

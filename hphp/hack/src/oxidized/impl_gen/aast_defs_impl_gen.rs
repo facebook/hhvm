@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<703658411f762ce0db0e9ea94c5c4cec>>
+// @generated SignedSource<<582c90d76bcc37c47386422ba0a023c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1034,6 +1034,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_hole(p0: Expr<Ex, En>, p1: Ex, p2: Ex, p3: HoleSource) -> Self {
         Expr_::Hole(Box::new((p0, p1, p2, p3)))
     }
+    pub fn mk_package(p0: Sid) -> Self {
+        Expr_::Package(Box::new(p0))
+    }
     pub fn is_darray(&self) -> bool {
         match self {
             Expr_::Darray(..) => true,
@@ -1343,6 +1346,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_hole(&self) -> bool {
         match self {
             Expr_::Hole(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_package(&self) -> bool {
+        match self {
+            Expr_::Package(..) => true,
             _ => false,
         }
     }
@@ -1661,6 +1670,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_hole(&self) -> Option<(&Expr<Ex, En>, &Ex, &Ex, &HoleSource)> {
         match self {
             Expr_::Hole(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
+            _ => None,
+        }
+    }
+    pub fn as_package(&self) -> Option<&Sid> {
+        match self {
+            Expr_::Package(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -2019,6 +2034,12 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_package_mut(&mut self) -> Option<&mut Sid> {
+        match self {
+            Expr_::Package(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_darray_into(
         self,
     ) -> Option<(
@@ -2334,6 +2355,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_hole_into(self) -> Option<(Expr<Ex, En>, Ex, Ex, HoleSource)> {
         match self {
             Expr_::Hole(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
+            _ => None,
+        }
+    }
+    pub fn as_package_into(self) -> Option<Sid> {
+        match self {
+            Expr_::Package(p0) => Some(*p0),
             _ => None,
         }
     }

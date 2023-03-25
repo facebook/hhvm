@@ -620,7 +620,8 @@ let expr tenv ((), _p, e) =
   | Pair _
   | EnumClassLabel _
   | ET_Splice _
-  | Hole _ ->
+  | Hole _
+  | Package _ ->
     []
 
 (** Check well-formedness of type hints. See .mli file for more. *)

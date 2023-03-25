@@ -83,3 +83,4 @@ let expr_name = function
   | A.ReadonlyExpr _ -> "Readonly"
   | A.Hole _ -> "Hole"
   | A.Invalid _ -> "Invalid"
+  | A.Package _ -> "Package"

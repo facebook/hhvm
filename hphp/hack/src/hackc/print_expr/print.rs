@@ -692,6 +692,7 @@ fn print_expr(
             Some(expr) => print_expr(ctx, w, env, expr),
             _ => Ok(()),
         },
+        Expr_::Package(_) => todo!(),
         Expr_::Dollardollar(_)
         | Expr_::ExpressionTree(_)
         | Expr_::Hole(_)

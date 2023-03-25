@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e87d4a2c7a824451e201a4e720cdbb34>>
+// @generated SignedSource<<a31e3ddc27ae4b70c0b13fb71407c1e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1000,6 +1000,10 @@ pub enum Expr_<Ex, En> {
     /// ```
     #[rust_to_ocaml(inline_tuple)]
     Hole(Box<(Expr<Ex, En>, Ex, Ex, HoleSource)>),
+    /// Expression used to check whether a package exists.
+    ///
+    ///     package package-name
+    Package(Box<Sid>),
 }
 
 #[derive(

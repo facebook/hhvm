@@ -321,6 +321,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
         Import(_) | Lplaceholder(_) => Rty::Mutable,
         // More function values which are always mutable
         MethodCaller(_) => Rty::Mutable,
+        Package(_) => Rty::Mutable,
     }
 }
 

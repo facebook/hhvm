@@ -800,6 +800,7 @@ module Visitor_DEPRECATED = struct
           this#on_enum_class_label acc opt_sid name
         | ReadonlyExpr e -> this#on_readonly_expr acc e
         | Hole (e, _, _, _) -> this#on_expr acc e
+        | Package id -> this#on_id acc id
         | Invalid (Some e) -> this#on_expr acc e
         | Invalid _ -> acc
 

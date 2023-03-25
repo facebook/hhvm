@@ -4988,6 +4988,7 @@ and expr_
       Errors.add_typing_error
         Typing_error.(enum @@ Primary.Enum.Enum_class_label_as_expr p);
       error ())
+  | Package _ -> failwith "todo"
 
 and class_const ?(incl_tc = false) env p (cid, mid) =
   let (env, _tal, ce, cty) = class_expr env [] cid in

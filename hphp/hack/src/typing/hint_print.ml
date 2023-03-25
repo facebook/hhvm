@@ -460,6 +460,7 @@ and pp_expr_ ppf = function
       Fmt.(pair ~sep:dbl_hash Fmt.string string) ppf (class_name, name)
   end
   | Aast.Invalid (Some expr) -> pp_expr ppf expr
+  | Aast.Package (_, id) -> Fmt.string ppf id
   | Aast.Invalid _
   | Aast.Efun _
   | Aast.Lfun _

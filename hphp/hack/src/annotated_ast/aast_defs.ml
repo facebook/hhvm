@@ -745,6 +745,10 @@ and ('ex, 'en) expr_ =
        *   )
        * ```
        *)
+  | Package of sid
+      (** Expression used to check whether a package exists.
+       *
+       *     package package-name *)
 
 and hole_source =
   | Typing

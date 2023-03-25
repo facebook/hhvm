@@ -60,7 +60,8 @@ let rec can_be_captured =
   | Collection _
   | ExpressionTree _
   | Pair _
-  | ET_Splice _ ->
+  | ET_Splice _
+  | Package _ ->
     true
   | Invalid (Some (_, _, exp))
   | Hole ((_, _, exp), _, _, _) ->

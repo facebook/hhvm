@@ -508,6 +508,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::MethodCaller(_) | Expr_::Hole(_) => {
                 unimplemented!("TODO(hrust)")
             }
+            Expr_::Package(_) => todo!(),
         }
     })
 }

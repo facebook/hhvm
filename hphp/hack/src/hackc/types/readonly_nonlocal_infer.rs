@@ -519,6 +519,7 @@ impl<'decl> Infer<'decl> {
             }
             EnumClassLabel(_b) => (exp.clone(), Tyx::Todo, ctx),
             Hole(_b) => (exp.clone(), Tyx::Todo, ctx),
+            Package(_) => todo!(),
         };
 
         let expr = aast::Expr(ex.clone(), pos.clone(), exp);

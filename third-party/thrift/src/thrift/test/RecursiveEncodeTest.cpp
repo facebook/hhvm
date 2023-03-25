@@ -95,6 +95,23 @@ TEST(RecursiveEncode, TestCustomType) {
     },
   },
 })");
+  EXPECT_EQ(
+      debugStringViaRecursiveEncode(
+          baz, apache::thrift::DebugProtocolWriter::Options::simple()),
+      R"( {
+  field = 10,
+  bar =  {
+    field = 20,
+    foos = list<struct>[2] {
+       {
+        field = 30,
+      },
+       {
+        field = 40,
+      },
+    },
+  },
+})");
 }
 
 } // namespace

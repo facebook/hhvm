@@ -206,7 +206,15 @@ uint32_t DebugProtocolWriter::writeStructEnd() {
 
 uint32_t DebugProtocolWriter::writeFieldBegin(
     const char* name, TType fieldType, int16_t fieldId) {
-  writeIndented("{:0d}: {} ({}) = ", fieldId, name, fieldTypeName(fieldType));
+  writeIndent();
+  if (!options_.skipFieldId) {
+    writePlain("{:0d}: ", fieldId);
+  }
+  writePlain("{}", name);
+  if (!options_.skipFieldType) {
+    writePlain(" ({})", fieldTypeName(fieldType));
+  }
+  writePlain(" = ");
   return 0;
 }
 

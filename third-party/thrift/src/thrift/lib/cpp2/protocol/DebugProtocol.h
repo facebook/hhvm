@@ -45,6 +45,16 @@ class DebugProtocolWriter {
     Options() {}
     bool skipListIndices = FLAGS_thrift_cpp2_debug_skip_list_indices;
     size_t stringLengthLimit = FLAGS_thrift_cpp2_debug_string_limit;
+    bool skipFieldId = false;
+    bool skipFieldType = false;
+
+    static Options simple() {
+      Options opt;
+      opt.skipListIndices = true;
+      opt.skipFieldId = true;
+      opt.skipFieldType = true;
+      return opt;
+    }
   };
 
   using ProtocolReader = void;

@@ -18,7 +18,7 @@
 #include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/DebugProtocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/test/gen-cpp2/RecursiveEncode_types.h>
+#include <thrift/test/gen-cpp2/recursive_encode_types.h>
 #include <thrift/test/testset/Populator.h>
 
 namespace apache::thrift::test {

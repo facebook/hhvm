@@ -1676,6 +1676,7 @@ fn p_expr_impl<'a>(
         AwaitableCreationExpression(c) => p_awaitable_creation_expr(c, env, pos),
         XHPExpression(c) if c.open.is_xhp_open() => p_xhp_expr(c, env),
         EnumClassLabelExpression(c) => p_enum_class_label_expr(c, env),
+        PackageExpression(p) => p_package_expr(p, env),
         _ => {
             raise_missing_syntax("expression", node, env);
             Ok(Expr_::Null)
@@ -2459,6 +2460,14 @@ fn p_enum_class_label_expr<'a>(
         ),
     };
     Ok(Expr_::mk_enum_class_label(qual, label_name))
+}
+
+fn p_package_expr<'a>(
+    p: &'a PackageExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let id = pos_name(&p.name, env)?;
+    Ok(Expr_::mk_package(id))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

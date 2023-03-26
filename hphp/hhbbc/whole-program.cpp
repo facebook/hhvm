@@ -234,16 +234,6 @@ std::vector<WorkItem> initial_work(const Index& index,
   return ret;
 }
 
-std::vector<Context> opt_prop_type_hints_contexts(const Index& index) {
-  std::vector<Context> ret;
-  for (auto const& c : index.program().classes) {
-    ret.emplace_back(
-      Context { index.lookup_class_unit(*c), nullptr, c.get() }
-    );
-  }
-  return ret;
-}
-
 WorkItem work_item_for(const DependencyContext& d,
                        AnalyzeMode mode,
                        const Index& index) {
@@ -443,18 +433,6 @@ void analyze_iteratively(Index& index, AnalyzeMode mode) {
     for (auto& d : deps) work.push_back(work_item_for(d, mode, index));
     deps.clear();
   }
-}
-
-void prop_type_hint_pass(Index& index) {
-  trace_time tracer("optimize prop type-hints", index.sample());
-
-  auto const contexts = opt_prop_type_hints_contexts(index);
-  parallel::for_each(
-    contexts,
-    [&] (Context ctx) {
-      index.mark_no_bad_redeclare_props(const_cast<php::Class&>(*ctx.cls));
-    }
-  );
 }
 
 /*
@@ -910,7 +888,6 @@ void whole_program(WholeProgramInput inputs,
   };
 
   assertx(check(index.program()));
-  prop_type_hint_pass(index);
   index.rewrite_default_initial_values();
   index.use_class_dependencies(false);
   analyze_iteratively(index, AnalyzeMode::ConstPass);

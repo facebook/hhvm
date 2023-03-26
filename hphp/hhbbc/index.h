@@ -1420,12 +1420,6 @@ struct Index {
                                       DependencyContextSet& deps);
 
   /*
-   * Mark any properties in cls that definitely do not redeclare a property in
-   * the parent, which has an inequivalent type-hint.
-   */
-  void mark_no_bad_redeclare_props(php::Class& cls) const;
-
-  /*
    * Rewrite the initial values of any AttrSystemInitialValue properties to
    * something more suitable for its type-hint, and add AttrNoImplicitNullable
    * where appropriate.

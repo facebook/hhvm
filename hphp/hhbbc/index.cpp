@@ -1750,6 +1750,12 @@ struct ClassInfo2 {
   Attr attrs;
 
   /*
+   * Track if this class has a property which might redeclare a property in a
+   * parent class with an inequivalent type-hint.
+   */
+  bool hasBadRedeclareProp{true};
+
+  /*
    * Track if this class has any const props (including inherited ones).
    */
   bool hasConstProp{false};
@@ -1826,6 +1832,7 @@ struct ClassInfo2 {
       (methodFamilies, string_data_lt{})
       (funcInfos)
       (attrs)
+      (hasBadRedeclareProp)
       (hasConstProp)
       (subHasConstProp)
       (hasReifiedParent)
@@ -5892,12 +5899,13 @@ struct FlattenJob {
     outNames.reserve(classes.vals.size());
     outMeta.parents.reserve(classes.vals.size() + newClosures.size());
 
+    // Do the processing which relies on a fully accessible
+    // LocalIndex
     for (auto& cls : classes.vals) {
-      auto const name = cls->name;
-      auto const cinfoIt = index.m_classInfos.find(name);
+      auto const cinfoIt = index.m_classInfos.find(cls->name);
       if (cinfoIt == end(index.m_classInfos)) {
-        always_assert(index.uninstantiable(name));
-        outMeta.uninstantiable.emplace(name);
+        always_assert(index.uninstantiable(cls->name));
+        outMeta.uninstantiable.emplace(cls->name);
         continue;
       }
       auto& cinfo = cinfoIt->second;
@@ -5905,42 +5913,14 @@ struct FlattenJob {
       index.m_ctx = cls.get();
       SCOPE_EXIT { index.m_ctx = nullptr; };
 
-      // For building FuncFamily::StaticInfo, we need to ensure that
-      // every method has an entry in methodFamilies. Make all of the
-      // initial entries here (they'll be created assuming this method
-      // is AttrNoOverride).
-      for (auto const& [methname, mte] : cinfo->methods) {
-        if (is_special_method_name(methname)) continue;
-        auto entry = make_initial_func_family_entry(*cls, index.meth(mte), mte);
-        always_assert(
-          cinfo->methodFamilies.emplace(methname, std::move(entry)).second
-        );
-      }
-
       outMeta.classTypeUses.emplace_back();
-      update_type_constraints(index, *cls, outMeta.classTypeUses.back());
-
+      update_type_constraints(index, *cls, &outMeta.classTypeUses.back());
+      optimize_properties(index, *cls, *cinfo);
       for (auto const& func : cls->methods) {
         cinfo->funcInfos.emplace_back(make_func_info(index, *func));
       }
 
-      if (!is_closure(*cls)) {
-        auto const& state = index.m_states.at(name);
-        outMeta.parents.emplace_back();
-        auto& parents = outMeta.parents.back().names;
-        parents.reserve(state->m_parents.size());
-        for (auto const p : state->m_parents) {
-          parents.emplace_back(p->name);
-        }
-      }
-
-      if (cls->attrs & AttrInterface) {
-        outMeta.interfaces.emplace(name);
-      }
-
-      outNames.emplace(name);
-      outClasses.vals.emplace_back(std::move(cls));
-      outInfos.vals.emplace_back(std::move(cinfo));
+      outNames.emplace(cls->name);
     }
 
     std::sort(
@@ -5962,11 +5942,72 @@ struct FlattenJob {
       // requested to flatten.
       if (!outNames.count(clo->closureContextCls)) continue;
 
+      auto& cinfo = index.m_classInfos.at(clo->name);
+
       index.m_ctx = clo.get();
       SCOPE_EXIT { index.m_ctx = nullptr; };
 
       outMeta.classTypeUses.emplace_back();
-      update_type_constraints(index, *clo, outMeta.classTypeUses.back());
+      update_type_constraints(index, *clo, &outMeta.classTypeUses.back());
+      optimize_properties(index, *clo, *cinfo);
+
+      for (auto const& func : clo->methods) {
+        cinfo->funcInfos.emplace_back(make_func_info(index, *func));
+      }
+    }
+
+    // Now move the classes out of LocalIndex and into the output. At
+    // this point, it's not safe to access the LocalIndex unless
+    // you're sure something hasn't been moved yet.
+    for (auto& cls : classes.vals) {
+      auto const name = cls->name;
+      auto const cinfoIt = index.m_classInfos.find(name);
+      if (cinfoIt == end(index.m_classInfos)) {
+        assertx(outMeta.uninstantiable.count(name));
+        continue;
+      }
+      auto& cinfo = cinfoIt->second;
+
+      index.m_ctx = cls.get();
+      SCOPE_EXIT { index.m_ctx = nullptr; };
+
+      // For building FuncFamily::StaticInfo, we need to ensure that
+      // every method has an entry in methodFamilies. Make all of the
+      // initial entries here (they'll be created assuming this method
+      // is AttrNoOverride).
+      for (auto const& [methname, mte] : cinfo->methods) {
+        if (is_special_method_name(methname)) continue;
+        auto entry = make_initial_func_family_entry(*cls, index.meth(mte), mte);
+        always_assert(
+          cinfo->methodFamilies.emplace(methname, std::move(entry)).second
+        );
+      }
+
+      if (!is_closure(*cls)) {
+        auto const& state = index.m_states.at(name);
+        outMeta.parents.emplace_back();
+        auto& parents = outMeta.parents.back().names;
+        parents.reserve(state->m_parents.size());
+        for (auto const p : state->m_parents) {
+          parents.emplace_back(p->name);
+        }
+      }
+
+      if (cls->attrs & AttrInterface) {
+        outMeta.interfaces.emplace(name);
+      }
+
+      outClasses.vals.emplace_back(std::move(cls));
+      outInfos.vals.emplace_back(std::move(cinfo));
+    }
+
+    for (auto& clo : newClosures) {
+      // Only return the closures for classes we were actually
+      // requested to flatten.
+      if (!outNames.count(clo->closureContextCls)) continue;
+
+      index.m_ctx = clo.get();
+      SCOPE_EXIT { index.m_ctx = nullptr; };
 
       auto& outNewClosures = outMeta.newClosures;
       if (outNewClosures.empty() || outNewClosures.back().unit != clo->unit) {
@@ -5976,9 +6017,6 @@ struct FlattenJob {
       outNewClosures.back().names.emplace_back(clo->name);
 
       auto& cinfo = index.m_classInfos.at(clo->name);
-      for (auto const& func : clo->methods) {
-        cinfo->funcInfos.emplace_back(make_func_info(index, *func));
-      }
       outClasses.vals.emplace_back(std::move(clo));
       outInfos.vals.emplace_back(std::move(cinfo));
     }
@@ -5986,7 +6024,7 @@ struct FlattenJob {
     Variadic<std::unique_ptr<FuncInfo2>> funcInfos;
     for (auto& func : funcs.vals) {
       outMeta.funcTypeUses.emplace_back();
-      update_type_constraints(index, *func, outMeta.funcTypeUses.back());
+      update_type_constraints(index, *func, &outMeta.funcTypeUses.back());
       funcInfos.vals.emplace_back(make_func_info(index, *func));
     }
 
@@ -6068,6 +6106,7 @@ private:
         m_ctx->name,
         name
       );
+      assertx(it->second);
       return *it->second;
     }
 
@@ -6080,6 +6119,7 @@ private:
         m_ctx->name,
         name
       );
+      assertx(it->second.get());
       return *it->second;
     }
 
@@ -6092,6 +6132,7 @@ private:
         m_ctx->name,
         name
       );
+      assertx(it->second.get());
       return *it->second;
     }
 
@@ -7866,10 +7907,10 @@ private:
   // in case it needs to be fixed up later.
   static void update_type_constraint(const LocalIndex& index,
                                      TypeConstraint& tc,
-                                     ISStringSet& uses) {
+                                     ISStringSet* uses) {
     if (!tc.isUnresolved()) {
       // Any TC already resolved is assumed to be correct.
-      if (tc.clsName()) uses.emplace(tc.clsName());
+      if (uses && tc.clsName()) uses->emplace(tc.clsName());
       return;
     }
     auto const name = tc.typeName();
@@ -7893,7 +7934,7 @@ private:
         tm->nullable,
         value
       );
-      if (value) uses.emplace(value);
+      if (uses && value) uses->emplace(value);
       return;
     }
 
@@ -7902,12 +7943,12 @@ private:
     // name.
     if (index.missingType(name)) return;
     tc.resolveType(AnnotType::Object, tc.isNullable(), name);
-    uses.emplace(name);
+    if (uses) uses->emplace(name);
   }
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Func& func,
-                                      ISStringSet& uses) {
+                                      ISStringSet* uses) {
     for (auto& p : func.params) {
       update_type_constraint(index, p.typeConstraint, uses);
       for (auto& ub : p.upperBounds) update_type_constraint(index, ub, uses);
@@ -7918,7 +7959,7 @@ private:
 
   static void update_type_constraints(const LocalIndex& index,
                                       php::Class& cls,
-                                      ISStringSet& uses) {
+                                      ISStringSet* uses) {
     if (cls.attrs & AttrEnum) {
       update_type_constraint(index, cls.enumBaseTy, uses);
     }
@@ -8012,6 +8053,81 @@ private:
     FTRACE(3, "Initial return type for {}: {}\n",
            func_fullname(f), show(ty));
     return ty;
+  }
+
+  /*
+   * Mark any properties in cls that definitely do not redeclare a
+   * property in the parent with an inequivalent type-hint.
+   */
+  static void optimize_properties(const LocalIndex& index,
+                                  php::Class& cls,
+                                  ClassInfo2& cinfo) {
+    assertx(cinfo.hasBadRedeclareProp);
+
+    auto const isClosure = is_closure(cls);
+
+    cinfo.hasBadRedeclareProp = false;
+    for (auto& prop : cls.properties) {
+      assertx(!(prop.attrs & AttrNoBadRedeclare));
+
+      auto const noBadRedeclare = [&] {
+        // Closures should never have redeclared properties.
+        if (isClosure) return true;
+        // Static and private properties never redeclare anything so
+        // need not be considered.
+        if (prop.attrs & (AttrStatic | AttrPrivate)) return true;
+
+        for (auto const base : cinfo.baseList) {
+          if (base->isame(cls.name)) continue;
+
+          auto& baseCInfo = index.classInfo(base);
+          auto& baseCls = index.cls(base);
+
+          auto const parentProp = [&] () -> php::Prop* {
+            for (auto& p : baseCls.properties) {
+              if (p.name == prop.name) return const_cast<php::Prop*>(&p);
+            }
+            for (auto& p : baseCInfo.traitProps) {
+              if (p.name == prop.name) return const_cast<php::Prop*>(&p);
+            }
+            return nullptr;
+          }();
+          if (!parentProp) continue;
+          if (parentProp->attrs & (AttrStatic | AttrPrivate)) continue;
+
+          // This property's type-constraint might not have been
+          // resolved (if the parent is not on the output list for
+          // this job), so do so here.
+          update_type_constraint(index, parentProp->typeConstraint, nullptr);
+
+          // This check is safe, but conservative. It might miss a few
+          // rare cases, but it's sufficient and doesn't require class
+          // hierarchies.
+          if (prop.typeConstraint.maybeInequivalentForProp(
+                parentProp->typeConstraint
+              )) {
+            return false;
+          }
+
+          for (auto ub : prop.ubs) {
+            applyFlagsToUB(ub, prop.typeConstraint);
+            for (auto pub : parentProp->ubs) {
+              update_type_constraint(index, pub, nullptr);
+              applyFlagsToUB(pub, parentProp->typeConstraint);
+              if (ub.maybeInequivalentForProp(pub)) return false;
+            }
+          }
+        }
+
+        return true;
+      }();
+
+      if (noBadRedeclare) {
+        attribute_setter(prop.attrs, true, AttrNoBadRedeclare);
+      } else {
+        cinfo.hasBadRedeclareProp = true;
+      }
+    }
   }
 };
 
@@ -12283,6 +12399,7 @@ void make_class_infos_local(
       }
       std::sort(begin(cinfo->subclassList), end(cinfo->subclassList));
 
+      cinfo->hasBadRedeclareProp = rcinfo->hasBadRedeclareProp;
       cinfo->hasConstProp = rcinfo->hasConstProp;
       cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
       cinfo->subHasConstProp = rcinfo->subHasConstProp;
@@ -13100,128 +13217,6 @@ void Index::for_each_unit_class_mutable(php::Unit& unit,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
-  /*
-   * Keep a list of properties which have not yet been found to redeclare
-   * anything inequivalently. Start out by putting everything on the list. Then
-   * walk up the inheritance chain, removing collisions as we find them.
-   */
-  std::vector<php::Prop*> props;
-  for (auto& prop : cls.properties) {
-    if (prop.attrs & (AttrStatic | AttrPrivate)) {
-      // Static and private properties never redeclare anything so need not be
-      // considered.
-      attribute_setter(prop.attrs, true, AttrNoBadRedeclare);
-      continue;
-    }
-    attribute_setter(prop.attrs, false, AttrNoBadRedeclare);
-    props.emplace_back(&prop);
-  }
-
-  auto currentCls = [&]() -> const ClassInfo* {
-    auto const rcls = resolve_class(&cls);
-    if (!rcls || rcls->val.left()) return nullptr;
-    return rcls->val.right();
-  }();
-  // If there's one more than one resolution for the class, be conservative and
-  // we'll treat everything as possibly redeclaring.
-  if (!currentCls) props.clear();
-
-  while (!props.empty()) {
-    auto const parent = currentCls->parent;
-    if (!parent) {
-      // No parent. We're done, so anything left on the prop list is
-      // AttrNoBadRedeclare.
-      for (auto& prop : props) {
-        attribute_setter(prop->attrs, true, AttrNoBadRedeclare);
-      }
-      break;
-    }
-
-    auto const findParentProp = [&] (SString name) -> const php::Prop* {
-      for (auto& prop : parent->cls->properties) {
-        if (prop.name == name) return &prop;
-      }
-      for (auto& prop : parent->traitProps) {
-        if (prop.name == name) return &prop;
-      }
-      return nullptr;
-    };
-
-    // Remove any properties which collide with the current class.
-
-    auto const propRedeclares = [&] (php::Prop* prop) {
-      auto const pprop = findParentProp(prop->name);
-      if (!pprop) return false;
-
-      // We found a property being redeclared. Check if the type-hints on
-      // the two are equivalent.
-      auto const equivOneTCPair =
-      [&](const TypeConstraint& tc1, const TypeConstraint& tc2) {
-        // Try the cheap check first, use the index otherwise. Two
-        // type-constraints are equivalent if all the possible values of one
-        // satisfies the other, and vice-versa.
-        if (!tc1.maybeInequivalentForProp(tc2)) return true;
-        auto const lookup1 = lookup_constraint(Context{}, tc1);
-        auto const lookup2 = lookup_constraint(Context{}, tc2);
-        return
-          lookup1.upper.moreRefined(lookup2.lower) &&
-          lookup2.upper.moreRefined(lookup1.lower);
-      };
-      auto const equiv = [&] {
-        if (!equivOneTCPair(prop->typeConstraint, pprop->typeConstraint)) {
-          return false;
-        }
-        for (auto ub : prop->ubs) {
-          applyFlagsToUB(ub, prop->typeConstraint);
-          auto foundEquiv = false;
-          for (auto pub : pprop->ubs) {
-            applyFlagsToUB(pub, pprop->typeConstraint);
-            if (equivOneTCPair(ub, pub)) {
-              foundEquiv = true;
-              break;
-            }
-          }
-          if (!foundEquiv) return false;
-        }
-        return true;
-      };
-      // If the property in the parent is static or private, the property in
-      // the child isn't actually redeclaring anything. Otherwise, if the
-      // type-hints are equivalent, remove this property from further
-      // consideration and mark it as AttrNoBadRedeclare.
-      if ((pprop->attrs & (AttrStatic | AttrPrivate)) || equiv()) {
-        attribute_setter(prop->attrs, true, AttrNoBadRedeclare);
-      }
-      return true;
-    };
-
-    props.erase(
-      std::remove_if(props.begin(), props.end(), propRedeclares),
-      props.end()
-    );
-
-    currentCls = parent;
-  }
-
-  auto const possibleOverride =
-    std::any_of(
-      cls.properties.begin(),
-      cls.properties.end(),
-      [&](const php::Prop& prop) { return !(prop.attrs & AttrNoBadRedeclare); }
-    );
-
-  // Mark all resolutions of this class as having any possible bad redeclaration
-  // props, even if there's not an unique resolution.
-  auto const it = m_data->classInfo.find(cls.name);
-  if (it != end(m_data->classInfo)) {
-    auto const cinfo = it->second;
-    if (cinfo->cls == &cls) {
-      cinfo->hasBadRedeclareProp = possibleOverride;
-    }
-  }
-}
 
 /*
  * Rewrite the initial values for any AttrSystemInitialValue properties. If the

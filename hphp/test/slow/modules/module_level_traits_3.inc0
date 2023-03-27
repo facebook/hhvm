@@ -1,0 +1,9 @@
+<?hh
+
+module MLT_A;
+
+public trait T {
+  public function getFoo(): void {
+    foo();
+  }
+}

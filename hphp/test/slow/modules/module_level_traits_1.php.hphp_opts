@@ -1,0 +1,3 @@
+--inputs=hphp/test/slow/modules/module_level_traits_modules.inc
+--inputs=hphp/test/slow/modules/module_level_traits_1.inc0
+--inputs=hphp/test/slow/modules/module_level_traits_1.inc1

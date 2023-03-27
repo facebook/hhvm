@@ -1,0 +1,12 @@
+<?hh
+
+module MLT_A;
+
+public trait T {
+   public function getFoo(): void {
+    // under module level trait semantics,
+    // invoking an internal function of A from T is correct
+    // even if T is used by a class in another module
+    foo();
+  }
+}

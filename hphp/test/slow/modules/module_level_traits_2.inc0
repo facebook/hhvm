@@ -1,0 +1,5 @@
+<?hh
+
+module MLT_A;
+
+internal function foo(): void { echo "foo\n"; }

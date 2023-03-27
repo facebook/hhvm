@@ -42,6 +42,11 @@ pub struct Opts {
     /// Attempt to keep going instead of panicking on unimplemented code.
     #[clap(long)]
     keep_going: bool,
+
+    /// Skip files that can't be fully translated. Unlike `--keep-going` it won't emit dummy
+    /// instructions for unimplemented code but will rather completely skip the file.
+    #[clap(long)]
+    skip_unimplemented: bool,
 }
 
 pub fn run(opts: Opts) -> Result<()> {
@@ -56,7 +61,7 @@ pub fn run(opts: Opts) -> Result<()> {
 
     writeln!(writer.lock(), "// TEXTUAL UNIT COUNT {}", files.len())?;
 
-    if opts.keep_going {
+    if opts.keep_going || opts.skip_unimplemented {
         files
             .into_par_iter()
             .for_each(|path| match process_single_file(&path, &opts, &writer) {
@@ -93,7 +98,7 @@ fn convert_single_file(path: &Path, opts: &Opts) -> Result<Vec<u8>> {
         })
     };
 
-    if opts.keep_going {
+    if opts.keep_going || opts.skip_unimplemented {
         with_catch_panics(action)
     } else {
         action()

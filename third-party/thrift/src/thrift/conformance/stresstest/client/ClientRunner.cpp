@@ -21,6 +21,8 @@
 
 #include <folly/experimental/io/IoUringBackend.h>
 
+#include <thrift/conformance/stresstest/util/IoUringUtil.h>
+
 namespace apache {
 namespace thrift {
 namespace stress {
@@ -40,21 +42,6 @@ class TestDoneTimeout : public folly::HHWheelTimer::Callback {
   void timeoutExpired() noexcept override { testDone_ = true; }
   bool& testDone_;
 };
-
-folly::IoUringBackend::Options getIoUringOptions() {
-  folly::IoUringBackend::Options options;
-  options.setMaxSubmit(128)
-      .setInitialProvidedBuffers(128, 1)
-      .setRegisterRingFd(true)
-      .setTaskRunCoop(true)
-      .setDeferTaskRun(true);
-
-  // must have enough capacity to stop overflows
-  options.setCapacity(1024);
-  options.setUseRegisteredFds(0);
-
-  return options;
-}
 
 std::unique_ptr<folly::EventBaseBackendBase> getIOUringBackend() {
   return std::make_unique<folly::IoUringBackend>(getIoUringOptions());

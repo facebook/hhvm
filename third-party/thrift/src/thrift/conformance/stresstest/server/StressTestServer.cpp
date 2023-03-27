@@ -20,6 +20,8 @@
 #include <folly/portability/GFlags.h>
 #include <wangle/ssl/SSLContextConfig.h>
 
+#include <thrift/conformance/stresstest/util/IoUringUtil.h>
+
 DEFINE_int32(port, 5000, "Server port");
 DEFINE_int32(io_threads, 0, "Number of IO threads (0 == number of cores)");
 DEFINE_int32(cpu_threads, 0, "Number of CPU threads (0 == number of cores)");
@@ -40,14 +42,6 @@ DEFINE_string(
     caPath,
     "folly/io/async/test/certs/ca-cert.pem",
     "Path to client trusted CA file");
-DEFINE_bool(use_iouring_event_eventfd, true, "");
-DEFINE_int32(io_submit_sqe, -1, "");
-DEFINE_int32(io_max_get, 64, "");
-DEFINE_bool(set_iouring_defer_taskrun, true, "");
-DEFINE_int32(io_max_submit, -1, "");
-DEFINE_int32(io_registers, 16000, "");
-DEFINE_int32(io_prov_buffs_size, 131072, "");
-DEFINE_int32(io_prov_buffs, 2000, "");
 
 namespace apache {
 namespace thrift {
@@ -75,44 +69,13 @@ std::shared_ptr<StressTestHandler> createStressTestHandler() {
   return std::make_shared<StressTestHandler>();
 }
 
-folly::IoUringBackend::Options iouOptions() {
-  folly::IoUringBackend::Options options;
-  options.setCapacity(static_cast<size_t>(16000))
-      .setUseRegisteredFds(static_cast<size_t>(FLAGS_io_registers))
-      .setMaxSubmit(static_cast<size_t>(128))
-      .setMaxGet(static_cast<size_t>(-1))
-      .setInitialProvidedBuffers(FLAGS_io_prov_buffs_size, FLAGS_io_prov_buffs)
-      .setRegisterRingFd(true);
-
-  if (FLAGS_io_max_get > 0) {
-    options.setMaxGet(FLAGS_io_max_get);
-  }
-
-  if (FLAGS_io_submit_sqe > 0) {
-    options.setSqeSize(FLAGS_io_submit_sqe);
-  }
-
-  if (FLAGS_io_max_submit > 0) {
-    options.setMaxSubmit(FLAGS_io_max_submit);
-  }
-
-  if (FLAGS_set_iouring_defer_taskrun) {
-    if (folly::IoUringBackend::kernelSupportsDeferTaskrun()) {
-      options.setDeferTaskRun(true);
-    } else {
-      LOG(ERROR) << "not setting DeferTaskRun as not supported on this kernel";
-    }
-  }
-  return options;
-}
-
 std::unique_ptr<folly::EventBaseBackendBase> getEventBaseBackendFunc() {
   try {
     // TODO numa node affinitization
     // static int sqSharedCore = 0;
     // LOG(INFO) << "Sharing eb sq poll on core: " << sqSharedCore;
     // options.setSQGroupName("fast_eb").setSQCpu(sqSharedCore);
-    return std::make_unique<folly::IoUringBackend>(iouOptions());
+    return std::make_unique<folly::IoUringBackend>(getIoUringOptions());
   } catch (const std::exception& ex) {
     LOG(FATAL) << "Failed to create io_uring backend: "
                << folly::exceptionStr(ex);

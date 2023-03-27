@@ -39,7 +39,7 @@ template <class Tgt>
 typename std::enable_if<IsVector<Tgt>::value, Tgt>::type to(const string& str) {
   Tgt res;
   vector<string> parts;
-  folly::split(",", str, parts, /* ignoreEmpty= */ true);
+  folly::split(',', str, parts, /* ignoreEmpty= */ true);
   for (const auto& it : parts) {
     res.push_back(folly::to<typename Tgt::value_type>(it));
   }

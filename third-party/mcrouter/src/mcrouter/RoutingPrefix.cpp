@@ -63,7 +63,7 @@ void RoutingPrefix::initFromPrefix() {
   }
 
   std::vector<folly::StringPiece> parts;
-  folly::split("/", prefix_, parts);
+  folly::split('/', prefix_, parts);
   // empty, region (non-empty), cluster (non-empty), empty
   if (parts.size() != 4 || !parts[0].empty() || parts[1].empty() ||
       parts[2].empty() || !parts[3].empty()) {

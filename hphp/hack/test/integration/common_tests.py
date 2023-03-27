@@ -824,7 +824,6 @@ class CommonTests(BarebonesTests):
                 '"type":"(function(): void)",'
                 '"pos":{{"filename":"{root}foo_3.php",'
                 '"line":9,"char_start":18,"char_end":40}},'
-                '"func_details":{{"min_arity":0,"return_type":"void","params":[]}},'
                 '"expected_ty":false}}]'
             ],
             options=["--auto-complete"],

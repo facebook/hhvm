@@ -7,21 +7,6 @@
  *
  *)
 
-(* Details about functions to be added in json output *)
-type func_param_result = {
-  param_name: string;
-  param_ty: string;
-  param_variadic: bool;
-}
-[@@deriving show]
-
-type func_details_result = {
-  params: func_param_result list;
-  return_ty: string;
-  min_arity: int;
-}
-[@@deriving show]
-
 type snippet_with_fallback = {
   snippet: string;
   fallback: string;
@@ -42,7 +27,6 @@ type autocomplete_item = {
   res_additional_edits: (string * Ide_api_types.range) list;
   res_fullname: string;
   res_kind: SearchUtils.si_kind;
-  func_details: func_details_result option;
   res_documentation: string option;
 }
 

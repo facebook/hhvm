@@ -1,0 +1,1 @@
+function add_one(int $x = _): int

@@ -56,7 +56,8 @@
          { fb_ast =
            [([9:3-26],
              (Throw
-                ((Exception), [9:9-25], (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                ((Exception), [9:9-25],
+                 (New (((Exception), [9:13-23], (CI ([9:13-23], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

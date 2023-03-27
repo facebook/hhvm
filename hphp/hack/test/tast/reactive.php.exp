@@ -27,7 +27,8 @@ Errors:
         { fb_ast =
           [([5:3-25],
             (Throw
-               ((Exception), [5:9-24], (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+               ((Exception), [5:9-24],
+                (New (((Exception), [5:13-22], (CI ([5:13-22], "\\Exception"))), [], [], None, ((function(string $message = _, int $code = _, ?Exception $previous = _)[]: void)))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }]; 

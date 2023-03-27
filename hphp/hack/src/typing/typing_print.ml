@@ -282,7 +282,7 @@ module Full = struct
           | false -> Nothing);
           d;
           (if get_fp_has_default fp then
-            text "=_"
+            text " = _"
           else
             Nothing);
         ]

@@ -1,17 +1,17 @@
 Str\capitalize
   (function(string $string): string)
 Str\capitalize_words
-  (function(string $string, ?string $delimiters=_): string)
+  (function(string $string, ?string $delimiters = _): string)
 Str\chunk
-  (function(string $string, int $chunk_size=_): vec<string>)
+  (function(string $string, int $chunk_size = _): vec<string>)
 Str\compare
   (function(string $string1, string $string2): int)
 Str\compare_ci
   (function(string $string1, string $string2): int)
 Str\contains
-  (function(string $haystack, string $needle, int $offset=_): bool)
+  (function(string $haystack, string $needle, int $offset = _): bool)
 Str\contains_ci
-  (function(string $haystack, string $needle, int $offset=_): bool)
+  (function(string $haystack, string $needle, int $offset = _): bool)
 Str\ends_with
   (function(string $string, string $suffix): bool)
 Str\ends_with_ci
@@ -23,9 +23,9 @@ Str\length
 Str\lowercase
   (function(string $string): string)
 Str\pad_left
-  (function(string $string, int $total_length, string $pad_string=_): string)
+  (function(string $string, int $total_length, string $pad_string = _): string)
 Str\pad_right
-  (function(string $string, int $total_length, string $pad_string=_): string)
+  (function(string $string, int $total_length, string $pad_string = _): string)
 Str\repeat
   (function(string $string, int $multiplier): string)
 Str\replace
@@ -43,17 +43,17 @@ Str\replace_every_nonrecursive_ci
 Str\reverse
   (function(string $string): string)
 Str\search
-  (function(string $haystack, string $needle, int $offset=_): ?int)
+  (function(string $haystack, string $needle, int $offset = _): ?int)
 Str\search_ci
-  (function(string $haystack, string $needle, int $offset=_): ?int)
+  (function(string $haystack, string $needle, int $offset = _): ?int)
 Str\search_last
-  (function(string $haystack, string $needle, int $offset=_): ?int)
+  (function(string $haystack, string $needle, int $offset = _): ?int)
 Str\slice
-  (function(string $string, int $offset, ?int $length=_): string)
+  (function(string $string, int $offset, ?int $length = _): string)
 Str\splice
-  (function(string $string, string $replacement, int $offset, ?int $length=_): string)
+  (function(string $string, string $replacement, int $offset, ?int $length = _): string)
 Str\split
-  (function(string $string, string $delimiter, ?int $limit=_): vec<string>)
+  (function(string $string, string $delimiter, ?int $limit = _): vec<string>)
 Str\starts_with
   (function(string $string, string $prefix): bool)
 Str\starts_with_ci
@@ -65,10 +65,10 @@ Str\strip_suffix
 Str\to_int
   (function(string $string): ?int)
 Str\trim
-  (function(string $string, ?string $char_mask=_): string)
+  (function(string $string, ?string $char_mask = _): string)
 Str\trim_left
-  (function(string $string, ?string $char_mask=_): string)
+  (function(string $string, ?string $char_mask = _): string)
 Str\trim_right
-  (function(string $string, ?string $char_mask=_): string)
+  (function(string $string, ?string $char_mask = _): string)
 Str\uppercase
   (function(string $string): string)

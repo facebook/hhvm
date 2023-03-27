@@ -10,9 +10,22 @@ use toml::Spanned;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
-    UndefinedInclude { name: String, span: (usize, usize) },
-    DuplicateUse { name: String, span: (usize, usize) },
-    CyclicIncludes { cycle: Vec<Spanned<String>> },
+    UndefinedInclude {
+        name: String,
+        span: (usize, usize),
+    },
+    DuplicateUse {
+        name: String,
+        span: (usize, usize),
+    },
+    CyclicIncludes {
+        cycle: Vec<Spanned<String>>,
+    },
+    IncompleteDeployment {
+        name: String,
+        span: (usize, usize),
+        missing_pkgs: Vec<Spanned<String>>,
+    },
 }
 
 impl Error {
@@ -34,9 +47,22 @@ impl Error {
         Self::CyclicIncludes { cycle }
     }
 
+    pub fn incomplete_deployment(
+        deployment: &Spanned<String>,
+        missing_pkgs: Vec<Spanned<String>>,
+    ) -> Self {
+        Self::IncompleteDeployment {
+            name: deployment.get_ref().into(),
+            span: deployment.span(),
+            missing_pkgs,
+        }
+    }
+
     pub fn span(&self) -> (usize, usize) {
         match self {
-            Self::DuplicateUse { span, .. } | Self::UndefinedInclude { span, .. } => *span,
+            Self::DuplicateUse { span, .. }
+            | Self::UndefinedInclude { span, .. }
+            | Self::IncompleteDeployment { span, .. } => *span,
             Self::CyclicIncludes { cycle } => {
                 let base = cycle.first().unwrap();
                 base.span()
@@ -74,6 +100,22 @@ impl Display for Error {
             }
             Self::DuplicateUse { name, .. } => {
                 write!(f, "This module can only be used in one package: {}", name)?;
+            }
+            Self::IncompleteDeployment {
+                name, missing_pkgs, ..
+            } => {
+                write!(
+                    f,
+                    "{} must deploy all nested included packages. Missing ",
+                    name
+                )?;
+                for (i, pkg) in missing_pkgs.iter().enumerate() {
+                    if i == missing_pkgs.len() - 1 {
+                        write!(f, "{}", pkg.get_ref())?;
+                    } else {
+                        write!(f, "{}, ", pkg.get_ref())?;
+                    }
+                }
             }
         };
         Ok(())

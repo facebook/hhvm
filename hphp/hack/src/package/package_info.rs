@@ -125,7 +125,7 @@ mod test {
     }
 
     #[test]
-    fn test_config_errors() {
+    fn test_config_errors1() {
         let contents = include_str!("tests/package-3.toml");
         let info = PackageInfo::from_text(contents).unwrap();
         assert_eq!(info.errors.len(), 2);
@@ -137,7 +137,7 @@ mod test {
     }
 
     #[test]
-    fn test_config_errors1() {
+    fn test_config_errors2() {
         let contents = include_str!("tests/package-4.toml");
         let info = PackageInfo::from_text(contents).unwrap();
         let errors = info
@@ -152,6 +152,9 @@ mod test {
                 String::from("Circular dependency detected: e -> f -> e"),
                 String::from("Circular dependency detected: a -> b -> c -> a"),
                 String::from("Circular dependency detected: h -> j -> i -> h"),
+                String::from(
+                    "my-prod must deploy all nested included packages. Missing e, g, h, i"
+                )
             ]
             .iter()
             .cloned()

@@ -7,7 +7,7 @@ includes = ["b"]
 includes = ["c", "d"]
 
 [packages.c]
-includes = ["a", "e", "h"]
+includes = ["a", "e"]
 
 [packages.d]
 includes = ["e"]
@@ -29,3 +29,8 @@ includes = ["h"]
 
 [packages.j]
 includes = ["i"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["d", "f", "j"]

@@ -67,7 +67,7 @@ pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
                         domains: convert(deployment.domains.as_ref()),
                     };
                     ffi::DeploymentMapEntry {
-                        name: name.to_string(),
+                        name: name.get_ref().into(),
                         deployment: deployment_ffi,
                     }
                 })

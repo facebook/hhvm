@@ -11,7 +11,7 @@ use toml::Spanned;
 // Preserve the order for ease of testing
 // Alternatively, we could use HashMap for performance
 pub type PackageMap = IndexMap<Spanned<String>, Package>;
-pub type DeploymentMap = IndexMap<String, Deployment>;
+pub type DeploymentMap = IndexMap<Spanned<String>, Deployment>;
 pub type NameSet = IndexSet<Spanned<String>>;
 
 #[derive(Debug, Deserialize)]

@@ -50,19 +50,81 @@ impl Config {
                 .into_iter()
                 .for_each(|cycle| errors.push(Error::cyclic_includes(cycle)));
         };
+        let check_deployed_packages_are_transitively_closed =
+            |errors: &mut Vec<Error>, deployment: &Spanned<String>, pkgs: &Option<NameSet>| {
+                if let Some(deployed) = pkgs {
+                    let missing_pkgs =
+                        find_missing_packages_from_deployment(&self.packages, deployed);
+                    errors.push(Error::incomplete_deployment(deployment, missing_pkgs));
+                }
+            };
         let mut errors = vec![];
         for (_, package) in self.packages.iter() {
             check_packages_are_defined(&mut errors, &package.includes);
             check_each_glob_is_used_once(&mut errors, &package.uses);
         }
         if let Some(deployments) = &self.deployments {
-            for (_, deployment) in deployments.iter() {
+            for (positioned_name, deployment) in deployments.iter() {
                 check_packages_are_defined(&mut errors, &deployment.packages);
+                check_deployed_packages_are_transitively_closed(
+                    &mut errors,
+                    positioned_name,
+                    &deployment.packages,
+                );
             }
         };
         check_cyclic_package_deps(&mut errors, &self.packages);
         errors
     }
+}
+
+fn find_missing_packages_from_deployment(
+    package_map: &PackageMap,
+    deployed: &NameSet,
+) -> Vec<Spanned<String>> {
+    // Taking the transitive closure of all nested included packages so that the user
+    // could complete the deployment set upon the first error message they receive, as
+    // opposed to iterating upon it over multiple checks and going through a full init
+    // every time they update the config.
+    // TODO: simplify after incremental mode (T148526825)
+    let mut transitive_closure: HashSet<&Spanned<String>> = HashSet::default();
+
+    fn dfs<'a>(
+        v: &'a Spanned<String>,
+        transitive_closure: &mut HashSet<&'a Spanned<String>>,
+        package_map: &'a PackageMap,
+    ) {
+        if transitive_closure.contains(v) {
+            return;
+        }
+        transitive_closure.insert(v);
+        if let Some(Package {
+            includes: Some(xs), ..
+        }) = package_map.get(v)
+        {
+            for x in xs.iter() {
+                dfs(x, transitive_closure, package_map)
+            }
+        }
+    }
+
+    for package in deployed.iter() {
+        dfs(package, &mut transitive_closure, package_map);
+    }
+    let mut missing_pkgs = transitive_closure
+        .into_iter()
+        .filter_map(|pkg| {
+            let pkg_name = pkg.get_ref().as_str();
+            if !deployed.contains(pkg_name) {
+                let (positioned_pkg_name, _) = package_map.get_key_value(pkg_name).unwrap();
+                Some(positioned_pkg_name.clone())
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    missing_pkgs.sort();
+    missing_pkgs
 }
 
 fn find_cycles(packages: &PackageMap) -> HashSet<Vec<Spanned<String>>> {

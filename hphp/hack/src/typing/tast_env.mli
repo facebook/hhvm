@@ -197,6 +197,8 @@ val get_enforceable : env -> string -> bool
 (** Indicates whether the type parameter with the given name is <<__Newable>>. *)
 val get_newable : env -> string -> bool
 
+val fresh_type : env -> Pos.t -> env * Typing_defs.locl_ty
+
 (** Return whether the type parameter with the given name was implicity created
     as part of an `instanceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)

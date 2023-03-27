@@ -150,6 +150,21 @@ let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
   |> ServerPos.resolve env
   |> Pos.to_absolute
 
+let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
+  (* A function call snippet looks like this:
+
+     fun_name(${1:\$first_arg}, ${2:\$second_arg})
+
+     The syntax for snippets is described here:
+     https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables *)
+  let param_templates =
+    List.mapi params ~f:(fun i param ->
+        match param.fp_name with
+        | Some param_name -> Printf.sprintf "${%d:\\%s}" (i + 1) param_name
+        | None -> Printf.sprintf "${%d}" (i + 1))
+  in
+  String.concat ~sep:", " param_templates
+
 (* If we're autocompleting a call (function or method), insert a
    template for the arguments as well as function name. *)
 let insert_text_for_fun_call
@@ -173,21 +188,8 @@ let insert_text_for_fun_call
         arity_min ft
     in
     let params = List.take ft.ft_params arity in
-    let param_templates =
-      List.mapi params ~f:(fun i param ->
-          match param.fp_name with
-          | Some param_name -> Printf.sprintf "${%d:\\%s}" (i + 1) param_name
-          | None -> Printf.sprintf "${%d}" (i + 1))
-    in
-    (* A snippet looks like this:
-
-       fun_name(${1:\$first_arg}, ${2:\$second_arg})
-
-       The syntax for snippets is described here:
-       https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables
-    *)
     let snippet =
-      Printf.sprintf "%s(%s)" fun_name (String.concat ~sep:", " param_templates)
+      Printf.sprintf "%s(%s)" fun_name (snippet_for_params params)
     in
     let fallback = Printf.sprintf "%s()" fun_name in
     InsertAsSnippet { snippet; fallback }
@@ -580,6 +582,183 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                   in
                   add_res complete))
   end
+
+(** Return all the paths of .hhi files. *)
+let hhi_paths () : Relative_path.t list =
+  let hhi_root = Path.make (Relative_path.path_of_prefix Relative_path.Hhi) in
+  let as_abs_path hhi_path : Path.t = Path.concat hhi_root hhi_path in
+
+  Hhi.get_raw_hhi_contents ()
+  |> Array.to_list
+  |> List.map ~f:(fun (fn, _) ->
+         Relative_path.create
+           Relative_path.Hhi
+           (Path.to_string (as_abs_path fn)))
+
+(** Return the fully qualified names of all functions in .hhi files, sorted
+    alphabetically. *)
+let hhi_funs (naming_table : Naming_table.t) : string list =
+  hhi_paths ()
+  |> List.map ~f:(fun fn ->
+         match Naming_table.get_file_info naming_table fn with
+         | Some info ->
+           List.map info.FileInfo.funs ~f:(fun (_, name, _) -> name)
+         | None -> [])
+  |> List.concat
+  |> List.sort ~compare:String.compare
+  |> List.rev
+
+(** Filter function names to those in namespaces can be used with value types. *)
+let filter_fake_arrow_namespaces (fun_names : string list) : string list =
+  let in_relevant_ns name : bool =
+    let name = Utils.strip_hh_lib_ns name in
+    String.is_prefix ~prefix:"C\\" name
+    || String.is_prefix ~prefix:"Vec\\" name
+    || String.is_prefix ~prefix:"Dict\\" name
+    || String.is_prefix ~prefix:"Keyset\\" name
+    || String.is_prefix ~prefix:"Str\\" name
+  in
+  List.filter fun_names ~f:in_relevant_ns
+
+(** Create a fresh type variable for every item in [tparams]. *)
+let fresh_tyvars (env : Tast_env.env) (tparams : 'a list) :
+    Tast_env.env * locl_ty list =
+  List.fold tparams ~init:(env, []) ~f:(fun (env, tvars) _ ->
+      let (env, tvar) = Tast_env.fresh_type env Pos.none in
+      (env, tvar :: tvars))
+
+let fresh_expand_env
+    (env : Tast_env.env) (tparams : decl_ty Typing_defs.tparam list) :
+    Tast_env.env * expand_env =
+  let (env, tyvars) = fresh_tyvars env tparams in
+  let substs = Decl_subst.make_locl tparams tyvars in
+  (env, { Typing_defs.empty_expand_env with substs })
+
+(** Does Hack function [f] accept [arg_ty] as its first argument? *)
+let fun_accepts_first_arg (env : Tast_env.env) (f : fun_elt) (arg_ty : locl_ty)
+    : bool =
+  match Typing_defs.get_node f.fe_type with
+  | Tfun ft ->
+    let params = ft.ft_params in
+    (match List.hd params with
+    | Some first_param ->
+      let (env, ety_env) = fresh_expand_env env ft.ft_tparams in
+      let (env, first_param) =
+        Tast_env.localize env ety_env first_param.fp_type.et_type
+      in
+      (match get_node first_param with
+      | Tvar _ ->
+        (* Kludge: If inference found a type variable that it couldn't solve,
+           we've probably violated a where constraint and shouldn't consider
+           this function to be compatible. *)
+        false
+      | _ -> Tast_env.can_subtype env arg_ty first_param)
+    | _ -> false)
+  | _ -> false
+
+(** Fetch decls for all the [fun_names] and filter to those where the first argument
+    is compatible with [arg_ty]. *)
+let compatible_fun_decls
+    (env : Tast_env.env) (arg_ty : locl_ty) (fun_names : string list) :
+    (string * fun_elt) list =
+  List.filter_map fun_names ~f:(fun fun_name ->
+      match Decl_provider.get_fun (Tast_env.get_ctx env) fun_name with
+      | Some f when fun_accepts_first_arg env f arg_ty -> Some (fun_name, f)
+      | _ -> None)
+
+(** Is [ty] a value type where we want to allow -> to complete to a HSL function? *)
+let is_fake_arrow_ty (ty : locl_ty) : bool =
+  let (_, ty_) = Typing_defs_core.deref ty in
+  match ty_ with
+  | Tclass ((_, name), _, _) ->
+    String.equal Naming_special_names.Collections.cVec name
+    || String.equal Naming_special_names.Collections.cDict name
+    || String.equal Naming_special_names.Collections.cKeyset name
+  | Tprim Tstring -> true
+  | _ -> false
+
+(** If the user is completing $v-> and $v is a vec/keyset/dict/string,
+    offer HSL functions like C\count(). *)
+let autocomplete_hack_fake_arrow
+    (env : Tast_env.env)
+    (recv : expr)
+    (prop_name : sid)
+    (naming_table : Naming_table.t) : unit =
+  let prop_replace_pos = replace_pos_of_id prop_name in
+  let prop_start = prop_replace_pos.Ide_api_types.st in
+  let replace_pos =
+    Ide_api_types.
+      {
+        prop_replace_pos with
+        st = { prop_start with column = prop_start.column - 2 };
+      }
+  in
+
+  let (recv_ty, recv_pos, _) = recv in
+  if is_fake_arrow_ty recv_ty && is_auto_complete (snd prop_name) then
+    let recv_start_pos = Pos.shrink_to_start recv_pos in
+
+    let fake_arrow_funs =
+      filter_fake_arrow_namespaces (hhi_funs naming_table)
+    in
+    let compatible_funs = compatible_fun_decls env recv_ty fake_arrow_funs in
+
+    List.iter compatible_funs ~f:(fun (fun_name, fun_decl) ->
+        let name = Utils.strip_hh_lib_ns fun_name in
+        let kind = SI_Function in
+
+        (* We want to transform $some_vec-> to e.g.
+
+           C\contains(some_vec, ${1:\$value})
+
+           This requires an additional insertion "C\contains(" before
+           the expression. *)
+        let res_additional_edits =
+          [
+            ( Printf.sprintf "%s(" name,
+              Ide_api_types.pos_to_range recv_start_pos );
+          ]
+        in
+
+        (* Construct a snippet with placeholders for any additional
+           required arguments for this function. For the C\contains()
+           example, this is ", ${1:\$value})". *)
+        let required_params =
+          match Typing_defs.get_node fun_decl.fe_type with
+          | Tfun ft -> List.take ft.ft_params (arity_min ft)
+          | _ -> []
+        in
+        let params = List.drop required_params 1 in
+        let snippet =
+          match params with
+          | [] -> ")"
+          | params -> Printf.sprintf ", %s)" (snippet_for_params params)
+        in
+
+        let complete =
+          {
+            res_decl_pos =
+              Pos.to_absolute (ServerPos.resolve env fun_decl.fe_pos);
+            res_replace_pos = replace_pos;
+            res_base_class = None;
+            res_detail = Tast_env.print_decl_ty env fun_decl.fe_type;
+            res_insert_text = InsertAsSnippet { snippet; fallback = ")" };
+            (* VS Code uses filter text to decide which items match the current
+               prefix. However, "C\contains" does not start with "->", so VS
+               Code would normally ignore this completion item.
+
+               We set the filter text to "->contains" so we offer C\contains if
+               the user types e.g. "->" or "->co". *)
+            res_filter_text =
+              Some (Printf.sprintf "->%s" (Utils.strip_all_ns fun_name));
+            res_label = name;
+            res_fullname = name;
+            res_kind = kind;
+            res_documentation = None;
+            res_additional_edits;
+          }
+        in
+        add_res complete)
 
 let autocomplete_typed_member
     ~is_static autocomplete_context env class_ty cid mid =
@@ -1390,6 +1569,7 @@ let visitor
     (ctx : Provider_context.t)
     (autocomplete_context : legacy_autocomplete_context)
     (sienv : si_env)
+    (naming_table : Naming_table.t)
     (toplevel_tast : Tast.def list) =
   object (self)
     inherit Tast_visitor.iter as super
@@ -1464,6 +1644,7 @@ let visitor
     method! on_Obj_get env obj mid ognf =
       (match mid with
       | (_, _, Aast.Id mid) ->
+        autocomplete_hack_fake_arrow env obj mid naming_table;
         autocomplete_typed_member
           ~is_static:false
           autocomplete_context
@@ -1962,7 +2143,6 @@ let go_ctx
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
     ~(naming_table : Naming_table.t) =
-  let _ = naming_table in
   reset ();
 
   let cst = Ast_provider.compute_cst ~ctx ~entry in
@@ -1972,7 +2152,7 @@ let go_ctx
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
-  (visitor ctx autocomplete_context sienv tast)#go ctx tast;
+  (visitor ctx autocomplete_context sienv naming_table tast)#go ctx tast;
 
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in

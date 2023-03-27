@@ -180,6 +180,8 @@ let localize_no_subst env ~ignore_errors dty =
 
 let get_upper_bounds = Typing_env.get_upper_bounds
 
+let fresh_type = Typing_env.fresh_type
+
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
 let simplify_unions env ty = Typing_union.simplify_unions env ty

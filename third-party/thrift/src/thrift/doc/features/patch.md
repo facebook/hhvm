@@ -28,13 +28,11 @@ How mutations for Thrift [values](../spec/definition/data.md) are represented, m
 
 To enable Patch, `@patch.GeneratePatch` annotation **must** be used recursively on package or struct level.
 
-## C++
-
-In C++, there are 2 representations of a Patch — Static Patch and Dynamic Patch. Both have identical wire format, though they have different requirements and provide different APIs. In general, Static Patch is preferred unless you can not include the generated thrift header.
+There are 2 representations of a Patch — Static Patch and Dynamic Patch. Both have identical wire format, though they have different requirements and provide different APIs. In general, Static Patch is preferred unless you can not include the generated thrift header.
 
 * Static Patch, or Schema-full Patch, is generated from Thrift codegen and has 1:1 mapping to Thrift type.
     * Pros: More user-friendly APIs (e.g., be able to modify patch based on field name, user can’t generate invalid patch).
-    * Cons: Requires thrift file to be available (e.g., `<thrift_file>_types.h` must be included).
+    * Cons: Requires thrift file to be available (e.g., `<thrift_file>_types.h` must be included in C++).
 * Dynamic Patch, or Schema-less Patch, is a schema-less representation of static patch that is consumed with dynamic type `protocol::Object`.
     * Pros: Can be used without thrift file.
     * Cons: Less user-friendly APIs.

@@ -481,6 +481,11 @@ let visitor =
             self#on_expr env arg
           | _ -> self#zero
         else
+          let expr_ =
+            match expr_ with
+            | Aast.ReadonlyExpr (_, _, e) -> e
+            | _ -> expr_
+          in
           match expr_ with
           | Aast.Id id ->
             (* E.g. foo() *)

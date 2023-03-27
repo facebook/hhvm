@@ -351,6 +351,11 @@ impl CanonicalPath {
     fn strip_unc_escape(path: PathBuf) -> PathBuf {
         path
     }
+
+    /// Consume self yielding the canonicalized PathBuf.
+    pub fn into_path_buf(self) -> PathBuf {
+        self.0
+    }
 }
 
 /// Data that describes a watched filesystem location.

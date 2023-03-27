@@ -43,6 +43,7 @@ type mode =
   | Cst_search
   | Dump_symbol_info
   | Glean_index of string
+  | Glean_sym_hash
   | Dump_inheritance
   | Errors
   | Lint
@@ -400,6 +401,9 @@ let parse_options () =
       ( "--glean-index",
         Arg.String (fun output_dir -> set_mode (Glean_index output_dir) ()),
         " Run indexer and output json in provided dir" );
+      ( "--glean-sym-hash",
+        Arg.Unit (set_mode Glean_sym_hash),
+        " Print symbols hashes used by incremental indexer" );
       ( "--error-format",
         Arg.String
           (fun s ->
@@ -2074,6 +2078,10 @@ let handle_mode
       exit 1
     ) else
       Symbol_entrypoint.index_files ctx ~out_dir ~files:filenames
+  | Glean_sym_hash ->
+    List.iter
+      (Symbol_entrypoint.sym_hashes ctx ~files:filenames)
+      ~f:(fun (path, hash) -> Printf.printf "%s %s\n" path (Md5.to_hex hash))
   | Lint ->
     let lint_errors =
       Relative_path.Map.fold

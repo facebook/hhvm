@@ -168,6 +168,27 @@ let recheck_job
   in
   JobReturn.{ res with reindexed = fanout_reindexed; referenced }
 
+let sym_hashes ctx ~files =
+  let f file =
+    let fi =
+      File_info.create
+        ctx
+        ~root_path:"www"
+        ~hhi_path:"hhi"
+        ~gen_sym_hash:true
+        ~sym_path:false
+        (Indexable.from_file file)
+    in
+    let sym_hash =
+      match fi.File_info.sym_hash with
+      | None ->
+        failwith "Internal error" (* can't happen since gen_sym_hash = true *)
+      | Some sh -> sh
+    in
+    (Relative_path.to_absolute file, sym_hash)
+  in
+  List.map files ~f
+
 let index_files ctx ~out_dir ~files =
   let idx = List.map files ~f:Indexable.from_file in
   recheck_job

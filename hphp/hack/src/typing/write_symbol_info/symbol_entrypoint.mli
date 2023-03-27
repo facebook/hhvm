@@ -8,11 +8,15 @@
 
 (* entry point to the hack indexer *)
 
+open Hh_prelude
 module Indexable = Symbol_indexable
 module Sym_hash = Symbol_sym_hash
 
 val index_files :
   Provider_context.t -> out_dir:string -> files:Relative_path.t list -> unit
+
+val sym_hashes :
+  Provider_context.t -> files:Relative_path.t list -> (string * Md5.t) list
 
 val go :
   MultiWorker.worker list option ->

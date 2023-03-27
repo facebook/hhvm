@@ -783,7 +783,8 @@ function find_tests(
     "-o -name '*.hack.type-errors' " .
     "-o -name '*.hackpartial.type-errors' " .
     "')' " .
-    "-not -regex '.*round_trip[.]hhas'"
+    "-not -regex '.*round_trip[.]hhas' " .
+    "-not -name '*.inc.php'"
   );
   if (!$tests) {
     error("Could not find any tests associated with your options.\n" .

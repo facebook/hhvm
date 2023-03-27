@@ -153,5 +153,16 @@ TEST(constants, examples) {
 TEST(constants, escapes) {
   EXPECT_EQ(
       test_constants::escapes(),
-      (std::vector<std::string>{"Bcafes", "café", "\"", "'"}));
+      (std::vector<std::string>{
+          "Bcafes",
+          "café",
+          "\"",
+          "'",
+          "\u0001",
+          "\u007f",
+          "\u0080",
+          "\u07ff",
+          "\u0800",
+          "\uffff",
+          "\uABCD"}));
 }

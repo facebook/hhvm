@@ -56,15 +56,26 @@ bool is_hex_digit(char c) {
       (c >= 'A' && c <= 'F');
 }
 
-unsigned char lex_hex_digit(char c) {
-  if (c >= '0' && c <= '9') {
-    return c - '0';
+boost::optional<unsigned> lex_hex_integer(
+    const char* begin, const char* end, int size) {
+  if (end - begin < size) {
+    return {};
   }
-  if (c >= 'a' && c <= 'f') {
-    return 10 + (c - 'a');
+  unsigned result = 0;
+  for (int i = 0; i < size; ++i) {
+    char c = begin[i];
+    result <<= 4;
+    if (c >= '0' && c <= '9') {
+      result |= c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+      result |= 10 + (c - 'a');
+    } else if (c >= 'A' && c <= 'F') {
+      result |= 10 + (c - 'A');
+    } else {
+      return {};
+    }
   }
-  assert(c >= 'A' && c <= 'F');
-  return 10 + (c - 'A');
+  return result;
 }
 
 bool is_id_start(char c) {
@@ -355,14 +366,30 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
         c = '"';
         break;
       case 'x':
-        if (end - p >= 2 && is_hex_digit(p[0]) && is_hex_digit(p[1])) {
-          c = (lex_hex_digit(p[0]) << 4) | lex_hex_digit(p[1]);
+        if (auto n = lex_hex_integer(p, end, 2)) {
+          c = static_cast<char>(*n);
           p += 2;
-        } else {
-          diags_->error(literal.range.begin, "invalid hex escape sequence");
-          return {};
+          break;
         }
-        break;
+        diags_->error(literal.range.begin, "invalid `\\x` escape sequence");
+        return {};
+      case 'u':
+        if (auto n = lex_hex_integer(p, end, 4)) {
+          if (*n < 0x80) {
+            c = static_cast<unsigned char>(*n);
+          } else if (*n < 0x800) {
+            result.push_back(0b1100'0000 | ((*n >> 6) & 0b1'1111));
+            c = 0b1000'0000 | (*n & 0b111111);
+          } else {
+            result.push_back(0b1110'0000 | ((*n >> 12) & 0b1'1111));
+            result.push_back(0b1000'0000 | ((*n >> 6) & 0b11'1111));
+            c = 0b1000'0000 | (*n & 0b11'1111);
+          }
+          p += 4;
+          break;
+        }
+        diags_->error(literal.range.begin, "invalid `\\u` escape sequence");
+        return {};
       default:
         --p; // Put an unparsed character back.
         break;

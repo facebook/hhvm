@@ -2506,7 +2506,13 @@ class CompilerFailureTest(unittest.TestCase):
         )
 
     def test_invalid_hex_escape(self):
-        write_file("foo.thrift", 'const string foo = "\\x"')
+        write_file("foo.thrift", 'const string s = "\\x";')
         ret, out, err = self.run_thrift("foo.thrift")
         self.assertEqual(ret, 1)
-        self.assertEqual(err, "[ERROR:foo.thrift:1] invalid hex escape sequence\n")
+        self.assertEqual(err, "[ERROR:foo.thrift:1] invalid `\\x` escape sequence\n")
+
+    def test_invalid_unicode_escape(self):
+        write_file("foo.thrift", 'const string s = "\\u";')
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(err, "[ERROR:foo.thrift:1] invalid `\\u` escape sequence\n")

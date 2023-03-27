@@ -6,8 +6,10 @@
  *
  *)
 
+(** Generate facts for all declarations in AST, and
+    a XRefs map for the module references *)
 val process_decls :
   Provider_context.t ->
   Symbol_predicate.Fact_acc.t ->
   Symbol_file_info.t ->
-  Symbol_predicate.Fact_acc.t
+  Symbol_xrefs.t * Symbol_predicate.Fact_acc.t

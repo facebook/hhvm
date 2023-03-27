@@ -9,7 +9,6 @@
 open Hh_prelude
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
-module Fact_id = Symbol_fact_id
 module Build = Symbol_build_json
 module Predicate = Symbol_predicate
 module File_info = Symbol_file_info
@@ -333,14 +332,8 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
 
 let process_xrefs_and_calls ctx prog File_info.{ path; tast; symbols; _ } =
   Fact_acc.set_ownership_unit prog (Some path);
-  let ((XRefs.{ fact_map; pos_map; _ } as xrefs), prog) =
+  let ((XRefs.{ pos_map; _ } as xrefs), prog) =
     process_xrefs ctx symbols prog
-  in
-  let prog =
-    if Fact_id.Map.is_empty fact_map then
-      prog
-    else
-      Add_fact.file_xrefs ~path fact_map prog |> snd
   in
   let prog = process_calls ctx path tast pos_map prog in
   (prog, xrefs)

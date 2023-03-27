@@ -72,35 +72,35 @@
   }}{{/type:struct?}}{{!
 
   Map constants
-  }}{{#type:map?}}{{!
-    }}{{> common/type}}{
-    {{#value:map_elements}}
-      {{#element:key}}{{!
-        }}{{#type:key_type}}{{!
-          }}{{#type:struct?}}{{!
-            }}{{#type:struct}}{{!
-              }}{{> const/struct_value}}{{!
-            }}{{/type:struct}}{{!
-          }}{{/type:struct?}}{{!
-          }}{{^type:struct?}}{{!
-            }}{{> const/value}}{{!
-          }}{{/type:struct?}}{{!
-        }}{{/type:key_type}}{{!
-      }}{{/element:key}}: {{!
-      }}{{#element:value}}{{!
-        }}{{#type:value_type}}{{!
-          }}{{#type:struct?}}{{!
-            }}{{#type:struct}}{{!
-              }}{{> const/struct_value}}{{!
-            }}{{/type:struct}}{{!
-          }}{{/type:struct?}}{{!
-          }}{{^type:struct?}}{{!
-            }}{{> const/value}}{{!
-          }}{{/type:struct?}}{{!
-        }}{{/type:value_type}}{{!
-      }}{{/element:value}},
-    {{/value:map_elements}}
-  }{{/type:map?}}{{!
+}}{{#type:map?}}{{!
+  }}{{> common/type}}{
+{{#value:map_elements}}
+    {{#element:key}}{{!
+      }}{{#type:key_type}}{{!
+        }}{{#type:struct?}}{{!
+          }}{{#type:struct}}{{!
+            }}{{> const/struct_value}}{{!
+          }}{{/type:struct}}{{!
+        }}{{/type:struct?}}{{!
+        }}{{^type:struct?}}{{!
+          }}{{> const/value}}{{!
+        }}{{/type:struct?}}{{!
+      }}{{/type:key_type}}{{!
+    }}{{/element:key}}: {{!
+    }}{{#element:value}}{{!
+      }}{{#type:value_type}}{{!
+        }}{{#type:struct?}}{{!
+          }}{{#type:struct}}{{!
+            }}{{> const/struct_value}}{{!
+          }}{{/type:struct}}{{!
+        }}{{/type:struct?}}{{!
+        }}{{^type:struct?}}{{!
+          }}{{> const/value}}{{!
+        }}{{/type:struct?}}{{!
+      }}{{/type:value_type}}{{!
+    }}{{/element:value}},
+{{/value:map_elements}}
+}{{/type:map?}}{{!
 
   List constants
 }}{{#type:list?}}{{!

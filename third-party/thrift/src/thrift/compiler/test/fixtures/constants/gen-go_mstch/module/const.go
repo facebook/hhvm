@@ -17,14 +17,14 @@ const Name string = "Mark Zuckerberg"
 const MultiLineString string = "This\nis a\nmulti line string.\n"
 var States []map[string]int32 = []map[string]int32{
     map[string]int32{
-      "San Diego": 3211000,
-      "Sacramento": 479600,
-      "SF": 837400,
-  },
+    "San Diego": 3211000,
+    "Sacramento": 479600,
+    "SF": 837400,
+},
     map[string]int32{
-      "New York": 8406000,
-      "Albany": 98400,
-  },
+    "New York": 8406000,
+    "Albany": 98400,
+},
 }
 const X float64 = 1
 const Y float64 = 1000000.0
@@ -35,8 +35,8 @@ const MyCompany MyCompany = Company_FACEBOOK
 const Foo MyStringIdentifier = "foo"
 const Bar MyIntIdentifier = 42
 var Mymap MyMapIdentifier = map[string]string{
-      "keys": "values",
-  }
+    "keys": "values",
+}
 var Instagram Internship = *NewInternship().
     SetWeeks(12).
     SetTitle("Software Engineer").
@@ -195,11 +195,11 @@ const QuotationMark string = "\""
 const Backslash string = "\\\\"
 const EscapedA string = "a"
 var Char2ascii map[string]int32 = map[string]int32{
-      "'": 39,
-      "\"": 34,
-      "\\\\": 92,
-      "a": 97,
-  }
+    "'": 39,
+    "\"": 34,
+    "\\\\": 92,
+    "a": 97,
+}
 var EscapedStrings []string = []string{
     "a",
     "«",
@@ -235,13 +235,13 @@ var EmptyIntSet []int32 = []int32{
 var EmptyStringSet []string = []string{
 }
 var EmptyIntIntMap map[int32]int32 = map[int32]int32{
-  }
+}
 var EmptyIntStringMap map[int32]string = map[int32]string{
-  }
+}
 var EmptyStringIntMap map[string]int32 = map[string]int32{
-  }
+}
 var EmptyStringStringMap map[string]string = map[string]string{
-  }
+}
 const MaxIntDec int64 = 9223372036854775807
 const MaxIntOct int64 = 9223372036854775807
 const MaxIntHex int64 = 9223372036854775807

@@ -5138,8 +5138,8 @@ func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
         ).
         SetAdaptedMapDefault(
             map[int64]int64{
-      1: 1,
-  },
+    1: 1,
+},
         )
 }
 

@@ -2458,8 +2458,8 @@ func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     SetA("3").
     SetB(
         map[string]int32{
-      "a": 3,
-  },
+    "a": 3,
+},
     ),
         )
 }

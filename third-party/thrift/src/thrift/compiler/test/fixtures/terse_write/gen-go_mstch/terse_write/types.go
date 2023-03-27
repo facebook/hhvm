@@ -4605,8 +4605,8 @@ func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
         ).
         SetMapField(
             map[int16]int16{
-      1: 1,
-  },
+    1: 1,
+},
         )
 }
 

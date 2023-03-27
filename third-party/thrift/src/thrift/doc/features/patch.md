@@ -6,7 +6,7 @@ state: experimental
 
 :::note
 
-Currently Thrift Patch is only implemented in C++
+Thrift Patch is an experimental feature that is only implemented in C++.
 
 :::
 

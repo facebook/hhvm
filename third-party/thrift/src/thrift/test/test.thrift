@@ -36,7 +36,7 @@ const string str_4 = '"foo"';
 const string str_5 = "line 1
 line 2
 ";
-const list<string> escapes = ["\x42cafes", "caf\xc3\xa9"];
+const list<string> escapes = ["\x42cafes", "caf\xc3\xa9", "\"", '\''];
 
 const list<string> l_e = [];
 const list<i32> l_1 = [23, 42, 56];

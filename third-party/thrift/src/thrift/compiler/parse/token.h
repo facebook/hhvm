@@ -247,7 +247,7 @@ class token {
     return as.int_value;
   }
 
-  // Returns the value of a floating-point constant.
+  // Returns the value of a floating-point literal.
   double float_value() const {
     if (kind != tok::float_literal) {
       throw_invalid_kind("float");

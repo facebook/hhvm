@@ -348,6 +348,12 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
       case '\\':
         result.push_back(c);
         break;
+      case '\'':
+        c = '\'';
+        break;
+      case '"':
+        c = '"';
+        break;
       case 'x':
         if (end - p >= 2 && is_hex_digit(p[0]) && is_hex_digit(p[1])) {
           c = (lex_hex_digit(p[0]) << 4) | lex_hex_digit(p[1]);
@@ -456,12 +462,23 @@ token lexer::get_next_token() {
         : token::make_int_literal(token_source_range(), 0);
   } else if (c == '"' || c == '\'') {
     // Lex a string literal.
-    const char* p = std::find(ptr_, end(), c);
-    if (*p) {
+    for (;;) {
+      const char* p = std::find(ptr_, end(), c);
+      if (!*p) {
+        break;
+      }
+      // Count any backslashes preceding the ending quote.
+      const char* before_backslashes = p - 1;
+      while (before_backslashes >= ptr_ && *before_backslashes == '\\') {
+        --before_backslashes;
+      }
       ptr_ = p + 1;
-      return token::make_string_literal(
-          token_source_range(),
-          {token_start_, static_cast<size_t>(ptr_ - token_start_)});
+      if ((p - before_backslashes) % 2 != 0) {
+        // Even number of backslashes means that the quote is unescaped.
+        return token::make_string_literal(
+            token_source_range(),
+            {token_start_, static_cast<size_t>(ptr_ - token_start_)});
+      }
     }
   } else if (!c && ptr_ > end()) {
     --ptr_; // Put '\0' back in case get_next_token() is called again.

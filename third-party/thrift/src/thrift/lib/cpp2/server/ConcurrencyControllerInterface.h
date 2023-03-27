@@ -69,6 +69,16 @@ class ConcurrencyControllerInterface : public RequestCompletionCallback {
   virtual uint64_t numPendingDequeRequest() const { return 0; }
 
   virtual std::string describe() const = 0;
+
+  // ConcurrencyController can notify an observer when request execution is
+  // completed
+  class Observer {
+   public:
+    virtual ~Observer() {}
+    virtual void onFinishExecution(ServerRequest& request) = 0;
+  };
+
+  virtual void setObserver(std::shared_ptr<Observer> observer) = 0;
 };
 
 } // namespace apache::thrift

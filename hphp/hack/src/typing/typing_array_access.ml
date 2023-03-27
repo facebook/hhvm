@@ -289,12 +289,6 @@ let pessimised_tup_assign p env arg_ty =
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, ty)
 
-(* Assignment into a pessimised vec or dict should behave as though it has type
-   forall T1 T2. vec<T1> -> idx -> ~T2 -> vec<T1|T2> *)
-let pessimised_vec_dict_assign p env vec_ty arg_ty =
-  let (env, ty) = pessimised_tup_assign p env arg_ty in
-  Typing_union.union env vec_ty ty
-
 (* Typing of array-get like expressions; [ty1] is the type of the expression
    into which we are indexing (the 'collection'), [e2] is the index expression
    and [ty2] is the type of that expression.
@@ -479,6 +473,7 @@ let rec array_get
           let (k, (env, v)) =
             match argl with
             | [t] when String.equal cn SN.Collections.cKeyset -> (t, (env, t))
+            | [k; v] when String.equal cn SN.Collections.cDict -> (k, (env, v))
             | [k; v] when String.( <> ) cn SN.Collections.cKeyset ->
               (k, maybe_pessimise_type env v)
             | _ ->
@@ -1264,25 +1259,17 @@ let rec assign_array_get
           let ak_t = MakeType.arraykey (Reason.Ridx_dict p) in
           match idx_err with
           | Ok _ ->
-            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-              pessimised_vec_dict_assign expr_pos env tk tkey
-            else
-              let (env, tkey_new) =
-                Typing_intersection.intersect
-                  env
-                  ~r:(Reason.Ridx_dict p)
-                  tkey
-                  ak_t
-              in
-              Typing_union.union env tk tkey_new
+            let (env, tkey_new) =
+              Typing_intersection.intersect
+                env
+                ~r:(Reason.Ridx_dict p)
+                tkey
+                ak_t
+            in
+            Typing_union.union env tk tkey_new
           | _ -> Typing_union.union env tk tkey
         in
-        let (env, tv') =
-          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-            pessimised_vec_dict_assign expr_pos env tv ty2
-          else
-            Typing_union.union env tv ty2
-        in
+        let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tclass (id, e, [tk'; tv'])) in
         (env, (ty, Ok ty, idx_err, Ok ty2))
       | Tclass ((_, cn), _, _) when String.equal cn SN.Collections.cKeyset ->
@@ -1351,21 +1338,8 @@ let rec assign_array_get
         let (env, idx_err) =
           check_arraykey_index_write env expr_pos ety1 tkey
         in
-        let (env, tk') =
-          match idx_err with
-          | Ok _ ->
-            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-              pessimised_vec_dict_assign expr_pos env tk tkey
-            else
-              Typing_union.union env tk tkey
-          | _ -> Typing_union.union env tk tkey
-        in
-        let (env, tv') =
-          if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-            pessimised_vec_dict_assign expr_pos env tv ty2
-          else
-            Typing_union.union env tv ty2
-        in
+        let (env, tk') = Typing_union.union env tk tkey in
+        let (env, tv') = Typing_union.union env tv ty2 in
         let ty = mk (r, Tvec_or_dict (tk', tv')) in
         (env, (ty, Ok ty, idx_err, Ok ty2))
       | Tvar _ when TUtils.is_tyvar_error env ety1 ->

@@ -3685,21 +3685,24 @@ and expr_
     make_result env p (make_expr th tel) (make_ty elem_ty)
   | Darray (th, l)
   | KeyValCollection (_, th, l) ->
-    let (get_expected_kind, name, make_expr, make_ty) =
+    let (get_expected_kind, name, make_expr, make_ty, pessimisable_builtin) =
       match e with
       | KeyValCollection ((kind_pos, kind), _, _) ->
         let class_name = Nast.kvc_kind_to_name kind in
         ( get_kvc_inst env p kind,
           class_name,
           (fun th pairs -> Aast.KeyValCollection ((kind_pos, kind), th, pairs)),
-          (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
-        )
+          (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v]),
+          (match kind with
+          | Dict -> false
+          | _ -> true) )
       | Darray _ ->
         let name = "darray" in
         ( get_kvc_inst env p Dict,
           name,
           (fun th pairs -> Aast.KeyValCollection ((p, Dict), th, pairs)),
-          (fun k v -> MakeType.dict (Reason.Rwitness p) k v) )
+          (fun k v -> MakeType.dict (Reason.Rwitness p) k v),
+          true )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -3717,7 +3720,7 @@ and expr_
       | _ -> begin
         (* no explicit typehint, fallback to supplied expect *)
         match
-          expand_expected_and_get_node ~pessimisable_builtin:true env expected
+          expand_expected_and_get_node ~pessimisable_builtin env expected
         with
         | (env, Some (pos, reason, _, ety, _)) -> begin
           match get_expected_kind ety with
@@ -3739,7 +3742,7 @@ and expr_
         ~use_pos:p
         ~reason:(Reason.URkey name)
         ~bound:(Some (MakeType.arraykey r))
-        ~can_pessimise:true
+        ~can_pessimise:pessimisable_builtin
         r
         env
         kl
@@ -3751,7 +3754,7 @@ and expr_
         ~explicit:(Option.is_some th)
         ~use_pos:p
         ~reason:(Reason.URvalue name)
-        ~can_pessimise:true
+        ~can_pessimise:pessimisable_builtin
         ~bound:None
         (Reason.Rtype_variable_generics (p, "Tv", strip_ns name))
         env

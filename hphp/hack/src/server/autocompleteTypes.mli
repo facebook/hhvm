@@ -22,6 +22,18 @@ type func_details_result = {
 }
 [@@deriving show]
 
+type snippet_with_fallback = {
+  snippet: string;
+  fallback: string;
+}
+
+(** Whether the inserted text should be treated as literal text or a template with placeholders.
+
+    https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#insertTextFormat *)
+type insert_text =
+  | InsertLiterally of string
+  | InsertAsSnippet of snippet_with_fallback
+
 type autocomplete_item = {
   (* The position of the declaration we're returning. *)
   res_decl_pos: Pos.absolute;
@@ -33,7 +45,7 @@ type autocomplete_item = {
   res_base_class: string option;
   (* These strings correspond to the LSP fields in CompletionItem. *)
   res_label: string;
-  res_insert_text: string;
+  res_insert_text: insert_text;
   res_detail: string;
   res_filter_text: string option;
   res_additional_edits: (string * Ide_api_types.range) list;

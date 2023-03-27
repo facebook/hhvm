@@ -199,6 +199,63 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
         List.mapi (List.take ft.ft_params min_arity) ~f:param_to_record);
   }
 
+(* If we're autocompleting a call (function or method), insert a
+   template for the arguments as well as function name. *)
+let insert_text_for_fun_call
+    env
+    (autocomplete_context : legacy_autocomplete_context)
+    (fun_name : string)
+    (ft : Typing_defs.locl_fun_type) : insert_text =
+  if Char.equal autocomplete_context.char_at_pos '(' then
+    (* Arguments are present already, e.g. the user has ->AUTO332(1, 2).
+       We don't want to insert params when we complete the name, or we
+       end up with ->methName()(1, 2). *)
+    InsertLiterally fun_name
+  else
+    let arity =
+      if Tast_env.is_in_expr_tree env then
+        (* Helper functions in expression trees don't have relevant
+           parameter names on their decl, so don't autofill
+           parameters.*)
+        0
+      else
+        arity_min ft
+    in
+    let params = List.take ft.ft_params arity in
+    let param_templates =
+      List.mapi params ~f:(fun i param ->
+          match param.fp_name with
+          | Some param_name -> Printf.sprintf "${%d:\\%s}" (i + 1) param_name
+          | None -> Printf.sprintf "${%d}" (i + 1))
+    in
+    (* A snippet looks like this:
+
+       fun_name(${1:\$first_arg}, ${2:\$second_arg})
+
+       The syntax for snippets is described here:
+       https://code.visualstudio.com/docs/editor/userdefinedsnippets#_variables
+    *)
+    let snippet =
+      Printf.sprintf "%s(%s)" fun_name (String.concat ~sep:", " param_templates)
+    in
+    let fallback = Printf.sprintf "%s()" fun_name in
+    InsertAsSnippet { snippet; fallback }
+
+let insert_text_for_ty
+    env
+    (autocomplete_context : legacy_autocomplete_context)
+    (label : string)
+    (ty : phase_ty) : insert_text =
+  let (env, ty) =
+    match ty with
+    | LoclTy locl_ty -> (env, locl_ty)
+    | DeclTy decl_ty ->
+      Tast_env.localize_no_subst env ~ignore_errors:true decl_ty
+  in
+  match Typing_defs.get_node ty with
+  | Tfun ft -> insert_text_for_fun_call env autocomplete_context label ft
+  | _ -> InsertLiterally label
+
 (* Convert a `ty` into a func details structure *)
 let get_func_details_for env ty =
   let (env, ty) =
@@ -255,7 +312,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
             res_replace_pos = replace_pos_of_id id;
             res_base_class = None;
             res_detail = kind_to_string kind;
-            res_insert_text;
+            res_insert_text = InsertLiterally res_insert_text;
             res_label = res_insert_text;
             res_fullname = code;
             res_kind = kind;
@@ -270,7 +327,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
 
     List.iter (TShapeMap.keys fields) ~f:add
 
-let autocomplete_member ~is_static env class_ cid id =
+let autocomplete_member ~is_static autocomplete_context env class_ cid id =
   (* This is used for instance "$x->|" and static "Class1::|" members. *)
   if is_auto_complete (snd id) then (
     (* Detect usage of "parent::|" which can use both static and instance *)
@@ -297,7 +354,7 @@ let autocomplete_member ~is_static env class_ cid id =
           res_base_class = Some (Cls.name class_);
           res_detail;
           res_label = name;
-          res_insert_text = name;
+          res_insert_text = insert_text_for_ty env autocomplete_context name ty;
           res_fullname = name;
           res_kind = kind;
           func_details = get_func_details_for env ty;
@@ -409,7 +466,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_base_class = Some (Cls.name class_);
               res_detail;
               res_label = lstrip name ":";
-              res_insert_text = lstrip name ":";
+              res_insert_text = InsertLiterally (lstrip name ":");
               res_fullname = name;
               res_kind = kind;
               func_details = get_func_details_for env ty;
@@ -443,7 +500,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
           res_base_class = None;
           res_detail = kind_to_string kind;
           res_label = "true";
-          res_insert_text = "true";
+          res_insert_text = InsertLiterally "true";
           res_fullname = "true";
           res_kind = kind;
           func_details = None;
@@ -458,7 +515,7 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
         {
           complete with
           res_label = "false";
-          res_insert_text = "false";
+          res_insert_text = InsertLiterally "false";
           res_fullname = "false";
         }
     )
@@ -500,7 +557,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           res_base_class = None;
           res_detail = kind_to_string kind;
           res_label = name;
-          res_insert_text = name;
+          res_insert_text = InsertLiterally name;
           res_fullname = name;
           res_kind = kind;
           func_details = get_func_details_for env ty;
@@ -578,7 +635,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       res_base_class;
                       res_detail = kind_to_string kind;
                       res_label = name;
-                      res_insert_text = name;
+                      res_insert_text = InsertLiterally name;
                       res_fullname = name;
                       res_kind = kind;
                       func_details = get_func_details_for env dty;
@@ -590,16 +647,29 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                   add_res complete))
   end
 
-let autocomplete_typed_member ~is_static env class_ty cid mid =
+let autocomplete_typed_member
+    ~is_static autocomplete_context env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:(fun cname ->
          Decl_provider.get_class (Tast_env.get_ctx env) cname
          |> Option.iter ~f:(fun class_ ->
                 let cid = Option.map cid ~f:to_nast_class_id_ in
-                autocomplete_member ~is_static env class_ cid mid))
+                autocomplete_member
+                  ~is_static
+                  autocomplete_context
+                  env
+                  class_
+                  cid
+                  mid))
 
-let autocomplete_static_member env (ty, _, cid) mid =
-  autocomplete_typed_member ~is_static:true env ty (Some cid) mid
+let autocomplete_static_member autocomplete_context env (ty, _, cid) mid =
+  autocomplete_typed_member
+    ~is_static:true
+    autocomplete_context
+    env
+    ty
+    (Some cid)
+    mid
 
 let compatible_enum_class_consts env cls (expected_ty : locl_ty option) =
   (* Ignore ::class, as it's not a normal enum constant. *)
@@ -658,7 +728,7 @@ let autocomplete_enum_class_label env opt_cname pos_labelname expected_ty =
             res_base_class = Some (Cls.name cls);
             res_detail;
             res_label = name;
-            res_insert_text = name;
+            res_insert_text = InsertLiterally name;
             res_fullname = name;
             res_kind = kind;
             func_details = get_func_details_for env ty;
@@ -772,7 +842,7 @@ let autocomplete_class_type_const env ((_, h) : Aast.hint) (ids : sid list) :
                 res_base_class = Some cc.cc_origin;
                 res_detail = "const type";
                 res_label = name;
-                res_insert_text = name;
+                res_insert_text = InsertLiterally name;
                 res_fullname = name;
                 res_kind = SI_ClassConstant;
                 func_details = None;
@@ -823,7 +893,7 @@ let autocomplete_shape_literal_in_call
         res_base_class = None;
         res_detail = kind_to_string kind;
         res_label = key;
-        res_insert_text = key;
+        res_insert_text = InsertLiterally key;
         res_fullname = key;
         res_kind = kind;
         func_details = get_func_details_for env lty;
@@ -879,7 +949,7 @@ let add_builtin_attribute_result replace_pos ~doc ~name : unit =
       res_base_class = None;
       res_detail = "built-in attribute";
       res_label = name;
-      res_insert_text = name;
+      res_insert_text = InsertLiterally name;
       res_fullname = name;
       res_kind = SI_Class;
       func_details = None;
@@ -937,7 +1007,7 @@ let autocomplete_overriding_method env m : unit =
               res_base_class = Some ce.ce_origin;
               res_detail = "method name";
               res_label = name;
-              res_insert_text = name;
+              res_insert_text = InsertLiterally name;
               res_fullname = name;
               res_kind = SI_ClassMethod;
               func_details = None;
@@ -1009,7 +1079,7 @@ let add_enum_const_result env pos replace_pos prefix const_name =
       res_base_class = None;
       res_detail = kind_to_string kind;
       res_label = key;
-      res_insert_text = key;
+      res_insert_text = InsertLiterally key;
       res_fullname = key;
       res_kind = kind;
       func_details = get_func_details_for env lty;
@@ -1126,6 +1196,7 @@ let builtin_type_hints =
 
 (* Find global autocomplete results *)
 let find_global_results
+    ~(env : Tast_env.env)
     ~(id : Pos.t * string)
     ~(completion_type : SearchUtils.autocomplete_type option)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
@@ -1200,26 +1271,32 @@ let find_global_results
      * memory and performance.
      *)
     List.iter results ~f:(fun r ->
-        let (res_insert_text, res_fullname) =
+        let (res_label, res_fullname) =
           if strip_xhp_colon then
             (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
           else
             (r.si_name, r.si_fullname)
         in
         (* Only load func details if the flag sie_resolve_signatures is true *)
-        let (func_details, res_detail) =
+        let (func_details, res_detail, res_insert_text) =
           if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
           then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
-            | None -> (None, kind_to_string r.si_kind)
+            | None -> (None, kind_to_string r.si_kind, InsertLiterally res_label)
             | Some fe ->
               let ty = fe.fe_type in
               let details = get_func_details_for tast_env (DeclTy ty) in
               let res_detail = Tast_env.print_decl_ty tast_env ty in
-              (details, res_detail)
+              ( details,
+                res_detail,
+                insert_text_for_ty
+                  env
+                  autocomplete_context
+                  res_label
+                  (Phase.decl ty) )
           else
-            (None, kind_to_string r.si_kind)
+            (None, kind_to_string r.si_kind, InsertLiterally res_label)
         in
         (* Only load exact positions if specially requested *)
         let res_decl_pos =
@@ -1241,7 +1318,7 @@ let find_global_results
             res_replace_pos = replace_pos_of_id ~strip_xhp_colon id;
             res_base_class = None;
             res_detail;
-            res_label = res_insert_text;
+            res_label;
             res_insert_text;
             res_fullname;
             res_kind = r.si_kind;
@@ -1271,7 +1348,7 @@ let find_global_results
                  res_base_class = None;
                  res_detail = "builtin";
                  res_label = name;
-                 res_insert_text = name;
+                 res_insert_text = InsertLiterally name;
                  res_fullname = name;
                  res_kind = kind;
                  func_details = None;
@@ -1376,7 +1453,7 @@ let compute_complete_local ctx tast =
             res_base_class = None;
             res_detail = kind_to_string kind;
             res_label = name;
-            res_insert_text = name;
+            res_insert_text = InsertLiterally name;
             res_fullname = name;
             res_kind = kind;
             func_details;
@@ -1399,11 +1476,14 @@ let visitor
     inherit Tast_visitor.iter as super
 
     method complete_global
-        ?(strip_xhp_colon = false) (id : sid) (ac_type : autocomplete_type)
-        : unit =
+        ?(strip_xhp_colon = false)
+        (env : Tast_env.env)
+        (id : sid)
+        (ac_type : autocomplete_type) : unit =
       if is_auto_complete (snd id) then
         let completion_type = Some ac_type in
         find_global_results
+          ~env
           ~id
           ~completion_type
           ~autocomplete_context
@@ -1411,7 +1491,8 @@ let visitor
           ~sienv
           ~pctx:ctx
 
-    method complete_id (id : Ast_defs.id) : unit = self#complete_global id Acid
+    method complete_id env (id : Ast_defs.id) : unit =
+      self#complete_global env id Acid
 
     method! on_def env d =
       match d with
@@ -1425,7 +1506,7 @@ let visitor
 
     method! on_Id env id =
       autocomplete_id id;
-      self#complete_id id;
+      self#complete_id env id;
       super#on_Id env id
 
     method! on_Call env f targs args unpack_arg =
@@ -1434,12 +1515,12 @@ let visitor
 
     method! on_New env ((_, _, cid_) as cid) el unpacked_element =
       (match cid_ with
-      | Aast.CI id -> self#complete_global id Acnew
+      | Aast.CI id -> self#complete_global env id Acnew
       | _ -> ());
       super#on_New env cid el unpacked_element
 
     method! on_Happly env sid hl =
-      self#complete_global sid Actype;
+      self#complete_global env sid Actype;
       super#on_Happly env sid hl
 
     method! on_Haccess env h ids =
@@ -1453,17 +1534,24 @@ let visitor
 
     method! on_Class_get env cid mid prop_or_method =
       match mid with
-      | Aast.CGstring p -> autocomplete_static_member env cid p
+      | Aast.CGstring p ->
+        autocomplete_static_member autocomplete_context env cid p
       | Aast.CGexpr _ -> super#on_Class_get env cid mid prop_or_method
 
     method! on_Class_const env cid mid =
-      autocomplete_static_member env cid mid;
+      autocomplete_static_member autocomplete_context env cid mid;
       super#on_Class_const env cid mid
 
     method! on_Obj_get env obj mid ognf =
       (match mid with
       | (_, _, Aast.Id mid) ->
-        autocomplete_typed_member ~is_static:false env (get_type obj) None mid
+        autocomplete_typed_member
+          ~is_static:false
+          autocomplete_context
+          env
+          (get_type obj)
+          None
+          mid
       | _ -> ());
       super#on_Obj_get env obj mid ognf
 
@@ -1529,7 +1617,7 @@ let visitor
 
     method! on_Xml env sid attrs el =
       autocomplete_id sid;
-      self#complete_global sid Acid ~strip_xhp_colon:true;
+      self#complete_global env sid Acid ~strip_xhp_colon:true;
 
       let cid = Aast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
@@ -1554,7 +1642,13 @@ let visitor
                    if Cls.is_xhp c then
                      autocomplete_xhp_attributes env c (Some cid) id attrs
                    else
-                     autocomplete_member ~is_static:false env c (Some cid) id
+                     autocomplete_member
+                       ~is_static:false
+                       autocomplete_context
+                       env
+                       c
+                       (Some cid)
+                       id
                  | Aast.Xhp_spread _ -> ()));
       super#on_Xml env sid attrs el
 
@@ -1620,7 +1714,7 @@ let visitor
       List.iter cls.Aast.c_uses ~f:(fun hint ->
           match snd hint with
           | Aast.Happly (id, params) ->
-            self#complete_global id Actrait_only;
+            self#complete_global env id Actrait_only;
             List.iter params ~f:(self#on_hint env)
           | _ -> ());
 
@@ -1661,7 +1755,7 @@ let complete_keywords_at possible_keywords text pos : unit =
                res_base_class = None;
                res_detail = kind_to_string kind;
                res_label = keyword;
-               res_insert_text = keyword;
+               res_insert_text = InsertLiterally keyword;
                res_fullname = keyword;
                res_kind = kind;
                func_details = None;

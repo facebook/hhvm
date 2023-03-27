@@ -2571,17 +2571,11 @@ let do_callHierarchyOutgoing
   in
   rpc conn ref_unblocked_time ~desc:"call-hierarchy-outgoing-calls" command
 
-let snippet_re = Str.regexp {|[\$}]|} (* snippets must backslash-escape "$\}" *)
-
 let make_ide_completion_response
     (result : AutocompleteTypes.ide_result) (filename : string) :
     Completion.completionList Lwt.t =
   let open AutocompleteTypes in
   let open Completion in
-  (* We use snippets to provide parentheses+arguments when autocompleting     *)
-  (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
-  (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
-  let is_caret_followed_by_lparen = Char.equal result.char_at_pos '(' in
   let p = initialize_params_exc () in
 
   let hack_to_insert (completion : autocomplete_item) :
@@ -2590,36 +2584,17 @@ let make_ide_completion_response
       List.map completion.res_additional_edits ~f:(fun (text, range) ->
           TextEdit.{ range = ide_range_to_lsp range; newText = text })
     in
-    match completion.func_details with
-    | Some details
-      when Lsp_helpers.supports_snippets p
-           && (not is_caret_followed_by_lparen)
-           && not
-                (SearchUtils.equal_si_kind
-                   completion.res_kind
-                   SearchUtils.SI_LocalVariable) ->
-      (* "method(${1:arg1}, ...)" but for args we just use param names. *)
-      let f i param =
-        let name = Str.global_replace snippet_re "\\\\\\0" param.param_name in
-        Printf.sprintf "${%i:%s}" (i + 1) name
-      in
-      let params = String.concat ~sep:", " (List.mapi details.params ~f) in
-      ( TextEdit.
-          {
-            range = ide_range_to_lsp completion.res_replace_pos;
-            newText = Printf.sprintf "%s(%s)" completion.res_insert_text params;
-          },
-        SnippetFormat,
-        additional_edits )
-    | _ ->
-      ( TextEdit.
-          {
-            range = ide_range_to_lsp completion.res_replace_pos;
-            newText = completion.res_insert_text;
-          },
-        PlainText,
-        additional_edits )
+    let range = ide_range_to_lsp completion.res_replace_pos in
+    match completion.res_insert_text with
+    | InsertAsSnippet { snippet; fallback } ->
+      if Lsp_helpers.supports_snippets p then
+        (TextEdit.{ range; newText = snippet }, SnippetFormat, additional_edits)
+      else
+        (TextEdit.{ range; newText = fallback }, PlainText, additional_edits)
+    | InsertLiterally text ->
+      (TextEdit.{ range; newText = text }, PlainText, additional_edits)
   in
+
   let hack_completion_to_lsp (completion : autocomplete_item) :
       Completion.completionItem =
     let (textEdit, insertTextFormat, additionalTextEdits) =

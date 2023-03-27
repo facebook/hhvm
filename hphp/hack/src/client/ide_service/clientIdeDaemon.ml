@@ -893,6 +893,7 @@ let handle_request :
         ~is_manually_invoked
         ~line:document_location.line
         ~column:document_location.column
+        ~naming_table:istate.naming_table
     in
     Lwt.return (state, Ok result)
   (* Autocomplete docblock resolve *)

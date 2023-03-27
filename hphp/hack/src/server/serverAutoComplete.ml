@@ -99,15 +99,22 @@ let go_at_auto332_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(sienv : SearchUtils.si_env)
-    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context) :
+    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
+    ~(naming_table : Naming_table.t) :
     AutocompleteTypes.autocomplete_item list Utils.With_complete_flag.t =
-  AutocompleteService.go_ctx ~ctx ~entry ~sienv ~autocomplete_context
+  AutocompleteService.go_ctx
+    ~ctx
+    ~entry
+    ~sienv
+    ~autocomplete_context
+    ~naming_table
 
 (** Call this function if you have a raw text file that DOES NOT have "AUTO332" in it *)
 let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(sienv : SearchUtils.si_env)
+    ~(naming_table : Naming_table.t)
     ~(is_manually_invoked : bool)
     ~(line : int)
     ~(column : int) : AutocompleteTypes.ide_result =
@@ -143,6 +150,7 @@ let go_ctx
       ~entry:modified_auto332_entry
       ~sienv
       ~autocomplete_context
+      ~naming_table
   in
   {
     AutocompleteTypes.completions = result.Utils.With_complete_flag.value;

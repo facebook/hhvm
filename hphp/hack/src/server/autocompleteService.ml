@@ -1960,7 +1960,9 @@ let go_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env) =
+    ~(sienv : SearchUtils.si_env)
+    ~(naming_table : Naming_table.t) =
+  let _ = naming_table in
   reset ();
 
   let cst = Ast_provider.compute_cst ~ctx ~entry in

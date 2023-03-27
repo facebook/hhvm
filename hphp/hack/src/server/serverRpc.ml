@@ -195,6 +195,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~entry
         ~sienv
         ~autocomplete_context
+        ~naming_table:env.naming_table
     in
     (env, result.With_complete_flag.value)
   | IDENTIFY_SYMBOL arg ->
@@ -409,7 +410,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             ~sienv:env.ServerEnv.local_symbol_table
             ~is_manually_invoked
             ~line:pos.File_content.line
-            ~column:pos.File_content.column)
+            ~column:pos.File_content.column
+            ~naming_table:env.naming_table)
     in
     (env, results)
   | CODE_ACTIONS (path, range) ->

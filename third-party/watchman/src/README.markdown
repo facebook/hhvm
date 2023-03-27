@@ -1,5 +1,5 @@
 <div align="center">
- <img src="website/static/logo.png" width="20%" height="20%" alt="watchman-logo">
+ <img src="website/static/img/logo.png" width="20%" height="20%" alt="watchman-logo">
  <h1>Watchman</h1>
  <h3>A file watching service.</h3>
 </div>

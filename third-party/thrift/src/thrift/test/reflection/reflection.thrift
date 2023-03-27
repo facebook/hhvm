@@ -581,28 +581,3 @@ struct StructWithAdaptedField {
 struct StructWithVectorBool {
   1: list<bool> values;
 }
-
-struct MyStruct {
-  1: i64 conflicting_name (cpp.name = 'unique_name');
-  2: optional i64 opt_conflicting_name (cpp.name = 'opt_unique_name');
-}
-
-union MyUnion {
-  1: i32 field;
-}
-
-permanent client exception MyException {
-  1: i32 field;
-}
-
-struct MyStruct2 {
-  1: i32 field;
-} (cpp.name = "RenamedMyStruct")
-
-union MyUnion2 {
-  1: i32 field;
-} (cpp.name = "RenamedMyUnion")
-
-permanent client exception MyException2 {
-  1: string message;
-} (cpp.name = "RenamedMyException")

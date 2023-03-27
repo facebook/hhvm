@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/test/reflection/gen-cpp2/class_name_types.h>
 #include <thrift/test/reflection/gen-cpp2/reflection_types.h>
 
 #include <type_traits>
@@ -336,12 +337,11 @@ TEST(FieldsTest, GetFieldNameCppName) {
 }
 
 TEST(FieldsTest, GetClassName) {
-  using namespace test_cpp2::cpp_reflection;
-  EXPECT_EQ(op::get_class_name_v<MyStruct>, "MyStruct");
-  EXPECT_EQ(op::get_class_name_v<MyUnion>, "MyUnion");
-  EXPECT_EQ(op::get_class_name_v<MyException>, "MyException");
-  EXPECT_EQ(op::get_class_name_v<RenamedMyStruct>, "MyStruct2");
-  EXPECT_EQ(op::get_class_name_v<RenamedMyUnion>, "MyUnion2");
-  EXPECT_EQ(op::get_class_name_v<RenamedMyException>, "MyException2");
+  EXPECT_EQ(op::get_class_name_v<test::MyStruct>, "MyStruct");
+  EXPECT_EQ(op::get_class_name_v<test::MyUnion>, "MyUnion");
+  EXPECT_EQ(op::get_class_name_v<test::MyException>, "MyException");
+  EXPECT_EQ(op::get_class_name_v<test::RenamedMyStruct>, "MyStruct2");
+  EXPECT_EQ(op::get_class_name_v<test::RenamedMyUnion>, "MyUnion2");
+  EXPECT_EQ(op::get_class_name_v<test::RenamedMyException>, "MyException2");
 }
 } // namespace apache::thrift::type

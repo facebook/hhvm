@@ -43,6 +43,7 @@
 #include "hphp/util/rds-local.h"
 
 #include <folly/AtomicHashMap.h>
+#include <folly/Bits.h>
 #include <folly/Format.h>
 
 #include <limits>
@@ -419,17 +420,12 @@ struct CompactWriter {
           break;
 
         case T_DOUBLE: {
-            union {
-              uint64_t i;
-              double d;
-            } u;
-
-            u.d = value.toDouble();
-            uint64_t bits;
+            double d = value.toDouble();
+            uint64_t bits = folly::bit_cast<uint64_t>(d);
             if (version >= VERSION_DOUBLE_BE) {
-              bits = htonll(u.i);
+              bits = htonll(bits);
             } else {
-              bits = htolell(u.i);
+              bits = htolell(bits);
             }
 
             transport->write((char*)&bits, 8);
@@ -437,14 +433,9 @@ struct CompactWriter {
           break;
 
         case T_FLOAT: {
-          union {
-            uint32_t i;
-            float d;
-          } u;
-
-          u.d = (float)value.toDouble();
-          uint32_t bits = htonl(u.i);
-          transport->write((char*)&bits, 4);
+            float d = (float)value.toDouble();
+            uint32_t bits = htonl(folly::bit_cast<uint32_t>(d));
+            transport->write((char*)&bits, 4);
           }
           break;
 
@@ -872,29 +863,21 @@ struct CompactReader {
           return readI();
 
         case T_DOUBLE: {
-            union {
-              uint64_t i;
-              double d;
-            } u;
-
-            transport.readBytes(&(u.i), 8);
+            uint64_t i;
+            transport.readBytes(&i, 8);
             if (version >= VERSION_DOUBLE_BE) {
-              u.i = ntohll(u.i);
+              i = ntohll(i);
             } else {
-              u.i = letohll(u.i);
+              i = letohll(i);
             }
-            return u.d;
+            return folly::bit_cast<double>(i);
           }
 
         case T_FLOAT: {
-             union {
-              uint32_t i;
-              float d;
-            } u;
-
-            transport.readBytes(&(u.i), 4);
-            u.i = ntohl(u.i);
-            return u.d;
+            uint32_t i;
+            transport.readBytes(&i, 4);
+            i = ntohl(i);
+            return folly::bit_cast<float>(i);
           }
 
         case T_UTF8:

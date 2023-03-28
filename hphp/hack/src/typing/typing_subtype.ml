@@ -1541,21 +1541,25 @@ and simplify_subtype_i
                  env
                  (LoclType ty)
                  (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)) ->
-          env
-          |> simplify_subtype_i
-               ~subtype_env
-               ~sub_supportdyn
-               ~this_ty
-               ~super_like:true
-               ty_sub
-               (LoclType ty)
+          simplify_subtype_i
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ~super_like:true
+            ty_sub
+            (LoclType ty)
+            env
           ||| simplify_subtype_i
                 ~subtype_env
                 ~sub_supportdyn
                 ~this_ty
                 ty_sub
                 (LoclType (MakeType.dynamic r))
-          ||| finish
+          |||
+          if is_tyvar ty then
+            invalid_env
+          else
+            finish
         | _ ->
           (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
            * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
@@ -1596,7 +1600,6 @@ and simplify_subtype_i
                         ~this_ty
                         ty_sub
                         (LoclType (MakeType.dynamic r))
-                  ||| finish
                 else
                   finish env
               | Some ty ->

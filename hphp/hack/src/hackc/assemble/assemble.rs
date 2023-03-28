@@ -47,6 +47,18 @@ pub fn assemble_from_bytes<'arena>(
     Ok(unit)
 }
 
+/// Assembles a single bytecode. This is useful for dynamic analysis,
+/// where we want to assemble each bytecode as it is being executed.
+pub fn assemble_single_instruction<'arena>(
+    alloc: &'arena Bump,
+    decl_map: &mut DeclMap<'arena>,
+    s: &[u8],
+) -> Result<hhbc::Instruct<'arena>> {
+    let mut lex = Lexer::from_slice(s, Line(1));
+    let mut tcb_count = 0;
+    assemble_instr(alloc, &mut lex, decl_map, &mut tcb_count)
+}
+
 /// Assembles the HCU. Parses over the top level of the .hhas file
 /// File is either empty OR looks like:
 /// .filepath <str_literal>

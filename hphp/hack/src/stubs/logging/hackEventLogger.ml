@@ -260,6 +260,8 @@ let ranked_autocomplete_request_duration ~start_time:_ = ()
 
 let monitor_dead_but_typechecker_alive () = ()
 
+let spinner_heartbeat _ _ = ()
+
 let client_established_connection _ = ()
 
 let client_connect_once ~t_start:_ = ()

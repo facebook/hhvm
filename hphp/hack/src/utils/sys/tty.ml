@@ -109,23 +109,6 @@ let should_color color_mode =
   | Color_Never -> false
   | Color_Auto -> supports_color () || force_color
 
-let emoji_spinner =
-  List.map
-  (* Some terminals display the emoji using only one column, even though they
-     may take up two columns, and put the cursor immediately after it in an
-     illegible manner. Add an extra space to separate the cursor from the emoji. *)
-    ~f:(fun x -> x ^ " ")
-    [
-      "\xF0\x9F\x98\xA1";
-      (* Angry Face *)
-      "\xF0\x9F\x98\x82";
-      (* Face With Tears of Joy *)
-      "\xF0\x9F\xA4\x94";
-      (* Thinking Face *)
-      "\xF0\x9F\x92\xAF";
-      (* Hundred Points *)
-    ]
-
 (* See https://github.com/yarnpkg/yarn/issues/405. *)
 let supports_emoji () =
   (not (String.equal Sys.os_type "Win32")) && supports_color ()
@@ -150,20 +133,6 @@ let cprint ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) strs =
 
 let cprintf ?(color_mode = Color_Auto) ?(out_channel = Stdio.stdout) c =
   Printf.ksprintf (print_one ~color_mode ~out_channel c)
-
-let (spinner, spinner_used) =
-  let state = ref 0 in
-  ( (fun ?(angery_reaccs_only = false) () ->
-      let spinner =
-        if angery_reaccs_only then
-          emoji_spinner
-        else
-          ["-"; "\\"; "|"; "/"]
-      in
-      let str = List.nth_exn spinner (!state % 4) in
-      state := !state + 1;
-      str),
-    (fun () -> !state <> 0) )
 
 (* ANSI escape sequence to clear whole line *)
 let clear_line_seq = "\r\x1b[0K"

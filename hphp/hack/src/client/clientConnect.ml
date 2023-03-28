@@ -30,7 +30,7 @@ type env = {
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
   remote: bool;
-  progress_callback: (string option -> unit) option;
+  progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
   save_64bit: string option;
@@ -52,56 +52,15 @@ type conn = {
   t_sent_connection_type: float;
   channels: Timeout.in_channel * Out_channel.t;
   server_specific_files: ServerCommandTypes.server_specific_files;
-  conn_progress_callback: (string option -> unit) option;
+  conn_progress_callback: string option -> unit;
   conn_root: Path.t;
   conn_deadline: float option;
   from: string;
 }
 
-let tty_progress_reporter ~(angery_reaccs_only : bool) : string option -> unit =
-  let angery_reaccs_only = angery_reaccs_only && Tty.supports_emoji () in
-  fun (status : string option) : unit ->
-    if Tty.spinner_used () then Tty.print_clear_line stderr;
-    match status with
-    | None -> ()
-    | Some s ->
-      Tty.eprintf
-        "hh_server is busy: %s %s%!"
-        s
-        (Tty.spinner ~angery_reaccs_only ())
-
-(** What is the latest progress message written by the server into a file?
-We store this in a mutable variable, so we can know whether it's changed and hence whether
-to display the warning banner. *)
-let latest_server_progress : ServerProgress.t ref =
-  ref ServerProgress.{ message = "connecting"; timestamp = 0.; pid = 0 }
-
-(** This reads from the progress file and assigns into mutable variable "latest_status_progress",
-and returns whether there was new status. *)
-let check_progress () : bool =
-  let server_progress = ServerProgress.read () in
-  if
-    not
-      (Float.equal
-         server_progress.ServerProgress.timestamp
-         !latest_server_progress.ServerProgress.timestamp)
-  then begin
-    log
-      "check_progress: [%s] %s"
-      (Utils.timestring server_progress.ServerProgress.timestamp)
-      server_progress.ServerProgress.message;
-    latest_server_progress := server_progress;
-    true
-  end else
-    false
-
-let show_progress (progress_callback : string option -> unit) : unit =
-  let (_any_changes : bool) = check_progress () in
-  let message = !latest_server_progress.ServerProgress.message in
-  (* We always show progress, even if there were no changes, just so the user
-     can see the spinner keep turning around. It looks better that way for things
-     like "loading saved-state" which would otherwise look stuck for 30s. *)
-  progress_callback (Some ("[" ^ message ^ "]"));
+let read_and_show_progress (progress_callback : string option -> unit) : unit =
+  let { ServerProgress.message; _ } = ServerProgress.read () in
+  progress_callback (Some message);
   ()
 
 let check_for_deadline deadline_opt =
@@ -124,7 +83,7 @@ let rec wait_for_server_message
     ~(ic : Timeout.in_channel)
     ~(deadline : float option)
     ~(server_specific_files : ServerCommandTypes.server_specific_files)
-    ~(progress_callback : (string option -> unit) option)
+    ~(progress_callback : string option -> unit)
     ~(root : Path.t) : _ ServerCommandTypes.message_type Lwt.t =
   check_for_deadline deadline;
   let%lwt (readable, _, _) =
@@ -135,7 +94,7 @@ let rec wait_for_server_message
       1.0
   in
   if List.is_empty readable then (
-    Option.iter progress_callback ~f:show_progress;
+    read_and_show_progress progress_callback;
     wait_for_server_message
       ~connection_log_id
       ~expected_message
@@ -170,14 +129,14 @@ let rec wait_for_server_message
           ~connection_log_id
           "wait_for_server_message: got expected %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
-        Option.iter progress_callback ~f:(fun callback -> callback None);
+        progress_callback None;
         Lwt.return msg
       ) else (
         log
           ~connection_log_id
           "wait_for_server_message: didn't want %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
-        if not is_ping then Option.iter progress_callback ~f:show_progress;
+        if not is_ping then read_and_show_progress progress_callback;
         wait_for_server_message
           ~connection_log_id
           ~expected_message
@@ -222,7 +181,7 @@ let rec wait_for_server_message
       in
       Printf.eprintf "%s\n" msg;
       (* spinner *)
-      Option.iter progress_callback ~f:(fun callback -> callback None);
+      progress_callback None;
       (* exception, caught by hh_client.ml and logged.
          In most cases we report that find_hh.sh should simply retry the failed command.
          There are only two cases where we say it shouldn't. *)
@@ -255,7 +214,7 @@ let wait_for_server_hello
     (ic : Timeout.in_channel)
     (deadline : float option)
     (server_specific_files : ServerCommandTypes.server_specific_files)
-    (progress_callback : (string option -> unit) option)
+    (progress_callback : string option -> unit)
     (root : Path.t) : unit Lwt.t =
   let%lwt (_ : 'a ServerCommandTypes.message_type) =
     wait_for_server_message

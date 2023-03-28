@@ -6,10 +6,6 @@
  *
  *)
 
-(** This callback is typically provided for env.progress_callback; it prints data with
-a spinner to stderr. *)
-val tty_progress_reporter : angery_reaccs_only:bool -> string option -> unit
-
 (** Used solely as an argument to [connect] *)
 type env = {
   root: Path.t;
@@ -22,7 +18,7 @@ type env = {
   watchman_debug_logging: bool;
   log_inference_constraints: bool;
   remote: bool;
-  progress_callback: (string option -> unit) option;
+  progress_callback: string option -> unit;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
   save_64bit: string option;
@@ -45,7 +41,7 @@ type conn = {
   t_sent_connection_type: float;
   channels: Timeout.in_channel * out_channel;
   server_specific_files: ServerCommandTypes.server_specific_files;
-  conn_progress_callback: (string option -> unit) option;
+  conn_progress_callback: string option -> unit;
   conn_root: Path.t;
   conn_deadline: float option;
   from: string;

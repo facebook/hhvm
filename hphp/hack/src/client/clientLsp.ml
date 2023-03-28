@@ -1361,8 +1361,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       (* irrelevant *)
       remote = false;
       (* only relevant when autostart=true *)
-      progress_callback = None;
-      (* we're fast! *)
+      progress_callback = (fun _ -> ());
       do_post_handoff_handshake = false;
       ignore_hh_version = false;
       saved_state_ignore_hhconfig = false;

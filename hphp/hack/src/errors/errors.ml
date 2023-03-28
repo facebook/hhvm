@@ -345,70 +345,74 @@ let phase_of_string (value : string) : phase option =
   | "typing" -> Some Typing
   | _ -> None
 
-let sort : error list -> error list =
- fun err ->
-  let compare_reasons = List.compare (Message.compare Pos_or_decl.compare) in
-  let compare_exact_code = Int.compare in
-  let compare_phase x_code y_code =
-    Int.compare (x_code / 1000) (y_code / 1000)
-  in
-  let compare
-      User_error.
+let compare_internal (x : error) (y : error) ~compare_code : int =
+  let User_error.
         {
           code = x_code;
           claim = x_claim;
           reasons = x_messages;
           quickfixes = _;
           is_fixmed = _;
-        }
-      User_error.
+        } =
+    x
+  in
+  let User_error.
         {
           code = y_code;
           claim = y_claim;
           reasons = y_messages;
           quickfixes = _;
           is_fixmed = _;
-        }
-      ~compare_code =
-    (* The primary sort order is by file *)
-    let comparison =
-      Relative_path.compare
-        (fst x_claim |> Pos.filename)
-        (fst y_claim |> Pos.filename)
-    in
-    (* Then within each file, sort by phase *)
-    let comparison =
-      if comparison = 0 then
-        compare_code x_code y_code
-      else
-        comparison
-    in
-    (* If the error codes are the same, sort by position *)
-    let comparison =
-      if comparison = 0 then
-        Pos.compare (fst x_claim) (fst y_claim)
-      else
-        comparison
-    in
-    (* If the primary positions are also the same, sort by message text *)
-    let comparison =
-      if comparison = 0 then
-        String.compare (snd x_claim) (snd y_claim)
-      else
-        comparison
-    in
-    (* Finally, if the message text is also the same, then continue comparing
-       the reason messages (which indicate the reason why Hack believes
-       there is an error reported in the claim message) *)
+        } =
+    y
+  in
+  (* The primary sort order is by file *)
+  let comparison =
+    Relative_path.compare
+      (fst x_claim |> Pos.filename)
+      (fst y_claim |> Pos.filename)
+  in
+  (* Then within each file, sort by phase *)
+  let comparison =
     if comparison = 0 then
-      compare_reasons x_messages y_messages
+      compare_code x_code y_code
     else
       comparison
   in
+  (* If the error codes are the same, sort by position *)
+  let comparison =
+    if comparison = 0 then
+      Pos.compare (fst x_claim) (fst y_claim)
+    else
+      comparison
+  in
+  (* If the primary positions are also the same, sort by message text *)
+  let comparison =
+    if comparison = 0 then
+      String.compare (snd x_claim) (snd y_claim)
+    else
+      comparison
+  in
+  (* Finally, if the message text is also the same, then continue comparing
+     the reason messages (which indicate the reason why Hack believes
+     there is an error reported in the claim message) *)
+  if comparison = 0 then
+    (List.compare (Message.compare Pos_or_decl.compare)) x_messages y_messages
+  else
+    comparison
+
+let compare (x : error) (y : error) : int =
+  compare_internal x y ~compare_code:Int.compare
+
+let sort (err : error list) : error list =
+  let compare_exact_code = Int.compare in
+  let compare_phase x_code y_code =
+    Int.compare (x_code / 1000) (y_code / 1000)
+  in
   (* Sort using the exact code to ensure sort stability, but use the phase to deduplicate *)
-  let equal x y = compare ~compare_code:compare_phase x y = 0 in
+  let equal x y = compare_internal ~compare_code:compare_phase x y = 0 in
   List.sort
-    ~compare:(fun x y -> compare ~compare_code:compare_exact_code x y)
+    ~compare:(fun x y -> compare_internal ~compare_code:compare_exact_code x y)
     err
   |> List.remove_consecutive_duplicates
        ~equal:(fun x y -> equal x y)

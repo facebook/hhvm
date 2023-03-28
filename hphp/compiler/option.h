@@ -99,6 +99,14 @@ struct Option {
    */
   static bool ParserOptimisticStore;
 
+  /*
+   * When an ActiveDeployment is specified, we disable SymbolRefs
+   * logic and only compile the requested files. This option will
+   * be used to force include SymbolRefs even when ActiveDeployment
+   * is specified.
+   */
+  static bool ForceEnableSymbolRefs;
+
   /* Config passed to extern_worker::Client */
   static std::string ExternWorkerUseCase;
   static std::string ExternWorkerFeaturesFile;

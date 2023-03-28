@@ -1582,7 +1582,6 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
     // Process the outputs
     OndemandInfo ondemand;
     for (size_t i = 0; i < workItems; i++) {
-      auto const filename = makeStaticString(group.m_files[i].native());
       auto const& meta = parseMetas[i];
       if (!meta.m_abort.empty()) {
         // The unit had an ICE and we're configured to treat that as a
@@ -1590,8 +1589,11 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
         fprintf(stderr, "%s", meta.m_abort.c_str());
         _Exit(1);
       }
-      // Resolve any symbol refs into files to parse ondemand
-      resolveOnDemand(ondemand, filename, meta.m_symbol_refs, index);
+      if (Option::ForceEnableSymbolRefs || RO::EvalActiveDeployment.empty()) {
+        auto const filename = makeStaticString(group.m_files[i].native());
+        // Resolve any symbol refs into files to parse ondemand
+        resolveOnDemand(ondemand, filename, meta.m_symbol_refs, index);
+      }
     }
     HPHP_CORO_MOVE_RETURN(ondemand);
   } catch (const Exception& e) {

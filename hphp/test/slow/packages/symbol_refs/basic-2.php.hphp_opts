@@ -1,0 +1,4 @@
+--dir=hphp/test/slow/packages/symbol_refs
+--exclude-dir=hphp/test/slow/packages/symbol_refs/inc
+-vRuntime.Eval.ActiveDeployment="deployment_with_a"
+-vForceEnableSymbolRefs=true

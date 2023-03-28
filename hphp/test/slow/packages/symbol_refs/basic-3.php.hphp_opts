@@ -1,0 +1,2 @@
+--dir=hphp/test/slow/packages/symbol_refs
+--exclude-dir=hphp/test/slow/packages/symbol_refs/inc

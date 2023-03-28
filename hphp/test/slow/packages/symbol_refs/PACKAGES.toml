@@ -1,0 +1,12 @@
+[packages]
+
+[packages.package_with_a]
+uses = ["a"]
+
+[packages.package_with_b]
+uses = ["b"]
+
+[deployments]
+
+[deployments.deployment_with_a]
+packages = ["package_with_a"]

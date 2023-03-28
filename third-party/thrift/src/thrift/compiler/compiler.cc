@@ -500,6 +500,7 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
     source_manager& sm, const std::vector<std::string>& arguments) {
   // Parse arguments.
   parsing_params pparams;
+  pparams.allow_missing_includes = true;
   gen_params gparams;
   diagnostic_params dparams;
   gparams.targets.push_back(""); // Avoid needing to pass --gen

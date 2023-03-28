@@ -113,22 +113,13 @@ module Program = struct
     exit error_code
 
   (* filter and relativize updated file paths *)
-  let process_updates genv updates =
-    let root = Path.to_string @@ ServerArgs.root genv.options in
-    (* Because of symlinks, we can have updates from files that aren't in
-     * the .hhconfig directory *)
-    let updates =
-      SSet.filter updates ~f:(fun p -> String.is_prefix p ~prefix:root)
-    in
-    let updates = Relative_path.(relativize_set Root updates) in
-    let to_recheck =
-      Relative_path.Set.filter updates ~f:(fun update ->
-          FindUtils.file_filter (Relative_path.to_absolute update))
-    in
+  let exit_if_critical_update genv ~(raw_updates : SSet.t) : unit =
     let hhconfig_in_updates =
-      Relative_path.Set.mem updates ServerConfig.repo_config_path
+      SSet.mem
+        raw_updates
+        (Relative_path.to_absolute ServerConfig.repo_config_path)
     in
-    (if hhconfig_in_updates then
+    if hhconfig_in_updates then begin
       let (new_config, _) = ServerConfig.load ~silent:false genv.options in
       if not (ServerConfig.is_compatible genv.config new_config) then (
         Hh_logger.log
@@ -138,18 +129,20 @@ module Program = struct
 
         (* TODO: Notify the server monitor directly about this. *)
         Exit.exit Exit_status.Hhconfig_changed
-      ));
+      )
+    end;
     let package_config_in_updates =
-      Relative_path.Set.mem updates PackageConfig.repo_config_path
+      SSet.mem
+        raw_updates
+        (Relative_path.to_absolute PackageConfig.repo_config_path)
     in
-    if package_config_in_updates then (
+    if package_config_in_updates then begin
       Hh_logger.log
         "%s changed; please restart %s.\n"
         (Relative_path.suffix PackageConfig.repo_config_path)
         GlobalConfig.program_name;
       Exit.exit Exit_status.Package_config_changed
-    );
-    to_recheck
+    end
 end
 
 let finalize_init init_env typecheck_telemetry init_telemetry =
@@ -214,7 +207,12 @@ let query_notifier genv env query_kind start_time =
   in
   let (raw_updates, clock) = pump_async_updates raw_updates clock in
   let telemetry = Telemetry.duration telemetry ~key:"pumped" ~start_time in
-  let updates = Program.process_updates genv raw_updates in
+  Program.exit_if_critical_update genv ~raw_updates;
+  let updates =
+    FindUtils.post_watchman_filter
+      ~root:(ServerArgs.root genv.options)
+      ~raw_updates
+  in
   let telemetry =
     telemetry
     |> Telemetry.duration ~key:"processed" ~start_time

@@ -59,3 +59,15 @@ let file_filter f =
   is_hack f && not (FilesToIgnore.should_ignore f)
 
 let path_filter f = Relative_path.suffix f |> file_filter
+
+let post_watchman_filter ~(root : Path.t) ~(raw_updates : SSet.t) :
+    Relative_path.Set.t =
+  let root = Path.to_string root in
+  (* Because of symlinks, we can have updates from files that aren't in
+   * the .hhconfig directory *)
+  let updates =
+    SSet.filter (fun p -> String.is_prefix p ~prefix:root) raw_updates
+  in
+  let updates = Relative_path.(relativize_set Root updates) in
+  Relative_path.Set.filter updates ~f:(fun update ->
+      file_filter (Relative_path.to_absolute update))

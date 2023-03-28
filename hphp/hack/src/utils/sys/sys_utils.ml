@@ -674,7 +674,7 @@ let write_non_intr (fd : Unix.file_descr) (buf : bytes) (pos : int) (len : int)
   while !pos < len do
     (* must use Unix.single_write, not Unix.write, because the latter does arbitrarily
        many OS calls and we don't know which one got the EINTR *)
-    let n = restart_on_EINTR (Unix.single_write fd buf !pos) len in
+    let n = restart_on_EINTR (Unix.single_write fd buf !pos) (len - !pos) in
     pos := !pos + n
   done
 
@@ -683,7 +683,7 @@ let read_non_intr (fd : Unix.file_descr) (len : int) : bytes option =
   let pos = ref 0 in
   let is_eof = ref false in
   while !pos < len && not !is_eof do
-    let n = restart_on_EINTR (Unix.read fd buf !pos) len in
+    let n = restart_on_EINTR (Unix.read fd buf !pos) (len - !pos) in
     pos := !pos + n;
     if n = 0 then is_eof := true
   done;

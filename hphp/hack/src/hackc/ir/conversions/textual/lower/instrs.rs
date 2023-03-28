@@ -81,7 +81,10 @@ impl LowerInstrs<'_> {
             .and_then(|cid| match builder.func.constant(cid) {
                 Constant::String(s) => {
                     let id = ir::GlobalId::new(*s);
-                    Some(Instr::Special(Special::Textual(Textual::LoadGlobal(id))))
+                    Some(Instr::Special(Special::Textual(Textual::LoadGlobal {
+                        id,
+                        is_const: false,
+                    })))
                 }
                 _ => None,
             })
@@ -92,6 +95,8 @@ impl LowerInstrs<'_> {
             Hhbc::Add(..) => hack::Hhbc::Add,
             Hhbc::AddElemC(..) => hack::Hhbc::AddElemC,
             Hhbc::AddNewElemC(..) => hack::Hhbc::AddNewElemC,
+            Hhbc::AwaitAll(..) => hack::Hhbc::AwaitAll,
+            Hhbc::CastKeyset(..) => hack::Hhbc::CastKeyset,
             Hhbc::CastVec(..) => hack::Hhbc::CastVec,
             Hhbc::ClassGetC(..) => hack::Hhbc::ClassGetC,
             Hhbc::ClassHasReifiedGenerics(..) => hack::Hhbc::ClassHasReifiedGenerics,
@@ -138,6 +143,7 @@ impl LowerInstrs<'_> {
             Hhbc::RecordReifiedGeneric(..) => hack::Hhbc::RecordReifiedGeneric,
             Hhbc::Sub(..) => hack::Hhbc::Sub,
             Hhbc::ThrowNonExhaustiveSwitch(..) => hack::Hhbc::ThrowNonExhaustiveSwitch,
+            Hhbc::WHResult(..) => hack::Hhbc::WHResult,
             _ => return None,
         };
         Some(builtin)

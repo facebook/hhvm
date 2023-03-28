@@ -1446,10 +1446,10 @@ pub(crate) fn print_textual(
             }
             write!(w, ")")?;
         }
-        Textual::LoadGlobal(id) => {
+        Textual::LoadGlobal { id, is_const } => {
             write!(
                 w,
-                "textual::load_global({})",
+                "textual::load_global({}, {is_const})",
                 FmtIdentifierId(id.id, strings)
             )?;
         }

@@ -176,6 +176,7 @@ impl fmt::Display for FmtFunctionName<'_> {
 #[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub(crate) enum GlobalName {
     Global(ir::GlobalId),
+    GlobalConst(ir::GlobalId),
     StaticConst(ir::ClassId, ir::ConstId),
 }
 
@@ -199,6 +200,9 @@ impl fmt::Display for FmtGlobalName<'_> {
         match name {
             GlobalName::Global(id) => {
                 write!(f, "global::{}", id.as_bytes(strings).mangle(strings))
+            }
+            GlobalName::GlobalConst(id) => {
+                write!(f, "gconst::{}", id.as_bytes(strings).mangle(strings))
             }
             GlobalName::StaticConst(class, cid) => {
                 write!(

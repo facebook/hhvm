@@ -394,8 +394,11 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             ref values,
             loc: _,
         })) => write_builtin(state, iid, target, values)?,
-        Instr::Special(Special::Textual(Textual::LoadGlobal(id))) => {
-            let name = GlobalName::Global(id);
+        Instr::Special(Special::Textual(Textual::LoadGlobal { id, is_const })) => {
+            let name = match is_const {
+                false => GlobalName::Global(id),
+                true => GlobalName::GlobalConst(id),
+            };
             let var = textual::Var::global(name);
             let expr = state.load_mixed(textual::Expr::deref(var))?;
             state.set_iid(iid, expr);
@@ -927,7 +930,6 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     Constant::File => textual_todo! { textual::Expr::null() },
                     Constant::FuncCred => textual_todo! { textual::Expr::null() },
                     Constant::Method => textual_todo! { textual::Expr::null() },
-                    Constant::Named(..) => textual_todo! { textual::Expr::null() },
                     Constant::NewCol(CollectionType::ImmMap) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColImmMap), ())
                     }
@@ -949,8 +951,8 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
                     Constant::NewCol(CollectionType::Vector) => {
                         hack::expr_builtin(Builtin::Hhbc(hack::Hhbc::NewColVector), ())
                     }
-                    Constant::NewCol(_) => unreachable!(),
                     Constant::Uninit => textual_todo! { textual::Expr::null() },
+                    Constant::Named(..) | Constant::NewCol(_) => unreachable!(),
                 }
             }
             ir::FullInstrId::None => unreachable!(),

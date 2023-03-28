@@ -160,10 +160,24 @@ function check_is_class(mixed $a): bool {
 // CHECK:   n2 = $root.sink(null, n1)
 // CHECK:   ret null
 // CHECK: }
-
-// TEST-CHECK-1: global global::_SERVER
-// CHECK: global global::_SERVER : *HackMixed
 function check_global(): void {
   $global_server = HH\global_get('_SERVER');
   sink($global_server);
 }
+
+// TEST-CHECK-BAL: define $root.check_constant
+// CHECK: define $root.check_constant($this: *void) : *void {
+// CHECK: #b0:
+// CHECK:   n0: *HackMixed = load &gconst::GLOBAL_CONSTANT
+// CHECK:   n1 = $builtins.hhbc_print(n0)
+// CHECK:   ret null
+// CHECK: }
+function check_constant(): void {
+  echo GLOBAL_CONSTANT;
+}
+
+// TEST-CHECK-1: global global::_SERVER
+// CHECK: global global::_SERVER : *HackMixed
+
+// TEST-CHECK-1: global gconst::GLOBAL_CONSTANT
+// CHECK: global gconst::GLOBAL_CONSTANT : *HackMixed

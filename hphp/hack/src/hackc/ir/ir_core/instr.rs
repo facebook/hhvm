@@ -1133,7 +1133,7 @@ pub enum Textual {
     #[has_operands(none)]
     #[has_loc(none)]
     #[has_locals(none)]
-    LoadGlobal(GlobalId),
+    LoadGlobal { id: GlobalId, is_const: bool },
     /// Literal String
     #[has_operands(none)]
     #[has_loc(none)]

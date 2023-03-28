@@ -37,14 +37,20 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// in hphp/doc/bytecode.specification.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 #[derive(TextualDecl, EnumIter)]
+#[derive(Default)]
 pub(crate) enum Hhbc {
     #[decl(fn hhbc_add(*HackMixed, *HackMixed) -> *HackMixed)]
+    #[default]
     Add,
     #[decl(fn hhbc_add_elem_c(*HackMixed, *HackMixed, *HackMixed) -> *HackMixed)]
     AddElemC,
     #[decl(fn hhbc_add_new_elem_c(*HackMixed, *HackMixed) -> *HackMixed)]
     AddNewElemC,
-    #[decl(fn hhbc_cast_vec(*HackMixed) -> void)]
+    #[decl(fn hhbc_await_all(...) -> *HackMixed)]
+    AwaitAll,
+    #[decl(fn hhbc_cast_keyset(*HackMixed) -> *HackMixed)]
+    CastKeyset,
+    #[decl(fn hhbc_cast_vec(*HackMixed) -> *HackMixed)]
     CastVec,
     #[decl(fn hhbc_class_get_c(*HackMixed) -> void)]
     CheckClsRGSoft,
@@ -192,14 +198,11 @@ pub(crate) enum Hhbc {
     ThrowNonExhaustiveSwitch,
     #[decl(fn hhbc_verify_param_type_ts(obj: *HackMixed, ts: *HackMixed) -> void)]
     VerifyParamTypeTS,
+    #[decl(fn hhbc_wh_result(obj: *HackMixed) -> *HackMixed)]
+    WHResult,
 }
 
 // Needed for EnumIter
-impl Default for Hhbc {
-    fn default() -> Self {
-        Hhbc::Add
-    }
-}
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Debug)]
 #[derive(TextualDecl, EnumIter)]

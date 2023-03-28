@@ -101,10 +101,12 @@ fn insert_constants(builder: &mut FuncBuilder<'_>, start_bid: BlockId) {
     builder.start_block(new_bid);
 
     for cid in constants.into_iter() {
-        let vid = write_constant(builder, cid);
+        let (vid, needs_fixup) = write_constant(builder, cid);
         let src = ValueId::from_constant(cid);
         remap.insert(src, vid);
-        fixups.push((vid, src));
+        if needs_fixup {
+            fixups.push((vid, src));
+        }
     }
 
     let mut old_iids = std::mem::take(&mut builder.func.block_mut(start_bid).iids);
@@ -128,7 +130,7 @@ fn sort_and_filter_constants(
     constants: ConstantIdSet,
     string_intern: &StringInterner,
 ) -> Vec<ConstantId> {
-    let mut strings = Vec::with_capacity(constants.len());
+    let mut result = Vec::with_capacity(constants.len());
     let mut arrays = Vec::with_capacity(constants.len());
     for cid in constants {
         let constant = func.constant(cid);
@@ -140,7 +142,6 @@ fn sort_and_filter_constants(
             | Constant::FuncCred
             | Constant::Int(..)
             | Constant::Method
-            | Constant::Named(..)
             | Constant::NewCol(..)
             | Constant::Null
             | Constant::Uninit => {}
@@ -148,23 +149,25 @@ fn sort_and_filter_constants(
             Constant::Array(_) => {
                 arrays.push(cid);
             }
+            Constant::Named(..) => {
+                result.push(cid);
+            }
             Constant::String(s) => {
                 // If the string is short then just keep it inline. This makes
                 // it easier to visually read the output but may be more work
                 // for infer (because it's a call)...
                 if string_intern.lookup_bstr(*s).len() > 40 {
-                    strings.push(cid);
+                    result.push(cid);
                 }
             }
         }
     }
 
-    let mut result = strings;
     result.append(&mut arrays);
     result
 }
 
-fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> ValueId {
+fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> (ValueId, bool) {
     let constant = builder.func.constant(cid);
     trace!("    Const {cid}: {constant:?}");
     match constant {
@@ -175,12 +178,19 @@ fn write_constant(builder: &mut FuncBuilder<'_>, cid: ConstantId) -> ValueId {
         | Constant::FuncCred
         | Constant::Int(..)
         | Constant::Method
-        | Constant::Named(..)
         | Constant::NewCol(..)
         | Constant::Null
         | Constant::Uninit => unreachable!(),
 
         // Insert a tombstone which will be turned into a 'copy' later.
-        Constant::Array(_) | Constant::String(_) => builder.emit(Instr::tombstone()),
+        Constant::Array(_) | Constant::String(_) => (builder.emit(Instr::tombstone()), true),
+
+        Constant::Named(name) => {
+            let id = ir::GlobalId::new(ir::ConstId::from_hhbc(*name, &builder.strings).id);
+            let vid = builder.emit(Instr::Special(ir::instr::Special::Textual(
+                ir::instr::Textual::LoadGlobal { id, is_const: true },
+            )));
+            (vid, false)
+        }
     }
 }

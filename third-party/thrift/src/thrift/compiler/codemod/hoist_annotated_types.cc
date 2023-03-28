@@ -234,6 +234,8 @@ class hoist_annotated_types {
     if (name.starts_with(prefix)) {
       name.erase(0, prefix.length());
     }
+    std::replace(name.begin(), name.end(), '<', '_');
+    std::replace(name.begin(), name.end(), ',', '_');
     name.erase(
         std::remove_if(
             name.begin(),

@@ -31,10 +31,10 @@
       "name_html": "type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "169",
+        "line": "173",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "169",
+        "bodystart": "173",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetOrdinalImpl"
@@ -42,11 +42,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "165",
+    "line": "169",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "165",
-    "bodyend": "170"
+    "bodystart": "169",
+    "bodyend": "174"
   },
   "namespacednames_html": [
     "apache",

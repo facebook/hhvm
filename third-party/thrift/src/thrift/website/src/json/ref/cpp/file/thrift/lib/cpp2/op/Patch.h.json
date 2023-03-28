@@ -6,12 +6,20 @@
   "includes": [
     {
       "local": "no",
+      "text_html": "type_traits"
+    },
+    {
+      "local": "no",
       "text_html": "thrift/lib/cpp2/Thrift.h"
     },
     {
       "refid": "op_2detail_2Patch_8h",
       "local": "no",
       "text_html": "thrift/lib/cpp2/op/detail/Patch.h"
+    },
+    {
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/protocol/DebugProtocol.h"
     },
     {
       "local": "no",
@@ -45,6 +53,55 @@
   },
   "filepath": "file/thrift/lib/cpp2/op/Patch.h",
   "href": "/ref/cpp/thrift/lib/cpp2/op/Patch.h",
+  "free_functions": [
+    {
+      "refid": "namespaceapache_1_1thrift_1_1op_1a04018433197eac61800d5d528dcfe195",
+      "prot": "public",
+      "static": "no",
+      "const": "no",
+      "explicit": "no",
+      "inline": "no",
+      "virtual": "non-virtual",
+      "tparams": [
+        {
+          "type_html": "typename T"
+        }
+      ],
+      "type_html": "std::string",
+      "definition_html": "std::string apache::thrift::op::prettyPrintPatch",
+      "argsstring_html": "(const T &amp;obj, DebugProtocolWriter::Options options=DebugProtocolWriter::Options::simple())",
+      "name_html": "prettyPrintPatch",
+      "param": [
+        {
+          "type_html": "const T &amp;",
+          "declname_html": "obj"
+        },
+        {
+          "type_html": "DebugProtocolWriter::Options",
+          "declname_html": "options",
+          "defval_html": "DebugProtocolWriter::Options::simple()"
+        }
+      ],
+      "location": {
+        "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "line": "88",
+        "column": "1",
+        "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+        "bodystart": "88",
+        "bodyend": "96"
+      },
+      "definition": {
+        "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+        "simple_raw": "template <typename T>\nstd::string prettyPrintPatch(\n    const T& obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+        "detailed_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+        "detailed_raw": "template <typename T>\nstd::string prettyPrintPatch(\n    const T& obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+        "original_definition_html": "std::string apache::thrift::op::prettyPrintPatch",
+        "original_argsstring_html": "(const T &amp;obj, DebugProtocolWriter::Options options=DebugProtocolWriter::Options::simple())"
+      },
+      "compoundname_html": "apache::thrift::op::prettyPrintPatch",
+      "namespace_html": "apache::thrift::op"
+    }
+  ],
   "free_typedefs": [
     {
       "refid": "namespaceapache_1_1thrift_1_1op_1a6d92753b5deafb5021817662b0ca0db7",
@@ -60,10 +117,10 @@
       "name_html": "patch_type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "line": "82",
+        "line": "85",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
-        "bodystart": "82",
+        "bodystart": "85",
         "bodyend": "-1"
       },
       "description": {
@@ -71,5 +128,73 @@
       }
     }
   ],
-  "free_overloadgroups": []
+  "free_overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "prettyPrintPatch",
+          "compoundname_html": "apache::thrift::op::prettyPrintPatch",
+          "functions": [
+            {
+              "refid": "namespaceapache_1_1thrift_1_1op_1a04018433197eac61800d5d528dcfe195",
+              "prot": "public",
+              "static": "no",
+              "const": "no",
+              "explicit": "no",
+              "inline": "no",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "std::string",
+              "definition_html": "std::string apache::thrift::op::prettyPrintPatch",
+              "argsstring_html": "(const T &amp;obj, DebugProtocolWriter::Options options=DebugProtocolWriter::Options::simple())",
+              "name_html": "prettyPrintPatch",
+              "param": [
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "obj"
+                },
+                {
+                  "type_html": "DebugProtocolWriter::Options",
+                  "declname_html": "options",
+                  "defval_html": "DebugProtocolWriter::Options::simple()"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/Patch.h",
+                "line": "88",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/Patch.h",
+                "bodystart": "88",
+                "bodyend": "96"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+                "simple_raw": "template <typename T>\nstd::string prettyPrintPatch(\n    const T& obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+                "detailed_html": "template &lt;typename T&gt;\nstd::string prettyPrintPatch(\n    const T&amp; obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+                "detailed_raw": "template <typename T>\nstd::string prettyPrintPatch(\n    const T& obj,\n    DebugProtocolWriter::Options options =\n        DebugProtocolWriter::Options::simple())",
+                "original_definition_html": "std::string apache::thrift::op::prettyPrintPatch",
+                "original_argsstring_html": "(const T &amp;obj, DebugProtocolWriter::Options options=DebugProtocolWriter::Options::simple())"
+              },
+              "compoundname_html": "apache::thrift::op::prettyPrintPatch",
+              "namespace_html": "apache::thrift::op"
+            }
+          ],
+          "filepath": "f/assoc/file/thrift/lib/cpp2/op/Patch.h/prettyPrintPatch",
+          "namespace_html": "apache::thrift::op",
+          "minprot": "public",
+          "displayname_html": "prettyPrintPatch",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/Patch.h/prettyPrintPatch",
+          "refid": "/ref/cpp/f/assoc/file/thrift/lib/cpp2/op/Patch.h/prettyPrintPatch"
+        }
+      ]
+    }
+  ]
 }

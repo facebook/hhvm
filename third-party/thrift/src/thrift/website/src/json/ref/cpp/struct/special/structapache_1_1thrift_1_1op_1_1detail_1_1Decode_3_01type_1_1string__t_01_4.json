@@ -43,11 +43,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "597",
+        "line": "624",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "597",
-        "bodyend": "599"
+        "bodystart": "624",
+        "bodyend": "626"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename StrType&gt;\nvoid operator()(Protocol&amp; prot, StrType&amp; s) const",
@@ -63,11 +63,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "595",
+    "line": "622",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "595",
-    "bodyend": "600"
+    "bodystart": "622",
+    "bodyend": "627"
   },
   "namespacednames_html": [
     "apache",
@@ -126,11 +126,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "597",
+                "line": "624",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "597",
-                "bodyend": "599"
+                "bodystart": "624",
+                "bodyend": "626"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename StrType&gt;\nvoid operator()(Protocol&amp; prot, StrType&amp; s) const",

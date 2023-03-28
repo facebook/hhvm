@@ -55,11 +55,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "313",
+        "line": "316",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "313",
-        "bodyend": "325"
+        "bodystart": "316",
+        "bodyend": "328"
       },
       "definition": {
         "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nuint32_t operator()(Protocol&amp; prot, const MapType&amp; map) const",
@@ -75,11 +75,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "311",
+    "line": "314",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "311",
-    "bodyend": "326"
+    "bodystart": "314",
+    "bodyend": "329"
   },
   "namespacednames_html": [
     "apache",
@@ -138,11 +138,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "line": "313",
+                "line": "316",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-                "bodystart": "313",
-                "bodyend": "325"
+                "bodystart": "316",
+                "bodyend": "328"
               },
               "definition": {
                 "simple_html": "template &lt;typename Protocol, typename MapType&gt;\nuint32_t operator()(Protocol&amp; prot, const MapType&amp; map) const",

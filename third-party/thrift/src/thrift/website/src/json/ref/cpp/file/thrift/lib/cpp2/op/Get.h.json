@@ -224,30 +224,30 @@
       }
     },
     {
-      "refid": "namespaceapache_1_1thrift_1_1op_1ac5155f70523fe8270df60653ccd4703a",
+      "refid": "namespaceapache_1_1thrift_1_1op_1af8090e6dd891d2122eeeba29692ebca8",
       "prot": "public",
       "static": "no",
       "mutable": "no",
       "tparams": [
         {
           "type_html": "typename T"
-        },
-        {
-          "type_html": "typename Id"
         }
       ],
       "type_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece",
-      "definition_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece apache::thrift::op::get_name",
+      "definition_html": "FOLLY_INLINE_VARIABLE const folly::StringPiece apache::thrift::op::get_class_name_v",
       "argsstring_html": "",
-      "name_html": "get_name",
-      "initializer_html": "= <code>get_name_v</code>&lt;T, Id&gt;",
+      "name_html": "get_class_name_v",
+      "initializer_html": "=\n    detail::pa::__fbthrift_get_class_name&lt;T&gt;()",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "142",
+        "line": "145",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "142",
+        "bodystart": "145",
         "bodyend": "-1"
+      },
+      "description": {
+        "detailed_html": "<p>Gets the thrift class name, for example:</p><p><ul>\n<li><p><code>op::get_class_name_v&lt;MyStruct&gt;</code> == \"MyStruct\" </p></li></ul>\n</p>"
       }
     },
     {
@@ -272,10 +272,10 @@
       "initializer_html": "= {}",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "149",
+        "line": "153",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "149",
+        "bodystart": "153",
         "bodyend": "-1"
       },
       "description": {
@@ -293,10 +293,10 @@
       "name_html": "getValueOrNull",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "160",
+        "line": "164",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "160",
+        "bodystart": "164",
         "bodyend": "-1"
       },
       "description": {

@@ -40,11 +40,11 @@
       ],
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "236",
+        "line": "240",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "236",
-        "bodyend": "238"
+        "bodystart": "240",
+        "bodyend": "242"
       },
       "definition": {
         "simple_html": "template &lt;typename U&gt;\ndecltype(auto) constexpr operator()(U&amp;&amp; obj) const",
@@ -60,11 +60,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "234",
+    "line": "238",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "234",
-    "bodyend": "239"
+    "bodystart": "238",
+    "bodyend": "243"
   },
   "namespacednames_html": [
     "apache",
@@ -116,11 +116,11 @@
               ],
               "location": {
                 "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "line": "236",
+                "line": "240",
                 "column": "1",
                 "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-                "bodystart": "236",
-                "bodyend": "238"
+                "bodystart": "240",
+                "bodyend": "242"
               },
               "definition": {
                 "simple_html": "template &lt;typename U&gt;\ndecltype(auto) constexpr operator()(U&amp;&amp; obj) const",

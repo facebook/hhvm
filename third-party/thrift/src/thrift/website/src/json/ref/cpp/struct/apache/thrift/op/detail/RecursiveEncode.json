@@ -1,0 +1,1409 @@
+{
+  "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode",
+  "kind": "struct",
+  "language": "C++",
+  "prot": "public",
+  "compoundname_html": "apache::thrift::op::detail::RecursiveEncode",
+  "basecompoundref": [
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode",
+      "prot": "public",
+      "virtual": "non-virtual",
+      "text_html": "apache::thrift::op::detail::Encode&lt; T &gt;",
+      "compoundname_html": "apache::thrift::op::detail::Encode",
+      "href": "/ref/cpp/struct/apache/thrift/op/detail/Encode"
+    }
+  ],
+  "includes": {
+    "refid": "detail_2Encode_8h",
+    "local": "no",
+    "text_html": "Encode.h"
+  },
+  "tparams": [
+    {
+      "type_html": "class T"
+    }
+  ],
+  "location": {
+    "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+    "line": "900",
+    "column": "1",
+    "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+    "bodystart": "900",
+    "bodyend": "900"
+  },
+  "namespacednames_html": [
+    "apache",
+    "thrift",
+    "op",
+    "detail",
+    "RecursiveEncode"
+  ],
+  "enums": [],
+  "types": [],
+  "functions": [],
+  "members": [],
+  "friends": [],
+  "declaration_raw": "template < class T >\nstruct RecursiveEncode;",
+  "declaration_html": "template &lt; class T &gt;\nstruct RecursiveEncode;",
+  "filepath": "struct/apache/thrift/op/detail/RecursiveEncode",
+  "href": "/ref/cpp/struct/apache/thrift/op/detail/RecursiveEncode",
+  "specializedBy": [
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1exception__t_3_01T_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1list_3_01T_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1map_3_01K_00_01V_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1set_3_01T_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4",
+    "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1union__t_3_01T_01_4_01_4"
+  ],
+  "overloadgroups": [
+    {
+      "groupname_html": "",
+      "overloadsets": [
+        {
+          "kind": "overloadset",
+          "name_html": "operator()",
+          "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()",
+          "functions": [
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AdaptedEncode_1a11c10eed600504bf09a1e7cc9fc0b884",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename U"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::AdaptedEncode&lt; Adapter, Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const U &amp;m) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const U &amp;",
+                  "declname_html": "m"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "547",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "547",
+                "bodyend": "549"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "simple_raw": "template <typename Protocol, typename U>\nuint32_t operator()(Protocol& prot, const U& m) const",
+                "detailed_html": "template &lt;typename Protocol, typename U&gt;\ninline uint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "detailed_raw": "template <typename Protocol, typename U>\ninline uint32_t operator()(Protocol& prot, const U& m) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::AdaptedEncode&lt; Adapter, Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const U &amp;m) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/AdaptedEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/AdaptedEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1AdaptedEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CppTypeEncode_1ad9c4f7f57a4dba896595d505ebca5074",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class Protocol"
+                },
+                {
+                  "type_html": "class U"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::CppTypeEncode&lt; T, Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const U &amp;m) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const U &amp;",
+                  "declname_html": "m"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "530",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "530",
+                "bodyend": "535"
+              },
+              "definition": {
+                "simple_html": "template &lt;class Protocol, class U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "simple_raw": "template <class Protocol, class U>\nuint32_t operator()(Protocol& prot, const U& m) const",
+                "detailed_html": "template &lt;class Protocol, class U&gt;\ninline uint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "detailed_raw": "template <class Protocol, class U>\ninline uint32_t operator()(Protocol& prot, const U& m) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::CppTypeEncode&lt; T, Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const U &amp;m) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/CppTypeEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/CppTypeEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1CppTypeEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4_1ad8a7c6a0e375a0e6c14f83e9e36e40b3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;t) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "t"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "914",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "914",
+                "bodyend": "935"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& t) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& t) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;t) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode_1ab5c68ada2086415e73f4b60cfc74b409",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;list) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "list"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "467",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "467",
+                "bodyend": "476"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
+                "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& list) const",
+                "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
+                "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& list) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;list) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ListEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ListEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a502e84285c2704ca3bd0a92e5b9d4f43",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "map"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "506",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "506",
+                "bodyend": "518"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
+                "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& map) const",
+                "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
+                "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& map) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;map) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode_1a4f99dcf686bd75650b06ac8ce13a0f54",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;set) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "set"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "485",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "485",
+                "bodyend": "494"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
+                "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& set) const",
+                "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
+                "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& set) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;set) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/SetEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/SetEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4_1ad8a7c6a0e375a0e6c14f83e9e36e40b3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;t) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "t"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "914",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "914",
+                "bodyend": "935"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& t) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& t) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;t) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4_1ad8a7c6a0e375a0e6c14f83e9e36e40b3",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;t) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "t"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "914",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "914",
+                "bodyend": "935"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& t) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; t) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& t) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;t) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AdaptedEncode_1a11c10eed600504bf09a1e7cc9fc0b884",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename U"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::AdaptedEncode&lt; Adapter, Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const U &amp;m) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const U &amp;",
+                  "declname_html": "m"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "547",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "547",
+                "bodyend": "549"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "simple_raw": "template <typename Protocol, typename U>\nuint32_t operator()(Protocol& prot, const U& m) const",
+                "detailed_html": "template &lt;typename Protocol, typename U&gt;\ninline uint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "detailed_raw": "template <typename Protocol, typename U>\ninline uint32_t operator()(Protocol& prot, const U& m) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::AdaptedEncode&lt; Adapter, Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const U &amp;m) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/AdaptedEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/AdaptedEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1AdaptedEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4_1ad105522ec1ac642d7438289aca7fea5c",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::binary_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const std::string &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const std::string &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "422",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "422",
+                "bodyend": "424"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const std::string&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const std::string& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const std::string&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const std::string& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::binary_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const std::string &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4_1aefff0154d6505c150180de7845cc1e73",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::binary_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const folly::IOBuf &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const folly::IOBuf &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "426",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "426",
+                "bodyend": "428"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const folly::IOBuf&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const folly::IOBuf& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const folly::IOBuf&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::binary_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const folly::IOBuf &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1binary__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1bool__t_01_4_1a6d479eb2342f7683655c2db03deb12e6",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::bool_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, bool t) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "bool",
+                  "declname_html": "t"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "358",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "358",
+                "bodyend": "360"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, bool t) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, bool t) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, bool t) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, bool t) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::bool_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, bool t) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1bool__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1bool__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1bool__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1byte__t_01_4_1ac81602c8e3d9e5b5aec8f53e86f325f2",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::byte_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, int8_t i) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "int8_t",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "366",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "366",
+                "bodyend": "368"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, int8_t i) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, int8_t i) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, int8_t i) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, int8_t i) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::byte_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, int8_t i) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1byte__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1byte__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1byte__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CppTypeEncode_1ad9c4f7f57a4dba896595d505ebca5074",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "class Protocol"
+                },
+                {
+                  "type_html": "class U"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::CppTypeEncode&lt; T, Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const U &amp;m) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const U &amp;",
+                  "declname_html": "m"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "530",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "530",
+                "bodyend": "535"
+              },
+              "definition": {
+                "simple_html": "template &lt;class Protocol, class U&gt;\nuint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "simple_raw": "template <class Protocol, class U>\nuint32_t operator()(Protocol& prot, const U& m) const",
+                "detailed_html": "template &lt;class Protocol, class U&gt;\ninline uint32_t operator()(Protocol&amp; prot, const U&amp; m) const",
+                "detailed_raw": "template <class Protocol, class U>\ninline uint32_t operator()(Protocol& prot, const U& m) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::CppTypeEncode&lt; T, Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const U &amp;m) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/CppTypeEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/CppTypeEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1CppTypeEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1double__t_01_4_1a958df3f67132c2c97e471f29b56d179c",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::double_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, double i) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "double",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "406",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "406",
+                "bodyend": "408"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, double i) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, double i) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, double i) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, double i) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::double_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, double i) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1double__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1double__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1double__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1enum__t_3_01T_01_4_01_4_1a5a5b9c16a1a7f9b0faac63bb76c23dc7",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::enum_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "458",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "458",
+                "bodyend": "460"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::enum_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1enum__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1enum__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1enum__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1exception__t_3_01T_01_4_01_4_1ac4347afcb65ef95cf72f1c887e49926b",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::exception_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "450",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "450",
+                "bodyend": "452"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::exception_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1exception__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1exception__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1exception__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1float__t_01_4_1af63a39096873aee93859d04bb594ec38",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::float_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, float i) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "float",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "398",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "398",
+                "bodyend": "400"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, float i) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, float i) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, float i) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, float i) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::float_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, float i) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1float__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1float__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1float__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i16__t_01_4_1a1665dbc418de3660dbfeca4b5a7daae1",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::i16_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, int16_t i) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "int16_t",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "374",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "374",
+                "bodyend": "376"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, int16_t i) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, int16_t i) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, int16_t i) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, int16_t i) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::i16_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, int16_t i) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i16__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i16__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i16__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i32__t_01_4_1a0c2892c045837dfe2aafe1ed4bbaacda",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::i32_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, int32_t i) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "int32_t",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "382",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "382",
+                "bodyend": "384"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, int32_t i) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, int32_t i) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, int32_t i) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, int32_t i) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::i32_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, int32_t i) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i32__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i32__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i32__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i64__t_01_4_1a0673595f458bfbbf80f44592e667507b",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::i64_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, int64_t i) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "int64_t",
+                  "declname_html": "i"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "390",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "390",
+                "bodyend": "392"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, int64_t i) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, int64_t i) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, int64_t i) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, int64_t i) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::i64_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, int64_t i) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i64__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i64__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1i64__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode_1ab5c68ada2086415e73f4b60cfc74b409",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;list) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "list"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "467",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "467",
+                "bodyend": "476"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
+                "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& list) const",
+                "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; list) const",
+                "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& list) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::ListEncode&lt; Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;list) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/ListEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/ListEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode_1a502e84285c2704ca3bd0a92e5b9d4f43",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;map) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "map"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "506",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "506",
+                "bodyend": "518"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
+                "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& map) const",
+                "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; map) const",
+                "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& map) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::MapEncode&lt; Key, Value, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;map) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/MapEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode_1a4f99dcf686bd75650b06ac8ce13a0f54",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                },
+                {
+                  "type_html": "typename T"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag, EncodeImpl &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;set) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "set"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "485",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "485",
+                "bodyend": "494"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol, typename T&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
+                "simple_raw": "template <typename Protocol, typename T>\nuint32_t operator()(Protocol& prot, const T& set) const",
+                "detailed_html": "template &lt;typename Protocol, typename T&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; set) const",
+                "detailed_raw": "template <typename Protocol, typename T>\ninline uint32_t operator()(Protocol& prot, const T& set) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::SetEncode&lt; Tag, EncodeImpl &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;set) const"
+              },
+              "filepath": "fns/struct/apache/thrift/op/detail/SetEncode/operator.call",
+              "href": "/ref/cpp/fns/struct/apache/thrift/op/detail/SetEncode/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1string__t_01_4_1aed926d18fe43dfda21577599d7f098d0",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::string_t &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const std::string &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const std::string &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "414",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "414",
+                "bodyend": "416"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const std::string&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const std::string& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const std::string&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const std::string& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::string_t &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const std::string &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1string__t_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1string__t_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1string__t_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1struct__t_3_01T_01_4_01_4_1a911d5662d99aeaa75da254aa9ad31c21",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "434",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "434",
+                "bodyend": "436"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::struct_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1struct__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1struct__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            },
+            {
+              "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1union__t_3_01T_01_4_01_4_1a861d59e06e9fd40b16c394f09d510365",
+              "prot": "public",
+              "static": "no",
+              "const": "yes",
+              "explicit": "no",
+              "inline": "yes",
+              "virtual": "non-virtual",
+              "tparams": [
+                {
+                  "type_html": "typename Protocol"
+                }
+              ],
+              "type_html": "uint32_t",
+              "definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::union_t&lt; T &gt; &gt;::operator()",
+              "argsstring_html": "(Protocol &amp;prot, const T &amp;s) const",
+              "name_html": "operator()",
+              "param": [
+                {
+                  "type_html": "Protocol &amp;",
+                  "declname_html": "prot"
+                },
+                {
+                  "type_html": "const T &amp;",
+                  "declname_html": "s"
+                }
+              ],
+              "location": {
+                "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "line": "442",
+                "column": "1",
+                "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
+                "bodystart": "442",
+                "bodyend": "444"
+              },
+              "definition": {
+                "simple_html": "template &lt;typename Protocol&gt;\nuint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "simple_raw": "template <typename Protocol>\nuint32_t operator()(Protocol& prot, const T& s) const",
+                "detailed_html": "template &lt;typename Protocol&gt;\ninline uint32_t operator()(Protocol&amp; prot, const T&amp; s) const",
+                "detailed_raw": "template <typename Protocol>\ninline uint32_t operator()(Protocol& prot, const T& s) const",
+                "original_definition_html": "uint32_t apache::thrift::op::detail::Encode&lt; type::union_t&lt; T &gt; &gt;::operator()",
+                "original_argsstring_html": "(Protocol &amp;prot, const T &amp;s) const"
+              },
+              "filepath": "fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1union__t_3_01T_01_4_01_4/operator.call",
+              "href": "/ref/cpp/fns/struct/special/structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1union__t_3_01T_01_4_01_4/operator.call",
+              "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1union__t_3_01T_01_4_01_4",
+              "compoundname_html": "apache::thrift::op::detail::RecursiveEncode::operator()"
+            }
+          ],
+          "filepath": "f/struct/apache/thrift/op/detail/RecursiveEncode/operator.call",
+          "minprot": "public",
+          "displayname_html": "operator()",
+          "brief_html": "",
+          "groupname_html": "",
+          "href": "/ref/cpp/f/struct/apache/thrift/op/detail/RecursiveEncode/operator.call",
+          "refid": "/ref/cpp/f/struct/apache/thrift/op/detail/RecursiveEncode/operator.call"
+        }
+      ]
+    }
+  ],
+  "free_overloadgroups": []
+}

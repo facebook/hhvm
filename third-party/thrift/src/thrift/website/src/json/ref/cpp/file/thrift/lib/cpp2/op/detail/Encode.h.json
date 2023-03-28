@@ -21,6 +21,21 @@
       "text_html": "thrift/lib/cpp/protocol/TType.h"
     },
     {
+      "refid": "FieldRef_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/FieldRef.h"
+    },
+    {
+      "refid": "Clear_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Clear.h"
+    },
+    {
+      "refid": "Get_8h",
+      "local": "no",
+      "text_html": "thrift/lib/cpp2/op/Get.h"
+    },
+    {
       "local": "no",
       "text_html": "thrift/lib/cpp2/protocol/detail/protocol_methods.h"
     },
@@ -315,9 +330,19 @@
       "text_html": "apache::thrift::op::detail::Encode&lt; type::enum_t&lt; T &gt; &gt;"
     },
     {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ListEncode",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::ListEncode"
+    },
+    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1list_3_01Tag_01_4_01_4",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::Encode&lt; type::list&lt; Tag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1SetEncode",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::SetEncode"
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1set_3_01Tag_01_4_01_4",
@@ -325,14 +350,29 @@
       "text_html": "apache::thrift::op::detail::Encode&lt; type::set&lt; Tag &gt; &gt;"
     },
     {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1MapEncode",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::MapEncode"
+    },
+    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1map_3_01Key_00_01Value_01_4_01_4",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::Encode&lt; type::map&lt; Key, Value &gt; &gt;"
     },
     {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1CppTypeEncode",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::CppTypeEncode"
+    },
+    {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::Encode&lt; type::cpp_type&lt; T, Tag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1AdaptedEncode",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::AdaptedEncode"
     },
     {
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Encode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
@@ -438,6 +478,56 @@
       "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1Decode_3_01type_1_1field_3_01type_1_1adapted_3_01Adapt53fe9d2b9425ff41b754617294bb2211",
       "prot": "public",
       "text_html": "apache::thrift::op::detail::Decode&lt; type::field&lt; type::adapted&lt; Adapter, Tag &gt;, FieldContext&lt; Struct, FieldId &gt; &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1ShouldWrite",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::ShouldWrite"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1list_3_01T_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::list&lt; T &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1set_3_01T_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::set&lt; T &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1map_3_01K_00_01V_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::map&lt; K, V &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1struct__t_3_01T_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::struct_t&lt; T &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1union__t_3_01T_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::union_t&lt; T &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1exception__t_3_01T_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::exception_t&lt; T &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1cpp__type_3_01T_00_01Tag_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::cpp_type&lt; T, Tag &gt; &gt;"
+    },
+    {
+      "refid": "structapache_1_1thrift_1_1op_1_1detail_1_1RecursiveEncode_3_01type_1_1adapted_3_01Adapter_00_01Tag_01_4_01_4",
+      "prot": "public",
+      "text_html": "apache::thrift::op::detail::RecursiveEncode&lt; type::adapted&lt; Adapter, Tag &gt; &gt;"
     }
   ],
   "innernamespace": [

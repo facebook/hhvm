@@ -29,10 +29,10 @@
       "name_html": "type",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "line": "179",
+        "line": "183",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-        "bodystart": "179",
+        "bodystart": "183",
         "bodyend": "-1"
       },
       "parentid": "structapache_1_1thrift_1_1op_1_1detail_1_1GetOrdinalImpl_3_01std_1_1integral__constant_3_01type_d5c0fbdfa58f5168df45602fb44b8b6c"
@@ -40,11 +40,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "line": "173",
+    "line": "177",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/Get.h",
-    "bodystart": "173",
-    "bodyend": "180"
+    "bodystart": "177",
+    "bodyend": "184"
   },
   "namespacednames_html": [
     "apache",

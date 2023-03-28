@@ -16,11 +16,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "96",
+    "line": "99",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "96",
-    "bodyend": "98"
+    "bodystart": "99",
+    "bodyend": "101"
   },
   "namespacednames_html": [
     "apache",
@@ -45,10 +45,10 @@
       "initializer_html": "= TType::T_I32",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "97",
+        "line": "100",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "97",
+        "bodystart": "100",
         "bodyend": "-1"
       }
     }

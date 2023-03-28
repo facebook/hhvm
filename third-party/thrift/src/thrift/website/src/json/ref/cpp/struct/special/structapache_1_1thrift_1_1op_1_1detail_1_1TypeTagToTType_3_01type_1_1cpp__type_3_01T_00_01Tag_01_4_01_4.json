@@ -19,11 +19,11 @@
   ],
   "location": {
     "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "line": "116",
+    "line": "119",
     "column": "1",
     "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-    "bodystart": "116",
-    "bodyend": "118"
+    "bodystart": "119",
+    "bodyend": "121"
   },
   "namespacednames_html": [
     "apache",
@@ -48,10 +48,10 @@
       "initializer_html": "= <a href=\"https://www.internalfb.com/intern/staticdocs/fbcref/ref/cpp/struct/apache/thrift/op/detail/TypeTagToTType\">TypeTagToTType</a>&lt;Tag&gt;::value",
       "location": {
         "file": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "line": "117",
+        "line": "120",
         "column": "1",
         "bodyfile": "fbcode/thrift/lib/cpp2/op/detail/Encode.h",
-        "bodystart": "117",
+        "bodystart": "120",
         "bodyend": "-1"
       }
     }

@@ -24,6 +24,10 @@ folly::AsyncSocket::ReadResult AsyncKTLSSocket::performReadMsg(
     struct ::msghdr& msg,
     AsyncReader::ReadCallback::ReadMode) {
 #if FIZZ_PLATFORM_CAPABLE_KTLS
+  // Reading of user ancillary data would have to be implemented, but
+  // currently conflicts with usage of `msg_control` below.
+  DCHECK(readAncillaryDataCallback_ == nullptr);
+
   // kTLS sends TLSInnerPlaintext.type in a 1 byte out-of-band cmsg payload.
   // The data that is read in `iov` is TLSInnerPlaintext.content
   char aux_data[CMSG_SPACE(1)];

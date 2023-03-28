@@ -2018,9 +2018,9 @@ TEST(FIeldMaskTest, LogicalOpSimple) {
 
 // Similar to previous unit-test, but for map
 TEST(FieldMaskTest, LogicalOpSimpleMap) {
-  // maskA = includes{1: excludes{},
-  //                  2: excludes{},
-  //                  3: includes{}}
+  // maskA = includes_map{1: excludes{},
+  //                      2: excludes{},
+  //                      3: includes{}}
   Mask maskA;
   {
     auto& includes = maskA.includes_map_ref().emplace();
@@ -2029,8 +2029,8 @@ TEST(FieldMaskTest, LogicalOpSimpleMap) {
     includes[3] = noneMask();
   }
 
-  // maskB = includes{2: excludes{},
-  //                  3: excludes{}}
+  // maskB = includes_map{2: excludes{},
+  //                      3: excludes{}}
   Mask maskB;
   {
     auto& includes = maskB.includes_map_ref().emplace();
@@ -2038,9 +2038,9 @@ TEST(FieldMaskTest, LogicalOpSimpleMap) {
     includes[3] = allMask();
   }
 
-  // maskA | maskB == includes{1: excludes{},
-  //                           2: excludes{},
-  //                           3: excludes{}}
+  // maskA | maskB == includes_map{1: excludes{},
+  //                               2: excludes{},
+  //                               3: excludes{}}
   Mask maskUnion;
   {
     auto& includes = maskUnion.includes_map_ref().emplace();
@@ -2051,18 +2051,18 @@ TEST(FieldMaskTest, LogicalOpSimpleMap) {
   EXPECT_EQ(maskA | maskB, maskUnion);
   EXPECT_EQ(maskB | maskA, maskUnion);
 
-  // maskA & maskB == includes{2: excludes{}}
+  // maskA & maskB == includes_map{2: excludes{}}
   Mask maskIntersect;
   { maskIntersect.includes_map_ref().emplace()[2] = allMask(); }
   EXPECT_EQ(maskA & maskB, maskIntersect);
   EXPECT_EQ(maskB & maskA, maskIntersect);
 
-  // maskA - maskB == includes{1: excludes{}}
+  // maskA - maskB == includes_map{1: excludes{}}
   Mask maskSubtractAB;
   { maskSubtractAB.includes_map_ref().emplace()[1] = allMask(); }
   EXPECT_EQ(maskA - maskB, maskSubtractAB);
 
-  // maskB - maskA == includes{3: excludes{}}
+  // maskB - maskA == includes_map{3: excludes{}}
   Mask maskSubtractBA;
   { maskSubtractBA.includes_map_ref().emplace()[3] = allMask(); }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);

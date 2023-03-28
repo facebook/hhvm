@@ -264,3 +264,9 @@ impl std::fmt::Display for ParseFormatError {
         "Unrecognized error format".fmt(f)
     }
 }
+
+impl Default for Format {
+    fn default() -> Self {
+        Format::Plain
+    }
+}

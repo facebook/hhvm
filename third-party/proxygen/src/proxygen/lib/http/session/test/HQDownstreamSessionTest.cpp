@@ -295,12 +295,14 @@ TEST_P(HQDownstreamSessionTest, PriorityUpdateIntoTransport) {
   auto request = getProgressiveGetRequest();
   sendRequest(request);
   auto handler = addSimpleStrictHandler();
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 1, true));
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(_, Priority(1, true)));
   handler->expectHeaders();
   handler->expectEOM([&]() {
     auto resp = makeResponse(200, 0);
     std::get<0>(resp)->getHeaders().add(HTTP_HEADER_PRIORITY, "u=2");
-    EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 2, false))
+    EXPECT_CALL(*socketDriver_->getSocket(),
+                setStreamPriority(_, Priority(2, false)))
         .Times(1);
     handler->sendRequest(*std::get<0>(resp));
   });
@@ -313,7 +315,8 @@ TEST_P(HQDownstreamSessionTest, ReplyResponsePriority) {
   auto request = getProgressiveGetRequest();
   sendRequest(request);
   auto handler = addSimpleStrictHandler();
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 1, true))
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(_, Priority(1, true)))
       .Times(1);
   handler->expectHeaders();
   handler->expectEOM([&]() {
@@ -335,11 +338,12 @@ TEST_P(HQDownstreamSessionTest, SetLocalPriorityOnHeadersComplete) {
   sendRequest(request);
   auto handler = addSimpleStrictHandler();
   // Check that the priority is set from the request headers
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 1, true))
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(_, Priority(1, true)))
       .Times(1);
   // Check that the priority is set from the local update
   EXPECT_CALL(*socketDriver_->getSocket(),
-              setStreamPriority(_, urgency, incremental))
+              setStreamPriority(_, Priority(urgency, incremental)))
       .Times(1);
   handler->expectHeaders(
       [&]() { handler->txn_->updateAndSendPriority(urgency, incremental); });
@@ -362,11 +366,12 @@ TEST_P(HQDownstreamSessionTest, SetLocalPriorityAfterClientEOM) {
   sendRequest(request);
   auto handler = addSimpleStrictHandler();
   // Check that the priority is set from the request headers
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 1, true))
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(_, Priority(1, true)))
       .Times(1);
   // Check that the priority is set from the local update
   EXPECT_CALL(*socketDriver_->getSocket(),
-              setStreamPriority(_, urgency, incremental))
+              setStreamPriority(_, Priority(urgency, incremental)))
       .Times(1);
   handler->expectHeaders();
   handler->expectEOM([&]() {
@@ -401,7 +406,7 @@ TEST_P(HQDownstreamSessionTestPush, PushPriority) {
   HTTPCodec::StreamID pushStreamId = 0;
   handler->expectEOM([&] {
     EXPECT_CALL(*socketDriver_->getSocket(),
-                setStreamPriority(handler->txn_->getID(), _, _))
+                setStreamPriority(handler->txn_->getID(), _))
         .Times(0);
     handler->txn_->sendHeaders(parentResp);
     handler->txn_->sendBody(makeBuf(100));
@@ -413,15 +418,15 @@ TEST_P(HQDownstreamSessionTestPush, PushPriority) {
     // PushPromise doesn't update parent streram's priority. It does update push
     // stream priority
     EXPECT_CALL(*socketDriver_->getSocket(),
-                setStreamPriority(handler->txn_->getID(), _, _))
+                setStreamPriority(handler->txn_->getID(), _))
         .Times(0);
     EXPECT_CALL(*socketDriver_->getSocket(),
-                setStreamPriority(pushTxn->getID(), 0, false))
+                setStreamPriority(pushTxn->getID(), Priority(0, false)))
         .Times(1);
     pushTxn->sendHeaders(promiseReq);
     pushStreamId = pushTxn->getID();
     EXPECT_CALL(*socketDriver_->getSocket(),
-                setStreamPriority(pushStreamId, 1, false))
+                setStreamPriority(pushStreamId, Priority(1, false)))
         .Times(1);
     pushTxn->sendHeaders(pushResp);
     pushTxn->sendBody(makeBuf(200));
@@ -442,14 +447,16 @@ TEST_P(HQDownstreamSessionTest, OnPriorityCallback) {
   // Simulate priority arriving too early, connection still valid
   // this is going to be stored and applied when receiving headers
   hqSession_->onPriority(0, HTTPPriority(3, false));
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(0, 3, false));
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(0, Priority(3, false)));
   auto id = sendRequest(getProgressiveGetRequest());
   CHECK_EQ(id, 0);
   auto handler = addSimpleStrictHandler();
   handler->expectHeaders([&]() {
     handler->sendHeaders(200, 1000);
     // Priority update on the stream
-    EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(0, 2, true));
+    EXPECT_CALL(*socketDriver_->getSocket(),
+                setStreamPriority(0, Priority(2, true)));
     hqSession_->onPriority(id, HTTPPriority(2, true));
     handler->sendBody(1000);
     handler->sendEOM();
@@ -2837,10 +2844,10 @@ TEST_P(HQDownstreamSessionTestPush, PushPriorityCallback) {
   // Push stream's priority can be updated either with stream id or push id:
   auto pushId = pushes_.find(pushStreamId)->second;
   EXPECT_CALL(*socketDriver_->getSocket(),
-              setStreamPriority(pushStreamId, 6, true));
+              setStreamPriority(pushStreamId, Priority(6, true)));
   hqSession_->onPushPriority(pushId, HTTPPriority(6, true));
   EXPECT_CALL(*socketDriver_->getSocket(),
-              setStreamPriority(pushStreamId, 5, true));
+              setStreamPriority(pushStreamId, Priority(5, true)));
   hqSession_->onPriority(pushStreamId, HTTPPriority(5, true));
 
   handler->txn_->sendEOM();

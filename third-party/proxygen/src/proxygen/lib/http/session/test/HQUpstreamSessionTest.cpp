@@ -262,7 +262,8 @@ TEST_P(HQUpstreamSessionTest, PriorityUpdateIntoTransport) {
   auto handler = openTransaction();
   auto req = getGetRequest();
   req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, i");
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 3, true));
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(_, quic::Priority(3, true)));
   handler->txn_->sendHeadersWithEOM(req);
 
   handler->expectHeaders();
@@ -275,7 +276,8 @@ TEST_P(HQUpstreamSessionTest, PriorityUpdateIntoTransport) {
                *std::get<0>(resp),
                std::move(std::get<1>(resp)),
                true);
-  EXPECT_CALL(*socketDriver_->getSocket(), setStreamPriority(_, 5, false));
+  EXPECT_CALL(*socketDriver_->getSocket(),
+              setStreamPriority(_, quic::Priority(5, false)));
   flushAndLoop();
   hqSession_->closeWhenIdle();
 }
@@ -323,8 +325,9 @@ TEST_P(HQUpstreamSessionTest, SendPriorityUpdate) {
   handler->txn_->sendHeaders(getGetRequest());
   handler->expectHeaders();
   handler->expectBody([&]() {
-    EXPECT_CALL(*socketDriver_->getSocket(),
-                setStreamPriority(handler->txn_->getID(), 5, true));
+    EXPECT_CALL(
+        *socketDriver_->getSocket(),
+        setStreamPriority(handler->txn_->getID(), quic::Priority(5, true)));
     handler->txn_->updateAndSendPriority(5, true);
   });
   handler->txn_->sendEOM();
@@ -345,8 +348,9 @@ TEST_P(HQUpstreamSessionTest, SkipPriorityUpdateAfterSeenEOM) {
   handler->expectHeaders();
   handler->expectBody();
   handler->expectEOM([&]() {
-    EXPECT_CALL(*socketDriver_->getSocket(),
-                setStreamPriority(handler->txn_->getID(), 5, true))
+    EXPECT_CALL(
+        *socketDriver_->getSocket(),
+        setStreamPriority(handler->txn_->getID(), quic::Priority(5, true)))
         .Times(0);
     handler->txn_->updateAndSendPriority(5, true);
   });

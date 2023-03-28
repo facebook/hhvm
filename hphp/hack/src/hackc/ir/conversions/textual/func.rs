@@ -653,10 +653,20 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
     // flags &= FCallArgsFlags::LockWhileUnwinding - ignored
     let is_async = flags & FCallArgsFlags::HasAsyncEagerOffset != 0;
 
+    let args = detail.args(operands);
+    let mut args = args
+        .iter()
+        .copied()
+        .map(|vid| state.lookup_vid(vid))
+        .collect_vec();
+
+    // A 'splat' is a call with an expanded array:
+    //   foo(1, 2, ...$a)
+    let mut splat = None;
+
     if flags & FCallArgsFlags::HasUnpack != 0 {
-        textual_todo! {
-            state.fb.comment("TODO: FCallArgsFlags::HasUnpack")?;
-        }
+        // 'unpack' means that the last arg was a splat.
+        splat = args.pop();
     }
     if flags & FCallArgsFlags::HasGenerics != 0 {
         textual_todo! {
@@ -707,12 +717,12 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         }
     }
 
-    let args = detail.args(operands);
-    let args = args
-        .iter()
-        .copied()
-        .map(|vid| state.lookup_vid(vid))
-        .collect_vec();
+    if let Some(splat) = splat {
+        // For a splat we'll pass the splat through a function that the model
+        // can recognize so it understands that it needs some extra analysis.
+        let splat = hack::call_builtin(state.fb, hack::Builtin::SilSplat, [splat])?;
+        args.push(splat.into());
+    }
 
     let mut output = match *detail {
         CallDetail::FCallClsMethod { .. } => write_todo(state.fb, "FCallClsMethod")?,

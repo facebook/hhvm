@@ -272,6 +272,9 @@ pub(crate) enum Builtin {
     /// Lazily initializes a static singleton.
     #[decl(fn lazy_initialize(*HackMixed) -> void)]
     SilLazyInitialize,
+    /// Note that this argument is a 'splat' (unwrapped array args for a function).
+    #[decl(fn __sil_splat(*HackArray) -> *HackArray)]
+    SilSplat,
     /// Turns a raw string into a HackMixed.
     #[decl(fn hack_string(string) -> *HackString)]
     String,

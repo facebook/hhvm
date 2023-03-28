@@ -152,6 +152,22 @@ function fcall_class_meth(): void {
   $x(1, 2, 3);
 }
 
+// TEST-CHECK-BAL: define $root.fcall_splat
+// CHECK: define $root.fcall_splat($this: *void) : *void {
+// CHECK: local $x: *void
+// CHECK: #b0:
+// CHECK:   n0 = $builtins.hhbc_new_vec($builtins.hack_int(2), $builtins.hack_int(3), $builtins.hack_int(4))
+// CHECK:   store &$x <- n0: *HackMixed
+// CHECK:   n1: *HackMixed = load &$x
+// CHECK:   n2 = $builtins.__sil_splat(n1)
+// CHECK:   n3 = $root.f(null, $builtins.hack_int(1), n2)
+// CHECK:   ret null
+// CHECK: }
+function fcall_splat(): void {
+  $x = vec[2, 3, 4];
+  f(1, ...$x);
+}
+
 // TEST-CHECK-1: declare C$static.f
 // CHECK: declare C$static.f(...): *HackMixed
 

@@ -295,6 +295,20 @@ module For_test : sig
   val find_oom_in_dmesg_output : int -> string -> string list -> bool
 end
 
+(** [atomically_create_and_init_file file ~rd ~wr perm ~init] will
+(1) create an anomymous FD using [rd], [wr] and [perm],
+(2) call the [init] callback allowing you to write contents or lock that FD,
+(3) attempt to atomically place that FD at the specified filename [file].
+If this third step fails because a file already exists there, the function
+will return None. Otherwise, it will return Some fd. *)
+val atomically_create_and_init_file :
+  string ->
+  rd:bool ->
+  wr:bool ->
+  Unix.file_perm ->
+  init:(Unix.file_descr -> unit) ->
+  Unix.file_descr option
+
 (** This will acquire a reader-lock on the file then read its content.
 Locks in unix are advisory, so this only works if writing is done by
 [protected_write_exn]. If the file doesn't exist, Unix.Unix_error(ENOENT). *)

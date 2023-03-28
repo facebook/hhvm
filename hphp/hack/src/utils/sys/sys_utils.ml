@@ -18,6 +18,10 @@ external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
+external open_tmpfile :
+  rd:bool -> wr:bool -> dir:string -> file_perm:int -> Unix.file_descr
+  = "hh_open_tmpfile"
+
 let get_env name =
   try Some (Sys.getenv name) with
   | Caml.Not_found -> None
@@ -624,6 +628,8 @@ type processor_info = {
 
 external processor_info : unit -> processor_info = "hh_processor_info"
 
+let string_of_fd (fd : Unix.file_descr) : string = string_of_int (Obj.magic fd)
+
 let rec select_non_intr read write exn timeout =
   let start_time = Unix.gettimeofday () in
   try Unix.select read write exn timeout with
@@ -649,7 +655,7 @@ let rec select_non_intr read write exn timeout =
        *)
       "["
       ^ List.fold_left
-          ~f:(fun init fd -> init ^ string_of_int (Obj.magic fd) ^ ", ")
+          ~f:(fun init fd -> init ^ string_of_fd fd ^ ", ")
           ~init:""
           fdl
       ^ "]"
@@ -759,6 +765,65 @@ external get_gc_time : unit -> float * float = "hh_get_gc_time"
 module For_test = struct
   let find_oom_in_dmesg_output = find_oom_in_dmesg_output
 end
+
+let atomically_create_and_init_file
+    (path : string)
+    ~(rd : bool)
+    ~(wr : bool)
+    (file_perm : Unix.file_perm)
+    ~(init : Unix.file_descr -> unit) : Unix.file_descr option =
+  if not Sys.unix then
+    failwith "O_TMPFILE, linkat and /proc/fd all require linux";
+  (* There's no way to pass O_TMPFILE to Unix.openfile. So, we need our own version... *)
+  let fd = open_tmpfile ~rd ~wr ~dir:(Filename.dirname path) ~file_perm in
+  try
+    init fd;
+
+    (* If the user's callback worked, we can proceed to atomically move the file into place.
+       If this fails due to pre-existing, then we'll return None.
+       Implementation of Unix.link is at
+       https://github.com/ocaml/ocaml/blob/trunk/otherlibs/unix/link_unix.c.
+       The ~follow:true flag makes it do
+       linkat(AT_FDCWD, "/proc/self/fd/<fd>", AT_FDCWD, filename, AT_SYMLINK_FOLLOW) *)
+
+    (* Here is documentation from "man 2 open": https://man7.org/linux/man-pages/man2/open.2.html
+       Note that it only exists on linux (since 2013) and not on other unix platforms.
+
+       O_TMPFILE must be specified with one of O_RDWR or O_WRONLY and, optionally, O_EXCL. If O_EXCL
+       is not specified, then linkat(2) can be used to link the temporary file into the filesystem,
+       making it permanent, using code like the following:
+         char path[PATH_MAX];
+         fd = open("/path/to/dir", O_TMPFILE | O_RDWR, S_IRUSR | S_IWUSR);
+         /* File I/O on 'fd'... */
+         snprintf(path, PATH_MAX,  "/proc/self/fd/%d", fd);
+         linkat(AT_FDCWD, path, AT_FDCWD, "/path/for/file", AT_SYMLINK_FOLLOW);
+
+       There are two main use cases for O_TMPFILE:
+
+       * Improved tmpfile(3) functionality: race-free creation of temporary files that (1) are
+       automatically deleted when closed; (2) can never be reached via any pathname; (3) are not
+       subject to symlink attacks; and (4) do not require the caller to devise unique names.
+       *  Creating a file that is initially invisible, which is then populated with data and adjusted to
+       have appropriate filesystem attributes (fchown(2), fchmod(2), fsetxattr(2), etc.) before being
+       atomically linked into the filesystem in a fully formed state (using linkat(2) as described above)
+    *)
+    begin
+      try
+        Unix.link
+          ~follow:true
+          (Printf.sprintf "/proc/self/fd/%s" (string_of_fd fd))
+          path;
+        Some fd
+      with
+      | Unix.Unix_error (Unix.EEXIST, _, _) ->
+        Unix.close fd;
+        None
+    end
+  with
+  | exn ->
+    let e = Exception.wrap exn in
+    Unix.close fd;
+    Exception.reraise e
 
 let protected_read_exn (filename : string) : string =
   (* We can't use the standard Disk.cat because we need to read from an existing (locked)

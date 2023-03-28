@@ -17,7 +17,7 @@
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
 DEFINE_bool(use_iouring_event_eventfd, true, "");
-DEFINE_int32(io_capacity, 16'000, "");
+DEFINE_int32(io_capacity, 256, "");
 DEFINE_int32(io_submit_sqe, -1, "");
 DEFINE_int32(io_max_get, -1, "");
 DEFINE_bool(set_iouring_defer_taskrun, true, "");

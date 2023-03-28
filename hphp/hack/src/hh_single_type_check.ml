@@ -2281,12 +2281,11 @@ let handle_mode
     if List.is_empty commands_or_actions then
       Format.printf "No commands or actions found\n"
     else
-      List.(
-        commands_or_actions
-        >>| Lsp_fmt.print_command_or_action
-        >>| Hh_json.json_to_string ~sort_keys:true ~pretty:true
-        >>| hermeticize_paths
-        |> iter ~f:(Format.printf "%s\n"))
+      commands_or_actions
+      |> Lsp_fmt.print_codeActionResult
+      |> Hh_json.json_to_string ~sort_keys:true ~pretty:true
+      |> hermeticize_paths
+      |> Format.printf "%s\n"
   | Find_local (line, char) ->
     let filename = expect_single_file () in
     let (ctx, entry) =

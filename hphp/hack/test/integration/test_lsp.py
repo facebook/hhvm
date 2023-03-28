@@ -5867,7 +5867,7 @@ function call_method(ClassWithFooBar $mc): void {
                                     },
                                 ],
                             }
-                        ],
+                        ]
                     },
                 },
                 result=[
@@ -5888,7 +5888,32 @@ function call_method(ClassWithFooBar $mc): void {
                                 ]
                             }
                         },
-                    }
+                    },
+                    {
+                        "title": "Extract into variable",
+                        "kind": "refactor",
+                        "diagnostics": [],
+                        "edit": {
+                            "changes": {
+                                "${root_path}/code_action_missing_method.php": [
+                                    {
+                                        "range": {
+                                            "start": {"line": 7, "character": 2},
+                                            "end": {"line": 7, "character": 2},
+                                        },
+                                        "newText": "$placeholder0 = foobaz;\n  ",
+                                    },
+                                    {
+                                        "range": {
+                                            "start": {"line": 7, "character": 7},
+                                            "end": {"line": 7, "character": 13},
+                                        },
+                                        "newText": "$placeholder0",
+                                    },
+                                ]
+                            }
+                        },
+                    },
                 ],
                 powered_by="serverless_ide",
             )

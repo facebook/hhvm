@@ -558,14 +558,6 @@ let print_codeActionResult (c : CodeAction.result) : json =
 
 (************************************************************************)
 
-let print_command_or_action : CodeAction.command_or_action -> json =
-  CodeAction.(
-    function
-    | Command c -> print_command c
-    | Action a -> print_codeAction a)
-
-(************************************************************************)
-
 let print_logMessage (type_ : MessageType.t) (message : string) : json =
   JSON_Object
     [

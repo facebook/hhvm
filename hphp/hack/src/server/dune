@@ -362,7 +362,9 @@
 (library
  (name server_code_actions_services)
  (wrapped false)
- (modules codeActionsService)
+ (modules
+  codeActionsService
+  codeActionsServiceExtractVariable)
  (libraries
   annotated_ast
   ast

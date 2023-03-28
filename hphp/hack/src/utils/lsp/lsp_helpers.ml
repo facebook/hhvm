@@ -116,6 +116,19 @@ let pos_to_lsp_range (p : 'a Pos.pos) : range =
   in
   { start = start_position; end_ = end_position }
 
+let lsp_range_contains ~(outer : range) (inner : range) =
+  let start_is_leq =
+    outer.start.line < inner.start.line
+    || outer.start.line = inner.start.line
+       && outer.start.character <= inner.start.character
+  in
+  let end_is_geq =
+    outer.end_.line > inner.end_.line
+    || outer.end_.line = inner.start.line
+       && outer.end_.character >= inner.end_.character
+  in
+  start_is_leq && end_is_geq
+
 let symbol_to_lsp_call_item
     (sym_occ : Relative_path.t SymbolOccurrence.t)
     (sym_def_opt : Relative_path.t SymbolDefinition.t option) :

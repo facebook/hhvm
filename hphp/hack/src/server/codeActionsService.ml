@@ -61,7 +61,7 @@ let override_method_quickfixes
 (* Quickfixes available at cursor position [start_line] and
    [start_col]. These aren't associated with errors, rather they
    transform code from one valid state to another. *)
-let refactorings_at ~start_line ~start_col =
+let override_method_refactorings_at ~start_line ~start_col =
   object
     inherit [_] Tast_visitor.reduce as super
 
@@ -143,6 +143,17 @@ let actions_for_errors
   in
   List.map quickfixes ~f:(fun qf -> fix_action path classish_starts qf)
 
+let lsp_range_of_ide_range (ide_range : Ide_api_types.range) : Lsp.range =
+  let module I = Ide_api_types in
+  let lsp_pos_of_ide_pos ide_pos =
+    Lsp.{ line = ide_pos.I.line; character = ide_pos.I.column }
+  in
+  Lsp.
+    {
+      start = lsp_pos_of_ide_pos ide_range.I.st;
+      end_ = lsp_pos_of_ide_pos ide_range.I.ed;
+    }
+
 let go
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
@@ -164,10 +175,23 @@ let go
   let { Tast_provider.Compute_tast_and_errors.tast; errors; _ } =
     Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
   in
-  let refactorings = (refactorings_at ~start_line ~start_col)#go ctx tast in
-  let refactoring_actions =
-    List.map refactorings ~f:(refactor_action path classish_starts)
+
+  let override_method_refactorings =
+    (override_method_refactorings_at ~start_line ~start_col)#go ctx tast
+  in
+  let override_method_commands_or_actions =
+    List.map
+      override_method_refactorings
+      ~f:(refactor_action path classish_starts)
   in
 
+  let lsp_range = lsp_range_of_ide_range range in
+
   actions_for_errors errors path classish_starts ~start_line ~start_col
-  @ refactoring_actions
+  @ override_method_commands_or_actions
+  @ CodeActionsServiceExtractVariable.find
+      ~range:lsp_range
+      ~path
+      ~entry
+      ctx
+      tast

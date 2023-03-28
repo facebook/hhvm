@@ -80,23 +80,43 @@ type 'a file_t = 'a list PhaseMap.t [@@deriving eq, show]
 (** Results of multi-file analysis. *)
 type 'a files_t = 'a file_t Relative_path.Map.t [@@deriving eq, show]
 
+type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
+[@@deriving eq, ord, show]
+
+type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, ord, show]
+
+type per_file_errors = error file_t
+
+type t = error files_t [@@deriving eq, show]
+
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc ->
       PhaseMap.fold v ~init:acc ~f:(fun phase v acc -> f path phase v acc))
 
 let files_t_map v ~f = Relative_path.Map.map v ~f:(fun v -> PhaseMap.map v ~f)
 
-let files_t_merge ~f x y =
+(** [files_t_merge f x y] is a merge by [file] & [phase], i.e. given "x:t" and "y:t" it
+goes through every (file * phase) mentioned in either of them, and combines
+the error-lists using the provided callback. Cost is O(x). *)
+let files_t_merge
+    ~(f :
+       phase ->
+       Relative_path.t ->
+       error list option ->
+       error list option ->
+       error list option)
+    (x : t)
+    (y : t) : t =
   (* Using fold instead of merge to make the runtime proportional to the size
    * of first argument (like List.rev_append ) *)
-  Relative_path.Map.fold x ~init:y ~f:(fun k x acc ->
+  Relative_path.Map.fold x ~init:y ~f:(fun path x acc ->
       let y =
-        Option.value (Relative_path.Map.find_opt y k) ~default:PhaseMap.empty
+        Option.value (Relative_path.Map.find_opt y path) ~default:PhaseMap.empty
       in
       Relative_path.Map.add
         acc
-        ~key:k
-        ~data:(PhaseMap.merge x y ~f:(fun phase x y -> f phase k x y)))
+        ~key:path
+        ~data:(PhaseMap.merge x y ~f:(fun phase x y -> f phase path x y)))
 
 let files_t_to_list x =
   files_t_fold x ~f:(fun _ _ x acc -> List.rev_append x acc) ~init:[]
@@ -125,15 +145,6 @@ let get_last error_map =
     (match List.rev error_list with
     | [] -> None
     | e :: _ -> Some e)
-
-type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
-[@@deriving eq, ord, show]
-
-type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, ord, show]
-
-type per_file_errors = error file_t
-
-type t = error files_t [@@deriving eq, show]
 
 module Error = struct
   type t = error [@@deriving ord]
@@ -728,10 +739,24 @@ and merge err' err =
   in
   files_t_merge ~f:append err' err
 
-and incremental_update old new_ fold phase =
+and incremental_update
+    ~(old : t) ~(new_ : t) ~(rechecked : Relative_path.Set.t) (phase : phase) :
+    t =
+  (* Helper to detect coding oversight *)
+  let assert_path_is_real (path : Relative_path.t) (phase : phase) : unit =
+    if Relative_path.equal path Relative_path.default then
+      Utils.assert_false_log_backtrace
+        (Some
+           ("Default (untracked) error sources should not get into incremental "
+           ^ "mode. There might be a missing call to `Errors.do_with_context`/"
+           ^ "`run_in_context` somwhere or incorrectly used `Errors.from_error_list`."
+           ^ "Phase: "
+           ^ show_phase phase))
+  in
+
   (* Helper to remove acc[path][phase]. If acc[path] becomes empty afterwards,
    * remove it too (i.e do not store empty maps or lists ever). *)
-  let remove path phase acc =
+  let remove (path : Relative_path.t) (phase : phase) (acc : t) : t =
     let new_phase_map =
       match Relative_path.Map.find_opt acc path with
       | None -> None
@@ -746,40 +771,29 @@ and incremental_update old new_ fold phase =
     | None -> Relative_path.Map.remove acc path
     | Some x -> Relative_path.Map.add acc ~key:path ~data:x
   in
+
   (* Replace old errors with new *)
-  let res =
+  let res : t =
     files_t_merge new_ old ~f:(fun phase path new_ old ->
-        (if Relative_path.equal path Relative_path.default then
-          let phase =
-            match phase with
-            | Init -> "Init"
-            | Parsing -> "Parsing"
-            | Naming -> "Naming"
-            | Decl -> "Decl"
-            | Typing -> "Typing"
-          in
-          Utils.assert_false_log_backtrace
-            (Some
-               ("Default (untracked) error sources should not get into incremental "
-               ^ "mode. There might be a missing call to `Errors.do_with_context`/"
-               ^ "`run_in_context` somwhere or incorrectly used `Errors.from_error_list`."
-               ^ "Phase: "
-               ^ phase)));
+        assert_path_is_real path phase;
         match new_ with
         | Some new_ -> Some (List.rev new_)
         | None -> old)
   in
   (* For files that were rechecked, but had no errors - remove them from maps *)
-  fold res (fun path acc ->
-      let has_errors =
-        match Relative_path.Map.find_opt new_ path with
-        | None -> false
-        | Some phase_map -> PhaseMap.mem phase_map phase
-      in
-      if has_errors then
-        acc
-      else
-        remove path phase acc)
+  let res : t =
+    Relative_path.Set.fold rechecked ~init:res ~f:(fun path acc ->
+        let has_errors =
+          match Relative_path.Map.find_opt new_ path with
+          | None -> false
+          | Some phase_map -> PhaseMap.mem phase_map phase
+        in
+        if has_errors then
+          acc
+        else
+          remove path phase acc)
+  in
+  res
 
 and from_error_list err = list_to_files_t err
 
@@ -847,18 +861,6 @@ let add_typing_error err =
     Eval_result.iter ~f:add_error
     @@ Eval_result.suppress_intersection ~is_suppressed
     @@ to_user_error err ~current_span:!current_span)
-
-let incremental_update ~old ~new_ ~rechecked phase =
-  let fold init g =
-    Relative_path.Set.fold
-      ~f:
-        begin
-          (fun path acc -> g path acc)
-        end
-      ~init
-      rechecked
-  in
-  incremental_update old new_ fold phase
 
 and empty = Relative_path.Map.empty
 

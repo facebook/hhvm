@@ -163,6 +163,9 @@ val merge : t -> t -> t
 
 val merge_into_current : t -> unit
 
+(** [incremental_update ~old ~new_ ~rechecked phase] is for updating errors.
+It starts with [old], removes every error in [rechecked]+[phase],
+then adds every error mentioned in [new_]. *)
 val incremental_update :
   old:t -> new_:t -> rechecked:Relative_path.Set.t -> phase -> t
 

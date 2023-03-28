@@ -359,15 +359,15 @@ struct CompactWriter {
                     const FieldSpec& valueSpec,
                     TType type,
                     const FieldInfo& fieldInfo) {
-      auto thrift_val = value;
       if (valueSpec.isTypeWrapped && value.isObject()) {
-        thrift_val = getThriftField(value.toObject());
+        writeField(getThriftField(value.toObject()), valueSpec, type, fieldInfo);
+        return;
       }
       if (valueSpec.adapter) {
-        const auto& thriftValue = transformToThriftType(thrift_val, *valueSpec.adapter);
+        const auto& thriftValue = transformToThriftType(value, *valueSpec.adapter);
         writeFieldInternal(thriftValue, valueSpec, type, fieldInfo);
       } else {
-        writeFieldInternal(thrift_val, valueSpec, type, fieldInfo);
+        writeFieldInternal(value, valueSpec, type, fieldInfo);
       }
     }
 

@@ -1,0 +1,8 @@
+File "typing_type_structure3.php", line 15, characters 3-26:
+  classname<E>
+File "typing_type_structure3.php", line 16, characters 3-26:
+  classname<I>
+File "typing_type_structure3.php", line 17, characters 3-26:
+  classname<E>
+File "typing_type_structure3.php", line 3, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])

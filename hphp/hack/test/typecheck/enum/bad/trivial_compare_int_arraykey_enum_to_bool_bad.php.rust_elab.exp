@@ -1,0 +1,26 @@
+File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 3, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 8, characters 10-20:
+This expression is always `false` (Typing[4118])
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 3, characters 6-6:
+  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 7, characters 13-16:
+  This is a bool
+File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 12, characters 10-20:
+This expression is always `false` (Typing[4118])
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 11, characters 13-16:
+  This is a bool
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 3, characters 6-6:
+  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
+File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 16, characters 10-20:
+This expression is always `true` (Typing[4118])
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 3, characters 6-6:
+  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 15, characters 13-16:
+  This is a bool
+File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 20, characters 10-20:
+This expression is always `true` (Typing[4118])
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 19, characters 13-16:
+  This is a bool
+  File "trivial_compare_int_arraykey_enum_to_bool_bad.php", line 3, characters 6-6:
+  This is an array key (int | string) arising from an implicit `as arraykey` constraint on this type

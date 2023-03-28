@@ -1,0 +1,10 @@
+File "instance_method.php", line 15, characters 5-10:
+Cannot use `parent::` in a function pointer due to class context ambiguity. Consider using `A::foo` instead (Naming[2112])
+File "instance_method.php", line 16, characters 5-8:
+Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `B::foo` instead (Naming[2113])
+File "instance_method.php", line 15, characters 13-15:
+Function pointer syntax requires a static method. Use `meth_caller(A::class, 'foo')` to create a function pointer to the instance method (Typing[4407])
+File "instance_method.php", line 16, characters 11-13:
+Function pointer syntax requires a static method. Use `meth_caller(B::class, 'foo')` to create a function pointer to the instance method (Typing[4407])
+File "instance_method.php", line 17, characters 13-15:
+Function pointer syntax requires a static method. Use `meth_caller(B::class, 'foo')` to create a function pointer to the instance method (Typing[4407])

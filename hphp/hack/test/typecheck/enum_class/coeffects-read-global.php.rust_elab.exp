@@ -1,0 +1,4 @@
+File "coeffects-read-global.php", line 8, characters 13-21:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "coeffects-read-global.php", line 7, characters 12-14:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

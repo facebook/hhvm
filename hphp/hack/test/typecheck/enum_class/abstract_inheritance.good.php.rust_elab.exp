@@ -1,0 +1,8 @@
+File "abstract_inheritance.good.php", line 4, characters 21-21:
+`HH\BuiltinAbstractEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "abstract_inheritance.good.php", line 8, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "abstract_inheritance.good.php", line 12, characters 21-21:
+`HH\BuiltinAbstractEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "abstract_inheritance.good.php", line 16, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

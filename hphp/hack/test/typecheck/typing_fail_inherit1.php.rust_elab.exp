@@ -1,0 +1,6 @@
+File "typing_fail_inherit1.php", line 18, characters 3-30:
+Redeclared method `Bar::bar` (Parsing[1002])
+File "typing_fail_inherit1.php", line 18, characters 19-21:
+Method name already bound: `bar` (Naming[2033])
+File "typing_fail_inherit1.php", line 18, characters 19-21:
+Argument already bound: `bar` (Naming[2036])

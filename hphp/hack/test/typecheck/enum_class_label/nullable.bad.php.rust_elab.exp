@@ -1,0 +1,18 @@
+File "nullable.bad.php", line 3, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "nullable.bad.php", line 18, characters 10-11:
+Invalid argument (Typing[4110])
+  File "nullable.bad.php", line 8, characters 35-37:
+  Expected `int`
+  File "nullable.bad.php", line 8, characters 35-37:
+  This type argument to `HH\EnumClass\Label` must match exactly (it is invariant)
+  File "nullable.bad.php", line 5, characters 3-8:
+  But got `string`
+File "nullable.bad.php", line 22, characters 10-11:
+Enum class `E` does not contain a label named `Z`. (Typing[4394])
+  File "nullable.bad.php", line 3, characters 12-12:
+  `E` is defined here
+  File "nullable.bad.php", line 4, characters 7-7:
+  Did you mean `#X`?
+  File "nullable.bad.php", line 8, characters 32-32:
+  This is why I expected an enum class label from `E`.

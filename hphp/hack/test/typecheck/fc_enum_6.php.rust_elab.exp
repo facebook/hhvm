@@ -1,0 +1,8 @@
+File "fc_enum_6.php", line 4, characters 6-8:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "fc_enum_6.php", line 4, characters 6-8:
+Underlying type for enum is incompatible with constraint (Typing[4330])
+  File "fc_enum_6.php", line 4, characters 18-23:
+  Expected `string`
+  File "fc_enum_6.php", line 4, characters 11-13:
+  But got `int`

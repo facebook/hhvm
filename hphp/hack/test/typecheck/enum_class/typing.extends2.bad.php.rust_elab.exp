@@ -1,0 +1,8 @@
+File "typing.extends2.bad.php", line 19, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.extends2.bad.php", line 19, characters 12-12:
+Enum classes can only extend other enum classes. (Typing[4115])
+  File "typing.extends2.bad.php", line 19, characters 29-29:
+  This is a class.
+File "typing.extends2.bad.php", line 19, characters 29-29:
+Enum X includes C which is not an enum (Typing[4388])

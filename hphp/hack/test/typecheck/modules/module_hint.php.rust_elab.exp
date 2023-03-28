@@ -1,0 +1,46 @@
+File "module_hint.php--here.php", line 9, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 10, characters 11-14:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 8, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 11, characters 12-12:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 12, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 13, characters 11-14:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 8, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 14, characters 12-12:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 15, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 10, characters 15-15:
+  This is from module `there`
+File "module_hint.php--here.php", line 16, characters 11-11:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 10, characters 15-15:
+  This is from module `there`
+File "module_hint.php--here.php", line 17, characters 12-12:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 18, characters 14-14:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--here.php", line 19, characters 21-21:
+Cannot access an internal element from module `there` in module `here` (Typing[4444])
+  File "module_hint.php--there.php", line 6, characters 16-16:
+  This is from module `there`
+File "module_hint.php--there.php", line 10, characters 15-15:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])

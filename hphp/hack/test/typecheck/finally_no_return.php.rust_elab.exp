@@ -1,0 +1,2 @@
+File "finally_no_return.php", line 17, characters 7-16:
+Don't use `return` in a `finally` block; there's nothing to receive the return value (NastCheck[3018])

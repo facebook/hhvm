@@ -1,0 +1,4 @@
+File "label.php", line 13, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "label.php", line 40, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

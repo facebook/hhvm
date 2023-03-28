@@ -1,0 +1,4 @@
+File "sealed.good.php", line 4, characters 12-15:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "sealed.good.php", line 7, characters 12-20:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

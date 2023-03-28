@@ -1,0 +1,6 @@
+File "bad_inout_use_arg11.php", line 7, characters 11-21:
+You cannot decorate this argument as `inout` (Parsing[1002])
+File "bad_inout_use_arg11.php", line 7, characters 11-19:
+Cannot use `[]` for reading (NastCheck[3047])
+File "bad_inout_use_arg11.php", line 7, characters 11-21:
+Cannot use `[]` for reading (NastCheck[3047])

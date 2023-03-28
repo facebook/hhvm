@@ -1,0 +1,2 @@
+File "fc_enum_classname.php", line 9, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])

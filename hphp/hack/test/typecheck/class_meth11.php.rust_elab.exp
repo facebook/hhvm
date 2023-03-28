@@ -1,0 +1,8 @@
+File "class_meth11.php", line 10, characters 5-15:
+  (readonly function(): string)
+File "class_meth11.php", line 18, characters 5-15:
+  (readonly function(): string)
+File "class_meth11.php", line 35, characters 5-15:
+  (readonly function(): string)
+File "class_meth11.php", line 17, characters 10-13:
+Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `D::aStaticMeth` instead (Naming[2113])

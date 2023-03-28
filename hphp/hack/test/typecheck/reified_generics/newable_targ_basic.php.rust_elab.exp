@@ -1,0 +1,28 @@
+File "newable_targ_basic.php", line 4, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "newable_targ_basic.php", line 14, characters 5-6:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_basic.php", line 11, characters 32-32:
+  Type parameter `T` was declared `__Newable` here
+File "newable_targ_basic.php", line 15, characters 5-11:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_basic.php", line 11, characters 32-32:
+  Type parameter `T` was declared `__Newable` here
+File "newable_targ_basic.php", line 19, characters 5-5:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_basic.php", line 11, characters 32-32:
+  Type parameter `T` was declared `__Newable` here
+File "newable_targ_basic.php", line 20, characters 5-5:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_basic.php", line 11, characters 32-32:
+  Type parameter `T` was declared `__Newable` here
+File "newable_targ_basic.php", line 21, characters 5-5:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_basic.php", line 11, characters 32-32:
+  Type parameter `T` was declared `__Newable` here
+File "newable_targ_basic.php", line 22, characters 5-6:
+A newable type argument must be a concrete class or a newable type parameter. (Typing[4307])
+  File "newable_targ_basic.php", line 11, characters 32-32:
+  Type parameter `T` was declared `__Newable` here
+File "newable_targ_basic.php", line 11, characters 32-32:
+The type parameter `T` has the `<<__Newable>>` attribute. Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. No constraints are valid newable classes (Typing[4308])

@@ -1,0 +1,4 @@
+File "public_toplevel.php--test.php", line 7, characters 13-19:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "public_toplevel.php--test.php", line 9, characters 19-30:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

@@ -1,0 +1,4 @@
+File "sealed_classes18.php", line 2, characters 12-15:
+`__Sealed` can only be used with named types, e.g. `Foo::class` (Parsing[1002])
+File "sealed_classes18.php", line 2, characters 12-15:
+Internal error: Unexpected CIself (Other[0000])

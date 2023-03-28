@@ -1,0 +1,16 @@
+File "enum_base_cycle.php", line 3, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "enum_base_cycle.php", line 5, characters 6-7:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "enum_base_cycle.php", line 7, characters 6-7:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "enum_base_cycle.php", line 9, characters 6-7:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "enum_base_cycle.php", line 3, characters 6-6:
+Cyclic class definition : `E`  (Typing[4013])
+File "enum_base_cycle.php", line 5, characters 6-7:
+Cyclic class definition : `E2` `E1` `E0`  (Typing[4013])
+File "enum_base_cycle.php", line 7, characters 6-7:
+Cyclic class definition : `E2` `E1` `E0`  (Typing[4013])
+File "enum_base_cycle.php", line 9, characters 6-7:
+Cyclic class definition : `E2` `E1` `E0`  (Typing[4013])

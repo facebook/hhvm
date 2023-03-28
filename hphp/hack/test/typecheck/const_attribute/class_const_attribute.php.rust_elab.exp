@@ -1,0 +1,6 @@
+File "class_const_attribute.php", line 3, characters 3-9:
+You cannot reuse the attribute `__Const` (Naming[2062])
+  File "class_const_attribute.php", line 6, characters 5-11:
+  `__Const` was already used here
+File "class_const_attribute.php", line 17, characters 12-26:
+Cannot mutate a `__Const` property (Typing[4196])

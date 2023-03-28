@@ -1,0 +1,14 @@
+File "coeffects.bad.php", line 43, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "coeffects.bad.php", line 46, characters 15-15:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "coeffects.bad.php", line 46, characters 11-17:
+  From this declaration, the context of this function body provides the capability WriteProperty
+  File "coeffects.bad.php", line 10, characters 19-29:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}
+File "coeffects.bad.php", line 47, characters 12-14:
+This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
+  File "coeffects.bad.php", line 47, characters 12-16:
+  From this declaration, the context of this function body provides the capability WriteProperty
+  File "coeffects.bad.php", line 3, characters 10-12:
+  But the function being called requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, SystemLocal, WriteProperty}

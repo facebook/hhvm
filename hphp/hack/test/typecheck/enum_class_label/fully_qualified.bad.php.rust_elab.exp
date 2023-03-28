@@ -1,0 +1,10 @@
+File "fully_qualified.bad.php", line 9, characters 8-8:
+Unbound name: `F` (an object type) (Naming[2049])
+File "fully_qualified.bad.php", line 3, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "fully_qualified.bad.php", line 8, characters 8-10:
+Enum class `E` does not contain a label named `B`. (Typing[4394])
+  File "fully_qualified.bad.php", line 3, characters 12-12:
+  `E` is defined here
+  File "fully_qualified.bad.php", line 4, characters 7-7:
+  Did you mean `E#A`?

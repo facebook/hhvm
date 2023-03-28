@@ -1,0 +1,14 @@
+File "public_toplevel2.php", line 3, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 4, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 5, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 7, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 10, characters 1-6:
+`public` on toplevel entities cannot be used outside of a module. Please define a module for this file. (Parsing[1002])
+File "public_toplevel2.php", line 5, characters 13-19:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "public_toplevel2.php", line 7, characters 19-30:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

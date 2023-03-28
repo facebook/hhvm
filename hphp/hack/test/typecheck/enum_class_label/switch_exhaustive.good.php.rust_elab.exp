@@ -1,0 +1,4 @@
+File "switch_exhaustive.good.php", line 10, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "switch_exhaustive.good.php", line 15, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

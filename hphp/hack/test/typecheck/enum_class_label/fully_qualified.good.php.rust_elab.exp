@@ -1,0 +1,2 @@
+File "fully_qualified.good.php", line 3, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

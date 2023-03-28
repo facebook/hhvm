@@ -1,0 +1,8 @@
+File "missing_label.php", line 3, characters 12-28:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "missing_label.php", line 9, characters 8-32:
+Enum class `VeryLongClassName` does not contain a label named `foobarr`. (Typing[4394])
+  File "missing_label.php", line 3, characters 12-28:
+  `VeryLongClassName` is defined here
+  File "missing_label.php", line 5, characters 7-12:
+  Did you mean `VeryLongClassName#foobar`?

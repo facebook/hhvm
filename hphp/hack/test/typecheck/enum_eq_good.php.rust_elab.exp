@@ -1,0 +1,4 @@
+File "enum_eq_good.php", line 4, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "enum_eq_good.php", line 9, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])

@@ -1,0 +1,6 @@
+File "memoized_bad_arity1.php", line 3, characters 25-27:
+`__Memoize` takes 1 argument when using `#KeyedByIC`. (Parsing[1002])
+File "memoized_bad_arity1.php", line 3, characters 13-22:
+Enum class label/member mismatch (Typing[4110])
+  File "memoized_bad_arity1.php", line 3, characters 13-22:
+  Unexpected enum class label: `#KeyedByIC`

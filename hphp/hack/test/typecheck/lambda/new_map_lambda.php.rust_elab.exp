@@ -1,0 +1,16 @@
+File "new_map_lambda.php", line 4, characters 6-11:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "new_map_lambda.php", line 24, characters 60-65:
+Invalid argument (Typing[4110])
+  File "new_map_lambda.php", line 18, characters 36-41:
+  Expected `MyEnum`
+  File "new_map_lambda.php", line 24, characters 26-31:
+  But got `string` because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+File "new_map_lambda.php", line 25, characters 25-73:
+Invalid argument (Typing[4110])
+  File "new_map_lambda.php", line 25, characters 26-31:
+  Expected `MyEnum`
+  File "new_map_lambda.php", line 22, characters 30-35:
+  But got `string`
+  File "new_map_lambda.php", line 11, characters 15-16:
+    via this generic `Tk`

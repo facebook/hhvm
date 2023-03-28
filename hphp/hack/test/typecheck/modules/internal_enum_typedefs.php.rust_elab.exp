@@ -1,0 +1,2 @@
+File "internal_enum_typedefs.php--test.php", line 7, characters 15-17:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])

@@ -1,0 +1,4 @@
+File "enum_class_enumerator_attr.php", line 17, characters 35-35:
+Attributes on enum class enumerators are not allowed (Parsing[1002])
+File "enum_class_enumerator_attr.php", line 14, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

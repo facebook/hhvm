@@ -1,0 +1,16 @@
+File "typing.good.php", line 28, characters 12-12:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 77, characters 12-14:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 82, characters 12-14:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 86, characters 12-14:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 92, characters 12-13:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 99, characters 12-17:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 103, characters 12-15:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.good.php", line 105, characters 12-18:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

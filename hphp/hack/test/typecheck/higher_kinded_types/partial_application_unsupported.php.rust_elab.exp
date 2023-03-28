@@ -1,0 +1,4 @@
+File "partial_application_unsupported.php", line 5, characters 12-12:
+Please make your type parameter start with the letter `T` (capital) (Naming[2042])
+File "partial_application_unsupported.php", line 8, characters 19-30:
+A higher-kinded type is expected here. We do not not support partial applications to yield higher-kinded types, but you are providing 1 type argument(s). (Naming[2047])

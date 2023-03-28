@@ -1,0 +1,4 @@
+File "xcont.php", line 48, characters 12-13:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "xcont.php", line 86, characters 12-16:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

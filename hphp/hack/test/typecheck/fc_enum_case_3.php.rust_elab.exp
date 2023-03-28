@@ -1,0 +1,6 @@
+File "fc_enum_case_3.php", line 3, characters 6-8:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
+File "fc_enum_case_3.php", line 11, characters 11-12:
+`switch` statement nonexhaustive; the following cases are missing: `BAR`, `BAZ` (Typing[4019])
+  File "fc_enum_case_3.php", line 3, characters 6-8:
+  Enum declared here

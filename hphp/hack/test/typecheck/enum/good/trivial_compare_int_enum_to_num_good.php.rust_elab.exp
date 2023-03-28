@@ -1,0 +1,2 @@
+File "trivial_compare_int_enum_to_num_good.php", line 3, characters 6-6:
+`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])

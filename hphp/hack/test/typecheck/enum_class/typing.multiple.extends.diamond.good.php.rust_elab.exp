@@ -1,0 +1,8 @@
+File "typing.multiple.extends.diamond.good.php", line 5, characters 12-13:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.multiple.extends.diamond.good.php", line 10, characters 12-13:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.multiple.extends.diamond.good.php", line 14, characters 12-13:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
+File "typing.multiple.extends.diamond.good.php", line 18, characters 12-13:
+`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

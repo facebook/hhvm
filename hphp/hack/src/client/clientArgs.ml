@@ -845,14 +845,8 @@ let parse_check_args cmd =
     | (MODE_LINT, _)
     | (MODE_CONCATENATE_ALL, _)
     | (MODE_FILE_LEVEL_DEPENDENCIES, _) ->
-      (Wwwroot.get None, args)
-    | (_, []) -> (Wwwroot.get None, [])
-    | (_, [x]) -> (Wwwroot.get (Some x), [])
-    | (_, _) ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
+      (Wwwroot.interpret_command_line_root_parameter [], args)
+    | (_, _) -> (Wwwroot.interpret_command_line_root_parameter args, [])
   in
 
   if !lock_file then (
@@ -986,16 +980,7 @@ let parse_start_env command =
     ]
   in
   let args = parse_without_command options usage command in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
-  in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   {
     ClientStart.config = !config;
     custom_hhi_path = !custom_hhi_path;
@@ -1032,16 +1017,7 @@ let parse_stop_args () =
   let from = ref "" in
   let options = [Common_argspecs.from from] in
   let args = parse_without_command options usage "stop" in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.fprintf
-        stderr
-        "Error: please provide at most one www directory\n%!";
-      exit 1
-  in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   CStop { ClientStop.root; from = !from }
 
 let parse_lsp_args () =
@@ -1108,14 +1084,7 @@ let parse_rage_args () =
     ]
   in
   let args = parse_without_command options usage "rage" in
-  let root =
-    match args with
-    | [] -> Wwwroot.get None
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
-      Printf.printf "%s\n" usage;
-      exit 2
-  in
+  let root = Wwwroot.interpret_command_line_root_parameter args in
   (* hh_client normally handles Ctrl+C by printing an exception-stack.
      But for us, in an interactive prompt, Ctrl+C is an unexceptional way to quit. *)
   Sys_utils.set_signal Sys.sigint Sys.Signal_default;
@@ -1253,10 +1222,10 @@ invocations of `hh` faster.|}
   let args = parse_without_command options usage "download-saved-state" in
   let root =
     match args with
-    | [x] -> Wwwroot.get (Some x)
-    | _ ->
+    | [] ->
       print_endline usage;
       exit 2
+    | _ -> Wwwroot.interpret_command_line_root_parameter args
   in
   let from =
     match !from with

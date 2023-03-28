@@ -64,7 +64,8 @@ let go
     (genv : ServerEnv.genv)
     (workers : MultiWorker.worker list option) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let repo = Wwwroot.get None in
+  (* TODO: the following is a bug! *)
+  let repo = Wwwroot.interpret_command_line_root_parameter [] in
   let hhconfig_version =
     match Future.get @@ get_hhconfig_version ~repo with
     | Ok (Ok result) -> result

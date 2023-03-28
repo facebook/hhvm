@@ -249,8 +249,8 @@ let get_root_opt () : Path.t option =
   match !initialize_params_ref with
   | None -> None
   | Some initialize_params ->
-    let path = Some (Lsp_helpers.get_root initialize_params) in
-    Some (Wwwroot.get path)
+    let paths = [Lsp_helpers.get_root initialize_params] in
+    Some (Wwwroot.interpret_command_line_root_parameter paths)
 
 (** root only becomes available after the initialize message *)
 let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
@@ -1689,7 +1689,10 @@ let run_ide_service
     (initialize_params : Lsp.Initialize.params)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
   let open Lsp.Initialize in
-  let root = Some (Lsp_helpers.get_root initialize_params) |> Wwwroot.get in
+  let root =
+    [Lsp_helpers.get_root initialize_params]
+    |> Wwwroot.interpret_command_line_root_parameter
+  in
   if
     not
       initialize_params.client_capabilities.workspace.didChangeWatchedFiles

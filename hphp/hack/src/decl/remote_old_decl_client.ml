@@ -13,7 +13,8 @@ open Hh_prelude
 
 module Utils = struct
   let get_hh_version () =
-    let repo = Wwwroot.get None in
+    (* TODO: the following is a bug! *)
+    let repo = Wwwroot.interpret_command_line_root_parameter [] in
     let hhconfig_path =
       Path.to_string
         (Path.concat repo Config_file.file_path_relative_to_repo_root)

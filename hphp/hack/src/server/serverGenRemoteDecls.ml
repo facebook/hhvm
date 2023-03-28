@@ -68,7 +68,8 @@ let get_changed_files_since_last_saved_state ~ssopts :
     (* TODO: using shallow_decls_saved_state *)
     Saved_state_loader.Naming_and_dep_table { naming_sqlite = false }
   in
-  let root = Wwwroot.get None in
+  (* TODO: the following is a bug! *)
+  let root = Wwwroot.interpret_command_line_root_parameter [] in
   let project_name = Saved_state_loader.get_project_name saved_state_type in
   get_project_metadata ~repo:root ~ssopts >>= fun project_metadata ->
   let query =
@@ -147,7 +148,8 @@ let go
     (workers : MultiWorker.worker list option)
     ~(incremental : bool) : unit =
   let ctx = Provider_utils.ctx_from_server_env env in
-  let repo = Wwwroot.get None in
+  (* TODO: the following is a bug! *)
+  let repo = Wwwroot.interpret_command_line_root_parameter [] in
   let hhconfig_version =
     match Future.get @@ get_hhconfig_info ~repo with
     | Ok (Ok result) -> result

@@ -451,9 +451,7 @@ let env
     changed_files
     state_path =
   let root =
-    match root with
-    | Some root -> Path.make root
-    | None -> Wwwroot.get None
+    Wwwroot.interpret_command_line_root_parameter (Option.to_list root)
   in
 
   (* Interpret relative paths with respect to the root from here on. That way,

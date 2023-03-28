@@ -23,6 +23,7 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
+#include <folly/io/async/ssl/OpenSSLTransportCertificate.h>
 #include <folly/IntrusiveList.h>
 #include <folly/IPAddress.h>
 
@@ -158,6 +159,8 @@ struct ProxygenTransport final
 
   const proxygen::HTTPHeaders* getProxygenHeaders() override;
 
+  folly::ssl::X509UniquePtr getPeerCertificate();
+
   /**
    * Get a description of the type of transport.
    */
@@ -233,6 +236,10 @@ struct ProxygenTransport final
     folly::IPAddress ipAddr(localAddr.getIPAddress());
     m_localAddr = ipAddr.toFullyQualified();
     m_localPort = localAddr.getPort();
+    m_peerCert = folly::OpenSSLTransportCertificate::tryExtractX509(
+        m_clientTxn->getTransport()
+            .getUnderlyingTransport()
+            ->getPeerCertificate());
   };
 
   proxygen::HTTPTransaction* getTransaction() noexcept {
@@ -387,7 +394,7 @@ struct ProxygenTransport final
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   int64_t m_maxPost{-1};
   const proxygen::HTTPHeaders* m_proxygenHeaders = nullptr;
-
+  folly::ssl::X509UniquePtr m_peerCert{nullptr};
  public:
   // List of ProxygenTransport not yet handed to the server will sit
   // in a list, so that we can abort them if they take too long.

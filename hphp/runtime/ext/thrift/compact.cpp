@@ -241,7 +241,8 @@ struct CompactWriter {
     CState state;
     uint16_t lastFieldNum;
     uint16_t boolFieldNum;
-    std::stack<std::pair<CState, uint16_t> > structHistory;
+    using StructHistoryState = std::pair<CState, uint16_t>;
+    std::stack<StructHistoryState, std::vector<StructHistoryState>> structHistory;
     std::stack<CState> containerHistory;
 
     void writeSlow(const FieldSpec& field, const Object& obj) {
@@ -770,7 +771,8 @@ struct CompactReader {
     CState state;
     uint16_t lastFieldNum;
     bool boolValue;
-    std::stack<std::pair<CState, uint16_t> > structHistory;
+    using StructHistoryState = std::pair<CState, uint16_t>;
+    std::stack<StructHistoryState, std::vector<StructHistoryState>> structHistory;
     std::stack<CState> containerHistory;
 
     void readStructBegin(void) {

@@ -357,7 +357,6 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
         c = '\v';
         break;
       case '\\':
-        result.push_back(c);
         break;
       case '\'':
         c = '\'';

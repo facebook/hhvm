@@ -628,7 +628,7 @@
     },
     "backslash" : {
       "lineno" : 199,
-      "value" : "\\\\",
+      "value" : "\\",
       "type_enum" : "STRING",
       "spec_args" : null,
       "source_range" : {
@@ -660,7 +660,7 @@
     },
     "char2ascii" : {
       "lineno" : 202,
-      "value" : { "'" : 39, "\"" : 34, "\\\\" : 92, "a" : 97 },
+      "value" : { "'" : 39, "\"" : 34, "\\" : 92, "a" : 97 },
       "type_enum" : "MAP",
       "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "I32", "spec_args" : null} } ,
       "source_range" : {

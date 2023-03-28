@@ -295,7 +295,7 @@ class t_py_generator : public t_concat_generator {
     EscapeQuote = 1 << 0,
     EscapeBackslash = 1 << 1,
   };
-  std::string render_string(std::string value, EscapeFlag = EscapeQuote);
+  std::string render_string(const std::string& value, EscapeFlag = EscapeQuote);
   std::string render_ttype_declarations(const char* delimiter);
 
   std::string get_priority(
@@ -1065,7 +1065,7 @@ void t_py_generator::generate_const(const t_const* tconst) {
   f_consts_ << endl << endl;
 }
 
-string t_py_generator::render_string(string value, EscapeFlag flag) {
+string t_py_generator::render_string(const string& value, EscapeFlag flag) {
   std::string escaped;
   escaped.reserve(value.size());
   for (unsigned char c : value) {
@@ -1102,7 +1102,8 @@ string t_py_generator::render_const_value(
     switch (tbase) {
       case t_base_type::TYPE_STRING:
       case t_base_type::TYPE_BINARY:
-        out << render_string(value->get_string());
+        out << render_string(
+            value->get_string(), EscapeFlag(EscapeQuote | EscapeBackslash));
         break;
       case t_base_type::TYPE_BOOL:
         out << (value->get_integer() > 0 ? "True" : "False");

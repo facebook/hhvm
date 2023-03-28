@@ -308,13 +308,13 @@ mstch::node mstch_const_value::string_value() {
   std::string escaped;
   escaped.reserve(str.size());
   for (unsigned char c : str) {
-    if (c >= 0x80) {
+    if (c == '"' || c == '\\') {
+      escaped.append({'\\', char(c)});
+    } else if (c >= 0x80) {
       // Use octal escape sequences because they are the most portable across
       // languages. Hexadecimal ones have a problem of consuming all hex digits
       // after \x in C++, e.g. \xcafefe is a single escape sequence.
       escaped.append(fmt::format("\\{:03o}", c));
-    } else if (c == '"') {
-      escaped.append("\\\"");
     } else {
       escaped.push_back(c);
     }

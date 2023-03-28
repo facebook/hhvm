@@ -167,6 +167,8 @@ std::string quote(const std::string& data, bool do_backslash) {
   for (auto ch : data) {
     if (ch == '\t') {
       quoted << '\\' << 't';
+    } else if (ch == '\\') {
+      quoted << '\\' << '\\';
     } else if (ch == '\r') {
       quoted << '\\' << 'r';
     } else if (ch == '\n') {

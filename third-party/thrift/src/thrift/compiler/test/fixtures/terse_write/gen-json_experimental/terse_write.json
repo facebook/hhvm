@@ -875,7 +875,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/hack.thrift"
 },
-            "value" : {"name": "\\\\Adapter1"}
+            "value" : {"name": "\\Adapter1"}
           },
                   "cpp.Adapter" : {
             "type" : {
@@ -936,7 +936,7 @@
   "name" : "FieldWrapper",
   "path" : "thrift/annotation/hack.thrift"
 },
-            "value" : {"name": "\\\\MyFieldWrapper"}
+            "value" : {"name": "\\MyFieldWrapper"}
           }
                 }
           }

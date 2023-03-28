@@ -12,6 +12,7 @@
 #include <folly/io/async/EventBase.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <proxygen/lib/transport/test/MockAsyncTransportCertificate.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <unordered_map>
 
@@ -862,6 +863,8 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
         .WillRepeatedly(testing::ReturnRef(localAddress_));
     EXPECT_CALL(*sock_, getPeerAddress())
         .WillRepeatedly(testing::ReturnRef(peerAddress_));
+    EXPECT_CALL(*sock_, getPeerCertificate())
+        .WillRepeatedly(testing::Return(mockCertificate));
   }
 
   uint16_t getDatagramSizeLimitImpl() {
@@ -1769,6 +1772,8 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
   QuicSocket::PingCallback* pingCB_{nullptr};
   folly::SocketAddress localAddress_;
   folly::SocketAddress peerAddress_;
+  std::shared_ptr<proxygen::MockAsyncTransportCertificate> mockCertificate{
+      std::make_shared<proxygen::MockAsyncTransportCertificate>()};
 }; // namespace quic
 
 } // namespace quic

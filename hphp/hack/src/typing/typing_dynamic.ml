@@ -311,6 +311,12 @@ let rec strip_covariant_like env ty =
       | None -> (env, ty)
       | Some td ->
         let (env, tyl) = strip_covariant_like_tyargs env tyl td.td_tparams in
+        let (env, bound) =
+          if String.equal n Naming_special_names.Classes.cMemberOf then
+            strip_covariant_like env bound
+          else
+            (env, bound)
+        in
         (env, mk (r, Tnewtype (n, tyl, bound)))
     end
     | (r, Tclass ((p, n), exact, tyl)) -> begin

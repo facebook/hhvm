@@ -529,14 +529,6 @@ const proxygen::HTTPHeaders* ProxygenTransport::getProxygenHeaders() {
   return m_proxygenHeaders;
 }
 
-folly::ssl::X509UniquePtr ProxygenTransport::getPeerCertificate() {
-  if (X509* x509raw = m_peerCert.get()) {
-    X509_up_ref(x509raw);
-    return folly::ssl::X509UniquePtr(x509raw);
-  }
-  return nullptr;
-}
-
 void ProxygenTransport::addHeaderImpl(const char *name, const char *value) {
   assertx(name && *name);
   assertx(value);

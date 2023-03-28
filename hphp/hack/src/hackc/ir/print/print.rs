@@ -892,6 +892,14 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
             )?;
         }
         Hhbc::CreateCont(_) => write!(w, "create_cont")?,
+        Hhbc::CreateSpecialImplicitContext(vids, _) => {
+            write!(
+                w,
+                "create_special_implicit_context {}, {}",
+                FmtVid(func, vids[0], verbose, strings),
+                FmtVid(func, vids[1], verbose, strings)
+            )?;
+        }
         Hhbc::GetClsRGProp(vid, _) => write!(
             w,
             "get_class_rg_prop {}",

@@ -368,6 +368,8 @@ static const struct {
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpVerifyImplicitContextState,
                    {None,             None,         OutNone         }},
+  { OpCreateSpecialImplicitContext,
+                   {StackTop2,        Stack1,       OutUnknown      }},
 
   /*** 14. Generator instructions ***/
 
@@ -1068,6 +1070,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ClsCnsL:
   case Op::SetImplicitContextByValue:
   case Op::VerifyImplicitContextState:
+  case Op::CreateSpecialImplicitContext:
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.

@@ -531,6 +531,23 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   return intersection_of(classname, TSStr);
 }
 
+TypeOrReduced builtin_create_special_implicit_context(ISS& env,
+                                                      const php::Func* func,
+                                                      const FCallArgs& fca) {
+  assertx(fca.numArgs() >= 1 && fca.numArgs() <= 2);
+
+  auto const type = getArg(env, func, fca, 0);
+  if (!type.subtypeOf(BInt)) return NoReduced{};
+
+  if (fca.numArgs() == 1) {
+    reduce(env, bc::Null {}, bc::CreateSpecialImplicitContext {});
+  } else {
+    if (!getArg(env, func, fca, 1).subtypeOf(BOptStr)) return NoReduced{};
+    reduce(env, bc::CreateSpecialImplicitContext {});
+  }
+  return Reduced{};
+}
+
 #define SPECIAL_BUILTINS                                                \
   X(abs, abs)                                                           \
   X(ceil, ceil)                                                         \
@@ -551,6 +568,7 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_no_throw, HH\\type_structure_no_throw)               \
   X(type_structure_classname, HH\\type_structure_classname)             \
+  X(create_special_implicit_context, HH\\ImplicitContext\\_Private\\create_special_implicit_context)   \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

@@ -3216,6 +3216,14 @@ VerifyImplicitContextState [] -> []
   exception if the state is invalid, set to soft implicit context or cleared.
   Can only be used in memoized wrapper functions.
 
+CreateSpecialImplicitContext [C:Int C:?Str] -> [C:?Obj]
+
+  Creates a special implicit context as if by calling the
+  create_special_implicit_context builtin. $1 is one of the
+  ImplicitContext::State enum values, and $2 is a nullable string optionally
+  providing a memo-key. If $1 is not an int, or if $2 is not a nullable string,
+  a fatal is raised.
+
 14. Generator creation and execution
 ---------------------------------------
 

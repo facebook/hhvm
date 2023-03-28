@@ -294,6 +294,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdImplicitContext:
   case LdImplicitContextMemoKey:
   case CallViolatesModuleBoundary:
+  case CreateSpecialImplicitContext:
     assertx(!inst.isControlFlow());
     return true;
 

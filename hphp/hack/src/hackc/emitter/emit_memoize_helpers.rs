@@ -88,42 +88,42 @@ pub fn get_implicit_context_memo_key<'arena>(
 }
 
 fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> InstrSeq<'arena> {
-    let (fn_name, num_args, args) = if soft {
-        (
-            "HH\\ImplicitContext\\_Private\\create_special_implicit_context",
-            1,
+    if soft {
+        InstrSeq::gather(vec![
             instr::cns_e(hhbc::ConstName::from_raw_string(
                 alloc,
                 "HH\\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE",
             )),
-        )
+            instr::null(),
+            instr::create_special_implicit_context(),
+            instr::set_implicit_context_by_value(),
+            instr::set_l(local),
+            instr::pop_c(),
+        ])
     } else {
-        (
-            "HH\\ImplicitContext\\_Private\\create_ic_inaccessible_context",
-            0,
-            instr::empty(),
-        )
-    };
-    InstrSeq::gather(vec![
-        instr::null_uninit(),
-        instr::null_uninit(),
-        args,
-        instr::f_call_func_d(
-            FCallArgs::new(
-                FCallArgsFlags::default(),
-                1,
-                num_args,
-                Slice::empty(),
-                Slice::empty(),
-                None,
-                None,
+        InstrSeq::gather(vec![
+            instr::null_uninit(),
+            instr::null_uninit(),
+            instr::f_call_func_d(
+                FCallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    0,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    None,
+                ),
+                hhbc::FunctionName::from_raw_string(
+                    alloc,
+                    "HH\\ImplicitContext\\_Private\\create_ic_inaccessible_context",
+                ),
             ),
-            hhbc::FunctionName::from_raw_string(alloc, fn_name),
-        ),
-        instr::set_implicit_context_by_value(),
-        instr::set_l(local),
-        instr::pop_c(),
-    ])
+            instr::set_implicit_context_by_value(),
+            instr::set_l(local),
+            instr::pop_c(),
+        ])
+    }
 }
 
 pub fn ic_restore<'arena>(

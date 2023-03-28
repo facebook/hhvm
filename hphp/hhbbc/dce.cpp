@@ -1543,6 +1543,9 @@ void dce(Env& env, const bc::LazyClassFromClass&) {
 }
 void dce(Env& env, const bc::ClassGetC&)        { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ResolveClass&)     { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CreateSpecialImplicitContext&) {
+  pushRemovableIfNoThrow(env);
+}
 
 /*
  * Default implementation is conservative: assume we use all of our

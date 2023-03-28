@@ -525,6 +525,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 Opcode::CreateCl(operands.len() as u32, class)
             }
             Hhbc::CreateCont(_) => Opcode::CreateCont,
+            Hhbc::CreateSpecialImplicitContext(..) => Opcode::CreateSpecialImplicitContext,
             Hhbc::Div(..) => Opcode::Div,
             Hhbc::GetClsRGProp(..) => Opcode::GetClsRGProp,
             Hhbc::GetMemoKeyL(lid, _) => {

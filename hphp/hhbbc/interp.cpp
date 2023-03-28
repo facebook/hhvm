@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
@@ -2136,7 +2137,7 @@ void in(ISS& env, const bc::VerifyImplicitContextState& /*op*/) {
       !providedCoeffects.canCall(RuntimeCoeffects::leak_safe_shallow())) {
     // If the current function cannot call zoned code, it cannot retrieve the
     // implicit context, so it is safe to kill the verify instruction.
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
 }
 
@@ -5417,7 +5418,61 @@ void in(ISS& env, const bc::AwaitAll& op) {
 
 void in(ISS& env, const bc::SetImplicitContextByValue&) {
   popC(env);
-  push(env, Type{BObj | BInitNull});
+  push(env, TOptObj);
+}
+
+const StaticString
+  s_Memoize("__Memoize"),
+  s_MemoizeLSB("__MemoizeLSB");
+
+void in(ISS& env, const bc::CreateSpecialImplicitContext&) {
+  auto const memoKey = popC(env);
+  auto const type = popC(env);
+
+  if (!type.couldBe(BInt) || !memoKey.couldBe(BOptStr)) {
+    unreachable(env);
+    return push(env, TBottom);
+  }
+
+  if (type.subtypeOf(BInt) && memoKey.subtypeOf(BOptStr)) {
+    effect_free(env);
+  }
+
+  if (auto const v = tv(type); v && tvIsInt(*v)) {
+    switch (static_cast<ImplicitContext::State>(v->m_data.num)) {
+      case ImplicitContext::State::Value:
+        return push(env, TOptObj);
+      case ImplicitContext::State::SoftInaccessible: {
+        auto const sampleRate = [&] () -> uint32_t {
+          if (!memoKey.couldBe(BInitNull)) return 1;
+
+          auto const attrName = env.ctx.func->isMemoizeWrapperLSB
+            ? s_MemoizeLSB.get()
+            : s_Memoize.get();
+          auto const it = env.ctx.func->userAttributes.find(attrName);
+          if (it == env.ctx.func->userAttributes.end()) return 1;
+
+          uint32_t rate = 1;
+          assertx(tvIsVec(it->second));
+          IterateV(
+            it->second.m_data.parr,
+            [&](TypedValue elem) {
+              if (tvIsInt(elem)) {
+                rate = std::max<uint32_t>(rate, elem.m_data.num);
+              }
+            }
+          );
+          return rate;
+        }();
+        return push(env, sampleRate == 1 ? TObj : TOptObj);
+      }
+      case ImplicitContext::State::Inaccessible:
+      case ImplicitContext::State::SoftSet:
+        return push(env, TObj);
+    }
+  }
+
+  return push(env, TOptObj);
 }
 
 void in(ISS& env, const bc::Idx&) {

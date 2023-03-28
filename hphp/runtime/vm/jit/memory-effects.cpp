@@ -1440,6 +1440,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
 
   case LdImplicitContext:
+  case CreateSpecialImplicitContext:
     // Not a PureLoad due to the leaking refcounting semantics.
     return may_load_store(ARds { ImplicitContext::activeCtx.handle() }, AEmpty);
 

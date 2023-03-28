@@ -77,6 +77,7 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/hh/ext_implicit_context.h"
 
 #include "hphp/runtime/server/source-root-info.h"
 
@@ -5138,6 +5139,26 @@ OPTBLD_INLINE void iopVerifyImplicitContextState() {
   }
 
   not_reached();
+}
+
+OPTBLD_INLINE void iopCreateSpecialImplicitContext() {
+  auto const memoKey = vmStack().topC();
+  auto const type = vmStack().indC(1);
+  if (!tvIsInt(type)) {
+    raise_error("CreateSpecialImplicitContext requires an int type");
+  }
+  if (!tvIsString(memoKey) && !tvIsNull(memoKey)) {
+    raise_error("CreateSpecialImplicitContext requires a nullable string memo key");
+  }
+  auto const ret = create_special_implicit_context_explicit(
+    type->m_data.num,
+    tvIsString(memoKey) ? memoKey->m_data.pstr : nullptr,
+    vmfp()->func()
+  );
+  assertx(tvIsNull(ret) || tvIsObject(ret));
+  vmStack().popC();
+  vmStack().popC();
+  tvCopy(ret, vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopCheckProp(const StringData* propName) {

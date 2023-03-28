@@ -1018,6 +1018,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::ContRaise => simple!(Hhbc::ContRaise),
         Opcode::ContValid => simple!(Hhbc::ContValid),
         Opcode::CreateCont => simple!(Hhbc::CreateCont),
+        Opcode::CreateSpecialImplicitContext => simple!(Hhbc::CreateSpecialImplicitContext),
         Opcode::DblAsBits => todo!(),
         Opcode::Dir => simple!(Constant::Dir),
         Opcode::Div => simple!(Hhbc::Div),

@@ -465,6 +465,7 @@ pub enum Hhbc {
         loc: LocId,
     },
     CreateCont(LocId),
+    CreateSpecialImplicitContext([ValueId; 2], LocId),
     Div([ValueId; 2], LocId),
     GetClsRGProp(ValueId, LocId),
     GetMemoKeyL(LocalId, LocId),

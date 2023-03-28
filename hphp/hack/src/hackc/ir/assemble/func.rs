@@ -1340,6 +1340,7 @@ impl FunctionParser<'_, '_> {
             "cont_valid" => I::Hhbc(H::ContValid(loc)),
             "create_class" => parse_instr!(tok, I::Hhbc(H::CreateCl{operands: operands.into(), clsid, loc}), <clsid:parse_class_id> "(" <operands:self.vid,*> ")"),
             "create_cont" => I::Hhbc(H::CreateCont(loc)),
+            "create_special_implicit_context" => I::Hhbc(H::CreateSpecialImplicitContext(self.vid2(tok)?, loc)),
             "div" => I::Hhbc(H::Div(self.vid2(tok)?, loc)),
             "enter" => parse_instr!(tok, I::Terminator(T::Enter(p0, loc)), "to" <p0:parse_bid>),
             "eval" => I::Hhbc(H::IncludeEval(IncludeEval { kind: IncludeKind::Eval, vid: self.vid(tok)?, loc })),

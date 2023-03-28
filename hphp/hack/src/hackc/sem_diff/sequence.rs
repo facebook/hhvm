@@ -344,6 +344,7 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::ContRaise
             | Opcode::ContValid
             | Opcode::CreateCont
+            | Opcode::CreateSpecialImplicitContext
             | Opcode::DblAsBits
             | Opcode::Exit
             | Opcode::GetClsRGProp

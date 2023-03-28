@@ -934,6 +934,7 @@ fn cmp_instr_hhbc(
         | (Hhbc::ContValid(_), _)
         | (Hhbc::CreateCl { .. }, _)
         | (Hhbc::CreateCont(_), _)
+        | (Hhbc::CreateSpecialImplicitContext(_, _), _)
         | (Hhbc::Div(_, _), _)
         | (Hhbc::GetClsRGProp(_, _), _)
         | (Hhbc::GetMemoKeyL(_, _), _)

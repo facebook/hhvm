@@ -1285,6 +1285,7 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
         NodeInstr::Opcode(
             Opcode::ClsCnsD(_, _)
             | Opcode::CnsE(_)
+            | Opcode::CreateSpecialImplicitContext
             | Opcode::Dict(..)
             | Opcode::Dir
             | Opcode::Double(..)
@@ -1605,6 +1606,7 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::ContRaise
         | Opcode::ContValid
         | Opcode::CreateCont
+        | Opcode::CreateSpecialImplicitContext
         | Opcode::DblAsBits
         | Opcode::Dir
         | Opcode::Div

@@ -284,13 +284,11 @@ struct CompactWriter {
       for (int slot = 0; slot < numFields; ++slot) {
         if (slot < numProps && fields[slot].name == prop[slot].name) {
           auto index = cls->propSlotToIndex(slot);
-
-          VarNR fieldWrapper(objProps->at(index).tv());
           Variant fieldVal;
           if (fields[slot].isWrapped) {
             fieldVal = getThriftType(obj, StrNR(fields[slot].name));
           } else {
-            fieldVal = fieldWrapper;
+            fieldVal = VarNR{objProps->at(index).tv()};
           }
           if (!fieldVal.isNull()) {
             TType fieldType = fields[slot].type;

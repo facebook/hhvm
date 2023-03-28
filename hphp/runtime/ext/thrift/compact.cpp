@@ -268,7 +268,7 @@ struct CompactWriter {
 
     void writeStruct(const Object& obj) {
       // Save state
-      structHistory.push(std::make_pair(state, lastFieldNum));
+      structHistory.emplace(state, lastFieldNum);
       state = STATE_FIELD_WRITE;
       lastFieldNum = 0;
 
@@ -776,7 +776,7 @@ struct CompactReader {
     std::stack<CState> containerHistory;
 
     void readStructBegin(void) {
-      structHistory.push(std::make_pair(state, lastFieldNum));
+      structHistory.emplace(state, lastFieldNum);
       state = STATE_FIELD_READ;
       lastFieldNum = 0;
     }

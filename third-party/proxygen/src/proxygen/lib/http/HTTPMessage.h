@@ -55,7 +55,7 @@ struct HTTPPriority {
 };
 
 // Convert Priority to a string representation in the form of "u=urgency[,i]"
-std::string httpPriorityToString(uint8_t urgency, bool incremental);
+std::string httpPriorityToString(const HTTPPriority& priority);
 
 class HTTPMessage;
 

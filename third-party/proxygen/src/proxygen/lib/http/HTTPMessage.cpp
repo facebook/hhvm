@@ -31,11 +31,11 @@ std::locale defaultLocale;
 
 namespace proxygen {
 
-std::string httpPriorityToString(uint8_t urgency, bool incremental) {
+std::string httpPriorityToString(const HTTPPriority& priority) {
   return folly::to<std::string>(
       "u=",
-      std::min(static_cast<uint8_t>(proxygen::kMaxPriority), urgency),
-      incremental ? ",i" : "");
+      std::min(static_cast<uint8_t>(proxygen::kMaxPriority), priority.urgency),
+      priority.incremental ? ",i" : "");
 }
 
 std::mutex HTTPMessage::mutexDump_;
@@ -993,13 +993,11 @@ ParseURL HTTPMessage::setURLImplInternal(bool unparse, bool strict) {
 
 void HTTPMessage::setHTTPPriority(uint8_t urgency, bool incremental) {
   headers_.set(HTTP_HEADER_PRIORITY,
-               httpPriorityToString(urgency, incremental));
+               httpPriorityToString(HTTPPriority(urgency, incremental)));
 }
 
 void HTTPMessage::setHTTPPriority(HTTPPriority httpPriority) {
-  headers_.set(
-      HTTP_HEADER_PRIORITY,
-      httpPriorityToString(httpPriority.urgency, httpPriority.incremental));
+  headers_.set(HTTP_HEADER_PRIORITY, httpPriorityToString(httpPriority));
 }
 
 } // namespace proxygen

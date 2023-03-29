@@ -726,10 +726,13 @@ void t_mstch_go_generator::set_go_package_aliases() {
   auto program = get_program();
   auto includes = program->get_included_programs();
 
+  // Prevent collisions with *this* program's package name
+  auto pkg_name = go::get_go_package_base_name(program, data_.package_override);
+  data_.go_package_name_collisions[pkg_name] = 0;
+
   for (auto include : includes) {
-    auto package = go::get_go_package_name(include, data_.package_override);
-    auto package_base_name =
-        go::get_go_package_base_name(include, data_.package_override);
+    auto package = go::get_go_package_name(include);
+    auto package_base_name = go::get_go_package_base_name(include);
     auto unique_package_name = go::make_unique_name(
         data_.go_package_name_collisions,
         go::munge_ident(package_base_name, /*exported*/ false));

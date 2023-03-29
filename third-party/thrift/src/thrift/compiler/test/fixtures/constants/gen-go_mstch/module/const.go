@@ -192,12 +192,12 @@ var U_2_6 Union2 = *NewUnion2().
 const Apostrophe string = "'"
 const TripleApostrophe string = "'''"
 const QuotationMark string = "\""
-const Backslash string = "\\"
+const Backslash string = "\\\\"
 const EscapedA string = "a"
 var Char2ascii map[string]int32 = map[string]int32{
     "'": 39,
     "\"": 34,
-    "\\": 92,
+    "\\\\": 92,
     "a": 97,
 }
 var EscapedStrings []string = []string{

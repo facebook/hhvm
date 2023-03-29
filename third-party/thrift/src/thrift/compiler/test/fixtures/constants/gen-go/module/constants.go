@@ -58,7 +58,7 @@ var U_2_6 *Union2
 const Apostrophe = "'"
 const TripleApostrophe = "'''"
 const QuotationMark = "\""
-const Backslash = "\\"
+const Backslash = "\\\\"
 const EscapedA = "a"
 var Char2ascii map[string]int32
 var EscapedStrings []string
@@ -321,7 +321,7 @@ U_2_6 = &Union2{
 Char2ascii = map[string]int32{
   "'": 39,
   "\"": 34,
-  "\\": 92,
+  "\\\\": 92,
   "a": 97,
 }
 

@@ -86,9 +86,7 @@ class lexer {
   lexer(source src, lex_handler& handler, diagnostics_engine& diags);
 
   // Lexes the content of a string literal and returns its value with escape
-  // sequences translated or an empty optional on error. It is done separately
-  // from get_next_token to keep tokens lightweight (no memory management and
-  // no dispatch on the token type in ctors/dtor).
+  // sequences translated or an empty optional on error.
   boost::optional<std::string> lex_string_literal(token literal);
 
   // Lexes and returns the next token.

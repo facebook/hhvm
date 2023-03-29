@@ -65,6 +65,10 @@ class t_name_generator {
   int counter_ = 0;
 };
 
+std::string unescape(std::string s) {
+  boost::replace_all(s, "\\\\", "\\");
+  return s;
+}
 } // namespace
 
 /**
@@ -658,7 +662,7 @@ class t_hack_generator : public t_concat_generator {
                   type, kHackAdapterUri)) {
         for (const auto& item : annotation->value()->get_map()) {
           if (item.first->get_string() == "name") {
-            return item.second->get_string();
+            return unescape(item.second->get_string());
           }
         }
       }
@@ -676,7 +680,7 @@ class t_hack_generator : public t_concat_generator {
       if (annotation) {
         for (const auto& item : annotation->value()->get_map()) {
           if (item.first->get_string() == "name") {
-            return item.second->get_string();
+            return unescape(item.second->get_string());
           }
         }
       }
@@ -709,12 +713,12 @@ class t_hack_generator : public t_concat_generator {
     info.extra_namespace = "thrift_adapted_types";
     for (const auto& item : annotation->value()->get_map()) {
       if (item.first->get_string() == "name") {
-        info.name = item.second->get_string();
+        info.name = unescape(item.second->get_string());
       } else if (item.first->get_string() == "underlyingName") {
-        info.underlying_name =
-            hack_name(item.second->get_string(), ttype->program(), true);
+        info.underlying_name = hack_name(
+            unescape(item.second->get_string()), ttype->program(), true);
       } else if (item.first->get_string() == "extraNamespace") {
-        info.extra_namespace = item.second->get_string();
+        info.extra_namespace = unescape(item.second->get_string());
       }
     }
     if (!info.name) {
@@ -741,7 +745,7 @@ class t_hack_generator : public t_concat_generator {
             node.find_structured_annotation_or_null(kHackAdapterUri)) {
       for (const auto& item : annotation->value()->get_map()) {
         if (item.first->get_string() == "name") {
-          return item.second->get_string();
+          return unescape(item.second->get_string());
         }
       }
     }
@@ -1826,7 +1830,7 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
 std::string t_hack_generator::render_string(std::string value) {
   std::ostringstream out;
   size_t pos = 0;
-  while ((pos = value.find_first_of("\"\\", pos)) != std::string::npos) {
+  while ((pos = value.find('"', pos)) != std::string::npos) {
     value.insert(pos, 1, '\\');
     pos += 2;
   }

@@ -47,7 +47,7 @@ TEST_F(JavaUtilTest, test_mangle_java_constant_name) {
 TEST_F(JavaUtilTest, test_escape_java_string) {
   EXPECT_EQ(java::quote_java_string("foo"), "\"foo\"");
   EXPECT_EQ(java::quote_java_string("\""), "\"\\\"\"");
-  EXPECT_EQ(java::quote_java_string("\\"), "\"\\\\\"");
+  EXPECT_EQ(java::quote_java_string("\\\\"), "\"\\\\\"");
 }
 
 TEST_F(JavaUtilTest, test_package_to_path) {

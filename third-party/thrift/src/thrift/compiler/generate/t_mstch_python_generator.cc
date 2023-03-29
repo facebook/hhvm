@@ -1071,7 +1071,6 @@ class python_mstch_const_value : public mstch_const_value {
       return mstch::node();
     }
     std::string string_val = const_value_->get_string();
-    boost::algorithm::replace_all(string_val, "\\", "\\\\");
     if (string_val.find('\n') == std::string::npos) {
       if (string_val.find('"') == std::string::npos) {
         return "\"" + string_val + "\"";

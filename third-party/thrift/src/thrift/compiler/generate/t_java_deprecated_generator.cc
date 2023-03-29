@@ -422,19 +422,62 @@ string t_java_deprecated_generator::render_const_value(
     t_base_type::t_base tbase = ((t_base_type*)type)->get_base();
     switch (tbase) {
       case t_base_type::TYPE_STRING:
-      case t_base_type::TYPE_BINARY:
+      case t_base_type::TYPE_BINARY: {
         render << '"';
-        for (char c : value->get_string()) {
-          if (c == '\\' || c == '"') {
-            render << '\\';
+        auto& rawValue = value->get_string();
+        for (std::string::size_type i = 0; i < rawValue.size();) {
+          switch (rawValue[i]) {
+            case '\\': {
+              render << rawValue[i];
+              ++i;
+              assert(i <= rawValue.size());
+              if (i == rawValue.size()) {
+                throw std::string(
+                    "compiler error: leading backslash missing "
+                    "escape sequence: ") +
+                    rawValue;
+              }
+              if (rawValue[i] == 'x') {
+                auto end =
+                    rawValue.find_first_not_of("0123456789abcdefABCDEF", ++i);
+                if (end == std::string::npos) {
+                  end = rawValue.size();
+                }
+                if (end == i) {
+                  throw std::string(
+                      "compiler error: missing hexadecimal "
+                      "character code in escape sequence: ") +
+                      rawValue;
+                }
+                assert(i < end);
+                if (end > i + 2) {
+                  end = i + 2;
+                }
+                render << 'u';
+                for (auto n = 4 - (end - i); n--;) {
+                  render << '0';
+                }
+                render.write(std::next(rawValue.data(), i), end - i);
+                i = end;
+              } else {
+                render << rawValue[i++];
+              }
+              break;
+            }
+            case '"':
+              render << '\\';
+              // intentional fallback
+            default:
+              render << rawValue[i];
+              ++i;
           }
-          render << c;
         }
         render << '"';
         if (tbase == t_base_type::TYPE_BINARY) {
           render << ".getBytes()";
         }
         break;
+      }
       case t_base_type::TYPE_BOOL:
         render << ((value->get_integer() > 0) ? "true" : "false");
         break;

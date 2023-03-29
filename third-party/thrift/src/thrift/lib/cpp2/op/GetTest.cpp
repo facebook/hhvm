@@ -28,11 +28,11 @@
 namespace apache::thrift::op {
 namespace {
 // TODO(afuller): Use shared test structs instead, e.g. testset
-using facebook::thrift::type::DecodedUri;
 using test::FieldRefNotOptionalStruct;
 using test::FieldRefOptionalStruct;
 using test::SmartPointerStruct;
 using test::UnionStruct;
+using type::DecodedUri;
 
 TEST(GetTest, GetField) {
   DecodedUri actual;

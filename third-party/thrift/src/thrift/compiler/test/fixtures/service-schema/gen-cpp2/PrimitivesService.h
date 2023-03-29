@@ -45,7 +45,7 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override;
   CreateMethodMetadataResult createMethodMetadata() override;
   #if defined(THRIFT_SCHEMA_AVAILABLE)
-  std::optional<std::vector<facebook::thrift::type::Schema>> getServiceMetadataV1() override;
+  std::optional<std::vector<apache::thrift::type::Schema>> getServiceMetadataV1() override;
   #endif
  private:
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;

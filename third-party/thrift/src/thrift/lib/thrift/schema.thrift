@@ -40,6 +40,7 @@ include "thrift/lib/thrift/type.thrift"
 @thrift.v1alpha
 package "facebook.com/thrift/type"
 
+namespace cpp2 apache.thrift.type
 namespace py3 apache.thrift.type
 
 /**

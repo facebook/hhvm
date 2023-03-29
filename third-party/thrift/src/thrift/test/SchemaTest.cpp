@@ -38,14 +38,14 @@ TEST(SchemaTest, Renamed) {
 }
 
 static void verify_fields_struct_schema(
-    std::vector<facebook::thrift::type::Field>& fields) {
+    std::vector<apache::thrift::type::Field>& fields) {
   EXPECT_EQ(fields.size(), 3);
 
   // 1: i32 num;
   auto field = fields.at(0);
   EXPECT_EQ(*field.name(), "num");
   EXPECT_EQ(*field.id(), apache::thrift::type::FieldId{1});
-  EXPECT_EQ(*field.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Fill);
   EXPECT_EQ(
       field.type()->toThrift().name()->getType(),
       apache::thrift::type::TypeName::Type::i32Type);
@@ -54,8 +54,7 @@ static void verify_fields_struct_schema(
   field = fields.at(1);
   EXPECT_EQ(*field.name(), "keyset");
   EXPECT_EQ(*field.id(), apache::thrift::type::FieldId{3});
-  EXPECT_EQ(
-      *field.qualifier(), facebook::thrift::type::FieldQualifier::Optional);
+  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Optional);
   EXPECT_EQ(
       field.type()->toThrift().name()->getType(),
       apache::thrift::type::TypeName::Type::setType);
@@ -68,7 +67,7 @@ static void verify_fields_struct_schema(
   field = fields.at(2);
   EXPECT_EQ(*field.name(), "strct");
   EXPECT_EQ(*field.id(), apache::thrift::type::FieldId{7});
-  EXPECT_EQ(*field.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+  EXPECT_EQ(*field.qualifier(), apache::thrift::type::FieldQualifier::Fill);
   EXPECT_EQ(
       field.type()->toThrift().name()->getType(),
       apache::thrift::type::TypeName::Type::structType);
@@ -78,7 +77,7 @@ static void verify_fields_struct_schema(
 }
 
 TEST(SchemaTest, Fields) {
-  facebook::thrift::type::Struct schema = schema_constants::schemaFields();
+  apache::thrift::type::Struct schema = schema_constants::schemaFields();
   verify_fields_struct_schema(*schema.fields());
 }
 
@@ -108,39 +107,39 @@ TEST(SchemaTest, Defaults) {
 }
 
 TEST(SchemaTest, Union) {
-  facebook::thrift::type::Union schema = schema_constants::schemaUnion();
+  apache::thrift::type::Union schema = schema_constants::schemaUnion();
   EXPECT_EQ(*schema.name(), "Union");
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/Union");
   EXPECT_TRUE(schema.fields()->empty());
 }
 
 TEST(SchemaTest, Exception) {
-  facebook::thrift::type::Exception schema =
+  apache::thrift::type::Exception schema =
       schema_constants::schemaSimpleException();
   EXPECT_EQ(*schema.name(), "SimpleException");
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/SimpleException");
   EXPECT_TRUE(schema.fields()->empty());
-  EXPECT_EQ(*schema.safety(), facebook::thrift::type::ErrorSafety::Unspecified);
-  EXPECT_EQ(*schema.kind(), facebook::thrift::type::ErrorKind::Unspecified);
-  EXPECT_EQ(*schema.blame(), facebook::thrift::type::ErrorBlame::Unspecified);
+  EXPECT_EQ(*schema.safety(), apache::thrift::type::ErrorSafety::Unspecified);
+  EXPECT_EQ(*schema.kind(), apache::thrift::type::ErrorKind::Unspecified);
+  EXPECT_EQ(*schema.blame(), apache::thrift::type::ErrorBlame::Unspecified);
 
   schema = schema_constants::schemaFancyException();
-  EXPECT_EQ(*schema.safety(), facebook::thrift::type::ErrorSafety::Safe);
-  EXPECT_EQ(*schema.kind(), facebook::thrift::type::ErrorKind::Transient);
-  EXPECT_EQ(*schema.blame(), facebook::thrift::type::ErrorBlame::Server);
+  EXPECT_EQ(*schema.safety(), apache::thrift::type::ErrorSafety::Safe);
+  EXPECT_EQ(*schema.kind(), apache::thrift::type::ErrorKind::Transient);
+  EXPECT_EQ(*schema.blame(), apache::thrift::type::ErrorBlame::Server);
 }
 
 static void verify_function(
-    facebook::thrift::type::Function func,
+    apache::thrift::type::Function func,
     std::string name,
-    std::function<void(facebook::thrift::type::Paramlist&)> paramsValidator,
-    std::function<void(facebook::thrift::type::Exceptions&)> exValidator,
-    std::function<void(std::vector<facebook::thrift::type::ReturnType>&)>
+    std::function<void(apache::thrift::type::Paramlist&)> paramsValidator,
+    std::function<void(apache::thrift::type::Exceptions&)> exValidator,
+    std::function<void(std::vector<apache::thrift::type::ReturnType>&)>
         retValidator) {
   EXPECT_EQ(*func.name(), name);
   EXPECT_TRUE(func.uri()->empty());
   EXPECT_EQ(
-      func.qualifier(), facebook::thrift::type::FunctionQualifier::Unspecified);
+      func.qualifier(), apache::thrift::type::FunctionQualifier::Unspecified);
 
   if (paramsValidator) {
     paramsValidator(*func.paramlist());
@@ -162,11 +161,10 @@ static void verify_function(
 }
 
 static void verify_void_return(
-    std::vector<facebook::thrift::type::ReturnType>& rets) {
+    std::vector<apache::thrift::type::ReturnType>& rets) {
   EXPECT_EQ(rets.size(), 1);
   auto ret1 = rets.at(0);
-  EXPECT_EQ(
-      ret1.getType(), facebook::thrift::type::ReturnType::Type::thriftType);
+  EXPECT_EQ(ret1.getType(), apache::thrift::type::ReturnType::Type::thriftType);
   EXPECT_TRUE(ret1.get_thriftType().empty());
 }
 
@@ -181,7 +179,7 @@ TEST(SchemaTest, EmptyService) {
 }
 
 TEST(SchemaTest, IntConst) {
-  facebook::thrift::type::Const schema = schema_constants::schemaIntConst();
+  apache::thrift::type::Const schema = schema_constants::schemaIntConst();
   EXPECT_EQ(*schema.name(), "IntConst");
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/IntConst");
   EXPECT_EQ(
@@ -194,7 +192,7 @@ TEST(SchemaTest, IntConst) {
 }
 
 TEST(SchemaTest, ListConst) {
-  facebook::thrift::type::Const schema = schema_constants::schemaListConst();
+  apache::thrift::type::Const schema = schema_constants::schemaListConst();
   EXPECT_EQ(*schema.name(), "ListConst");
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/ListConst");
   EXPECT_EQ(
@@ -247,12 +245,11 @@ TEST(SchemaTest, TestService) {
       "noParamsPrimitiveReturnNoEx",
       nullptr,
       nullptr,
-      [](std::vector<facebook::thrift::type::ReturnType>& rets) {
+      [](std::vector<apache::thrift::type::ReturnType>& rets) {
         EXPECT_EQ(rets.size(), 1);
         auto ret1 = rets.at(0);
         EXPECT_EQ(
-            ret1.getType(),
-            facebook::thrift::type::ReturnType::Type::thriftType);
+            ret1.getType(), apache::thrift::type::ReturnType::Type::thriftType);
         EXPECT_EQ(
             ret1.get_thriftType().toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::i32Type);
@@ -261,7 +258,7 @@ TEST(SchemaTest, TestService) {
   verify_function(
       svc_schema.functions()->at(2),
       "primitiveParamsNoReturnEx",
-      [](facebook::thrift::type::Paramlist& params) {
+      [](apache::thrift::type::Paramlist& params) {
         auto fields = params.fields();
         EXPECT_EQ(fields->size(), 1);
 
@@ -269,19 +266,19 @@ TEST(SchemaTest, TestService) {
         EXPECT_EQ(*field0.name(), "param0");
         EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field0.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), apache::thrift::type::FieldQualifier::Fill);
         EXPECT_EQ(
             field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::i32Type);
       },
-      [](facebook::thrift::type::Exceptions& ex) {
+      [](apache::thrift::type::Exceptions& ex) {
         EXPECT_EQ(ex.size(), 1);
 
         auto field0 = ex.at(0);
         EXPECT_EQ(*field0.name(), "ex0");
         EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field0.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), apache::thrift::type::FieldQualifier::Fill);
         EXPECT_EQ(
             field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::exceptionType);
@@ -291,7 +288,7 @@ TEST(SchemaTest, TestService) {
   verify_function(
       svc_schema.functions()->at(3),
       "unionParamStructReturnNoEx",
-      [](facebook::thrift::type::Paramlist& params) {
+      [](apache::thrift::type::Paramlist& params) {
         auto fields = params.fields();
         EXPECT_EQ(fields->size(), 1);
 
@@ -299,18 +296,17 @@ TEST(SchemaTest, TestService) {
         EXPECT_EQ(*field0.name(), "param0");
         EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field0.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), apache::thrift::type::FieldQualifier::Fill);
         EXPECT_EQ(
             field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::unionType);
       },
       nullptr,
-      [](std::vector<facebook::thrift::type::ReturnType>& rets) {
+      [](std::vector<apache::thrift::type::ReturnType>& rets) {
         EXPECT_EQ(rets.size(), 1);
         auto ret1 = rets.at(0);
         EXPECT_EQ(
-            ret1.getType(),
-            facebook::thrift::type::ReturnType::Type::thriftType);
+            ret1.getType(), apache::thrift::type::ReturnType::Type::thriftType);
         EXPECT_EQ(
             ret1.get_thriftType().toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::structType);
@@ -318,7 +314,7 @@ TEST(SchemaTest, TestService) {
 }
 
 TEST(SchemaTest, Enum) {
-  facebook::thrift::type::Enum schema = schema_constants::schemaEnum();
+  apache::thrift::type::Enum schema = schema_constants::schemaEnum();
   EXPECT_EQ(*schema.name(), "Enum");
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/Enum");
   auto values = schema.values().value();
@@ -336,7 +332,7 @@ TEST(SchemaTest, Enum) {
 }
 
 TEST(SchemaTest, TypedefFields) {
-  facebook::thrift::type::Struct schema = schema_constants::schemaTypedefs();
+  apache::thrift::type::Struct schema = schema_constants::schemaTypedefs();
   EXPECT_EQ(schema.fields()->size(), 2);
 
   auto field = schema.fields()->at(0);
@@ -357,7 +353,7 @@ TEST(SchemaTest, TypedefFields) {
 TEST(SchemaTest, Typedef) {
   //@thrift.GenerateRuntimeSchema
   // typedef i32 TD
-  facebook::thrift::type::Typedef schema = schema_constants::schemaTD();
+  apache::thrift::type::Typedef schema = schema_constants::schemaTD();
   EXPECT_EQ(*schema.name(), "TD");
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/TD");
   EXPECT_EQ(
@@ -367,7 +363,7 @@ TEST(SchemaTest, Typedef) {
 
   //@thrift.GenerateRuntimeSchema
   // typedef TD TDTD
-  facebook::thrift::type::Typedef schemaTD = schema_constants::schemaTDTD();
+  apache::thrift::type::Typedef schemaTD = schema_constants::schemaTDTD();
   EXPECT_EQ(*schemaTD.name(), "TDTD");
   EXPECT_EQ(*schemaTD.uri(), "facebook.com/thrift/test/schema/TDTD");
   EXPECT_EQ(
@@ -377,13 +373,12 @@ TEST(SchemaTest, Typedef) {
 }
 
 TEST(SchemaTest, Annotations) {
-  facebook::thrift::type::Struct schema = schema_constants::schemaAnnotated();
+  apache::thrift::type::Struct schema = schema_constants::schemaAnnotated();
   bool found = false;
   for (auto id : *schema.annotations()) {
-    const auto& annot =
-        schema_constants::getValue(id)
-            .as<apache::thrift::type::struct_t<
-                facebook::thrift::type::StructuredAnnotation>>();
+    const auto& annot = schema_constants::getValue(id)
+                            .as<apache::thrift::type::struct_t<
+                                apache::thrift::type::StructuredAnnotation>>();
     if (*annot.name() == "Annot") {
       found = true;
       EXPECT_EQ(annot.fields()->at("val").as_i64(), 42);

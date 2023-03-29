@@ -42,7 +42,7 @@ class ServiceHandler<<%service:qualified_name%>> : <%#service:extends%>virtual p
   CreateMethodMetadataResult createMethodMetadata() override;
   <%#service:has_service_schema%>
   #if defined(THRIFT_SCHEMA_AVAILABLE)
-  std::optional<std::vector<facebook::thrift::type::Schema>> getServiceMetadataV1() override;
+  std::optional<std::vector<apache::thrift::type::Schema>> getServiceMetadataV1() override;
   #endif
   <%/service:has_service_schema%>
  private:

@@ -34,7 +34,7 @@
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
-using facebook::thrift::type::DecodedUri;
+using apache::thrift::type::DecodedUri;
 
 namespace apache::thrift::type {
 namespace {

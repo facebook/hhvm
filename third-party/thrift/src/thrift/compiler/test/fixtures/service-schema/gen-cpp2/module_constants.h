@@ -14,7 +14,7 @@ namespace cpp2 {
 
 struct module_constants {
 
-  static ::facebook::thrift::type::Schema const& schemaPrimitivesService();
+  static ::apache::thrift::type::Schema const& schemaPrimitivesService();
 
 };
 

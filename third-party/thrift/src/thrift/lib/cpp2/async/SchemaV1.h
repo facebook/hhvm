@@ -22,7 +22,7 @@
 namespace apache {
 namespace thrift {
 namespace schema {
-using SchemaV1 = facebook::thrift::type::Schema;
+using SchemaV1 = type::Schema;
 } // namespace schema
 } // namespace thrift
 } // namespace apache

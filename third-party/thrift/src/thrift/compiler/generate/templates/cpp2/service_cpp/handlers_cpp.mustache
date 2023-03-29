@@ -25,7 +25,7 @@ std::unique_ptr<apache::thrift::AsyncProcessor> <% > service_common/service_clas
 
 <%#service:has_service_schema%>
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<std::vector<facebook::thrift::type::Schema>> <% > service_common/service_class_name%>::getServiceMetadataV1() {
+std::optional<std::vector<apache::thrift::type::Schema>> <% > service_common/service_class_name%>::getServiceMetadataV1() {
   return apache::thrift::detail::si::schemaAsOptionalVector(<%service:program_qualified_name%>_constants::<%service:service_schema_name%>());
 }
 #endif

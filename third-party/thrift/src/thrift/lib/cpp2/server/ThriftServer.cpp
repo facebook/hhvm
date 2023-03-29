@@ -1031,7 +1031,7 @@ void ThriftServer::ensureResourcePools() {
               *requestPile.get(), *executor.get());
 
       resourcePoolSet().setResourcePool(
-          ResourcePoolHandle::defaultSync(),
+          ResourcePoolHandle::defaultAsync(),
           std::move(requestPile),
           executor,
           std::move(concurrencyController));

@@ -67,4 +67,15 @@ namespace HH {
     string Uncategorized = 'Uncategorized';
   }
 
+  /**
+   * States obtainable via get_state_unsafe
+   */
+  enum State: string as string {
+    NULL = 'NULL';
+    VALUE = 'VALUE';
+    SOFT_SET = 'SOFT_SET';
+    INACCESSIBLE = 'INACCESSIBLE';
+    SOFT_INACCESSIBLE = 'SOFT_INACCESSIBLE';
+  }
+
 } // namespace HH

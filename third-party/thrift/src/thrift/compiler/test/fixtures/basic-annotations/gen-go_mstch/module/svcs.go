@@ -23,25 +23,25 @@ var _ = thrift.ZERO
 
 
 type MyService interface {
-    Ping(ctx context.Context) error
+    Ping(ctx context.Context) (error)
     GetRandomData(ctx context.Context) (string, error)
     HasDataById(ctx context.Context, id int64) (bool, error)
     GetDataById(ctx context.Context, id int64) (string, error)
-    PutDataById(ctx context.Context, id int64, data string) error
-    LobDataById(ctx context.Context, id int64, data string) error
-    GoDoNothing(ctx context.Context) error
+    PutDataById(ctx context.Context, id int64, data string) (error)
+    LobDataById(ctx context.Context, id int64, data string) (error)
+    GoDoNothing(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Ping() error
+    Ping() (error)
     GetRandomData() (string, error)
     HasDataById(id int64) (bool, error)
     GetDataById(id int64) (string, error)
-    PutDataById(id int64, data string) error
-    LobDataById(id int64, data string) error
-    GoDoNothing() error
+    PutDataById(id int64, data string) (error)
+    LobDataById(id int64, data string) (error)
+    GoDoNothing() (error)
 }
 
 type MyServiceChannelClient struct {
@@ -127,15 +127,20 @@ func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolF
 }
 
 
-func (c *MyServiceChannelClient) Ping(ctx context.Context) error {
+func (c *MyServiceChannelClient) Ping(ctx context.Context) (error) {
     in := &reqMyServicePing{
     }
     out := newRespMyServicePing()
     err := c.ch.Call(ctx, "ping", in, out)
-    return err
+    if err != nil {
+        return err
+    } else if out.MyExcept != nil {
+        return out.MyExcept
+    }
+    return nil
 }
 
-func (c *MyServiceClient) Ping() error {
+func (c *MyServiceClient) Ping() (error) {
     return c.chClient.Ping(nil)
 }
 
@@ -145,7 +150,10 @@ func (c *MyServiceChannelClient) GetRandomData(ctx context.Context) (string, err
     }
     out := newRespMyServiceGetRandomData()
     err := c.ch.Call(ctx, "getRandomData", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *MyServiceClient) GetRandomData() (string, error) {
@@ -159,7 +167,10 @@ func (c *MyServiceChannelClient) HasDataById(ctx context.Context, id int64) (boo
     }
     out := newRespMyServiceHasDataById()
     err := c.ch.Call(ctx, "hasDataById", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *MyServiceClient) HasDataById(id int64) (bool, error) {
@@ -173,7 +184,10 @@ func (c *MyServiceChannelClient) GetDataById(ctx context.Context, id int64) (str
     }
     out := newRespMyServiceGetDataById()
     err := c.ch.Call(ctx, "getDataById", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *MyServiceClient) GetDataById(id int64) (string, error) {
@@ -181,22 +195,25 @@ func (c *MyServiceClient) GetDataById(id int64) (string, error) {
 }
 
 
-func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data string) error {
+func (c *MyServiceChannelClient) PutDataById(ctx context.Context, id int64, data string) (error) {
     in := &reqMyServicePutDataById{
         Id: id,
         Data: data,
     }
     out := newRespMyServicePutDataById()
     err := c.ch.Call(ctx, "putDataById", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServiceClient) PutDataById(id int64, data string) error {
+func (c *MyServiceClient) PutDataById(id int64, data string) (error) {
     return c.chClient.PutDataById(nil, id, data)
 }
 
 
-func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data string) error {
+func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data string) (error) {
     in := &reqMyServiceLobDataById{
         Id: id,
         Data: data,
@@ -204,20 +221,23 @@ func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data
     return c.ch.Oneway(ctx, "lobDataById", in)
 }
 
-func (c *MyServiceClient) LobDataById(id int64, data string) error {
+func (c *MyServiceClient) LobDataById(id int64, data string) (error) {
     return c.chClient.LobDataById(nil, id, data)
 }
 
 
-func (c *MyServiceChannelClient) GoDoNothing(ctx context.Context) error {
+func (c *MyServiceChannelClient) GoDoNothing(ctx context.Context) (error) {
     in := &reqMyServiceGoDoNothing{
     }
     out := newRespMyServiceGoDoNothing()
     err := c.ch.Call(ctx, "doNothing", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServiceClient) GoDoNothing() error {
+func (c *MyServiceClient) GoDoNothing() (error) {
     return c.chClient.GoDoNothing(nil)
 }
 
@@ -2011,9 +2031,15 @@ func (p *procFuncMyServicePing) Read(iprot thrift.Protocol) (thrift.Struct, thri
 func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch v := result.(type) {
+    case *MyException:
+        result = &respMyServicePing{
+            MyExcept: v,
+        }
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Ping", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2033,8 +2059,13 @@ func (p *procFuncMyServicePing) Run(reqStruct thrift.Struct) (thrift.WritableStr
     result := newRespMyServicePing()
     err := p.handler.Ping()
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Ping: " + err.Error(), err)
-        return x, x
+        switch v := err.(type) {
+        case *MyException:
+            result.MyExcept = v
+        default:
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            return x, x
+        }
     }
 
     return result, nil
@@ -2059,9 +2090,11 @@ func (p *procFuncMyServiceGetRandomData) Read(iprot thrift.Protocol) (thrift.Str
 func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetRandomData", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2108,9 +2141,11 @@ func (p *procFuncMyServiceHasDataById) Read(iprot thrift.Protocol) (thrift.Struc
 func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("HasDataById", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2158,9 +2193,11 @@ func (p *procFuncMyServiceGetDataById) Read(iprot thrift.Protocol) (thrift.Struc
 func (p *procFuncMyServiceGetDataById) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetDataById", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2208,9 +2245,11 @@ func (p *procFuncMyServicePutDataById) Read(iprot thrift.Protocol) (thrift.Struc
 func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("PutDataById", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2257,9 +2296,11 @@ func (p *procFuncMyServiceLobDataById) Read(iprot thrift.Protocol) (thrift.Struc
 func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("LobDataById", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2305,9 +2346,11 @@ func (p *procFuncMyServiceGoDoNothing) Read(iprot thrift.Protocol) (thrift.Struc
 func (p *procFuncMyServiceGoDoNothing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GoDoNothing", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2338,15 +2381,15 @@ func (p *procFuncMyServiceGoDoNothing) Run(reqStruct thrift.Struct) (thrift.Writ
 
 
 type MyServicePrioParent interface {
-    Ping(ctx context.Context) error
-    Pong(ctx context.Context) error
+    Ping(ctx context.Context) (error)
+    Pong(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyServicePrioParent instead.
 type MyServicePrioParentClientInterface interface {
     thrift.ClientInterface
-    Ping() error
-    Pong() error
+    Ping() (error)
+    Pong() (error)
 }
 
 type MyServicePrioParentChannelClient struct {
@@ -2432,28 +2475,34 @@ func NewMyServicePrioParentThreadsafeClientFactory(t thrift.Transport, pf thrift
 }
 
 
-func (c *MyServicePrioParentChannelClient) Ping(ctx context.Context) error {
+func (c *MyServicePrioParentChannelClient) Ping(ctx context.Context) (error) {
     in := &reqMyServicePrioParentPing{
     }
     out := newRespMyServicePrioParentPing()
     err := c.ch.Call(ctx, "ping", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServicePrioParentClient) Ping() error {
+func (c *MyServicePrioParentClient) Ping() (error) {
     return c.chClient.Ping(nil)
 }
 
 
-func (c *MyServicePrioParentChannelClient) Pong(ctx context.Context) error {
+func (c *MyServicePrioParentChannelClient) Pong(ctx context.Context) (error) {
     in := &reqMyServicePrioParentPong{
     }
     out := newRespMyServicePrioParentPong()
     err := c.ch.Call(ctx, "pong", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServicePrioParentClient) Pong() error {
+func (c *MyServicePrioParentClient) Pong() (error) {
     return c.chClient.Pong(nil)
 }
 
@@ -2854,9 +2903,11 @@ func (p *procFuncMyServicePrioParentPing) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncMyServicePrioParentPing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Ping", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2902,9 +2953,11 @@ func (p *procFuncMyServicePrioParentPong) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncMyServicePrioParentPong) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Pong", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2938,13 +2991,13 @@ type MyServicePrioChild interface {
     // Inherited/extended service
     MyServicePrioParent
 
-    Pang(ctx context.Context) error
+    Pang(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyServicePrioChild instead.
 type MyServicePrioChildClientInterface interface {
     thrift.ClientInterface
-    Pang() error
+    Pang() (error)
 }
 
 type MyServicePrioChildChannelClient struct {
@@ -3036,15 +3089,18 @@ func NewMyServicePrioChildThreadsafeClientFactory(t thrift.Transport, pf thrift.
 }
 
 
-func (c *MyServicePrioChildChannelClient) Pang(ctx context.Context) error {
+func (c *MyServicePrioChildChannelClient) Pang(ctx context.Context) (error) {
     in := &reqMyServicePrioChildPang{
     }
     out := newRespMyServicePrioChildPang()
     err := c.ch.Call(ctx, "pang", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServicePrioChildClient) Pang() error {
+func (c *MyServicePrioChildClient) Pang() (error) {
     return c.chClient.Pang(nil)
 }
 
@@ -3253,9 +3309,11 @@ func (p *procFuncMyServicePrioChildPang) Read(iprot thrift.Protocol) (thrift.Str
 func (p *procFuncMyServicePrioChildPang) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Pang", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3383,7 +3441,10 @@ func (c *BadServiceChannelClient) Bar(ctx context.Context) (int32, error) {
     }
     out := newRespBadServiceBar()
     err := c.ch.Call(ctx, "bar", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *BadServiceClient) Bar() (int32, error) {
@@ -3674,9 +3735,11 @@ func (p *procFuncBadServiceBar) Read(iprot thrift.Protocol) (thrift.Struct, thri
 func (p *procFuncBadServiceBar) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Bar", messageType, seqId); err2 != nil {
         err = err2
     }

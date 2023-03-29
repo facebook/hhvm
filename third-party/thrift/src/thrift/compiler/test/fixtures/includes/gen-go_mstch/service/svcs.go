@@ -25,15 +25,15 @@ var _ = thrift.ZERO
 
 
 type MyService interface {
-    Query(ctx context.Context, s *module.MyStruct, i *includes.Included) error
-    HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) error
+    Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
+    HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error)
 }
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Query(s *module.MyStruct, i *includes.Included) error
-    HasArgDocs(s *module.MyStruct, i *includes.Included) error
+    Query(s *module.MyStruct, i *includes.Included) (error)
+    HasArgDocs(s *module.MyStruct, i *includes.Included) (error)
 }
 
 type MyServiceChannelClient struct {
@@ -119,32 +119,38 @@ func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolF
 }
 
 
-func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) error {
+func (c *MyServiceChannelClient) Query(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     in := &reqMyServiceQuery{
         S: s,
         I: i,
     }
     out := newRespMyServiceQuery()
     err := c.ch.Call(ctx, "query", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServiceClient) Query(s *module.MyStruct, i *includes.Included) error {
+func (c *MyServiceClient) Query(s *module.MyStruct, i *includes.Included) (error) {
     return c.chClient.Query(nil, s, i)
 }
 
 
-func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) error {
+func (c *MyServiceChannelClient) HasArgDocs(ctx context.Context, s *module.MyStruct, i *includes.Included) (error) {
     in := &reqMyServiceHasArgDocs{
         S: s,
         I: i,
     }
     out := newRespMyServiceHasArgDocs()
     err := c.ch.Call(ctx, "has_arg_docs", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServiceClient) HasArgDocs(s *module.MyStruct, i *includes.Included) error {
+func (c *MyServiceClient) HasArgDocs(s *module.MyStruct, i *includes.Included) (error) {
     return c.chClient.HasArgDocs(nil, s, i)
 }
 
@@ -821,9 +827,11 @@ func (p *procFuncMyServiceQuery) Read(iprot thrift.Protocol) (thrift.Struct, thr
 func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Query", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -870,9 +878,11 @@ func (p *procFuncMyServiceHasArgDocs) Read(iprot thrift.Protocol) (thrift.Struct
 func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("HasArgDocs", messageType, seqId); err2 != nil {
         err = err2
     }

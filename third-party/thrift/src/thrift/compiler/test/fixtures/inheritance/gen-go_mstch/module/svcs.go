@@ -21,13 +21,13 @@ var _ = thrift.ZERO
 
 
 type MyRoot interface {
-    DoRoot(ctx context.Context) error
+    DoRoot(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyRoot instead.
 type MyRootClientInterface interface {
     thrift.ClientInterface
-    DoRoot() error
+    DoRoot() (error)
 }
 
 type MyRootChannelClient struct {
@@ -113,15 +113,18 @@ func NewMyRootThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFact
 }
 
 
-func (c *MyRootChannelClient) DoRoot(ctx context.Context) error {
+func (c *MyRootChannelClient) DoRoot(ctx context.Context) (error) {
     in := &reqMyRootDoRoot{
     }
     out := newRespMyRootDoRoot()
     err := c.ch.Call(ctx, "do_root", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyRootClient) DoRoot() error {
+func (c *MyRootClient) DoRoot() (error) {
     return c.chClient.DoRoot(nil)
 }
 
@@ -355,9 +358,11 @@ func (p *procFuncMyRootDoRoot) Read(iprot thrift.Protocol) (thrift.Struct, thrif
 func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("DoRoot", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -391,13 +396,13 @@ type MyNode interface {
     // Inherited/extended service
     MyRoot
 
-    DoMid(ctx context.Context) error
+    DoMid(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyNode instead.
 type MyNodeClientInterface interface {
     thrift.ClientInterface
-    DoMid() error
+    DoMid() (error)
 }
 
 type MyNodeChannelClient struct {
@@ -489,15 +494,18 @@ func NewMyNodeThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFact
 }
 
 
-func (c *MyNodeChannelClient) DoMid(ctx context.Context) error {
+func (c *MyNodeChannelClient) DoMid(ctx context.Context) (error) {
     in := &reqMyNodeDoMid{
     }
     out := newRespMyNodeDoMid()
     err := c.ch.Call(ctx, "do_mid", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyNodeClient) DoMid() error {
+func (c *MyNodeClient) DoMid() (error) {
     return c.chClient.DoMid(nil)
 }
 
@@ -706,9 +714,11 @@ func (p *procFuncMyNodeDoMid) Read(iprot thrift.Protocol) (thrift.Struct, thrift
 func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("DoMid", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -742,13 +752,13 @@ type MyLeaf interface {
     // Inherited/extended service
     MyNode
 
-    DoLeaf(ctx context.Context) error
+    DoLeaf(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyLeaf instead.
 type MyLeafClientInterface interface {
     thrift.ClientInterface
-    DoLeaf() error
+    DoLeaf() (error)
 }
 
 type MyLeafChannelClient struct {
@@ -840,15 +850,18 @@ func NewMyLeafThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFact
 }
 
 
-func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) error {
+func (c *MyLeafChannelClient) DoLeaf(ctx context.Context) (error) {
     in := &reqMyLeafDoLeaf{
     }
     out := newRespMyLeafDoLeaf()
     err := c.ch.Call(ctx, "do_leaf", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyLeafClient) DoLeaf() error {
+func (c *MyLeafClient) DoLeaf() (error) {
     return c.chClient.DoLeaf(nil)
 }
 
@@ -1057,9 +1070,11 @@ func (p *procFuncMyLeafDoLeaf) Read(iprot thrift.Protocol) (thrift.Struct, thrif
 func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("DoLeaf", messageType, seqId); err2 != nil {
         err = err2
     }

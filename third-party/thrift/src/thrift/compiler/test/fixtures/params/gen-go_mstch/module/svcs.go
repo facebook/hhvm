@@ -21,21 +21,21 @@ var _ = thrift.ZERO
 
 
 type NestedContainers interface {
-    MapList(ctx context.Context, foo map[int32][]int32) error
-    MapSet(ctx context.Context, foo map[int32][]int32) error
-    ListMap(ctx context.Context, foo []map[int32]int32) error
-    ListSet(ctx context.Context, foo [][]int32) error
-    Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) error
+    MapList(ctx context.Context, foo map[int32][]int32) (error)
+    MapSet(ctx context.Context, foo map[int32][]int32) (error)
+    ListMap(ctx context.Context, foo []map[int32]int32) (error)
+    ListSet(ctx context.Context, foo [][]int32) (error)
+    Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error)
 }
 
 // Deprecated: Use NestedContainers instead.
 type NestedContainersClientInterface interface {
     thrift.ClientInterface
-    MapList(foo map[int32][]int32) error
-    MapSet(foo map[int32][]int32) error
-    ListMap(foo []map[int32]int32) error
-    ListSet(foo [][]int32) error
-    Turtles(foo [][]map[int32]map[int32][]int32) error
+    MapList(foo map[int32][]int32) (error)
+    MapSet(foo map[int32][]int32) (error)
+    ListMap(foo []map[int32]int32) (error)
+    ListSet(foo [][]int32) (error)
+    Turtles(foo [][]map[int32]map[int32][]int32) (error)
 }
 
 type NestedContainersChannelClient struct {
@@ -121,72 +121,87 @@ func NewNestedContainersThreadsafeClientFactory(t thrift.Transport, pf thrift.Pr
 }
 
 
-func (c *NestedContainersChannelClient) MapList(ctx context.Context, foo map[int32][]int32) error {
+func (c *NestedContainersChannelClient) MapList(ctx context.Context, foo map[int32][]int32) (error) {
     in := &reqNestedContainersMapList{
         Foo: foo,
     }
     out := newRespNestedContainersMapList()
     err := c.ch.Call(ctx, "mapList", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *NestedContainersClient) MapList(foo map[int32][]int32) error {
+func (c *NestedContainersClient) MapList(foo map[int32][]int32) (error) {
     return c.chClient.MapList(nil, foo)
 }
 
 
-func (c *NestedContainersChannelClient) MapSet(ctx context.Context, foo map[int32][]int32) error {
+func (c *NestedContainersChannelClient) MapSet(ctx context.Context, foo map[int32][]int32) (error) {
     in := &reqNestedContainersMapSet{
         Foo: foo,
     }
     out := newRespNestedContainersMapSet()
     err := c.ch.Call(ctx, "mapSet", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *NestedContainersClient) MapSet(foo map[int32][]int32) error {
+func (c *NestedContainersClient) MapSet(foo map[int32][]int32) (error) {
     return c.chClient.MapSet(nil, foo)
 }
 
 
-func (c *NestedContainersChannelClient) ListMap(ctx context.Context, foo []map[int32]int32) error {
+func (c *NestedContainersChannelClient) ListMap(ctx context.Context, foo []map[int32]int32) (error) {
     in := &reqNestedContainersListMap{
         Foo: foo,
     }
     out := newRespNestedContainersListMap()
     err := c.ch.Call(ctx, "listMap", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *NestedContainersClient) ListMap(foo []map[int32]int32) error {
+func (c *NestedContainersClient) ListMap(foo []map[int32]int32) (error) {
     return c.chClient.ListMap(nil, foo)
 }
 
 
-func (c *NestedContainersChannelClient) ListSet(ctx context.Context, foo [][]int32) error {
+func (c *NestedContainersChannelClient) ListSet(ctx context.Context, foo [][]int32) (error) {
     in := &reqNestedContainersListSet{
         Foo: foo,
     }
     out := newRespNestedContainersListSet()
     err := c.ch.Call(ctx, "listSet", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *NestedContainersClient) ListSet(foo [][]int32) error {
+func (c *NestedContainersClient) ListSet(foo [][]int32) (error) {
     return c.chClient.ListSet(nil, foo)
 }
 
 
-func (c *NestedContainersChannelClient) Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) error {
+func (c *NestedContainersChannelClient) Turtles(ctx context.Context, foo [][]map[int32]map[int32][]int32) (error) {
     in := &reqNestedContainersTurtles{
         Foo: foo,
     }
     out := newRespNestedContainersTurtles()
     err := c.ch.Call(ctx, "turtles", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *NestedContainersClient) Turtles(foo [][]map[int32]map[int32][]int32) error {
+func (c *NestedContainersClient) Turtles(foo [][]map[int32]map[int32][]int32) (error) {
     return c.chClient.Turtles(nil, foo)
 }
 
@@ -1875,9 +1890,11 @@ func (p *procFuncNestedContainersMapList) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("MapList", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1924,9 +1941,11 @@ func (p *procFuncNestedContainersMapSet) Read(iprot thrift.Protocol) (thrift.Str
 func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("MapSet", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1973,9 +1992,11 @@ func (p *procFuncNestedContainersListMap) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("ListMap", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2022,9 +2043,11 @@ func (p *procFuncNestedContainersListSet) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("ListSet", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -2071,9 +2094,11 @@ func (p *procFuncNestedContainersTurtles) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Turtles", messageType, seqId); err2 != nil {
         err = err2
     }

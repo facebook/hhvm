@@ -27,10 +27,5 @@
 }}{{/function:args}}{{!
 }}) {{!
 }}{{#function:return_type}}{{!
-}}{{^type:void?}}{{!
-  }}({{#type:struct?}}*{{/type:struct?}}{{> common/type}}, error){{!
-}}{{/type:void?}}{{!
-}}{{#type:void?}}{{!
-  }}error{{!
-}}{{/type:void?}}{{!
+}}({{^type:void?}}{{#type:struct?}}*{{/type:struct?}}{{> common/type}}, {{/type:void?}}error){{!
 }}{{/function:return_type}}

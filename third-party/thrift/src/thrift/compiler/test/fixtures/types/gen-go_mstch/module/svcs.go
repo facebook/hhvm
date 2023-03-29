@@ -127,7 +127,10 @@ func (c *SomeServiceChannelClient) BounceMap(ctx context.Context, m included.Som
     }
     out := newRespSomeServiceBounceMap()
     err := c.ch.Call(ctx, "bounce_map", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *SomeServiceClient) BounceMap(m included.SomeMap) (included.SomeMap, error) {
@@ -141,7 +144,10 @@ func (c *SomeServiceChannelClient) BinaryKeyedMap(ctx context.Context, r []int64
     }
     out := newRespSomeServiceBinaryKeyedMap()
     err := c.ch.Call(ctx, "binary_keyed_map", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *SomeServiceClient) BinaryKeyedMap(r []int64) (map[TBinary]int64, error) {
@@ -883,9 +889,11 @@ func (p *procFuncSomeServiceBounceMap) Read(iprot thrift.Protocol) (thrift.Struc
 func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("BounceMap", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -933,9 +941,11 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Read(iprot thrift.Protocol) (thrift.
 func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("BinaryKeyedMap", messageType, seqId); err2 != nil {
         err = err2
     }

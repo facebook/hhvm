@@ -121,7 +121,10 @@ func (c *MyServiceChannelClient) Query(ctx context.Context, u *MyUnion) (*MyStru
     }
     out := newRespMyServiceQuery()
     err := c.ch.Call(ctx, "query", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *MyServiceClient) Query(u *MyUnion) (*MyStruct, error) {
@@ -496,9 +499,11 @@ func (p *procFuncMyServiceQuery) Read(iprot thrift.Protocol) (thrift.Struct, thr
 func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Query", messageType, seqId); err2 != nil {
         err = err2
     }

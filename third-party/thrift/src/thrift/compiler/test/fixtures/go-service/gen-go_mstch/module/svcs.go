@@ -143,7 +143,10 @@ func (c *GetEntityChannelClient) GetEntity(ctx context.Context, r *GetEntityRequ
     }
     out := newRespGetEntityGetEntity()
     err := c.ch.Call(ctx, "getEntity", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetEntity(r *GetEntityRequest) (*GetEntityResponse, error) {
@@ -156,7 +159,10 @@ func (c *GetEntityChannelClient) GetBool(ctx context.Context) (bool, error) {
     }
     out := newRespGetEntityGetBool()
     err := c.ch.Call(ctx, "getBool", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetBool() (bool, error) {
@@ -169,7 +175,10 @@ func (c *GetEntityChannelClient) GetByte(ctx context.Context) (byte, error) {
     }
     out := newRespGetEntityGetByte()
     err := c.ch.Call(ctx, "getByte", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetByte() (byte, error) {
@@ -182,7 +191,10 @@ func (c *GetEntityChannelClient) GetI16(ctx context.Context) (int16, error) {
     }
     out := newRespGetEntityGetI16()
     err := c.ch.Call(ctx, "getI16", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetI16() (int16, error) {
@@ -195,7 +207,10 @@ func (c *GetEntityChannelClient) GetI32(ctx context.Context) (int32, error) {
     }
     out := newRespGetEntityGetI32()
     err := c.ch.Call(ctx, "getI32", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetI32() (int32, error) {
@@ -208,7 +223,10 @@ func (c *GetEntityChannelClient) GetI64(ctx context.Context) (int64, error) {
     }
     out := newRespGetEntityGetI64()
     err := c.ch.Call(ctx, "getI64", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetI64() (int64, error) {
@@ -221,7 +239,10 @@ func (c *GetEntityChannelClient) GetDouble(ctx context.Context) (float64, error)
     }
     out := newRespGetEntityGetDouble()
     err := c.ch.Call(ctx, "getDouble", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetDouble() (float64, error) {
@@ -234,7 +255,10 @@ func (c *GetEntityChannelClient) GetString(ctx context.Context) (string, error) 
     }
     out := newRespGetEntityGetString()
     err := c.ch.Call(ctx, "getString", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetString() (string, error) {
@@ -247,7 +271,10 @@ func (c *GetEntityChannelClient) GetBinary(ctx context.Context) ([]byte, error) 
     }
     out := newRespGetEntityGetBinary()
     err := c.ch.Call(ctx, "getBinary", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetBinary() ([]byte, error) {
@@ -260,7 +287,10 @@ func (c *GetEntityChannelClient) GetMap(ctx context.Context) (map[string]string,
     }
     out := newRespGetEntityGetMap()
     err := c.ch.Call(ctx, "getMap", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetMap() (map[string]string, error) {
@@ -273,7 +303,10 @@ func (c *GetEntityChannelClient) GetSet(ctx context.Context) ([]string, error) {
     }
     out := newRespGetEntityGetSet()
     err := c.ch.Call(ctx, "getSet", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetSet() ([]string, error) {
@@ -286,7 +319,10 @@ func (c *GetEntityChannelClient) GetList(ctx context.Context) ([]string, error) 
     }
     out := newRespGetEntityGetList()
     err := c.ch.Call(ctx, "getList", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetList() ([]string, error) {
@@ -302,7 +338,10 @@ func (c *GetEntityChannelClient) GetLegacyStuff(ctx context.Context, numPos int6
     }
     out := newRespGetEntityGetLegacyStuff()
     err := c.ch.Call(ctx, "getLegacyStuff", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *GetEntityClient) GetLegacyStuff(numPos int64, numNeg1 int64, numNeg2 int64) (int32, error) {
@@ -3639,9 +3678,11 @@ func (p *procFuncGetEntityGetEntity) Read(iprot thrift.Protocol) (thrift.Struct,
 func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetEntity", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3689,9 +3730,11 @@ func (p *procFuncGetEntityGetBool) Read(iprot thrift.Protocol) (thrift.Struct, t
 func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetBool", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3738,9 +3781,11 @@ func (p *procFuncGetEntityGetByte) Read(iprot thrift.Protocol) (thrift.Struct, t
 func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetByte", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3787,9 +3832,11 @@ func (p *procFuncGetEntityGetI16) Read(iprot thrift.Protocol) (thrift.Struct, th
 func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetI16", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3836,9 +3883,11 @@ func (p *procFuncGetEntityGetI32) Read(iprot thrift.Protocol) (thrift.Struct, th
 func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetI32", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3885,9 +3934,11 @@ func (p *procFuncGetEntityGetI64) Read(iprot thrift.Protocol) (thrift.Struct, th
 func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetI64", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3934,9 +3985,11 @@ func (p *procFuncGetEntityGetDouble) Read(iprot thrift.Protocol) (thrift.Struct,
 func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetDouble", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -3983,9 +4036,11 @@ func (p *procFuncGetEntityGetString) Read(iprot thrift.Protocol) (thrift.Struct,
 func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetString", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -4032,9 +4087,11 @@ func (p *procFuncGetEntityGetBinary) Read(iprot thrift.Protocol) (thrift.Struct,
 func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetBinary", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -4081,9 +4138,11 @@ func (p *procFuncGetEntityGetMap) Read(iprot thrift.Protocol) (thrift.Struct, th
 func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetMap", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -4130,9 +4189,11 @@ func (p *procFuncGetEntityGetSet) Read(iprot thrift.Protocol) (thrift.Struct, th
 func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetSet", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -4179,9 +4240,11 @@ func (p *procFuncGetEntityGetList) Read(iprot thrift.Protocol) (thrift.Struct, t
 func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetList", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -4228,9 +4291,11 @@ func (p *procFuncGetEntityGetLegacyStuff) Read(iprot thrift.Protocol) (thrift.St
 func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("GetLegacyStuff", messageType, seqId); err2 != nil {
         err = err2
     }

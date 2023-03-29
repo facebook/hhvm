@@ -23,8 +23,8 @@ var _ = thrift.ZERO
 
 
 type Raiser interface {
-    DoBland(ctx context.Context) error
-    DoRaise(ctx context.Context) error
+    DoBland(ctx context.Context) (error)
+    DoRaise(ctx context.Context) (error)
     Get200(ctx context.Context) (string, error)
     Get500(ctx context.Context) (string, error)
 }
@@ -32,8 +32,8 @@ type Raiser interface {
 // Deprecated: Use Raiser instead.
 type RaiserClientInterface interface {
     thrift.ClientInterface
-    DoBland() error
-    DoRaise() error
+    DoBland() (error)
+    DoRaise() (error)
     Get200() (string, error)
     Get500() (string, error)
 }
@@ -121,28 +121,40 @@ func NewRaiserThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFact
 }
 
 
-func (c *RaiserChannelClient) DoBland(ctx context.Context) error {
+func (c *RaiserChannelClient) DoBland(ctx context.Context) (error) {
     in := &reqRaiserDoBland{
     }
     out := newRespRaiserDoBland()
     err := c.ch.Call(ctx, "doBland", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *RaiserClient) DoBland() error {
+func (c *RaiserClient) DoBland() (error) {
     return c.chClient.DoBland(nil)
 }
 
 
-func (c *RaiserChannelClient) DoRaise(ctx context.Context) error {
+func (c *RaiserChannelClient) DoRaise(ctx context.Context) (error) {
     in := &reqRaiserDoRaise{
     }
     out := newRespRaiserDoRaise()
     err := c.ch.Call(ctx, "doRaise", in, out)
-    return err
+    if err != nil {
+        return err
+    } else if out.B != nil {
+        return out.B
+    } else if out.F != nil {
+        return out.F
+    } else if out.S != nil {
+        return out.S
+    }
+    return nil
 }
 
-func (c *RaiserClient) DoRaise() error {
+func (c *RaiserClient) DoRaise() (error) {
     return c.chClient.DoRaise(nil)
 }
 
@@ -152,7 +164,10 @@ func (c *RaiserChannelClient) Get200(ctx context.Context) (string, error) {
     }
     out := newRespRaiserGet200()
     err := c.ch.Call(ctx, "get200", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *RaiserClient) Get200() (string, error) {
@@ -165,7 +180,16 @@ func (c *RaiserChannelClient) Get500(ctx context.Context) (string, error) {
     }
     out := newRespRaiserGet500()
     err := c.ch.Call(ctx, "get500", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    } else if out.F != nil {
+        return out.Value, out.F
+    } else if out.B != nil {
+        return out.Value, out.B
+    } else if out.S != nil {
+        return out.Value, out.S
+    }
+    return out.Value, nil
 }
 
 func (c *RaiserClient) Get500() (string, error) {
@@ -1443,9 +1467,11 @@ func (p *procFuncRaiserDoBland) Read(iprot thrift.Protocol) (thrift.Struct, thri
 func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("DoBland", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1491,9 +1517,23 @@ func (p *procFuncRaiserDoRaise) Read(iprot thrift.Protocol) (thrift.Struct, thri
 func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch v := result.(type) {
+    case *Banal:
+        result = &respRaiserDoRaise{
+            B: v,
+        }
+    case *Fiery:
+        result = &respRaiserDoRaise{
+            F: v,
+        }
+    case *Serious:
+        result = &respRaiserDoRaise{
+            S: v,
+        }
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("DoRaise", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1513,8 +1553,17 @@ func (p *procFuncRaiserDoRaise) Run(reqStruct thrift.Struct) (thrift.WritableStr
     result := newRespRaiserDoRaise()
     err := p.handler.DoRaise()
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRaise: " + err.Error(), err)
-        return x, x
+        switch v := err.(type) {
+        case *Banal:
+            result.B = v
+        case *Fiery:
+            result.F = v
+        case *Serious:
+            result.S = v
+        default:
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            return x, x
+        }
     }
 
     return result, nil
@@ -1539,9 +1588,11 @@ func (p *procFuncRaiserGet200) Read(iprot thrift.Protocol) (thrift.Struct, thrif
 func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Get200", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1588,9 +1639,23 @@ func (p *procFuncRaiserGet500) Read(iprot thrift.Protocol) (thrift.Struct, thrif
 func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch v := result.(type) {
+    case *Fiery:
+        result = &respRaiserGet500{
+            F: v,
+        }
+    case *Banal:
+        result = &respRaiserGet500{
+            B: v,
+        }
+    case *Serious:
+        result = &respRaiserGet500{
+            S: v,
+        }
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Get500", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1610,8 +1675,17 @@ func (p *procFuncRaiserGet500) Run(reqStruct thrift.Struct) (thrift.WritableStru
     result := newRespRaiserGet500()
     retval, err := p.handler.Get500()
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Get500: " + err.Error(), err)
-        return x, x
+        switch v := err.(type) {
+        case *Fiery:
+            result.F = v
+        case *Banal:
+            result.B = v
+        case *Serious:
+            result.S = v
+        default:
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            return x, x
+        }
     }
 
     result.Value = retval

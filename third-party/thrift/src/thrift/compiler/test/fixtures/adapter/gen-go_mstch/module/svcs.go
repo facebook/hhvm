@@ -133,7 +133,10 @@ func (c *ServiceChannelClient) Func(ctx context.Context, arg1 StringWithAdapter,
     }
     out := newRespServiceFunc()
     err := c.ch.Call(ctx, "func", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *ServiceClient) Func(arg1 StringWithAdapter, arg2 string, arg3 *Foo) (MyI32, error) {
@@ -603,9 +606,11 @@ func (p *procFuncServiceFunc) Read(iprot thrift.Protocol) (thrift.Struct, thrift
 func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Func", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -737,7 +742,10 @@ func (c *AdapterServiceChannelClient) Count(ctx context.Context) (*CountingStruc
     }
     out := newRespAdapterServiceCount()
     err := c.ch.Call(ctx, "count", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *AdapterServiceClient) Count() (*CountingStruct, error) {
@@ -751,7 +759,10 @@ func (c *AdapterServiceChannelClient) AdaptedTypes(ctx context.Context, arg *Hea
     }
     out := newRespAdapterServiceAdaptedTypes()
     err := c.ch.Call(ctx, "adaptedTypes", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *AdapterServiceClient) AdaptedTypes(arg *HeapAllocated) (*HeapAllocated, error) {
@@ -1362,9 +1373,11 @@ func (p *procFuncAdapterServiceCount) Read(iprot thrift.Protocol) (thrift.Struct
 func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Count", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1411,9 +1424,11 @@ func (p *procFuncAdapterServiceAdaptedTypes) Read(iprot thrift.Protocol) (thrift
 func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("AdaptedTypes", messageType, seqId); err2 != nil {
         err = err2
     }

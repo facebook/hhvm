@@ -21,14 +21,14 @@ var _ = thrift.ZERO
 
 
 type C interface {
-    F(ctx context.Context) error
+    F(ctx context.Context) (error)
     Thing(ctx context.Context, a int32, b string, c []int32) (string, error)
 }
 
 // Deprecated: Use C instead.
 type CClientInterface interface {
     thrift.ClientInterface
-    F() error
+    F() (error)
     Thing(a int32, b string, c []int32) (string, error)
 }
 
@@ -115,15 +115,18 @@ func NewCThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolFactory) 
 }
 
 
-func (c *CChannelClient) F(ctx context.Context) error {
+func (c *CChannelClient) F(ctx context.Context) (error) {
     in := &reqCF{
     }
     out := newRespCF()
     err := c.ch.Call(ctx, "f", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *CClient) F() error {
+func (c *CClient) F() (error) {
     return c.chClient.F(nil)
 }
 
@@ -136,7 +139,12 @@ func (c *CChannelClient) Thing(ctx context.Context, a int32, b string, c []int32
     }
     out := newRespCThing()
     err := c.ch.Call(ctx, "thing", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    } else if out.Bang != nil {
+        return out.Value, out.Bang
+    }
+    return out.Value, nil
 }
 
 func (c *CClient) Thing(a int32, b string, c []int32) (string, error) {
@@ -868,9 +876,11 @@ func (p *procFuncCF) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exceptio
 func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("F", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -916,9 +926,15 @@ func (p *procFuncCThing) Read(iprot thrift.Protocol) (thrift.Struct, thrift.Exce
 func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch v := result.(type) {
+    case *Bang:
+        result = &respCThing{
+            Bang: v,
+        }
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Thing", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -939,8 +955,13 @@ func (p *procFuncCThing) Run(reqStruct thrift.Struct) (thrift.WritableStruct, th
     result := newRespCThing()
     retval, err := p.handler.Thing(args.A, args.B, args.C)
     if err != nil {
-        x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Thing: " + err.Error(), err)
-        return x, x
+        switch v := err.(type) {
+        case *Bang:
+            result.Bang = v
+        default:
+            x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing doRaise: " + err.Error(), err)
+            return x, x
+        }
     }
 
     result.Value = retval

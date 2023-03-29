@@ -125,7 +125,10 @@ func (c *FinderChannelClient) ByPlate(ctx context.Context, plate Plate) (*Automo
     }
     out := newRespFinderByPlate()
     err := c.ch.Call(ctx, "byPlate", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *FinderClient) ByPlate(plate Plate) (*Automobile, error) {
@@ -139,7 +142,10 @@ func (c *FinderChannelClient) AliasByPlate(ctx context.Context, plate Plate) (*C
     }
     out := newRespFinderAliasByPlate()
     err := c.ch.Call(ctx, "aliasByPlate", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *FinderClient) AliasByPlate(plate Plate) (*Car, error) {
@@ -153,7 +159,10 @@ func (c *FinderChannelClient) PreviousPlate(ctx context.Context, plate Plate) (P
     }
     out := newRespFinderPreviousPlate()
     err := c.ch.Call(ctx, "previousPlate", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *FinderClient) PreviousPlate(plate Plate) (Plate, error) {
@@ -1082,9 +1091,11 @@ func (p *procFuncFinderByPlate) Read(iprot thrift.Protocol) (thrift.Struct, thri
 func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("ByPlate", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1132,9 +1143,11 @@ func (p *procFuncFinderAliasByPlate) Read(iprot thrift.Protocol) (thrift.Struct,
 func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("AliasByPlate", messageType, seqId); err2 != nil {
         err = err2
     }
@@ -1182,9 +1195,11 @@ func (p *procFuncFinderPreviousPlate) Read(iprot thrift.Protocol) (thrift.Struct
 func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("PreviousPlate", messageType, seqId); err2 != nil {
         err = err2
     }

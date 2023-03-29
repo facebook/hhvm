@@ -119,7 +119,10 @@ func (c *TestServiceChannelClient) Init(ctx context.Context, int1 int64) (int64,
     }
     out := newRespTestServiceInit()
     err := c.ch.Call(ctx, "init", in, out)
-    return out.Value, err
+    if err != nil {
+        return out.Value, err
+    }
+    return out.Value, nil
 }
 
 func (c *TestServiceClient) Init(int1 int64) (int64, error) {
@@ -464,9 +467,11 @@ func (p *procFuncTestServiceInit) Read(iprot thrift.Protocol) (thrift.Struct, th
 func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Init", messageType, seqId); err2 != nil {
         err = err2
     }

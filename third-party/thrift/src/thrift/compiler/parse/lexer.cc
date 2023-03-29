@@ -350,12 +350,6 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
       case 'f':
         c = '\f';
         break;
-      case 'n':
-        c = '\n';
-        break;
-      case 'r':
-        c = '\r';
-        break;
       case 't':
         c = '\t';
         break;

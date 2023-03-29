@@ -83,8 +83,6 @@ std::string quote_java_string(const std::string& unescaped) {
   for (unsigned char c : unescaped) {
     if (c == '\\' || c == '"') {
       quoted << '\\' << c;
-    } else if (c == '\r') {
-      quoted << "\\r";
     } else if (c >= 0xf8) {
       quoted << fmt::format("\\u{:04x}", c);
     } else {

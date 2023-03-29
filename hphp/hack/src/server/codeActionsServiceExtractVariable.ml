@@ -34,13 +34,41 @@ let lsp_range_of_pos (pos : Pos.t) : Lsp.range =
     end_ = { Lsp.line = last_line - 1; character = last_col };
   }
 
-let is_single_statement_body Aast.{ fb_ast } = List.length fb_ast = 1
+let source_slice ~source_text ~start_pos ~length =
+  let offset =
+    let (first_line, first_col) = Pos.line_column start_pos in
+    Full_fidelity_source_text.position_to_offset
+      source_text
+      (first_line, first_col + 1)
+  in
+  Full_fidelity_source_text.sub source_text offset length
 
-let positions_visitor (range : Lsp.range) =
+(**
+We don't want to extract variables for lambdas like this: `() ==> 200`.
+The AST of such a lambda is indistinguishable from `() ==> { return 200; }`
+so we peek at the source *)
+let might_be_expression_lambda ~f_body:Aast.{ fb_ast } ~pos ~source_text =
+  match fb_ast with
+  | [(stmt_pos, _)] ->
+    let length = Pos.start_offset stmt_pos - Pos.start_offset pos in
+    if length > 0 then
+      let src = source_slice ~source_text ~start_pos:pos ~length in
+      not @@ String.is_substring ~substring:"{" src
+    else
+      (*  length can be negative to curlies in default params: `(($a = () ==> {}) ==> ...` *)
+      true
+  | _ -> false
+
+let positions_visitor (range : Lsp.range) ~source_text =
   let stmt_pos = ref Pos.none in
+  let expression_lambda_pos = ref None in
   let placeholder_n = ref 0 in
+  let reset () =
+    expression_lambda_pos := None;
+    placeholder_n := 0
+  in
 
-  object (self)
+  object
     inherit [candidate option] Tast_visitor.reduce as super
 
     method zero = None
@@ -48,11 +76,11 @@ let positions_visitor (range : Lsp.range) =
     method plus = Option.first_some
 
     method! on_method_ env meth =
-      placeholder_n := 0;
+      reset ();
       super#on_method_ env meth
 
     method! on_fun_def env fd =
-      placeholder_n := 0;
+      reset ();
       super#on_fun_def env fd
 
     method! on_lid env lid =
@@ -83,19 +111,24 @@ let positions_visitor (range : Lsp.range) =
         let acc = super#on_expr env expr in
         Option.filter acc ~f:(fun candidate ->
             not @@ Pos.contains lhs_pos candidate.pos)
-      | Aast.Lfun (Aast.{ f_body; _ }, _) when is_single_statement_body f_body
-        ->
-        (*
-        We don't want to extract variables for lambdas like this: `() ==> 200`.
-        Unfortunately, the AST of such a lambda is indistinguishable from
-        `() ==> { return 200; }`, so we skip *all* single-statement lambdas
-        *)
-        self#zero
+      | Aast.Lfun (Aast.{ f_body; _ }, _) ->
+        expression_lambda_pos :=
+          Option.some_if
+            (might_be_expression_lambda ~f_body ~pos ~source_text)
+            pos;
+        super#on_expr env expr
+      | Aast.Efun _ ->
+        expression_lambda_pos := None;
+        super#on_expr env expr
       | _ ->
         let acc = super#on_expr env expr in
         if
           Option.is_none acc
           && (not @@ Pos.equal !stmt_pos Pos.none)
+          && (not
+                (Option.map !expression_lambda_pos ~f:(fun lpos ->
+                     Pos.contains lpos pos)
+                |> Option.value ~default:false))
           && pos_matches_lsp_range pos range
         then
           Some
@@ -111,7 +144,7 @@ let positions_visitor (range : Lsp.range) =
 (** ensures that `positions_visitor` only traverses
 functions and methods such that
 the function body contains the selected range *)
-let top_visitor ctx (range : Lsp.range) =
+let top_visitor ctx (range : Lsp.range) ~source_text =
   let should_traverse span =
     let outer = Lsp_helpers.pos_to_lsp_range span in
     Lsp_helpers.lsp_range_contains ~outer range
@@ -132,7 +165,7 @@ let top_visitor ctx (range : Lsp.range) =
              let class_ = Aast.{ class_ with c_methods = [meth] } in
              let span = meth.Aast.m_span in
              if Option.is_none acc && should_traverse span then
-               (positions_visitor range)#go ctx [Aast.Class class_]
+               (positions_visitor range ~source_text)#go ctx [Aast.Class class_]
              else
                acc)
 
@@ -140,7 +173,7 @@ let top_visitor ctx (range : Lsp.range) =
       let acc = super#on_fun_def env fun_def in
       let span = Aast.(fun_def.fd_fun.f_span) in
       if Option.is_none acc && should_traverse span then
-        (positions_visitor range)#go ctx [Aast.Fun fun_def]
+        (positions_visitor range ~source_text)#go ctx [Aast.Fun fun_def]
       else
         acc
   end
@@ -148,14 +181,9 @@ let top_visitor ctx (range : Lsp.range) =
 let command_or_action_of_candidate
     ~source_text ~path { stmt_pos; pos; placeholder_n } =
   let placeholder = Format.sprintf "%s%d" placeholder_base placeholder_n in
-  let (first_line, first_col) = Pos.line_column pos in
-  let exp_offset =
-    Full_fidelity_source_text.position_to_offset
-      source_text
-      (first_line, first_col + 1)
+  let exp_string =
+    source_slice ~source_text ~start_pos:pos ~length:(Pos.length pos)
   in
-  let len = Pos.length pos in
-  let exp_string = Full_fidelity_source_text.sub source_text exp_offset len in
   let change_expression =
     Lsp.TextEdit.{ range = lsp_range_of_pos pos; newText = placeholder }
   in
@@ -195,7 +223,7 @@ let find ~(range : Lsp.range) ~path ~entry ctx tast =
   | None -> []
   | Some source_text ->
     if is_range_selection then
-      (top_visitor ctx range)#go ctx tast
+      (top_visitor ctx range ~source_text)#go ctx tast
       |> Option.map ~f:(command_or_action_of_candidate ~source_text ~path)
       |> Option.to_list
     else

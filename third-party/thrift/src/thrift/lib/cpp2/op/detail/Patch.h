@@ -21,6 +21,7 @@
 #include <utility>
 
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 #include <thrift/lib/cpp2/op/detail/ContainerPatch.h>
 #include <thrift/lib/cpp2/op/detail/StructPatch.h>

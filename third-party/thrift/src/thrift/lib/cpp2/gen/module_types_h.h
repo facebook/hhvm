@@ -29,6 +29,7 @@
 #include <folly/container/F14Set.h>
 #include <folly/synchronization/Lock.h>
 #include <thrift/lib/cpp2/Adapt.h>
+#include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/TypeClass.h>

@@ -648,17 +648,6 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         }
     }
 
-    {
-        let context = state.strings.lookup_bytes_or_none(context);
-        if let Some(context) = context {
-            if !context.is_empty() {
-                textual_todo! {
-                    state.fb.comment("TODO: write_call(Context: {context:?})")?;
-                }
-            }
-        }
-    }
-
     // flags &= FCallArgsFlags::LockWhileUnwinding - ignored
     let is_async = flags & FCallArgsFlags::HasAsyncEagerOffset != 0;
 
@@ -701,8 +690,11 @@ fn write_call(state: &mut FuncState<'_, '_, '_>, iid: InstrId, call: &ir::Call) 
         }
     }
     if flags & FCallArgsFlags::ExplicitContext != 0 {
-        textual_todo! {
-            state.fb.comment("TODO: FCallArgsFlags::ExplicitContext")?;
+        if let Some(context) = state.strings.lookup_bytes_or_none(context) {
+            // For analysis context shouldn't really matter. For now with a
+            // calling context just report it as a comment.
+            let context = util::escaped_string(&context);
+            state.fb.comment(&format!("ExplicitContext: {context}"))?;
         }
     }
     if flags & FCallArgsFlags::HasInOut != 0 {

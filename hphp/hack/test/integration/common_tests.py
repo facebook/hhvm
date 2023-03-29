@@ -742,6 +742,21 @@ class CommonTests(BarebonesTests):
             options=["--ide-go-to-impl", "{}:3,11".format(path)],
         )
 
+    def test_ide_refactor(self) -> None:
+        self.test_driver.start_hh_server()
+        path = os.path.join(self.test_driver.repo_dir, "foo_readonly.php")
+        self.test_driver.check_cmd_and_json_cmd(
+            ["Rewrote 1 file."],
+            [
+                '[{{"filename":"{root}foo_readonly.php","patches":[{{'
+                '"char_start":75,"char_end":77,"line":3,"col_start":70,'
+                '"col_end":71,"patch_type":"replace","replacement":"$renamed"}},'
+                '{{"char_start":94,"char_end":96,"line":4,"col_start":8,'
+                '"col_end":9,"patch_type":"replace","replacement":"$renamed"}}]}}]'
+            ],
+            options=["--ide-refactor", "{}:3:71:{}".format(path, "renamed")],
+        )
+
     def test_ide_highlight_refs(self) -> None:
         self.test_driver.start_hh_server()
 

@@ -34,21 +34,27 @@ namespace proxygen {
 constexpr uint8_t kDefaultHttpPriorityUrgency = 3;
 // We default incremental to True, different from the draft
 constexpr bool kDefaultHttpPriorityIncremental = true;
+constexpr uint64_t kDefaultOrderId = 0;
 constexpr int8_t kMinPriority = 0;
 constexpr int8_t kMaxPriority = 7;
 
 struct HTTPPriority {
   uint8_t urgency : 3;
   bool incremental : 1;
+  uint64_t orderId : 58;
 
   HTTPPriority()
       : urgency(kDefaultHttpPriorityUrgency),
-        incremental(kDefaultHttpPriorityIncremental) {
+        incremental(kDefaultHttpPriorityIncremental),
+        orderId(kDefaultOrderId) {
   }
 
-  HTTPPriority(uint8_t urgencyIn, bool incrementalIn)
+  HTTPPriority(uint8_t urgencyIn,
+               bool incrementalIn,
+               uint64_t orderIdIn = kDefaultOrderId)
       : urgency(std::min(urgencyIn, static_cast<uint8_t>(kMaxPriority))),
-        incremental(incrementalIn) {
+        incremental(incrementalIn),
+        orderId(orderIdIn) {
   }
 
   virtual ~HTTPPriority() = default;

@@ -31,11 +31,12 @@ std::locale defaultLocale;
 
 namespace proxygen {
 
-std::string httpPriorityToString(const HTTPPriority& priority) {
+std::string httpPriorityToString(const HTTPPriority& pri) {
   return folly::to<std::string>(
       "u=",
-      std::min(static_cast<uint8_t>(proxygen::kMaxPriority), priority.urgency),
-      priority.incremental ? ",i" : "");
+      std::min(static_cast<uint8_t>(proxygen::kMaxPriority), pri.urgency),
+      pri.incremental ? ",i" : "",
+      pri.orderId > 0 ? folly::to<std::string>(",o=", pri.orderId) : "");
 }
 
 std::mutex HTTPMessage::mutexDump_;

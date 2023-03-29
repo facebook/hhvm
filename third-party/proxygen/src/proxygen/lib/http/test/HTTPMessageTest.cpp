@@ -765,6 +765,17 @@ TEST(HTTPMessage, HTTPPrioritySetOutRangeUrgency) {
   EXPECT_TRUE(priHeaderViaGetter->incremental);
 }
 
+TEST(HTTPMessage, HTTPPriorityOrderIdSetGet) {
+  HTTPMessage message;
+  message.setHTTPPriority(HTTPPriority(7, false, 10));
+  EXPECT_EQ(httpPriorityFromHTTPMessage(message)->orderId, 10);
+  auto& priHeader = message.getHeaders().getSingleOrEmpty(HTTP_HEADER_PRIORITY);
+  EXPECT_EQ("u=7,o=10", priHeader);
+  auto priHeaderViaGetter = message.getHTTPPriority();
+  EXPECT_EQ(priHeaderViaGetter->urgency, 7);
+  EXPECT_EQ(priHeaderViaGetter->orderId, 10);
+}
+
 TEST(HTTPHeaders, GetSetOnResize) {
   HTTPHeaders headers;
   for (size_t i = 0; i < kInitialVectorReserve - 1; i++) {

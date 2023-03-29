@@ -81,6 +81,10 @@ quic::QuicErrorCode quicControlStreamError(quic::QuicErrorCode error) {
   }
   folly::assume_unreachable();
 }
+
+quic::Priority toQuicPriority(const proxygen::HTTPPriority& pri) {
+  return quic::Priority(pri.urgency, pri.incremental, pri.orderId);
+}
 } // namespace
 
 using namespace proxygen::hq;
@@ -508,7 +512,7 @@ size_t HQSession::sendPriority(HTTPCodec::StreamID id, HTTPPriority priority) {
   if (streams_.find(id) == streams_.end() && !findPushStream(id)) {
     return 0;
   }
-  sock_->setStreamPriority(id, priority.urgency, priority.incremental);
+  sock_->setStreamPriority(id, toQuicPriority(priority));
   // PRIORITY_UPDATE frames are sent by clients on the control stream.
   // Servers do not send PRIORITY_UPDATE
   if (direction_ == TransportDirection::DOWNSTREAM) {
@@ -536,7 +540,7 @@ size_t HQSession::sendPushPriority(hq::PushId pushId, HTTPPriority priority) {
                << " with pushId=" << pushId << " presented in id map";
     return 0;
   }
-  sock_->setStreamPriority(streamId, priority.urgency, priority.incremental);
+  sock_->setStreamPriority(streamId, toQuicPriority(priority));
   auto controlStream = findControlStream(UnidirectionalStreamType::CONTROL);
   if (!controlStream) {
     return 0;
@@ -1548,7 +1552,7 @@ void HQSession::onPriority(quic::StreamId streamId, const HTTPPriority& pri) {
     priorityUpdatesBuffer_.insert(streamId, pri);
     return;
   }
-  sock_->setStreamPriority(streamId, pri.urgency, pri.incremental);
+  sock_->setStreamPriority(streamId, toQuicPriority(pri));
 }
 
 void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
@@ -1576,7 +1580,7 @@ void HQSession::onPushPriority(hq::PushId pushId, const HTTPPriority& pri) {
   if (!stream) {
     return;
   }
-  sock_->setStreamPriority(streamId, pri.urgency, pri.incremental);
+  sock_->setStreamPriority(streamId, toQuicPriority(pri));
 }
 
 void HQSession::notifyEgressBodyBuffered(int64_t bytes) {
@@ -2508,13 +2512,11 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   if (sock) {
     auto itr = session_.priorityUpdatesBuffer_.find(streamId);
     if (itr != session_.priorityUpdatesBuffer_.end()) {
-      sock->setStreamPriority(
-          streamId, itr->second.urgency, itr->second.incremental);
+      sock->setStreamPriority(streamId, toQuicPriority(itr->second));
     } else {
       const auto httpPriority = httpPriorityFromHTTPMessage(*msg);
       if (httpPriority) {
-        sock->setStreamPriority(
-            streamId, httpPriority->urgency, httpPriority->incremental);
+        sock->setStreamPriority(streamId, toQuicPriority(httpPriority.value()));
       }
     }
   }
@@ -2652,8 +2654,7 @@ void HQSession::HQStreamTransportBase::updatePriority(
   auto streamId = getStreamId();
   auto httpPriority = httpPriorityFromHTTPMessage(headers);
   if (sock && httpPriority) {
-    sock->setStreamPriority(
-        streamId, httpPriority->urgency, httpPriority->incremental);
+    sock->setStreamPriority(streamId, toQuicPriority(httpPriority.value()));
   }
 }
 

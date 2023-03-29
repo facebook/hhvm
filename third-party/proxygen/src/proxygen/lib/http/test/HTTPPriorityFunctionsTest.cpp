@@ -128,3 +128,18 @@ TEST(HTTPPriorityFunctionsTest, PriorityHeaderBadPriority) {
   auto priority = httpPriorityFromHTTPMessage(req);
   EXPECT_FALSE(priority.hasValue());
 }
+
+TEST(HTTPPriorityFunctionsTest, PriorityHeaderDefaultOrderId) {
+  HTTPMessage req;
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3");
+  auto priority = httpPriorityFromHTTPMessage(req);
+  EXPECT_EQ(priority->orderId, 0);
+}
+
+TEST(HTTPPriorityFunctionsTest, PriorityHeaderCustomOrderId) {
+  HTTPMessage req;
+  req.getHeaders().add(HTTP_HEADER_PRIORITY, "u=3, o=100");
+  auto priority = httpPriorityFromHTTPMessage(req);
+  EXPECT_EQ(priority->urgency, 3);
+  EXPECT_EQ(priority->orderId, 100);
+}

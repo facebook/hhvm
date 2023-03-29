@@ -942,6 +942,31 @@ where
 }
 
 
+impl ::fbthrift::metadata::ThriftAnnotations for MyData {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyDataWithCustomDefault {
     fn default() -> Self {
@@ -1026,6 +1051,31 @@ where
 }
 
 
+impl ::fbthrift::metadata::ThriftAnnotations for MyDataWithCustomDefault {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
 
 impl ::std::default::Default for InnerUnion {
     fn default() -> Self {
@@ -1096,6 +1146,29 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for InnerUnion {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
+            },
+            _ => {}
+        }
+
+        None
     }
 }
 
@@ -1189,6 +1262,33 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            1 => {
+            },
+            2 => {
+            },
+            3 => {
+            },
+            _ => {}
+        }
+
+        None
     }
 }
 
@@ -1593,6 +1693,106 @@ where
 }
 
 
+impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<thrift::types::Testing>() {
+            let mut tmp = Some(thrift::types::Testing {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <thrift::types::Testing as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            -1 => {
+            },
+            -2 => {
+            },
+            -3 => {
+            },
+            -4 => {
+            },
+            -5 => {
+            },
+            -6 => {
+            },
+            -7 => {
+            },
+            -8 => {
+            },
+            -9 => {
+            },
+            -10 => {
+            },
+            -11 => {
+            },
+            -12 => {
+            },
+            -13 => {
+            },
+            -14 => {
+            },
+            -15 => {
+            },
+            -16 => {
+            },
+            -17 => {
+            },
+            -18 => {
+            },
+            -19 => {
+            },
+            -20 => {
+            },
+            -21 => {
+            },
+            -22 => {
+            },
+            -23 => {
+            },
+            -24 => {
+            },
+            -25 => {
+            },
+            -26 => {
+            },
+            -27 => {
+            },
+            -28 => {
+            },
+            -29 => {
+            },
+            -30 => {
+            },
+            -31 => {
+            },
+            -32 => {
+            },
+            1 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LateDefStruct {
     fn default() -> Self {
@@ -1655,6 +1855,27 @@ where
         ::std::result::Result::Ok(Self {
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for LateDefStruct {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            _ => {}
+        }
+
+        None
     }
 }
 
@@ -1734,6 +1955,42 @@ where
 }
 
 
+impl ::fbthrift::metadata::ThriftAnnotations for Recursive {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            -1 => {
+
+                if type_id == ::std::any::TypeId::of::<patch::types::AssignOnlyPatch>() {
+                    let mut tmp = Some(patch::types::AssignOnlyPatch {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let Some(r) = <patch::types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Bar {
     fn default() -> Self {
@@ -1809,6 +2066,29 @@ where
 }
 
 
+impl ::fbthrift::metadata::ThriftAnnotations for Bar {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            -1 => {
+            },
+            _ => {}
+        }
+
+        None
+    }
+}
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Loop {
     fn default() -> Self {
@@ -1880,6 +2160,55 @@ where
             bar: field_bar.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
+    }
+}
+
+
+impl ::fbthrift::metadata::ThriftAnnotations for Loop {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        if type_id == ::std::any::TypeId::of::<patch::types::AssignOnlyPatch>() {
+            let mut tmp = Some(patch::types::AssignOnlyPatch {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <patch::types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            -1 => {
+
+                if type_id == ::std::any::TypeId::of::<patch::types::AssignOnlyPatch>() {
+                    let mut tmp = Some(patch::types::AssignOnlyPatch {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let Some(r) = <patch::types::AssignOnlyPatch as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+            },
+            _ => {}
+        }
+
+        None
     }
 }
 
@@ -1972,6 +2301,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyDataFieldPatch {
     fn default() -> Self {
@@ -2054,6 +2385,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -2169,6 +2502,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyDataWithCustomDefaultEnsureStruct {
     fn default() -> Self {
@@ -2257,6 +2592,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyDataWithCustomDefaultFieldPatch {
     fn default() -> Self {
@@ -2339,6 +2676,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -2454,6 +2793,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::InnerUnionFieldPatch {
     fn default() -> Self {
@@ -2527,6 +2868,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -2642,6 +2985,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyUnionFieldPatch {
     fn default() -> Self {
@@ -2733,6 +3078,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -2846,6 +3193,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -3277,6 +3626,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructField10Patch {
     fn default() -> Self {
@@ -3363,6 +3714,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructField23Patch {
     fn default() -> Self {
@@ -3447,6 +3800,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -3571,6 +3926,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructField27Patch {
     fn default() -> Self {
@@ -3673,6 +4030,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -3806,6 +4165,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructField29Patch {
     fn default() -> Self {
@@ -3926,6 +4287,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -4059,6 +4422,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructField30Patch {
     fn default() -> Self {
@@ -4190,6 +4555,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructField30Patch1 {
     fn default() -> Self {
@@ -4319,6 +4686,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -4684,6 +5053,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::MyStructPatch {
     fn default() -> Self {
@@ -4797,6 +5168,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LateDefStructEnsureStruct {
     fn default() -> Self {
@@ -4863,6 +5236,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LateDefStructFieldPatch {
     fn default() -> Self {
@@ -4927,6 +5302,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -5042,6 +5419,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::RecursiveEnsureStruct {
     fn default() -> Self {
@@ -5117,6 +5496,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -5205,6 +5586,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::RecursiveFieldPatch {
     fn default() -> Self {
@@ -5278,6 +5661,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -5393,6 +5778,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::BarEnsureStruct {
     fn default() -> Self {
@@ -5470,6 +5857,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::BarFieldPatch {
     fn default() -> Self {
@@ -5543,6 +5932,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -5658,6 +6049,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LoopEnsureStruct {
     fn default() -> Self {
@@ -5735,6 +6128,8 @@ where
 }
 
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::LoopFieldPatch {
     fn default() -> Self {
@@ -5808,6 +6203,8 @@ where
         })
     }
 }
+
+
 
 
 #[allow(clippy::derivable_impls)]
@@ -5894,6 +6291,8 @@ where
         })
     }
 }
+
+
 
 
 mod dot_dot {

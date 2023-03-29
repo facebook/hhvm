@@ -48,6 +48,7 @@ pub mod context_stack;
 pub mod deserialize;
 pub mod export;
 pub mod framing;
+pub mod metadata;
 pub mod processor;
 pub mod request_context;
 pub mod serialize;

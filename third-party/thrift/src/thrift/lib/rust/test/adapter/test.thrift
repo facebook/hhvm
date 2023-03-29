@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/rust.thrift"
+include "thrift/annotation/scope.thrift"
 
 @rust.Adapter{name = "::adapters::StringAdapter"}
 typedef string AdaptedString
@@ -75,6 +76,11 @@ const Asset adapted_struct_const = {
   "comment": "foobar",
 };
 
+struct TestAnnotation {
+  1: string payload;
+}
+
+@TestAnnotation{payload = "some_payload"}
 struct Foo {
   1: string str_val;
   2: i64 int_val;
@@ -134,3 +140,31 @@ union Bar {
   @rust.Adapter{name = "::adapters::NonZeroI64Adapter"}
   4: i64 validated_int_val = 1;
 }
+
+struct FirstAnnotation {
+  1: string uri;
+}
+
+@rust.Adapter{name = "crate::TransitiveTestAdapter<>"}
+@FirstAnnotation{uri = "thrift/test"}
+@scope.Transitive
+struct TransitiveAdapterAnnotation {
+  1: string payload;
+}
+
+@rust.Adapter{name = "crate::TransitiveAnnotationTestAdapter<>"}
+@FirstAnnotation{uri = "thrift/transitive_field_test"}
+@scope.Transitive
+struct TransitiveFieldAdapterAnnotation {
+  1: string payload;
+}
+
+@TransitiveAdapterAnnotation{payload = "hello_world"}
+struct TransitiveStruct {
+  @rust.Adapter{name = "crate::AnnotationTestAdapter"}
+  1: string test_field;
+  @TransitiveFieldAdapterAnnotation{payload = "foobar"}
+  2: string test_field_2;
+}
+
+typedef TransitiveStruct TransitiveStructWrapper (rust.newtype)

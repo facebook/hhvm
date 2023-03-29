@@ -1,0 +1,93 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and its affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+
+{{!
+  Annotations on generated patch structs implicitly assume all dependencies
+  of `thrift/annotation/patch.thrift` are immediately available in the
+  crate, e.g. they require a dependency on `thrift/annotation/cpp.thrift`.
+  
+  This might be fine in C++, but Rust crates have isolated dependencies, so
+  this doesn't work for us. Disable generating annotations on patch structs
+  for now.
+}}{{^struct:generated?}}
+impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
+    fn get_structured_annotation<T: Sized + 'static>() -> ::std::option::Option<T> {
+        {{! We can't use a match statement as `TypeId::of` must be const, which is blocked by
+            https://github.com/rust-lang/rust/issues/77125.
+            
+            We assume there won't be a large number of annotations, so linear search should
+            be fine here.
+        }}
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+        {{#struct:rust_structured_annotations}}
+        {{#structured_annotations:direct}}
+
+        if type_id == ::std::any::TypeId::of::<{{#value:type}}{{>lib/type}}{{/value:type}}>() {
+            let mut tmp = Some({{>lib/value}});
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+        {{/structured_annotations:direct}}
+        {{! Iterate through our direct annotations first before checking transitive annotations. }}
+        {{#structured_annotations:transitive}}
+
+        if let Some(r) = <{{>lib/type}} as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+        {{/structured_annotations:transitive}}
+        {{/struct:rust_structured_annotations}}
+
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> ::std::option::Option<T> {
+        #[allow(unused_variables)]
+        let type_id = ::std::any::TypeId::of::<T>();
+
+        match field_id {
+            {{#struct:fields}}
+            {{field:key}} => {
+                {{#field:rust_structured_annotations}}
+                {{#structured_annotations:direct}}
+
+                if type_id == ::std::any::TypeId::of::<{{#value:type}}{{>lib/type}}{{/value:type}}>() {
+                    let mut tmp = Some({{>lib/value}});
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+                {{/structured_annotations:direct}}
+                {{#structured_annotations:transitive}}
+
+                if let Some(r) = <{{>lib/type}} as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+                {{/structured_annotations:transitive}}
+                {{/field:rust_structured_annotations}}
+            },
+            {{/struct:fields}}
+            _ => {}
+        }
+
+        None
+    }
+}
+{{/struct:generated?}}
+{{!newline}}

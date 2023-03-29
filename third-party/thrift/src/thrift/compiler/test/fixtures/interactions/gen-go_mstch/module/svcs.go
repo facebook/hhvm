@@ -21,13 +21,13 @@ var _ = thrift.ZERO
 
 
 type MyService interface {
-    Foo(ctx context.Context) error
+    Foo(ctx context.Context) (error)
 }
 
 // Deprecated: Use MyService instead.
 type MyServiceClientInterface interface {
     thrift.ClientInterface
-    Foo() error
+    Foo() (error)
 }
 
 type MyServiceChannelClient struct {
@@ -113,15 +113,18 @@ func NewMyServiceThreadsafeClientFactory(t thrift.Transport, pf thrift.ProtocolF
 }
 
 
-func (c *MyServiceChannelClient) Foo(ctx context.Context) error {
+func (c *MyServiceChannelClient) Foo(ctx context.Context) (error) {
     in := &reqMyServiceFoo{
     }
     out := newRespMyServiceFoo()
     err := c.ch.Call(ctx, "foo", in, out)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 
-func (c *MyServiceClient) Foo() error {
+func (c *MyServiceClient) Foo() (error) {
     return c.chClient.Foo(nil)
 }
 
@@ -130,6 +133,7 @@ type reqMyServiceFoo struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceFoo{}
+
 
 func newReqMyServiceFoo() *reqMyServiceFoo {
     return (&reqMyServiceFoo{})
@@ -155,6 +159,7 @@ func (x *reqMyServiceFooBuilder) Emit() *reqMyServiceFoo {
     var objCopy reqMyServiceFoo = *x.obj
     return &objCopy
 }
+
 func (x *reqMyServiceFoo) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -203,10 +208,13 @@ func (x *reqMyServiceFoo) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respMyServiceFoo struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceFoo{}
+var _ thrift.WritableResult = &respMyServiceFoo{}
+
 
 func newRespMyServiceFoo() *respMyServiceFoo {
     return (&respMyServiceFoo{})
@@ -232,6 +240,11 @@ func (x *respMyServiceFooBuilder) Emit() *respMyServiceFoo {
     var objCopy respMyServiceFoo = *x.obj
     return &objCopy
 }
+
+func (x *respMyServiceFoo) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respMyServiceFoo) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceFoo"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -280,6 +293,7 @@ func (x *respMyServiceFoo) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type MyServiceProcessor struct {
@@ -344,9 +358,11 @@ func (p *procFuncMyServiceFoo) Read(iprot thrift.Protocol) (thrift.Struct, thrif
 func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, oprot thrift.Protocol) (err thrift.Exception) {
     var err2 error
     messageType := thrift.REPLY
-    if _, ok := result.(thrift.ApplicationException); ok {
+    switch result.(type) {
+    case thrift.ApplicationException:
         messageType = thrift.EXCEPTION
     }
+
     if err2 = oprot.WriteMessageBegin("Foo", messageType, seqId); err2 != nil {
         err = err2
     }

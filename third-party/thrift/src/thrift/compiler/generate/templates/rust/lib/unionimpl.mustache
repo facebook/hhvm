@@ -51,9 +51,9 @@ where
                     }}{{field:key}}{{!
                 }});
                 {{#field:type}}{{>lib/write}}{{/field:type}}({{!
-                }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field(&{{/field:has_adapter?}}{{!
+                }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field::<{{struct:rust_name}}>(&{{/field:has_adapter?}}{{!
                 }}inner{{!
-                }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}}){{/field:has_adapter?}}{{!
+                }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
                 }}, p);
                 p.write_field_end();
             }{{!
@@ -86,9 +86,9 @@ where
                 ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}, false) => {
                     once = true;
                     alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field({{/field:has_adapter?}}{{!
+                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                     }}{{#field:type}}{{>lib/read}}{{/field:type}}(p)?{{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter/thrift_field_args}})?{{/field:has_adapter?}}{{!
+                    }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}));
                 }{{!
                 }}{{/struct:fields}}
@@ -109,5 +109,9 @@ where
         ::std::result::Result::Ok(alt.unwrap_or_default())
     }
 }
+
+{{#program:rust_gen_native_metadata?}}
+{{>lib/metadata/struct}}
+{{/program:rust_gen_native_metadata?}}
 {{/struct:union?}}
 {{!newline}}

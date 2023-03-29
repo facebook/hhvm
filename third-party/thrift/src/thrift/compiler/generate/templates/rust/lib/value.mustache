@@ -105,10 +105,7 @@
     }}{{>lib/type}} {{>lib/block}}{{!
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
-            }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default({{/field:has_adapter?}}{{!
-            }}{{#field:value}}{{>lib/fieldvalue}}{{/field:value}}{{!
-            }}{{^field:value}}::std::default::Default::default(){{/field:value}}{{!
-            }}{{#field:has_adapter?}}, {{field:key}}, ::std::any::TypeId::of::<{{!
+            }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default::<{{!
                 }}{{#value:type}}{{#type:struct}}{{!
                     }}{{#struct:has_adapter?}}{{!
                         }}{{type:package}}::types::unadapted::{{struct:rust_name}}{{!
@@ -117,7 +114,10 @@
                         }}{{type:package}}::types::{{struct:rust_name}}{{!
                     }}{{/struct:has_adapter?}}{{!
                 }}{{/type:struct}}{{/value:type}}{{!
-            }}>()){{/field:has_adapter?}}{{!
+            }}>({{/field:has_adapter?}}{{!
+            }}{{#field:value}}{{>lib/fieldvalue}}{{/field:value}}{{!
+            }}{{^field:value}}::std::default::Default::default(){{/field:value}}{{!
+            }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
             }},{{!
         }}{{/value:structFields}}{{!
         }}{{^value:exhaustive?}}

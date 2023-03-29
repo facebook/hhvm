@@ -24,6 +24,7 @@ use thrift_test::consts;
 use thrift_test::types::Asset;
 use thrift_test::types::Bar;
 use thrift_test::types::Foo;
+use thrift_test::types::TransitiveStructWrapper;
 use thrift_test::types::WrappedAdaptedBytes;
 use thrift_test::types::WrappedAdaptedString;
 use thrift_test::types::WrappedAdaptedWrappedAdaptedBytes;
@@ -430,5 +431,20 @@ fn test_consts() {
             type_: AssetType::Server,
             id: 42,
         }
+    );
+}
+
+#[test]
+fn test_annotations() {
+    let deser: TransitiveStructWrapper =
+        simplejson_protocol::deserialize(r#"{"test_field": "boo", "test_field_2": "spooky"}"#)
+            .unwrap();
+
+    assert_eq!(deser.0.0.test_field.0, "boo");
+    assert_eq!(deser.0.0.test_field_2.0, "spooky");
+
+    assert_eq!(
+        simplejson_protocol::serialize(deser),
+        r#"{"test_field":"boo","test_field_2":"spooky"}"#
     );
 }

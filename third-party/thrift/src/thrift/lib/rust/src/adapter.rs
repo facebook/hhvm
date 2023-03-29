@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-use std::any::TypeId;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+
+use crate::metadata::ThriftAnnotations;
 
 pub trait ThriftAdapter {
     /// Aka the "from" type.
@@ -50,25 +51,25 @@ pub trait ThriftAdapter {
     fn to_thrift(value: &Self::AdaptedType) -> Self::StandardType;
 
     /// Method called when this adapter is used on a Thrift struct's field. Provides information
-    /// about the specific field ID and the type ID of the parent struct this field is in.
+    /// about the specific field ID in `field_id`. The type of the struct that owns this field is
+    /// passed in as `T`.
     ///
     /// Defaults to calling `from_thrift`.
-    fn from_thrift_field(
+    fn from_thrift_field<T: ThriftAnnotations>(
         value: Self::StandardType,
         _field_id: i16,
-        _strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
         Self::from_thrift(value)
     }
 
     /// Method called when this adapter is used on a Thrift struct's field. Provides information
-    /// about the specific field ID and the type ID of the parent struct this field is in.
+    /// about the specific field ID in `field_id`. The type of the struct that owns this field is
+    /// passed in as `T`.
     ///
     /// Defaults to calling `to_thrift`.
-    fn to_thrift_field(
+    fn to_thrift_field<T: ThriftAnnotations>(
         value: &Self::AdaptedType,
         _field_id: i16,
-        _strct: TypeId,
     ) -> Self::StandardType {
         Self::to_thrift(value)
     }
@@ -83,12 +84,11 @@ pub trait ThriftAdapter {
     ///
     /// WARNING: This defaults to calling `from_thrift_field` and **assumes `from_thrift_field`
     /// will not return an `Err` for the default value**.
-    fn from_thrift_default(
+    fn from_thrift_default<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::AdaptedType {
-        Self::from_thrift_field(value, field_id, strct).unwrap_or_else(|e| {
+        Self::from_thrift_field::<T>(value, field_id).unwrap_or_else(|e| {
             panic!(
                 "`from_thrift_field` must not return an `Err` on field ID {} for its default value, but it did: '{:?}'",
                 field_id, e
@@ -141,44 +141,38 @@ where
     }
 
     #[inline]
-    fn from_thrift_field(
+    fn from_thrift_field<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
-        <Fst as ThriftAdapter>::from_thrift_field(
-            <Snd as ThriftAdapter>::from_thrift_field(value, field_id, strct)
+        <Fst as ThriftAdapter>::from_thrift_field::<T>(
+            <Snd as ThriftAdapter>::from_thrift_field::<T>(value, field_id)
                 .map_err(Into::<anyhow::Error>::into)?
                 .into(),
             field_id,
-            strct,
         )
         .map_err(Into::<anyhow::Error>::into)
     }
 
     #[inline]
-    fn to_thrift_field(
+    fn to_thrift_field<T: ThriftAnnotations>(
         value: &Self::AdaptedType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::StandardType {
-        <Snd as ThriftAdapter>::to_thrift_field(
-            &<Fst as ThriftAdapter>::to_thrift_field(value, field_id, strct).into(),
+        <Snd as ThriftAdapter>::to_thrift_field::<T>(
+            &<Fst as ThriftAdapter>::to_thrift_field::<T>(value, field_id).into(),
             field_id,
-            strct,
         )
     }
 
     #[inline]
-    fn from_thrift_default(
+    fn from_thrift_default<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::AdaptedType {
-        <Fst as ThriftAdapter>::from_thrift_default(
-            <Snd as ThriftAdapter>::from_thrift_default(value, field_id, strct).into(),
+        <Fst as ThriftAdapter>::from_thrift_default::<T>(
+            <Snd as ThriftAdapter>::from_thrift_default::<T>(value, field_id).into(),
             field_id,
-            strct,
         )
     }
 }
@@ -216,38 +210,35 @@ where
     }
 
     #[inline]
-    fn from_thrift_field(
+    fn from_thrift_field<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
         value
             .into_iter()
-            .map(|elem| A::from_thrift_field(elem, field_id, strct))
+            .map(|elem| A::from_thrift_field::<T>(elem, field_id))
             .collect::<Result<Self::AdaptedType, Self::Error>>()
     }
 
     #[inline]
-    fn to_thrift_field(
+    fn to_thrift_field<T: ThriftAnnotations>(
         value: &Self::AdaptedType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::StandardType {
         value
             .iter()
-            .map(|elem| A::to_thrift_field(elem, field_id, strct))
+            .map(|elem| A::to_thrift_field::<T>(elem, field_id))
             .collect()
     }
 
     #[inline]
-    fn from_thrift_default(
+    fn from_thrift_default<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::AdaptedType {
         value
             .into_iter()
-            .map(|elem| A::from_thrift_default(elem, field_id, strct))
+            .map(|elem| A::from_thrift_default::<T>(elem, field_id))
             .collect()
     }
 }
@@ -289,38 +280,35 @@ where
     }
 
     #[inline]
-    fn from_thrift_field(
+    fn from_thrift_field<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
         value
             .into_iter()
-            .map(|elem| A::from_thrift_field(elem, field_id, strct))
+            .map(|elem| A::from_thrift_field::<T>(elem, field_id))
             .collect::<Result<Self::AdaptedType, Self::Error>>()
     }
 
     #[inline]
-    fn to_thrift_field(
+    fn to_thrift_field<T: ThriftAnnotations>(
         value: &Self::AdaptedType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::StandardType {
         value
             .iter()
-            .map(|elem| A::to_thrift_field(elem, field_id, strct))
+            .map(|elem| A::to_thrift_field::<T>(elem, field_id))
             .collect()
     }
 
     #[inline]
-    fn from_thrift_default(
+    fn from_thrift_default<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::AdaptedType {
         value
             .into_iter()
-            .map(|elem| A::from_thrift_default(elem, field_id, strct))
+            .map(|elem| A::from_thrift_default::<T>(elem, field_id))
             .collect()
     }
 }
@@ -373,18 +361,17 @@ where
     }
 
     #[inline]
-    fn from_thrift_field(
+    fn from_thrift_field<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Result<Self::AdaptedType, Self::Error> {
         value
             .into_iter()
             .map(|(key, val)| {
                 Ok((
-                    KA::from_thrift_field(key, field_id, strct)
+                    KA::from_thrift_field::<T>(key, field_id)
                         .map_err(Into::<anyhow::Error>::into)?,
-                    KV::from_thrift_field(val, field_id, strct)
+                    KV::from_thrift_field::<T>(val, field_id)
                         .map_err(Into::<anyhow::Error>::into)?,
                 ))
             })
@@ -392,34 +379,32 @@ where
     }
 
     #[inline]
-    fn to_thrift_field(
+    fn to_thrift_field<T: ThriftAnnotations>(
         value: &Self::AdaptedType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::StandardType {
         value
             .iter()
             .map(|(key, val)| {
                 (
-                    KA::to_thrift_field(key, field_id, strct),
-                    KV::to_thrift_field(val, field_id, strct),
+                    KA::to_thrift_field::<T>(key, field_id),
+                    KV::to_thrift_field::<T>(val, field_id),
                 )
             })
             .collect::<Self::StandardType>()
     }
 
     #[inline]
-    fn from_thrift_default(
+    fn from_thrift_default<T: ThriftAnnotations>(
         value: Self::StandardType,
         field_id: i16,
-        strct: TypeId,
     ) -> Self::AdaptedType {
         value
             .into_iter()
             .map(|(key, val)| {
                 (
-                    KA::from_thrift_default(key, field_id, strct),
-                    KV::from_thrift_default(val, field_id, strct),
+                    KA::from_thrift_default::<T>(key, field_id),
+                    KV::from_thrift_default::<T>(val, field_id),
                 )
             })
             .collect::<Self::AdaptedType>()
@@ -510,12 +495,16 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::any::TypeId;
+
     use super::*;
 
     // Represents the following flow
     // String (Final Adapted Type) <- BoolToStringAdapter -> Bool <- I64ToBoolAdapter -> i64
     // <- I8ToI64Adapter -> i8 (Original Thrift type)
     struct DummyParentStruct {}
+
+    impl ThriftAnnotations for DummyParentStruct {}
 
     struct BoolToStringAdapter {}
 
@@ -533,37 +522,34 @@ mod tests {
             value == "true"
         }
 
-        fn from_thrift_field(
+        fn from_thrift_field<T: ThriftAnnotations>(
             value: Self::StandardType,
             field_id: i16,
-            strct: TypeId,
         ) -> Result<Self::AdaptedType, Self::Error> {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
             Self::from_thrift(value)
         }
 
-        fn to_thrift_field(
+        fn to_thrift_field<T: ThriftAnnotations>(
             value: &Self::AdaptedType,
             field_id: i16,
-            strct: TypeId,
         ) -> Self::StandardType {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
             Self::to_thrift(value)
         }
 
-        fn from_thrift_default(
+        fn from_thrift_default<T: ThriftAnnotations>(
             value: Self::StandardType,
             field_id: i16,
-            strct: TypeId,
         ) -> Self::AdaptedType {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
-            Self::from_thrift_field(value, field_id, strct).unwrap()
+            Self::from_thrift_field::<T>(value, field_id).unwrap()
         }
     }
 
@@ -587,37 +573,34 @@ mod tests {
             if *value { 1 } else { 0 }
         }
 
-        fn from_thrift_field(
+        fn from_thrift_field<T: ThriftAnnotations>(
             value: Self::StandardType,
             field_id: i16,
-            strct: TypeId,
         ) -> Result<Self::AdaptedType, Self::Error> {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
             Self::from_thrift(value)
         }
 
-        fn to_thrift_field(
+        fn to_thrift_field<T: ThriftAnnotations>(
             value: &Self::AdaptedType,
             field_id: i16,
-            strct: TypeId,
         ) -> Self::StandardType {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
             Self::to_thrift(value)
         }
 
-        fn from_thrift_default(
+        fn from_thrift_default<T: ThriftAnnotations>(
             value: Self::StandardType,
             field_id: i16,
-            strct: TypeId,
         ) -> Self::AdaptedType {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
-            Self::from_thrift_field(value, field_id, strct).unwrap()
+            Self::from_thrift_field::<T>(value, field_id).unwrap()
         }
     }
 
@@ -637,37 +620,34 @@ mod tests {
             (*value).try_into().unwrap()
         }
 
-        fn from_thrift_field(
+        fn from_thrift_field<T: ThriftAnnotations>(
             value: Self::StandardType,
             field_id: i16,
-            strct: TypeId,
         ) -> Result<Self::AdaptedType, Self::Error> {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
             Self::from_thrift(value)
         }
 
-        fn to_thrift_field(
+        fn to_thrift_field<T: ThriftAnnotations>(
             value: &Self::AdaptedType,
             field_id: i16,
-            strct: TypeId,
         ) -> Self::StandardType {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
             Self::to_thrift(value)
         }
 
-        fn from_thrift_default(
+        fn from_thrift_default<T: ThriftAnnotations>(
             value: Self::StandardType,
             field_id: i16,
-            strct: TypeId,
         ) -> Self::AdaptedType {
             assert_eq!(field_id, 42);
-            assert_eq!(TypeId::of::<DummyParentStruct>(), strct);
+            assert_eq!(TypeId::of::<DummyParentStruct>(), TypeId::of::<T>());
 
-            Self::from_thrift_field(value, field_id, strct).unwrap()
+            Self::from_thrift_field::<T>(value, field_id).unwrap()
         }
     }
 
@@ -699,20 +679,15 @@ mod tests {
     #[test]
     fn test_thrift_field() {
         assert_eq!(
-            TestLayeredAdapter::from_thrift_field(0_i8, 42, TypeId::of::<DummyParentStruct>())
-                .unwrap(),
+            TestLayeredAdapter::from_thrift_field::<DummyParentStruct>(0_i8, 42).unwrap(),
             "false"
         );
         assert_eq!(
-            TestLayeredAdapter::from_thrift_default(0_i8, 42, TypeId::of::<DummyParentStruct>()),
+            TestLayeredAdapter::from_thrift_default::<DummyParentStruct>(0_i8, 42),
             "false"
         );
         assert_eq!(
-            TestLayeredAdapter::to_thrift_field(
-                &"false".to_string(),
-                42,
-                TypeId::of::<DummyParentStruct>()
-            ),
+            TestLayeredAdapter::to_thrift_field::<DummyParentStruct>(&"false".to_string(), 42),
             0_i8
         );
     }

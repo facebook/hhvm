@@ -21,6 +21,7 @@ type CustomException struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CustomException{}
 
+
 func NewCustomException() *CustomException {
     return (&CustomException{})
 }
@@ -94,6 +95,7 @@ func (x *CustomExceptionBuilder) Emit() *CustomException {
     var objCopy CustomException = *x.obj
     return &objCopy
 }
+
 func (x *CustomException) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("CustomException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -150,3 +152,4 @@ func (x *CustomException) Read(p thrift.Protocol) error {
 
     return nil
 }
+

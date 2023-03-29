@@ -244,6 +244,9 @@ struct rust_codegen_options {
   // The current program being generated and its Rust module path.
   const t_program* current_program;
   std::string current_crate;
+
+  // Whether to generate Thrift metadata for structs or not.
+  bool gen_metadata = true;
 };
 
 static bool validate_rust_serde(const t_node& node) {
@@ -485,6 +488,43 @@ mstch::node adapter_node(
   return node;
 }
 
+class mstch_rust_value;
+
+mstch::node structured_annotations_node(
+    const t_named& named,
+    unsigned depth,
+    mstch_context& context,
+    mstch_element_position pos,
+    const rust_codegen_options& options) {
+  std::vector<mstch::node> direct_annotations;
+  std::vector<mstch::node> transitive_annotation_types;
+
+  // Note, duplicate annotations are not allowed per the Thrift spec.
+  for (const t_const* annotation : named.structured_annotations()) {
+    direct_annotations.push_back(std::make_shared<mstch_rust_value>(
+        annotation->get_value(),
+        annotation->get_type(),
+        depth,
+        context,
+        pos,
+        options));
+
+    const t_type* annotation_type = annotation->get_type();
+    if ((*annotation_type).find_structured_annotation_or_null(kTransitiveUri)) {
+      transitive_annotation_types.push_back(
+          context.type_factory->make_mstch_object(
+              annotation_type, context, pos));
+    }
+  }
+
+  mstch::map node{
+      {"structured_annotations:direct", direct_annotations},
+      {"structured_annotations:transitive", transitive_annotation_types},
+  };
+
+  return node;
+}
+
 class t_mstch_rust_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
@@ -547,6 +587,8 @@ class rust_mstch_program : public mstch_program {
              &rust_mstch_program::rust_has_const_tests},
             {"program:consts_for_test",
              &rust_mstch_program::rust_consts_for_test},
+            {"program:rust_gen_native_metadata?",
+             &rust_mstch_program::rust_gen_native_metadata},
         });
     register_has_option("program:default_enum_zero?", "default_enum_zero");
   }
@@ -790,6 +832,7 @@ class rust_mstch_program : public mstch_program {
 
     return consts;
   }
+  mstch::node rust_gen_native_metadata() { return options_.gen_metadata; }
 
  private:
   const rust_codegen_options& options_;
@@ -974,6 +1017,8 @@ class rust_mstch_function : public mstch_function {
   t_field success_return;
 };
 
+class mstch_rust_value;
+
 class rust_mstch_function_factory {
  public:
   std::shared_ptr<mstch_base> make_mstch_object(
@@ -1016,6 +1061,9 @@ class rust_mstch_struct : public mstch_struct {
             {"struct:exception_message", &rust_mstch_struct::exception_message},
             {"struct:serde?", &rust_mstch_struct::rust_serde},
             {"struct:has_adapter?", &rust_mstch_struct::has_adapter},
+            {"struct:rust_structured_annotations",
+             &rust_mstch_struct::rust_structured_annotations},
+            {"struct:generated?", &rust_mstch_struct::rust_generated_struct},
         });
   }
   mstch::node rust_name() { return struct_rust_name(struct_); }
@@ -1076,6 +1124,10 @@ class rust_mstch_struct : public mstch_struct {
     // check.
     return adapter_node(adapter_annotation_, struct_, true, context_, pos_);
   }
+  mstch::node rust_structured_annotations() {
+    return structured_annotations_node(*struct_, 1, context_, pos_, options_);
+  }
+  mstch::node rust_generated_struct() { return (*struct_).generated(); }
 
  private:
   const rust_codegen_options& options_;
@@ -1685,6 +1737,8 @@ class rust_mstch_field : public mstch_field {
             {"field:docs?", &rust_mstch_field::rust_has_docs},
             {"field:docs", &rust_mstch_field::rust_docs},
             {"field:has_adapter?", &rust_mstch_field::has_adapter},
+            {"field:rust_structured_annotations",
+             &rust_mstch_field::rust_structured_annotations},
         });
   }
   mstch::node rust_name() {
@@ -1717,6 +1771,9 @@ class rust_mstch_field : public mstch_field {
   mstch::node has_adapter() {
     return adapter_node(
         adapter_annotation_, field_->get_type(), false, context_, pos_);
+  }
+  mstch::node rust_structured_annotations() {
+    return structured_annotations_node(*field_, 3, context_, pos_, options_);
   }
 
  private:
@@ -1903,6 +1960,10 @@ void t_mstch_rust_generator::generate_program() {
 
   options_.current_program = program_;
   out_dir_base_ = "gen-rust";
+
+  if (auto gen_metadata = get_option("gen_metadata")) {
+    options_.gen_metadata = gen_metadata.value() == "true";
+  }
 
   set_mstch_factories();
 

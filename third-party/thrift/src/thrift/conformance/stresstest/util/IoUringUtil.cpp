@@ -17,14 +17,14 @@
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
 DEFINE_bool(use_iouring_event_eventfd, true, "");
-DEFINE_int32(io_capacity, 256, "");
-DEFINE_int32(io_submit_sqe, -1, "");
-DEFINE_int32(io_max_get, -1, "");
+DEFINE_int32(io_capacity, 0, "");
+DEFINE_int32(io_submit_sqe, 0, "");
+DEFINE_int32(io_max_get, 0, "");
 DEFINE_bool(set_iouring_defer_taskrun, true, "");
-DEFINE_int32(io_max_submit, -1, "");
-DEFINE_int32(io_registers, 16'000, "");
-DEFINE_int32(io_prov_buffs_size, 131'072, "");
-DEFINE_int32(io_prov_buffs, 2'000, "");
+DEFINE_int32(io_max_submit, 0, "");
+DEFINE_int32(io_registers, 2048, "");
+DEFINE_int32(io_prov_buffs_size, 2048, "");
+DEFINE_int32(io_prov_buffs, 2000, "");
 
 namespace apache {
 namespace thrift {

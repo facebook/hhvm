@@ -249,6 +249,7 @@ let go
     gen_global_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
   in
   write_file out_dir 1 global_facts;
+  SSet.iter (Hh_logger.log "Reindexed: %s") jobs.JobReturn.reindexed;
   Option.iter referenced_file ~f:(write_referenced jobs.JobReturn.referenced);
   let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;

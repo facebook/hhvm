@@ -174,11 +174,18 @@ module Lost_env = struct
   and shellable_type =
     | FindRefs of lsp_id * string * int * int (* lsp_id, filename, line, col *)
     | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
+    | Rename of
+        lsp_id
+        * string
+        * int
+        * int
+        * string (* lsp_id, filename, line, col, new_name *)
 end
 
 let get_lsp_id_of_shell_out = function
   | Lost_env.FindRefs (lsp_id, _, _, _) -> lsp_id
   | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
+  | Lost_env.Rename (lsp_id, _, _, _, _) -> lsp_id
 
 type state =
   | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
@@ -230,11 +237,21 @@ type result_telemetry = {
 }
 
 (* --ide-find-refs returns a list of positions, this is a mapping of the response *)
-type ide_find_refs_pos = {
+type ide_shell_out_pos = {
   filename: string;
   line: int;
   char_start: int;
   char_end: int;
+}
+
+(* --ide-refactor returns a list of patches *)
+type ide_refactor_patch = {
+  filename: string;
+  line: int;
+  char_start: int;
+  char_end: int;
+  patch_type: string;
+  replacement: string;
 }
 
 let initialize_params_ref : Lsp.Initialize.params option ref = ref None
@@ -1084,7 +1101,7 @@ let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
       end_ = { line = line2 - 1; character = col2 - 1 };
     }
 
-let ide_find_refs_pos_to_lsp_location (pos : ide_find_refs_pos) : Lsp.Location.t
+let ide_shell_out_pos_to_lsp_location (pos : ide_shell_out_pos) : Lsp.Location.t
     =
   Lsp.Location.
     {
@@ -2174,6 +2191,18 @@ let kickoff_shell_out_and_maybe_cancel
             "--json";
             "--prefer-stdout";
           |]
+        | Lost_env.Rename (_, filename, line, col, new_name) ->
+          let file_line_col_symbol =
+            Printf.sprintf "%s:%d:%d:%s" filename line col new_name
+          in
+          [|
+            "--from";
+            "clientLsp:rename";
+            "--ide-refactor";
+            file_line_col_symbol;
+            "--json";
+            "--prefer-stdout";
+          |]
       end
     in
     let process =
@@ -2730,6 +2759,8 @@ let do_completion_local
   Lwt.return response
 
 exception NoLocationFound
+
+exception InvalidIdePatchType of string
 
 let docblock_to_markdown (raw_docblock : DocblockService.result) :
     Completion.completionDocumentation option =
@@ -3520,6 +3551,18 @@ let do_documentRename
   in
   Lwt.return (patches_to_workspace_edit patches)
 
+let do_documentRename_local
+    (state : state) (params : Rename.params) (lsp_id : lsp_id) : state =
+  let (filename, line, col) =
+    lsp_file_position_to_hack (rename_params_to_document_position params)
+  in
+  let new_name = params.Rename.newName in
+  let shellable_type =
+    Lost_env.Rename (lsp_id, filename, line, col, new_name)
+  in
+  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  state
+
 (** This updates Main_env.hh_server_status according to the status message
 we just received from hh_server. See comments on hh_server_status for
 the invariants on its fields. *)
@@ -3846,9 +3889,80 @@ let handle_shell_out_hh_feature
             let char_start = pos_json |> member "char_start" |> to_int in
             let char_end = pos_json |> member "char_end" |> to_int in
             let pos = { filename; line; char_start; char_end } in
-            ide_find_refs_pos_to_lsp_location pos)
+            ide_shell_out_pos_to_lsp_location pos)
       in
       Ok lsp_locations
+    | _ -> Error ()
+  in
+  let parse_patch_list stdout =
+    let json = Yojson.Safe.from_string stdout in
+    match json with
+    | `List positions ->
+      let patch_locations =
+        List.map positions ~f:(fun pos ->
+            let open Yojson.Basic.Util in
+            let lst_json = Yojson.Safe.to_basic pos in
+            let filename = lst_json |> member "filename" |> to_string in
+            let patches = lst_json |> member "patches" |> to_list in
+            let patches =
+              List.map
+                ~f:(fun x ->
+                  let char_start = x |> member "col_start" |> to_int in
+                  let char_end = x |> member "col_end" |> to_int in
+                  let line = x |> member "line" |> to_int in
+                  let patch_type = x |> member "patch_type" |> to_string in
+                  let replacement = x |> member "replacement" |> to_string in
+                  {
+                    filename;
+                    char_start;
+                    char_end;
+                    line;
+                    patch_type;
+                    replacement;
+                  })
+                patches
+            in
+            patches)
+      in
+      let locations = List.concat patch_locations in
+      let patch_to_workspace_edit_change patch =
+        let ide_shell_out_pos =
+          {
+            filename = patch.filename;
+            char_start = patch.char_start;
+            char_end = patch.char_end + 1;
+            (* This end is inclusive for range replacement *)
+            line = patch.line;
+          }
+        in
+        let (uri, text_edit) =
+          match patch.patch_type with
+          | "insert"
+          | "replace" ->
+            let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
+            ( File_url.create patch.filename,
+              {
+                TextEdit.range = loc.Lsp.Location.range;
+                newText = patch.replacement;
+              } )
+          | "remove" ->
+            let loc = ide_shell_out_pos_to_lsp_location ide_shell_out_pos in
+            ( File_url.create patch.filename,
+              { TextEdit.range = loc.Lsp.Location.range; newText = "" } )
+          | e -> raise (InvalidIdePatchType e)
+        in
+        (uri, text_edit)
+      in
+      let changes = List.map ~f:patch_to_workspace_edit_change locations in
+      let changes =
+        List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
+            let current_edits =
+              Option.value ~default:[] (SMap.find_opt uri acc)
+            in
+            let new_edits = text_edit :: current_edits in
+            SMap.add uri new_edits acc)
+      in
+      Ok { WorkspaceEdit.changes }
     | _ -> Error ()
   in
   let respond_jsonrpc_for_shell shellable_type stdout =
@@ -3876,6 +3990,15 @@ let handle_shell_out_hh_feature
             (ImplementationResult lsp_locations)
         in
         Some lsp_locations
+      | Error _ -> None
+    end
+    | Lost_env.Rename _ -> begin
+      match parse_patch_list stdout with
+      | Ok result ->
+        let _ =
+          respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
+        in
+        Some []
       | Error _ -> None
     end
   in
@@ -4859,6 +4982,11 @@ let handle_client_message
       ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       state := do_goToImplementation_local !state params id;
+      Lwt.return_none
+    (* textDocument/rename request *)
+    | (_, Some _ide_service, RequestMessage (id, RenameRequest params)) ->
+      let%lwt () = cancel_if_stale client timestamp long_timeout in
+      state := do_documentRename_local !state params id;
       Lwt.return_none
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, Some ide_service, RequestMessage (id, SignatureHelpRequest params)) ->

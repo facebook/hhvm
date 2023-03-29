@@ -260,9 +260,7 @@ module.exports = {
                 type: 'doc',
                 id: "fb/languages/hack/updating-the-thrift-compiler-in-www/index",
               },
-              items: [
-                'fb/languages/hack/updating-the-thrift-compiler-in-www/repo-lock',
-              ]
+              items: []
             },
             'fb/languages/hack/adding-graphql-and-jsenum-support',
             {

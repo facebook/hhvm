@@ -790,57 +790,98 @@ let update_status (env : env msg_update) monitor_config : env msg_update =
   in
   let max_watchman_retries = 3 in
   let max_sql_retries = 3 in
-  match (informant_report, env.server) with
-  | (Informant.Move_along, Died_config_changed) -> Ok env
-  | (Informant.Restart_server, Died_config_changed) ->
-    Hh_logger.log "%s"
-    @@ "Ignoring Informant directed restart - waiting for next client "
-    ^ "connection to verify server version first";
-    Ok env
-  | (Informant.Restart_server, _) ->
-    Hh_logger.log "Informant directed server restart. Restarting server.";
-    HackEventLogger.informant_induced_restart ();
-    kill_and_maybe_restart_server (Ok env) exit_status
-  | (Informant.Move_along, _) ->
-    if
-      (is_watchman_failed || is_watchman_fresh_instance)
-      && env.watchman_retries < max_watchman_retries
-    then (
-      Hh_logger.log
-        "Watchman died. Restarting hh_server (attempt: %d)"
-        (env.watchman_retries + 1);
-      let env = { env with watchman_retries = env.watchman_retries + 1 } in
-      set_server (Ok env) Not_yet_started
-    ) else if is_decl_heap_elems_bug then (
-      Hh_logger.log "hh_server died due to Decl_heap_elems_bug. Restarting";
-      set_server (Ok env) Not_yet_started
-    ) else if is_worker_error then (
-      Hh_logger.log "hh_server died due to worker error. Restarting";
-      set_server (Ok env) Not_yet_started
-    ) else if is_config_changed then (
-      Hh_logger.log "hh_server died from hh config change. Restarting";
-      set_server (Ok env) Not_yet_started
-    ) else if is_heap_stale then (
-      Hh_logger.log
-        "Several large rebases caused shared heap to be stale. Restarting";
-      set_server (Ok env) Not_yet_started
-    ) else if is_big_rebase then (
-      Hh_logger.log "Server exited because of big rebase. Restarting";
-      set_server (Ok env) Not_yet_started
-    ) else if is_sql_assertion_failure && env.sql_retries < max_sql_retries then (
-      Hh_logger.log
-        "Sql failed. Restarting hh_server in fresh mode (attempt: %d)"
-        (env.sql_retries + 1);
-      let env = { env with sql_retries = env.sql_retries + 1 } in
-      set_server (Ok env) Not_yet_started
-    ) else
-      Ok env
+  let (reason, msg_update) =
+    match (informant_report, env.server) with
+    | (Informant.Move_along, Died_config_changed) ->
+      (* No "reason" here -- we're on an "inner-loop non-failure" path *)
+      (None, Ok env)
+    | (Informant.Restart_server, Died_config_changed) ->
+      let reason =
+        "Ignoring Informant directed restart - waiting for next client connection to verify server version first"
+      in
+      (Some reason, Ok env)
+    | (Informant.Restart_server, _) ->
+      let reason = "Informant directed server restart. Restarting server." in
+      (Some reason, kill_and_maybe_restart_server (Ok env) exit_status)
+    | (Informant.Move_along, _) ->
+      if
+        (is_watchman_failed || is_watchman_fresh_instance)
+        && env.watchman_retries < max_watchman_retries
+      then
+        let reason =
+          Printf.sprintf
+            "Watchman died. Restarting hh_server (attempt: %d)"
+            (env.watchman_retries + 1)
+        in
+        let env = { env with watchman_retries = env.watchman_retries + 1 } in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_decl_heap_elems_bug then
+        let reason = "hh_server died due to Decl_heap_elems_bug. Restarting" in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_worker_error then
+        let reason = "hh_server died due to worker error. Restarting" in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_config_changed then
+        let reason = "hh_server died from hh config change. Restarting" in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_heap_stale then
+        let reason =
+          "Several large rebases caused shared heap to be stale. Restarting"
+        in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_big_rebase then
+        let reason = "Server exited because of big rebase. Restarting" in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else if is_sql_assertion_failure && env.sql_retries < max_sql_retries then
+        let reason =
+          Printf.sprintf
+            "Sql failed. Restarting hh_server in fresh mode (attempt: %d)"
+            (env.sql_retries + 1)
+        in
+        let env = { env with sql_retries = env.sql_retries + 1 } in
+        (Some reason, set_server (Ok env) Not_yet_started)
+      else
+        (* No reason here, on the inner-loop non-failure path. *)
+        (None, Ok env)
+  in
+  begin
+    match reason with
+    | None -> ()
+    | Some reason ->
+      Hh_logger.log "MONITOR_UPDATE_STATUS %s" reason;
+      let (new_server, new_error) =
+        match msg_update with
+        | Ok env -> (env.server, None)
+        | Error (env, s) -> (env.server, Some s)
+      in
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.string_opt
+             ~key:"exit_status"
+             ~value:(Option.map exit_status ~f:Exit_status.exit_code_to_string)
+        |> Telemetry.string_
+             ~key:"informant_report"
+             ~value:(Informant.show_report informant_report)
+        |> Telemetry.string_
+             ~key:"server_state"
+             ~value:(Informant.show_server_state server_state)
+        |> Telemetry.string_
+             ~key:"server"
+             ~value:(ServerProcess.show_server_process env.server)
+        |> Telemetry.string_
+             ~key:"new_server"
+             ~value:(ServerProcess.show_server_process new_server)
+        |> Telemetry.string_opt ~key:"new_error" ~value:new_error
+      in
+      HackEventLogger.monitor_update_status reason telemetry
+  end;
+  msg_update
 
 let rec check_and_run_loop
     ?(consecutive_throws = 0)
     (env : env msg_update)
     monitor_config
-    (socket : Unix.file_descr) =
+    (socket : Unix.file_descr) : 'a =
   let (env, consecutive_throws) =
     try (check_and_run_loop_ env monitor_config socket, 0) with
     | Unix.Unix_error (Unix.ECHILD, _, _) as exn ->
@@ -890,6 +931,10 @@ and check_and_run_loop_
   env >>= fun env ->
   let lock_file = monitor_config.lock_file in
   if not (Lock.grab lock_file) then (
+    (* e.g. (conjectured) tmpcleaner deletes the .lock file we have a lock on, and another instance of hh_server
+       starts up and acquires its own lock on a lockfile by the same name; our "Lock.grab" will return false because
+       we're unable to grab a lock on the file currently under pathname "lock_file".
+       Or, maybe users just manually deleted the file. *)
     Hh_logger.log "Lost lock; terminating.\n%!";
     HackEventLogger.lock_stolen lock_file;
     Exit.exit Exit_status.Lock_stolen

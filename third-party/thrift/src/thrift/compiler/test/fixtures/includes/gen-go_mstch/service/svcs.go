@@ -300,6 +300,7 @@ func (x *reqMyServiceQueryBuilder) Emit() *reqMyServiceQuery {
     var objCopy reqMyServiceQuery = *x.obj
     return &objCopy
 }
+
 func (x *reqMyServiceQuery) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -364,6 +365,7 @@ func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respMyServiceQuery struct {
 }
 // Compile time interface enforcer
@@ -393,6 +395,7 @@ func (x *respMyServiceQueryBuilder) Emit() *respMyServiceQuery {
     var objCopy respMyServiceQuery = *x.obj
     return &objCopy
 }
+
 func (x *respMyServiceQuery) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceQuery"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -441,6 +444,7 @@ func (x *respMyServiceQuery) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type reqMyServiceHasArgDocs struct {
     S *module.MyStruct `thrift:"s,1" json:"s" db:"s"`
     I *includes.Included `thrift:"i,2" json:"i" db:"i"`
@@ -592,6 +596,7 @@ func (x *reqMyServiceHasArgDocsBuilder) Emit() *reqMyServiceHasArgDocs {
     var objCopy reqMyServiceHasArgDocs = *x.obj
     return &objCopy
 }
+
 func (x *reqMyServiceHasArgDocs) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyServiceHasArgDocs"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -656,6 +661,7 @@ func (x *reqMyServiceHasArgDocs) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
@@ -685,6 +691,7 @@ func (x *respMyServiceHasArgDocsBuilder) Emit() *respMyServiceHasArgDocs {
     var objCopy respMyServiceHasArgDocs = *x.obj
     return &objCopy
 }
+
 func (x *respMyServiceHasArgDocs) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceHasArgDocs"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -733,6 +740,7 @@ func (x *respMyServiceHasArgDocs) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type MyServiceProcessor struct {

@@ -92,6 +92,7 @@ func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
 }
+
 func (x *Adapter) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Adapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -148,3 +149,4 @@ func (x *Adapter) Read(p thrift.Protocol) error {
 
     return nil
 }
+

@@ -138,6 +138,7 @@ func (x *AdapterBuilder) Emit() *Adapter {
     var objCopy Adapter = *x.obj
     return &objCopy
 }
+
 func (x *Adapter) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Adapter"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -202,6 +203,7 @@ func (x *Adapter) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Wrapper struct {
     WrapperClassName string `thrift:"wrapperClassName,1" json:"wrapperClassName" db:"wrapperClassName"`
@@ -324,6 +326,7 @@ func (x *WrapperBuilder) Emit() *Wrapper {
     var objCopy Wrapper = *x.obj
     return &objCopy
 }
+
 func (x *Wrapper) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Wrapper"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -388,3 +391,4 @@ func (x *Wrapper) Read(p thrift.Protocol) error {
 
     return nil
 }
+

@@ -44,6 +44,7 @@ func (x *TransitiveBuilder) Emit() *Transitive {
     var objCopy Transitive = *x.obj
     return &objCopy
 }
+
 func (x *Transitive) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Transitive"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -93,6 +94,7 @@ func (x *Transitive) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Schema struct {
 }
 // Compile time interface enforcer
@@ -122,6 +124,7 @@ func (x *SchemaBuilder) Emit() *Schema {
     var objCopy Schema = *x.obj
     return &objCopy
 }
+
 func (x *Schema) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Schema"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -171,6 +174,7 @@ func (x *Schema) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Program struct {
 }
 // Compile time interface enforcer
@@ -200,6 +204,7 @@ func (x *ProgramBuilder) Emit() *Program {
     var objCopy Program = *x.obj
     return &objCopy
 }
+
 func (x *Program) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Program"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -249,6 +254,7 @@ func (x *Program) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Struct struct {
 }
 // Compile time interface enforcer
@@ -278,6 +284,7 @@ func (x *StructBuilder) Emit() *Struct {
     var objCopy Struct = *x.obj
     return &objCopy
 }
+
 func (x *Struct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Struct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -327,6 +334,7 @@ func (x *Struct) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Union struct {
 }
 // Compile time interface enforcer
@@ -356,6 +364,7 @@ func (x *UnionBuilder) Emit() *Union {
     var objCopy Union = *x.obj
     return &objCopy
 }
+
 func (x *Union) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Union"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -405,6 +414,7 @@ func (x *Union) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Exception struct {
 }
 // Compile time interface enforcer
@@ -434,6 +444,7 @@ func (x *ExceptionBuilder) Emit() *Exception {
     var objCopy Exception = *x.obj
     return &objCopy
 }
+
 func (x *Exception) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Exception"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -483,6 +494,7 @@ func (x *Exception) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Field struct {
 }
 // Compile time interface enforcer
@@ -512,6 +524,7 @@ func (x *FieldBuilder) Emit() *Field {
     var objCopy Field = *x.obj
     return &objCopy
 }
+
 func (x *Field) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Field"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -561,6 +574,7 @@ func (x *Field) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Typedef struct {
 }
 // Compile time interface enforcer
@@ -590,6 +604,7 @@ func (x *TypedefBuilder) Emit() *Typedef {
     var objCopy Typedef = *x.obj
     return &objCopy
 }
+
 func (x *Typedef) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Typedef"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -639,6 +654,7 @@ func (x *Typedef) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Service struct {
 }
 // Compile time interface enforcer
@@ -668,6 +684,7 @@ func (x *ServiceBuilder) Emit() *Service {
     var objCopy Service = *x.obj
     return &objCopy
 }
+
 func (x *Service) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Service"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -717,6 +734,7 @@ func (x *Service) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Interaction struct {
 }
 // Compile time interface enforcer
@@ -746,6 +764,7 @@ func (x *InteractionBuilder) Emit() *Interaction {
     var objCopy Interaction = *x.obj
     return &objCopy
 }
+
 func (x *Interaction) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Interaction"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -795,6 +814,7 @@ func (x *Interaction) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Function struct {
 }
 // Compile time interface enforcer
@@ -824,6 +844,7 @@ func (x *FunctionBuilder) Emit() *Function {
     var objCopy Function = *x.obj
     return &objCopy
 }
+
 func (x *Function) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Function"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -873,6 +894,7 @@ func (x *Function) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type EnumValue struct {
 }
 // Compile time interface enforcer
@@ -902,6 +924,7 @@ func (x *EnumValueBuilder) Emit() *EnumValue {
     var objCopy EnumValue = *x.obj
     return &objCopy
 }
+
 func (x *EnumValue) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("EnumValue"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -951,6 +974,7 @@ func (x *EnumValue) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Const struct {
 }
 // Compile time interface enforcer
@@ -980,6 +1004,7 @@ func (x *ConstBuilder) Emit() *Const {
     var objCopy Const = *x.obj
     return &objCopy
 }
+
 func (x *Const) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Const"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1029,6 +1054,7 @@ func (x *Const) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Enum struct {
 }
 // Compile time interface enforcer
@@ -1058,6 +1084,7 @@ func (x *EnumBuilder) Emit() *Enum {
     var objCopy Enum = *x.obj
     return &objCopy
 }
+
 func (x *Enum) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Enum"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1107,6 +1134,7 @@ func (x *Enum) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Structured struct {
 }
 // Compile time interface enforcer
@@ -1136,6 +1164,7 @@ func (x *StructuredBuilder) Emit() *Structured {
     var objCopy Structured = *x.obj
     return &objCopy
 }
+
 func (x *Structured) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Structured"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1185,6 +1214,7 @@ func (x *Structured) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Interface struct {
 }
 // Compile time interface enforcer
@@ -1214,6 +1244,7 @@ func (x *InterfaceBuilder) Emit() *Interface {
     var objCopy Interface = *x.obj
     return &objCopy
 }
+
 func (x *Interface) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Interface"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1263,6 +1294,7 @@ func (x *Interface) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type RootDefinition struct {
 }
 // Compile time interface enforcer
@@ -1292,6 +1324,7 @@ func (x *RootDefinitionBuilder) Emit() *RootDefinition {
     var objCopy RootDefinition = *x.obj
     return &objCopy
 }
+
 func (x *RootDefinition) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("RootDefinition"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1341,6 +1374,7 @@ func (x *RootDefinition) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Definition struct {
 }
 // Compile time interface enforcer
@@ -1370,6 +1404,7 @@ func (x *DefinitionBuilder) Emit() *Definition {
     var objCopy Definition = *x.obj
     return &objCopy
 }
+
 func (x *Definition) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Definition"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1418,3 +1453,4 @@ func (x *Definition) Read(p thrift.Protocol) error {
 
     return nil
 }
+

@@ -173,6 +173,7 @@ func (x *reqCFBuilder) Emit() *reqCF {
     var objCopy reqCF = *x.obj
     return &objCopy
 }
+
 func (x *reqCF) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -221,6 +222,7 @@ func (x *reqCF) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respCF struct {
 }
 // Compile time interface enforcer
@@ -250,6 +252,7 @@ func (x *respCFBuilder) Emit() *respCF {
     var objCopy respCF = *x.obj
     return &objCopy
 }
+
 func (x *respCF) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respCF"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -298,6 +301,7 @@ func (x *respCF) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type reqCThing struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
     B string `thrift:"b,2" json:"b" db:"b"`
@@ -505,6 +509,7 @@ func (x *reqCThingBuilder) Emit() *reqCThing {
     var objCopy reqCThing = *x.obj
     return &objCopy
 }
+
 func (x *reqCThing) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqCThing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -577,6 +582,7 @@ func (x *reqCThing) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respCThing struct {
     Value string `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -652,6 +658,7 @@ func (x *respCThingBuilder) Emit() *respCThing {
     var objCopy respCThing = *x.obj
     return &objCopy
 }
+
 func (x *respCThing) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respCThing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -708,6 +715,7 @@ func (x *respCThing) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type CProcessor struct {

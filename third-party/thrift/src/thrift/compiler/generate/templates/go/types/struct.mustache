@@ -33,5 +33,8 @@
 {{> types/struct_builder}}
 {{/program:compat?}}
 
-{{! marshal/unmarshal }}
-{{> types/struct_codec}}
+{{! write (serialize) }}
+{{> types/struct_method_write}}
+
+{{! read (deserialize) }}
+{{> types/struct_method_read}}

@@ -44,6 +44,7 @@ func (x *EmptyBuilder) Emit() *Empty {
     var objCopy Empty = *x.obj
     return &objCopy
 }
+
 func (x *Empty) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Empty"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -93,6 +94,7 @@ func (x *Empty) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type Nada struct {
 }
 // Compile time interface enforcer
@@ -127,6 +129,7 @@ func (x *NadaBuilder) Emit() *Nada {
     var objCopy Nada = *x.obj
     return &objCopy
 }
+
 func (x *Nada) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -178,3 +181,4 @@ func (x *Nada) Read(p thrift.Protocol) error {
 
     return nil
 }
+

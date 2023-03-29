@@ -90,6 +90,7 @@ func (x *GetEntityRequestBuilder) Emit() *GetEntityRequest {
     var objCopy GetEntityRequest = *x.obj
     return &objCopy
 }
+
 func (x *GetEntityRequest) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("GetEntityRequest"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -146,6 +147,7 @@ func (x *GetEntityRequest) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type GetEntityResponse struct {
     Entity string `thrift:"entity,1" json:"entity" db:"entity"`
@@ -222,6 +224,7 @@ func (x *GetEntityResponseBuilder) Emit() *GetEntityResponse {
     var objCopy GetEntityResponse = *x.obj
     return &objCopy
 }
+
 func (x *GetEntityResponse) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("GetEntityResponse"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -278,3 +281,4 @@ func (x *GetEntityResponse) Read(p thrift.Protocol) error {
 
     return nil
 }
+

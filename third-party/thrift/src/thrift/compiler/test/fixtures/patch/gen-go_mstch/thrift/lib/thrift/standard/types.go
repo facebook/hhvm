@@ -376,6 +376,7 @@ func (x *TypeUriBuilder) Emit() *TypeUri {
     var objCopy TypeUri = *x.obj
     return &objCopy
 }
+
 func (x *TypeUri) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -443,6 +444,7 @@ func (x *TypeUri) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type TypeName struct {
     BoolType *Void `thrift:"boolType,1" json:"boolType" db:"boolType"`
@@ -1566,6 +1568,7 @@ func (x *TypeNameBuilder) Emit() *TypeName {
     var objCopy TypeName = *x.obj
     return &objCopy
 }
+
 func (x *TypeName) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1753,3 +1756,4 @@ func (x *TypeName) Read(p thrift.Protocol) error {
 
     return nil
 }
+

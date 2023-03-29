@@ -193,6 +193,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
+
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -257,6 +258,7 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type MyUnion struct {
     MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum" db:"myEnum"`
@@ -420,6 +422,7 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     var objCopy MyUnion = *x.obj
     return &objCopy
 }
+
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -487,3 +490,4 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+

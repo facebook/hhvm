@@ -131,6 +131,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
+
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -179,6 +180,7 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type MyUnion struct {
     BoolField *bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -1190,6 +1192,7 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     var objCopy MyUnion = *x.obj
     return &objCopy
 }
+
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1354,6 +1357,7 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type MyStructWithCustomDefault struct {
     Field1 int64 `thrift:"field1,1" json:"field1" db:"field1"`
 }
@@ -1430,6 +1434,7 @@ func (x *MyStructWithCustomDefaultBuilder) Emit() *MyStructWithCustomDefault {
     var objCopy MyStructWithCustomDefault = *x.obj
     return &objCopy
 }
+
 func (x *MyStructWithCustomDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1486,6 +1491,7 @@ func (x *MyStructWithCustomDefault) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type StructLevelTerseStruct struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -2385,6 +2391,7 @@ func (x *StructLevelTerseStructBuilder) Emit() *StructLevelTerseStruct {
     var objCopy StructLevelTerseStruct = *x.obj
     return &objCopy
 }
+
 func (x *StructLevelTerseStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("StructLevelTerseStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2553,6 +2560,7 @@ func (x *StructLevelTerseStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type FieldLevelTerseStruct struct {
     TerseBoolField bool `thrift:"terse_bool_field,1" json:"terse_bool_field" db:"terse_bool_field"`
@@ -4321,6 +4329,7 @@ func (x *FieldLevelTerseStructBuilder) Emit() *FieldLevelTerseStruct {
     var objCopy FieldLevelTerseStruct = *x.obj
     return &objCopy
 }
+
 func (x *FieldLevelTerseStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("FieldLevelTerseStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4609,6 +4618,7 @@ func (x *FieldLevelTerseStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type TerseStructWithCustomDefault struct {
     BoolField bool `thrift:"bool_field,1" json:"bool_field" db:"bool_field"`
@@ -5474,6 +5484,7 @@ func (x *TerseStructWithCustomDefaultBuilder) Emit() *TerseStructWithCustomDefau
     var objCopy TerseStructWithCustomDefault = *x.obj
     return &objCopy
 }
+
 func (x *TerseStructWithCustomDefault) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TerseStructWithCustomDefault"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5634,6 +5645,7 @@ func (x *TerseStructWithCustomDefault) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type AdaptedFields struct {
     Field1 MyInteger `thrift:"field1,1" json:"field1" db:"field1"`
@@ -5804,6 +5816,7 @@ func (x *AdaptedFieldsBuilder) Emit() *AdaptedFields {
     var objCopy AdaptedFields = *x.obj
     return &objCopy
 }
+
 func (x *AdaptedFields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("AdaptedFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -5876,6 +5889,7 @@ func (x *AdaptedFields) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type WrappedFields struct {
     Field1 int32 `thrift:"field1,1" json:"field1" db:"field1"`
@@ -5953,6 +5967,7 @@ func (x *WrappedFieldsBuilder) Emit() *WrappedFields {
     var objCopy WrappedFields = *x.obj
     return &objCopy
 }
+
 func (x *WrappedFields) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("WrappedFields"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -6009,6 +6024,7 @@ func (x *WrappedFields) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type TerseException struct {
     Msg string `thrift:"msg,1" json:"msg" db:"msg"`
@@ -6089,6 +6105,7 @@ func (x *TerseExceptionBuilder) Emit() *TerseException {
     var objCopy TerseException = *x.obj
     return &objCopy
 }
+
 func (x *TerseException) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("TerseException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -6145,3 +6162,4 @@ func (x *TerseException) Read(p thrift.Protocol) error {
 
     return nil
 }
+

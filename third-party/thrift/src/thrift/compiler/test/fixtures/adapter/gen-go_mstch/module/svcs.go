@@ -324,6 +324,7 @@ func (x *reqServiceFuncBuilder) Emit() *reqServiceFunc {
     var objCopy reqServiceFunc = *x.obj
     return &objCopy
 }
+
 func (x *reqServiceFunc) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -396,6 +397,7 @@ func (x *reqServiceFunc) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respServiceFunc struct {
     Value MyI32 `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -472,6 +474,7 @@ func (x *respServiceFuncBuilder) Emit() *respServiceFunc {
     var objCopy respServiceFunc = *x.obj
     return &objCopy
 }
+
 func (x *respServiceFunc) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respServiceFunc"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -528,6 +531,7 @@ func (x *respServiceFunc) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type ServiceProcessor struct {
@@ -777,6 +781,7 @@ func (x *reqAdapterServiceCountBuilder) Emit() *reqAdapterServiceCount {
     var objCopy reqAdapterServiceCount = *x.obj
     return &objCopy
 }
+
 func (x *reqAdapterServiceCount) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -825,6 +830,7 @@ func (x *reqAdapterServiceCount) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respAdapterServiceCount struct {
     Value *CountingStruct `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -915,6 +921,7 @@ func (x *respAdapterServiceCountBuilder) Emit() *respAdapterServiceCount {
     var objCopy respAdapterServiceCount = *x.obj
     return &objCopy
 }
+
 func (x *respAdapterServiceCount) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -971,6 +978,7 @@ func (x *respAdapterServiceCount) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type reqAdapterServiceAdaptedTypes struct {
     Arg_ *HeapAllocated `thrift:"arg,1" json:"arg" db:"arg"`
 }
@@ -1061,6 +1069,7 @@ func (x *reqAdapterServiceAdaptedTypesBuilder) Emit() *reqAdapterServiceAdaptedT
     var objCopy reqAdapterServiceAdaptedTypes = *x.obj
     return &objCopy
 }
+
 func (x *reqAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1117,6 +1126,7 @@ func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respAdapterServiceAdaptedTypes struct {
     Value *HeapAllocated `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -1207,6 +1217,7 @@ func (x *respAdapterServiceAdaptedTypesBuilder) Emit() *respAdapterServiceAdapte
     var objCopy respAdapterServiceAdaptedTypes = *x.obj
     return &objCopy
 }
+
 func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respAdapterServiceAdaptedTypes"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1263,6 +1274,7 @@ func (x *respAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type AdapterServiceProcessor struct {

@@ -237,6 +237,7 @@ func (x *reqFinderByPlateBuilder) Emit() *reqFinderByPlate {
     var objCopy reqFinderByPlate = *x.obj
     return &objCopy
 }
+
 func (x *reqFinderByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -293,6 +294,7 @@ func (x *reqFinderByPlate) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respFinderByPlate struct {
     Value *Automobile `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -383,6 +385,7 @@ func (x *respFinderByPlateBuilder) Emit() *respFinderByPlate {
     var objCopy respFinderByPlate = *x.obj
     return &objCopy
 }
+
 func (x *respFinderByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -439,6 +442,7 @@ func (x *respFinderByPlate) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type reqFinderAliasByPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
@@ -515,6 +519,7 @@ func (x *reqFinderAliasByPlateBuilder) Emit() *reqFinderAliasByPlate {
     var objCopy reqFinderAliasByPlate = *x.obj
     return &objCopy
 }
+
 func (x *reqFinderAliasByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -571,6 +576,7 @@ func (x *reqFinderAliasByPlate) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respFinderAliasByPlate struct {
     Value *Car `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -661,6 +667,7 @@ func (x *respFinderAliasByPlateBuilder) Emit() *respFinderAliasByPlate {
     var objCopy respFinderAliasByPlate = *x.obj
     return &objCopy
 }
+
 func (x *respFinderAliasByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -717,6 +724,7 @@ func (x *respFinderAliasByPlate) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type reqFinderPreviousPlate struct {
     Plate Plate `thrift:"plate,1" json:"plate" db:"plate"`
 }
@@ -793,6 +801,7 @@ func (x *reqFinderPreviousPlateBuilder) Emit() *reqFinderPreviousPlate {
     var objCopy reqFinderPreviousPlate = *x.obj
     return &objCopy
 }
+
 func (x *reqFinderPreviousPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqFinderPreviousPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -849,6 +858,7 @@ func (x *reqFinderPreviousPlate) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respFinderPreviousPlate struct {
     Value Plate `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -925,6 +935,7 @@ func (x *respFinderPreviousPlateBuilder) Emit() *respFinderPreviousPlate {
     var objCopy respFinderPreviousPlate = *x.obj
     return &objCopy
 }
+
 func (x *respFinderPreviousPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderPreviousPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -981,6 +992,7 @@ func (x *respFinderPreviousPlate) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type FinderProcessor struct {

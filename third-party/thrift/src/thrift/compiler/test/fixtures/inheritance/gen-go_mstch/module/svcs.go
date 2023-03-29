@@ -155,6 +155,7 @@ func (x *reqMyRootDoRootBuilder) Emit() *reqMyRootDoRoot {
     var objCopy reqMyRootDoRoot = *x.obj
     return &objCopy
 }
+
 func (x *reqMyRootDoRoot) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -203,6 +204,7 @@ func (x *reqMyRootDoRoot) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respMyRootDoRoot struct {
 }
 // Compile time interface enforcer
@@ -232,6 +234,7 @@ func (x *respMyRootDoRootBuilder) Emit() *respMyRootDoRoot {
     var objCopy respMyRootDoRoot = *x.obj
     return &objCopy
 }
+
 func (x *respMyRootDoRoot) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyRootDoRoot"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -280,6 +283,7 @@ func (x *respMyRootDoRoot) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type MyRootProcessor struct {
@@ -520,6 +524,7 @@ func (x *reqMyNodeDoMidBuilder) Emit() *reqMyNodeDoMid {
     var objCopy reqMyNodeDoMid = *x.obj
     return &objCopy
 }
+
 func (x *reqMyNodeDoMid) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -568,6 +573,7 @@ func (x *reqMyNodeDoMid) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respMyNodeDoMid struct {
 }
 // Compile time interface enforcer
@@ -597,6 +603,7 @@ func (x *respMyNodeDoMidBuilder) Emit() *respMyNodeDoMid {
     var objCopy respMyNodeDoMid = *x.obj
     return &objCopy
 }
+
 func (x *respMyNodeDoMid) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyNodeDoMid"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -645,6 +652,7 @@ func (x *respMyNodeDoMid) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type MyNodeProcessor struct {
@@ -860,6 +868,7 @@ func (x *reqMyLeafDoLeafBuilder) Emit() *reqMyLeafDoLeaf {
     var objCopy reqMyLeafDoLeaf = *x.obj
     return &objCopy
 }
+
 func (x *reqMyLeafDoLeaf) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -908,6 +917,7 @@ func (x *reqMyLeafDoLeaf) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
@@ -937,6 +947,7 @@ func (x *respMyLeafDoLeafBuilder) Emit() *respMyLeafDoLeaf {
     var objCopy respMyLeafDoLeaf = *x.obj
     return &objCopy
 }
+
 func (x *respMyLeafDoLeaf) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyLeafDoLeaf"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -985,6 +996,7 @@ func (x *respMyLeafDoLeaf) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type MyLeafProcessor struct {

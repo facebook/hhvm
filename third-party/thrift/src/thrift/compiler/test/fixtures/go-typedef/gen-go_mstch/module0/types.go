@@ -136,6 +136,7 @@ func (x *AccessoryBuilder) Emit() *Accessory {
     var objCopy Accessory = *x.obj
     return &objCopy
 }
+
 func (x *Accessory) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Accessory"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -200,6 +201,7 @@ func (x *Accessory) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type PartName struct {
     InventoryId int32 `thrift:"InventoryId,1" json:"InventoryId" db:"InventoryId"`
@@ -322,6 +324,7 @@ func (x *PartNameBuilder) Emit() *PartName {
     var objCopy PartName = *x.obj
     return &objCopy
 }
+
 func (x *PartName) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("PartName"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -386,3 +389,4 @@ func (x *PartName) Read(p thrift.Protocol) error {
 
     return nil
 }
+

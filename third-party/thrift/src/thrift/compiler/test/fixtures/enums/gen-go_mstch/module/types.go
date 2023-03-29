@@ -766,6 +766,7 @@ func (x *SomeStructBuilder) Emit() *SomeStruct {
     var objCopy SomeStruct = *x.obj
     return &objCopy
 }
+
 func (x *SomeStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("SomeStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -846,6 +847,7 @@ func (x *SomeStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type MyStruct struct {
     Me2_3 MyEnum2 `thrift:"me2_3,1" json:"me2_3" db:"me2_3"`
@@ -1076,6 +1078,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
+
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1156,3 +1159,4 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+

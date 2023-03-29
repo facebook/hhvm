@@ -549,6 +549,7 @@ func (x *ComplexUnionBuilder) Emit() *ComplexUnion {
     var objCopy ComplexUnion = *x.obj
     return &objCopy
 }
+
 func (x *ComplexUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -648,6 +649,7 @@ func (x *ComplexUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type ListUnion struct {
     IntListValue []int64 `thrift:"intListValue,2" json:"intListValue" db:"intListValue"`
@@ -861,6 +863,7 @@ func (x *ListUnionBuilder) Emit() *ListUnion {
     var objCopy ListUnion = *x.obj
     return &objCopy
 }
+
 func (x *ListUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -928,6 +931,7 @@ func (x *ListUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type DataUnion struct {
     BinaryData []byte `thrift:"binaryData,1" json:"binaryData" db:"binaryData"`
@@ -1086,6 +1090,7 @@ func (x *DataUnionBuilder) Emit() *DataUnion {
     var objCopy DataUnion = *x.obj
     return &objCopy
 }
+
 func (x *DataUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1153,6 +1158,7 @@ func (x *DataUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Val struct {
     StrVal string `thrift:"strVal,1" json:"strVal" db:"strVal"`
@@ -1333,6 +1339,7 @@ func (x *ValBuilder) Emit() *Val {
     var objCopy Val = *x.obj
     return &objCopy
 }
+
 func (x *Val) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Val"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1405,6 +1412,7 @@ func (x *Val) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type ValUnion struct {
     V1 *Val `thrift:"v1,1" json:"v1" db:"v1"`
@@ -1568,6 +1576,7 @@ func (x *ValUnionBuilder) Emit() *ValUnion {
     var objCopy ValUnion = *x.obj
     return &objCopy
 }
+
 func (x *ValUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1635,6 +1644,7 @@ func (x *ValUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type VirtualComplexUnion struct {
     ThingOne *string `thrift:"thingOne,1" json:"thingOne" db:"thingOne"`
@@ -1796,6 +1806,7 @@ func (x *VirtualComplexUnionBuilder) Emit() *VirtualComplexUnion {
     var objCopy VirtualComplexUnion = *x.obj
     return &objCopy
 }
+
 func (x *VirtualComplexUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1863,6 +1874,7 @@ func (x *VirtualComplexUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type NonCopyableStruct struct {
     Num int64 `thrift:"num,1" json:"num" db:"num"`
@@ -1939,6 +1951,7 @@ func (x *NonCopyableStructBuilder) Emit() *NonCopyableStruct {
     var objCopy NonCopyableStruct = *x.obj
     return &objCopy
 }
+
 func (x *NonCopyableStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("NonCopyableStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1995,6 +2008,7 @@ func (x *NonCopyableStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type NonCopyableUnion struct {
     S *NonCopyableStruct `thrift:"s,1" json:"s" db:"s"`
@@ -2094,6 +2108,7 @@ func (x *NonCopyableUnionBuilder) Emit() *NonCopyableUnion {
     var objCopy NonCopyableUnion = *x.obj
     return &objCopy
 }
+
 func (x *NonCopyableUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -2153,3 +2168,4 @@ func (x *NonCopyableUnion) Read(p thrift.Protocol) error {
 
     return nil
 }
+

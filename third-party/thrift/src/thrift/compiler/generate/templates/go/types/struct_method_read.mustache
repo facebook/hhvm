@@ -16,35 +16,9 @@
 
 }}{{!
 
-  This template creates Read and Write methods for Thrift structs.
+  This template creates a Read method for Thrift structs.
 
 }}
-func (x *{{struct:go_name}}) Write(p thrift.Protocol) error {
-    {{#struct:union?}}
-    if countSet := x.countSetFields(); countSet > 1 {
-        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
-    }
-    {{/struct:union?}}
-    if err := p.WriteStructBegin("{{struct:name}}"); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    {{#struct:fields}}
-    if err := x.writeField{{field:key_str}}(p); err != nil {
-        return err
-    }
-
-    {{/struct:fields}}
-    if err := p.WriteFieldStop(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
-    }
-
-    if err := p.WriteStructEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
-    }
-    return nil
-}
-
 func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
@@ -84,3 +58,4 @@ func (x *{{struct:go_name}}) Read(p thrift.Protocol) error {
 
     return nil
 }
+{{!newline}}

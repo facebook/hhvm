@@ -643,6 +643,7 @@ func (x *InternshipBuilder) Emit() *Internship {
     var objCopy Internship = *x.obj
     return &objCopy
 }
+
 func (x *Internship) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Internship"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -731,6 +732,7 @@ func (x *Internship) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Range struct {
     Min int32 `thrift:"min,1,required" json:"min" db:"min"`
@@ -853,6 +855,7 @@ func (x *RangeBuilder) Emit() *Range {
     var objCopy Range = *x.obj
     return &objCopy
 }
+
 func (x *Range) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Range"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -917,6 +920,7 @@ func (x *Range) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Struct1 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1041,6 +1045,7 @@ func (x *Struct1Builder) Emit() *Struct1 {
     var objCopy Struct1 = *x.obj
     return &objCopy
 }
+
 func (x *Struct1) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct1"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1105,6 +1110,7 @@ func (x *Struct1) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Struct2 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1374,6 +1380,7 @@ func (x *Struct2Builder) Emit() *Struct2 {
     var objCopy Struct2 = *x.obj
     return &objCopy
 }
+
 func (x *Struct2) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1454,6 +1461,7 @@ func (x *Struct2) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Struct3 struct {
     A string `thrift:"a,1" json:"a" db:"a"`
@@ -1637,6 +1645,7 @@ func (x *Struct3Builder) Emit() *Struct3 {
     var objCopy Struct3 = *x.obj
     return &objCopy
 }
+
 func (x *Struct3) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct3"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1709,6 +1718,7 @@ func (x *Struct3) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Struct4 struct {
     A int32 `thrift:"a,1" json:"a" db:"a"`
@@ -1905,6 +1915,7 @@ func (x *Struct4Builder) Emit() *Struct4 {
     var objCopy Struct4 = *x.obj
     return &objCopy
 }
+
 func (x *Struct4) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("struct4"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1977,6 +1988,7 @@ func (x *Struct4) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Union1 struct {
     I *int32 `thrift:"i,1" json:"i" db:"i"`
@@ -2138,6 +2150,7 @@ func (x *Union1Builder) Emit() *Union1 {
     var objCopy Union1 = *x.obj
     return &objCopy
 }
+
 func (x *Union1) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -2205,6 +2218,7 @@ func (x *Union1) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type Union2 struct {
     I *int32 `thrift:"i,1" json:"i" db:"i"`
@@ -2494,6 +2508,7 @@ func (x *Union2Builder) Emit() *Union2 {
     var objCopy Union2 = *x.obj
     return &objCopy
 }
+
 func (x *Union2) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -2577,3 +2592,4 @@ func (x *Union2) Read(p thrift.Protocol) error {
 
     return nil
 }
+

@@ -626,6 +626,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
+
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -747,6 +748,7 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type MyDataItem struct {
 }
 // Compile time interface enforcer
@@ -776,6 +778,7 @@ func (x *MyDataItemBuilder) Emit() *MyDataItem {
     var objCopy MyDataItem = *x.obj
     return &objCopy
 }
+
 func (x *MyDataItem) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyDataItem"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -824,6 +827,7 @@ func (x *MyDataItem) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type MyUnion struct {
     MyEnum *MyEnum `thrift:"myEnum,1" json:"myEnum" db:"myEnum"`
@@ -1140,6 +1144,7 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     var objCopy MyUnion = *x.obj
     return &objCopy
 }
+
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1224,6 +1229,7 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type ReservedKeyword struct {
     ReservedField int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
 }
@@ -1299,6 +1305,7 @@ func (x *ReservedKeywordBuilder) Emit() *ReservedKeyword {
     var objCopy ReservedKeyword = *x.obj
     return &objCopy
 }
+
 func (x *ReservedKeyword) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("ReservedKeyword"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1355,6 +1362,7 @@ func (x *ReservedKeyword) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type UnionToBeRenamed struct {
     ReservedField *int32 `thrift:"reserved_field,1" json:"reserved_field" db:"reserved_field"`
@@ -1453,6 +1461,7 @@ func (x *UnionToBeRenamedBuilder) Emit() *UnionToBeRenamed {
     var objCopy UnionToBeRenamed = *x.obj
     return &objCopy
 }
+
 func (x *UnionToBeRenamed) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -1512,3 +1521,4 @@ func (x *UnionToBeRenamed) Read(p thrift.Protocol) error {
 
     return nil
 }
+

@@ -236,6 +236,7 @@ func (x *reqSomeServiceBounceMapBuilder) Emit() *reqSomeServiceBounceMap {
     var objCopy reqSomeServiceBounceMap = *x.obj
     return &objCopy
 }
+
 func (x *reqSomeServiceBounceMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -292,6 +293,7 @@ func (x *reqSomeServiceBounceMap) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respSomeServiceBounceMap struct {
     Value included.SomeMap `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -379,6 +381,7 @@ func (x *respSomeServiceBounceMapBuilder) Emit() *respSomeServiceBounceMap {
     var objCopy respSomeServiceBounceMap = *x.obj
     return &objCopy
 }
+
 func (x *respSomeServiceBounceMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -435,6 +438,7 @@ func (x *respSomeServiceBounceMap) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type reqSomeServiceBinaryKeyedMap struct {
     R []int64 `thrift:"r,1" json:"r" db:"r"`
 }
@@ -550,6 +554,7 @@ func (x *reqSomeServiceBinaryKeyedMapBuilder) Emit() *reqSomeServiceBinaryKeyedM
     var objCopy reqSomeServiceBinaryKeyedMap = *x.obj
     return &objCopy
 }
+
 func (x *reqSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -606,6 +611,7 @@ func (x *reqSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respSomeServiceBinaryKeyedMap struct {
     Value map[TBinary]int64 `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -739,6 +745,7 @@ func (x *respSomeServiceBinaryKeyedMapBuilder) Emit() *respSomeServiceBinaryKeye
     var objCopy respSomeServiceBinaryKeyedMap = *x.obj
     return &objCopy
 }
+
 func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respSomeServiceBinaryKeyedMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -795,6 +802,7 @@ func (x *respSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type SomeServiceProcessor struct {

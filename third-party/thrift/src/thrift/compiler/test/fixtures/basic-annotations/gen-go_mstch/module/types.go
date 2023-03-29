@@ -178,6 +178,7 @@ func (x *MyStructNestedAnnotationBuilder) Emit() *MyStructNestedAnnotation {
     var objCopy MyStructNestedAnnotation = *x.obj
     return &objCopy
 }
+
 func (x *MyStructNestedAnnotation) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStructNestedAnnotation"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -235,6 +236,7 @@ func (x *MyStructNestedAnnotation) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type MyUnion struct {
 }
 // Compile time interface enforcer
@@ -269,6 +271,7 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     var objCopy MyUnion = *x.obj
     return &objCopy
 }
+
 func (x *MyUnion) Write(p thrift.Protocol) error {
     if countSet := x.countSetFields(); countSet > 1 {
         return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
@@ -321,6 +324,7 @@ func (x *MyUnion) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type MyException struct {
 }
 // Compile time interface enforcer
@@ -354,6 +358,7 @@ func (x *MyExceptionBuilder) Emit() *MyException {
     var objCopy MyException = *x.obj
     return &objCopy
 }
+
 func (x *MyException) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyException"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -402,6 +407,7 @@ func (x *MyException) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 type MyStruct struct {
     Major int64 `thrift:"major,2" json:"major" db:"major"`
@@ -949,6 +955,7 @@ func (x *MyStructBuilder) Emit() *MyStruct {
     var objCopy MyStruct = *x.obj
     return &objCopy
 }
+
 func (x *MyStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("MyStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1078,6 +1085,7 @@ func (x *MyStruct) Read(p thrift.Protocol) error {
     return nil
 }
 
+
 type SecretStruct struct {
     Id int64 `thrift:"id,1" json:"id" db:"id"`
     Password string `thrift:"password,2" json:"password" db:"password"`
@@ -1199,6 +1207,7 @@ func (x *SecretStructBuilder) Emit() *SecretStruct {
     var objCopy SecretStruct = *x.obj
     return &objCopy
 }
+
 func (x *SecretStruct) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("SecretStruct"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1263,3 +1272,4 @@ func (x *SecretStruct) Read(p thrift.Protocol) error {
 
     return nil
 }
+

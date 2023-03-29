@@ -44,6 +44,7 @@ func (x *AlsoBuilder) Emit() *Also {
     var objCopy Also = *x.obj
     return &objCopy
 }
+
 func (x *Also) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("Also"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -92,3 +93,4 @@ func (x *Also) Read(p thrift.Protocol) error {
 
     return nil
 }
+

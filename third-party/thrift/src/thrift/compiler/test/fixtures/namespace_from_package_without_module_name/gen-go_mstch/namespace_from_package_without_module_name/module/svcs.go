@@ -202,6 +202,7 @@ func (x *reqTestServiceInitBuilder) Emit() *reqTestServiceInit {
     var objCopy reqTestServiceInit = *x.obj
     return &objCopy
 }
+
 func (x *reqTestServiceInit) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("reqTestServiceInit"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -258,6 +259,7 @@ func (x *reqTestServiceInit) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 type respTestServiceInit struct {
     Value int64 `thrift:"value,0,required" json:"value" db:"value"`
 }
@@ -333,6 +335,7 @@ func (x *respTestServiceInitBuilder) Emit() *respTestServiceInit {
     var objCopy respTestServiceInit = *x.obj
     return &objCopy
 }
+
 func (x *respTestServiceInit) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respTestServiceInit"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -389,6 +392,7 @@ func (x *respTestServiceInit) Read(p thrift.Protocol) error {
 
     return nil
 }
+
 
 
 type TestServiceProcessor struct {

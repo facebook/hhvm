@@ -3873,9 +3873,9 @@ let handle_shell_out_hh_check
   in
   Lwt.return telemetry
 
-let handle_shell_out_hh_feature
-    (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
-    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
+let respond_jsonrpc_for_shell
+    (shellable_type : Lost_env.shellable_type) (stdout : string) :
+    (int * Telemetry.t) option =
   let parse_lsp_locations stdout : (Lsp.Location.t list, unit) result =
     let json = Yojson.Safe.from_string stdout in
     match json with
@@ -3965,54 +3965,70 @@ let handle_shell_out_hh_feature
       Ok { WorkspaceEdit.changes }
     | _ -> Error ()
   in
-  let respond_jsonrpc_for_shell shellable_type stdout =
-    let lsp_id = get_lsp_id_of_shell_out shellable_type in
-    match shellable_type with
-    | Lost_env.FindRefs _ -> begin
-      match parse_lsp_locations stdout with
-      | Ok lsp_locations ->
-        let _ =
-          respond_jsonrpc
-            ~powered_by:Serverless_ide
-            lsp_id
-            (FindReferencesResult lsp_locations)
-        in
-        Some lsp_locations
-      | Error _ -> None
-    end
-    | Lost_env.GoToImpl _ -> begin
-      match parse_lsp_locations stdout with
-      | Ok lsp_locations ->
-        let _ =
-          respond_jsonrpc
-            ~powered_by:Serverless_ide
-            lsp_id
-            (ImplementationResult lsp_locations)
-        in
-        Some lsp_locations
-      | Error _ -> None
-    end
-    | Lost_env.Rename _ -> begin
-      match parse_patch_list stdout with
-      | Ok result ->
-        let _ =
-          respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
-        in
-        Some []
-      | Error _ -> None
-    end
-  in
+
+  let lsp_id = get_lsp_id_of_shell_out shellable_type in
+  match shellable_type with
+  | Lost_env.FindRefs _ -> begin
+    match parse_lsp_locations stdout with
+    | Ok lsp_locations ->
+      let _ =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (FindReferencesResult lsp_locations)
+      in
+      Some (List.length lsp_locations, Telemetry.create ())
+    | Error _ -> None
+  end
+  | Lost_env.GoToImpl _ -> begin
+    match parse_lsp_locations stdout with
+    | Ok lsp_locations ->
+      let _ =
+        respond_jsonrpc
+          ~powered_by:Serverless_ide
+          lsp_id
+          (ImplementationResult lsp_locations)
+      in
+      Some (List.length lsp_locations, Telemetry.create ())
+    | Error _ -> None
+  end
+  | Lost_env.Rename _ -> begin
+    match parse_patch_list stdout with
+    | Ok result ->
+      let _ =
+        respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult result)
+      in
+      let result_count =
+        SMap.fold
+          (fun _file changes tot -> tot + List.length changes)
+          result.WorkspaceEdit.changes
+          0
+      in
+      let result_extra_telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_
+             ~key:"files"
+             ~value:(SMap.cardinal result.WorkspaceEdit.changes)
+      in
+
+      Some (result_count, result_extra_telemetry)
+    | Error _ -> None
+  end
+
+let handle_shell_out_hh_feature
+    (result : (Lwt_utils.Process_success.t, Lwt_utils.Process_failure.t) result)
+    (shellable_type : Lost_env.shellable_type) : result_telemetry option Lwt.t =
   let telemetry =
     match result with
     | Ok { Lwt_utils.Process_success.stdout; start_time; end_time; _ } -> begin
       match respond_jsonrpc_for_shell shellable_type stdout with
-      | Some resp ->
+      | Some (length, telemetry) ->
         Some
           {
-            result_count = List.length resp;
+            result_count = length;
             result_extra_telemetry =
               Some
-                (Telemetry.create ()
+                (telemetry
                 |> Telemetry.float_
                      ~key:"duration"
                      ~value:(end_time -. start_time));

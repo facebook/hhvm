@@ -20,6 +20,8 @@ pub(crate) fn convert_ty(ty: &EnforceableType, strings: &StringInterner) -> text
     modifiers -= TypeConstraintFlags::ExtendedHint;
     // DisplayNullable does nothing interesting.
     modifiers -= TypeConstraintFlags::DisplayNullable;
+    // TypeVar doesn't add any interesting context.
+    modifiers -= TypeConstraintFlags::TypeVar;
 
     // All textual boxed types are nullable.
     modifiers -= TypeConstraintFlags::Nullable;

@@ -70,6 +70,9 @@ class D extends B {
   public static function bar(): void { }
 }
 
+// TEST-CHECK-1: define $root.MethCaller$C$b
+// CHECK: define $root.MethCaller$C$b($this: *void, $o: *HackMixed, $args: *array) : *HackMixed {
+
 // TEST-CHECK-BAL: define $root.fcall_func
 // CHECK: define $root.fcall_func($this: *void) : *void {
 // CHECK: #b0:
@@ -166,6 +169,33 @@ function fcall_class_meth(): void {
 function fcall_splat(): void {
   $x = vec[2, 3, 4];
   f(1, ...$x);
+}
+
+// TEST-CHECK-BAL: define $root.fcall_meth_caller
+// CHECK: define $root.fcall_meth_caller($this: *void, $b: *C) : *void {
+// CHECK: local $x: *void, $0: *void
+// CHECK: #b0:
+// CHECK:   n0 = __sil_allocate_curry("<$root>", "MethCaller$C$b", null)
+// CHECK:   store &$x <- n0: *HackMixed
+// CHECK:   jmp b1
+// CHECK: #b1:
+// CHECK:   n1: *HackMixed = load &$x
+// CHECK:   store &$0 <- n1: *HackMixed
+// CHECK:   n2: *HackMixed = load &$b
+// CHECK:   n3: *HackMixed = load &$0
+// CHECK:   n4 = n3.HackMixed.__invoke(n2, $builtins.hack_int(1), $builtins.hack_int(2), $builtins.hack_int(3))
+// CHECK:   jmp b3
+// CHECK:   .handlers b2
+// CHECK: #b2(n5: *HackMixed):
+// CHECK:   store &$0 <- null: *HackMixed
+// CHECK:   n6 = $builtins.hhbc_throw(n5)
+// CHECK:   unreachable
+// CHECK: #b3:
+// CHECK:   ret null
+// CHECK: }
+function fcall_meth_caller(C $b): void {
+  $x = meth_caller(C::class, 'b');
+  $x($b, 1, 2, 3);
 }
 
 // TEST-CHECK-1: declare C$static.f

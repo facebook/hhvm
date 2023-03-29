@@ -354,6 +354,15 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             let expr = state.fb.write_expr_stmt(curry)?;
             state.set_iid(iid, expr);
         }
+        Instr::Hhbc(Hhbc::ResolveMethCaller(func_id, _)) => {
+            // ResolveMethCaller is weird in that HackC builds a function which
+            // calls the method.
+            let name = FunctionName::Function(func_id);
+            let that = textual::Expr::null();
+            let curry = textual::Expr::alloc_curry(name, that, ());
+            let expr = state.fb.copy(curry)?;
+            state.set_iid(iid, expr);
+        }
         Instr::Hhbc(Hhbc::SelfCls(_)) => {
             let method_info = state
                 .func_info

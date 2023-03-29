@@ -68,8 +68,8 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 const StaticString s_coeffects_var("0Coeffects");
 
-State entry_state(const Index& index, CollectedInfo& collect,
-                  const Context& ctx, const KnownArgs* knownArgs) {
+Optional<State> entry_state(const Index& index, CollectedInfo& collect,
+                            const Context& ctx, const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
   ret.thisType = [&] {
@@ -103,7 +103,14 @@ State entry_state(const Index& index, CollectedInfo& collect,
         } else {
           auto [ty, _, effectFree] =
             index.verify_param_type(ctx, locId, unctx(knownArgs->args[locId]));
-          ret.unreachable |= ty.subtypeOf(BBottom);
+
+          if (ty.subtypeOf(BBottom)) {
+            ret.unreachable = true;
+            if (ctx.func->params[locId].dvEntryPoint == NoBlockId) {
+              return std::nullopt;
+            }
+          }
+
           ret.locals[locId] = std::move(ty);
           collect.effectFree &= effectFree;
         }
@@ -123,7 +130,14 @@ State entry_state(const Index& index, CollectedInfo& collect,
 
     auto [ty, _, effectFree] =
       index.verify_param_type(ctx, locId, TInitCell);
-    ret.unreachable |= ty.subtypeOf(BBottom);
+
+    if (ty.subtypeOf(BBottom)) {
+      ret.unreachable = true;
+      if (ctx.func->params[locId].dvEntryPoint == NoBlockId) {
+        return std::nullopt;
+      }
+    }
+
     ret.locals[locId] = std::move(ty);
     collect.effectFree &= effectFree;
   }
@@ -206,6 +220,7 @@ prepare_incompleteQ(const Index& index,
   auto const numParams = ctx.func->params.size();
 
   auto const entryState = entry_state(index, collect, ctx, knownArgs);
+  if (!entryState) return incompleteQ;
 
   if (knownArgs) {
     // When we have known args, we only need to add one of the entry points to
@@ -215,7 +230,8 @@ prepare_incompleteQ(const Index& index,
       for (auto i = knownArgs->args.size(); i < numParams; ++i) {
         auto const dv = ctx.func->params[i].dvEntryPoint;
         if (dv != NoBlockId) {
-          ai.bdata[dv].stateIn.copy_from(entryState);
+          ai.bdata[dv].stateIn.copy_from(*entryState);
+          ai.bdata[dv].stateIn.unreachable = false;
           incompleteQ.push(rpoId(ai, dv));
           return true;
         }
@@ -223,8 +239,8 @@ prepare_incompleteQ(const Index& index,
       return false;
     }();
 
-    if (!useDvInit) {
-      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
+    if (!useDvInit && !entryState->unreachable) {
+      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(*entryState);
       incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
@@ -234,7 +250,8 @@ prepare_incompleteQ(const Index& index,
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
     auto const dv = ctx.func->params[paramId].dvEntryPoint;
     if (dv != NoBlockId) {
-      ai.bdata[dv].stateIn.copy_from(entryState);
+      ai.bdata[dv].stateIn.copy_from(*entryState);
+      ai.bdata[dv].stateIn.unreachable = false;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv].stateIn.locals[locId] =
@@ -243,8 +260,10 @@ prepare_incompleteQ(const Index& index,
     }
   }
 
-  ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
-  incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  if (!entryState->unreachable) {
+    ai.bdata[ctx.func->mainEntry].stateIn.copy_from(*entryState);
+    incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
+  }
 
   return incompleteQ;
 }

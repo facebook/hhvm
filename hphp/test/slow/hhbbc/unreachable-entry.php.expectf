@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 passed to A::foo() must be an instance of T, bool given in %s/unreachable-entry.php on line %d

@@ -18,6 +18,7 @@
 
 #include <thrift/lib/cpp2/Adapt.h>
 #include <thrift/lib/cpp2/Thrift.h>
+#include <thrift/lib/cpp2/op/Clear.h>
 
 namespace apache {
 namespace thrift {
@@ -43,6 +44,20 @@ struct BindBack {
 
 } // namespace bound
 } // namespace detail
+
+namespace adapt_detail {
+
+// Used to detect if an adapted type has a reset method.
+template <typename AdaptedT>
+using HasResetType = decltype(std::declval<AdaptedT>().reset());
+template <typename AdaptedT>
+constexpr bool has_reset_v = folly::is_detected_v<HasResetType, AdaptedT>;
+template <typename AdaptedT, typename R = void>
+using if_has_reset = std::enable_if_t<has_reset_v<AdaptedT>, R>;
+template <typename AdaptedT, typename R = void>
+using if_has_no_reset = std::enable_if_t<!has_reset_v<AdaptedT>, R>;
+
+} // namespace adapt_detail
 
 template <typename AdaptedT>
 struct IndirectionAdapter {
@@ -93,12 +108,18 @@ struct BaseInlineAdapter {
     return std::forward<U>(value).toThrift();
   }
 
+  // If an adapted type (e.g. type::detail::Wrap) has a reset method, use it.
   template <typename U>
-  static void clear(U& value) {
+  static adapt_detail::if_has_reset<U> clear(U& value) {
+    value.reset();
+  }
+
+  template <typename U>
+  static adapt_detail::if_has_no_reset<U> clear(U& value) {
     static_assert(
         adapt_detail::is_mutable_ref<decltype(value.toThrift())>::value,
         "not a mutable reference");
-    apache::thrift::clear(value.toThrift());
+    apache::thrift::op::clear<>(value.toThrift());
   }
 };
 

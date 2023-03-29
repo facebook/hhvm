@@ -6470,6 +6470,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let ty_mismatch = mk_ty_mismatch_opt ty2 exp_real_type ty_err_opt in
       (env, te1, ty2, ty_mismatch)
     | (_, pos, Array_get (e1, None)) ->
+      let parent_lenv = env.lenv in
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (_, p1, _) = e1 in
       let (env, (ty1', arr_ty_mismatch_opt, val_ty_mismatch_opt)) =
@@ -6486,6 +6487,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
         if ty1_is_hack_collection then
           (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
         else
+          let env = { env with lenv = parent_lenv } in
+          let env = might_throw env in
           let (env, te1, ty, _) =
             assign_with_subtype_err_ p ur env e1 p1 ty1'
           in
@@ -6503,6 +6506,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       (env, te, ty, val_ty_mismatch_opt)
     | (_, pos, Array_get (e1, Some e)) ->
       let (env, te, ty) = expr env e ~allow_awaitable in
+      let parent_lenv = env.lenv in
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let env = might_throw env in
       let (_, p1, _) = e1 in
@@ -6524,6 +6528,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
         if ty1_is_hack_collection then
           (env, hole_on_ty_mismatch ~ty_mismatch_opt:arr_ty_mismatch_opt te1)
         else
+          let env = { env with lenv = parent_lenv } in
+          let env = might_throw env in
           let (env, te1, ty, _) =
             assign_with_subtype_err_ p ur env e1 p1 ty1'
           in

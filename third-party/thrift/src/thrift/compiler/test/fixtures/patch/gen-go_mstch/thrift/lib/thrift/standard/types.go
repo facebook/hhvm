@@ -339,6 +339,17 @@ func (x *TypeUri) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *TypeUri) countSetFields() int {
+    count := int(0)
+    if (x.IsSetUri()) {
+        count++
+    }
+    if (x.IsSetTypeHashPrefixSha2_256()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use TypeUri.Set* methods instead or set the fields directly.
 type TypeUriBuilder struct {
@@ -366,6 +377,9 @@ func (x *TypeUriBuilder) Emit() *TypeUri {
     return &objCopy
 }
 func (x *TypeUri) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("TypeUri"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1395,6 +1409,62 @@ func (x *TypeName) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *TypeName) countSetFields() int {
+    count := int(0)
+    if (x.IsSetBoolType()) {
+        count++
+    }
+    if (x.IsSetByteType()) {
+        count++
+    }
+    if (x.IsSetI16Type()) {
+        count++
+    }
+    if (x.IsSetI32Type()) {
+        count++
+    }
+    if (x.IsSetI64Type()) {
+        count++
+    }
+    if (x.IsSetFloatType()) {
+        count++
+    }
+    if (x.IsSetDoubleType()) {
+        count++
+    }
+    if (x.IsSetStringType()) {
+        count++
+    }
+    if (x.IsSetBinaryType()) {
+        count++
+    }
+    if (x.IsSetEnumType()) {
+        count++
+    }
+    if (x.IsSetTypedefType()) {
+        count++
+    }
+    if (x.IsSetStructType()) {
+        count++
+    }
+    if (x.IsSetUnionType()) {
+        count++
+    }
+    if (x.IsSetExceptionType()) {
+        count++
+    }
+    if (x.IsSetListType()) {
+        count++
+    }
+    if (x.IsSetSetType()) {
+        count++
+    }
+    if (x.IsSetMapType()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use TypeName.Set* methods instead or set the fields directly.
 type TypeNameBuilder struct {
@@ -1497,6 +1567,9 @@ func (x *TypeNameBuilder) Emit() *TypeName {
     return &objCopy
 }
 func (x *TypeName) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("TypeName"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

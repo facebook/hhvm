@@ -2101,6 +2101,17 @@ func (x *Union1) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *Union1) countSetFields() int {
+    count := int(0)
+    if (x.IsSetI()) {
+        count++
+    }
+    if (x.IsSetD()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use Union1.Set* methods instead or set the fields directly.
 type Union1Builder struct {
@@ -2128,6 +2139,9 @@ func (x *Union1Builder) Emit() *Union1 {
     return &objCopy
 }
 func (x *Union1) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("union1"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -2427,6 +2441,23 @@ func (x *Union2) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *Union2) countSetFields() int {
+    count := int(0)
+    if (x.IsSetI()) {
+        count++
+    }
+    if (x.IsSetD()) {
+        count++
+    }
+    if (x.IsSetS()) {
+        count++
+    }
+    if (x.IsSetU()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use Union2.Set* methods instead or set the fields directly.
 type Union2Builder struct {
@@ -2464,6 +2495,9 @@ func (x *Union2Builder) Emit() *Union2 {
     return &objCopy
 }
 func (x *Union2) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("union2"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

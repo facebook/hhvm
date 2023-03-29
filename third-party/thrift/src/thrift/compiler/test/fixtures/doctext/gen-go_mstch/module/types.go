@@ -372,6 +372,17 @@ func (x *U) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *U) countSetFields() int {
+    count := int(0)
+    if (x.IsSetI()) {
+        count++
+    }
+    if (x.IsSetS()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use U.Set* methods instead or set the fields directly.
 type UBuilder struct {
@@ -399,6 +410,9 @@ func (x *UBuilder) Emit() *U {
     return &objCopy
 }
 func (x *U) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("U"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

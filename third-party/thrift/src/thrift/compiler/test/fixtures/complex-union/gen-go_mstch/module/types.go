@@ -480,6 +480,29 @@ func (x *ComplexUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *ComplexUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetIntValue()) {
+        count++
+    }
+    if (x.IsSetStringValue()) {
+        count++
+    }
+    if (x.IsSetIntListValue()) {
+        count++
+    }
+    if (x.IsSetStringListValue()) {
+        count++
+    }
+    if (x.IsSetTypedefValue()) {
+        count++
+    }
+    if (x.IsSetStringRef()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use ComplexUnion.Set* methods instead or set the fields directly.
 type ComplexUnionBuilder struct {
@@ -527,6 +550,9 @@ func (x *ComplexUnionBuilder) Emit() *ComplexUnion {
     return &objCopy
 }
 func (x *ComplexUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("ComplexUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -798,6 +824,17 @@ func (x *ListUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *ListUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetIntListValue()) {
+        count++
+    }
+    if (x.IsSetStringListValue()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use ListUnion.Set* methods instead or set the fields directly.
 type ListUnionBuilder struct {
@@ -825,6 +862,9 @@ func (x *ListUnionBuilder) Emit() *ListUnion {
     return &objCopy
 }
 func (x *ListUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("ListUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1009,6 +1049,17 @@ func (x *DataUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *DataUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetBinaryData()) {
+        count++
+    }
+    if (x.IsSetStringData()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use DataUnion.Set* methods instead or set the fields directly.
 type DataUnionBuilder struct {
@@ -1036,6 +1087,9 @@ func (x *DataUnionBuilder) Emit() *DataUnion {
     return &objCopy
 }
 func (x *DataUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("DataUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1477,6 +1531,17 @@ func (x *ValUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *ValUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetV1()) {
+        count++
+    }
+    if (x.IsSetV2()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use ValUnion.Set* methods instead or set the fields directly.
 type ValUnionBuilder struct {
@@ -1504,6 +1569,9 @@ func (x *ValUnionBuilder) Emit() *ValUnion {
     return &objCopy
 }
 func (x *ValUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("ValUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1691,6 +1759,17 @@ func (x *VirtualComplexUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *VirtualComplexUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetThingOne()) {
+        count++
+    }
+    if (x.IsSetThingTwo()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use VirtualComplexUnion.Set* methods instead or set the fields directly.
 type VirtualComplexUnionBuilder struct {
@@ -1718,6 +1797,9 @@ func (x *VirtualComplexUnionBuilder) Emit() *VirtualComplexUnion {
     return &objCopy
 }
 func (x *VirtualComplexUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("VirtualComplexUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -1983,6 +2065,14 @@ func (x *NonCopyableUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *NonCopyableUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetS()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use NonCopyableUnion.Set* methods instead or set the fields directly.
 type NonCopyableUnionBuilder struct {
@@ -2005,6 +2095,9 @@ func (x *NonCopyableUnionBuilder) Emit() *NonCopyableUnion {
     return &objCopy
 }
 func (x *NonCopyableUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("NonCopyableUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

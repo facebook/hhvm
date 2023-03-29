@@ -106,6 +106,11 @@ func (x *Nada) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *Nada) countSetFields() int {
+    count := int(0)
+    return count
+}
+
 
 // Deprecated: Use Nada.Set* methods instead or set the fields directly.
 type NadaBuilder struct {
@@ -123,6 +128,9 @@ func (x *NadaBuilder) Emit() *Nada {
     return &objCopy
 }
 func (x *Nada) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("Nada"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

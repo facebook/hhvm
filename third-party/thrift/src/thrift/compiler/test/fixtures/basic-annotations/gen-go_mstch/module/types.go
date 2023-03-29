@@ -248,6 +248,11 @@ func (x *MyUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *MyUnion) countSetFields() int {
+    count := int(0)
+    return count
+}
+
 
 // Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
 type MyUnionBuilder struct {
@@ -265,6 +270,9 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     return &objCopy
 }
 func (x *MyUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

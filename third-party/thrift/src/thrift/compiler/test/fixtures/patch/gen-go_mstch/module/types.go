@@ -510,6 +510,14 @@ func (x *InnerUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *InnerUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetInnerOption()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use InnerUnion.Set* methods instead or set the fields directly.
 type InnerUnionBuilder struct {
@@ -532,6 +540,9 @@ func (x *InnerUnionBuilder) Emit() *InnerUnion {
     return &objCopy
 }
 func (x *InnerUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("InnerUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -767,6 +778,20 @@ func (x *MyUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *MyUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetOption1()) {
+        count++
+    }
+    if (x.IsSetOption2()) {
+        count++
+    }
+    if (x.IsSetOption3()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use MyUnion.Set* methods instead or set the fields directly.
 type MyUnionBuilder struct {
@@ -799,6 +824,9 @@ func (x *MyUnionBuilder) Emit() *MyUnion {
     return &objCopy
 }
 func (x *MyUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("MyUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

@@ -104,7 +104,7 @@ func (x *{{struct:go_name}}) readField{{field:key_str}}(p thrift.Protocol) error
 
 {{/struct:fields}}{{!
 
-  String methodd.
+  String method.
 
 }}
 func (x *{{struct:go_name}}) String() string {
@@ -120,4 +120,19 @@ func (x *{{struct:go_name}}) Error() string {
     return x.String()
 }
 
-{{/struct:exception?}}
+{{/struct:exception?}}{{!
+
+  countSetFields method.
+
+}}{{#struct:union?}}
+func (x *{{struct:go_name}}) countSetFields() int {
+    count := int(0)
+    {{#struct:fields}}
+    if (x.IsSet{{field:go_name}}()) {
+        count++
+    }
+    {{/struct:fields}}
+    return count
+}
+
+{{/struct:union?}}

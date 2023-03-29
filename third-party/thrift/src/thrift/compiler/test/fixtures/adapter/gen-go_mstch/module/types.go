@@ -2278,6 +2278,26 @@ func (x *Baz) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *Baz) countSetFields() int {
+    count := int(0)
+    if (x.IsSetIntField()) {
+        count++
+    }
+    if (x.IsSetSetField()) {
+        count++
+    }
+    if (x.IsSetMapField()) {
+        count++
+    }
+    if (x.IsSetBinaryField()) {
+        count++
+    }
+    if (x.IsSetLongField()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use Baz.Set* methods instead or set the fields directly.
 type BazBuilder struct {
@@ -2320,6 +2340,9 @@ func (x *BazBuilder) Emit() *Baz {
     return &objCopy
 }
 func (x *Baz) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("Baz"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }
@@ -6937,6 +6960,17 @@ func (x *AdaptTestUnion) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
+func (x *AdaptTestUnion) countSetFields() int {
+    count := int(0)
+    if (x.IsSetDelay()) {
+        count++
+    }
+    if (x.IsSetCustom()) {
+        count++
+    }
+    return count
+}
+
 
 // Deprecated: Use AdaptTestUnion.Set* methods instead or set the fields directly.
 type AdaptTestUnionBuilder struct {
@@ -6964,6 +6998,9 @@ func (x *AdaptTestUnionBuilder) Emit() *AdaptTestUnion {
     return &objCopy
 }
 func (x *AdaptTestUnion) Write(p thrift.Protocol) error {
+    if countSet := x.countSetFields(); countSet > 1 {
+        return fmt.Errorf("%T write union: no more than one field must be set (%d set).", x, countSet)
+    }
     if err := p.WriteStructBegin("AdaptTestUnion"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
     }

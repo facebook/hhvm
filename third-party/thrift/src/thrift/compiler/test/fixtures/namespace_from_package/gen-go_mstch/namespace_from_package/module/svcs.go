@@ -133,6 +133,7 @@ type reqTestServiceInit struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqTestServiceInit{}
 
+
 func newReqTestServiceInit() *reqTestServiceInit {
     return (&reqTestServiceInit{})
 }
@@ -265,6 +266,8 @@ type respTestServiceInit struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respTestServiceInit{}
+var _ thrift.WritableResult = &respTestServiceInit{}
+
 
 func newRespTestServiceInit() *respTestServiceInit {
     return (&respTestServiceInit{})
@@ -334,6 +337,10 @@ func (x *respTestServiceInitBuilder) Value(value int64) *respTestServiceInitBuil
 func (x *respTestServiceInitBuilder) Emit() *respTestServiceInit {
     var objCopy respTestServiceInit = *x.obj
     return &objCopy
+}
+
+func (x *respTestServiceInit) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respTestServiceInit) Write(p thrift.Protocol) error {

@@ -926,6 +926,7 @@ type MyAnnotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyAnnotation{}
 
+
 func NewMyAnnotation() *MyAnnotation {
     return (&MyAnnotation{}).
         SetColor(
@@ -1126,6 +1127,7 @@ type Foo struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo{}
+
 
 func NewFoo() *Foo {
     return (&Foo{}).
@@ -1964,6 +1966,7 @@ type Baz struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Baz{}
 
+
 func NewBaz() *Baz {
     return (&Baz{})
 }
@@ -2448,6 +2451,7 @@ type Bar struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Bar{}
+
 
 func NewBar() *Bar {
     return (&Bar{})
@@ -3058,6 +3062,7 @@ type DirectlyAdapted struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DirectlyAdapted{}
 
+
 func NewDirectlyAdapted() *DirectlyAdapted {
     return (&DirectlyAdapted{})
 }
@@ -3191,6 +3196,7 @@ type IndependentDirectlyAdapted struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &IndependentDirectlyAdapted{}
+
 
 func NewIndependentDirectlyAdapted() *IndependentDirectlyAdapted {
     return (&IndependentDirectlyAdapted{})
@@ -3328,6 +3334,7 @@ type StructWithFieldAdapter struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StructWithFieldAdapter{}
+
 
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
     return (&StructWithFieldAdapter{})
@@ -3652,6 +3659,7 @@ type TerseAdaptedFields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TerseAdaptedFields{}
 
+
 func NewTerseAdaptedFields() *TerseAdaptedFields {
     return (&TerseAdaptedFields{})
 }
@@ -3932,6 +3940,7 @@ type B struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &B{}
 
+
 func NewB() *B {
     return (&B{})
 }
@@ -4080,6 +4089,7 @@ type A struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &A{}
 
+
 func NewA() *A {
     return (&A{})
 }
@@ -4160,6 +4170,7 @@ type Config struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Config{}
+
 
 func NewConfig() *Config {
     return (&Config{})
@@ -4295,6 +4306,7 @@ type MyStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
+
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
@@ -4503,6 +4515,7 @@ type AdaptTestStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTestStruct{}
+
 
 func NewAdaptTestStruct() *AdaptTestStruct {
     return (&AdaptTestStruct{})
@@ -5162,6 +5175,7 @@ type AdaptTemplatedTestStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTemplatedTestStruct{}
+
 
 func NewAdaptTemplatedTestStruct() *AdaptTemplatedTestStruct {
     return (&AdaptTemplatedTestStruct{}).
@@ -6725,6 +6739,7 @@ type AdaptTemplatedNestedTestStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTemplatedNestedTestStruct{}
 
+
 func NewAdaptTemplatedNestedTestStruct() *AdaptTemplatedNestedTestStruct {
     return (&AdaptTemplatedNestedTestStruct{})
 }
@@ -6874,6 +6889,7 @@ type AdaptTestUnion struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptTestUnion{}
+
 
 func NewAdaptTestUnion() *AdaptTestUnion {
     return (&AdaptTestUnion{})
@@ -7103,6 +7119,7 @@ type AdaptedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedStruct{}
 
+
 func NewAdaptedStruct() *AdaptedStruct {
     return (&AdaptedStruct{})
 }
@@ -7236,6 +7253,7 @@ type DirectlyAdaptedStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &DirectlyAdaptedStruct{}
+
 
 func NewDirectlyAdaptedStruct() *DirectlyAdaptedStruct {
     return (&DirectlyAdaptedStruct{})
@@ -7373,6 +7391,7 @@ type StructFieldAdaptedStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StructFieldAdaptedStruct{}
+
 
 func NewStructFieldAdaptedStruct() *StructFieldAdaptedStruct {
     return (&StructFieldAdaptedStruct{})
@@ -7727,6 +7746,7 @@ type CircularAdaptee struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CircularAdaptee{}
 
+
 func NewCircularAdaptee() *CircularAdaptee {
     return (&CircularAdaptee{})
 }
@@ -7875,6 +7895,7 @@ type CircularStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &CircularStruct{}
+
 
 func NewCircularStruct() *CircularStruct {
     return (&CircularStruct{})
@@ -8025,6 +8046,7 @@ type ReorderedStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ReorderedStruct{}
 
+
 func NewReorderedStruct() *ReorderedStruct {
     return (&ReorderedStruct{})
 }
@@ -8173,6 +8195,7 @@ type DeclaredAfterStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DeclaredAfterStruct{}
 
+
 func NewDeclaredAfterStruct() *DeclaredAfterStruct {
     return (&DeclaredAfterStruct{})
 }
@@ -8253,6 +8276,7 @@ type RenamedStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &RenamedStruct{}
+
 
 func NewRenamedStruct() *RenamedStruct {
     return (&RenamedStruct{})
@@ -8388,6 +8412,7 @@ type SameNamespaceStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SameNamespaceStruct{}
 
+
 func NewSameNamespaceStruct() *SameNamespaceStruct {
     return (&SameNamespaceStruct{})
 }
@@ -8521,6 +8546,7 @@ type HeapAllocated struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &HeapAllocated{}
 
+
 func NewHeapAllocated() *HeapAllocated {
     return (&HeapAllocated{})
 }
@@ -8601,6 +8627,7 @@ type MoveOnly struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MoveOnly{}
+
 
 func NewMoveOnly() *MoveOnly {
     return (&MoveOnly{})
@@ -8751,6 +8778,7 @@ type AlsoMoveOnly struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AlsoMoveOnly{}
 
+
 func NewAlsoMoveOnly() *AlsoMoveOnly {
     return (&AlsoMoveOnly{})
 }
@@ -8884,6 +8912,7 @@ type ApplyAdapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ApplyAdapter{}
 
+
 func NewApplyAdapter() *ApplyAdapter {
     return (&ApplyAdapter{})
 }
@@ -8963,6 +8992,7 @@ type TransitiveAdapted struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TransitiveAdapted{}
+
 
 func NewTransitiveAdapted() *TransitiveAdapted {
     return (&TransitiveAdapted{})
@@ -9046,6 +9076,7 @@ type CountingStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &CountingStruct{}
+
 
 func NewCountingStruct() *CountingStruct {
     return (&CountingStruct{})
@@ -9330,6 +9361,7 @@ type Person struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Person{}
 
+
 func NewPerson() *Person {
     return (&Person{})
 }
@@ -9463,6 +9495,7 @@ type Person2 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Person2{}
+
 
 func NewPerson2() *Person2 {
     return (&Person2{})

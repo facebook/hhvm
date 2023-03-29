@@ -20,6 +20,7 @@ type Transitive struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Transitive{}
 
+
 func NewTransitive() *Transitive {
     return (&Transitive{})
 }
@@ -99,6 +100,7 @@ type Schema struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Schema{}
+
 
 func NewSchema() *Schema {
     return (&Schema{})
@@ -180,6 +182,7 @@ type Program struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Program{}
 
+
 func NewProgram() *Program {
     return (&Program{})
 }
@@ -259,6 +262,7 @@ type Struct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct{}
+
 
 func NewStruct() *Struct {
     return (&Struct{})
@@ -340,6 +344,7 @@ type Union struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Union{}
 
+
 func NewUnion() *Union {
     return (&Union{})
 }
@@ -419,6 +424,7 @@ type Exception struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Exception{}
+
 
 func NewException() *Exception {
     return (&Exception{})
@@ -500,6 +506,7 @@ type Field struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Field{}
 
+
 func NewField() *Field {
     return (&Field{})
 }
@@ -579,6 +586,7 @@ type Typedef struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Typedef{}
+
 
 func NewTypedef() *Typedef {
     return (&Typedef{})
@@ -660,6 +668,7 @@ type Service struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Service{}
 
+
 func NewService() *Service {
     return (&Service{})
 }
@@ -739,6 +748,7 @@ type Interaction struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Interaction{}
+
 
 func NewInteraction() *Interaction {
     return (&Interaction{})
@@ -820,6 +830,7 @@ type Function struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Function{}
 
+
 func NewFunction() *Function {
     return (&Function{})
 }
@@ -899,6 +910,7 @@ type EnumValue struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &EnumValue{}
+
 
 func NewEnumValue() *EnumValue {
     return (&EnumValue{})
@@ -980,6 +992,7 @@ type Const struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Const{}
 
+
 func NewConst() *Const {
     return (&Const{})
 }
@@ -1059,6 +1072,7 @@ type Enum struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Enum{}
+
 
 func NewEnum() *Enum {
     return (&Enum{})
@@ -1140,6 +1154,7 @@ type Structured struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Structured{}
 
+
 func NewStructured() *Structured {
     return (&Structured{})
 }
@@ -1219,6 +1234,7 @@ type Interface struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Interface{}
+
 
 func NewInterface() *Interface {
     return (&Interface{})
@@ -1300,6 +1316,7 @@ type RootDefinition struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RootDefinition{}
 
+
 func NewRootDefinition() *RootDefinition {
     return (&RootDefinition{})
 }
@@ -1379,6 +1396,7 @@ type Definition struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Definition{}
+
 
 func NewDefinition() *Definition {
     return (&Definition{})

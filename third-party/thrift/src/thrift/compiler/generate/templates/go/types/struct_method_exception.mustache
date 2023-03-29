@@ -16,30 +16,18 @@
 
 }}{{!
 
-  This template generate a Thrift struct
+  This template creates an Exception method for response helper structs.
+  (Implementing thrift.WriteableResult interface.)
 
 }}
-{{! type definition }}
-{{> types/struct_definition}}
-
-{{! default function }}
-{{> types/struct_default}}
-
-{{! methods }}
-{{> types/struct_methods}}
-{{#program:compat?}}
-
-{{! builder }}
-{{> types/struct_builder}}
-{{/program:compat?}}
-{{#struct:resp?}}
-
-{{! exception }}
-{{> types/struct_method_exception}}
-{{/struct:resp?}}
-
-{{! write (serialize) }}
-{{> types/struct_method_write}}
-
-{{! read (deserialize) }}
-{{> types/struct_method_read}}
+func (x *{{struct:go_name}}) Exception() thrift.WritableException {
+    {{#struct:fields}}
+    {{^field:retval?}}
+    if x.{{field:go_name}} != nil {
+        return x.{{field:go_name}}
+    }
+    {{/field:retval?}}
+    {{/struct:fields}}
+    return nil
+}
+{{!newline}}

@@ -133,6 +133,7 @@ type reqFooServiceSimpleRPC struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFooServiceSimpleRPC{}
 
+
 func newReqFooServiceSimpleRPC() *reqFooServiceSimpleRPC {
     return (&reqFooServiceSimpleRPC{})
 }
@@ -211,6 +212,8 @@ type respFooServiceSimpleRPC struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFooServiceSimpleRPC{}
+var _ thrift.WritableResult = &respFooServiceSimpleRPC{}
+
 
 func newRespFooServiceSimpleRPC() *respFooServiceSimpleRPC {
     return (&respFooServiceSimpleRPC{})
@@ -235,6 +238,10 @@ func newRespFooServiceSimpleRPCBuilder() *respFooServiceSimpleRPCBuilder {
 func (x *respFooServiceSimpleRPCBuilder) Emit() *respFooServiceSimpleRPC {
     var objCopy respFooServiceSimpleRPC = *x.obj
     return &objCopy
+}
+
+func (x *respFooServiceSimpleRPC) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respFooServiceSimpleRPC) Write(p thrift.Protocol) error {
@@ -495,6 +502,7 @@ type reqFB303ServiceSimpleRPC struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFB303ServiceSimpleRPC{}
 
+
 func newReqFB303ServiceSimpleRPC() *reqFB303ServiceSimpleRPC {
     return (&reqFB303ServiceSimpleRPC{})
 }
@@ -627,6 +635,8 @@ type respFB303ServiceSimpleRPC struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFB303ServiceSimpleRPC{}
+var _ thrift.WritableResult = &respFB303ServiceSimpleRPC{}
+
 
 func newRespFB303ServiceSimpleRPC() *respFB303ServiceSimpleRPC {
     return (&respFB303ServiceSimpleRPC{})
@@ -711,6 +721,10 @@ func (x *respFB303ServiceSimpleRPCBuilder) Value(value *ReservedKeyword) *respFB
 func (x *respFB303ServiceSimpleRPCBuilder) Emit() *respFB303ServiceSimpleRPC {
     var objCopy respFB303ServiceSimpleRPC = *x.obj
     return &objCopy
+}
+
+func (x *respFB303ServiceSimpleRPC) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respFB303ServiceSimpleRPC) Write(p thrift.Protocol) error {
@@ -1120,6 +1134,7 @@ type reqMyServicePing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePing{}
 
+
 func newReqMyServicePing() *reqMyServicePing {
     return (&reqMyServicePing{})
 }
@@ -1198,6 +1213,8 @@ type respMyServicePing struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePing{}
+var _ thrift.WritableResult = &respMyServicePing{}
+
 
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
@@ -1222,6 +1239,10 @@ func newRespMyServicePingBuilder() *respMyServicePingBuilder {
 func (x *respMyServicePingBuilder) Emit() *respMyServicePing {
     var objCopy respMyServicePing = *x.obj
     return &objCopy
+}
+
+func (x *respMyServicePing) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServicePing) Write(p thrift.Protocol) error {
@@ -1277,6 +1298,7 @@ type reqMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetRandomData{}
+
 
 func newReqMyServiceGetRandomData() *reqMyServiceGetRandomData {
     return (&reqMyServiceGetRandomData{})
@@ -1357,6 +1379,8 @@ type respMyServiceGetRandomData struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetRandomData{}
+var _ thrift.WritableResult = &respMyServiceGetRandomData{}
+
 
 func newRespMyServiceGetRandomData() *respMyServiceGetRandomData {
     return (&respMyServiceGetRandomData{})
@@ -1428,6 +1452,10 @@ func (x *respMyServiceGetRandomDataBuilder) Emit() *respMyServiceGetRandomData {
     return &objCopy
 }
 
+func (x *respMyServiceGetRandomData) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respMyServiceGetRandomData) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceGetRandomData"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1490,6 +1518,7 @@ type reqMyServiceSink struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceSink{}
+
 
 func newReqMyServiceSink() *reqMyServiceSink {
     return (&reqMyServiceSink{})
@@ -1622,6 +1651,8 @@ type respMyServiceSink struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceSink{}
+var _ thrift.WritableResult = &respMyServiceSink{}
+
 
 func newRespMyServiceSink() *respMyServiceSink {
     return (&respMyServiceSink{})
@@ -1646,6 +1677,10 @@ func newRespMyServiceSinkBuilder() *respMyServiceSinkBuilder {
 func (x *respMyServiceSinkBuilder) Emit() *respMyServiceSink {
     var objCopy respMyServiceSink = *x.obj
     return &objCopy
+}
+
+func (x *respMyServiceSink) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServiceSink) Write(p thrift.Protocol) error {
@@ -1703,6 +1738,7 @@ type reqMyServicePutDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServicePutDataById{}
+
 
 func newReqMyServicePutDataById() *reqMyServicePutDataById {
     return (&reqMyServicePutDataById{})
@@ -1888,6 +1924,8 @@ type respMyServicePutDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePutDataById{}
+var _ thrift.WritableResult = &respMyServicePutDataById{}
+
 
 func newRespMyServicePutDataById() *respMyServicePutDataById {
     return (&respMyServicePutDataById{})
@@ -1912,6 +1950,10 @@ func newRespMyServicePutDataByIdBuilder() *respMyServicePutDataByIdBuilder {
 func (x *respMyServicePutDataByIdBuilder) Emit() *respMyServicePutDataById {
     var objCopy respMyServicePutDataById = *x.obj
     return &objCopy
+}
+
+func (x *respMyServicePutDataById) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServicePutDataById) Write(p thrift.Protocol) error {
@@ -1968,6 +2010,7 @@ type reqMyServiceHasDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasDataById{}
+
 
 func newReqMyServiceHasDataById() *reqMyServiceHasDataById {
     return (&reqMyServiceHasDataById{})
@@ -2101,6 +2144,8 @@ type respMyServiceHasDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasDataById{}
+var _ thrift.WritableResult = &respMyServiceHasDataById{}
+
 
 func newRespMyServiceHasDataById() *respMyServiceHasDataById {
     return (&respMyServiceHasDataById{})
@@ -2172,6 +2217,10 @@ func (x *respMyServiceHasDataByIdBuilder) Emit() *respMyServiceHasDataById {
     return &objCopy
 }
 
+func (x *respMyServiceHasDataById) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respMyServiceHasDataById) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceHasDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2234,6 +2283,7 @@ type reqMyServiceGetDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceGetDataById{}
+
 
 func newReqMyServiceGetDataById() *reqMyServiceGetDataById {
     return (&reqMyServiceGetDataById{})
@@ -2367,6 +2417,8 @@ type respMyServiceGetDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetDataById{}
+var _ thrift.WritableResult = &respMyServiceGetDataById{}
+
 
 func newRespMyServiceGetDataById() *respMyServiceGetDataById {
     return (&respMyServiceGetDataById{})
@@ -2438,6 +2490,10 @@ func (x *respMyServiceGetDataByIdBuilder) Emit() *respMyServiceGetDataById {
     return &objCopy
 }
 
+func (x *respMyServiceGetDataById) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respMyServiceGetDataById) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceGetDataById"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2500,6 +2556,7 @@ type reqMyServiceDeleteDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceDeleteDataById{}
+
 
 func newReqMyServiceDeleteDataById() *reqMyServiceDeleteDataById {
     return (&reqMyServiceDeleteDataById{})
@@ -2632,6 +2689,8 @@ type respMyServiceDeleteDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceDeleteDataById{}
+var _ thrift.WritableResult = &respMyServiceDeleteDataById{}
+
 
 func newRespMyServiceDeleteDataById() *respMyServiceDeleteDataById {
     return (&respMyServiceDeleteDataById{})
@@ -2656,6 +2715,10 @@ func newRespMyServiceDeleteDataByIdBuilder() *respMyServiceDeleteDataByIdBuilder
 func (x *respMyServiceDeleteDataByIdBuilder) Emit() *respMyServiceDeleteDataById {
     var objCopy respMyServiceDeleteDataById = *x.obj
     return &objCopy
+}
+
+func (x *respMyServiceDeleteDataById) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServiceDeleteDataById) Write(p thrift.Protocol) error {
@@ -2713,6 +2776,7 @@ type reqMyServiceLobDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceLobDataById{}
+
 
 func newReqMyServiceLobDataById() *reqMyServiceLobDataById {
     return (&reqMyServiceLobDataById{})
@@ -2898,6 +2962,8 @@ type respMyServiceLobDataById struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceLobDataById{}
+var _ thrift.WritableResult = &respMyServiceLobDataById{}
+
 
 func newRespMyServiceLobDataById() *respMyServiceLobDataById {
     return (&respMyServiceLobDataById{})
@@ -2922,6 +2988,10 @@ func newRespMyServiceLobDataByIdBuilder() *respMyServiceLobDataByIdBuilder {
 func (x *respMyServiceLobDataByIdBuilder) Emit() *respMyServiceLobDataById {
     var objCopy respMyServiceLobDataById = *x.obj
     return &objCopy
+}
+
+func (x *respMyServiceLobDataById) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServiceLobDataById) Write(p thrift.Protocol) error {
@@ -2977,6 +3047,7 @@ type reqMyServiceInvalidReturnForHack struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceInvalidReturnForHack{}
+
 
 func newReqMyServiceInvalidReturnForHack() *reqMyServiceInvalidReturnForHack {
     return (&reqMyServiceInvalidReturnForHack{})
@@ -3057,6 +3128,8 @@ type respMyServiceInvalidReturnForHack struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceInvalidReturnForHack{}
+var _ thrift.WritableResult = &respMyServiceInvalidReturnForHack{}
+
 
 func newRespMyServiceInvalidReturnForHack() *respMyServiceInvalidReturnForHack {
     return (&respMyServiceInvalidReturnForHack{})
@@ -3168,6 +3241,10 @@ func (x *respMyServiceInvalidReturnForHackBuilder) Emit() *respMyServiceInvalidR
     return &objCopy
 }
 
+func (x *respMyServiceInvalidReturnForHack) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respMyServiceInvalidReturnForHack) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServiceInvalidReturnForHack"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3229,6 +3306,7 @@ type reqMyServiceRpcSkippedCodegen struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceRpcSkippedCodegen{}
+
 
 func newReqMyServiceRpcSkippedCodegen() *reqMyServiceRpcSkippedCodegen {
     return (&reqMyServiceRpcSkippedCodegen{})
@@ -3308,6 +3386,8 @@ type respMyServiceRpcSkippedCodegen struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceRpcSkippedCodegen{}
+var _ thrift.WritableResult = &respMyServiceRpcSkippedCodegen{}
+
 
 func newRespMyServiceRpcSkippedCodegen() *respMyServiceRpcSkippedCodegen {
     return (&respMyServiceRpcSkippedCodegen{})
@@ -3332,6 +3412,10 @@ func newRespMyServiceRpcSkippedCodegenBuilder() *respMyServiceRpcSkippedCodegenB
 func (x *respMyServiceRpcSkippedCodegenBuilder) Emit() *respMyServiceRpcSkippedCodegen {
     var objCopy respMyServiceRpcSkippedCodegen = *x.obj
     return &objCopy
+}
+
+func (x *respMyServiceRpcSkippedCodegen) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServiceRpcSkippedCodegen) Write(p thrift.Protocol) error {
@@ -4067,6 +4151,7 @@ type reqDbMixedStackArgumentsGetDataByKey0 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey0{}
 
+
 func newReqDbMixedStackArgumentsGetDataByKey0() *reqDbMixedStackArgumentsGetDataByKey0 {
     return (&reqDbMixedStackArgumentsGetDataByKey0{})
 }
@@ -4199,6 +4284,8 @@ type respDbMixedStackArgumentsGetDataByKey0 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey0{}
+var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey0{}
+
 
 func newRespDbMixedStackArgumentsGetDataByKey0() *respDbMixedStackArgumentsGetDataByKey0 {
     return (&respDbMixedStackArgumentsGetDataByKey0{})
@@ -4281,6 +4368,10 @@ func (x *respDbMixedStackArgumentsGetDataByKey0Builder) Emit() *respDbMixedStack
     return &objCopy
 }
 
+func (x *respDbMixedStackArgumentsGetDataByKey0) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respDbMixedStackArgumentsGetDataByKey0) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respDbMixedStackArgumentsGetDataByKey0"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -4343,6 +4434,7 @@ type reqDbMixedStackArgumentsGetDataByKey1 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqDbMixedStackArgumentsGetDataByKey1{}
+
 
 func newReqDbMixedStackArgumentsGetDataByKey1() *reqDbMixedStackArgumentsGetDataByKey1 {
     return (&reqDbMixedStackArgumentsGetDataByKey1{})
@@ -4476,6 +4568,8 @@ type respDbMixedStackArgumentsGetDataByKey1 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey1{}
+var _ thrift.WritableResult = &respDbMixedStackArgumentsGetDataByKey1{}
+
 
 func newRespDbMixedStackArgumentsGetDataByKey1() *respDbMixedStackArgumentsGetDataByKey1 {
     return (&respDbMixedStackArgumentsGetDataByKey1{})
@@ -4556,6 +4650,10 @@ func (x *respDbMixedStackArgumentsGetDataByKey1Builder) Value(value []byte) *res
 func (x *respDbMixedStackArgumentsGetDataByKey1Builder) Emit() *respDbMixedStackArgumentsGetDataByKey1 {
     var objCopy respDbMixedStackArgumentsGetDataByKey1 = *x.obj
     return &objCopy
+}
+
+func (x *respDbMixedStackArgumentsGetDataByKey1) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respDbMixedStackArgumentsGetDataByKey1) Write(p thrift.Protocol) error {

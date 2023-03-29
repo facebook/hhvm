@@ -23,6 +23,7 @@ type Fiery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Fiery{}
 
+
 func NewFiery() *Fiery {
     return (&Fiery{})
 }
@@ -160,6 +161,7 @@ type Serious struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Serious{}
+
 
 func NewSerious() *Serious {
     return (&Serious{})
@@ -313,6 +315,7 @@ type ComplexFieldNames struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexFieldNames{}
+
 
 func NewComplexFieldNames() *ComplexFieldNames {
     return (&ComplexFieldNames{})
@@ -506,6 +509,7 @@ type CustomFieldNames struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CustomFieldNames{}
 
+
 func NewCustomFieldNames() *CustomFieldNames {
     return (&CustomFieldNames{})
 }
@@ -697,6 +701,7 @@ type ExceptionWithPrimitiveField struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ExceptionWithPrimitiveField{}
+
 
 func NewExceptionWithPrimitiveField() *ExceptionWithPrimitiveField {
     return (&ExceptionWithPrimitiveField{})
@@ -890,6 +895,7 @@ type ExceptionWithStructuredAnnotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ExceptionWithStructuredAnnotation{}
 
+
 func NewExceptionWithStructuredAnnotation() *ExceptionWithStructuredAnnotation {
     return (&ExceptionWithStructuredAnnotation{})
 }
@@ -1079,6 +1085,7 @@ type Banal struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Banal{}
+
 
 func NewBanal() *Banal {
     return (&Banal{})

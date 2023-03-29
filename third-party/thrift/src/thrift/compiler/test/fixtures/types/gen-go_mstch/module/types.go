@@ -285,6 +285,7 @@ type EmptyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &EmptyStruct{}
 
+
 func NewEmptyStruct() *EmptyStruct {
     return (&EmptyStruct{})
 }
@@ -365,6 +366,7 @@ type DecoratedStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &DecoratedStruct{}
+
 
 func NewDecoratedStruct() *DecoratedStruct {
     return (&DecoratedStruct{})
@@ -506,6 +508,7 @@ type ContainerStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ContainerStruct{}
+
 
 func NewContainerStruct() *ContainerStruct {
     return (&ContainerStruct{})
@@ -1321,6 +1324,7 @@ type CppTypeStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CppTypeStruct{}
 
+
 func NewCppTypeStruct() *CppTypeStruct {
     return (&CppTypeStruct{})
 }
@@ -1495,6 +1499,7 @@ type VirtualStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &VirtualStruct{}
 
+
 func NewVirtualStruct() *VirtualStruct {
     return (&VirtualStruct{})
 }
@@ -1629,6 +1634,7 @@ type MyStructWithForwardRefEnum struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructWithForwardRefEnum{}
+
 
 func NewMyStructWithForwardRefEnum() *MyStructWithForwardRefEnum {
     return (&MyStructWithForwardRefEnum{}).
@@ -1826,6 +1832,7 @@ type TrivialNumeric struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TrivialNumeric{}
 
+
 func NewTrivialNumeric() *TrivialNumeric {
     return (&TrivialNumeric{})
 }
@@ -2013,6 +2020,7 @@ type TrivialNestedWithDefault struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TrivialNestedWithDefault{}
+
 
 func NewTrivialNestedWithDefault() *TrivialNestedWithDefault {
     return (&TrivialNestedWithDefault{}).
@@ -2222,6 +2230,7 @@ type ComplexString struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexString{}
+
 
 func NewComplexString() *ComplexString {
     return (&ComplexString{})
@@ -2468,6 +2477,7 @@ type ComplexNestedWithDefault struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexNestedWithDefault{}
 
+
 func NewComplexNestedWithDefault() *ComplexNestedWithDefault {
     return (&ComplexNestedWithDefault{}).
         SetZ("4").
@@ -2683,6 +2693,7 @@ type MinPadding struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MinPadding{}
+
 
 func NewMinPadding() *MinPadding {
     return (&MinPadding{})
@@ -3034,6 +3045,7 @@ type MinPaddingWithCustomType struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MinPaddingWithCustomType{}
 
+
 func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
     return (&MinPaddingWithCustomType{})
 }
@@ -3383,6 +3395,7 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
+
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
@@ -3690,6 +3703,7 @@ type MyDataItem struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataItem{}
 
+
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
@@ -3770,6 +3784,7 @@ type Renaming struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Renaming{}
+
 
 func NewRenaming() *Renaming {
     return (&Renaming{})
@@ -3905,6 +3920,7 @@ type AnnotatedTypes struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AnnotatedTypes{}
+
 
 func NewAnnotatedTypes() *AnnotatedTypes {
     return (&AnnotatedTypes{})
@@ -4117,6 +4133,7 @@ type ForwardUsageRoot struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ForwardUsageRoot{}
+
 
 func NewForwardUsageRoot() *ForwardUsageRoot {
     return (&ForwardUsageRoot{})
@@ -4335,6 +4352,7 @@ type ForwardUsageStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ForwardUsageStruct{}
 
+
 func NewForwardUsageStruct() *ForwardUsageStruct {
     return (&ForwardUsageStruct{})
 }
@@ -4484,6 +4502,7 @@ type ForwardUsageByRef struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ForwardUsageByRef{}
 
+
 func NewForwardUsageByRef() *ForwardUsageByRef {
     return (&ForwardUsageByRef{})
 }
@@ -4632,6 +4651,7 @@ type IncompleteMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteMap{}
+
 
 func NewIncompleteMap() *IncompleteMap {
     return (&IncompleteMap{})
@@ -4824,6 +4844,7 @@ type IncompleteMapDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteMapDep{}
 
+
 func NewIncompleteMapDep() *IncompleteMapDep {
     return (&IncompleteMapDep{})
 }
@@ -4904,6 +4925,7 @@ type CompleteMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteMap{}
+
 
 func NewCompleteMap() *CompleteMap {
     return (&CompleteMap{})
@@ -5096,6 +5118,7 @@ type CompleteMapDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteMapDep{}
 
+
 func NewCompleteMapDep() *CompleteMapDep {
     return (&CompleteMapDep{})
 }
@@ -5176,6 +5199,7 @@ type IncompleteList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteList{}
+
 
 func NewIncompleteList() *IncompleteList {
     return (&IncompleteList{})
@@ -5351,6 +5375,7 @@ type IncompleteListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncompleteListDep{}
 
+
 func NewIncompleteListDep() *IncompleteListDep {
     return (&IncompleteListDep{})
 }
@@ -5431,6 +5456,7 @@ type CompleteList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteList{}
+
 
 func NewCompleteList() *CompleteList {
     return (&CompleteList{})
@@ -5606,6 +5632,7 @@ type CompleteListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &CompleteListDep{}
 
+
 func NewCompleteListDep() *CompleteListDep {
     return (&CompleteListDep{})
 }
@@ -5686,6 +5713,7 @@ type AdaptedList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedList{}
+
 
 func NewAdaptedList() *AdaptedList {
     return (&AdaptedList{})
@@ -5862,6 +5890,7 @@ type AdaptedListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedListDep{}
 
+
 func NewAdaptedListDep() *AdaptedListDep {
     return (&AdaptedListDep{})
 }
@@ -6010,6 +6039,7 @@ type DependentAdaptedList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &DependentAdaptedList{}
+
 
 func NewDependentAdaptedList() *DependentAdaptedList {
     return (&DependentAdaptedList{})
@@ -6186,6 +6216,7 @@ type DependentAdaptedListDep struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DependentAdaptedListDep{}
 
+
 func NewDependentAdaptedListDep() *DependentAdaptedListDep {
     return (&DependentAdaptedListDep{})
 }
@@ -6339,6 +6370,7 @@ type AllocatorAware struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AllocatorAware{}
+
 
 func NewAllocatorAware() *AllocatorAware {
     return (&AllocatorAware{})
@@ -6930,6 +6962,7 @@ type AllocatorAware2 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AllocatorAware2{}
 
+
 func NewAllocatorAware2() *AllocatorAware2 {
     return (&AllocatorAware2{})
 }
@@ -7132,6 +7165,7 @@ type TypedefStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypedefStruct{}
+
 
 func NewTypedefStruct() *TypedefStruct {
     return (&TypedefStruct{})
@@ -7374,6 +7408,7 @@ type StructWithDoubleUnderscores struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StructWithDoubleUnderscores{}
+
 
 func NewStructWithDoubleUnderscores() *StructWithDoubleUnderscores {
     return (&StructWithDoubleUnderscores{})

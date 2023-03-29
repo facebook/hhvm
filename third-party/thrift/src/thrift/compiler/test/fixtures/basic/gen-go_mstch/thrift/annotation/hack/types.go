@@ -23,6 +23,7 @@ type FieldWrapper struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldWrapper{}
 
+
 func NewFieldWrapper() *FieldWrapper {
     return (&FieldWrapper{})
 }
@@ -158,6 +159,7 @@ type Wrapper struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Wrapper{}
+
 
 func NewWrapper() *Wrapper {
     return (&Wrapper{}).
@@ -400,6 +402,7 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
+
 func NewAdapter() *Adapter {
     return (&Adapter{})
 }
@@ -533,6 +536,7 @@ type SkipCodegen struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &SkipCodegen{}
+
 
 func NewSkipCodegen() *SkipCodegen {
     return (&SkipCodegen{})
@@ -668,6 +672,7 @@ type Name struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Name{}
+
 
 func NewName() *Name {
     return (&Name{})
@@ -856,6 +861,7 @@ type UnionEnumAttributes struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &UnionEnumAttributes{}
 
+
 func NewUnionEnumAttributes() *UnionEnumAttributes {
     return (&UnionEnumAttributes{})
 }
@@ -1030,6 +1036,7 @@ type StructTrait struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &StructTrait{}
 
+
 func NewStructTrait() *StructTrait {
     return (&StructTrait{})
 }
@@ -1163,6 +1170,7 @@ type Attributes struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Attributes{}
+
 
 func NewAttributes() *Attributes {
     return (&Attributes{})
@@ -1336,6 +1344,7 @@ type StructAsTrait struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StructAsTrait{}
+
 
 func NewStructAsTrait() *StructAsTrait {
     return (&StructAsTrait{})

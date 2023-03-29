@@ -156,6 +156,7 @@ type reqMyServiceQuery struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceQuery{}
 
+
 func newReqMyServiceQuery() *reqMyServiceQuery {
     return (&reqMyServiceQuery{})
 }
@@ -370,6 +371,8 @@ type respMyServiceQuery struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceQuery{}
+var _ thrift.WritableResult = &respMyServiceQuery{}
+
 
 func newRespMyServiceQuery() *respMyServiceQuery {
     return (&respMyServiceQuery{})
@@ -394,6 +397,10 @@ func newRespMyServiceQueryBuilder() *respMyServiceQueryBuilder {
 func (x *respMyServiceQueryBuilder) Emit() *respMyServiceQuery {
     var objCopy respMyServiceQuery = *x.obj
     return &objCopy
+}
+
+func (x *respMyServiceQuery) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServiceQuery) Write(p thrift.Protocol) error {
@@ -451,6 +458,7 @@ type reqMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyServiceHasArgDocs{}
+
 
 func newReqMyServiceHasArgDocs() *reqMyServiceHasArgDocs {
     return (&reqMyServiceHasArgDocs{})
@@ -666,6 +674,8 @@ type respMyServiceHasArgDocs struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasArgDocs{}
+var _ thrift.WritableResult = &respMyServiceHasArgDocs{}
+
 
 func newRespMyServiceHasArgDocs() *respMyServiceHasArgDocs {
     return (&respMyServiceHasArgDocs{})
@@ -690,6 +700,10 @@ func newRespMyServiceHasArgDocsBuilder() *respMyServiceHasArgDocsBuilder {
 func (x *respMyServiceHasArgDocsBuilder) Emit() *respMyServiceHasArgDocs {
     var objCopy respMyServiceHasArgDocs = *x.obj
     return &objCopy
+}
+
+func (x *respMyServiceHasArgDocs) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyServiceHasArgDocs) Write(p thrift.Protocol) error {

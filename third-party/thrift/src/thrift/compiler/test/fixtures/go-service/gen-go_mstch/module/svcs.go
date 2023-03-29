@@ -316,6 +316,7 @@ type reqGetEntityGetEntity struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetEntity{}
 
+
 func newReqGetEntityGetEntity() *reqGetEntityGetEntity {
     return (&reqGetEntityGetEntity{})
 }
@@ -463,6 +464,8 @@ type respGetEntityGetEntity struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetEntity{}
+var _ thrift.WritableResult = &respGetEntityGetEntity{}
+
 
 func newRespGetEntityGetEntity() *respGetEntityGetEntity {
     return (&respGetEntityGetEntity{})
@@ -549,6 +552,10 @@ func (x *respGetEntityGetEntityBuilder) Emit() *respGetEntityGetEntity {
     return &objCopy
 }
 
+func (x *respGetEntityGetEntity) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetEntity) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetEntity"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -610,6 +617,7 @@ type reqGetEntityGetBool struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBool{}
+
 
 func newReqGetEntityGetBool() *reqGetEntityGetBool {
     return (&reqGetEntityGetBool{})
@@ -690,6 +698,8 @@ type respGetEntityGetBool struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBool{}
+var _ thrift.WritableResult = &respGetEntityGetBool{}
+
 
 func newRespGetEntityGetBool() *respGetEntityGetBool {
     return (&respGetEntityGetBool{})
@@ -761,6 +771,10 @@ func (x *respGetEntityGetBoolBuilder) Emit() *respGetEntityGetBool {
     return &objCopy
 }
 
+func (x *respGetEntityGetBool) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetBool) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetBool"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -822,6 +836,7 @@ type reqGetEntityGetByte struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetByte{}
+
 
 func newReqGetEntityGetByte() *reqGetEntityGetByte {
     return (&reqGetEntityGetByte{})
@@ -902,6 +917,8 @@ type respGetEntityGetByte struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetByte{}
+var _ thrift.WritableResult = &respGetEntityGetByte{}
+
 
 func newRespGetEntityGetByte() *respGetEntityGetByte {
     return (&respGetEntityGetByte{})
@@ -973,6 +990,10 @@ func (x *respGetEntityGetByteBuilder) Emit() *respGetEntityGetByte {
     return &objCopy
 }
 
+func (x *respGetEntityGetByte) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetByte) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetByte"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1034,6 +1055,7 @@ type reqGetEntityGetI16 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI16{}
+
 
 func newReqGetEntityGetI16() *reqGetEntityGetI16 {
     return (&reqGetEntityGetI16{})
@@ -1114,6 +1136,8 @@ type respGetEntityGetI16 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI16{}
+var _ thrift.WritableResult = &respGetEntityGetI16{}
+
 
 func newRespGetEntityGetI16() *respGetEntityGetI16 {
     return (&respGetEntityGetI16{})
@@ -1185,6 +1209,10 @@ func (x *respGetEntityGetI16Builder) Emit() *respGetEntityGetI16 {
     return &objCopy
 }
 
+func (x *respGetEntityGetI16) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetI16) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetI16"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1246,6 +1274,7 @@ type reqGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI32{}
+
 
 func newReqGetEntityGetI32() *reqGetEntityGetI32 {
     return (&reqGetEntityGetI32{})
@@ -1326,6 +1355,8 @@ type respGetEntityGetI32 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI32{}
+var _ thrift.WritableResult = &respGetEntityGetI32{}
+
 
 func newRespGetEntityGetI32() *respGetEntityGetI32 {
     return (&respGetEntityGetI32{})
@@ -1397,6 +1428,10 @@ func (x *respGetEntityGetI32Builder) Emit() *respGetEntityGetI32 {
     return &objCopy
 }
 
+func (x *respGetEntityGetI32) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetI32) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetI32"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1458,6 +1493,7 @@ type reqGetEntityGetI64 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetI64{}
+
 
 func newReqGetEntityGetI64() *reqGetEntityGetI64 {
     return (&reqGetEntityGetI64{})
@@ -1538,6 +1574,8 @@ type respGetEntityGetI64 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI64{}
+var _ thrift.WritableResult = &respGetEntityGetI64{}
+
 
 func newRespGetEntityGetI64() *respGetEntityGetI64 {
     return (&respGetEntityGetI64{})
@@ -1609,6 +1647,10 @@ func (x *respGetEntityGetI64Builder) Emit() *respGetEntityGetI64 {
     return &objCopy
 }
 
+func (x *respGetEntityGetI64) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetI64) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetI64"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1670,6 +1712,7 @@ type reqGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetDouble{}
+
 
 func newReqGetEntityGetDouble() *reqGetEntityGetDouble {
     return (&reqGetEntityGetDouble{})
@@ -1750,6 +1793,8 @@ type respGetEntityGetDouble struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetDouble{}
+var _ thrift.WritableResult = &respGetEntityGetDouble{}
+
 
 func newRespGetEntityGetDouble() *respGetEntityGetDouble {
     return (&respGetEntityGetDouble{})
@@ -1821,6 +1866,10 @@ func (x *respGetEntityGetDoubleBuilder) Emit() *respGetEntityGetDouble {
     return &objCopy
 }
 
+func (x *respGetEntityGetDouble) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetDouble) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetDouble"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -1882,6 +1931,7 @@ type reqGetEntityGetString struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetString{}
+
 
 func newReqGetEntityGetString() *reqGetEntityGetString {
     return (&reqGetEntityGetString{})
@@ -1962,6 +2012,8 @@ type respGetEntityGetString struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetString{}
+var _ thrift.WritableResult = &respGetEntityGetString{}
+
 
 func newRespGetEntityGetString() *respGetEntityGetString {
     return (&respGetEntityGetString{})
@@ -2033,6 +2085,10 @@ func (x *respGetEntityGetStringBuilder) Emit() *respGetEntityGetString {
     return &objCopy
 }
 
+func (x *respGetEntityGetString) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetString) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetString"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2094,6 +2150,7 @@ type reqGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetBinary{}
+
 
 func newReqGetEntityGetBinary() *reqGetEntityGetBinary {
     return (&reqGetEntityGetBinary{})
@@ -2174,6 +2231,8 @@ type respGetEntityGetBinary struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBinary{}
+var _ thrift.WritableResult = &respGetEntityGetBinary{}
+
 
 func newRespGetEntityGetBinary() *respGetEntityGetBinary {
     return (&respGetEntityGetBinary{})
@@ -2256,6 +2315,10 @@ func (x *respGetEntityGetBinaryBuilder) Emit() *respGetEntityGetBinary {
     return &objCopy
 }
 
+func (x *respGetEntityGetBinary) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetBinary) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetBinary"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2317,6 +2380,7 @@ type reqGetEntityGetMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetMap{}
+
 
 func newReqGetEntityGetMap() *reqGetEntityGetMap {
     return (&reqGetEntityGetMap{})
@@ -2397,6 +2461,8 @@ type respGetEntityGetMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetMap{}
+var _ thrift.WritableResult = &respGetEntityGetMap{}
+
 
 func newRespGetEntityGetMap() *respGetEntityGetMap {
     return (&respGetEntityGetMap{})
@@ -2525,6 +2591,10 @@ func (x *respGetEntityGetMapBuilder) Emit() *respGetEntityGetMap {
     return &objCopy
 }
 
+func (x *respGetEntityGetMap) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2586,6 +2656,7 @@ type reqGetEntityGetSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetSet{}
+
 
 func newReqGetEntityGetSet() *reqGetEntityGetSet {
     return (&reqGetEntityGetSet{})
@@ -2666,6 +2737,8 @@ type respGetEntityGetSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetSet{}
+var _ thrift.WritableResult = &respGetEntityGetSet{}
+
 
 func newRespGetEntityGetSet() *respGetEntityGetSet {
     return (&respGetEntityGetSet{})
@@ -2777,6 +2850,10 @@ func (x *respGetEntityGetSetBuilder) Emit() *respGetEntityGetSet {
     return &objCopy
 }
 
+func (x *respGetEntityGetSet) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetSet) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetSet"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -2838,6 +2915,7 @@ type reqGetEntityGetList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetList{}
+
 
 func newReqGetEntityGetList() *reqGetEntityGetList {
     return (&reqGetEntityGetList{})
@@ -2918,6 +2996,8 @@ type respGetEntityGetList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetList{}
+var _ thrift.WritableResult = &respGetEntityGetList{}
+
 
 func newRespGetEntityGetList() *respGetEntityGetList {
     return (&respGetEntityGetList{})
@@ -3029,6 +3109,10 @@ func (x *respGetEntityGetListBuilder) Emit() *respGetEntityGetList {
     return &objCopy
 }
 
+func (x *respGetEntityGetList) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respGetEntityGetList) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respGetEntityGetList"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -3093,6 +3177,7 @@ type reqGetEntityGetLegacyStuff struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqGetEntityGetLegacyStuff{}
+
 
 func newReqGetEntityGetLegacyStuff() *reqGetEntityGetLegacyStuff {
     return (&reqGetEntityGetLegacyStuff{})
@@ -3332,6 +3417,8 @@ type respGetEntityGetLegacyStuff struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetLegacyStuff{}
+var _ thrift.WritableResult = &respGetEntityGetLegacyStuff{}
+
 
 func newRespGetEntityGetLegacyStuff() *respGetEntityGetLegacyStuff {
     return (&respGetEntityGetLegacyStuff{})
@@ -3401,6 +3488,10 @@ func (x *respGetEntityGetLegacyStuffBuilder) Value(value int32) *respGetEntityGe
 func (x *respGetEntityGetLegacyStuffBuilder) Emit() *respGetEntityGetLegacyStuff {
     var objCopy respGetEntityGetLegacyStuff = *x.obj
     return &objCopy
+}
+
+func (x *respGetEntityGetLegacyStuff) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respGetEntityGetLegacyStuff) Write(p thrift.Protocol) error {

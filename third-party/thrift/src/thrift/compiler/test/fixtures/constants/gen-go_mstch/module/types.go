@@ -351,6 +351,7 @@ type Internship struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Internship{}
 
+
 func NewInternship() *Internship {
     return (&Internship{})
 }
@@ -741,6 +742,7 @@ type Range struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Range{}
 
+
 func NewRange() *Range {
     return (&Range{})
 }
@@ -928,6 +930,7 @@ type Struct1 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct1{}
+
 
 func NewStruct1() *Struct1 {
     return (&Struct1{}).
@@ -1120,6 +1123,7 @@ type Struct2 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct2{}
+
 
 func NewStruct2() *Struct2 {
     return (&Struct2{})
@@ -1471,6 +1475,7 @@ type Struct3 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct3{}
 
+
 func NewStruct3() *Struct3 {
     return (&Struct3{})
 }
@@ -1727,6 +1732,7 @@ type Struct4 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Struct4{}
+
 
 func NewStruct4() *Struct4 {
     return (&Struct4{})
@@ -1997,6 +2003,7 @@ type Union1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Union1{}
 
+
 func NewUnion1() *Union1 {
     return (&Union1{})
 }
@@ -2228,6 +2235,7 @@ type Union2 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Union2{}
+
 
 func NewUnion2() *Union2 {
     return (&Union2{})

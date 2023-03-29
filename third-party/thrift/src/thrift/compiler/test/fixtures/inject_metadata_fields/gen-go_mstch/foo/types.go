@@ -25,6 +25,7 @@ type Fields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Fields{}
 
+
 func NewFields() *Fields {
     return (&Fields{})
 }

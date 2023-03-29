@@ -141,6 +141,7 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
+
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
@@ -754,6 +755,7 @@ type MyDataItem struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataItem{}
 
+
 func NewMyDataItem() *MyDataItem {
     return (&MyDataItem{})
 }
@@ -837,6 +839,7 @@ type MyUnion struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
+
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -1236,6 +1239,7 @@ type ReservedKeyword struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ReservedKeyword{}
 
+
 func NewReservedKeyword() *ReservedKeyword {
     return (&ReservedKeyword{})
 }
@@ -1369,6 +1373,7 @@ type UnionToBeRenamed struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &UnionToBeRenamed{}
+
 
 func NewUnionToBeRenamed() *UnionToBeRenamed {
     return (&UnionToBeRenamed{})

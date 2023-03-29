@@ -25,6 +25,7 @@ type Fields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Fields{}
 
+
 func NewFields() *Fields {
     return (&Fields{})
 }
@@ -158,6 +159,7 @@ type FieldsInjectedToEmptyStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldsInjectedToEmptyStruct{}
+
 
 func NewFieldsInjectedToEmptyStruct() *FieldsInjectedToEmptyStruct {
     return (&FieldsInjectedToEmptyStruct{})
@@ -293,6 +295,7 @@ type FieldsInjectedToStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldsInjectedToStruct{}
+
 
 func NewFieldsInjectedToStruct() *FieldsInjectedToStruct {
     return (&FieldsInjectedToStruct{})
@@ -483,6 +486,7 @@ type FieldsInjectedWithIncludedStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldsInjectedWithIncludedStruct{}
+
 
 func NewFieldsInjectedWithIncludedStruct() *FieldsInjectedWithIncludedStruct {
     return (&FieldsInjectedWithIncludedStruct{})

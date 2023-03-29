@@ -131,6 +131,7 @@ type reqMyRootDoRoot struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyRootDoRoot{}
 
+
 func newReqMyRootDoRoot() *reqMyRootDoRoot {
     return (&reqMyRootDoRoot{})
 }
@@ -209,6 +210,8 @@ type respMyRootDoRoot struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyRootDoRoot{}
+var _ thrift.WritableResult = &respMyRootDoRoot{}
+
 
 func newRespMyRootDoRoot() *respMyRootDoRoot {
     return (&respMyRootDoRoot{})
@@ -233,6 +236,10 @@ func newRespMyRootDoRootBuilder() *respMyRootDoRootBuilder {
 func (x *respMyRootDoRootBuilder) Emit() *respMyRootDoRoot {
     var objCopy respMyRootDoRoot = *x.obj
     return &objCopy
+}
+
+func (x *respMyRootDoRoot) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyRootDoRoot) Write(p thrift.Protocol) error {
@@ -500,6 +507,7 @@ type reqMyNodeDoMid struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyNodeDoMid{}
 
+
 func newReqMyNodeDoMid() *reqMyNodeDoMid {
     return (&reqMyNodeDoMid{})
 }
@@ -578,6 +586,8 @@ type respMyNodeDoMid struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyNodeDoMid{}
+var _ thrift.WritableResult = &respMyNodeDoMid{}
+
 
 func newRespMyNodeDoMid() *respMyNodeDoMid {
     return (&respMyNodeDoMid{})
@@ -602,6 +612,10 @@ func newRespMyNodeDoMidBuilder() *respMyNodeDoMidBuilder {
 func (x *respMyNodeDoMidBuilder) Emit() *respMyNodeDoMid {
     var objCopy respMyNodeDoMid = *x.obj
     return &objCopy
+}
+
+func (x *respMyNodeDoMid) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyNodeDoMid) Write(p thrift.Protocol) error {
@@ -844,6 +858,7 @@ type reqMyLeafDoLeaf struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqMyLeafDoLeaf{}
 
+
 func newReqMyLeafDoLeaf() *reqMyLeafDoLeaf {
     return (&reqMyLeafDoLeaf{})
 }
@@ -922,6 +937,8 @@ type respMyLeafDoLeaf struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyLeafDoLeaf{}
+var _ thrift.WritableResult = &respMyLeafDoLeaf{}
+
 
 func newRespMyLeafDoLeaf() *respMyLeafDoLeaf {
     return (&respMyLeafDoLeaf{})
@@ -946,6 +963,10 @@ func newRespMyLeafDoLeafBuilder() *respMyLeafDoLeafBuilder {
 func (x *respMyLeafDoLeafBuilder) Emit() *respMyLeafDoLeaf {
     var objCopy respMyLeafDoLeaf = *x.obj
     return &objCopy
+}
+
+func (x *respMyLeafDoLeaf) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respMyLeafDoLeaf) Write(p thrift.Protocol) error {

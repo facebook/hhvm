@@ -123,6 +123,7 @@ type A struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &A{}
 
+
 func NewA() *A {
     return (&A{})
 }
@@ -257,6 +258,7 @@ type U struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &U{}
+
 
 func NewU() *U {
     return (&U{})
@@ -486,6 +488,7 @@ type Bang struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Bang{}
+
 
 func NewBang() *Bang {
     return (&Bang{})

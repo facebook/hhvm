@@ -110,6 +110,7 @@ type Color struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Color{}
 
+
 func NewColor() *Color {
     return (&Color{})
 }
@@ -406,6 +407,7 @@ type Vehicle struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Vehicle{}
+
 
 func NewVehicle() *Vehicle {
     return (&Vehicle{}).
@@ -833,6 +835,7 @@ type Person struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Person{}
+
 
 func NewPerson() *Person {
     return (&Person{})

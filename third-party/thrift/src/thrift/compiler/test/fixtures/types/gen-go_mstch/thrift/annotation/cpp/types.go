@@ -155,6 +155,7 @@ type Ref struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Ref{}
 
+
 func NewRef() *Ref {
     return (&Ref{})
 }
@@ -290,6 +291,7 @@ type Lazy struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Lazy{}
 
+
 func NewLazy() *Lazy {
     return (&Lazy{}).
         SetRef(false)
@@ -424,6 +426,7 @@ type DisableLazyChecksum struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DisableLazyChecksum{}
 
+
 func NewDisableLazyChecksum() *DisableLazyChecksum {
     return (&DisableLazyChecksum{})
 }
@@ -508,6 +511,7 @@ type Adapter struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
+
 
 func NewAdapter() *Adapter {
     return (&Adapter{})
@@ -855,6 +859,7 @@ type PackIsset struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &PackIsset{}
 
+
 func NewPackIsset() *PackIsset {
     return (&PackIsset{}).
         SetAtomic(true)
@@ -989,6 +994,7 @@ type MinimizePadding struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MinimizePadding{}
 
+
 func NewMinimizePadding() *MinimizePadding {
     return (&MinimizePadding{})
 }
@@ -1068,6 +1074,7 @@ type TriviallyRelocatable struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TriviallyRelocatable{}
+
 
 func NewTriviallyRelocatable() *TriviallyRelocatable {
     return (&TriviallyRelocatable{})
@@ -1149,6 +1156,7 @@ type ScopedEnumAsUnionType struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ScopedEnumAsUnionType{}
 
+
 func NewScopedEnumAsUnionType() *ScopedEnumAsUnionType {
     return (&ScopedEnumAsUnionType{})
 }
@@ -1228,6 +1236,7 @@ type StrongType struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StrongType{}
+
 
 func NewStrongType() *StrongType {
     return (&StrongType{})
@@ -1310,6 +1319,7 @@ type FieldInterceptor struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldInterceptor{}
+
 
 func NewFieldInterceptor() *FieldInterceptor {
     return (&FieldInterceptor{})
@@ -1497,6 +1507,7 @@ type UseOpEncode struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &UseOpEncode{}
 
+
 func NewUseOpEncode() *UseOpEncode {
     return (&UseOpEncode{})
 }
@@ -1577,6 +1588,7 @@ type EnumType struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &EnumType{}
+
 
 func NewEnumType() *EnumType {
     return (&EnumType{})

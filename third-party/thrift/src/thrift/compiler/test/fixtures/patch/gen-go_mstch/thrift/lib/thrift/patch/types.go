@@ -123,6 +123,7 @@ type GeneratePatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &GeneratePatch{}
 
+
 func NewGeneratePatch() *GeneratePatch {
     return (&GeneratePatch{})
 }
@@ -202,6 +203,7 @@ type AssignOnlyPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &AssignOnlyPatch{}
+
 
 func NewAssignOnlyPatch() *AssignOnlyPatch {
     return (&AssignOnlyPatch{})
@@ -285,6 +287,7 @@ type BoolPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BoolPatch{}
+
 
 func NewBoolPatch() *BoolPatch {
     return (&BoolPatch{})
@@ -542,6 +545,7 @@ type BytePatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BytePatch{}
 
+
 func NewBytePatch() *BytePatch {
     return (&BytePatch{})
 }
@@ -797,6 +801,7 @@ type I16Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &I16Patch{}
+
 
 func NewI16Patch() *I16Patch {
     return (&I16Patch{})
@@ -1054,6 +1059,7 @@ type I32Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &I32Patch{}
 
+
 func NewI32Patch() *I32Patch {
     return (&I32Patch{})
 }
@@ -1309,6 +1315,7 @@ type I64Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &I64Patch{}
+
 
 func NewI64Patch() *I64Patch {
     return (&I64Patch{})
@@ -1566,6 +1573,7 @@ type FloatPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &FloatPatch{}
 
+
 func NewFloatPatch() *FloatPatch {
     return (&FloatPatch{})
 }
@@ -1821,6 +1829,7 @@ type DoublePatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &DoublePatch{}
+
 
 func NewDoublePatch() *DoublePatch {
     return (&DoublePatch{})
@@ -2078,6 +2087,7 @@ type StringPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StringPatch{}
+
 
 func NewStringPatch() *StringPatch {
     return (&StringPatch{})
@@ -2388,6 +2398,7 @@ type BinaryPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BinaryPatch{}
+
 
 func NewBinaryPatch() *BinaryPatch {
     return (&BinaryPatch{})

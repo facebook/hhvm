@@ -78,6 +78,7 @@ type MyData struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyData{}
 
+
 func NewMyData() *MyData {
     return (&MyData{})
 }
@@ -265,6 +266,7 @@ type MyDataWithCustomDefault struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefault{}
+
 
 func NewMyDataWithCustomDefault() *MyDataWithCustomDefault {
     return (&MyDataWithCustomDefault{}).
@@ -455,6 +457,7 @@ type InnerUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnion{}
 
+
 func NewInnerUnion() *InnerUnion {
     return (&InnerUnion{})
 }
@@ -612,6 +615,7 @@ type MyUnion struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
+
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -944,6 +948,7 @@ type MyStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
+
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
@@ -3361,6 +3366,7 @@ type LateDefStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStruct{}
 
+
 func NewLateDefStruct() *LateDefStruct {
     return (&LateDefStruct{})
 }
@@ -3441,6 +3447,7 @@ type Recursive struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Recursive{}
+
 
 func NewRecursive() *Recursive {
     return (&Recursive{})
@@ -3634,6 +3641,7 @@ type Bar struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Bar{}
 
+
 func NewBar() *Bar {
     return (&Bar{})
 }
@@ -3782,6 +3790,7 @@ type Loop struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Loop{}
+
 
 func NewLoop() *Loop {
     return (&Loop{})
@@ -3932,6 +3941,7 @@ type MyDataEnsureStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataEnsureStruct{}
+
 
 func NewMyDataEnsureStruct() *MyDataEnsureStruct {
     return (&MyDataEnsureStruct{})
@@ -4148,6 +4158,7 @@ type MyDataFieldPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataFieldPatch{}
+
 
 func NewMyDataFieldPatch() *MyDataFieldPatch {
     return (&MyDataFieldPatch{})
@@ -4369,6 +4380,7 @@ type MyDataPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataPatch{}
+
 
 func NewMyDataPatch() *MyDataPatch {
     return (&MyDataPatch{})
@@ -4777,6 +4789,7 @@ type MyDataWithCustomDefaultEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultEnsureStruct{}
 
+
 func NewMyDataWithCustomDefaultEnsureStruct() *MyDataWithCustomDefaultEnsureStruct {
     return (&MyDataWithCustomDefaultEnsureStruct{})
 }
@@ -4992,6 +5005,7 @@ type MyDataWithCustomDefaultFieldPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultFieldPatch{}
+
 
 func NewMyDataWithCustomDefaultFieldPatch() *MyDataWithCustomDefaultFieldPatch {
     return (&MyDataWithCustomDefaultFieldPatch{})
@@ -5213,6 +5227,7 @@ type MyDataWithCustomDefaultPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyDataWithCustomDefaultPatch{}
+
 
 func NewMyDataWithCustomDefaultPatch() *MyDataWithCustomDefaultPatch {
     return (&MyDataWithCustomDefaultPatch{})
@@ -5620,6 +5635,7 @@ type InnerUnionFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnionFieldPatch{}
 
+
 func NewInnerUnionFieldPatch() *InnerUnionFieldPatch {
     return (&InnerUnionFieldPatch{})
 }
@@ -5772,6 +5788,7 @@ type InnerUnionPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &InnerUnionPatch{}
+
 
 func NewInnerUnionPatch() *InnerUnionPatch {
     return (&InnerUnionPatch{})
@@ -6181,6 +6198,7 @@ type MyUnionFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnionFieldPatch{}
 
+
 func NewMyUnionFieldPatch() *MyUnionFieldPatch {
     return (&MyUnionFieldPatch{})
 }
@@ -6469,6 +6487,7 @@ type MyUnionPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnionPatch{}
+
 
 func NewMyUnionPatch() *MyUnionPatch {
     return (&MyUnionPatch{})
@@ -6907,6 +6926,7 @@ type MyStructEnsureStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructEnsureStruct{}
+
 
 func NewMyStructEnsureStruct() *MyStructEnsureStruct {
     return (&MyStructEnsureStruct{})
@@ -9460,6 +9480,7 @@ type MyStructField10Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField10Patch{}
 
+
 func NewMyStructField10Patch() *MyStructField10Patch {
     return (&MyStructField10Patch{})
 }
@@ -9662,6 +9683,7 @@ type MyStructField23Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField23Patch{}
+
 
 func NewMyStructField23Patch() *MyStructField23Patch {
     return (&MyStructField23Patch{})
@@ -9869,6 +9891,7 @@ type MyStructField26Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField26Patch{}
+
 
 func NewMyStructField26Patch() *MyStructField26Patch {
     return (&MyStructField26Patch{})
@@ -10490,6 +10513,7 @@ type MyStructField27Patch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField27Patch{}
 
+
 func NewMyStructField27Patch() *MyStructField27Patch {
     return (&MyStructField27Patch{})
 }
@@ -10908,6 +10932,7 @@ type MyStructField28Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField28Patch{}
+
 
 func NewMyStructField28Patch() *MyStructField28Patch {
     return (&MyStructField28Patch{})
@@ -11692,6 +11717,7 @@ type MyStructField29Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField29Patch{}
+
 
 func NewMyStructField29Patch() *MyStructField29Patch {
     return (&MyStructField29Patch{})
@@ -12500,6 +12526,7 @@ type MyStructField29Patch1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField29Patch1{}
 
+
 func NewMyStructField29Patch1() *MyStructField29Patch1 {
     return (&MyStructField29Patch1{})
 }
@@ -13284,6 +13311,7 @@ type MyStructField30Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField30Patch{}
+
 
 func NewMyStructField30Patch() *MyStructField30Patch {
     return (&MyStructField30Patch{})
@@ -14208,6 +14236,7 @@ type MyStructField30Patch1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructField30Patch1{}
 
+
 func NewMyStructField30Patch1() *MyStructField30Patch1 {
     return (&MyStructField30Patch1{})
 }
@@ -15018,6 +15047,7 @@ type MyStructFieldPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructFieldPatch{}
+
 
 func NewMyStructFieldPatch() *MyStructFieldPatch {
     return (&MyStructFieldPatch{})
@@ -17348,6 +17378,7 @@ type MyStructPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructPatch{}
 
+
 func NewMyStructPatch() *MyStructPatch {
     return (&MyStructPatch{})
 }
@@ -17753,6 +17784,7 @@ type LateDefStructEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructEnsureStruct{}
 
+
 func NewLateDefStructEnsureStruct() *LateDefStructEnsureStruct {
     return (&LateDefStructEnsureStruct{})
 }
@@ -17832,6 +17864,7 @@ type LateDefStructFieldPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructFieldPatch{}
+
 
 func NewLateDefStructFieldPatch() *LateDefStructFieldPatch {
     return (&LateDefStructFieldPatch{})
@@ -17917,6 +17950,7 @@ type LateDefStructPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &LateDefStructPatch{}
+
 
 func NewLateDefStructPatch() *LateDefStructPatch {
     return (&LateDefStructPatch{})
@@ -18324,6 +18358,7 @@ type RecursiveEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursiveEnsureStruct{}
 
+
 func NewRecursiveEnsureStruct() *RecursiveEnsureStruct {
     return (&RecursiveEnsureStruct{})
 }
@@ -18516,6 +18551,7 @@ type RecursiveField1Patch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursiveField1Patch{}
+
 
 func NewRecursiveField1Patch() *RecursiveField1Patch {
     return (&RecursiveField1Patch{})
@@ -18762,6 +18798,7 @@ type RecursiveFieldPatch struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursiveFieldPatch{}
 
+
 func NewRecursiveFieldPatch() *RecursiveFieldPatch {
     return (&RecursiveFieldPatch{})
 }
@@ -18914,6 +18951,7 @@ type RecursivePatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &RecursivePatch{}
+
 
 func NewRecursivePatch() *RecursivePatch {
     return (&RecursivePatch{})
@@ -19321,6 +19359,7 @@ type BarEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &BarEnsureStruct{}
 
+
 func NewBarEnsureStruct() *BarEnsureStruct {
     return (&BarEnsureStruct{})
 }
@@ -19469,6 +19508,7 @@ type BarFieldPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BarFieldPatch{}
+
 
 func NewBarFieldPatch() *BarFieldPatch {
     return (&BarFieldPatch{})
@@ -19622,6 +19662,7 @@ type BarPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BarPatch{}
+
 
 func NewBarPatch() *BarPatch {
     return (&BarPatch{})
@@ -20029,6 +20070,7 @@ type LoopEnsureStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &LoopEnsureStruct{}
 
+
 func NewLoopEnsureStruct() *LoopEnsureStruct {
     return (&LoopEnsureStruct{})
 }
@@ -20177,6 +20219,7 @@ type LoopFieldPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &LoopFieldPatch{}
+
 
 func NewLoopFieldPatch() *LoopFieldPatch {
     return (&LoopFieldPatch{})
@@ -20327,6 +20370,7 @@ type LoopPatch struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &LoopPatch{}
+
 
 func NewLoopPatch() *LoopPatch {
     return (&LoopPatch{})

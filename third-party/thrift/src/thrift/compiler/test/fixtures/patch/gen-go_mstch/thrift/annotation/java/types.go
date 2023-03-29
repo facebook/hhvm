@@ -24,6 +24,7 @@ type Adapter struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Adapter{}
 
+
 func NewAdapter() *Adapter {
     return (&Adapter{})
 }
@@ -211,6 +212,7 @@ type Wrapper struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Wrapper{}
+
 
 func NewWrapper() *Wrapper {
     return (&Wrapper{})

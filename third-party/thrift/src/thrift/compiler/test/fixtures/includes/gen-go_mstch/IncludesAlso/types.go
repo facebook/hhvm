@@ -20,6 +20,7 @@ type Also struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Also{}
 
+
 func NewAlso() *Also {
     return (&Also{})
 }

@@ -79,6 +79,7 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
+
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
@@ -266,6 +267,7 @@ type MyUnion struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
+
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})

@@ -149,6 +149,7 @@ type reqServiceFunc struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqServiceFunc{}
 
+
 func newReqServiceFunc() *reqServiceFunc {
     return (&reqServiceFunc{})
 }
@@ -403,6 +404,8 @@ type respServiceFunc struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respServiceFunc{}
+var _ thrift.WritableResult = &respServiceFunc{}
+
 
 func newRespServiceFunc() *respServiceFunc {
     return (&respServiceFunc{})
@@ -473,6 +476,10 @@ func (x *respServiceFuncBuilder) Value(value MyI32) *respServiceFuncBuilder {
 func (x *respServiceFuncBuilder) Emit() *respServiceFunc {
     var objCopy respServiceFunc = *x.obj
     return &objCopy
+}
+
+func (x *respServiceFunc) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respServiceFunc) Write(p thrift.Protocol) error {
@@ -757,6 +764,7 @@ type reqAdapterServiceCount struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceCount{}
 
+
 func newReqAdapterServiceCount() *reqAdapterServiceCount {
     return (&reqAdapterServiceCount{})
 }
@@ -836,6 +844,8 @@ type respAdapterServiceCount struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respAdapterServiceCount{}
+var _ thrift.WritableResult = &respAdapterServiceCount{}
+
 
 func newRespAdapterServiceCount() *respAdapterServiceCount {
     return (&respAdapterServiceCount{})
@@ -922,6 +932,10 @@ func (x *respAdapterServiceCountBuilder) Emit() *respAdapterServiceCount {
     return &objCopy
 }
 
+func (x *respAdapterServiceCount) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respAdapterServiceCount) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respAdapterServiceCount"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -984,6 +998,7 @@ type reqAdapterServiceAdaptedTypes struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqAdapterServiceAdaptedTypes{}
+
 
 func newReqAdapterServiceAdaptedTypes() *reqAdapterServiceAdaptedTypes {
     return (&reqAdapterServiceAdaptedTypes{})
@@ -1132,6 +1147,8 @@ type respAdapterServiceAdaptedTypes struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}
+var _ thrift.WritableResult = &respAdapterServiceAdaptedTypes{}
+
 
 func newRespAdapterServiceAdaptedTypes() *respAdapterServiceAdaptedTypes {
     return (&respAdapterServiceAdaptedTypes{})
@@ -1216,6 +1233,10 @@ func (x *respAdapterServiceAdaptedTypesBuilder) Value(value *HeapAllocated) *res
 func (x *respAdapterServiceAdaptedTypesBuilder) Emit() *respAdapterServiceAdaptedTypes {
     var objCopy respAdapterServiceAdaptedTypes = *x.obj
     return &objCopy
+}
+
+func (x *respAdapterServiceAdaptedTypes) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respAdapterServiceAdaptedTypes) Write(p thrift.Protocol) error {

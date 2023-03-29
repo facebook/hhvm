@@ -31,6 +31,10 @@ namespace compiler {
 
 namespace {
 
+// Name of the field of the response helper struct where return value is stored
+// (if function call is not void).
+const std::string DEFAULT_RETVAL_FIELD_NAME = "value";
+
 struct go_codegen_data {
   // the import path for the supporting library
   std::string thrift_lib_import =
@@ -317,6 +321,7 @@ class mstch_go_field : public mstch_field {
             {"field:key_str", &mstch_go_field::key_str},
             {"field:go_tag?", &mstch_go_field::has_go_tag},
             {"field:go_tag", &mstch_go_field::go_tag},
+            {"field:retval?", &mstch_go_field::is_retval},
         });
   }
 
@@ -395,6 +400,9 @@ class mstch_go_field : public mstch_field {
     }
     return std::string();
   }
+  mstch::node is_retval() {
+    return field_->name() == DEFAULT_RETVAL_FIELD_NAME;
+  }
 
  private:
   go_codegen_data& data_;
@@ -421,6 +429,7 @@ class mstch_go_struct : public mstch_struct {
             {"struct:go_qualified_name", &mstch_go_struct::go_qualified_name},
             {"struct:go_qualified_new_func",
              &mstch_go_struct::go_qualified_new_func},
+            {"struct:resp?", &mstch_go_struct::is_resp_struct},
         });
   }
 
@@ -433,13 +442,18 @@ class mstch_go_struct : public mstch_struct {
     auto prefix = go_package_alias_prefix(struct_->program(), data_);
     return prefix + go_new_func_();
   }
+  mstch::node is_resp_struct() {
+    // Whether this is a helper response struct.
+    return is_req_resp_struct() &&
+        boost::algorithm::starts_with(struct_->name(), "resp");
+  }
 
  private:
   go_codegen_data& data_;
 
   std::string go_name_() {
     auto name = struct_->name();
-    if (data_.req_resp_struct_names.count(name) > 0) {
+    if (is_req_resp_struct()) {
       // Unexported/lowercase
       return go::munge_ident(name, false);
     } else {
@@ -451,13 +465,17 @@ class mstch_go_struct : public mstch_struct {
   std::string go_new_func_() {
     auto name = struct_->name();
     auto go_name = go::munge_ident(struct_->name(), true);
-    if (data_.req_resp_struct_names.count(name) > 0) {
+    if (is_req_resp_struct()) {
       // Unexported/lowercase
       return "new" + go_name;
     } else {
       // Exported/uppercase
       return "New" + go_name;
     }
+  }
+
+  bool is_req_resp_struct() {
+    return (data_.req_resp_struct_names.count(struct_->name()) > 0);
   }
 };
 
@@ -523,8 +541,8 @@ class mstch_go_service : public mstch_service {
           go::munge_ident("resp" + svcGoName + funcGoName, false);
       auto resp_struct = new t_struct(service_->program(), resp_struct_name);
       if (!func->get_return_type()->is_void()) {
-        auto resp_field =
-            std::make_unique<t_field>(func->get_return_type(), "value", 0);
+        auto resp_field = std::make_unique<t_field>(
+            func->get_return_type(), DEFAULT_RETVAL_FIELD_NAME, 0);
         resp_field->set_qualifier(t_field_qualifier::none);
         resp_struct->append_field(std::move(resp_field));
       }

@@ -20,6 +20,7 @@ type Empty struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Empty{}
 
+
 func NewEmpty() *Empty {
     return (&Empty{})
 }
@@ -99,6 +100,7 @@ type Nada struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Nada{}
+
 
 func NewNada() *Nada {
     return (&Nada{})

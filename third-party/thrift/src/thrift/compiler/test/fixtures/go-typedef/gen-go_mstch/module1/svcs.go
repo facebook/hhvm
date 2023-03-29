@@ -167,6 +167,7 @@ type reqFinderByPlate struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderByPlate{}
 
+
 func newReqFinderByPlate() *reqFinderByPlate {
     return (&reqFinderByPlate{})
 }
@@ -300,6 +301,8 @@ type respFinderByPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderByPlate{}
+var _ thrift.WritableResult = &respFinderByPlate{}
+
 
 func newRespFinderByPlate() *respFinderByPlate {
     return (&respFinderByPlate{})
@@ -386,6 +389,10 @@ func (x *respFinderByPlateBuilder) Emit() *respFinderByPlate {
     return &objCopy
 }
 
+func (x *respFinderByPlate) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respFinderByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -448,6 +455,7 @@ type reqFinderAliasByPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderAliasByPlate{}
+
 
 func newReqFinderAliasByPlate() *reqFinderAliasByPlate {
     return (&reqFinderAliasByPlate{})
@@ -582,6 +590,8 @@ type respFinderAliasByPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderAliasByPlate{}
+var _ thrift.WritableResult = &respFinderAliasByPlate{}
+
 
 func newRespFinderAliasByPlate() *respFinderAliasByPlate {
     return (&respFinderAliasByPlate{})
@@ -668,6 +678,10 @@ func (x *respFinderAliasByPlateBuilder) Emit() *respFinderAliasByPlate {
     return &objCopy
 }
 
+func (x *respFinderAliasByPlate) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respFinderAliasByPlate) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respFinderAliasByPlate"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -730,6 +744,7 @@ type reqFinderPreviousPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqFinderPreviousPlate{}
+
 
 func newReqFinderPreviousPlate() *reqFinderPreviousPlate {
     return (&reqFinderPreviousPlate{})
@@ -864,6 +879,8 @@ type respFinderPreviousPlate struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderPreviousPlate{}
+var _ thrift.WritableResult = &respFinderPreviousPlate{}
+
 
 func newRespFinderPreviousPlate() *respFinderPreviousPlate {
     return (&respFinderPreviousPlate{})
@@ -934,6 +951,10 @@ func (x *respFinderPreviousPlateBuilder) Value(value Plate) *respFinderPreviousP
 func (x *respFinderPreviousPlateBuilder) Emit() *respFinderPreviousPlate {
     var objCopy respFinderPreviousPlate = *x.obj
     return &objCopy
+}
+
+func (x *respFinderPreviousPlate) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respFinderPreviousPlate) Write(p thrift.Protocol) error {

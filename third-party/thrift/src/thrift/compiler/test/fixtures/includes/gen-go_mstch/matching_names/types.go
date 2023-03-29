@@ -23,6 +23,7 @@ type IncludesAlso struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &IncludesAlso{}
 
+
 func NewIncludesAlso() *IncludesAlso {
     return (&IncludesAlso{})
 }

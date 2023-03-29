@@ -224,6 +224,7 @@ type TypeUri struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeUri{}
 
+
 func NewTypeUri() *TypeUri {
     return (&TypeUri{})
 }
@@ -467,6 +468,7 @@ type TypeName struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TypeName{}
+
 
 func NewTypeName() *TypeName {
     return (&TypeName{})

@@ -149,6 +149,7 @@ type reqCF struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCF{}
 
+
 func newReqCF() *reqCF {
     return (&reqCF{})
 }
@@ -227,6 +228,8 @@ type respCF struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respCF{}
+var _ thrift.WritableResult = &respCF{}
+
 
 func newRespCF() *respCF {
     return (&respCF{})
@@ -251,6 +254,10 @@ func newRespCFBuilder() *respCFBuilder {
 func (x *respCFBuilder) Emit() *respCF {
     var objCopy respCF = *x.obj
     return &objCopy
+}
+
+func (x *respCF) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respCF) Write(p thrift.Protocol) error {
@@ -309,6 +316,7 @@ type reqCThing struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqCThing{}
+
 
 func newReqCThing() *reqCThing {
     return (&reqCThing{})
@@ -589,6 +597,8 @@ type respCThing struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respCThing{}
+var _ thrift.WritableResult = &respCThing{}
+
 
 func newRespCThing() *respCThing {
     return (&respCThing{})
@@ -718,6 +728,13 @@ func (x *respCThingBuilder) Bang(value *Bang) *respCThingBuilder {
 func (x *respCThingBuilder) Emit() *respCThing {
     var objCopy respCThing = *x.obj
     return &objCopy
+}
+
+func (x *respCThing) Exception() thrift.WritableException {
+    if x.Bang != nil {
+        return x.Bang
+    }
+    return nil
 }
 
 func (x *respCThing) Write(p thrift.Protocol) error {

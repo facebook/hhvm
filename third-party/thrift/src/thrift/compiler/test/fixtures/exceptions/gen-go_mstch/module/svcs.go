@@ -178,6 +178,7 @@ type reqRaiserDoBland struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoBland{}
 
+
 func newReqRaiserDoBland() *reqRaiserDoBland {
     return (&reqRaiserDoBland{})
 }
@@ -256,6 +257,8 @@ type respRaiserDoBland struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserDoBland{}
+var _ thrift.WritableResult = &respRaiserDoBland{}
+
 
 func newRespRaiserDoBland() *respRaiserDoBland {
     return (&respRaiserDoBland{})
@@ -280,6 +283,10 @@ func newRespRaiserDoBlandBuilder() *respRaiserDoBlandBuilder {
 func (x *respRaiserDoBlandBuilder) Emit() *respRaiserDoBland {
     var objCopy respRaiserDoBland = *x.obj
     return &objCopy
+}
+
+func (x *respRaiserDoBland) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respRaiserDoBland) Write(p thrift.Protocol) error {
@@ -335,6 +342,7 @@ type reqRaiserDoRaise struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserDoRaise{}
+
 
 func newReqRaiserDoRaise() *reqRaiserDoRaise {
     return (&reqRaiserDoRaise{})
@@ -417,6 +425,8 @@ type respRaiserDoRaise struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserDoRaise{}
+var _ thrift.WritableResult = &respRaiserDoRaise{}
+
 
 func newRespRaiserDoRaise() *respRaiserDoRaise {
     return (&respRaiserDoRaise{})
@@ -623,6 +633,19 @@ func (x *respRaiserDoRaiseBuilder) Emit() *respRaiserDoRaise {
     return &objCopy
 }
 
+func (x *respRaiserDoRaise) Exception() thrift.WritableException {
+    if x.B != nil {
+        return x.B
+    }
+    if x.F != nil {
+        return x.F
+    }
+    if x.S != nil {
+        return x.S
+    }
+    return nil
+}
+
 func (x *respRaiserDoRaise) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respRaiserDoRaise"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -700,6 +723,7 @@ type reqRaiserGet200 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet200{}
+
 
 func newReqRaiserGet200() *reqRaiserGet200 {
     return (&reqRaiserGet200{})
@@ -780,6 +804,8 @@ type respRaiserGet200 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserGet200{}
+var _ thrift.WritableResult = &respRaiserGet200{}
+
 
 func newRespRaiserGet200() *respRaiserGet200 {
     return (&respRaiserGet200{})
@@ -851,6 +877,10 @@ func (x *respRaiserGet200Builder) Emit() *respRaiserGet200 {
     return &objCopy
 }
 
+func (x *respRaiserGet200) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respRaiserGet200) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respRaiserGet200"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -912,6 +942,7 @@ type reqRaiserGet500 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqRaiserGet500{}
+
 
 func newReqRaiserGet500() *reqRaiserGet500 {
     return (&reqRaiserGet500{})
@@ -995,6 +1026,8 @@ type respRaiserGet500 struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respRaiserGet500{}
+var _ thrift.WritableResult = &respRaiserGet500{}
+
 
 func newRespRaiserGet500() *respRaiserGet500 {
     return (&respRaiserGet500{})
@@ -1244,6 +1277,19 @@ func (x *respRaiserGet500Builder) S(value *Serious) *respRaiserGet500Builder {
 func (x *respRaiserGet500Builder) Emit() *respRaiserGet500 {
     var objCopy respRaiserGet500 = *x.obj
     return &objCopy
+}
+
+func (x *respRaiserGet500) Exception() thrift.WritableException {
+    if x.F != nil {
+        return x.F
+    }
+    if x.B != nil {
+        return x.B
+    }
+    if x.S != nil {
+        return x.S
+    }
+    return nil
 }
 
 func (x *respRaiserGet500) Write(p thrift.Protocol) error {

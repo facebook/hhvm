@@ -98,6 +98,7 @@ type ComplexUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ComplexUnion{}
 
+
 func NewComplexUnion() *ComplexUnion {
     return (&ComplexUnion{})
 }
@@ -658,6 +659,7 @@ type ListUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ListUnion{}
 
+
 func NewListUnion() *ListUnion {
     return (&ListUnion{})
 }
@@ -940,6 +942,7 @@ type DataUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &DataUnion{}
 
+
 func NewDataUnion() *DataUnion {
     return (&DataUnion{})
 }
@@ -1167,6 +1170,7 @@ type Val struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Val{}
+
 
 func NewVal() *Val {
     return (&Val{})
@@ -1421,6 +1425,7 @@ type ValUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &ValUnion{}
 
+
 func NewValUnion() *ValUnion {
     return (&ValUnion{})
 }
@@ -1653,6 +1658,7 @@ type VirtualComplexUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &VirtualComplexUnion{}
 
+
 func NewVirtualComplexUnion() *VirtualComplexUnion {
     return (&VirtualComplexUnion{})
 }
@@ -1882,6 +1888,7 @@ type NonCopyableStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &NonCopyableStruct{}
 
+
 func NewNonCopyableStruct() *NonCopyableStruct {
     return (&NonCopyableStruct{})
 }
@@ -2015,6 +2022,7 @@ type NonCopyableUnion struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &NonCopyableUnion{}
+
 
 func NewNonCopyableUnion() *NonCopyableUnion {
     return (&NonCopyableUnion{})

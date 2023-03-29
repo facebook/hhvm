@@ -155,6 +155,7 @@ type reqSomeServiceBounceMap struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBounceMap{}
 
+
 func newReqSomeServiceBounceMap() *reqSomeServiceBounceMap {
     return (&reqSomeServiceBounceMap{})
 }
@@ -299,6 +300,8 @@ type respSomeServiceBounceMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBounceMap{}
+var _ thrift.WritableResult = &respSomeServiceBounceMap{}
+
 
 func newRespSomeServiceBounceMap() *respSomeServiceBounceMap {
     return (&respSomeServiceBounceMap{})
@@ -382,6 +385,10 @@ func (x *respSomeServiceBounceMapBuilder) Emit() *respSomeServiceBounceMap {
     return &objCopy
 }
 
+func (x *respSomeServiceBounceMap) Exception() thrift.WritableException {
+    return nil
+}
+
 func (x *respSomeServiceBounceMap) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respSomeServiceBounceMap"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
@@ -444,6 +451,7 @@ type reqSomeServiceBinaryKeyedMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqSomeServiceBinaryKeyedMap{}
+
 
 func newReqSomeServiceBinaryKeyedMap() *reqSomeServiceBinaryKeyedMap {
     return (&reqSomeServiceBinaryKeyedMap{})
@@ -617,6 +625,8 @@ type respSomeServiceBinaryKeyedMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}
+var _ thrift.WritableResult = &respSomeServiceBinaryKeyedMap{}
+
 
 func newRespSomeServiceBinaryKeyedMap() *respSomeServiceBinaryKeyedMap {
     return (&respSomeServiceBinaryKeyedMap{})
@@ -744,6 +754,10 @@ func (x *respSomeServiceBinaryKeyedMapBuilder) Value(value map[TBinary]int64) *r
 func (x *respSomeServiceBinaryKeyedMapBuilder) Emit() *respSomeServiceBinaryKeyedMap {
     var objCopy respSomeServiceBinaryKeyedMap = *x.obj
     return &objCopy
+}
+
+func (x *respSomeServiceBinaryKeyedMap) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respSomeServiceBinaryKeyedMap) Write(p thrift.Protocol) error {

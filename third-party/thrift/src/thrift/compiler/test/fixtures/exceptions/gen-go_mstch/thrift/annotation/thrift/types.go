@@ -22,6 +22,7 @@ type Beta struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Beta{}
 
+
 func NewBeta() *Beta {
     return (&Beta{})
 }
@@ -101,6 +102,7 @@ type Experimental struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Experimental{}
+
 
 func NewExperimental() *Experimental {
     return (&Experimental{})
@@ -182,6 +184,7 @@ type Testing struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Testing{}
 
+
 func NewTesting() *Testing {
     return (&Testing{})
 }
@@ -262,6 +265,7 @@ type Deprecated struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Deprecated{}
+
 
 func NewDeprecated() *Deprecated {
     return (&Deprecated{})
@@ -397,6 +401,7 @@ type ReserveIds struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ReserveIds{}
+
 
 func NewReserveIds() *ReserveIds {
     return (&ReserveIds{})
@@ -682,6 +687,7 @@ type Legacy struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Legacy{}
 
+
 func NewLegacy() *Legacy {
     return (&Legacy{})
 }
@@ -815,6 +821,7 @@ type RequiresBackwardCompatibility struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &RequiresBackwardCompatibility{}
+
 
 func NewRequiresBackwardCompatibility() *RequiresBackwardCompatibility {
     return (&RequiresBackwardCompatibility{}).
@@ -950,6 +957,7 @@ type NoTesting struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &NoTesting{}
 
+
 func NewNoTesting() *NoTesting {
     return (&NoTesting{})
 }
@@ -1029,6 +1037,7 @@ type NoExperimental struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &NoExperimental{}
+
 
 func NewNoExperimental() *NoExperimental {
     return (&NoExperimental{})
@@ -1110,6 +1119,7 @@ type NoBeta struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &NoBeta{}
 
+
 func NewNoBeta() *NoBeta {
     return (&NoBeta{})
 }
@@ -1189,6 +1199,7 @@ type Released struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Released{}
+
 
 func NewReleased() *Released {
     return (&Released{})
@@ -1270,6 +1281,7 @@ type NoLegacy struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &NoLegacy{}
 
+
 func NewNoLegacy() *NoLegacy {
     return (&NoLegacy{})
 }
@@ -1349,6 +1361,7 @@ type NoDeprecated struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &NoDeprecated{}
+
 
 func NewNoDeprecated() *NoDeprecated {
     return (&NoDeprecated{})
@@ -1430,6 +1443,7 @@ type TerseWrite struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TerseWrite{}
 
+
 func NewTerseWrite() *TerseWrite {
     return (&TerseWrite{})
 }
@@ -1509,6 +1523,7 @@ type Box struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Box{}
+
 
 func NewBox() *Box {
     return (&Box{})
@@ -1590,6 +1605,7 @@ type Mixin struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Mixin{}
 
+
 func NewMixin() *Mixin {
     return (&Mixin{})
 }
@@ -1669,6 +1685,7 @@ type Bit struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Bit{}
+
 
 func NewBit() *Bit {
     return (&Bit{})
@@ -1750,6 +1767,7 @@ type SerializeInFieldIdOrder struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SerializeInFieldIdOrder{}
 
+
 func NewSerializeInFieldIdOrder() *SerializeInFieldIdOrder {
     return (&SerializeInFieldIdOrder{})
 }
@@ -1829,6 +1847,7 @@ type BitmaskEnum struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &BitmaskEnum{}
+
 
 func NewBitmaskEnum() *BitmaskEnum {
     return (&BitmaskEnum{})
@@ -1910,6 +1929,7 @@ type GenDefaultEnumValue struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &GenDefaultEnumValue{}
+
 
 func NewGenDefaultEnumValue() *GenDefaultEnumValue {
     return (&GenDefaultEnumValue{}).
@@ -2046,6 +2066,7 @@ type GenEnumSet struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &GenEnumSet{}
 
+
 func NewGenEnumSet() *GenEnumSet {
     return (&GenEnumSet{})
 }
@@ -2179,6 +2200,7 @@ type V1 struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &V1{}
 
+
 func NewV1() *V1 {
     return (&V1{})
 }
@@ -2258,6 +2280,7 @@ type V1beta struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &V1beta{}
+
 
 func NewV1beta() *V1beta {
     return (&V1beta{})
@@ -2339,6 +2362,7 @@ type V1alpha struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &V1alpha{}
 
+
 func NewV1alpha() *V1alpha {
     return (&V1alpha{})
 }
@@ -2418,6 +2442,7 @@ type V1test struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &V1test{}
+
 
 func NewV1test() *V1test {
     return (&V1test{})
@@ -2499,6 +2524,7 @@ type ExceptionMessage struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &ExceptionMessage{}
+
 
 func NewExceptionMessage() *ExceptionMessage {
     return (&ExceptionMessage{})
@@ -2634,6 +2660,7 @@ type GenerateRuntimeSchema struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &GenerateRuntimeSchema{}
 
+
 func NewGenerateRuntimeSchema() *GenerateRuntimeSchema {
     return (&GenerateRuntimeSchema{})
 }
@@ -2766,6 +2793,7 @@ type InternBox struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &InternBox{}
+
 
 func NewInternBox() *InternBox {
     return (&InternBox{})

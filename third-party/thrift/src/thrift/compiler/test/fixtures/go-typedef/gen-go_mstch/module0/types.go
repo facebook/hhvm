@@ -22,6 +22,7 @@ type Accessory struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Accessory{}
 
+
 func NewAccessory() *Accessory {
     return (&Accessory{})
 }
@@ -209,6 +210,7 @@ type PartName struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &PartName{}
+
 
 func NewPartName() *PartName {
     return (&PartName{})

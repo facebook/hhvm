@@ -107,6 +107,7 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
+
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
 }
@@ -200,6 +201,7 @@ type MyUnion struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
+
 
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
@@ -1364,6 +1366,7 @@ type MyStructWithCustomDefault struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructWithCustomDefault{}
 
+
 func NewMyStructWithCustomDefault() *MyStructWithCustomDefault {
     return (&MyStructWithCustomDefault{}).
         SetField1(1)
@@ -1512,6 +1515,7 @@ type StructLevelTerseStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &StructLevelTerseStruct{}
+
 
 func NewStructLevelTerseStruct() *StructLevelTerseStruct {
     return (&StructLevelTerseStruct{})
@@ -2596,6 +2600,7 @@ type FieldLevelTerseStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &FieldLevelTerseStruct{}
+
 
 func NewFieldLevelTerseStruct() *FieldLevelTerseStruct {
     return (&FieldLevelTerseStruct{})
@@ -4639,6 +4644,7 @@ type TerseStructWithCustomDefault struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &TerseStructWithCustomDefault{}
 
+
 func NewTerseStructWithCustomDefault() *TerseStructWithCustomDefault {
     return (&TerseStructWithCustomDefault{}).
         SetBoolField(true).
@@ -5655,6 +5661,7 @@ type AdaptedFields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &AdaptedFields{}
 
+
 func NewAdaptedFields() *AdaptedFields {
     return (&AdaptedFields{})
 }
@@ -5897,6 +5904,7 @@ type WrappedFields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &WrappedFields{}
 
+
 func NewWrappedFields() *WrappedFields {
     return (&WrappedFields{}).
         SetField1(7)
@@ -6031,6 +6039,7 @@ type TerseException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &TerseException{}
+
 
 func NewTerseException() *TerseException {
     return (&TerseException{})

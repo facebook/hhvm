@@ -197,6 +197,7 @@ type reqNestedContainersMapList struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersMapList{}
 
+
 func newReqNestedContainersMapList() *reqNestedContainersMapList {
     return (&reqNestedContainersMapList{})
 }
@@ -414,6 +415,8 @@ type respNestedContainersMapList struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersMapList{}
+var _ thrift.WritableResult = &respNestedContainersMapList{}
+
 
 func newRespNestedContainersMapList() *respNestedContainersMapList {
     return (&respNestedContainersMapList{})
@@ -438,6 +441,10 @@ func newRespNestedContainersMapListBuilder() *respNestedContainersMapListBuilder
 func (x *respNestedContainersMapListBuilder) Emit() *respNestedContainersMapList {
     var objCopy respNestedContainersMapList = *x.obj
     return &objCopy
+}
+
+func (x *respNestedContainersMapList) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respNestedContainersMapList) Write(p thrift.Protocol) error {
@@ -494,6 +501,7 @@ type reqNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersMapSet{}
+
 
 func newReqNestedContainersMapSet() *reqNestedContainersMapSet {
     return (&reqNestedContainersMapSet{})
@@ -712,6 +720,8 @@ type respNestedContainersMapSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersMapSet{}
+var _ thrift.WritableResult = &respNestedContainersMapSet{}
+
 
 func newRespNestedContainersMapSet() *respNestedContainersMapSet {
     return (&respNestedContainersMapSet{})
@@ -736,6 +746,10 @@ func newRespNestedContainersMapSetBuilder() *respNestedContainersMapSetBuilder {
 func (x *respNestedContainersMapSetBuilder) Emit() *respNestedContainersMapSet {
     var objCopy respNestedContainersMapSet = *x.obj
     return &objCopy
+}
+
+func (x *respNestedContainersMapSet) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respNestedContainersMapSet) Write(p thrift.Protocol) error {
@@ -792,6 +806,7 @@ type reqNestedContainersListMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersListMap{}
+
 
 func newReqNestedContainersListMap() *reqNestedContainersListMap {
     return (&reqNestedContainersListMap{})
@@ -1010,6 +1025,8 @@ type respNestedContainersListMap struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersListMap{}
+var _ thrift.WritableResult = &respNestedContainersListMap{}
+
 
 func newRespNestedContainersListMap() *respNestedContainersListMap {
     return (&respNestedContainersListMap{})
@@ -1034,6 +1051,10 @@ func newRespNestedContainersListMapBuilder() *respNestedContainersListMapBuilder
 func (x *respNestedContainersListMapBuilder) Emit() *respNestedContainersListMap {
     var objCopy respNestedContainersListMap = *x.obj
     return &objCopy
+}
+
+func (x *respNestedContainersListMap) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respNestedContainersListMap) Write(p thrift.Protocol) error {
@@ -1090,6 +1111,7 @@ type reqNestedContainersListSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersListSet{}
+
 
 func newReqNestedContainersListSet() *reqNestedContainersListSet {
     return (&reqNestedContainersListSet{})
@@ -1291,6 +1313,8 @@ type respNestedContainersListSet struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersListSet{}
+var _ thrift.WritableResult = &respNestedContainersListSet{}
+
 
 func newRespNestedContainersListSet() *respNestedContainersListSet {
     return (&respNestedContainersListSet{})
@@ -1315,6 +1339,10 @@ func newRespNestedContainersListSetBuilder() *respNestedContainersListSetBuilder
 func (x *respNestedContainersListSetBuilder) Emit() *respNestedContainersListSet {
     var objCopy respNestedContainersListSet = *x.obj
     return &objCopy
+}
+
+func (x *respNestedContainersListSet) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respNestedContainersListSet) Write(p thrift.Protocol) error {
@@ -1371,6 +1399,7 @@ type reqNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &reqNestedContainersTurtles{}
+
 
 func newReqNestedContainersTurtles() *reqNestedContainersTurtles {
     return (&reqNestedContainersTurtles{})
@@ -1693,6 +1722,8 @@ type respNestedContainersTurtles struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respNestedContainersTurtles{}
+var _ thrift.WritableResult = &respNestedContainersTurtles{}
+
 
 func newRespNestedContainersTurtles() *respNestedContainersTurtles {
     return (&respNestedContainersTurtles{})
@@ -1717,6 +1748,10 @@ func newRespNestedContainersTurtlesBuilder() *respNestedContainersTurtlesBuilder
 func (x *respNestedContainersTurtlesBuilder) Emit() *respNestedContainersTurtles {
     var objCopy respNestedContainersTurtles = *x.obj
     return &objCopy
+}
+
+func (x *respNestedContainersTurtles) Exception() thrift.WritableException {
+    return nil
 }
 
 func (x *respNestedContainersTurtles) Write(p thrift.Protocol) error {

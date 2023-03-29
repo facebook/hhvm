@@ -25,6 +25,7 @@ type MyStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
 
+
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).
         SetMyIncludedField(

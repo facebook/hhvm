@@ -27,3 +27,6 @@ type {{struct:go_name}} struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &{{struct:go_name}}{}
+{{#struct:resp?}}
+var _ thrift.WritableResult = &{{struct:go_name}}{}
+{{/struct:resp?}}

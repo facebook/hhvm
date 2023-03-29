@@ -21,6 +21,7 @@ type Foo struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Foo{}
 
+
 func NewFoo() *Foo {
     return (&Foo{})
 }

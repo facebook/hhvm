@@ -506,6 +506,7 @@ type SomeStruct struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &SomeStruct{}
 
+
 func NewSomeStruct() *SomeStruct {
     return (&SomeStruct{}).
         SetReasonable(
@@ -857,6 +858,7 @@ type MyStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
+
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{}).

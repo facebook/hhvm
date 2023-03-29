@@ -25,6 +25,7 @@ type InjectMetadataFields struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &InjectMetadataFields{}
 
+
 func NewInjectMetadataFields() *InjectMetadataFields {
     return (&InjectMetadataFields{})
 }

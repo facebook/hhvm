@@ -109,6 +109,7 @@ type MyStructNestedAnnotation struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStructNestedAnnotation{}
 
+
 func NewMyStructNestedAnnotation() *MyStructNestedAnnotation {
     return (&MyStructNestedAnnotation{})
 }
@@ -242,6 +243,7 @@ type MyUnion struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MyUnion{}
 
+
 func NewMyUnion() *MyUnion {
     return (&MyUnion{})
 }
@@ -329,6 +331,7 @@ type MyException struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyException{}
+
 
 func NewMyException() *MyException {
     return (&MyException{})
@@ -423,6 +426,7 @@ type MyStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MyStruct{}
+
 
 func NewMyStruct() *MyStruct {
     return (&MyStruct{})
@@ -1092,6 +1096,7 @@ type SecretStruct struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &SecretStruct{}
+
 
 func NewSecretStruct() *SecretStruct {
     return (&SecretStruct{})

@@ -243,6 +243,7 @@ type Automobile struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &Automobile{}
 
+
 func NewAutomobile() *Automobile {
     return (&Automobile{}).
         SetFirstPlate("0000")
@@ -840,6 +841,7 @@ type MapKey struct {
 // Compile time interface enforcer
 var _ thrift.Struct = &MapKey{}
 
+
 func NewMapKey() *MapKey {
     return (&MapKey{})
 }
@@ -1026,6 +1028,7 @@ type MapContainer struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &MapContainer{}
+
 
 func NewMapContainer() *MapContainer {
     return (&MapContainer{})
@@ -1219,6 +1222,7 @@ type Pair struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Pair{}
+
 
 func NewPair() *Pair {
     return (&Pair{})
@@ -1437,6 +1441,7 @@ type Collection struct {
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &Collection{}
+
 
 func NewCollection() *Collection {
     return (&Collection{})

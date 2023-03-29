@@ -442,7 +442,8 @@ fn write_instr(state: &mut FuncState<'_, '_, '_>, iid: InstrId) -> Result {
             // a simpler form (like control flow and generic calls). Everything
             // else should be handled in lower().
             textual_todo! {
-                message = ("Non-lowered hhbc instr: {hhbc:?}"),
+                message = ("Non-lowered hhbc instr: {hhbc:?} (from {})",
+                           ir::print::formatters::FmtFullLoc(state.func.loc(hhbc.loc_id()), &state.strings)),
                 use ir::instr::HasOperands;
                 let name = FunctionName::Unmangled(format!("TODO_hhbc_{}", hhbc));
                 let operands = instr

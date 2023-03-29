@@ -30,7 +30,6 @@
           },
           "JOB" : {
             "name" : "JOB",
-            "docstring" : "Comments should work inline, too\n",
             "lineno" : 33,
             "value" : 4
           },
@@ -148,7 +147,6 @@
                   },
           "comments" : {
             "name" : "comments",
-            "docstring" : "all comments\nmay support multiline\n",
             "key" : 5,
             "lineno" : 83,
             "required" : "opt-in-req-out",

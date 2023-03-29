@@ -30,9 +30,9 @@ enum WidgetType {
   KNOB = 2,
   /** An actual person named Bob. */
   BOB = 3,
-  JOB = 4, /**< Comments should work inline, too */
+  JOB = 4,
   ROB = 5, ///< C++ style comments, also
-           ///< and support for multiline
+///< and support for multiline
 }
 
 /**
@@ -79,8 +79,6 @@ struct WidgetOrder {
   2: i32 numWidgets;
   /** @must _ >= 0 */
   3: i32 priceCents;
-  4: i32 numComments;  ///< count of comments
-  5: string comments;  /**< all comments
-                        * may support multiline
-                        */
+  4: i32 numComments; ///< count of comments
+  5: string comments;
 }

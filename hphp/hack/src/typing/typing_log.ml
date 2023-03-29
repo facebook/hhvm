@@ -562,6 +562,10 @@ let fun_tast_info_as_map = function
 
 let checked_as_value check_status = Atom (Tast.show_check_status check_status)
 
+let in_expr_tree_as_value = function
+  | None -> bool_as_value false
+  | Some { dsl = hint } -> make_map [("dsl", Atom (Aast_defs.show_hint hint))]
+
 let env_as_value env =
   let {
     fresh_typarams;
@@ -590,7 +594,7 @@ let env_as_value env =
       ("genv", genv_as_value env genv);
       ("in_loop", bool_as_value in_loop);
       ("in_try", bool_as_value in_try);
-      ("in_expr_tree", bool_as_value in_expr_tree);
+      ("in_expr_tree", in_expr_tree_as_value in_expr_tree);
       ("inside_constructor", bool_as_value inside_constructor);
       ("checked", checked_as_value checked);
       ("tpenv", tpenv_as_value env tpenv);

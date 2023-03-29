@@ -70,7 +70,9 @@ val get_class_or_typedef :
 
 val is_in_expr_tree : env -> bool
 
-val set_in_expr_tree : env -> bool -> env
+val inside_expr_tree : env -> Tast.hint -> env
+
+val outside_expr_tree : env -> env
 
 (** Return {true} when in the definition of a static property or method. *)
 val is_static : env -> bool

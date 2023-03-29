@@ -204,11 +204,16 @@ val with_origin : env -> Decl_counters.origin -> (env -> env * 'a) -> env * 'a
 val with_origin2 :
   env -> Decl_counters.origin -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
-val with_in_expr_tree : env -> bool -> (env -> env * 'a * 'b) -> env * 'a * 'b
+val with_inside_expr_tree :
+  env -> Aast_defs.hint -> (env -> env * 'a * 'b) -> env * 'a * 'b
+
+val with_outside_expr_tree : env -> (env -> env * 'a * 'b) -> env * 'a * 'b
+
+val inside_expr_tree : env -> Aast_defs.hint -> env
+
+val outside_expr_tree : env -> env
 
 val is_in_expr_tree : env -> bool
-
-val set_in_expr_tree : env -> bool -> env
 
 val is_static : env -> bool
 

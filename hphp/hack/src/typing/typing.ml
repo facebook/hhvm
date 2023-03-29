@@ -4891,7 +4891,7 @@ and expr_
       (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
       (mk (Reason.Rshape_literal p, Tshape (Missing_origin, Closed_shape, fdm)))
   | ET_Splice e ->
-    Typing_env.with_in_expr_tree env false (fun env -> et_splice env p e)
+    Typing_env.with_outside_expr_tree env (fun env -> et_splice env p e)
   | EnumClassLabel (None, s) ->
     let (env, expect_label, lty_opt) =
       match expected with
@@ -5854,7 +5854,7 @@ and expression_tree env p et =
 
   (* Next, typecheck the function pointer assignments *)
   let (env, _, t_function_pointers) =
-    Typing_env.with_in_expr_tree env true (fun env ->
+    Typing_env.with_inside_expr_tree env et_hint (fun env ->
         let (env, t_function_pointers) = block env et_function_pointers in
         (env, (), t_function_pointers))
   in
@@ -5868,7 +5868,7 @@ and expression_tree env p et =
      }
   *)
   let (env, t_virtualized_expr, ty_virtual) =
-    Typing_env.with_in_expr_tree env true (fun env ->
+    Typing_env.with_inside_expr_tree env et_hint (fun env ->
         expr env et_virtualized_expr ~allow_awaitable:false)
   in
 

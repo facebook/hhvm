@@ -77,7 +77,9 @@ let get_class_or_typedef env x =
 
 let is_in_expr_tree = Typing_env.is_in_expr_tree
 
-let set_in_expr_tree = Typing_env.set_in_expr_tree
+let inside_expr_tree = Typing_env.inside_expr_tree
+
+let outside_expr_tree = Typing_env.outside_expr_tree
 
 let is_static = Typing_env.is_static
 

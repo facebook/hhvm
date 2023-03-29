@@ -405,7 +405,7 @@ let visitor =
 
       (* We're overriding super#on_expression_tree, so we need to
          update the environment. *)
-      let env = Tast_env.set_in_expr_tree env true in
+      let env = Tast_env.inside_expr_tree env et_hint in
       let acc = self#plus acc (self#on_Block env et_function_pointers) in
 
       let (_, _, virtualized_expr_) = et_virtualized_expr in

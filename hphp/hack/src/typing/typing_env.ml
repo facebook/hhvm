@@ -974,16 +974,26 @@ let with_origin2 env origin f =
   let env = { env with tracing_info = ti1 } in
   (env, r1, r2)
 
-let with_in_expr_tree env in_expr_tree f =
+let inside_expr_tree env expr_tree_hint =
+  { env with in_expr_tree = Some { dsl = expr_tree_hint } }
+
+let outside_expr_tree env = { env with in_expr_tree = None }
+
+let with_inside_expr_tree env expr_tree_hint f =
   let old_in_expr_tree = env.in_expr_tree in
-  let env = { env with in_expr_tree } in
+  let env = inside_expr_tree env expr_tree_hint in
   let (env, r1, r2) = f env in
   let env = { env with in_expr_tree = old_in_expr_tree } in
   (env, r1, r2)
 
-let is_in_expr_tree env = env.in_expr_tree
+let with_outside_expr_tree env f =
+  let old_in_expr_tree = env.in_expr_tree in
+  let env = outside_expr_tree env in
+  let (env, r1, r2) = f env in
+  let env = { env with in_expr_tree = old_in_expr_tree } in
+  (env, r1, r2)
 
-let set_in_expr_tree env b = { env with in_expr_tree = b }
+let is_in_expr_tree env = Option.is_some env.in_expr_tree
 
 let is_static env = env.genv.static
 

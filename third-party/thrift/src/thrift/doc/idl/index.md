@@ -103,22 +103,43 @@ hex_digit ::=  digit | "a"..."f" | "A"..."F"
 float_literal ::=  digit+ "." digit+ | (digit+ ["." digit+]) exponent
 exponent      ::=  ("e" | "E") ["+" | "-"] digit+
 
-string_literal ::=  '"' dstring_char* '"' | "'" sstring_char* "'"
-dstring_char   ::=  <any source character except '"'>
-sstring_char   ::=  <any source character except "'">
+string_literal ::=  '"' (dstring_char | escape_seq)* '"' |
+                    "'" (sstring_char | escape_seq)* "'"
+dstring_char   ::=  <any source character except "\\" or '"'>
+sstring_char   ::=  <any source character except "\\" or "'">
+escape_seq     ::=  simple_escape | hex_escape | unicode_escape
+simple_escape  ::=  "\\" ("\\" | "'" | "\"" | "n" | "r" | "t")
+hex_escape     ::=  "\\x" hex_digit hex_digit
+unicode_escape ::=  "\\u" hex_digit hex_digit hex_digit hex_digit
 
 bool_literal ::=  "true" | "false"
 ```
 
+Both single quoted and double quoted string literals support the following
+escape sequences:
+
+| Escape Sequence | Meaning                       |
+| --------------- | ----------------------------- |
+| `\\`            | Backslash (U+005C)            |
+| `\'`            | Single quote (U+0027)         |
+| `\"`            | Double quote (U+0022)         |
+| `\n`            | Line feed (U+000A)            |
+| `\r`            | Carriage return (U+000D)      |
+| `\t`            | Horizontal tab (U+0009)       |
+| `\xhh`          | Code unit with hex value *hh* |
+| `\uhhhh`        | Unicode scalar value *hhhh*   |
+
+where `h` denotes a hexadecimal digit.
+
 Here are some examples of literals in Thrift:
 
 ```thrift
-42               // decimal integer literal
-0xCAFE           // hexadecimal integer literal
-3.14159          // floating-point literal
-"Don't panic!"   // string literal using double quotes
-'Heart of Gold'  // string literal using single quotes
-true             // Boolean literal
+42                // decimal integer literal
+0xCAFE            // hexadecimal integer literal
+3.14159           // floating-point literal
+"Don't panic!"    // string literal using double quotes
+'\u2665 of Gold'  // string literal using single quotes
+true              // Boolean literal
 ```
 
 Literals in Thrift do not have exact types. Instead they are represented using maximum precision and the actual type is inferred from context. For example:

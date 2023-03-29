@@ -364,10 +364,12 @@ func (p *procFuncMyServiceFoo) Write(seqId int32, result thrift.WritableStruct, 
 
 func (p *procFuncMyServiceFoo) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceFoo()
-    if err := p.handler.Foo(); err != nil {
+    err := p.handler.Foo()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Foo: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 

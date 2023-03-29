@@ -4,11 +4,11 @@
 package module // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  internals "thrift/annotation/internals"
-  foo "foo"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    internals "thrift/annotation/internals"
+    foo "foo"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = internals.GoUnusedProtection__

@@ -4,10 +4,10 @@
 package module // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  hack "thrift/annotation/hack"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    hack "thrift/annotation/hack"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = hack.GoUnusedProtection__

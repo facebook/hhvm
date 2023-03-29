@@ -4,8 +4,8 @@
 package matching_names // [[[ program thrift source path ]]]
 
 import (
-  includesAlso "IncludesAlso"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    includesAlso "IncludesAlso"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = includesAlso.GoUnusedProtection__

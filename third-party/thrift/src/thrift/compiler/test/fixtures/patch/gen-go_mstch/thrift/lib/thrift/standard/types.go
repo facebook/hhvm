@@ -4,11 +4,11 @@
 package standard // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  thrift0 "thrift/annotation/thrift"
-  java "thrift/annotation/java"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift0 "thrift/annotation/thrift"
+    java "thrift/annotation/java"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = thrift0.GoUnusedProtection__

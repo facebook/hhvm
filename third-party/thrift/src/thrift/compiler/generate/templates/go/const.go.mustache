@@ -18,10 +18,10 @@
 }}{{> common/header}}
 
 import (
-  {{#program:thrift_imports}}
-  {{program:go_package_alias}} "{{program:go_import_path}}"
-  {{/program:thrift_imports}}
-  "{{program:thrift_lib_import}}"
+    {{#program:thrift_imports}}
+    {{program:go_package_alias}} "{{program:go_import_path}}"
+    {{/program:thrift_imports}}
+    thrift "{{program:thrift_lib_import}}"
 )
 
 {{> common/unused_imports_protection}}

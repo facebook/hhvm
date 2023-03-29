@@ -4,15 +4,15 @@
 package module // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  cpp "thrift/annotation/cpp"
-  python "thrift/annotation/python"
-  thrift0 "thrift/annotation/thrift"
-  scope "thrift/annotation/scope"
-  hack "thrift/annotation/hack"
-  rust "thrift/annotation/rust"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    cpp "thrift/annotation/cpp"
+    python "thrift/annotation/python"
+    thrift0 "thrift/annotation/thrift"
+    scope "thrift/annotation/scope"
+    hack "thrift/annotation/hack"
+    rust "thrift/annotation/rust"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = cpp.GoUnusedProtection__

@@ -4,10 +4,10 @@
 package terse_write // [[[ program thrift source path ]]]
 
 import (
-  cpp "thrift/annotation/cpp"
-  hack "thrift/annotation/hack"
-  thrift0 "thrift/annotation/thrift"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    cpp "thrift/annotation/cpp"
+    hack "thrift/annotation/hack"
+    thrift0 "thrift/annotation/thrift"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = cpp.GoUnusedProtection__

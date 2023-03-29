@@ -4,10 +4,10 @@
 package includes // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  transitive "transitive"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    transitive "transitive"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = transitive.GoUnusedProtection__

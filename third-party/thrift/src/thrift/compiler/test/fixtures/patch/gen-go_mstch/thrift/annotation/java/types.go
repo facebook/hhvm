@@ -4,10 +4,10 @@
 package java // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  scope "thrift/annotation/scope"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    scope "thrift/annotation/scope"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = scope.GoUnusedProtection__

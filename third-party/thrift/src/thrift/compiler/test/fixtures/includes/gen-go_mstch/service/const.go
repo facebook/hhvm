@@ -4,9 +4,9 @@
 package service // [[[ program thrift source path ]]]
 
 import (
-  module "module"
-  includes "includes"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    module "module"
+    includes "includes"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = module.GoUnusedProtection__

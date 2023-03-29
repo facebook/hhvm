@@ -4,10 +4,10 @@
 package module // [[[ program thrift source path ]]]
 
 import (
-  thrift0 "thrift/annotation/thrift"
-  patch "thrift/lib/thrift/patch"
-  standard "thrift/lib/thrift/standard"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    thrift0 "thrift/annotation/thrift"
+    patch "thrift/lib/thrift/patch"
+    standard "thrift/lib/thrift/standard"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = thrift0.GoUnusedProtection__

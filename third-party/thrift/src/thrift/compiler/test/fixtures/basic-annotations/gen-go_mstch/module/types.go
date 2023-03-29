@@ -4,10 +4,10 @@
 package module // [[[ program thrift source path ]]]
 
 import (
-  "fmt"
+    "fmt"
 
-  cpp "thrift/annotation/cpp"
-  "github.com/facebook/fbthrift/thrift/lib/go/thrift"
+    cpp "thrift/annotation/cpp"
+    thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 )
 
 var _ = cpp.GoUnusedProtection__

@@ -794,10 +794,12 @@ func (p *procFuncCF) Write(seqId int32, result thrift.WritableStruct, oprot thri
 
 func (p *procFuncCF) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespCF()
-    if err := p.handler.F(); err != nil {
+    err := p.handler.F()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing F: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -841,13 +843,13 @@ func (p *procFuncCThing) Write(seqId int32, result thrift.WritableStruct, oprot 
 func (p *procFuncCThing) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqCThing)
     result := newRespCThing()
-    if retval, err := p.handler.Thing(args.A, args.B, args.C); err != nil {
+    retval, err := p.handler.Thing(args.A, args.B, args.C)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Thing: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

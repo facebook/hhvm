@@ -366,10 +366,12 @@ func (p *procFuncFooServiceSimpleRPC) Write(seqId int32, result thrift.WritableS
 
 func (p *procFuncFooServiceSimpleRPC) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespFooServiceSimpleRPC()
-    if err := p.handler.SimpleRPC(); err != nil {
+    err := p.handler.SimpleRPC()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing SimpleRPC: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -845,13 +847,13 @@ func (p *procFuncFB303ServiceSimpleRPC) Write(seqId int32, result thrift.Writabl
 func (p *procFuncFB303ServiceSimpleRPC) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFB303ServiceSimpleRPC)
     result := newRespFB303ServiceSimpleRPC()
-    if retval, err := p.handler.SimpleRPC(args.IntParameter); err != nil {
+    retval, err := p.handler.SimpleRPC(args.IntParameter)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing SimpleRPC: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -1071,9 +1073,7 @@ func (c *MyServiceChannelClient) LobDataById(ctx context.Context, id int64, data
         Id: id,
         Data: data,
     }
-    out := newRespMyServiceLobDataById()
-    err := c.ch.Call(ctx, "lobDataById", in, out)
-    return err
+    return c.ch.Oneway(ctx, "lobDataById", in)
 }
 
 func (c *MyServiceClient) LobDataById(id int64, data string) error {
@@ -3437,10 +3437,12 @@ func (p *procFuncMyServicePing) Write(seqId int32, result thrift.WritableStruct,
 
 func (p *procFuncMyServicePing) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServicePing()
-    if err := p.handler.Ping(); err != nil {
+    err := p.handler.Ping()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Ping: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -3483,13 +3485,13 @@ func (p *procFuncMyServiceGetRandomData) Write(seqId int32, result thrift.Writab
 
 func (p *procFuncMyServiceGetRandomData) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceGetRandomData()
-    if retval, err := p.handler.GetRandomData(); err != nil {
+    retval, err := p.handler.GetRandomData()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetRandomData: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3533,10 +3535,12 @@ func (p *procFuncMyServiceSink) Write(seqId int32, result thrift.WritableStruct,
 func (p *procFuncMyServiceSink) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceSink)
     result := newRespMyServiceSink()
-    if err := p.handler.Sink(args.Sink); err != nil {
+    err := p.handler.Sink(args.Sink)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Sink: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -3580,10 +3584,12 @@ func (p *procFuncMyServicePutDataById) Write(seqId int32, result thrift.Writable
 func (p *procFuncMyServicePutDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServicePutDataById)
     result := newRespMyServicePutDataById()
-    if err := p.handler.PutDataById(args.Id, args.Data); err != nil {
+    err := p.handler.PutDataById(args.Id, args.Data)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing PutDataById: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -3627,13 +3633,13 @@ func (p *procFuncMyServiceHasDataById) Write(seqId int32, result thrift.Writable
 func (p *procFuncMyServiceHasDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceHasDataById)
     result := newRespMyServiceHasDataById()
-    if retval, err := p.handler.HasDataById(args.Id); err != nil {
+    retval, err := p.handler.HasDataById(args.Id)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing HasDataById: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3677,13 +3683,13 @@ func (p *procFuncMyServiceGetDataById) Write(seqId int32, result thrift.Writable
 func (p *procFuncMyServiceGetDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceGetDataById)
     result := newRespMyServiceGetDataById()
-    if retval, err := p.handler.GetDataById(args.Id); err != nil {
+    retval, err := p.handler.GetDataById(args.Id)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDataById: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3727,10 +3733,12 @@ func (p *procFuncMyServiceDeleteDataById) Write(seqId int32, result thrift.Writa
 func (p *procFuncMyServiceDeleteDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceDeleteDataById)
     result := newRespMyServiceDeleteDataById()
-    if err := p.handler.DeleteDataById(args.Id); err != nil {
+    err := p.handler.DeleteDataById(args.Id)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DeleteDataById: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -3773,12 +3781,13 @@ func (p *procFuncMyServiceLobDataById) Write(seqId int32, result thrift.Writable
 
 func (p *procFuncMyServiceLobDataById) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceLobDataById)
-    result := newRespMyServiceLobDataById()
-    if err := p.handler.LobDataById(args.Id, args.Data); err != nil {
+    err := p.handler.LobDataById(args.Id, args.Data)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing LobDataById: " + err.Error(), err)
         return x, x
     }
-    return result, nil
+
+    return nil, nil
 }
 
 
@@ -3820,13 +3829,13 @@ func (p *procFuncMyServiceInvalidReturnForHack) Write(seqId int32, result thrift
 
 func (p *procFuncMyServiceInvalidReturnForHack) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceInvalidReturnForHack()
-    if retval, err := p.handler.InvalidReturnForHack(); err != nil {
+    retval, err := p.handler.InvalidReturnForHack()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing InvalidReturnForHack: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3869,10 +3878,12 @@ func (p *procFuncMyServiceRpcSkippedCodegen) Write(seqId int32, result thrift.Wr
 
 func (p *procFuncMyServiceRpcSkippedCodegen) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyServiceRpcSkippedCodegen()
-    if err := p.handler.RpcSkippedCodegen(); err != nil {
+    err := p.handler.RpcSkippedCodegen()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing RpcSkippedCodegen: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -4635,13 +4646,13 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Write(seqId int32, result t
 func (p *procFuncDbMixedStackArgumentsGetDataByKey0) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqDbMixedStackArgumentsGetDataByKey0)
     result := newRespDbMixedStackArgumentsGetDataByKey0()
-    if retval, err := p.handler.GetDataByKey0(args.Key); err != nil {
+    retval, err := p.handler.GetDataByKey0(args.Key)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDataByKey0: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -4685,13 +4696,13 @@ func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Write(seqId int32, result t
 func (p *procFuncDbMixedStackArgumentsGetDataByKey1) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqDbMixedStackArgumentsGetDataByKey1)
     result := newRespDbMixedStackArgumentsGetDataByKey1()
-    if retval, err := p.handler.GetDataByKey1(args.Key); err != nil {
+    retval, err := p.handler.GetDataByKey1(args.Key)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDataByKey1: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

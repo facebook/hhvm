@@ -987,10 +987,12 @@ func (p *procFuncRaiserDoBland) Write(seqId int32, result thrift.WritableStruct,
 
 func (p *procFuncRaiserDoBland) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserDoBland()
-    if err := p.handler.DoBland(); err != nil {
+    err := p.handler.DoBland()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoBland: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -1033,10 +1035,12 @@ func (p *procFuncRaiserDoRaise) Write(seqId int32, result thrift.WritableStruct,
 
 func (p *procFuncRaiserDoRaise) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserDoRaise()
-    if err := p.handler.DoRaise(); err != nil {
+    err := p.handler.DoRaise()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRaise: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -1079,13 +1083,13 @@ func (p *procFuncRaiserGet200) Write(seqId int32, result thrift.WritableStruct, 
 
 func (p *procFuncRaiserGet200) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserGet200()
-    if retval, err := p.handler.Get200(); err != nil {
+    retval, err := p.handler.Get200()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Get200: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -1128,13 +1132,13 @@ func (p *procFuncRaiserGet500) Write(seqId int32, result thrift.WritableStruct, 
 
 func (p *procFuncRaiserGet500) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespRaiserGet500()
-    if retval, err := p.handler.Get500(); err != nil {
+    retval, err := p.handler.Get500()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Get500: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

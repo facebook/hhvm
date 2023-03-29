@@ -474,13 +474,13 @@ func (p *procFuncTestServiceInit) Write(seqId int32, result thrift.WritableStruc
 func (p *procFuncTestServiceInit) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqTestServiceInit)
     result := newRespTestServiceInit()
-    if retval, err := p.handler.Init(args.Int1); err != nil {
+    retval, err := p.handler.Init(args.Int1)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Init: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

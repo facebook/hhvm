@@ -3517,13 +3517,13 @@ func (p *procFuncGetEntityGetEntity) Write(seqId int32, result thrift.WritableSt
 func (p *procFuncGetEntityGetEntity) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqGetEntityGetEntity)
     result := newRespGetEntityGetEntity()
-    if retval, err := p.handler.GetEntity(args.R); err != nil {
+    retval, err := p.handler.GetEntity(args.R)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetEntity: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3566,13 +3566,13 @@ func (p *procFuncGetEntityGetBool) Write(seqId int32, result thrift.WritableStru
 
 func (p *procFuncGetEntityGetBool) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetBool()
-    if retval, err := p.handler.GetBool(); err != nil {
+    retval, err := p.handler.GetBool()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetBool: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3615,13 +3615,13 @@ func (p *procFuncGetEntityGetByte) Write(seqId int32, result thrift.WritableStru
 
 func (p *procFuncGetEntityGetByte) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetByte()
-    if retval, err := p.handler.GetByte(); err != nil {
+    retval, err := p.handler.GetByte()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetByte: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3664,13 +3664,13 @@ func (p *procFuncGetEntityGetI16) Write(seqId int32, result thrift.WritableStruc
 
 func (p *procFuncGetEntityGetI16) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetI16()
-    if retval, err := p.handler.GetI16(); err != nil {
+    retval, err := p.handler.GetI16()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetI16: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3713,13 +3713,13 @@ func (p *procFuncGetEntityGetI32) Write(seqId int32, result thrift.WritableStruc
 
 func (p *procFuncGetEntityGetI32) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetI32()
-    if retval, err := p.handler.GetI32(); err != nil {
+    retval, err := p.handler.GetI32()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetI32: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3762,13 +3762,13 @@ func (p *procFuncGetEntityGetI64) Write(seqId int32, result thrift.WritableStruc
 
 func (p *procFuncGetEntityGetI64) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetI64()
-    if retval, err := p.handler.GetI64(); err != nil {
+    retval, err := p.handler.GetI64()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetI64: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3811,13 +3811,13 @@ func (p *procFuncGetEntityGetDouble) Write(seqId int32, result thrift.WritableSt
 
 func (p *procFuncGetEntityGetDouble) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetDouble()
-    if retval, err := p.handler.GetDouble(); err != nil {
+    retval, err := p.handler.GetDouble()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetDouble: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3860,13 +3860,13 @@ func (p *procFuncGetEntityGetString) Write(seqId int32, result thrift.WritableSt
 
 func (p *procFuncGetEntityGetString) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetString()
-    if retval, err := p.handler.GetString(); err != nil {
+    retval, err := p.handler.GetString()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetString: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3909,13 +3909,13 @@ func (p *procFuncGetEntityGetBinary) Write(seqId int32, result thrift.WritableSt
 
 func (p *procFuncGetEntityGetBinary) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetBinary()
-    if retval, err := p.handler.GetBinary(); err != nil {
+    retval, err := p.handler.GetBinary()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetBinary: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -3958,13 +3958,13 @@ func (p *procFuncGetEntityGetMap) Write(seqId int32, result thrift.WritableStruc
 
 func (p *procFuncGetEntityGetMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetMap()
-    if retval, err := p.handler.GetMap(); err != nil {
+    retval, err := p.handler.GetMap()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetMap: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -4007,13 +4007,13 @@ func (p *procFuncGetEntityGetSet) Write(seqId int32, result thrift.WritableStruc
 
 func (p *procFuncGetEntityGetSet) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetSet()
-    if retval, err := p.handler.GetSet(); err != nil {
+    retval, err := p.handler.GetSet()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetSet: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -4056,13 +4056,13 @@ func (p *procFuncGetEntityGetList) Write(seqId int32, result thrift.WritableStru
 
 func (p *procFuncGetEntityGetList) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespGetEntityGetList()
-    if retval, err := p.handler.GetList(); err != nil {
+    retval, err := p.handler.GetList()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetList: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -4106,13 +4106,13 @@ func (p *procFuncGetEntityGetLegacyStuff) Write(seqId int32, result thrift.Writa
 func (p *procFuncGetEntityGetLegacyStuff) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqGetEntityGetLegacyStuff)
     result := newRespGetEntityGetLegacyStuff()
-    if retval, err := p.handler.GetLegacyStuff(args.NumPos, args.NumNeg1, args.NumNeg2); err != nil {
+    retval, err := p.handler.GetLegacyStuff(args.NumPos, args.NumNeg1, args.NumNeg2)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing GetLegacyStuff: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

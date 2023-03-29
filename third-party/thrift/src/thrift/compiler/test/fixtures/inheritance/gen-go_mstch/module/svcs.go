@@ -364,10 +364,12 @@ func (p *procFuncMyRootDoRoot) Write(seqId int32, result thrift.WritableStruct, 
 
 func (p *procFuncMyRootDoRoot) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyRootDoRoot()
-    if err := p.handler.DoRoot(); err != nil {
+    err := p.handler.DoRoot()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoRoot: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -702,10 +704,12 @@ func (p *procFuncMyNodeDoMid) Write(seqId int32, result thrift.WritableStruct, o
 
 func (p *procFuncMyNodeDoMid) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyNodeDoMid()
-    if err := p.handler.DoMid(); err != nil {
+    err := p.handler.DoMid()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoMid: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -1040,10 +1044,12 @@ func (p *procFuncMyLeafDoLeaf) Write(seqId int32, result thrift.WritableStruct, 
 
 func (p *procFuncMyLeafDoLeaf) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespMyLeafDoLeaf()
-    if err := p.handler.DoLeaf(); err != nil {
+    err := p.handler.DoLeaf()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing DoLeaf: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 

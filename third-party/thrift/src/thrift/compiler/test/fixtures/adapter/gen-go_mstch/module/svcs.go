@@ -613,13 +613,13 @@ func (p *procFuncServiceFunc) Write(seqId int32, result thrift.WritableStruct, o
 func (p *procFuncServiceFunc) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqServiceFunc)
     result := newRespServiceFunc()
-    if retval, err := p.handler.Func(args.Arg1, args.Arg2, args.Arg3); err != nil {
+    retval, err := p.handler.Func(args.Arg1, args.Arg2, args.Arg3)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Func: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -1349,13 +1349,13 @@ func (p *procFuncAdapterServiceCount) Write(seqId int32, result thrift.WritableS
 
 func (p *procFuncAdapterServiceCount) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     result := newRespAdapterServiceCount()
-    if retval, err := p.handler.Count(); err != nil {
+    retval, err := p.handler.Count()
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Count: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -1399,13 +1399,13 @@ func (p *procFuncAdapterServiceAdaptedTypes) Write(seqId int32, result thrift.Wr
 func (p *procFuncAdapterServiceAdaptedTypes) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqAdapterServiceAdaptedTypes)
     result := newRespAdapterServiceAdaptedTypes()
-    if retval, err := p.handler.AdaptedTypes(args.Arg_); err != nil {
+    retval, err := p.handler.AdaptedTypes(args.Arg_)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AdaptedTypes: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

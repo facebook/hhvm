@@ -134,22 +134,29 @@ func (p *{{> svc/proc_func_name}}) {{!
     {{#function:args?}}
     args := reqStruct.(*req{{service:go_name}}{{function:go_name}})
     {{/function:args?}}
+    {{^function:oneway?}}
     result := newResp{{service:go_name}}{{function:go_name}}()
-    if {{^function:void?}}retval, {{/function:void?}}err := p.handler.{{function:go_name}}({{!
+    {{/function:oneway?}}
+    {{^function:void?}}retval, {{/function:void?}}err := p.handler.{{function:go_name}}({{!
         }}{{#service:use_context?}}ctx{{function:comma}}{{/service:use_context?}}{{!
         }}{{#function:args}}{{!
-        }}args.{{field:go_name}}{{!
-        }}{{^last?}}, {{/last?}}{{!
-        }}{{/function:args}}{{!
-        }}); err != nil {
+          }}args.{{field:go_name}}{{!
+          }}{{^last?}}, {{/last?}}{{!
+        }}{{/function:args}})
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing {{function:go_name}}: " + err.Error(), err)
         return x, x
-    }{{^function:void?}} else {
-        result.Value = retval
     }
-    {{/function:void?}}
 
+    {{^function:void?}}
+    result.Value = retval
+    {{/function:void?}}
+    {{#function:oneway?}}
+    return nil, nil
+    {{/function:oneway?}}
+    {{^function:oneway?}}
     return result, nil
+    {{/function:oneway?}}
 }
 
 {{/function:go_supported?}}

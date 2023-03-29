@@ -506,13 +506,13 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
 func (p *procFuncMyServiceQuery) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceQuery)
     result := newRespMyServiceQuery()
-    if retval, err := p.handler.Query(args.U); err != nil {
+    retval, err := p.handler.Query(args.U)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Query: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

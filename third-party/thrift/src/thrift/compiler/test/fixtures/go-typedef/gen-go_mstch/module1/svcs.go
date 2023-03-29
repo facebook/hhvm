@@ -1070,13 +1070,13 @@ func (p *procFuncFinderByPlate) Write(seqId int32, result thrift.WritableStruct,
 func (p *procFuncFinderByPlate) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFinderByPlate)
     result := newRespFinderByPlate()
-    if retval, err := p.handler.ByPlate(args.Plate); err != nil {
+    retval, err := p.handler.ByPlate(args.Plate)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ByPlate: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -1120,13 +1120,13 @@ func (p *procFuncFinderAliasByPlate) Write(seqId int32, result thrift.WritableSt
 func (p *procFuncFinderAliasByPlate) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFinderAliasByPlate)
     result := newRespFinderAliasByPlate()
-    if retval, err := p.handler.AliasByPlate(args.Plate); err != nil {
+    retval, err := p.handler.AliasByPlate(args.Plate)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing AliasByPlate: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -1170,13 +1170,13 @@ func (p *procFuncFinderPreviousPlate) Write(seqId int32, result thrift.WritableS
 func (p *procFuncFinderPreviousPlate) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqFinderPreviousPlate)
     result := newRespFinderPreviousPlate()
-    if retval, err := p.handler.PreviousPlate(args.Plate); err != nil {
+    retval, err := p.handler.PreviousPlate(args.Plate)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing PreviousPlate: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

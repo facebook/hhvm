@@ -1841,10 +1841,12 @@ func (p *procFuncNestedContainersMapList) Write(seqId int32, result thrift.Writa
 func (p *procFuncNestedContainersMapList) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersMapList)
     result := newRespNestedContainersMapList()
-    if err := p.handler.MapList(args.Foo); err != nil {
+    err := p.handler.MapList(args.Foo)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MapList: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -1888,10 +1890,12 @@ func (p *procFuncNestedContainersMapSet) Write(seqId int32, result thrift.Writab
 func (p *procFuncNestedContainersMapSet) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersMapSet)
     result := newRespNestedContainersMapSet()
-    if err := p.handler.MapSet(args.Foo); err != nil {
+    err := p.handler.MapSet(args.Foo)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing MapSet: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -1935,10 +1939,12 @@ func (p *procFuncNestedContainersListMap) Write(seqId int32, result thrift.Writa
 func (p *procFuncNestedContainersListMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersListMap)
     result := newRespNestedContainersListMap()
-    if err := p.handler.ListMap(args.Foo); err != nil {
+    err := p.handler.ListMap(args.Foo)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ListMap: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -1982,10 +1988,12 @@ func (p *procFuncNestedContainersListSet) Write(seqId int32, result thrift.Writa
 func (p *procFuncNestedContainersListSet) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersListSet)
     result := newRespNestedContainersListSet()
-    if err := p.handler.ListSet(args.Foo); err != nil {
+    err := p.handler.ListSet(args.Foo)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing ListSet: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -2029,10 +2037,12 @@ func (p *procFuncNestedContainersTurtles) Write(seqId int32, result thrift.Writa
 func (p *procFuncNestedContainersTurtles) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqNestedContainersTurtles)
     result := newRespNestedContainersTurtles()
-    if err := p.handler.Turtles(args.Foo); err != nil {
+    err := p.handler.Turtles(args.Foo)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Turtles: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 

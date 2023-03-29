@@ -882,13 +882,13 @@ func (p *procFuncSomeServiceBounceMap) Write(seqId int32, result thrift.Writable
 func (p *procFuncSomeServiceBounceMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqSomeServiceBounceMap)
     result := newRespSomeServiceBounceMap()
-    if retval, err := p.handler.BounceMap(args.M); err != nil {
+    retval, err := p.handler.BounceMap(args.M)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BounceMap: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 
@@ -932,13 +932,13 @@ func (p *procFuncSomeServiceBinaryKeyedMap) Write(seqId int32, result thrift.Wri
 func (p *procFuncSomeServiceBinaryKeyedMap) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqSomeServiceBinaryKeyedMap)
     result := newRespSomeServiceBinaryKeyedMap()
-    if retval, err := p.handler.BinaryKeyedMap(args.R); err != nil {
+    retval, err := p.handler.BinaryKeyedMap(args.R)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing BinaryKeyedMap: " + err.Error(), err)
         return x, x
-    } else {
-        result.Value = retval
     }
 
+    result.Value = retval
     return result, nil
 }
 

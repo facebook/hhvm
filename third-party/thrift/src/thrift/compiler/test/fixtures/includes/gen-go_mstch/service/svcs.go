@@ -820,10 +820,12 @@ func (p *procFuncMyServiceQuery) Write(seqId int32, result thrift.WritableStruct
 func (p *procFuncMyServiceQuery) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceQuery)
     result := newRespMyServiceQuery()
-    if err := p.handler.Query(args.S, args.I); err != nil {
+    err := p.handler.Query(args.S, args.I)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing Query: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 
@@ -867,10 +869,12 @@ func (p *procFuncMyServiceHasArgDocs) Write(seqId int32, result thrift.WritableS
 func (p *procFuncMyServiceHasArgDocs) Run(reqStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
     args := reqStruct.(*reqMyServiceHasArgDocs)
     result := newRespMyServiceHasArgDocs()
-    if err := p.handler.HasArgDocs(args.S, args.I); err != nil {
+    err := p.handler.HasArgDocs(args.S, args.I)
+    if err != nil {
         x := thrift.NewApplicationExceptionCause(thrift.INTERNAL_ERROR, "Internal error processing HasArgDocs: " + err.Error(), err)
         return x, x
     }
+
     return result, nil
 }
 

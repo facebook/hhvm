@@ -242,14 +242,14 @@ let start_server (env : env) =
         Printf.eprintf
           "Starting hh_server failed. Exited with status code: %d!\n"
           i;
-      if exit_on_failure then exit 77
+      if exit_on_failure then Exit.exit Exit_status.Server_already_exists
     | _ ->
       if not silent then Printf.eprintf "Could not start hh_server!\n";
-      if exit_on_failure then exit 77
+      if exit_on_failure then Exit.exit Exit_status.Server_already_exists
   with
   | _ ->
     if not silent then Printf.eprintf "Could not start hh_server!\n";
-    if exit_on_failure then exit 77
+    if exit_on_failure then Exit.exit Exit_status.Server_already_exists
 
 let should_start env =
   let root_s = Path.to_string env.root in

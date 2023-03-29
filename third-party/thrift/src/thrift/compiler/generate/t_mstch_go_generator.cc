@@ -525,8 +525,15 @@ class mstch_go_service : public mstch_service {
       if (!func->get_return_type()->is_void()) {
         auto resp_field =
             std::make_unique<t_field>(func->get_return_type(), "value", 0);
-        resp_field->set_req(t_field::e_req::required);
+        resp_field->set_qualifier(t_field_qualifier::none);
         resp_struct->append_field(std::move(resp_field));
+      }
+      if (func->exceptions() != nullptr) {
+        for (const auto& xs : func->exceptions()->get_members()) {
+          auto xc_ptr = std::unique_ptr<t_field>(xs);
+          xc_ptr->set_qualifier(t_field_qualifier::optional);
+          resp_struct->append_field(std::move(xc_ptr));
+        }
       }
       req_resp_structs.push_back(resp_struct);
       data_.req_resp_struct_names.insert(resp_struct_name);

@@ -399,7 +399,7 @@ func (x *reqServiceFunc) Read(p thrift.Protocol) error {
 }
 
 type respServiceFunc struct {
-    Value MyI32 `thrift:"value,0,required" json:"value" db:"value"`
+    Value MyI32 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respServiceFunc{}
@@ -832,7 +832,7 @@ func (x *reqAdapterServiceCount) Read(p thrift.Protocol) error {
 }
 
 type respAdapterServiceCount struct {
-    Value *CountingStruct `thrift:"value,0,required" json:"value" db:"value"`
+    Value *CountingStruct `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respAdapterServiceCount{}
@@ -1128,7 +1128,7 @@ func (x *reqAdapterServiceAdaptedTypes) Read(p thrift.Protocol) error {
 }
 
 type respAdapterServiceAdaptedTypes struct {
-    Value *HeapAllocated `thrift:"value,0,required" json:"value" db:"value"`
+    Value *HeapAllocated `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respAdapterServiceAdaptedTypes{}

@@ -584,7 +584,8 @@ func (x *reqCThing) Read(p thrift.Protocol) error {
 }
 
 type respCThing struct {
-    Value string `thrift:"value,0,required" json:"value" db:"value"`
+    Value string `thrift:"value,0" json:"value" db:"value"`
+    Bang *Bang `thrift:"bang,1,optional" json:"bang,omitempty" db:"bang"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respCThing{}
@@ -592,6 +593,9 @@ var _ thrift.Struct = &respCThing{}
 func newRespCThing() *respCThing {
     return (&respCThing{})
 }
+
+// Deprecated: Use newRespCThing().Bang instead.
+var respCThing_Bang_DEFAULT = newRespCThing().Bang
 
 func (x *respCThing) GetValueNonCompat() string {
     return x.Value
@@ -601,11 +605,32 @@ func (x *respCThing) GetValue() string {
     return x.Value
 }
 
+func (x *respCThing) GetBangNonCompat() *Bang {
+    return x.Bang
+}
+
+func (x *respCThing) GetBang() *Bang {
+    if !x.IsSetBang() {
+      return NewBang()
+    }
+
+    return x.Bang
+}
+
 func (x *respCThing) SetValue(value string) *respCThing {
     x.Value = value
     return x
 }
 
+func (x *respCThing) SetBang(value Bang) *respCThing {
+    x.Bang = &value
+    return x
+}
+
+
+func (x *respCThing) IsSetBang() bool {
+    return x.Bang != nil
+}
 
 func (x *respCThing) writeField0(p thrift.Protocol) error {  // Value
     if err := p.WriteFieldBegin("value", thrift.STRING, 0); err != nil {
@@ -623,6 +648,26 @@ func (x *respCThing) writeField0(p thrift.Protocol) error {  // Value
     return nil
 }
 
+func (x *respCThing) writeField1(p thrift.Protocol) error {  // Bang
+    if !x.IsSetBang() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("bang", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetBangNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
 func (x *respCThing) readField0(p thrift.Protocol) error {  // Value
     result, err := p.ReadString()
 if err != nil {
@@ -630,6 +675,17 @@ if err != nil {
 }
 
     x.SetValue(result)
+    return nil
+}
+
+func (x *respCThing) readField1(p thrift.Protocol) error {  // Bang
+    result := *NewBang()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetBang(result)
     return nil
 }
 
@@ -654,6 +710,11 @@ func (x *respCThingBuilder) Value(value string) *respCThingBuilder {
     return x
 }
 
+func (x *respCThingBuilder) Bang(value *Bang) *respCThingBuilder {
+    x.obj.Bang = value
+    return x
+}
+
 func (x *respCThingBuilder) Emit() *respCThing {
     var objCopy respCThing = *x.obj
     return &objCopy
@@ -665,6 +726,10 @@ func (x *respCThing) Write(p thrift.Protocol) error {
     }
 
     if err := x.writeField0(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField1(p); err != nil {
         return err
     }
 
@@ -696,6 +761,10 @@ func (x *respCThing) Read(p thrift.Protocol) error {
         switch id {
         case 0:  // value
             if err := x.readField0(p); err != nil {
+                return err
+            }
+        case 1:  // bang
+            if err := x.readField1(p); err != nil {
                 return err
             }
         default:

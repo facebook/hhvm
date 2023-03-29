@@ -278,7 +278,7 @@ func (x *reqMyServiceQuery) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceQuery struct {
-    Value *MyStruct `thrift:"value,0,required" json:"value" db:"value"`
+    Value *MyStruct `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceQuery{}

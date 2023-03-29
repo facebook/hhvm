@@ -296,7 +296,7 @@ func (x *reqFinderByPlate) Read(p thrift.Protocol) error {
 }
 
 type respFinderByPlate struct {
-    Value *Automobile `thrift:"value,0,required" json:"value" db:"value"`
+    Value *Automobile `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderByPlate{}
@@ -578,7 +578,7 @@ func (x *reqFinderAliasByPlate) Read(p thrift.Protocol) error {
 }
 
 type respFinderAliasByPlate struct {
-    Value *Car `thrift:"value,0,required" json:"value" db:"value"`
+    Value *Car `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderAliasByPlate{}
@@ -860,7 +860,7 @@ func (x *reqFinderPreviousPlate) Read(p thrift.Protocol) error {
 }
 
 type respFinderPreviousPlate struct {
-    Value Plate `thrift:"value,0,required" json:"value" db:"value"`
+    Value Plate `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFinderPreviousPlate{}

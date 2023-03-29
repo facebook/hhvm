@@ -261,7 +261,7 @@ func (x *reqTestServiceInit) Read(p thrift.Protocol) error {
 }
 
 type respTestServiceInit struct {
-    Value int64 `thrift:"value,0,required" json:"value" db:"value"`
+    Value int64 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respTestServiceInit{}

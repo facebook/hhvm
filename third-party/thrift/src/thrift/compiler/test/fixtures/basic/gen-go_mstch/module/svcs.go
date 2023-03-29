@@ -623,7 +623,7 @@ func (x *reqFB303ServiceSimpleRPC) Read(p thrift.Protocol) error {
 }
 
 type respFB303ServiceSimpleRPC struct {
-    Value *ReservedKeyword `thrift:"value,0,required" json:"value" db:"value"`
+    Value *ReservedKeyword `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respFB303ServiceSimpleRPC{}
@@ -1353,7 +1353,7 @@ func (x *reqMyServiceGetRandomData) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceGetRandomData struct {
-    Value string `thrift:"value,0,required" json:"value" db:"value"`
+    Value string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetRandomData{}
@@ -2097,7 +2097,7 @@ func (x *reqMyServiceHasDataById) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceHasDataById struct {
-    Value bool `thrift:"value,0,required" json:"value" db:"value"`
+    Value bool `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasDataById{}
@@ -2363,7 +2363,7 @@ func (x *reqMyServiceGetDataById) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceGetDataById struct {
-    Value string `thrift:"value,0,required" json:"value" db:"value"`
+    Value string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetDataById{}
@@ -3053,7 +3053,7 @@ func (x *reqMyServiceInvalidReturnForHack) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceInvalidReturnForHack struct {
-    Value []float32 `thrift:"value,0,required" json:"value" db:"value"`
+    Value []float32 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceInvalidReturnForHack{}
@@ -4195,7 +4195,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey0) Read(p thrift.Protocol) error {
 }
 
 type respDbMixedStackArgumentsGetDataByKey0 struct {
-    Value []byte `thrift:"value,0,required" json:"value" db:"value"`
+    Value []byte `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey0{}
@@ -4472,7 +4472,7 @@ func (x *reqDbMixedStackArgumentsGetDataByKey1) Read(p thrift.Protocol) error {
 }
 
 type respDbMixedStackArgumentsGetDataByKey1 struct {
-    Value []byte `thrift:"value,0,required" json:"value" db:"value"`
+    Value []byte `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respDbMixedStackArgumentsGetDataByKey1{}

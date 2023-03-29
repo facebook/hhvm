@@ -295,7 +295,7 @@ func (x *reqSomeServiceBounceMap) Read(p thrift.Protocol) error {
 }
 
 type respSomeServiceBounceMap struct {
-    Value included.SomeMap `thrift:"value,0,required" json:"value" db:"value"`
+    Value included.SomeMap `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBounceMap{}
@@ -613,7 +613,7 @@ func (x *reqSomeServiceBinaryKeyedMap) Read(p thrift.Protocol) error {
 }
 
 type respSomeServiceBinaryKeyedMap struct {
-    Value map[TBinary]int64 `thrift:"value,0,required" json:"value" db:"value"`
+    Value map[TBinary]int64 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respSomeServiceBinaryKeyedMap{}

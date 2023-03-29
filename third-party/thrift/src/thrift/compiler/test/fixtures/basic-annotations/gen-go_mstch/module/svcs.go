@@ -302,12 +302,68 @@ func (x *reqMyServicePing) Read(p thrift.Protocol) error {
 }
 
 type respMyServicePing struct {
+    MyExcept *MyException `thrift:"myExcept,1,optional" json:"myExcept,omitempty" db:"myExcept"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServicePing{}
 
 func newRespMyServicePing() *respMyServicePing {
     return (&respMyServicePing{})
+}
+
+// Deprecated: Use newRespMyServicePing().MyExcept instead.
+var respMyServicePing_MyExcept_DEFAULT = newRespMyServicePing().MyExcept
+
+func (x *respMyServicePing) GetMyExceptNonCompat() *MyException {
+    return x.MyExcept
+}
+
+func (x *respMyServicePing) GetMyExcept() *MyException {
+    if !x.IsSetMyExcept() {
+      return NewMyException()
+    }
+
+    return x.MyExcept
+}
+
+func (x *respMyServicePing) SetMyExcept(value MyException) *respMyServicePing {
+    x.MyExcept = &value
+    return x
+}
+
+func (x *respMyServicePing) IsSetMyExcept() bool {
+    return x.MyExcept != nil
+}
+
+func (x *respMyServicePing) writeField1(p thrift.Protocol) error {  // MyExcept
+    if !x.IsSetMyExcept() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("myExcept", thrift.STRUCT, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetMyExceptNonCompat()
+    if err := item.Write(p); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *respMyServicePing) readField1(p thrift.Protocol) error {  // MyExcept
+    result := *NewMyException()
+err := result.Read(p)
+if err != nil {
+    return err
+}
+
+    x.SetMyExcept(result)
+    return nil
 }
 
 func (x *respMyServicePing) String() string {
@@ -326,6 +382,11 @@ func newRespMyServicePingBuilder() *respMyServicePingBuilder {
     }
 }
 
+func (x *respMyServicePingBuilder) MyExcept(value *MyException) *respMyServicePingBuilder {
+    x.obj.MyExcept = value
+    return x
+}
+
 func (x *respMyServicePingBuilder) Emit() *respMyServicePing {
     var objCopy respMyServicePing = *x.obj
     return &objCopy
@@ -334,6 +395,10 @@ func (x *respMyServicePingBuilder) Emit() *respMyServicePing {
 func (x *respMyServicePing) Write(p thrift.Protocol) error {
     if err := p.WriteStructBegin("respMyServicePing"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -362,6 +427,10 @@ func (x *respMyServicePing) Read(p thrift.Protocol) error {
         }
 
         switch id {
+        case 1:  // myExcept
+            if err := x.readField1(p); err != nil {
+                return err
+            }
         default:
             if err := p.Skip(typ); err != nil {
                 return err
@@ -460,7 +529,7 @@ func (x *reqMyServiceGetRandomData) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceGetRandomData struct {
-    Value string `thrift:"value,0,required" json:"value" db:"value"`
+    Value string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetRandomData{}
@@ -726,7 +795,7 @@ func (x *reqMyServiceHasDataById) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceHasDataById struct {
-    Value bool `thrift:"value,0,required" json:"value" db:"value"`
+    Value bool `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceHasDataById{}
@@ -992,7 +1061,7 @@ func (x *reqMyServiceGetDataById) Read(p thrift.Protocol) error {
 }
 
 type respMyServiceGetDataById struct {
-    Value string `thrift:"value,0,required" json:"value" db:"value"`
+    Value string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respMyServiceGetDataById{}
@@ -3329,7 +3398,7 @@ func (x *reqBadServiceBar) Read(p thrift.Protocol) error {
 }
 
 type respBadServiceBar struct {
-    Value int32 `thrift:"value,0,required" json:"value" db:"value"`
+    Value int32 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respBadServiceBar{}

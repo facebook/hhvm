@@ -459,7 +459,7 @@ func (x *reqGetEntityGetEntity) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetEntity struct {
-    Value *GetEntityResponse `thrift:"value,0,required" json:"value" db:"value"`
+    Value *GetEntityResponse `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetEntity{}
@@ -686,7 +686,7 @@ func (x *reqGetEntityGetBool) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetBool struct {
-    Value bool `thrift:"value,0,required" json:"value" db:"value"`
+    Value bool `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBool{}
@@ -898,7 +898,7 @@ func (x *reqGetEntityGetByte) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetByte struct {
-    Value byte `thrift:"value,0,required" json:"value" db:"value"`
+    Value byte `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetByte{}
@@ -1110,7 +1110,7 @@ func (x *reqGetEntityGetI16) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetI16 struct {
-    Value int16 `thrift:"value,0,required" json:"value" db:"value"`
+    Value int16 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI16{}
@@ -1322,7 +1322,7 @@ func (x *reqGetEntityGetI32) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetI32 struct {
-    Value int32 `thrift:"value,0,required" json:"value" db:"value"`
+    Value int32 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI32{}
@@ -1534,7 +1534,7 @@ func (x *reqGetEntityGetI64) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetI64 struct {
-    Value int64 `thrift:"value,0,required" json:"value" db:"value"`
+    Value int64 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetI64{}
@@ -1746,7 +1746,7 @@ func (x *reqGetEntityGetDouble) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetDouble struct {
-    Value float64 `thrift:"value,0,required" json:"value" db:"value"`
+    Value float64 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetDouble{}
@@ -1958,7 +1958,7 @@ func (x *reqGetEntityGetString) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetString struct {
-    Value string `thrift:"value,0,required" json:"value" db:"value"`
+    Value string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetString{}
@@ -2170,7 +2170,7 @@ func (x *reqGetEntityGetBinary) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetBinary struct {
-    Value []byte `thrift:"value,0,required" json:"value" db:"value"`
+    Value []byte `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetBinary{}
@@ -2393,7 +2393,7 @@ func (x *reqGetEntityGetMap) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetMap struct {
-    Value map[string]string `thrift:"value,0,required" json:"value" db:"value"`
+    Value map[string]string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetMap{}
@@ -2662,7 +2662,7 @@ func (x *reqGetEntityGetSet) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetSet struct {
-    Value []string `thrift:"value,0,required" json:"value" db:"value"`
+    Value []string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetSet{}
@@ -2914,7 +2914,7 @@ func (x *reqGetEntityGetList) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetList struct {
-    Value []string `thrift:"value,0,required" json:"value" db:"value"`
+    Value []string `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetList{}
@@ -3328,7 +3328,7 @@ func (x *reqGetEntityGetLegacyStuff) Read(p thrift.Protocol) error {
 }
 
 type respGetEntityGetLegacyStuff struct {
-    Value int32 `thrift:"value,0,required" json:"value" db:"value"`
+    Value int32 `thrift:"value,0" json:"value" db:"value"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = &respGetEntityGetLegacyStuff{}

@@ -17,14 +17,21 @@ type candidate = {
   placeholder_n: int;
 }
 
-let pos_matches_lsp_range pos (range : Lsp.range) =
+let lsp_range_contains_pos (range : Lsp.range) pos =
+  let (start_line, start_character, end_line, end_character) =
+    Pos.destruct_range pos
+  in
   Lsp.(
-    Pos.exactly_matches_range
-      pos
-      ~start_line:range.start.line
-      ~start_col:range.start.character
-      ~end_line:range.end_.line
-      ~end_col:range.end_.character)
+    let start_contains =
+      range.start.line < start_line
+      || range.start.line = start_line
+         && range.start.character <= start_character
+    in
+    let end_contains =
+      range.end_.line > end_line
+      || (range.end_.line = end_line && range.end_.character >= end_character)
+    in
+    start_contains && end_contains)
 
 let lsp_range_of_pos (pos : Pos.t) : Lsp.range =
   let (first_line, first_col) = Pos.line_column pos in
@@ -121,15 +128,13 @@ let positions_visitor (range : Lsp.range) ~source_text =
         expression_lambda_pos := None;
         super#on_expr env expr
       | _ ->
-        let acc = super#on_expr env expr in
         if
-          Option.is_none acc
+          lsp_range_contains_pos range pos
           && (not @@ Pos.equal !stmt_pos Pos.none)
-          && (not
-                (Option.map !expression_lambda_pos ~f:(fun lpos ->
-                     Pos.contains lpos pos)
-                |> Option.value ~default:false))
-          && pos_matches_lsp_range pos range
+          && not
+               (Option.map !expression_lambda_pos ~f:(fun lpos ->
+                    Pos.contains lpos pos)
+               |> Option.value ~default:false)
         then
           Some
             {
@@ -138,7 +143,7 @@ let positions_visitor (range : Lsp.range) ~source_text =
               placeholder_n = 0 (* will be adjusted on the way up *);
             }
         else
-          acc
+          super#on_expr env expr
   end
 
 (** ensures that `positions_visitor` only traverses

@@ -590,7 +590,7 @@ class t_hack_generator : public t_concat_generator {
       std::ofstream& out, int start_pos, const t_struct* arg_list);
   void generate_php_docstring_stream_exceptions(
       std::ofstream& out, const t_throws* ex);
-  std::string render_string(std::string value);
+  static std::string render_string(const std::string& value);
 
   std::string field_to_typehint(
       const t_field& tfield,
@@ -1827,15 +1827,30 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
   return false;
 }
 
-std::string t_hack_generator::render_string(std::string value) {
-  std::ostringstream out;
-  size_t pos = 0;
-  while ((pos = value.find('"', pos)) != std::string::npos) {
-    value.insert(pos, 1, '\\');
-    pos += 2;
+std::string t_hack_generator::render_string(const std::string& value) {
+  std::string result;
+  result.reserve(value.size() + 2);
+  result.push_back('"');
+  for (unsigned char c : value) {
+    switch (c) {
+      case '"':
+        result.append("\\\"");
+        break;
+      case '\n':
+        result.append("\\n");
+        break;
+      default:
+        if (c < 32) {
+          // Escape control characters.
+          result.append(fmt::format("\\x{:02x}", c));
+        } else {
+          result.push_back(c);
+        }
+        break;
+    }
   }
-  out << "\"" << value << "\"";
-  return out.str();
+  result.push_back('"');
+  return result;
 }
 
 /**

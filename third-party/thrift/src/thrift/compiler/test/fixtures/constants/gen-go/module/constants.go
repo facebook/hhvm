@@ -326,6 +326,14 @@ Char2ascii = map[string]int32{
 }
 
 EscapedStrings = []string{
+  "",
+  "",
+  " ",
+  "'",
+  "\"",
+  "\\n",
+  "\\r",
+  "\t",
   "a",
   "«",
   "j",

@@ -202,6 +202,15 @@ const string escaped_a = "\x61";
 const map<string, i32> char2ascii = {"'": 39, '"': 34, "\\": 92, "\x61": 97};
 
 const list<string> escaped_strings = [
+  // \x00 - \x1f are control characters:
+  "\x01",
+  "\x1f",
+  "\x20", // space
+  "\'",
+  '\"',
+  "\n",
+  "\r",
+  "\t",
   "\x61",
   "\xc2\xab",
   "\x6a",

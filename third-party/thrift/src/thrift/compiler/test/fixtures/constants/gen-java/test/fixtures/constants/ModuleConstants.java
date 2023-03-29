@@ -146,6 +146,14 @@ multi line string.
         .build();
 
     public static final List<String> ESCAPED_STRINGS = ImmutableList.<String>builder()
+        .add("")
+        .add("")
+        .add(" ")
+        .add("'")
+        .add("\"")
+        .add("\n")
+        .add("\r")
+        .add("	")
         .add("a")
         .add("«")
         .add("j")

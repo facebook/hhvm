@@ -267,6 +267,14 @@ pub mod consts {
         });
 
     pub static escaped_strings: ::once_cell::sync::Lazy<::std::vec::Vec<::std::string::String>> = ::once_cell::sync::Lazy::new(|| vec![
+            "".to_owned(),
+            "".to_owned(),
+            " ".to_owned(),
+            "'".to_owned(),
+            "\"".to_owned(),
+            "\n".to_owned(),
+            "\r".to_owned(),
+            "\t".to_owned(),
             "a".to_owned(),
             "«".to_owned(),
             "j".to_owned(),

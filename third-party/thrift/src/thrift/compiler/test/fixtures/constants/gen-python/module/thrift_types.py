@@ -672,7 +672,7 @@ escaped_a = "a"
 
 char2ascii = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i32, {"'": 39, '"': 34, "\\": 92, "a": 97})
 
-escaped_strings = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("a", "«", "j", "¦", "ayyy", "«yyy", "jyyy", "¦yyy", "zzza", "zzz«", "zzzj", "zzz¦", "zzzayyy", "zzz«yyy", "zzzjyyy", "zzz¦yyy", ))
+escaped_strings = _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_string, ("", "", " ", "'", '"', "\n", "\r", "	", "a", "«", "j", "¦", "ayyy", "«yyy", "jyyy", "¦yyy", "zzza", "zzz«", "zzzj", "zzz¦", "zzzayyy", "zzz«yyy", "zzzjyyy", "zzz¦yyy", ))
 
 false_c = False
 

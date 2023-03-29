@@ -201,6 +201,14 @@ var Char2ascii map[string]int32 = map[string]int32{
     "a": 97,
 }
 var EscapedStrings []string = []string{
+    "",
+    "",
+    " ",
+    "'",
+    "\"",
+    "\\n",
+    "\\r",
+    "\t",
     "a",
     "«",
     "j",

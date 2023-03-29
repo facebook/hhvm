@@ -303,6 +303,14 @@ multi line string.
 
   public static final List<String> escaped_strings = new ArrayList<String>();
   static {
+    escaped_strings.add("");
+    escaped_strings.add("");
+    escaped_strings.add(" ");
+    escaped_strings.add("'");
+    escaped_strings.add("\"");
+    escaped_strings.add("\n");
+    escaped_strings.add("\r");
+    escaped_strings.add("	");
     escaped_strings.add("a");
     escaped_strings.add("«");
     escaped_strings.add("j");

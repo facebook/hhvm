@@ -23,10 +23,7 @@ class module_CONSTANTS implements \IThriftConstants {
    * Original thrift constant:-
    * string multi_line_string
    */
-  const string multi_line_string = "This
-is a
-multi line string.
-";
+  const string multi_line_string = "This\nis a\nmulti line string.\n";
 
   /**
    * Original thrift constant:-
@@ -569,6 +566,14 @@ multi line string.
   <<__Memoize>>
   public static function escaped_strings()[write_props]: \ConstVector<string>{
     return ImmVector {
+      "\x01",
+      "\x1f",
+      " ",
+      "'",
+      "\"",
+      "\n",
+      "\r",
+      "\x09",
       "a",
       "«",
       "j",

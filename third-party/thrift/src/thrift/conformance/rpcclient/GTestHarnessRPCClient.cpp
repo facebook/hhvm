@@ -17,6 +17,7 @@
 #include <thrift/conformance/rpcclient/GTestHarnessRPCClient.h>
 
 #include <chrono>
+#include <filesystem>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
@@ -343,7 +344,7 @@ class RPCClientConformanceTest : public testing::Test {
     if (connectViaServer_) {
       createClient(clientCmd, server_.getAddress().getAddressStr(), port);
     } else {
-      clientProcess_ = folly::Subprocess(
+      clientProcess_ = launch_client_process_(
           std::vector<std::string>{std::string(clientCmd), "--port", port});
     }
   }

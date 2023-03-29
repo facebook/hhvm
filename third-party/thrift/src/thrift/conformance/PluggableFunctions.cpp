@@ -60,4 +60,11 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 THRIFT_PLUGGABLE_FUNC_REGISTER(std::string, get_server_ip_addr_) {
   throw std::invalid_argument("Unimplemented Method get_server_ip_addr_");
 }
+
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    folly::Subprocess,
+    launch_client_process_,
+    const std::vector<std::string>& argv) {
+  return folly::Subprocess(argv);
+}
 } // namespace apache::thrift::conformance

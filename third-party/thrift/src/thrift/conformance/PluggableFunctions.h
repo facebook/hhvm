@@ -18,6 +18,7 @@
 
 #include <string_view>
 
+#include <folly/Subprocess.h>
 #include <thrift/conformance/if/gen-cpp2/ConformanceServiceAsyncClient.h>
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceSetupServiceAsyncClient.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_clients.h>
@@ -50,4 +51,7 @@ THRIFT_PLUGGABLE_FUNC_DECLARE(
     int, update_server_props_, apache::thrift::ThriftServer&);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(std::string, get_server_ip_addr_);
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    folly::Subprocess, launch_client_process_, const std::vector<std::string>&);
 } // namespace apache::thrift::conformance

@@ -32,8 +32,6 @@ class BaseStats {
   // At a minimum they require formatters and map lookups for
   // operations and make it easier to violate the constraint that all counters
   // are created at startup.
-  using TLTimeseriesQuarterMinuteOnly =
-      facebook::fb303::QuarterMinuteOnlyTimeseriesWrapper;
   using TLTimeseriesMinute = facebook::fb303::MinuteOnlyTimeseriesWrapper;
   // TLTimeseries was exporting as TimeseriesPolymorphicWrapper
   // were are trying to get rid of .600/.3600 counters

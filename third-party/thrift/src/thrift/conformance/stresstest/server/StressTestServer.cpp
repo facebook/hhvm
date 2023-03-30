@@ -105,7 +105,7 @@ std::shared_ptr<folly::IOThreadPoolExecutor> getIOThreadPool(
 }
 
 std::shared_ptr<ThriftServer> createStressTestServer(
-    std::shared_ptr<StressTestHandler> handler) {
+    std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler) {
   if (!handler) {
     handler = createStressTestHandler();
   }

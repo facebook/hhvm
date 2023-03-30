@@ -26,7 +26,8 @@ namespace stress {
 std::shared_ptr<StressTestHandler> createStressTestHandler();
 
 std::shared_ptr<ThriftServer> createStressTestServer(
-    std::shared_ptr<StressTestHandler> handler = nullptr);
+    std::shared_ptr<apache::thrift::ServiceHandler<StressTest>> handler =
+        nullptr);
 
 } // namespace stress
 } // namespace thrift

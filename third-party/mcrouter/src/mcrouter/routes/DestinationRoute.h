@@ -225,6 +225,11 @@ class DestinationRoute {
       Args&&... args) const {
     auto now = nowUs();
     auto reply = createReply<Request>(std::forward<Args>(args)...);
+    auto bucketIdOptional = bucketIdOpt();
+    std::string_view bucketId;
+    if (bucketIdOptional.has_value()) {
+      bucketId = *bucketIdOptional;
+    }
     RpcStatsContext rpcContext;
     ctx.onBeforeRequestSent(
         poolName_,
@@ -232,7 +237,8 @@ class DestinationRoute {
         folly::StringPiece(),
         req,
         fiber_local<RouterInfo>::getRequestClass(),
-        now);
+        now,
+        bucketId);
     ctx.onReplyReceived(
         poolName_,
         std::optional<size_t>(indexInPool_),
@@ -246,7 +252,8 @@ class DestinationRoute {
         poolStatIndex_,
         rpcContext,
         fiber_local<RouterInfo>::getNetworkTransportTimeUs(),
-        fiber_local<RouterInfo>::getExtraDataCallbacks());
+        fiber_local<RouterInfo>::getExtraDataCallbacks(),
+        bucketId);
     return reply;
   }
 
@@ -301,7 +308,7 @@ class DestinationRoute {
     }
 
     const auto& reqToSend = newReq ? *newReq : req;
-    auto bucketIdOptional = getBucketId(newReq);
+    auto bucketIdOptional = getBucketId(reqToSend);
     std::string_view bucketId;
     if (bucketIdOptional.has_value()) {
       bucketId = *bucketIdOptional;

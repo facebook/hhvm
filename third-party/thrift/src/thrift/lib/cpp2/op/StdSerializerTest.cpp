@@ -17,9 +17,8 @@
 #include <thrift/lib/cpp2/op/StdSerializer.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/conformance/cpp2/Object.h>
-#include <thrift/conformance/if/gen-cpp2/object_types_custom_protocol.h>
 #include <thrift/lib/cpp2/op/Testing.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 
 namespace apache::thrift::op {
 namespace {
@@ -66,7 +65,7 @@ void testRoundTrip(const T& value) {
 }
 
 TEST(StdSerializerTest, Struct) {
-  using conformance::asValueStruct;
+  using protocol::asValueStruct;
   FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::bool_t>(true)));
   FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::byte_t>(1)));
   FBTHRIFT_SCOPED_CHECK(testRoundTrip(asValueStruct<type::i16_t>(1)));

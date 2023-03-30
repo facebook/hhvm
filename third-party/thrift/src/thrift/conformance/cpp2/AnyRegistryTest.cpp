@@ -19,8 +19,8 @@
 #include <folly/portability/GTest.h>
 
 #include <thrift/conformance/cpp2/Any.h>
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/cpp2/Testing.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
 namespace apache::thrift::conformance {
@@ -345,24 +345,26 @@ TEST(AnyRegistryTest, ForwardCompat_Any) {
 TEST(AnyRegistryTest, StdProtocol) {
   AnyRegistry registry;
   const AnyRegistry& cregistry = registry;
-  registry
-      .registerType<Value, StandardProtocol::Binary, StandardProtocol::Compact>(
-          testThriftType("Value"));
+  registry.registerType<
+      protocol::Value,
+      StandardProtocol::Binary,
+      StandardProtocol::Compact>(testThriftType("Value"));
 
-  auto value = asValueStruct<type::i32_t>(1);
+  auto value = protocol::asValueStruct<type::i32_t>(1);
   auto any = cregistry.store<StandardProtocol::Compact>(value);
   ASSERT_TRUE(any.type());
   EXPECT_EQ(any.type().value_unchecked(), thriftType("Value"));
-  EXPECT_EQ(cregistry.load<Value>(any), value);
+  EXPECT_EQ(cregistry.load<protocol::Value>(any), value);
 }
 
 TEST(AnyRegistryTest, Generated) {
   // Double register fails with a runtime error.
-  EXPECT_THROW(detail::registerGeneratedStruct<Value>(), std::runtime_error);
+  EXPECT_THROW(
+      detail::registerGeneratedStruct<protocol::Value>(), std::runtime_error);
 
-  auto value = asValueStruct<type::i32_t>(1);
+  auto value = protocol::asValueStruct<type::i32_t>(1);
   auto any = AnyRegistry::generated().store<StandardProtocol::Compact>(value);
-  EXPECT_EQ(AnyRegistry::generated().load<Value>(any), value);
+  EXPECT_EQ(AnyRegistry::generated().load<protocol::Value>(any), value);
   EXPECT_THROW(
       AnyRegistry::generated().store<StandardProtocol::Json>(value),
       std::out_of_range);
@@ -370,15 +372,15 @@ TEST(AnyRegistryTest, Generated) {
 
 TEST(AnyRegistryTest, ForceRegister) {
   AnyRegistry registry;
-  EXPECT_TRUE(registry.forceRegisterType(typeid(Value), "va"));
-  EXPECT_TRUE(registry.registerSerializer<Value>(
-      &getAnyStandardSerializer<Value, StandardProtocol::Compact>()));
-  Value expected;
+  EXPECT_TRUE(registry.forceRegisterType(typeid(protocol::Value), "va"));
+  EXPECT_TRUE(registry.registerSerializer<protocol::Value>(
+      &getAnyStandardSerializer<protocol::Value, StandardProtocol::Compact>()));
+  protocol::Value expected;
   expected.set_boolValue(true);
   Any any = registry.store(
       expected, getStandardProtocol<StandardProtocol::Compact>());
   EXPECT_EQ(any.type(), "va");
-  Value actual = registry.load<Value>(any);
+  protocol::Value actual = registry.load<protocol::Value>(any);
   EXPECT_EQ(actual, expected);
 }
 

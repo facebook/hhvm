@@ -31,7 +31,7 @@
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>
 #include <thrift/conformance/if/gen-cpp2/any_types_custom_protocol.h>
-#include <thrift/conformance/if/gen-cpp2/object_types_custom_protocol.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h>
 
 // Helper so gtest prints out the line number when running the given check.
 #define THRIFT_SCOPED_CHECK(check) \

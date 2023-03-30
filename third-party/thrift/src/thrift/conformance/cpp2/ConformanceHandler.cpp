@@ -19,7 +19,6 @@
 #include <thrift/conformance/cpp2/Any.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/ConformanceHandler.h>
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/cpp2/Protocol.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 

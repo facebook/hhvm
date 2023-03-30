@@ -17,11 +17,12 @@
 #include <thrift/conformance/cpp2/AnyStructSerializer.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/cpp2/Testing.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 
 namespace apache::thrift::conformance {
 namespace {
+using ::apache::thrift::protocol::asValueStruct;
 
 TEST(SerializerTest, BaseTypes) {
   THRIFT_SCOPED_CHECK(checkRoundTrip(asValueStruct<type::bool_t>(true)));

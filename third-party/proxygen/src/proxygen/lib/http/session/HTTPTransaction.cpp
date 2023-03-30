@@ -1753,10 +1753,10 @@ void HTTPTransaction::updateAndSendPriority(
   transport_.sendPriority(this, priority_);
 }
 
-void HTTPTransaction::updateAndSendPriority(uint8_t urgency, bool incremental) {
-  urgency = HTTPMessage::normalizePriority((int8_t)urgency);
+void HTTPTransaction::updateAndSendPriority(HTTPPriority pri) {
+  pri.urgency = HTTPMessage::normalizePriority((int8_t)pri.urgency);
   // Note we no longer want to play with the egressQueue_ with the new API.
-  transport_.changePriority(this, HTTPPriority(urgency, incremental));
+  transport_.changePriority(this, pri);
 }
 
 void HTTPTransaction::onPriorityUpdate(const http2::PriorityUpdate& priority) {

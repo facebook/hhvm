@@ -60,6 +60,11 @@ struct HTTPPriority {
   virtual ~HTTPPriority() = default;
 };
 
+inline bool operator==(const HTTPPriority& a, const HTTPPriority& b) {
+  return a.urgency == b.urgency && a.incremental == b.incremental &&
+         a.orderId == b.orderId;
+}
+
 // Convert Priority to a string representation in the form of "u=urgency[,i]"
 std::string httpPriorityToString(const HTTPPriority& priority);
 

@@ -1495,7 +1495,7 @@ class HTTPTransaction
    */
   void updateAndSendPriority(int8_t newPriority);
   void updateAndSendPriority(const http2::PriorityUpdate& pri);
-  virtual void updateAndSendPriority(uint8_t urgency, bool incremental);
+  virtual void updateAndSendPriority(HTTPPriority pri);
 
   /**
    * Notify of priority change, will not generate a PRIORITY frame

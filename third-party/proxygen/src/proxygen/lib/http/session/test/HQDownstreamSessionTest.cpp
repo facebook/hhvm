@@ -345,8 +345,9 @@ TEST_P(HQDownstreamSessionTest, SetLocalPriorityOnHeadersComplete) {
   EXPECT_CALL(*socketDriver_->getSocket(),
               setStreamPriority(_, Priority(urgency, incremental)))
       .Times(1);
-  handler->expectHeaders(
-      [&]() { handler->txn_->updateAndSendPriority(urgency, incremental); });
+  handler->expectHeaders([&]() {
+    handler->txn_->updateAndSendPriority(HTTPPriority(urgency, incremental));
+  });
   handler->expectEOM([&]() {
     auto resp = makeResponse(200, 0);
     EXPECT_CALL(*socketDriver_->getSocket(), getStreamPriority(_))
@@ -375,7 +376,7 @@ TEST_P(HQDownstreamSessionTest, SetLocalPriorityAfterClientEOM) {
       .Times(1);
   handler->expectHeaders();
   handler->expectEOM([&]() {
-    handler->txn_->updateAndSendPriority(urgency, incremental);
+    handler->txn_->updateAndSendPriority(HTTPPriority(urgency, incremental));
     auto resp = makeResponse(200, 0);
     EXPECT_CALL(*socketDriver_->getSocket(), getStreamPriority(_))
         .Times(1)

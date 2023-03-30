@@ -328,7 +328,7 @@ TEST_P(HQUpstreamSessionTest, SendPriorityUpdate) {
     EXPECT_CALL(
         *socketDriver_->getSocket(),
         setStreamPriority(handler->txn_->getID(), quic::Priority(5, true)));
-    handler->txn_->updateAndSendPriority(5, true);
+    handler->txn_->updateAndSendPriority(HTTPPriority(5, true));
   });
   handler->txn_->sendEOM();
   handler->expectEOM();
@@ -352,7 +352,7 @@ TEST_P(HQUpstreamSessionTest, SkipPriorityUpdateAfterSeenEOM) {
         *socketDriver_->getSocket(),
         setStreamPriority(handler->txn_->getID(), quic::Priority(5, true)))
         .Times(0);
-    handler->txn_->updateAndSendPriority(5, true);
+    handler->txn_->updateAndSendPriority(HTTPPriority(5, true));
   });
   handler->txn_->sendEOM();
 

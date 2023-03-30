@@ -413,7 +413,7 @@ Thrift has strongly-typed containers that map to commonly used containers in tar
 * `map<K,V>`: An unordered map of unique keys of type `K` to values of type `V`.
 
 :::note
-In some languages default mode is to use ordered sets and maps. This could be changed to use unordered and customized containers - see [Thrift Annotations](/spec/definition/annotation.md#unstructured-annotations-deprecated).
+In some languages default mode is to use ordered sets and maps. This could be changed to use unordered and customized containers - see [Thrift Annotations](/idl/annotations.md#unstructured-annotations-deprecated).
 :::
 
 :::caution

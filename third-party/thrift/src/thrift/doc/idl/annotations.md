@@ -6,7 +6,7 @@ state: draft
 
 ## Structured Annotations
 
-Structured annotations are structural constants attached to the named IDL entities, typically representing some metadata or altering the compiler behavior. They are specified via `@Annotation{key1=value1, key2=value2, ...}` syntax before the [Definitions](../index.md). Each definition may have several annotations with no duplicates allowed. `@Annotation` can be used as a syntactic sugar for `@Annotation{}`.
+Structured annotations are structural constants attached to the named IDL entities, typically representing some metadata or altering the compiler behavior. They are specified via `@Annotation{key1=value1, key2=value2, ...}` syntax before the [Definitions](/spec/index.md). Each definition may have several annotations with no duplicates allowed. `@Annotation` can be used as a syntactic sugar for `@Annotation{}`.
 
 ### Grammar
 
@@ -79,7 +79,7 @@ const map<string, string> MyConst = {
 
 ## Unstructured Annotations (Deprecated)
 
-Unstructured annotations are key-value pairs where the key is an identifier and the value is either a string or an identifier. Both identifiers are interpreted as strings. These annotations may be applied to [definitions](../index.md) in the Thrift language, following that construct.
+Unstructured annotations are key-value pairs where the key is an identifier and the value is either a string or an identifier. Both identifiers are interpreted as strings. These annotations may be applied to [definitions](/spec/index.md) in the Thrift language, following that construct.
 
 ```
 Annotations ::=

@@ -78,6 +78,7 @@ module.exports = {
       },
       items: [
         "idl/field-qualifiers",
+        "idl/annotations",
         "idl/structured-annotations",
         "idl/standard-thrift-annotation-library",
         "idl/mixins"
@@ -103,7 +104,6 @@ module.exports = {
             "spec/definition/interface",
             "spec/definition/data",
             "spec/definition/value",
-            "spec/definition/annotation",
             "spec/definition/patch",
           ]
         },

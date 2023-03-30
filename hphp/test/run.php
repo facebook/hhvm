@@ -440,7 +440,8 @@ final class Options {
     public ?string $hh_single_type_check;
     public bool $write_to_checkout = false;
     public bool $bespoke = false;
-    public bool $record_replay = false;
+    public bool $record = false;
+    public bool $replay = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -500,7 +501,8 @@ function get_options(
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
     'bespoke' => '',
-    '*record-replay' => '',
+    '*record' => '',
+    '*replay' => '',
   ];
   $options = new Options() as dynamic;
   $files = vec[];
@@ -1019,8 +1021,8 @@ function hhvm_cmd_impl(
       $args[] = '-vServer.APC.MemModelTreadmill=true';
     }
 
-    if ($options->record_replay) {
-      // Create a temporary directory for the recording
+    if ($options->record || $options->replay) {
+      // Extract the test to be run
       $test_run_index = -1;
       foreach ($extra_args as $i => $replay_extra_arg) {
         if ($replay_extra_arg === '--file') {
@@ -1029,17 +1031,23 @@ function hhvm_cmd_impl(
         }
       }
       $test_run = substr($extra_args[$test_run_index], 1, -1);
+
+      // Create a temporary directory for the recording
       $record_dir = Status::getTestTmpPath($test_run, 'record');
       @mkdir($record_dir, 0777, true);
 
-      // Create two commands, first to record and second to replay
+      // Create the record command
       $args[] = '-vEval.RecordReplay=true';
-      $record_args = $args;
-      $record_args[] = '-vEval.RecordSampleRate=1';
-      $record_args[] = "-vEval.RecordDir=$record_dir";
-      $cmds[] = implode(' ', array_merge($record_args, $extra_args));
-      $args[] = '-vEval.Replay=true';
-      $extra_args[$test_run_index] = "$record_dir/*.hhvm";
+      $args[] = '-vEval.RecordSampleRate=1';
+      $args[] = "-vEval.RecordDir=$record_dir";
+
+      // If replaying, create a second replay command
+      if ($options->replay && !file_exists($test_run.'.verify')) {
+        $cmds[] = implode(' ', array_merge($args, $extra_args));
+        $args = HH\Lib\Vec\take($args, C\count($args) - 2);
+        $args[] = '-vEval.Replay=true';
+        $extra_args[$test_run_index] = "$record_dir/*.hhvm";
+      }
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));

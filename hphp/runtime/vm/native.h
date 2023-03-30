@@ -15,6 +15,10 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/record-replay.h"
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -83,6 +87,24 @@ struct Extension;
  * function or for registering functions that live in a namespace.
  *
  */
+
+#define REGISTER_NATIVE_FUNC(functable, name, f) do { \
+  if constexpr (shouldRecordReplay(name)) { \
+    if (RO::EvalRecordReplay) { \
+      if (RO::EvalRecordSampleRate) { \
+        const auto wrapper{Recorder::wrapNativeFunc<f>(name)}; \
+        Native::registerNativeFunc(functable, name, wrapper); \
+        break; \
+      } else if (RO::EvalReplay) { \
+        const auto wrapper{Replayer::wrapNativeFunc<f>(name)}; \
+        Native::registerNativeFunc(functable, name, wrapper); \
+        break; \
+      } \
+    } \
+  } \
+  Native::registerNativeFunc(functable, name, f); \
+} while(0)
+
 #define HHVM_FN(fn) f_ ## fn
 #define HHVM_FUNCTION(fn, ...) \
         HHVM_FN(fn)(__VA_ARGS__)
@@ -90,7 +112,7 @@ struct Extension;
         do { \
           String name{makeStaticString(fn)}; \
           registerExtensionFunction(name); \
-          Native::registerNativeFunc(functable, name, fimpl); \
+          REGISTER_NATIVE_FUNC(functable, fn, fimpl); \
         } while(0)
 #define HHVM_NAMED_FE(fn, fimpl)\
   HHVM_NAMED_FE_STR(#fn, fimpl, nativeFuncs())
@@ -114,7 +136,7 @@ struct Extension;
 #define HHVM_METHOD(cn, fn, ...) \
         HHVM_MN(cn,fn)(ObjectData* const this_, ##__VA_ARGS__)
 #define HHVM_NAMED_ME(cn,fn,mimpl) \
-        Native::registerNativeFunc(nativeFuncs(), #cn "->" #fn, mimpl)
+  REGISTER_NATIVE_FUNC(nativeFuncs(), #cn "->" #fn, mimpl)
 #define HHVM_ME(cn,fn) HHVM_NAMED_ME(cn,fn, HHVM_MN(cn,fn))
 #define HHVM_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_ME(cn,fn,HHVM_MN(calias,falias))
@@ -124,8 +146,8 @@ struct Extension;
  */
 #define HHVM_SYS_FE(fn)\
   HHVM_NAMED_FE_STR(#fn, HHVM_FN(fn), Native::s_systemNativeFuncs)
-#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) Native::registerNativeFunc(\
-    Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
+#define HHVM_NAMED_SYS_ME(cn,fn,mimpl) \
+  REGISTER_NATIVE_FUNC(Native::s_systemNativeFuncs, #cn "->" #fn, mimpl)
 #define HHVM_SYS_ME(cn,fn) HHVM_NAMED_SYS_ME(cn,fn, HHVM_MN(cn,fn))
 
 /* Macros related to declaring/registering internal implementations
@@ -141,7 +163,7 @@ struct Extension;
 #define HHVM_STATIC_METHOD(cn, fn, ...) \
         HHVM_STATIC_MN(cn,fn)(const Class *self_, ##__VA_ARGS__)
 #define HHVM_NAMED_STATIC_ME(cn,fn,mimpl) \
-        Native::registerNativeFunc(nativeFuncs(), #cn "::" #fn, mimpl)
+  REGISTER_NATIVE_FUNC(nativeFuncs(), #cn "::" #fn, mimpl)
 #define HHVM_STATIC_ME(cn,fn) HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(cn,fn))
 #define HHVM_STATIC_MALIAS(cn,fn,calias,falias) \
   HHVM_NAMED_STATIC_ME(cn,fn,HHVM_STATIC_MN(calias,falias))
@@ -276,6 +298,10 @@ private:
    */
   NativeArg(const NativeArg&) = default;
   T* m_px;
+
+  // These need to be friends so they can forward args to wrapped native funcs
+  friend Recorder;
+  friend Replayer;
 };
 }
 

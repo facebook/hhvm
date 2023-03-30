@@ -2068,6 +2068,57 @@ TEST(FieldMaskTest, LogicalOpSimpleMap) {
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
 }
 
+TEST(FieldMaskTest, LogicalOpSimpleStringMap) {
+  // maskA = includes_string_map{1: excludes_string_map{},
+  //                             2: excludes_string_map{},
+  //                             3: includes_string_map{}}
+  Mask maskA;
+  {
+    auto& includes = maskA.includes_string_map_ref().emplace();
+    includes["1"] = allMask();
+    includes["2"] = allMask();
+    includes["3"] = noneMask();
+  }
+
+  // maskB = includes_string_map{2: excludes_string_map{},
+  //                             3: excludes_string_map{}}
+  Mask maskB;
+  {
+    auto& includes = maskB.includes_string_map_ref().emplace();
+    includes["2"] = allMask();
+    includes["3"] = allMask();
+  }
+
+  // maskA | maskB == includes_string_map{1: excludes_string_map{},
+  //                                      2: excludes_string_map{},
+  //                                      3: excludes_string_map{}}
+  Mask maskUnion;
+  {
+    auto& includes = maskUnion.includes_string_map_ref().emplace();
+    includes["1"] = allMask();
+    includes["2"] = allMask();
+    includes["3"] = allMask();
+  }
+  EXPECT_EQ(maskA | maskB, maskUnion);
+  EXPECT_EQ(maskB | maskA, maskUnion);
+
+  // maskA & maskB == includes_string_map{2: excludes_string_map{}}
+  Mask maskIntersect;
+  { maskIntersect.includes_string_map_ref().emplace()["2"] = allMask(); }
+  EXPECT_EQ(maskA & maskB, maskIntersect);
+  EXPECT_EQ(maskB & maskA, maskIntersect);
+
+  // maskA - maskB == includes_string_map{1: excludes_string_map{}}
+  Mask maskSubtractAB;
+  { maskSubtractAB.includes_string_map_ref().emplace()["1"] = allMask(); }
+  EXPECT_EQ(maskA - maskB, maskSubtractAB);
+
+  // maskB - maskA == includes_string_map{3: excludes_string_map{}}
+  Mask maskSubtractBA;
+  { maskSubtractBA.includes_string_map_ref().emplace()["3"] = allMask(); }
+  EXPECT_EQ(maskB - maskA, maskSubtractBA);
+}
+
 TEST(FieldMaskTest, LogicalOpBothIncludes) {
   // maskA = includes{1: includes{2: excludes{}},
   //                  3: includes{4: excludes{},
@@ -2288,6 +2339,98 @@ TEST(FieldMaskTest, LogicalOpIncludesExcludes) {
     includes[5] = allMask();
     includes[6] = allMask();
     excludes[7] = allMask();
+  }
+  EXPECT_EQ(maskB - maskA, maskSubtractBA);
+}
+
+TEST(FieldMaskTest, LogicalOpMixed) {
+  // maskA = includes{1: includes_map{1: includes_string_map{"1": includes{},
+  //                                                         "2": excludes{}},
+  //                                  2: excludes_string_map{"1": includes{}}
+  //                                                         "2": excludes{}}}}
+  Mask maskA;
+  {
+    auto& includes = maskA.includes_ref().emplace();
+    auto add = [](auto& m) {
+      auto& includes_string_map = m[1].includes_string_map_ref().emplace();
+      includes_string_map["1"].includes_ref().emplace();
+      includes_string_map["2"].excludes_ref().emplace();
+    };
+    add(includes[1].includes_map_ref().emplace());
+  }
+
+  // maskB = excludes{1: excludes_map{1: excludes_string_map{"1": excludes{},
+  //                                                         "2": includes{}},
+  //                                  2: includes_string_map{"1": excludes{}}
+  //                                                         "2": includes{}}}}
+  Mask maskB;
+  {
+    auto& excludes = maskB.excludes_ref().emplace();
+    auto add = [](auto& m) {
+      auto& excludes_string_map = m[1].excludes_string_map_ref().emplace();
+      excludes_string_map["1"].excludes_ref().emplace();
+      excludes_string_map["2"].includes_ref().emplace();
+    };
+    add(excludes[1].excludes_map_ref().emplace());
+  }
+
+  // maskA | maskB ==
+  //     excludes{1: excludes_map{1: excludes_string_map{"1": excludes{}}}}
+  Mask maskUnion;
+  {
+    auto& excludes = maskUnion.excludes_ref().emplace();
+    excludes[1]
+        .excludes_map_ref()
+        .emplace()[1]
+        .excludes_string_map_ref()
+        .emplace()["1"]
+        .excludes_ref()
+        .emplace();
+  }
+  EXPECT_EQ(maskA | maskB, maskUnion);
+  EXPECT_EQ(maskB | maskA, maskUnion);
+
+  // maskA & maskB ==
+  //     includes{1: includes_map{1: includes_string_map{"2": excludes{}}}}
+  Mask maskIntersect;
+  {
+    auto& includes = maskIntersect.includes_ref().emplace();
+    includes[1]
+        .includes_map_ref()
+        .emplace()[1]
+        .includes_string_map_ref()
+        .emplace()["2"]
+        .excludes_ref()
+        .emplace();
+  }
+  EXPECT_EQ(maskA & maskB, maskIntersect);
+  EXPECT_EQ(maskB & maskA, maskIntersect);
+
+  // maskA - maskB == includes{1: includes_map{1: includes_string_map{}}}
+  Mask maskSubtractAB;
+  {
+    auto& includes = maskSubtractAB.includes_ref().emplace();
+    includes[1]
+        .includes_map_ref()
+        .emplace()[1]
+        .includes_string_map_ref()
+        .emplace();
+  }
+  EXPECT_EQ(maskA - maskB, maskSubtractAB);
+
+  // maskB - maskA ==
+  //     excludes{1: excludes_map{1: excludes_string_map{"1": excludes{},
+  //                                                     "2": excludes{}}}
+  Mask maskSubtractBA;
+  {
+    auto& excludes = maskSubtractBA.excludes_ref().emplace();
+    auto& string_map = excludes[1]
+                           .excludes_map_ref()
+                           .emplace()[1]
+                           .excludes_string_map_ref()
+                           .emplace();
+    string_map["1"].excludes_ref().emplace();
+    string_map["2"].excludes_ref().emplace();
   }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
 }

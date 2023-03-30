@@ -104,18 +104,18 @@ void insertIfNotNoneMask(Map& map, Key key, const Mask& mask) {
 // - lhs = excludes, rhs = includes: ~P-Q=~P·~Q​=~(P+Q)​
 // - lhs = excludes, rhs = excludes: ~P-~Q​=(~P·Q)=Q/P
 
-// Returns the intersection, union, or subtraction of the given FieldIdToMasks.
+// Returns the intersection, union, or subtraction of the given maps.
 // This basically treats the maps as inclusive sets.
 struct IntersectMaskImpl {
   template <class Map>
   Map operator()(const Map& lhs, const Map& rhs) const {
     Map map;
-    for (auto& [fieldId, lhsMask] : lhs) {
-      if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
+    for (auto& [id, lhsMask] : lhs) {
+      if (rhs.find(id) == rhs.end()) { // Only lhs contains the id.
         continue;
       }
-      // Both maps have the field, so the mask is their intersection.
-      insertIfNotNoneMask(map, fieldId, lhsMask & rhs.at(fieldId));
+      // Both maps have the id, so the mask is their intersection.
+      insertIfNotNoneMask(map, id, lhsMask & rhs.at(id));
     }
     return map;
   }
@@ -125,17 +125,17 @@ struct UnionMaskImpl {
   template <class Map>
   Map operator()(const Map& lhs, const Map& rhs) const {
     Map map;
-    for (auto& [fieldId, lhsMask] : lhs) {
-      if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
-        insertIfNotNoneMask(map, fieldId, lhsMask);
+    for (auto& [id, lhsMask] : lhs) {
+      if (rhs.find(id) == rhs.end()) { // Only lhs contains the id.
+        insertIfNotNoneMask(map, id, lhsMask);
         continue;
       }
-      // Both maps have the field, so the mask is their union.
-      insertIfNotNoneMask(map, fieldId, lhsMask | rhs.at(fieldId));
+      // Both maps have the id, so the mask is their union.
+      insertIfNotNoneMask(map, id, lhsMask | rhs.at(id));
     }
-    for (auto& [fieldId, rhsMask] : rhs) {
-      if (lhs.find(fieldId) == lhs.end()) { // Only rhs contains the field.
-        insertIfNotNoneMask(map, fieldId, rhsMask);
+    for (auto& [id, rhsMask] : rhs) {
+      if (lhs.find(id) == lhs.end()) { // Only rhs contains the id.
+        insertIfNotNoneMask(map, id, rhsMask);
       }
     }
     return map;
@@ -146,19 +146,36 @@ struct SubtractMaskImpl {
   template <class Map>
   Map operator()(const Map& lhs, const Map& rhs) const {
     Map map;
-    for (auto& [fieldId, lhsMask] : lhs) {
-      if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
-        insertIfNotNoneMask(map, fieldId, lhsMask);
+    for (auto& [id, lhsMask] : lhs) {
+      if (rhs.find(id) == rhs.end()) { // Only lhs contains the id.
+        insertIfNotNoneMask(map, id, lhsMask);
         continue;
       }
-      // Both maps have the field, so the mask is their subtraction.
-      insertIfNotNoneMask(map, fieldId, lhsMask - rhs.at(fieldId));
+      // Both maps have the id, so the mask is their subtraction.
+      insertIfNotNoneMask(map, id, lhsMask - rhs.at(id));
     }
     return map;
   }
 };
 
-const MapIdToMask& toMapMask(const Mask& mask) {
+const MapStringToMask& toStringMapMask(const Mask& mask) {
+  using detail::getStringMapMask;
+
+  if (const auto* mapMask = getStringMapMask(mask)) {
+    return *mapMask;
+  }
+
+  if (detail::isAllMask(mask) || detail::isNoneMask(mask)) {
+    static const MapStringToMask map;
+    return map;
+  }
+
+  // The mask can't be applied to a string map since it's not a string map mask
+  // or allMask/noneMask
+  folly::throw_exception<std::runtime_error>("Incompatible masks");
+}
+
+const MapIdToMask& toIntegerMapMask(const Mask& mask) {
   using detail::getIntegerMapMask;
 
   if (const auto* mapMask = getIntegerMapMask(mask)) {
@@ -170,8 +187,8 @@ const MapIdToMask& toMapMask(const Mask& mask) {
     return map;
   }
 
-  // The mask can't be applied to a map since it's not map mask or
-  // allMask/noneMask
+  // The mask can't be applied to an integer map since it's not an integer map
+  // mask or allMask/noneMask
   folly::throw_exception<std::runtime_error>("Incompatible masks");
 }
 
@@ -183,16 +200,18 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
 
   Mask mask;
 
-  // TODO(dokwon): Add support for string map mask.
   if (getStringMapMask(lhs) || getStringMapMask(rhs)) {
-    folly::throw_exception<std::runtime_error>("not implemented");
+    mask.includes_string_map_ref() =
+        func(toStringMapMask(lhs), toStringMapMask(rhs));
+    return mask;
   }
 
   // If one of them is an integer map mask, the other one must be either integer
   // map mask, or allMask/noneMask which either mask the whole integer map, or
   // nothing.
   if (getIntegerMapMask(lhs) || getIntegerMapMask(rhs)) {
-    mask.includes_map_ref() = func(toMapMask(lhs), toMapMask(rhs));
+    mask.includes_map_ref() =
+        func(toIntegerMapMask(lhs), toIntegerMapMask(rhs));
     return mask;
   }
 

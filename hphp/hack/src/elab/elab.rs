@@ -30,6 +30,7 @@ mod prelude {
     pub use std::ops::ControlFlow;
     pub use std::ops::ControlFlow::Break;
     pub use std::ops::ControlFlow::Continue;
+    pub use std::rc::Rc;
 
     pub use naming_special_names_rust as sn;
     pub use oxidized::naming_error::NamingError;

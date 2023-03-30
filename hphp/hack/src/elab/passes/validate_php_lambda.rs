@@ -8,7 +8,7 @@ use nast::Expr_;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidatePhpLambdaPass;
 
 impl Pass for ValidatePhpLambdaPass {

@@ -16,8 +16,8 @@ use crate::prelude::*;
 #[derive(Clone, Default)]
 pub struct ValidateExprFunctionPointerPass {
     in_final_class: bool,
-    class_name: Option<String>,
-    parent_name: Option<String>,
+    class_name: Option<Rc<String>>,
+    parent_name: Option<Rc<String>>,
     is_trait: bool,
 }
 
@@ -25,9 +25,9 @@ impl Pass for ValidateExprFunctionPointerPass {
     fn on_ty_class__top_down(&mut self, _env: &Env, class_: &mut Class_) -> ControlFlow<()> {
         self.in_final_class = class_.final_;
         self.is_trait = class_.kind.is_ctrait();
-        self.class_name = Some(class_.name.name().to_string());
+        self.class_name = Some(Rc::new(class_.name.name().to_string()));
         self.parent_name = match class_.extends.as_slice() {
-            [Hint(_, box Hint_::Happly(id, _)), ..] => Some(id.name().to_string()),
+            [Hint(_, box Hint_::Happly(id, _)), ..] => Some(Rc::new(id.name().to_string())),
             _ => None,
         };
         ControlFlow::Continue(())
@@ -46,14 +46,14 @@ impl Pass for ValidateExprFunctionPointerPass {
                         class_name: if self.is_trait {
                             None
                         } else {
-                            self.class_name.clone()
+                            self.class_name.as_deref().cloned()
                         },
                     })
                 }
                 ClassId_::CIparent => env.emit_error(NamingError::ParentInFunctionPointer {
                     pos: pos.clone(),
                     meth_name: meth_name.clone(),
-                    parent_name: self.parent_name.clone(),
+                    parent_name: self.parent_name.as_deref().cloned(),
                 }),
                 _ => (),
             },

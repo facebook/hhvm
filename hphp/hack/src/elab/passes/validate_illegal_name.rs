@@ -17,13 +17,13 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateIllegalNamePass {
-    func_name: Option<String>,
+    func_name: Option<Rc<String>>,
     classish_kind: Option<ClassishKind>,
 }
 
 impl ValidateIllegalNamePass {
     fn is_current_func(&self, nm: &str) -> bool {
-        if let Some(cur_nm) = &self.func_name {
+        if let Some(cur_nm) = self.func_name.as_deref() {
             return cur_nm == nm;
         }
         false
@@ -52,7 +52,7 @@ impl Pass for ValidateIllegalNamePass {
     }
 
     fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
-        self.func_name = Some(elem.name.name().to_string());
+        self.func_name = Some(Rc::new(elem.name.name().to_string()));
         Continue(())
     }
 
@@ -72,7 +72,7 @@ impl Pass for ValidateIllegalNamePass {
     }
 
     fn on_ty_method__top_down(&mut self, _: &Env, elem: &mut Method_) -> ControlFlow<()> {
-        self.func_name = Some(elem.name.name().to_string());
+        self.func_name = Some(Rc::new(elem.name.name().to_string()));
         Continue(())
     }
 

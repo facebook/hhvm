@@ -9,7 +9,7 @@ use nast::ShapeFieldName;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidateShapeNamePass;
 
 impl Pass for ValidateShapeNamePass {

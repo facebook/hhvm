@@ -10,13 +10,13 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateClassVarUserAttributeLsbPass {
-    final_class: Option<Id>,
+    final_class: Option<Rc<Id>>,
 }
 
 impl Pass for ValidateClassVarUserAttributeLsbPass {
     fn on_ty_class__bottom_up(&mut self, _: &Env, elem: &mut nast::Class_) -> ControlFlow<()> {
         self.final_class = if elem.final_ {
-            Some(elem.name.clone())
+            Some(Rc::new(elem.name.clone()))
         } else {
             None
         };

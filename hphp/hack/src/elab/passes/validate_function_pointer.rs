@@ -18,20 +18,20 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateFunctionPointerPass {
-    pub in_final_class: bool,
-    pub class_name: Option<String>,
-    pub parent_name: Option<String>,
-    pub is_trait: bool,
+    in_final_class: bool,
+    class_name: Option<Rc<String>>,
+    parent_name: Option<Rc<String>>,
+    is_trait: bool,
 }
 
 impl Pass for ValidateFunctionPointerPass {
     fn on_ty_class__top_down(&mut self, _: &Env, class: &mut Class_) -> ControlFlow<()> {
         *self = Self {
             in_final_class: class.final_,
-            class_name: Some(class.name.name().to_string()),
+            class_name: Some(Rc::new(class.name.name().to_string())),
             parent_name: class.extends.first().and_then(|h| {
                 if let Hint(_, box Hint_::Happly(Id(_, name), _)) = h {
-                    Some(name.clone())
+                    Some(Rc::new(name.clone()))
                 } else {
                     None
                 }
@@ -60,7 +60,7 @@ impl Pass for ValidateFunctionPointerPass {
                     env.emit_error(NamingError::SelfInNonFinalFunctionPointer {
                         pos: pos.clone(),
                         meth_name: meth_name.clone(),
-                        class_name: self.class_name.clone(),
+                        class_name: self.class_name.as_deref().cloned(),
                     });
                 }
             }
@@ -70,7 +70,7 @@ impl Pass for ValidateFunctionPointerPass {
             )) => {
                 env.emit_error(NamingError::ParentInFunctionPointer {
                     pos: pos.clone(),
-                    parent_name: self.parent_name.clone(),
+                    parent_name: self.parent_name.as_deref().cloned(),
                     meth_name: meth_name.clone(),
                 });
             }

@@ -11,7 +11,7 @@ use nast::Id;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidateGlobalConstPass;
 
 impl Pass for ValidateGlobalConstPass {

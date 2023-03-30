@@ -10,7 +10,7 @@ use nast::Method_;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidateClassMethodsPass;
 
 impl Pass for ValidateClassMethodsPass {

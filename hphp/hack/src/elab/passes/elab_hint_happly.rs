@@ -21,17 +21,18 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ElabHintHapplyPass {
-    tparams: HashSet<String>,
+    tparams: Rc<HashSet<String>>,
 }
 
 impl ElabHintHapplyPass {
     pub fn extend_tparams(&mut self, tps: &[Tparam]) {
+        let tparams = Rc::make_mut(&mut self.tparams);
         tps.iter().for_each(|tparam| {
-            self.tparams.insert(tparam.name.1.clone());
+            tparams.insert(tparam.name.1.clone());
         })
     }
     pub fn reset_tparams(&mut self) {
-        self.tparams.clear()
+        Rc::make_mut(&mut self.tparams).clear()
     }
     pub fn set_tparams(&mut self, tps: &[Tparam]) {
         self.reset_tparams();

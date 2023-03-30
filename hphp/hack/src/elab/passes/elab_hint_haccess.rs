@@ -15,7 +15,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ElabHintHaccessPass {
-    current_class: Option<Id>,
+    current_class: Option<Rc<Id>>,
     flags: Flags,
 }
 
@@ -30,7 +30,7 @@ bitflags! {
 
 impl ElabHintHaccessPass {
     fn set_in_class(&mut self, cls: &Class_) {
-        self.current_class = Some(cls.name.clone())
+        self.current_class = Some(Rc::new(cls.name.clone()))
     }
 
     fn in_context(&self) -> bool {
@@ -65,7 +65,7 @@ impl Pass for ElabHintHaccessPass {
         }
         match &mut *elem.1 {
             Hint_::Happly(id, hints) if id.name() == sn::classes::SELF => {
-                if let Some(class_id) = &self.current_class {
+                if let Some(class_id) = self.current_class.as_deref() {
                     *id = class_id.clone();
                     // TODO[mjt] we appear to be discarding type arguments on `Happly` here?
                     hints.clear();
@@ -149,7 +149,7 @@ mod tests {
 
         let class_name = "Classy";
         let mut pass = ElabHintHaccessPass {
-            current_class: Some(Id(Default::default(), "Classy".to_string())),
+            current_class: Some(Rc::new(Id(Default::default(), "Classy".to_string()))),
             ..Default::default()
         };
         let mut elem = Hint(
@@ -183,7 +183,7 @@ mod tests {
 
         let class_name = "Classy";
         let mut pass = ElabHintHaccessPass {
-            current_class: Some(Id(Default::default(), "Classy".to_string())),
+            current_class: Some(Rc::new(Id(Default::default(), "Classy".to_string()))),
             ..Default::default()
         };
         let mut elem = Hint(
@@ -271,7 +271,7 @@ mod tests {
         let env = Env::default();
 
         let mut pass = ElabHintHaccessPass {
-            current_class: Some(Id(Default::default(), "Classy".to_string())),
+            current_class: Some(Rc::new(Id(Default::default(), "Classy".to_string()))),
             ..Default::default()
         };
         let mut elem = Hint(

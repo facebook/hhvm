@@ -8,7 +8,7 @@ use nast::Method_;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidateMethodPrivateFinalPass {
     in_trait: bool,
 }

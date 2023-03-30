@@ -9,7 +9,7 @@ use oxidized::nast::XhpSimple;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidateXhpAttributePass;
 
 impl Pass for ValidateXhpAttributePass {

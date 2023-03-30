@@ -9,7 +9,7 @@ use nast::Sid;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Copy, Default)]
 pub struct ValidateClassMemberPass;
 
 impl Pass for ValidateClassMemberPass {

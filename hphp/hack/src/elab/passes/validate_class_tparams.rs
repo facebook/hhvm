@@ -13,13 +13,15 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ValidateClassTparamsPass {
-    class_tparams: Option<Vec<Id>>,
+    class_tparams: Option<Rc<Vec<Id>>>,
     in_typeconst_def: bool,
 }
 
 impl Pass for ValidateClassTparamsPass {
     fn on_ty_class__top_down(&mut self, _: &Env, elem: &mut Class_) -> ControlFlow<()> {
-        self.class_tparams = Some(elem.tparams.iter().map(|tp| tp.name.clone()).collect());
+        self.class_tparams = Some(Rc::new(
+            elem.tparams.iter().map(|tp| tp.name.clone()).collect(),
+        ));
         Continue(())
     }
 

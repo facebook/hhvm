@@ -7,7 +7,7 @@ use nast::Class_;
 
 use crate::prelude::*;
 
-#[derive(Clone, Default)]
+#[derive(Copy, Clone, Default)]
 pub struct ValidateEnumSupertypingPass;
 
 impl Pass for ValidateEnumSupertypingPass {

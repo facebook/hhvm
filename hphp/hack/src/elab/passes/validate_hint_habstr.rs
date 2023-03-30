@@ -23,10 +23,9 @@ enum TparamKind {
     Concrete,
     Higher,
 }
-#[derive(Clone)]
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct ValidateHintHabstrPass {
-    tparam_info: HashMap<String, (Pos, bool, TparamKind)>,
+    tparam_info: Rc<HashMap<String, (Pos, bool, TparamKind)>>,
     flags: Flags,
 }
 
@@ -56,17 +55,18 @@ impl ValidateHintHabstrPass {
     }
 
     fn clear_tparams(&mut self) {
-        self.tparam_info.clear();
+        Rc::make_mut(&mut self.tparam_info).clear();
     }
     fn check_tparams(&mut self, env: &Env, tparams: &[Tparam], nested: bool) {
         // Put each tparam in scope and record its kind; raise errors for
         // shadowed tparams in scope and non-shadowing reuse of previously seen
         // params of higher-kinded params
+        let tparam_info = Rc::make_mut(&mut self.tparam_info);
         tparams
             .iter()
             .filter(|tp| tp.name.name() != sn::typehints::WILDCARD)
             .for_each(|tp| {
-                match self.tparam_info.get(tp.name.name()) {
+                match tparam_info.get(tp.name.name()) {
                     // Shadows either a tparam either previously bound in the current scope or bound at some outer scope
                     Some((prev_pos, true, _)) => env.emit_error(NamingError::ShadowedTparam {
                         pos: tp.name.pos().clone(),
@@ -85,7 +85,7 @@ impl ValidateHintHabstrPass {
                 } else {
                     TparamKind::Higher
                 };
-                self.tparam_info.insert(
+                tparam_info.insert(
                     tp.name.name().to_string(),
                     (tp.name.pos().clone(), true, kind),
                 );
@@ -98,11 +98,12 @@ impl ValidateHintHabstrPass {
         // if we are checking tparams of a higher-kinded tparams, remove them from scope
         // but remember we have seen them for non-shadow reuse warnings
         if nested {
+            let tparam_info = Rc::make_mut(&mut self.tparam_info);
             tparams
                 .iter()
                 .filter(|tp| tp.name.name() != sn::typehints::WILDCARD)
                 .for_each(|tp| {
-                    self.tparam_info
+                    tparam_info
                         .entry(tp.name.name().to_string())
                         .and_modify(|e| e.1 = false);
                 });

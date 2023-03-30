@@ -12,12 +12,12 @@ use crate::prelude::*;
 
 #[derive(Clone, Default)]
 pub struct ElabShapeFieldNamePass {
-    current_class: Option<String>,
+    current_class: Option<Rc<String>>,
 }
 
 impl ElabShapeFieldNamePass {
     pub fn in_class(&mut self, cls: &Class_) {
-        self.current_class = Some(cls.name.name().to_string())
+        self.current_class = Some(Rc::new(cls.name.name().to_string()));
     }
 }
 
@@ -31,7 +31,7 @@ impl Pass for ElabShapeFieldNamePass {
         match elem {
             Expr_::Shape(fields) => fields
                 .iter_mut()
-                .for_each(|(nm, _)| canonical_shape_name(env, nm, &self.current_class)),
+                .for_each(|(nm, _)| canonical_shape_name(env, nm, self.current_class.as_deref())),
             _ => (),
         }
         Continue(())
@@ -42,12 +42,12 @@ impl Pass for ElabShapeFieldNamePass {
         env: &Env,
         elem: &mut ShapeFieldInfo,
     ) -> ControlFlow<()> {
-        canonical_shape_name(env, &mut elem.name, &self.current_class);
+        canonical_shape_name(env, &mut elem.name, self.current_class.as_deref());
         Continue(())
     }
 }
 
-fn canonical_shape_name(env: &Env, nm: &mut ShapeFieldName, current_class: &Option<String>) {
+fn canonical_shape_name(env: &Env, nm: &mut ShapeFieldName, current_class: Option<&String>) {
     match (nm, current_class) {
         (ShapeFieldName::SFclassConst(id, _), Some(cls_nm)) if id.name() == sn::classes::SELF => {
             id.1 = cls_nm.to_string();
@@ -78,7 +78,7 @@ mod tests {
 
         let class_name = "Classy";
         let mut pass = ElabShapeFieldNamePass {
-            current_class: Some(class_name.to_string()),
+            current_class: Some(Rc::new(class_name.to_string())),
         };
         let mut elem = Expr_::Shape(vec![(
             ShapeFieldName::SFclassConst(
@@ -109,7 +109,7 @@ mod tests {
 
         let class_name = "Classy";
         let mut pass = ElabShapeFieldNamePass {
-            current_class: Some(class_name.to_string()),
+            current_class: Some(Rc::new(class_name.to_string())),
         };
         let mut elem = ShapeFieldInfo {
             optional: Default::default(),

@@ -24,10 +24,7 @@ Base Constant Values
 
 %><%#value:double?%>static_cast<<%type:cpp_standard_type%>>(<%value:double_value%>)<%/value:double?%><%!
 
-%><%#value:string?%><%!
-  %><%^value:string_multi_line?%>"<%value:string_value%>"<%/value:string_multi_line?%><%!
-  %><%#value:string_multi_line?%>R"__FBTHRIFT_STRL(<%value:string_value%>)__FBTHRIFT_STRL"<%/value:string_multi_line?%><%!
-%><%/value:string?%><%!
+%><%#value:string?%>"<%value:string_value%>"<%/value:string?%><%!
 
 %><%#value:enum?%><%!
   %><%#value:enum_value?%><% > common/type_namespace_cpp2%><%type:cpp_name%>::<%value:enum_value_cpp_name%><%/value:enum_value?%><%!

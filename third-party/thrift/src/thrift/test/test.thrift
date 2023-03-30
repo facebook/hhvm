@@ -51,6 +51,11 @@ const list<string> escapes = [
   "\uABCD",
 ];
 
+const string multi_line_string = "This
+is a
+multi line string.
+";
+
 const list<string> l_e = [];
 const list<i32> l_1 = [23, 42, 56];
 const list<string> l_2 = ["foo", "bar", "baz"];

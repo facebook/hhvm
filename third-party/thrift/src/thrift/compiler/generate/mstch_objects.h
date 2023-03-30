@@ -1304,8 +1304,6 @@ class mstch_const_value : public mstch_base {
             {"value:enum?", &mstch_const_value::is_enum},
             {"value:enum_value?", &mstch_const_value::has_enum_value},
             {"value:string?", &mstch_const_value::is_string},
-            {"value:string_multi_line?",
-             &mstch_const_value::is_string_multi_line},
             {"value:base?", &mstch_const_value::is_base},
             {"value:map?", &mstch_const_value::is_map},
             {"value:list?", &mstch_const_value::is_list},
@@ -1343,10 +1341,6 @@ class mstch_const_value : public mstch_base {
     return const_value_->get_enum_value() != nullptr;
   }
   mstch::node is_string() { return type_ == cv::CV_STRING; }
-  mstch::node is_string_multi_line() {
-    return type_ == cv::CV_STRING &&
-        const_value_->get_string().find("\n") != std::string::npos;
-  }
   mstch::node is_base() {
     return type_ == cv::CV_BOOL || type_ == cv::CV_DOUBLE ||
         type_ == cv::CV_INTEGER || type_ == cv::CV_STRING;

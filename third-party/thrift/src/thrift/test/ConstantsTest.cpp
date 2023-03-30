@@ -166,3 +166,8 @@ TEST(constants, escapes) {
           "\uffff",
           "\uABCD"}));
 }
+
+TEST(constants, multi_line_string) {
+  EXPECT_EQ(
+      test_constants::multi_line_string(), "This\nis a\nmulti line string.\n");
+}

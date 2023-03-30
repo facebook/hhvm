@@ -315,6 +315,8 @@ mstch::node mstch_const_value::string_value() {
       escaped.append(fmt::format("\\{:03o}", c));
     } else if (c == '"') {
       escaped.append("\\\"");
+    } else if (c == '\n') {
+      escaped.append("\\n");
     } else {
       escaped.push_back(c);
     }

@@ -16,35 +16,20 @@
 
 #pragma once
 
-#include <cstddef>
-
-#include "hphp/runtime/base/req-hash-map.h"
-#include "hphp/runtime/base/req-vector.h"
-#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 
 namespace HPHP {
 
-struct Recorder {
-  void onFunctionReturn(const ActRec* ar, TypedValue ret);
-  void requestExit();
-  void requestInit();
-  void setEntryPoint(const String& entryPoint);
+struct Replayer {
+  String file(String path);
+  String init(String path);
+  bool onFunctionCall(ActRec* ar);
 
  private:
-  struct NativeCall {
-    TypedValue ret;
-    Array args;
-  };
-
-  Array toArray() const;
-
-  bool m_enabled{false};
-  String m_entryPoint;
-  req::vector_map<const StringData*, req::vector<NativeCall>> m_nativeCalls;
+  Array m_files;
+  Array m_nativeCalls;
 };
 
 } // namespace HPHP

@@ -786,6 +786,12 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
     return false;
   }
 
+  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
+    if (!g_context->m_replayer.onFunctionCall(const_cast<ActRec*>(ar))) {
+      return false;
+    }
+  }
+
   // Xenon
   if (flags & XenonSignalFlag) {
     if (Strobelight::active()) {
@@ -1061,6 +1067,10 @@ void EventHook::onFunctionReturn(ActRec* ar,
   try {
     auto const flags = handle_request_surprise();
     onFunctionExit(ar, &retval, false, nullptr, flags, false, sourceType);
+
+    if (UNLIKELY(RO::EvalRecordReplay)) {
+      g_context->m_recorder.onFunctionReturn(ar, retval);
+    }
 
     // Async profiler
     if ((flags & AsyncEventHookFlag) && isResumed(ar) &&

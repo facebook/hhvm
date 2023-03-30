@@ -18,6 +18,8 @@
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/recorder.h"
+#include "hphp/runtime/base/replayer.h"
 #include "hphp/runtime/base/req-list.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
 #include "hphp/runtime/base/req-vector.h"
@@ -648,6 +650,9 @@ public:
     const StringData*,
     req::vector<std::pair<std::string, SHA1>>
   > m_loadedRdepMap;
+
+  Recorder m_recorder;
+  Replayer m_replayer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

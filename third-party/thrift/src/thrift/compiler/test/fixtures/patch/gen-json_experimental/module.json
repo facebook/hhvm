@@ -626,7 +626,18 @@
   "type" : "struct",
   "name" : "MyDataEnsureStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -774,7 +785,18 @@
   "type" : "struct",
   "name" : "MyDataWithCustomDefaultEnsureStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -879,7 +901,18 @@
   "type" : "struct",
   "name" : "InnerUnion"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -1025,7 +1058,18 @@
   "type" : "struct",
   "name" : "MyUnion"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -2790,7 +2834,18 @@
   "type" : "struct",
   "name" : "MyStructEnsureStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -2878,7 +2933,18 @@
   "type" : "struct",
   "name" : "LateDefStructEnsureStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -3044,7 +3110,18 @@
   "type" : "struct",
   "name" : "RecursiveEnsureStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",
@@ -3166,7 +3243,18 @@
   "type" : "struct",
   "name" : "BarEnsureStruct"
 }
-                  },
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
           "patch" : {
             "name" : "patch",
             "docstring" : "Patches any set value, including newly set values. Applies last.\n",

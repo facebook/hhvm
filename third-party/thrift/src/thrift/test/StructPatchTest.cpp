@@ -938,6 +938,46 @@ TEST(StructPatchTest, InternBox) {
            .value());
 }
 
+template <typename T>
+struct is_terse_intern_boxed_field_ref : std::false_type {};
+template <typename T>
+struct is_terse_intern_boxed_field_ref<terse_intern_boxed_field_ref<T>>
+    : std::true_type {};
+
+TEST(StructPatchTest, EnsureStruct) {
+  MyDataPatch patch;
+  using EnsureType = folly::remove_cvref_t<decltype(patch.toThrift().ensure())>;
+  static_assert(is_terse_intern_boxed_field_ref<EnsureType>::value, "");
+
+  patch.ensure<ident::data1>("10");
+  patch.ensure<ident::data3>("20");
+
+  MyData data;
+  EXPECT_EQ(data.data1(), "");
+  EXPECT_FALSE(data.data3().has_value());
+
+  patch.apply(data);
+  EXPECT_EQ(data.data1(), "");
+  EXPECT_EQ(data.data3(), "20");
+}
+
+TEST(StructPatchTest, EnsureUnion) {
+  MyUnionPatch patch;
+  using EnsureType = folly::remove_cvref_t<decltype(patch.toThrift().ensure())>;
+  static_assert(is_terse_intern_boxed_field_ref<EnsureType>::value, "");
+
+  patch.ensure<ident::option1>("10");
+  patch.ensure<ident::option2>(20);
+
+  MyUnion data;
+  EXPECT_FALSE(data.option1_ref());
+  EXPECT_FALSE(data.option2_ref());
+
+  patch.apply(data);
+  EXPECT_FALSE(data.option1_ref());
+  EXPECT_EQ(data.option2_ref(), 20);
+}
+
 TEST(StructPatchTest, EnsureStructValPatchable) {
   MyData data;
   data.data3() = "";

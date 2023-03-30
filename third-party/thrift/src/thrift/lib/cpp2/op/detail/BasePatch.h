@@ -50,6 +50,10 @@ template <typename T, typename U>
 bool sameType(terse_field_ref<T> unn1, const U& unn2) {
   return unn1->getType() == unn2.getType();
 }
+template <typename T, typename U>
+bool sameType(terse_intern_boxed_field_ref<T&> unn1, const U& unn2) {
+  return as_const_intern_box(unn1)->getType() == unn2.getType();
+}
 
 /// Base class for all patch types.
 /// - Patch: The Thrift struct representation for the patch.

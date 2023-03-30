@@ -241,16 +241,16 @@ struct PatchGen : StructGen {
 
   // {kEnsureUnionId}: {type} ensure;
   t_field& ensureUnion(t_type_ref type) {
-    return doc(
+    return intern_box(doc(
         "Assigns the value, if not already set to the same field. Applies third.",
-        field(kEnsureUnionId, type, "ensure"));
+        field(kEnsureUnionId, type, "ensure")));
   }
 
   // {kEnsureStructId}: {type} ensure;
   t_field& ensureStruct(t_type_ref type) {
-    return doc(
-        "Initialize fields, using the given defaults. Applies third.",
-        field(kEnsureStructId, type, "ensure"));
+    return intern_box(
+        doc("Initialize fields, using the given defaults. Applies third.",
+            field(kEnsureStructId, type, "ensure")));
   }
 
   // {kAddMapId}: {type} ensure;

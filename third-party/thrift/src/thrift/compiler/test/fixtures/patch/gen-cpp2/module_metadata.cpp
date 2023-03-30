@@ -344,7 +344,7 @@ StructMetadata<::test::fixtures::patch::MyDataPatchStruct>::gen(ThriftMetadata& 
     {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyDataFieldPatchStruct>>("module.MyDataFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyDataEnsureStruct>>("module.MyDataEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyDataEnsureStruct>>("module.MyDataEnsureStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::MyDataFieldPatchStruct>>("module.MyDataFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyDataPatch_fields) {
@@ -424,7 +424,7 @@ StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::gen
     {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefault>>("module.MyDataWithCustomDefault"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>("module.MyDataWithCustomDefaultFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>("module.MyDataWithCustomDefaultEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>("module.MyDataWithCustomDefaultEnsureStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>("module.MyDataWithCustomDefaultFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyDataWithCustomDefaultPatch_fields) {
@@ -478,7 +478,7 @@ StructMetadata<::test::fixtures::patch::InnerUnionPatchStruct>::gen(ThriftMetada
     {1, "assign", true, std::make_unique<Union<::test::fixtures::patch::InnerUnion>>("module.InnerUnion"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionFieldPatchStruct>>("module.InnerUnionFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {4, "ensure", false, std::make_unique<Union<::test::fixtures::patch::InnerUnion>>("module.InnerUnion"), std::vector<ThriftConstStruct>{}},
+    {4, "ensure", false, std::make_unique<Union<::test::fixtures::patch::InnerUnion>>("module.InnerUnion"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionFieldPatchStruct>>("module.InnerUnionFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_InnerUnionPatch_fields) {
@@ -534,7 +534,7 @@ StructMetadata<::test::fixtures::patch::MyUnionPatchStruct>::gen(ThriftMetadata&
     {1, "assign", true, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyUnionFieldPatchStruct>>("module.MyUnionFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {4, "ensure", false, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
+    {4, "ensure", false, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::MyUnionFieldPatchStruct>>("module.MyUnionFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyUnionPatch_fields) {
@@ -940,7 +940,7 @@ StructMetadata<::test::fixtures::patch::MyStructPatchStruct>::gen(ThriftMetadata
     {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyStructEnsureStruct>>("module.MyStructEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyStructEnsureStruct>>("module.MyStructEnsureStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_MyStructPatch_fields) {
@@ -992,7 +992,7 @@ StructMetadata<::test::fixtures::patch::LateDefStructPatchStruct>::gen(ThriftMet
     {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::LateDefStruct>>("module.LateDefStruct"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::LateDefStructFieldPatchStruct>>("module.LateDefStructFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::LateDefStructEnsureStruct>>("module.LateDefStructEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::LateDefStructEnsureStruct>>("module.LateDefStructEnsureStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::LateDefStructFieldPatchStruct>>("module.LateDefStructFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_LateDefStructPatch_fields) {
@@ -1096,7 +1096,7 @@ StructMetadata<::test::fixtures::patch::RecursivePatchStruct>::gen(ThriftMetadat
     {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::Recursive>>("module.Recursive"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveFieldPatchStruct>>("module.RecursiveFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveEnsureStruct>>("module.RecursiveEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveEnsureStruct>>("module.RecursiveEnsureStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveFieldPatchStruct>>("module.RecursiveFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_RecursivePatch_fields) {
@@ -1174,7 +1174,7 @@ StructMetadata<::test::fixtures::patch::BarPatchStruct>::gen(ThriftMetadata& met
     {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::Bar>>("module.Bar"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::BarFieldPatchStruct>>("module.BarFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::BarEnsureStruct>>("module.BarEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::BarEnsureStruct>>("module.BarEnsureStruct"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::BarFieldPatchStruct>>("module.BarFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
   for (const auto& f : *module_BarPatch_fields) {

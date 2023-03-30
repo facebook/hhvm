@@ -1500,6 +1500,12 @@ class terse_intern_boxed_field_ref {
   get_default_t get_default_;
 };
 
+template <typename T>
+terse_intern_boxed_field_ref<const T&> as_const_intern_box(
+    terse_intern_boxed_field_ref<T&> val) {
+  return val;
+}
+
 template <typename T1, typename T2>
 bool operator==(
     terse_intern_boxed_field_ref<T1> a, terse_intern_boxed_field_ref<T2> b) {

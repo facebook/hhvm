@@ -3337,6 +3337,15 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patch' => shape(
           'field' => dict[],
           'type' => dict[
@@ -3948,6 +3957,15 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
             ),
           ],
         ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patch' => shape(
           'field' => dict[],
           'type' => dict[
@@ -4373,6 +4391,15 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
+        ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -4906,6 +4933,15 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
+        ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -11928,6 +11964,15 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patch' => shape(
           'field' => dict[],
           'type' => dict[
@@ -12367,6 +12412,15 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
+        ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -13131,6 +13185,15 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
             ),
           ],
         ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
         'patch' => shape(
           'field' => dict[],
           'type' => dict[
@@ -13691,6 +13754,15 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
+        ),
+        'ensure' => shape(
+          'field' => dict[
+            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],

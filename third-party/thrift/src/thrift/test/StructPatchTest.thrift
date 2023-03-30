@@ -79,7 +79,6 @@ struct Bar {
   MapStruct extraCycle;
 }
 
-@cpp.Frozen2Exclude
 struct MapStruct {
   @patch.AssignOnlyPatch
   1: map<i32, MapStruct> rabbitHole;

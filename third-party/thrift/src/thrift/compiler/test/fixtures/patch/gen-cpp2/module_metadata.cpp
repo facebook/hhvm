@@ -302,7 +302,6 @@ StructMetadata<::test::fixtures::patch::MyDataEnsureStruct>::gen(ThriftMetadata&
     field.structured_annotations() = f.structured_annotations;
     module_MyDataEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_MyDataEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -383,7 +382,6 @@ StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::ge
     field.structured_annotations() = f.structured_annotations;
     module_MyDataWithCustomDefaultEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_MyDataWithCustomDefaultEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -605,7 +603,6 @@ StructMetadata<::test::fixtures::patch::MyStructEnsureStruct>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_MyStructEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_MyStructEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -967,7 +964,6 @@ StructMetadata<::test::fixtures::patch::LateDefStructEnsureStruct>::gen(ThriftMe
   ::apache::thrift::metadata::ThriftStruct& module_LateDefStructEnsureStruct = res.first->second;
   module_LateDefStructEnsureStruct.name() = "module.LateDefStructEnsureStruct";
   module_LateDefStructEnsureStruct.is_union() = false;
-  module_LateDefStructEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1033,7 +1029,6 @@ StructMetadata<::test::fixtures::patch::RecursiveEnsureStruct>::gen(ThriftMetada
     field.structured_annotations() = f.structured_annotations;
     module_RecursiveEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_RecursiveEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1138,7 +1133,6 @@ StructMetadata<::test::fixtures::patch::BarEnsureStruct>::gen(ThriftMetadata& me
     field.structured_annotations() = f.structured_annotations;
     module_BarEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_BarEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1217,7 +1211,6 @@ StructMetadata<::test::fixtures::patch::LoopEnsureStruct>::gen(ThriftMetadata& m
     field.structured_annotations() = f.structured_annotations;
     module_LoopEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_LoopEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

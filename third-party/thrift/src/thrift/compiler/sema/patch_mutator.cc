@@ -132,17 +132,6 @@ struct StructGen {
   operator t_struct&() { return generated; }
   operator t_type_ref() { return generated; }
 
-  void add_frozen_exclude() {
-    const t_type* annotation = dynamic_cast<const t_type*>(
-        program_.scope()->find_def(kCppFrozen2ExcludeUri));
-    assert(annotation); // transitive include from patch.thrift
-    auto value = std::make_unique<t_const_value>();
-    value->set_ttype(*annotation);
-    auto frozen_exclude =
-        std::make_unique<t_const>(&program_, annotation, "", std::move(value));
-    generated.add_structured_annotation(std::move(frozen_exclude));
-  }
-
   void set_adapter(std::string name) {
     const t_type* annotation =
         dynamic_cast<const t_type*>(program_.scope()->find_def(kCppAdapterUri));
@@ -367,7 +356,6 @@ t_struct& patch_generator::add_ensure_struct(
     const t_const& annot, t_structured& orig) {
   StructGen gen{
       annot, gen_suffix_struct(annot, orig, "EnsureStruct"), program_};
-  gen.add_frozen_exclude();
   for (const auto& field : orig.fields_id_order()) {
     box(gen.field(field->id(), field->type(), field->name()));
   }

@@ -2884,12 +2884,7 @@ class MyDataEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
       ],
     );
@@ -3349,12 +3344,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[
-            '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -3514,12 +3504,7 @@ class MyDataWithCustomDefaultEnsureStruct implements \IThriftSyncStruct, \IThrif
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
       ],
     );
@@ -3979,12 +3964,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
               )
             ),
           ],
-          'type' => dict[
-            '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -6088,12 +6068,7 @@ class MyStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
       ],
     );
@@ -11996,12 +11971,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[
-            '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -12109,12 +12079,7 @@ class LateDefStructEnsureStruct implements \IThriftSyncStruct, \IThriftStructMet
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
       ],
     );
@@ -12455,12 +12420,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[
-            '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -12631,12 +12591,7 @@ class RecursiveEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadat
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
       ],
     );
@@ -13237,12 +13192,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[
-            '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -13391,12 +13341,7 @@ class BarEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
         'loop' => shape(
           'field' => dict[],
@@ -13817,12 +13762,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
               )
             ),
           ],
-          'type' => dict[
-            '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'type' => dict[],
         ),
         'patch' => shape(
           'field' => dict[],
@@ -13962,12 +13902,7 @@ class LoopEnsureStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[
-        '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
-          shape(
-          )
-        ),
-      ],
+      'struct' => dict[],
       'fields' => dict[
       ],
     );

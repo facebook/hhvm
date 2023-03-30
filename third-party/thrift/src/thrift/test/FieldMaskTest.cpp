@@ -2935,6 +2935,31 @@ TEST(FieldMaskTest, MaskBuilderMap) {
   EXPECT_EQ(builder.toThrift(), expected);
 }
 
+TEST(FieldMaskTest, MaskBuilderStringMap) {
+  MaskBuilder<HasMap> builder(noneMask());
+  Mask expected;
+
+  builder.includes_map_element<ident::string_map>("1");
+  expected.includes_ref().ensure()[3].includes_string_map_ref().ensure()["1"] =
+      allMask();
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.includes_map_element<ident::string_map>("2");
+  expected.includes_ref().ensure()[3].includes_string_map_ref().ensure()["2"] =
+      allMask();
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.excludes_map_element<ident::string_map>("2");
+  expected.includes_ref().ensure()[3].includes_string_map_ref().ensure().erase(
+      "2");
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.excludes_map_element<ident::string_map>("1");
+  expected.includes_ref().ensure()[3].includes_string_map_ref().ensure().erase(
+      "1");
+  EXPECT_EQ(builder.toThrift(), expected);
+}
+
 TEST(FieldMaskTest, ReverseMask) {
   EXPECT_EQ(reverseMask(allMask()), noneMask());
   EXPECT_EQ(reverseMask(noneMask()), allMask());
@@ -3164,6 +3189,10 @@ TEST(FieldMaskTest, MaskBuilderMaskNotCompatible) {
   EXPECT_THROW(builder.includes({}, mask), std::runtime_error);
   EXPECT_THROW(builder.includes<ident::foo>(mask), std::runtime_error);
   EXPECT_THROW(builder.includes({"foo"}, mask), std::runtime_error);
+  EXPECT_THROW(
+      builder.includes_map_element<ident::foo>(1, mask), std::runtime_error);
+  EXPECT_THROW(
+      builder.includes_map_element<ident::foo>("1", mask), std::runtime_error);
 }
 
 } // namespace apache::thrift::test

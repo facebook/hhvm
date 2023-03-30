@@ -135,6 +135,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return includes<Id...>(map);
   }
 
+  template <typename... Id>
+  MaskBuilder& includes_map_element(
+      std::string key, const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_string_map_ref().emplace()[std::move(key)] = mask;
+    return includes<Id...>(map);
+  }
+
   MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
@@ -156,6 +164,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& excludes_map_element(int64_t key, const Mask& mask = allMask()) {
     Mask map;
     map.includes_map_ref().emplace()[key] = mask;
+    return excludes<Id...>(map);
+  }
+
+  template <typename... Id>
+  MaskBuilder& excludes_map_element(
+      std::string key, const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_string_map_ref().emplace()[std::move(key)] = mask;
     return excludes<Id...>(map);
   }
 

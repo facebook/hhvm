@@ -43,6 +43,7 @@ struct Baz {
 struct HasMap {
   1: map<i64, Foo> foos;
   2: Foo foo;
+  3: map<string, Foo> string_map;
 }
 
 struct Foo2 {

@@ -14,7 +14,7 @@ else
   echo "ERROR: Files have changed!"
   echo "$CHANGED_FILES"
   echo ""
-  echo "Please run:"
+  echo "Please run the following command in your fbcode directory:"
   echo "$ buck run fbcode//hphp/hack/src/hh_manual:hh_manual extract hphp/hack/manual/hack/"
   echo "and amend the generated files into your diff."
   exit 1

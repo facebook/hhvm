@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::ffi::OsString;
+use std::io::ErrorKind;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
@@ -373,7 +374,22 @@ fn main() -> Result<()> {
     let guide_dir = match cli.command {
         Commands::Extract { path } => path,
     };
-    let abs_guide_dir = guide_dir.canonicalize()?;
+
+    let abs_guide_dir = match guide_dir.canonicalize() {
+        Ok(d) => d,
+        Err(e) => match e.kind() {
+            ErrorKind::NotFound => {
+                return Err(anyhow::format_err!(
+                    "Path does not exist: {}",
+                    guide_dir.display()
+                ));
+            }
+            _ => {
+                return Err(anyhow::format_err!("{}", e.to_string()));
+            }
+        },
+    };
+
     let hack_dir = abs_guide_dir.parent().unwrap().parent().unwrap();
     let test_dir = hack_dir.join("test").join("extracted_from_manual");
 

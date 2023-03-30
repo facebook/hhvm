@@ -12,6 +12,22 @@
     "py.asyncio": "facebook_thrift_asyncio.annotation.java"
   },  "structs" :
   {
+      "Mutable" : {
+        "name" : "Mutable",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 29
+      },
       "Adapter" : {
         "name" : "Adapter",
         "structured_annotations": {
@@ -44,21 +60,21 @@
           "adapterClassName" : {
             "name" : "adapterClassName",
             "key" : 1,
-            "lineno" : 37,
+            "lineno" : 42,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 40,
+            "lineno" : 45,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 32
+        "lineno" : 37
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -76,21 +92,21 @@
           "wrapperClassName" : {
             "name" : "wrapperClassName",
             "key" : 1,
-            "lineno" : 46,
+            "lineno" : 51,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 49,
+            "lineno" : 54,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 43
+        "lineno" : 48
       }
       },
   "source_path" : "thrift/annotation/java",

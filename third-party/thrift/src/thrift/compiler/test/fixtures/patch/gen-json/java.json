@@ -7,8 +7,26 @@
     }
   },
   "structs" : {
+    "Mutable" : {
+      "lineno" : 29,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 29,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 30,
+          "column" : 18
+        }
+      }
+    },
     "Adapter" : {
-      "lineno" : 32,
+      "lineno" : 37,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -18,11 +36,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 37,
+              "line" : 42,
               "column" : 3
             },
             "end" : {
-              "line" : 37,
+              "line" : 42,
               "column" : 30
             }
           }
@@ -33,11 +51,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 40,
+              "line" : 45,
               "column" : 3
             },
             "end" : {
-              "line" : 40,
+              "line" : 45,
               "column" : 27
             }
           }
@@ -45,17 +63,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 32,
+          "line" : 37,
           "column" : 1
         },
         "end" : {
-          "line" : 41,
+          "line" : 46,
           "column" : 63
         }
       }
     },
     "Wrapper" : {
-      "lineno" : 43,
+      "lineno" : 48,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -65,11 +83,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 46,
+              "line" : 51,
               "column" : 3
             },
             "end" : {
-              "line" : 46,
+              "line" : 51,
               "column" : 30
             }
           }
@@ -80,11 +98,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 49,
+              "line" : 54,
               "column" : 3
             },
             "end" : {
-              "line" : 49,
+              "line" : 54,
               "column" : 27
             }
           }
@@ -92,11 +110,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 43,
+          "line" : 48,
           "column" : 1
         },
         "end" : {
-          "line" : 50,
+          "line" : 55,
           "column" : 63
         }
       }

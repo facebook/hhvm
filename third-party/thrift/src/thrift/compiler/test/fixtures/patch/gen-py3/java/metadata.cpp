@@ -14,6 +14,7 @@ namespace java {
 ::apache::thrift::metadata::ThriftMetadata java_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::detail::md::StructMetadata<Mutable>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Wrapper>::gen(metadata);
   return metadata;

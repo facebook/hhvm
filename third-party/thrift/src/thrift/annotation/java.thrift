@@ -24,6 +24,11 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.java
 namespace go thrift.annotation.java
 namespace py thrift.annotation.java
 
+// The thrift java compiler generate immutable structs and corresponding Builder by default.
+// When this annotation is applied to a struct, thrift compiler will generate getters and setters for the struct.
+@scope.Struct
+struct Mutable {}
+
 // An annotation that is applied to a Typedef or field that maps it a Java type Adapter.
 // For example:
 // @java.Adapter{adapterClassName="com.facebook.thrift.TimestampAdapter", typeClassName="java.time.Instant"}

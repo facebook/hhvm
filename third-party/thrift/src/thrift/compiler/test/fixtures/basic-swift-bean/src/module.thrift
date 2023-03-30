@@ -16,6 +16,8 @@
 
 namespace java.swift test.fixtures.basic_swift_bean
 
+include "thrift/annotation/java.thrift"
+
 enum MyEnum {
   MyValue1 = 0,
   MyValue2 = 1,
@@ -31,11 +33,13 @@ struct MyStruct1 {
   4: i64 major (cpp.name = "majorVer");
 }
 
+@java.Mutable
 struct MyStruct2 {
   1: MyStruct1 myStruct1;
   2: string myString;
-} (java.swift.mutable = "true")
+}
 
+@java.Mutable
 struct MyStruct3 {
   1: i16 myInt16 = 42;
   2: i32 myInt32 = 422;
@@ -55,17 +59,19 @@ struct MyStruct3 {
   };
   11: list<MyDataItem> myEmptyList = [];
   12: map<i32, list<MyDataItem>> myEmptyMapList = {};
-} (java.swift.mutable = "true")
+}
 
+@java.Mutable
 struct MyDataItem {
   1: i32 field1;
   2: i32 field2;
-} (java.swift.mutable = "true")
+}
 
+@java.Mutable
 struct LegacyStruct {
   1: i32 normal;
   -1: i32 bad;
-} (java.swift.mutable = "true")
+}
 
 const MyStruct1 ms = {
   "MyIntField": 42,

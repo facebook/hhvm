@@ -16,6 +16,8 @@
 
 namespace java.swift test.fixtures.basic
 
+include "thrift/annotation/java.thrift"
+
 struct MyNomralStruct {
   1: string msg1;
   2: string msg2;
@@ -309,6 +311,7 @@ struct MyBigStruct {
   257: string msg257;
 }
 
+@java.Mutable
 struct MyMutableBigStruct {
   1: string msg1;
   2: string msg2;
@@ -567,4 +570,4 @@ struct MyMutableBigStruct {
   255: string msg255;
   256: string msg256;
   257: string msg257;
-} (java.swift.mutable = "true")
+}

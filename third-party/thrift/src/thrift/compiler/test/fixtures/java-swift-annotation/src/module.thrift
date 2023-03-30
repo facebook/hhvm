@@ -16,6 +16,8 @@
 
 namespace java.swift test.fixtures.annotation
 
+include "thrift/annotation/java.thrift"
+
 typedef map<i32, i64> (java.swift.type = "com.foo.FastIntLongMap") FMap
 
 struct MyStruct {
@@ -29,10 +31,11 @@ struct MyStruct {
   java.swift.annotations = "@com.foo.Enabled @com.bar.AnotherAnnotation(val = 1)",
 )
 
+@java.Mutable
 struct MyMutableStruct {
   1: i64 intField;
   2: string stringField;
-} (java.swift.annotations = "@com.foo.Enabled", java.swift.mutable = "true")
+} (java.swift.annotations = "@com.foo.Enabled")
 
 struct MyMapping {
   1: map<i64, string> (java.swift.type = "com.foo.FastLongStringMap") lsMap;

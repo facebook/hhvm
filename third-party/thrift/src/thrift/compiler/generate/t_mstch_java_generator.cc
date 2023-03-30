@@ -541,7 +541,8 @@ class mstch_java_struct : public mstch_struct {
   }
   mstch::node is_as_bean() {
     if (!struct_->is_xception() && !struct_->is_union()) {
-      return struct_->get_annotation("java.swift.mutable") == "true";
+      return struct_->get_annotation("java.swift.mutable") == "true" ||
+          struct_->find_structured_annotation_or_null(kJavaMutableUri);
     } else {
       return false;
     }

@@ -253,15 +253,6 @@ module.exports = {
             'fb/languages/hack/adding-updating',
             'fb/languages/hack/adding-new-files',
             'fb/languages/hack/auto-sync-for-existing-thrift-files',
-            {
-              type: 'category',
-              label: 'Updating the thrift compiler in www',
-              link: {
-                type: 'doc',
-                id: "fb/languages/hack/updating-the-thrift-compiler-in-www/index",
-              },
-              items: []
-            },
             'fb/languages/hack/adding-graphql-and-jsenum-support',
             {
               type: 'category',
@@ -521,7 +512,15 @@ module.exports = {
         'fb/contributions/runbook',
         'fb/contributions/test-coverage',
         'fb/contributions/testing-dogpiles-locally',
-        'fb/contributions/compiler',
+        {
+          type: 'category',
+          label: 'Thrift Compiler',
+          link: {
+            type: 'doc',
+            id: "fb/contributions/compiler/index",
+          },
+          items: ['fb/contributions/compiler/updating-thrift-compiler-in-www']
+        },
         'fb/contributions/linter',
         'fb/contributions/oss',
         'fb/contributions/troubleshooting',

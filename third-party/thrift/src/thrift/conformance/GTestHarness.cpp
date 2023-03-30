@@ -76,7 +76,7 @@ testing::AssertionResult runRoundTripTest(
 
   protocol::Object actual = parseAny(*res.value());
   protocol::Object expected = parseAny(expectedAny);
-  if (!op::identical<type::struct_t<protocol::Object>>(actual, expected)) {
+  if (!op::identical<protocol::Object::Tag>(actual, expected)) {
     // TODO(afuller): Report out the delta
     return testing::AssertionFailure()
         << "\nInput: " << toJson(parseAny(*roundTrip.request()->value()))
@@ -113,7 +113,7 @@ testing::AssertionResult runPatchTest(
 
   protocol::Object actual = parseAny(*res.result());
   protocol::Object expected = parseAny(expectedAny);
-  if (!op::identical<type::struct_t<protocol::Object>>(actual, expected)) {
+  if (!op::identical<protocol::Object::Tag>(actual, expected)) {
     // TODO: Report out the delta
     return testing::AssertionFailure();
   }

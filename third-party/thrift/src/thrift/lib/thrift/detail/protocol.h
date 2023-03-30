@@ -26,6 +26,8 @@ class Object;
 class Value;
 } // namespace detail
 
+struct ObjectAdapter;
+
 template <class Base = detail::Object>
 class ObjectWrapper;
 template <class Base = detail::Value>
@@ -44,6 +46,8 @@ class ObjectWrapper : public Base {
  public:
   using Base::Base;
   using Base::members;
+  using Tag = type::adapted<ObjectAdapter, type::struct_t<detail::Object>>;
+
   explicit ObjectWrapper(const Base& base) : Base(base) {}
   explicit ObjectWrapper(Base&& base) : Base(std::move(base)) {}
 

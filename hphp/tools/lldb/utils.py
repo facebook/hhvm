@@ -7,6 +7,7 @@ import collections.abc
 import functools
 import lldb
 import re
+import sys
 import typing
 
 class Command(abc.ABC):
@@ -244,9 +245,14 @@ def template_type(t: lldb.SBType) -> str:
 # Pointer helpers
 
 
-def nullptr(target: lldb.SBValue):
+def nullptr(target: lldb.SBTarget):
     """ Return an SBValue wrapping a pointer to 0 """
     return target.CreateValueFromExpression("nullptr", "(void *)0")
+
+
+def is_nullptr(ptr: lldb.SBValue):
+    assert ptr.type.IsPointerType()
+    return ptr.unsigned == 0
 
 
 def referenced_value(val: lldb.SBValue) -> lldb.SBValue:
@@ -382,8 +388,36 @@ def nameof(val: lldb.SBValue) -> typing.Optional[str]:
 #------------------------------------------------------------------------------
 # String helpers
 
+def read_cstring(addr: typing.Union[int, lldb.SBValue], len: str, process: lldb.SBProcess, keep_case: bool = True) -> str:
+    """ Read a null-terminated char * from memory at the given address or lldb.SBValue's load_addr
 
-def string_data_val(val: lldb.SBValue, keep_case=True):
+        LLDB can already format char * variables, like so:
+
+            (char *) varname = 0x0000abcd "string value"
+
+        This gets just the "string value" char array.
+        We could probably also just parse the result of str(val) or val.summary.
+    """
+    if isinstance(addr, lldb.SBValue):
+        addr = addr.load_addr
+
+    err = None
+
+    try:
+        error = lldb.SBError()
+        cstring = process.ReadCStringFromMemory(addr, len, error)
+        if error.Success():
+            return cstring if keep_case else cstring.lower()
+        else:
+            err = error
+    except SystemError as error:
+        err = error
+
+    print(f"error while trying to get string: {err}", file=sys.stderr)
+    return f"<invalid string with addr 0x{addr:0x} and length {len}>"
+
+
+def string_data_val(val: lldb.SBValue, keep_case=True) -> str:
     """ Convert an HPHP::StringData[*] to a Python string
 
     Arguments:
@@ -391,7 +425,7 @@ def string_data_val(val: lldb.SBValue, keep_case=True):
         keep_case: If False, lowercase the returned string
 
     Returns:
-        A Python string that stored by the StringData
+        A Python string with the string value stored by the StringData
     """
 
     if val.type.IsPointerType():
@@ -402,25 +436,60 @@ def string_data_val(val: lldb.SBValue, keep_case=True):
     assert addr != lldb.LLDB_INVALID_ADDRESS, f"invalid string address {val.load_addr}"
     addr += val.size
     m_len = val.children[1].GetChildMemberWithName("m_len").unsigned
-    err = None
+    return read_cstring(addr, m_len + 1, val.process)
 
-    try:
-        error = lldb.SBError()
-        # +1 for null terminator, it seems
-        cstring = val.process.ReadCStringFromMemory(addr, m_len + 1, error)
-        if error.Success():
-            return cstring if keep_case else cstring.lower()
-        else:
-            err = error
-    except SystemError as error:
-        err = error
+#------------------------------------------------------------------------------
+# Resource helpers
 
-    print(f"error while trying to get string: {err}")
-    return f"<invalid string with addr 0x{addr:0x} and length {m_len}>"
+def pretty_resource_data(data: lldb.SBValue, print_header=False) -> str:
+    """ Convert an HPHP::ResourceData[*] to a Python string
+
+    Arguments:
+        val: A ResourceData* wrapped by an lldb.SBValue
+        print_header: If True, also print the ResourceHeader the precedes it
+
+    Returns:
+        A Python string representing the contents of the ResourceData object
+    """
+
+    if data.type.IsPointerType():
+        data = deref(data)
+
+    assert data.type.name == "HPHP::ResourceData"
+    return str(hex(data.load_addr))
+
+
+def pretty_resource_header(header: lldb.SBValue, print_data=True) -> str:
+    """ Convert an HPHP::ResourceHdr[*] to a Python string
+
+    Arguments:
+        val: A ResourceHdr* wrapped by an lldb.SBValue
+        print_data: If True, also print the ResourceData that follows
+
+    Returns:
+        A Python string representing the contents of the ResourceHdr object
+    """
+
+    if header.type.IsPointerType():
+        header = deref(header)
+
+    assert header.type.name == "HPHP::ResourceHdr", f"Expected HPHP::ResourceHdr, got {header.type.name}"
+    data = None
+    if print_data:
+        addr = header.load_addr
+        addr += header.size
+        data = header.CreateValueFromAddress("data", addr, Type("HPHP::ResourceData", header.target))
+        data = pretty_resource_data(data)
+
+    header = str(hex(header.load_addr))
+
+    return f"(hdr = {header}" + (f", data = {data}" if data else "") + ")"
 
 
 #------------------------------------------------------------------------------
 # TypedValue helpers
+
+
 def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
     """ Get the pretty string representation of a TypedValue (or its subclasses)
 
@@ -447,7 +516,7 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
         val = get(data, "num").unsigned
         val = bool(val) if val in (0, 1) else val
     elif typ.unsigned == DT("Int64"):
-        val = int(get(data, "num").value)
+        val = get(data, "num").signed
     elif typ.unsigned == DT("Double"):
         val = float(get(data, "dbl").value)
     elif typ.unsigned in (DT("String"), DT("PersistentString")):
@@ -457,7 +526,8 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
         val = get(data, "pobj")
         name = nameof(val)
     elif typ.unsigned == DT("Resource"):
-        val = get(data, "pres")
+        val = deref(get(data, "pres"))
+        val = pretty_resource_header(val)
     elif typ.unsigned == DT("Class"):
         val = get(data, "pclass")
         name = nameof(val)
@@ -505,6 +575,7 @@ def pretty_tv(typ: lldb.SBValue, data: lldb.SBValue) -> str:
 
 #------------------------------------------------------------------------------
 # Architecture
+
 
 def arch(target: lldb.SBTarget) -> str:
     """ Get the current architecture (e.g. "x86_64" or "aarch64") """

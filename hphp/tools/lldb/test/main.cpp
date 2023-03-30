@@ -136,22 +136,59 @@ void buildTypedValues() {
   takeVarNR(VarNR(2.718));
 }
 
-void takeStringData(StringData* UNUSED s) { return; }
+// Other values
 
-void buildStringData() {
-  auto s = StringData::MakeStatic("hello");
-  takeStringData(s);
+using LowStrPtr = LowPtr<const StringData>;
+
+void takeStringData(StringData* UNUSED v) { return; }
+void takeString(String UNUSED v) { return; }
+void takeStaticString(StaticString UNUSED v) { return; }
+void takeStrNR(StrNR UNUSED v) { return; }
+void takeResource(Resource UNUSED v) { return; }
+void takeObject(Object UNUSED v) { return; }
+void takeReqPtr(req::ptr<ObjectData> UNUSED v) { return; }
+void takeOptional(Optional<String> UNUSED v) { return; }
+void takeLowPtr(LowPtr<Class> UNUSED v) { return; }
+void takeLowStrPtr(LowStrPtr UNUSED v) { return; }
+void takeExtension(Extension UNUSED v) { return; }
+
+void buildOtherValues() {
+  TestObject = SystemLib::AllocInvalidArgumentExceptionObject("This is a test exception object for lldb");
+
+  takeStringData(StringData::MakeStatic("hello"));
+  takeString(String("hello"));
+  takeStaticString(StaticString("hello"));
+  takeStrNR(StrNR(StringData::MakeStatic("hello")));
+  takeResource(Resource(req::make<DummyResource>()));
+  takeObject(TestObject);
+  takeReqPtr(*reinterpret_cast<req::ptr<ObjectData> *>(&TestObject)); // Want to its sole private member m_obj
+  takeOptional(Optional<String>("hello"));
+  takeOptional(Optional<String>());
+  takeLowPtr(LowPtr(TestObject->getVMClass()));
+  takeLowStrPtr(LowStrPtr(StringData::MakeStatic("hello")));
+  takeExtension(Extension("test-extension", "0.5", "test-oncall"));
 }
 
 } // namespace lldb_test
 } // namespace HPHP
 
-int main(int UNUSED argc, char** UNUSED argv) {
+int main(int argc, char** argv) {
   HPHP::rds::local::init();
   SCOPE_EXIT { HPHP::rds::local::fini(); };
   HPHP::init_for_unit_test();
   SCOPE_EXIT { HPHP::hphp_process_exit(); };
 
-  HPHP::lldb_test::buildTypedValues();
-  HPHP::lldb_test::buildStringData();
+  if (argc < 2) {
+    std::cout << "Specify what to run (options: \"typed-values\", \"other-values\")" << std::endl;
+    return 1;
+  }
+  if (!strcmp(argv[1], "typed-values")) {
+    HPHP::lldb_test::buildTypedValues();
+  } else if (!strcmp(argv[1], "other-values")) {
+    HPHP::lldb_test::buildOtherValues();
+  } else {
+    std::cout << "Invalid option (options: \"typed-values\", \"other-values\"" << std::endl;
+    return 1;
+  }
+  return 0;
 }

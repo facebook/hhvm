@@ -114,5 +114,13 @@ class TestHHVMBinary(LLDBTestBase):
         return hhvm_args
 
 class TestHHVMTypesBinary(LLDBTestBase):
+
+    def setUp(self, test_type: str):
+        self.test_type = test_type
+        super().setUp()
+
     def getTargetPath(self) -> str:
         return hhvm_types_path.as_posix()
+
+    def getArgs(self) -> typing.List[str]:
+        return [self.test_type]

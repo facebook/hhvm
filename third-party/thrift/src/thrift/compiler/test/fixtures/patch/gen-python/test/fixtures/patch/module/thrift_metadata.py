@@ -363,6 +363,7 @@ def _fbthrift_gen_metadata_struct_MyDataEnsureStruct(metadata_struct: _fbthrift_
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -458,6 +459,7 @@ def _fbthrift_gen_metadata_struct_MyDataWithCustomDefaultEnsureStruct(metadata_s
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -751,6 +753,7 @@ def _fbthrift_gen_metadata_struct_MyStructEnsureStruct(metadata_struct: _fbthrif
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -1372,6 +1375,7 @@ def _fbthrift_gen_metadata_struct_LateDefStructEnsureStruct(metadata_struct: _fb
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -1455,6 +1459,7 @@ def _fbthrift_gen_metadata_struct_RecursiveEnsureStruct(metadata_struct: _fbthri
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -1573,6 +1578,7 @@ def _fbthrift_gen_metadata_struct_BarEnsureStruct(metadata_struct: _fbthrift_met
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 
@@ -1661,6 +1667,7 @@ def _fbthrift_gen_metadata_struct_LoopEnsureStruct(metadata_struct: _fbthrift_me
     struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
         is_union=False,
         structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Frozen2Exclude"), fields= {  }),
         ])
     new_struct = metadata_struct(structs=struct_dict)
 

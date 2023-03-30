@@ -1965,6 +1965,36 @@ TEST(FieldMaskTest, SchemafulCopyException) {
   EXPECT_THROW(protocol::copy(m2, src, dst), std::runtime_error);
 }
 
+void testLogicalOperations(Mask A, Mask B) {
+  Mask maskUnion = A | B;
+  Mask maskIntersect = A & B;
+  Mask maskSubtractAB = A - B;
+  Mask maskSubtractBA = B - A;
+
+  EXPECT_EQ(maskUnion, maskIntersect | maskSubtractAB | maskSubtractBA);
+
+  EXPECT_EQ(maskIntersect, maskUnion - maskSubtractAB - maskSubtractBA);
+  EXPECT_EQ(maskIntersect, B - maskSubtractBA);
+  EXPECT_EQ(maskIntersect, A - maskSubtractAB);
+  EXPECT_EQ(maskIntersect, maskUnion & maskIntersect);
+
+  // TODO(dokwon): Add testing operator to check if two mask is semantically
+  // identical.
+  // EXPECT_EQ(A, maskUnion & A);
+  // EXPECT_EQ(A, A | maskIntersect);
+  // EXPECT_EQ(A, A | maskSubtractAB);
+
+  // EXPECT_EQ(B, maskUnion & B);
+  // EXPECT_EQ(B, B | maskIntersect);
+  // EXPECT_EQ(B, B | maskSubtractBA);
+
+  EXPECT_EQ(maskSubtractAB, A & maskSubtractAB);
+  EXPECT_EQ(maskSubtractAB, maskUnion - B);
+
+  EXPECT_EQ(maskSubtractBA, B & maskSubtractBA);
+  EXPECT_EQ(maskSubtractBA, maskUnion - A);
+}
+
 TEST(FIeldMaskTest, LogicalOpSimple) {
   // maskA = includes{1: excludes{},
   //                  2: excludes{},
@@ -2066,6 +2096,8 @@ TEST(FieldMaskTest, LogicalOpSimpleMap) {
   Mask maskSubtractBA;
   { maskSubtractBA.includes_map_ref().emplace()[3] = allMask(); }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
+
+  testLogicalOperations(maskA, maskB);
 }
 
 TEST(FieldMaskTest, LogicalOpSimpleStringMap) {
@@ -2117,6 +2149,8 @@ TEST(FieldMaskTest, LogicalOpSimpleStringMap) {
   Mask maskSubtractBA;
   { maskSubtractBA.includes_string_map_ref().emplace()["3"] = allMask(); }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
+
+  testLogicalOperations(maskA, maskB);
 }
 
 TEST(FieldMaskTest, LogicalOpBothIncludes) {
@@ -2195,6 +2229,8 @@ TEST(FieldMaskTest, LogicalOpBothIncludes) {
     includes[7] = allMask();
   }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
+
+  testLogicalOperations(maskA, maskB);
 }
 
 TEST(FieldMaskTest, LogicalOpBothExcludes) {
@@ -2266,6 +2302,8 @@ TEST(FieldMaskTest, LogicalOpBothExcludes) {
         allMask();
   }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
+
+  testLogicalOperations(maskA, maskB);
 }
 
 TEST(FieldMaskTest, LogicalOpIncludesExcludes) {
@@ -2341,6 +2379,8 @@ TEST(FieldMaskTest, LogicalOpIncludesExcludes) {
     excludes[7] = allMask();
   }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
+
+  testLogicalOperations(maskA, maskB);
 }
 
 TEST(FieldMaskTest, LogicalOpMixed) {
@@ -2433,6 +2473,8 @@ TEST(FieldMaskTest, LogicalOpMixed) {
     string_map["2"].excludes_ref().emplace();
   }
   EXPECT_EQ(maskB - maskA, maskSubtractBA);
+
+  testLogicalOperations(maskA, maskB);
 }
 
 TEST(FieldMaskTest, MaskBuilderIncludeExcludeEmpty) {

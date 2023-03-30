@@ -72,7 +72,7 @@ libmcroutercore_a_SOURCES = \
   lib/invalidation/McInvalidationKvPairs.h \
   lib/invalidation/McInvalidationKvPairs.cpp \
   lib/invalidation/McInvalidationDefs.h \
-  lib/network/McCallbackUtils.h \
+  lib/network/McThriftContext.h \
   Observable-inl.h \
   Observable.h \
   options-template.h \

@@ -16,8 +16,8 @@
 #include "mcrouter/lib/network/AsyncMcServer.h"
 #include "mcrouter/lib/network/AsyncMcServerWorker.h"
 #include "mcrouter/lib/network/CaretHeader.h"
-#include "mcrouter/lib/network/McCallbackUtils.h"
 #include "mcrouter/lib/network/McServerRequestContext.h"
+#include "mcrouter/lib/network/McThriftContext.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
 
 namespace facebook {
@@ -96,12 +96,12 @@ class ServerOnRequest {
     if (HasKeyTrait<Request>::value) {
       req.key_ref()->update();
     }
-    McThriftCallback<ReplyT<Request>> ctx =
-        McThriftCallback<typename Request::reply_type>(std::move(callback));
+    McThriftContext<ReplyT<Request>> ctx =
+        McThriftContext<typename Request::reply_type>(std::move(callback));
     send(
         std::move(ctx),
         std::move(req),
-        &McThriftCallback<ReplyT<Request>>::reply);
+        &McThriftContext<ReplyT<Request>>::reply);
   }
 
   template <class Request, class Callback>

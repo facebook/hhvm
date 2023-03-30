@@ -16,21 +16,19 @@ namespace facebook {
 namespace memcache {
 
 template <class Reply>
-class McThriftCallback {
+class McThriftContext {
  public:
-  McThriftCallback(std::unique_ptr<apache::thrift::HandlerCallback<Reply>> ctx)
+  McThriftContext(std::unique_ptr<apache::thrift::HandlerCallback<Reply>> ctx)
       : underlying_(std::move(ctx)) {}
 
-  static void reply(
-      McThriftCallback<Reply>&& ctx,
-      Reply&& reply,
-      bool /* flush */ = false) {
+  static void
+  reply(McThriftContext<Reply>&& ctx, Reply&& reply, bool /* flush */ = false) {
     ctx.underlying_->result(std::move(reply));
     ctx.underlying_.reset();
   }
 
   template <class E>
-  static void exception(McThriftCallback<Reply>&& ctx, E&& ex) {
+  static void exception(McThriftContext<Reply>&& ctx, E&& ex) {
     ctx.underlying_->exception(std::move(ex));
   }
 

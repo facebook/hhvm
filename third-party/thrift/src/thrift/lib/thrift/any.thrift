@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/java.thrift"
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any_rep.thrift"
 

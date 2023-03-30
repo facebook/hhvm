@@ -108,7 +108,7 @@ O(size of patched fields + size of patch)
 
 
 [^1]: If Assign PatchOp exists, all other PatchOp are ignored.
-[^2]: For optional field, clear means reset the field. For elements in container, clear means remove from the container. Otherwise clear means set to intrinstic default.
+[^2]: For optional field, clear means reset the field. For elements in container, clear means remove from the container. Otherwise clear means set to intrinsic default.
 [^3]: No-op if keys don't exist.
 [^4]: No-op if keys exist.
 

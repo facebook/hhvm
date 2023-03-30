@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/MapUtil.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 
 using apache::thrift::protocol::FieldIdToMask;
@@ -111,11 +112,13 @@ struct IntersectMaskImpl {
   Map operator()(const Map& lhs, const Map& rhs) const {
     Map map;
     for (auto& [id, lhsMask] : lhs) {
-      if (rhs.find(id) == rhs.end()) { // Only lhs contains the id.
+      auto* p = folly::get_ptr(rhs, id);
+      // Only lhs contains the id.
+      if (p == nullptr) {
         continue;
       }
       // Both maps have the id, so the mask is their intersection.
-      insertIfNotNoneMask(map, id, lhsMask & rhs.at(id));
+      insertIfNotNoneMask(map, id, lhsMask & *p);
     }
     return map;
   }
@@ -126,12 +129,14 @@ struct UnionMaskImpl {
   Map operator()(const Map& lhs, const Map& rhs) const {
     Map map;
     for (auto& [id, lhsMask] : lhs) {
-      if (rhs.find(id) == rhs.end()) { // Only lhs contains the id.
+      auto* p = folly::get_ptr(rhs, id);
+      // Only lhs contains the id.
+      if (p == nullptr) {
         insertIfNotNoneMask(map, id, lhsMask);
         continue;
       }
       // Both maps have the id, so the mask is their union.
-      insertIfNotNoneMask(map, id, lhsMask | rhs.at(id));
+      insertIfNotNoneMask(map, id, lhsMask | *p);
     }
     for (auto& [id, rhsMask] : rhs) {
       if (lhs.find(id) == lhs.end()) { // Only rhs contains the id.
@@ -147,12 +152,14 @@ struct SubtractMaskImpl {
   Map operator()(const Map& lhs, const Map& rhs) const {
     Map map;
     for (auto& [id, lhsMask] : lhs) {
-      if (rhs.find(id) == rhs.end()) { // Only lhs contains the id.
+      auto* p = folly::get_ptr(rhs, id);
+      // Only lhs contains the id.
+      if (p == nullptr) {
         insertIfNotNoneMask(map, id, lhsMask);
         continue;
       }
       // Both maps have the id, so the mask is their subtraction.
-      insertIfNotNoneMask(map, id, lhsMask - rhs.at(id));
+      insertIfNotNoneMask(map, id, lhsMask - *p);
     }
     return map;
   }

@@ -15,6 +15,7 @@
  */
 
 #include <folly/MapUtil.h>
+#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 
 using apache::thrift::protocol::FieldIdToMask;

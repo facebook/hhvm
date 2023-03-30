@@ -17,10 +17,15 @@
 #pragma once
 
 #include <functional>
+#include <map>
+#include <set>
 #include <string_view>
+#include <unordered_set>
 
 #include <folly/CppAttributes.h>
+#include <folly/Range.h>
 #include <folly/Traits.h>
+#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Copy.h>
 #include <thrift/lib/cpp2/op/Create.h>

@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <vector>
+
+#include <folly/Range.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_constants.h>

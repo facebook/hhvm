@@ -15,10 +15,15 @@
  */
 
 #include <functional>
+#include <map>
+#include <set>
 #include <string_view>
 #include <type_traits>
+#include <unordered_set>
 
+#include <folly/MapUtil.h>
 #include <folly/Utility.h>
+#include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 
 using apache::thrift::protocol::field_mask_constants;

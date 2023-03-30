@@ -126,7 +126,7 @@ module.exports = {
               },
               items: [
                 "spec/protocol/interface/rocket"
-              ]
+              ],
             }
           ]
         },
@@ -222,6 +222,7 @@ module.exports = {
             },
             'languages/cpp/channel',
             'languages/cpp/cpp2',
+            'languages/cpp/fd-passing',
             'fb/languages/cpp/serialization',
             'fb/languages/cpp/visitation',
             'fb/languages/cpp/hash',
@@ -554,6 +555,7 @@ module.exports = {
         'contributions/universal-name',
         'contributions/terse-write',
         'contributions/adapter',
+        'contributions/fd-passing',
         'contributions/patch',
         {
           type: 'category',

@@ -14,7 +14,7 @@ Patch is an experimental feature. The thrift struct representation is subject to
 
 ### Patch for Primitive Types
 
-Patch for [Primitive types](data.md#primitive-types) are defined [here](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/patch.thrift).
+Patch for [primitive types](../../idl/#primitive-types) are defined [here](https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/patch.thrift).
 
 ### Patch for Structs
 

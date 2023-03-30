@@ -12,7 +12,7 @@ Thrift Patch is an experimental feature that is only implemented in C++.
 
 ## Overview
 
-How mutations for Thrift [values](../spec/definition/data.md) are represented, manipulated, and applied. It can be considered a [diff](https://en.wikipedia.org/wiki/Diff) between two Thrift values.
+How mutations for Thrift values are represented, manipulated, and applied. It can be considered a [diff](https://en.wikipedia.org/wiki/Diff) between two Thrift values.
 
 ## Motivation
 

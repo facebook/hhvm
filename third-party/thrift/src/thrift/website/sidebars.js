@@ -102,8 +102,6 @@ module.exports = {
           },
           items: [
             "spec/definition/interface",
-            "spec/definition/data",
-            "spec/definition/value",
             "spec/definition/patch",
           ]
         },
@@ -146,6 +144,7 @@ module.exports = {
 
         // Released features:
         'fb/features/serialization',
+        'features/operators',
         'features/universal-name',
         {
           type: 'category',

@@ -4,7 +4,7 @@ state: draft
 
 # Interface Types
 
-Types that send and/or receive [data](data.md) using [interface protocols](../protocol/interface/index.md).
+Types that send and/or receive data using [interface protocols](../protocol/interface/index.md).
 
 ## Service
 

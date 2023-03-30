@@ -5513,7 +5513,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function Derp\\Lib\\Herp\\aliased_global_func(string $s): void",
+                            "label": "function aliased_global_func(string $s): void",
                             "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }
@@ -5534,7 +5534,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "signatures": [
                         {
-                            "label": "function Derp\\Lib\\Herp\\aliased_global_func(string $s): void",
+                            "label": "function aliased_global_func(string $s): void",
                             "documentation": "Namespace-aliased function with doc block",
                             "parameters": [{"label": "$s"}],
                         }

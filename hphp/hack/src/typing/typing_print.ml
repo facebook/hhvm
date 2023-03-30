@@ -116,6 +116,8 @@ module Full = struct
 
   let text_strip_ns s = Doc.text (strip_ns s)
 
+  let text_strip_all_ns s = Doc.text (Utils.strip_all_ns s)
+
   let ( ^^ ) a b = Concat [a; b]
 
   let debug_mode = ref false
@@ -1129,7 +1131,7 @@ module Full = struct
             fun_locl_implicit_params
         in
         let fun_doc =
-          Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]
+          Concat [text "function"; Space; text_strip_all_ns name; fun_ty_doc]
         in
         (fuel, fun_doc)
       | ({ type_ = Property (_, name); _ }, _) ->

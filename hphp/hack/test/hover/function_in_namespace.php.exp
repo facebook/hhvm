@@ -1,0 +1,6 @@
+// Defined in namespace C
+function count(readonly Container<mixed> $container)[]: int
+Returns the number of elements in the given Container.
+
+Time complexity: O(1)
+Space complexity: O(1)

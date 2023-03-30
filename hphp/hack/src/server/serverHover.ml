@@ -400,6 +400,20 @@ let split_class_name (full_name : string) : string =
   | Some (class_name, _member) -> class_name
   | None -> full_name
 
+let fun_defined_in def_opt : string =
+  match def_opt with
+  | Some { SymbolDefinition.full_name; _ } ->
+    let abs_name = "\\" ^ full_name in
+    if SN.PseudoFunctions.is_pseudo_function abs_name then
+      ""
+    else (
+      match String.rsplit2 (Utils.strip_hh_lib_ns abs_name) ~on:'\\' with
+      | Some (namespace, _) when not (String.equal namespace "") ->
+        Printf.sprintf "// Defined in namespace %s\n" namespace
+      | _ -> ""
+    )
+  | _ -> ""
+
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(
     Typing_defs.(
@@ -443,6 +457,9 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
           | Some def_txt -> def_txt
           | None ->
             Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt)
+        | ({ type_ = Function; _ }, Some (env, ty)) ->
+          fun_defined_in def_opt
+          ^ Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
         | (occurrence, Some (env, ty)) ->
           Tast_env.print_ty_with_identity env (LoclTy ty) occurrence def_opt
       in

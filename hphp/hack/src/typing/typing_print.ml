@@ -200,6 +200,21 @@ module Full = struct
       fields
       ~out_of_fuel_message:"shape was truncated"
 
+  (* Split type parameters [tparams] into normal user-denoted type
+     parameters, and a list of polymorphic context names that were
+     desugared to type parameters. *)
+  let split_desugared_ctx_tparams (tparams : 'a tparam list) :
+      string list * 'a tparam list =
+    let (generated_tparams, other_tparams) =
+      List.partition_tf tparams ~f:(fun { tp_name = (_, name); _ } ->
+          SN.Coeffects.is_generated_generic name)
+    in
+    let desugared_tparams =
+      List.map generated_tparams ~f:(fun { tp_name = (_, name); _ } ->
+          SN.Coeffects.unwrap_generated_generic name)
+    in
+    (desugared_tparams, other_tparams)
+
   let rec fun_type ~fuel ~ty to_doc st penv ft fun_implicit_params =
     let n = List.length ft.ft_params in
     let (fuel, params) =
@@ -211,10 +226,12 @@ module Full = struct
             else
               d ))
     in
+
+    let (_, tparams) = split_desugared_ctx_tparams ft.ft_tparams in
     let (fuel, tparams_doc) =
       (* only print tparams when they have been instantiated with targs
        * so that they correctly express reified parameterization *)
-      match (ft.ft_tparams, get_ft_ftk ft) with
+      match (tparams, get_ft_ftk ft) with
       | ([], _)
       | (_, FTKtparams) ->
         (fuel, Nothing)
@@ -225,7 +242,13 @@ module Full = struct
       possibly_enforced_ty ~fuel ~ty to_doc st penv ft.ft_ret
     in
     let (fuel, capabilities_doc) =
-      fun_implicit_params ~fuel to_doc st penv ft.ft_implicit_params
+      fun_implicit_params
+        ~fuel
+        to_doc
+        st
+        penv
+        ft.ft_tparams
+        ft.ft_implicit_params
     in
     let (fuel, params_doc) = list ~fuel "(" id params ")" in
     let tparams_doc =
@@ -606,7 +629,8 @@ module Full = struct
     | Tshape (_, shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
 
   (* TODO (T86471586): Display capabilities that are decls for functions *)
-  and fun_decl_implicit_params ~fuel _to_doc _st _penv _implicit_param =
+  and fun_decl_implicit_params ~fuel _to_doc _st _penv _tparams _implicit_param
+      =
     (fuel, text ":")
 
   (* For a given type parameter, construct a list of its constraints *)
@@ -928,27 +952,39 @@ module Full = struct
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
       (fuel, access_doc)
 
-  and fun_locl_implicit_params ~fuel to_doc st penv { capability } =
-    match capability with
-    | CapDefaults _ -> (fuel, text ":")
-    | CapTy t ->
-      let default_capability : locl_ty =
-        Typing_make_type.default_capability Pos_or_decl.none
-      in
-      if ty_equal ~normalize_lists:true t default_capability then
-        (fuel, text ":")
-      else
-        let (fuel, capabilities) =
+  and fun_locl_implicit_params ~fuel to_doc st penv tparams { capability } =
+    let (fuel, capabilities) =
+      match capability with
+      | CapDefaults _ -> (fuel, None)
+      | CapTy t ->
+        let default_capability : locl_ty =
+          Typing_make_type.default_capability Pos_or_decl.none
+        in
+        if ty_equal ~normalize_lists:true t default_capability then
+          (fuel, None)
+        else (
           match get_node t with
-          | Tintersection [] -> (fuel, Nothing)
+          | Tintersection [] -> (fuel, Some [])
           | Toption t -> begin
             match deref t with
-            | (_, Tnonnull) -> (fuel, Nothing)
-            | _ -> locl_ty ~fuel to_doc st penv t
+            | (_, Tnonnull) -> (fuel, Some [])
+            | _ ->
+              let (fuel, cap) = locl_ty ~fuel to_doc st penv t in
+              (fuel, Some [cap])
           end
-          | _ -> locl_ty ~fuel to_doc st penv t
-        in
-        (fuel, Concat [text "["; capabilities; text "]:"])
+          | _ ->
+            let (fuel, cap) = locl_ty ~fuel to_doc st penv t in
+            (fuel, Some [cap])
+        )
+    in
+    let (ctx_names, _) = split_desugared_ctx_tparams tparams in
+    let ctx_names = List.map ctx_names ~f:(fun name -> text name) in
+
+    match (capabilities, ctx_names) with
+    | (None, []) -> (fuel, text ":")
+    | (None, ctx_names) -> (fuel, Concat [text "["; Concat ctx_names; text "]:"])
+    | (Some capabilities, ctx_names) ->
+      (fuel, Concat [text "["; Concat (capabilities @ ctx_names); text "]:"])
 
   let rec constraint_type_ ~fuel to_doc st penv x =
     let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in

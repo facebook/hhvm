@@ -1209,6 +1209,12 @@ module Coeffects = struct
   let generated_generic_prefix = "T/"
 
   let is_generated_generic = String.is_prefix ~prefix:generated_generic_prefix
+
+  (** "T/[ctx $foo]" to "ctx $foo". *)
+  let unwrap_generated_generic name =
+    name
+    |> String.chop_prefix_if_exists ~prefix:"T/["
+    |> String.chop_suffix_if_exists ~suffix:"]"
 end
 
 module Readonly = struct

@@ -1,18 +1,18 @@
-File "tc_in_enum_class.php", line 99, characters 5-15:
+File "tc_in_enum_class.php", line 98, characters 5-15:
   arraykey
-File "tc_in_enum_class.php", line 106, characters 5-15:
+File "tc_in_enum_class.php", line 105, characters 5-15:
   nothing
-File "tc_in_enum_class.php", line 39, characters 21-32:
+File "tc_in_enum_class.php", line 38, characters 21-32:
 `HH\BuiltinAbstractEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "tc_in_enum_class.php", line 42, characters 21-40:
+File "tc_in_enum_class.php", line 41, characters 21-40:
 `HH\BuiltinAbstractEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "tc_in_enum_class.php", line 45, characters 21-35:
+File "tc_in_enum_class.php", line 44, characters 21-35:
 `HH\BuiltinAbstractEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "tc_in_enum_class.php", line 52, characters 12-25:
+File "tc_in_enum_class.php", line 51, characters 12-25:
 `HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "tc_in_enum_class.php", line 104, characters 20-23:
+File "tc_in_enum_class.php", line 103, characters 20-23:
 Invalid argument (Typing[4110])
-  File "tc_in_enum_class.php", line 48, characters 23-25:
+  File "tc_in_enum_class.php", line 47, characters 23-25:
   Expected `int`
-  File "tc_in_enum_class.php", line 92, characters 29-44:
+  File "tc_in_enum_class.php", line 91, characters 29-44:
   But got `<expr#1>::T::TSource as IAntParent::T::TSource`

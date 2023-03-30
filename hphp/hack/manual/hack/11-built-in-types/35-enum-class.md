@@ -259,7 +259,6 @@ Like normal classes, enum classes can declare type constants. Abstract type
 constants are also supported:
 
 ```Hack
-<<file:__EnableUnstableFeatures('enum_class_type_constants')>>
 interface IGet<+T> {
   public function get(): T;
 }
@@ -281,17 +280,6 @@ enum class F : IGet<mixed> extends E {
   Box<this::T> A = new Box('zuck');
 }
 ```
-
-As you can see, the feature is currently available as an unstable feature.
-It is also gated by a `.hhconfig` option,
-`allowed_locations_for_type_constant_in_enum_class`, in order to implement
-a fine-grained control of the locations where this feature is used.
-If you do not need such level of control, the
-`allow_all_locations_for_type_constant_in_enum_class` will enable it
-everywhere.
-
-All these restrictions will be lifted when the feature is finally released.
-
 
 ## Full Example: Dependent Dictionary
 

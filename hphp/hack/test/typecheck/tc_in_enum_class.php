@@ -6,7 +6,6 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-<<file:__EnableUnstableFeatures('enum_class_type_constants')>>
 
 //
 // Accessors

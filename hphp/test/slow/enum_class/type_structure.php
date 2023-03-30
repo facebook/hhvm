@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('enum_class_type_constants')>>
 
 interface I {
   abstract const int X;

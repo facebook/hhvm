@@ -7,8 +7,6 @@
  *
  */
 
-<<file:__EnableUnstableFeatures('enum_class_type_constants')>>
-
 // Attribuets are allowed on type constants, but not on enumerators
 
 enum class E : int {

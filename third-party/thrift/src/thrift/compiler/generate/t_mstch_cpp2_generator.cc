@@ -1359,6 +1359,7 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node cpp_frozen2_exclude() {
     // TODO(dokwon): Fix frozen2 compatibility with adapter.
     return struct_->has_annotation("cpp.frozen2_exclude") ||
+        struct_->find_structured_annotation_or_null(kCppFrozen2ExcludeUri) ||
         cpp_context_->resolver().is_directly_adapted(*struct_);
   }
   mstch::node cpp_allocator_via() {

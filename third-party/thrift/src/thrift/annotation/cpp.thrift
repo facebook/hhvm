@@ -231,3 +231,9 @@ enum EnumUnderlyingType {
 struct EnumType {
   1: EnumUnderlyingType type;
 }
+
+/**
+ * Indicates that frozen types should not be generated for a given struct.
+ */
+@scope.Structured
+struct Frozen2Exclude {}

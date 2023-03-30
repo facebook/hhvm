@@ -20,5 +20,5 @@ import thrift.annotation.scope.ttypes
 import thrift.annotation.thrift.ttypes
 
 
-from .ttypes import UTF8STRINGS, RefType, EnumUnderlyingType, Ref, Lazy, DisableLazyChecksum, Adapter, PackIsset, MinimizePadding, TriviallyRelocatable, ScopedEnumAsUnionType, StrongType, FieldInterceptor, UseOpEncode, EnumType
+from .ttypes import UTF8STRINGS, RefType, EnumUnderlyingType, Ref, Lazy, DisableLazyChecksum, Adapter, PackIsset, MinimizePadding, TriviallyRelocatable, ScopedEnumAsUnionType, StrongType, FieldInterceptor, UseOpEncode, EnumType, Frozen2Exclude
 

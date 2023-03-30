@@ -1501,3 +1501,69 @@ func (p *EnumType) String() string {
   return fmt.Sprintf("EnumType({Type:%s})", typeVal)
 }
 
+// Indicates that frozen types should not be generated for a given struct.
+type Frozen2Exclude struct {
+}
+
+func NewFrozen2Exclude() *Frozen2Exclude {
+  return &Frozen2Exclude{}
+}
+
+type Frozen2ExcludeBuilder struct {
+  obj *Frozen2Exclude
+}
+
+func NewFrozen2ExcludeBuilder() *Frozen2ExcludeBuilder{
+  return &Frozen2ExcludeBuilder{
+    obj: NewFrozen2Exclude(),
+  }
+}
+
+func (p Frozen2ExcludeBuilder) Emit() *Frozen2Exclude{
+  return &Frozen2Exclude{
+  }
+}
+
+func (p *Frozen2Exclude) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    if err := iprot.Skip(fieldTypeId); err != nil {
+      return err
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Frozen2Exclude) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Frozen2Exclude"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Frozen2Exclude) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  return fmt.Sprintf("Frozen2Exclude({})")
+}
+

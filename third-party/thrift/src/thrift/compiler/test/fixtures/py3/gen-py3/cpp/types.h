@@ -159,6 +159,13 @@ inline void reset_field<::facebook::thrift::annotation::cpp::EnumType>(
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::cpp::Frozen2Exclude>(
+    ::facebook::thrift::annotation::cpp::Frozen2Exclude& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::Ref>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -271,6 +278,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::cpp::EnumType>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::cpp::Frozen2Exclude>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

@@ -1718,3 +1718,84 @@ func (x *EnumType) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+type Frozen2Exclude struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Frozen2Exclude{}
+
+
+func NewFrozen2Exclude() *Frozen2Exclude {
+    return (&Frozen2Exclude{})
+}
+
+func (x *Frozen2Exclude) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Frozen2Exclude.Set* methods instead or set the fields directly.
+type Frozen2ExcludeBuilder struct {
+    obj *Frozen2Exclude
+}
+
+func NewFrozen2ExcludeBuilder() *Frozen2ExcludeBuilder {
+    return &Frozen2ExcludeBuilder{
+        obj: NewFrozen2Exclude(),
+    }
+}
+
+func (x *Frozen2ExcludeBuilder) Emit() *Frozen2Exclude {
+    var objCopy Frozen2Exclude = *x.obj
+    return &objCopy
+}
+
+func (x *Frozen2Exclude) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Frozen2Exclude"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Frozen2Exclude) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+

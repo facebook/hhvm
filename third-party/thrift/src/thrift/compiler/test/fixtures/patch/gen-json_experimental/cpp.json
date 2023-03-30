@@ -421,6 +421,23 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 230
+      },
+      "Frozen2Exclude" : {
+        "name" : "Frozen2Exclude",
+        "structured_annotations": {
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Indicates that frozen types should not be generated for a given struct.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 238
       }
       },
   "source_path" : "thrift/annotation/cpp",

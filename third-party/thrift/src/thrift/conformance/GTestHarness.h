@@ -39,7 +39,6 @@
 #include <folly/stop_watch.h>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/if/gen-cpp2/ConformanceServiceAsyncClient.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_clients.h>
 #include <thrift/conformance/if/gen-cpp2/test_suite_types.h>
@@ -48,6 +47,7 @@
 #include <thrift/lib/cpp2/async/PooledRequestChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/cpp2/op/Compare.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 
 // Registers the given conformance test suites with gtest using the
 // client providers in clientFns.

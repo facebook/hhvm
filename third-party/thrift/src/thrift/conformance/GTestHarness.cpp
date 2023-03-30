@@ -54,16 +54,18 @@ testing::AssertionResult runRoundTripTest(
   auto parseAny = [](const Any& a) {
     switch (auto protocol = a.protocol().value_or(StandardProtocol::Compact)) {
       case StandardProtocol::Compact:
-        return parseObject<apache::thrift::CompactProtocolReader>(*a.data());
+        return protocol::parseObject<apache::thrift::CompactProtocolReader>(
+            *a.data());
       case StandardProtocol::Binary:
-        return parseObject<apache::thrift::BinaryProtocolReader>(*a.data());
+        return protocol::parseObject<apache::thrift::BinaryProtocolReader>(
+            *a.data());
       default:
         throw std::invalid_argument(
             "Unsupported protocol: " + util::enumNameSafe(protocol));
     }
   };
 
-  auto toJson = [](const Object& obj) {
+  auto toJson = [](const protocol::Object& obj) {
     folly::json::serialization_opts opts;
     opts.pretty_formatting = true;
     opts.sort_keys = true;
@@ -72,9 +74,9 @@ testing::AssertionResult runRoundTripTest(
     return folly::json::serialize(protocol::toDynamic(obj), opts);
   };
 
-  Object actual = parseAny(*res.value());
-  Object expected = parseAny(expectedAny);
-  if (!op::identical<type::struct_t<Object>>(actual, expected)) {
+  protocol::Object actual = parseAny(*res.value());
+  protocol::Object expected = parseAny(expectedAny);
+  if (!op::identical<type::struct_t<protocol::Object>>(actual, expected)) {
     // TODO(afuller): Report out the delta
     return testing::AssertionFailure()
         << "\nInput: " << toJson(parseAny(*roundTrip.request()->value()))
@@ -98,18 +100,20 @@ testing::AssertionResult runPatchTest(
   auto parseAny = [](const Any& a) {
     switch (auto protocol = a.protocol().value_or(StandardProtocol::Compact)) {
       case StandardProtocol::Compact:
-        return parseObject<apache::thrift::CompactProtocolReader>(*a.data());
+        return protocol::parseObject<apache::thrift::CompactProtocolReader>(
+            *a.data());
       case StandardProtocol::Binary:
-        return parseObject<apache::thrift::BinaryProtocolReader>(*a.data());
+        return protocol::parseObject<apache::thrift::BinaryProtocolReader>(
+            *a.data());
       default:
         throw std::invalid_argument(
             "Unsupported protocol: " + util::enumNameSafe(protocol));
     }
   };
 
-  Object actual = parseAny(*res.result());
-  Object expected = parseAny(expectedAny);
-  if (!op::identical<type::struct_t<Object>>(actual, expected)) {
+  protocol::Object actual = parseAny(*res.result());
+  protocol::Object expected = parseAny(expectedAny);
+  if (!op::identical<type::struct_t<protocol::Object>>(actual, expected)) {
     // TODO: Report out the delta
     return testing::AssertionFailure();
   }

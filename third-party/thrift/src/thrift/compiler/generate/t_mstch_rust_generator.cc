@@ -39,6 +39,8 @@ namespace thrift {
 namespace compiler {
 
 namespace {
+const std::string_view kRustCratePrefix = "crate::";
+
 std::string mangle(const std::string& name) {
   static const char* raw_identifiable_keywords[] = {
       "abstract", "alignof", "as",      "async",    "await",    "become",
@@ -319,6 +321,11 @@ const t_const* find_structured_adapter_annotation(const t_named& node) {
       "facebook.com/thrift/annotation/rust/Adapter");
 }
 
+const t_const* find_structured_derive_annotation(const t_named& node) {
+  return node.find_structured_annotation_or_null(
+      "facebook.com/thrift/annotation/rust/Derive");
+}
+
 bool node_has_adapter(const t_named& node) {
   return find_structured_adapter_annotation(node) != nullptr;
 }
@@ -423,13 +430,42 @@ const std::string struct_rust_name(const t_struct* strct) {
   return strct->get_annotation("rust.name");
 }
 
+// NOTE: a transitive _adapter_ is different from a transitive _annotation_. A
+// transitive adapter is defined as one applied transitively through types. E.g.
+// ```
+// @rust.Adapter{ name = "Foo" }
+// typedef string AdaptedString
+//
+// struct Bar {
+//    1: AdaptedString field1;
+// }
+// ```
+//
+// `Bar.field1` has a transitive adapter due to its type being an adapted type.
+//
+// A transitive annotation is one that is applied through `@scope.Transitive`.
+// E.g.
+// ```
+// @rust.Adapter{ name = "Foo" }
+// @scope.Transitive
+// struct SomeAnnotation {}
+//
+// struct Bar {
+//    @SomeAnnotation
+//    1: string field1;
+// }
+// ```
+//
+// `Bar.field1` has an non-transitive adapter applied through a transitive
+// annotation in this example.
 mstch::node adapter_node(
     // The field or typedef's adapter (if there is one).
     const t_const* adapter_annotation,
     const t_type* type,
     bool ignore_transitive_check,
     mstch_context& context,
-    mstch_element_position pos) {
+    mstch_element_position pos,
+    const rust_codegen_options& options) {
   // Step through typedefs.
   const t_type* curr_type = step_through_typedefs(type, true);
   const t_type* transitive_type = nullptr;
@@ -446,6 +482,13 @@ mstch::node adapter_node(
   mstch::node name;
   bool is_generic = false;
   if (adapter_annotation != nullptr) {
+    // Always replace `crate::` with the package name of where this annotation
+    // originated to support adapters applied with `@scope.Transitive`.
+    // If the annotation originates from the same module, this will just return
+    // `crate::` anyways to be a no-op.
+    std::string package =
+        get_import_name(adapter_annotation->program(), options);
+
     auto adapter_name = get_annotation_property(adapter_annotation, "name");
 
     is_generic = boost::algorithm::ends_with(adapter_name, "<>");
@@ -454,8 +497,13 @@ mstch::node adapter_node(
     }
 
     if (!(boost::algorithm::starts_with(adapter_name, "::") ||
-          boost::algorithm::starts_with(adapter_name, "crate::"))) {
+          boost::algorithm::starts_with(adapter_name, kRustCratePrefix))) {
       adapter_name = "::" + adapter_name;
+    } else if (
+        !package.empty() &&
+        boost::algorithm::starts_with(adapter_name, kRustCratePrefix)) {
+      adapter_name =
+          package + "::" + adapter_name.substr(kRustCratePrefix.length());
     }
 
     name = adapter_name;
@@ -496,33 +544,32 @@ mstch::node structured_annotations_node(
     mstch_context& context,
     mstch_element_position pos,
     const rust_codegen_options& options) {
-  std::vector<mstch::node> direct_annotations;
-  std::vector<mstch::node> transitive_annotation_types;
+  std::vector<mstch::node> annotations;
 
   // Note, duplicate annotations are not allowed per the Thrift spec.
   for (const t_const* annotation : named.structured_annotations()) {
-    direct_annotations.push_back(std::make_shared<mstch_rust_value>(
+    auto direct_annotation = std::make_shared<mstch_rust_value>(
         annotation->get_value(),
         annotation->get_type(),
         depth,
         context,
         pos,
-        options));
+        options);
 
+    mstch::node transitive;
     const t_type* annotation_type = annotation->get_type();
     if ((*annotation_type).find_structured_annotation_or_null(kTransitiveUri)) {
-      transitive_annotation_types.push_back(
-          context.type_factory->make_mstch_object(
-              annotation_type, context, pos));
+      transitive = context.type_factory->make_mstch_object(
+          annotation_type, context, pos);
     }
+
+    annotations.push_back(mstch::map{
+        {"structured_annotation:direct", direct_annotation},
+        {"structured_annotation:transitive?", transitive},
+    });
   }
 
-  mstch::map node{
-      {"structured_annotations:direct", direct_annotations},
-      {"structured_annotations:transitive", transitive_annotation_types},
-  };
-
-  return node;
+  return annotations;
 }
 
 class t_mstch_rust_generator : public t_mstch_generator {
@@ -1102,6 +1149,36 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node rust_has_doc() { return struct_->has_doc(); }
   mstch::node rust_doc() { return quoted_rust_doc(struct_); }
   mstch::node rust_derive() {
+    if (auto annotation = find_structured_derive_annotation(*struct_)) {
+      // Always replace `crate::` with the package name of where this annotation
+      // originated to support derives applied with `@scope.Transitive`.
+      // If the annotation originates from the same module, this will just
+      // return `crate::` anyways to be a no-op.
+      std::string package = get_import_name(annotation->program(), options_);
+
+      std::string ret;
+      std::string delimiter = "";
+
+      for (const auto& item : annotation->value()->get_map()) {
+        if (item.first->get_string() == "derives") {
+          for (const t_const_value* val : item.second->get_list()) {
+            auto str_val = val->get_string();
+
+            if (!package.empty() &&
+                boost::algorithm::starts_with(str_val, kRustCratePrefix)) {
+              str_val =
+                  package + "::" + str_val.substr(kRustCratePrefix.length());
+            }
+
+            ret = ret + delimiter + str_val;
+            delimiter = ", ";
+          }
+        }
+      }
+
+      return ret;
+    }
+
     if (!struct_->has_annotation("rust.derive")) {
       return nullptr;
     }
@@ -1122,7 +1199,8 @@ class rust_mstch_struct : public mstch_struct {
   mstch::node has_adapter() {
     // Structs cannot have transitive types, so we ignore the transitive type
     // check.
-    return adapter_node(adapter_annotation_, struct_, true, context_, pos_);
+    return adapter_node(
+        adapter_annotation_, struct_, true, context_, pos_, options_);
   }
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*struct_, 1, context_, pos_, options_);
@@ -1251,7 +1329,7 @@ class rust_mstch_type : public mstch_type {
         !(type_->is_typedef() && type_->has_annotation("rust.newtype"));
   }
   mstch::node adapter() {
-    return adapter_node(nullptr, type_, false, context_, pos_);
+    return adapter_node(nullptr, type_, false, context_, pos_, options_);
   }
 
  private:
@@ -1598,7 +1676,12 @@ class mstch_rust_struct_field : public mstch_base {
   mstch::node rust_docs() { return quoted_rust_doc(field_); }
   mstch::node has_adapter() {
     return adapter_node(
-        adapter_annotation_, field_->get_type(), false, context_, pos_);
+        adapter_annotation_,
+        field_->get_type(),
+        false,
+        context_,
+        pos_,
+        options_);
   }
 
  private:
@@ -1770,7 +1853,12 @@ class rust_mstch_field : public mstch_field {
   mstch::node rust_docs() { return quoted_rust_doc(field_); }
   mstch::node has_adapter() {
     return adapter_node(
-        adapter_annotation_, field_->get_type(), false, context_, pos_);
+        adapter_annotation_,
+        field_->get_type(),
+        false,
+        context_,
+        pos_,
+        options_);
   }
   mstch::node rust_structured_annotations() {
     return structured_annotations_node(*field_, 3, context_, pos_, options_);
@@ -1844,7 +1932,12 @@ class rust_mstch_typedef : public mstch_typedef {
   mstch::node rust_serde() { return rust_serde_enabled(options_, *typedef_); }
   mstch::node has_adapter() {
     return adapter_node(
-        adapter_annotation_, typedef_->get_type(), false, context_, pos_);
+        adapter_annotation_,
+        typedef_->get_type(),
+        false,
+        context_,
+        pos_,
+        options_);
   }
 
  private:

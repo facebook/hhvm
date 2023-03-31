@@ -135,3 +135,135 @@ func (p *Adapter) String() string {
   return fmt.Sprintf("Adapter({Name:%s})", nameVal)
 }
 
+// Attributes:
+//  - Derives
+type Derive struct {
+  Derives []string `thrift:"derives,1" db:"derives" json:"derives"`
+}
+
+func NewDerive() *Derive {
+  return &Derive{}
+}
+
+
+func (p *Derive) GetDerives() []string {
+  return p.Derives
+}
+type DeriveBuilder struct {
+  obj *Derive
+}
+
+func NewDeriveBuilder() *DeriveBuilder{
+  return &DeriveBuilder{
+    obj: NewDerive(),
+  }
+}
+
+func (p DeriveBuilder) Emit() *Derive{
+  return &Derive{
+    Derives: p.obj.Derives,
+  }
+}
+
+func (d *DeriveBuilder) Derives(derives []string) *DeriveBuilder {
+  d.obj.Derives = derives
+  return d
+}
+
+func (d *Derive) SetDerives(derives []string) *Derive {
+  d.Derives = derives
+  return d
+}
+
+func (p *Derive) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Derive)  ReadField1(iprot thrift.Protocol) error {
+  _, size, err := iprot.ReadListBegin()
+  if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+  }
+  tSlice := make([]string, 0, size)
+  p.Derives =  tSlice
+  for i := 0; i < size; i ++ {
+    var _elem1 string
+    if v, err := iprot.ReadString(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _elem1 = v
+    }
+    p.Derives = append(p.Derives, _elem1)
+  }
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+  }
+  return nil
+}
+
+func (p *Derive) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Derive"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Derive) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("derives", thrift.LIST, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:derives: ", p), err) }
+  if err := oprot.WriteListBegin(thrift.STRING, len(p.Derives)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+  }
+  for _, v := range p.Derives {
+    if err := oprot.WriteString(string(v)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+  }
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:derives: ", p), err) }
+  return err
+}
+
+func (p *Derive) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  derivesVal := fmt.Sprintf("%v", p.Derives)
+  return fmt.Sprintf("Derive({Derives:%s})", derivesVal)
+}
+

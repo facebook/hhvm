@@ -1943,6 +1943,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
                     let mut tmp = Some(thrift::types::InternBox {
                         ..::std::default::Default::default()
@@ -1950,10 +1954,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             2 => {
@@ -1972,6 +1972,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
                     let mut tmp = Some(thrift::types::InternBox {
                         ..::std::default::Default::default()
@@ -1979,10 +1983,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             3 => {
@@ -2001,6 +2001,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
                     let mut tmp = Some(thrift::types::InternBox {
                         ..::std::default::Default::default()
@@ -2017,10 +2021,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             4 => {
@@ -2039,6 +2039,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::InternBox>() {
                     let mut tmp = Some(thrift::types::InternBox {
                         ..::std::default::Default::default()
@@ -2055,10 +2059,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptedStructWithInternBox {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             _ => {}

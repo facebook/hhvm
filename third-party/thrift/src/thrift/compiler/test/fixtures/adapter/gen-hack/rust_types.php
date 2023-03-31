@@ -133,3 +133,140 @@ class Adapter implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSha
 
 }
 
+/**
+ * Original thrift struct:-
+ * Derive
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/rust/Derive'))>>
+class Derive implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'derives',
+      'type' => \TType::LST,
+      'etype' => \TType::STRING,
+      'elem' => shape(
+        'type' => \TType::STRING,
+      ),
+      'format' => 'collection',
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'derives' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'derives' => ?Vector<string>,
+  );
+
+  const type TShape = shape(
+    'derives' => vec<string>,
+  );
+  const int STRUCTURAL_ID = 365218803088477774;
+  /**
+   * Original thrift field:-
+   * 1: list<string> derives
+   */
+  public Vector<string> $derives;
+
+  public function __construct(?Vector<string> $derives = null)[] {
+    $this->derives = $derives ?? Vector {};
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'derives'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Derive';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "rust.Derive",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "derives",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      (new Vector($shape['derives'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'derives' => vec($this->derives),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'derives') !== null) {
+      $_json3 = HH\FIXME\UNSAFE_CAST<mixed, Vector<string>>($parsed['derives']);
+      $_container4 = Vector {};
+      foreach($_json3 as $_key1 => $_value2) {
+        $_elem5 = '';
+        $_elem5 = $_value2;
+        $_container4 []= $_elem5;
+      }
+      $this->derives = $_container4;
+    }
+  }
+
+}
+

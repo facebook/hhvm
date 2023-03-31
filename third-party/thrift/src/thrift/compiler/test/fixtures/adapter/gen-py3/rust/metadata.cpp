@@ -15,6 +15,7 @@ namespace rust {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::StructMetadata<Adapter>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<Derive>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

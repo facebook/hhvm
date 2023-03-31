@@ -34,7 +34,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Adapter']
+__all__ = ['UTF8STRINGS', 'Adapter', 'Derive']
 
 class Adapter:
   r"""
@@ -143,6 +143,128 @@ class Adapter:
   def _to_py_deprecated(self):
     return self
 
+class Derive:
+  r"""
+  Attributes:
+   - derives
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.LIST:
+          self.derives = []
+          (_etype3, _size0) = iprot.readListBegin()
+          if _size0 >= 0:
+            for _i4 in range(_size0):
+              _elem5 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.derives.append(_elem5)
+          else: 
+            while iprot.peekList():
+              _elem6 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.derives.append(_elem6)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Derive')
+    if self.derives != None:
+      oprot.writeFieldBegin('derives', TType.LIST, 1)
+      oprot.writeListBegin(TType.STRING, len(self.derives))
+      for iter7 in self.derives:
+        oprot.writeString(iter7.encode('utf-8')) if UTF8STRINGS and not isinstance(iter7, bytes) else oprot.writeString(iter7)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'derives' in json_obj and json_obj['derives'] is not None:
+      self.derives = []
+      for _tmp_e8 in json_obj['derives']:
+        self.derives.append(_tmp_e8)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.derives is not None:
+      value = pprint.pformat(self.derives, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    derives=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'derives',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Derive, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.rust.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Derive, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Adapter)
 Adapter.thrift_spec = (
   None, # 0
@@ -166,6 +288,30 @@ def Adapter__setstate__(self, state):
 
 Adapter.__getstate__ = lambda self: self.__dict__.copy()
 Adapter.__setstate__ = Adapter__setstate__
+
+all_structs.append(Derive)
+Derive.thrift_spec = (
+  None, # 0
+  (1, TType.LIST, 'derives', (TType.STRING,True), None, 2, ), # 1
+)
+
+Derive.thrift_struct_annotations = {
+  "thrift.uri": "facebook.com/thrift/annotation/rust/Derive",
+}
+Derive.thrift_field_annotations = {
+}
+
+def Derive__init__(self, derives=None,):
+  self.derives = derives
+
+Derive.__init__ = Derive__init__
+
+def Derive__setstate__(self, state):
+  state.setdefault('derives', None)
+  self.__dict__ = state
+
+Derive.__getstate__ = lambda self: self.__dict__.copy()
+Derive.__setstate__ = Derive__setstate__
 
 fix_spec(all_structs)
 del all_structs

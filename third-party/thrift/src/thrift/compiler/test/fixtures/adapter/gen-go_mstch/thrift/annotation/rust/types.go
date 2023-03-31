@@ -151,3 +151,178 @@ func (x *Adapter) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+type Derive struct {
+    Derives []string `thrift:"derives,1" json:"derives" db:"derives"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Derive{}
+
+
+func NewDerive() *Derive {
+    return (&Derive{})
+}
+
+func (x *Derive) GetDerivesNonCompat() []string {
+    return x.Derives
+}
+
+func (x *Derive) GetDerives() []string {
+    if !x.IsSetDerives() {
+      return nil
+    }
+
+    return x.Derives
+}
+
+func (x *Derive) SetDerives(value []string) *Derive {
+    x.Derives = value
+    return x
+}
+
+func (x *Derive) IsSetDerives() bool {
+    return x.Derives != nil
+}
+
+func (x *Derive) writeField1(p thrift.Protocol) error {  // Derives
+    if !x.IsSetDerives() {
+        return nil
+    }
+
+    if err := p.WriteFieldBegin("derives", thrift.LIST, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetDerivesNonCompat()
+    if err := p.WriteListBegin(thrift.STRING, len(item)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+}
+for _, v := range item {
+    {
+        item := v
+        if err := p.WriteString(item); err != nil {
+    return err
+}
+    }
+}
+if err := p.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Derive) readField1(p thrift.Protocol) error {  // Derives
+    _ /* elemType */, size, err := p.ReadListBegin()
+if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+}
+
+listResult := make([]string, 0, size)
+for i := 0; i < size; i++ {
+    var elem string
+    {
+        result, err := p.ReadString()
+if err != nil {
+    return err
+}
+        elem = result
+    }
+    listResult = append(listResult, elem)
+}
+
+if err := p.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+}
+result := listResult
+
+    x.SetDerives(result)
+    return nil
+}
+
+func (x *Derive) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Derive.Set* methods instead or set the fields directly.
+type DeriveBuilder struct {
+    obj *Derive
+}
+
+func NewDeriveBuilder() *DeriveBuilder {
+    return &DeriveBuilder{
+        obj: NewDerive(),
+    }
+}
+
+func (x *DeriveBuilder) Derives(value []string) *DeriveBuilder {
+    x.obj.Derives = value
+    return x
+}
+
+func (x *DeriveBuilder) Emit() *Derive {
+    var objCopy Derive = *x.obj
+    return &objCopy
+}
+
+func (x *Derive) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Derive"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Derive) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // derives
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+

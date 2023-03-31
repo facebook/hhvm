@@ -64,5 +64,34 @@ struct Adapter {
   // }
   // ```
   // will use `fbthrift_adapters::DurationSecondsAdapter<i64>` as the adapter.
+  //
+  // If the adapter name starts with `crate::` and this `@rust.Adapter` is applied transitively with
+  // @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
+  // transitive annotation is defined.
   1: string name;
 } (thrift.uri = "facebook.com/thrift/annotation/rust/Adapter")
+
+@scope.Struct
+struct Derive {
+  // List of additional derives to apply to the struct.
+  //
+  // Example:
+  // ```
+  // @rust.Derive{ derives = ["Foo"] }
+  // struct SomeStruct {
+  //    1: string some_field;
+  // }
+  // ```
+  // will generated the Rust struct
+  // ```
+  // #[derive(Foo)]
+  // struct SomeStruct {
+  //    some_field: String,
+  // }
+  // ```
+  //
+  // If the derive starts with `crate::` and this `@rust.Derive` is applied transitively with
+  // @scope.Transitive, `crate::` will be replaced with the name of the crate in which the
+  // transitive annotation is defined.
+  1: list<string> derives;
+} (thrift.uri = "facebook.com/thrift/annotation/rust/Derive")

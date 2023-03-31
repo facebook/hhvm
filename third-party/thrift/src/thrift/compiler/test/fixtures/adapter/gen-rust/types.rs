@@ -815,6 +815,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyAnnotation {
             return r.take();
         }
 
+        if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<scope::types::Transitive>() {
             let mut tmp = Some(scope::types::Transitive {
                 ..::std::default::Default::default()
@@ -822,10 +826,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyAnnotation {
             let r: &mut dyn ::std::any::Any = &mut tmp;
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
-        }
-
-        if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
         }
 
         None
@@ -1058,6 +1058,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter1".to_owned(),
@@ -1066,10 +1070,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             2 => {
@@ -1098,6 +1098,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter1".to_owned(),
@@ -1106,10 +1110,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             3 => {
@@ -1138,6 +1138,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter1".to_owned(),
@@ -1146,10 +1150,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             4 => {
@@ -1182,6 +1182,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter3".to_owned(),
@@ -1190,10 +1194,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             7 => {
@@ -1222,6 +1222,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter3".to_owned(),
@@ -1230,10 +1234,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             8 => {
@@ -1262,6 +1262,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter3".to_owned(),
@@ -1270,10 +1274,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             9 => {
@@ -1294,6 +1294,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<python::types::Adapter>() {
                     let mut tmp = Some(python::types::Adapter {
                         name: "my.Adapter3".to_owned(),
@@ -1305,6 +1309,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     return r.take();
                 }
 
+                if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter2".to_owned(),
@@ -1313,14 +1321,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
-                }
-
-                if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             11 => {
@@ -1486,6 +1486,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter1".to_owned(),
@@ -1494,10 +1498,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             4 => {
@@ -1528,6 +1528,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter3".to_owned(),
@@ -1536,10 +1540,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             8 => {
@@ -1568,6 +1568,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter1".to_owned(),
@@ -1576,10 +1580,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Baz {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             9 => {
@@ -1967,6 +1967,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
             return r.take();
         }
 
+        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<python::types::Adapter>() {
             let mut tmp = Some(python::types::Adapter {
                 name: "my.module.Adapter".to_owned(),
@@ -1976,10 +1980,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for DirectlyAdapted {
             let r: &mut dyn ::std::any::Any = &mut tmp;
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
-        }
-
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
         }
 
         if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
@@ -2255,6 +2255,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<python::types::Adapter>() {
                     let mut tmp = Some(python::types::Adapter {
                         name: "my.Adapter1".to_owned(),
@@ -2266,6 +2270,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     return r.take();
                 }
 
+                if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::my::Adapter1<>".to_owned(),
@@ -2274,14 +2282,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
-                }
-
-                if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             2 => {
@@ -2300,6 +2300,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
                     let mut tmp = Some(cpp::types::Ref {
                         r#type: cpp::types::RefType(1),
@@ -2308,10 +2312,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             3 => {
@@ -2328,6 +2328,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
+                }
+
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
                 }
 
                 if type_id == ::std::any::TypeId::of::<cpp::types::Ref>() {
@@ -2349,10 +2353,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
-                }
             },
             4 => {
 
@@ -2370,6 +2370,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::Box>() {
                     let mut tmp = Some(thrift::types::Box {
                         ..::std::default::Default::default()
@@ -2377,10 +2381,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithFieldAdapter {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             _ => {}
@@ -2513,6 +2513,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
                     let mut tmp = Some(thrift::types::TerseWrite {
                         ..::std::default::Default::default()
@@ -2520,10 +2524,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             2 => {
@@ -2542,6 +2542,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
                     let mut tmp = Some(thrift::types::TerseWrite {
                         ..::std::default::Default::default()
@@ -2549,10 +2553,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             3 => {
@@ -2571,6 +2571,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<thrift::types::TerseWrite>() {
                     let mut tmp = Some(thrift::types::TerseWrite {
                         ..::std::default::Default::default()
@@ -2578,10 +2582,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseAdaptedFields {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             _ => {}
@@ -2871,6 +2871,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
             return r.take();
         }
 
+        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<python::types::Adapter>() {
             let mut tmp = Some(python::types::Adapter {
                 name: "my.ConfigAdapter".to_owned(),
@@ -2880,6 +2884,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
             let r: &mut dyn ::std::any::Any = &mut tmp;
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
+        }
+
+        if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
         }
 
         if type_id == ::std::any::TypeId::of::<scope::types::Transitive>() {
@@ -2898,14 +2906,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Config {
             let r: &mut dyn ::std::any::Any = &mut tmp;
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
-        }
-
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
-        }
-
-        if let Some(r) = <python::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
         }
 
         if let Some(r) = <thrift::types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
@@ -3747,6 +3747,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::fbthrift_adapters::test::TestAdapter".to_owned(),
@@ -3755,10 +3759,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             20 => {
@@ -3777,6 +3777,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::fbthrift_adapters::test::TestAdapter".to_owned(),
@@ -3785,10 +3789,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             21 => {
@@ -3807,6 +3807,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                     return r.take();
                 }
 
+                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return Some(r);
+                }
+
                 if type_id == ::std::any::TypeId::of::<rust::types::Adapter>() {
                     let mut tmp = Some(rust::types::Adapter {
                         name: "::fbthrift_adapters::test::TestAdapter".to_owned(),
@@ -3815,10 +3819,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for AdaptTemplatedTestStruct {
                     let r: &mut dyn ::std::any::Any = &mut tmp;
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
-                }
-
-                if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-                    return Some(r);
                 }
             },
             22 => {
@@ -5457,6 +5457,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
             return r.take();
         }
 
+        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<scope::types::Transitive>() {
             let mut tmp = Some(scope::types::Transitive {
                 ..::std::default::Default::default()
@@ -5464,10 +5468,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for ApplyAdapter {
             let r: &mut dyn ::std::any::Any = &mut tmp;
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
-        }
-
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
         }
 
         None
@@ -5842,6 +5842,10 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
             return r.take();
         }
 
+        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<scope::types::Transitive>() {
             let mut tmp = Some(scope::types::Transitive {
                 ..::std::default::Default::default()
@@ -5849,10 +5853,6 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
             let r: &mut dyn ::std::any::Any = &mut tmp;
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
-        }
-
-        if let Some(r) = <cpp::types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
-            return Some(r);
         }
 
         None

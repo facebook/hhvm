@@ -36,7 +36,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
         {{#struct:rust_structured_annotations}}
-        {{#structured_annotations:direct}}
+        {{#structured_annotation:direct}}
 
         if type_id == ::std::any::TypeId::of::<{{#value:type}}{{>lib/type}}{{/value:type}}>() {
             let mut tmp = Some({{>lib/value}});
@@ -44,14 +44,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
             let r: &mut Option<T> = r.downcast_mut().unwrap();
             return r.take();
         }
-        {{/structured_annotations:direct}}
-        {{! Iterate through our direct annotations first before checking transitive annotations. }}
-        {{#structured_annotations:transitive}}
+        {{/structured_annotation:direct}}
+        {{#structured_annotation:transitive?}}
 
         if let Some(r) = <{{>lib/type}} as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
             return Some(r);
         }
-        {{/structured_annotations:transitive}}
+        {{/structured_annotation:transitive?}}
         {{/struct:rust_structured_annotations}}
 
         None
@@ -65,7 +64,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
             {{#struct:fields}}
             {{field:key}} => {
                 {{#field:rust_structured_annotations}}
-                {{#structured_annotations:direct}}
+                {{#structured_annotation:direct}}
 
                 if type_id == ::std::any::TypeId::of::<{{#value:type}}{{>lib/type}}{{/value:type}}>() {
                     let mut tmp = Some({{>lib/value}});
@@ -73,13 +72,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for {{struct:rust_name}} {
                     let r: &mut Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
-                {{/structured_annotations:direct}}
-                {{#structured_annotations:transitive}}
+                {{/structured_annotation:direct}}
+                {{#structured_annotation:transitive?}}
 
                 if let Some(r) = <{{>lib/type}} as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
                     return Some(r);
                 }
-                {{/structured_annotations:transitive}}
+                {{/structured_annotation:transitive?}}
                 {{/field:rust_structured_annotations}}
             },
             {{/struct:fields}}

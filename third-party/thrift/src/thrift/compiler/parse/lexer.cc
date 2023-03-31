@@ -26,7 +26,15 @@
 #include <unordered_map>
 #include <utility>
 
+#include <boost/functional/hash.hpp>
 #include <thrift/compiler/diagnostic.h>
+
+template <>
+struct std::hash<fmt::string_view> {
+  size_t operator()(fmt::string_view s) const {
+    return boost::hash_range(s.begin(), s.end());
+  }
+};
 
 namespace apache {
 namespace thrift {
@@ -126,7 +134,7 @@ const char* lex_float_literal(const char* p) {
   return p ? lex_float_exponent(p, p) : nullptr;
 }
 
-const std::unordered_map<std::string, tok> keywords = {
+const std::unordered_map<fmt::string_view, tok> keywords = {
     {"false", tok::bool_literal},
     {"true", tok::bool_literal},
     {"include", tok::kw_include},
@@ -418,7 +426,7 @@ token lexer::get_next_token() {
       return token::make_identifier(token_source_range(), token_text());
     }
     auto text = token_text();
-    auto it = keywords.find(std::string(text.data(), text.size()));
+    auto it = keywords.find(text);
     if (it != keywords.end()) {
       return it->second == tok::bool_literal
           ? token::make_bool_literal(token_source_range(), it->first == "true")

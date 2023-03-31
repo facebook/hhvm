@@ -572,3 +572,10 @@ let internal_classname p =
     ("This is a classname of an `internal` class. Internal classnames are dangerous because they are effectively raw strings. "
     ^ "Please avoid them, or make sure that they are never used outside of the module."
     )
+
+let async_lambda pos =
+  Lints.add
+    Codes.async_lambda
+    Lint_advice
+    pos
+    "Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position."

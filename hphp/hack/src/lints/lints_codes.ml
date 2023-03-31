@@ -110,4 +110,6 @@ module Codes = struct
   let redundant_cast = 5648
 
   let internal_classname = 5649
+
+  let async_lambda = 5650
 end

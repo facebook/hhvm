@@ -672,6 +672,7 @@ let unbound_name pos name kind =
     | Name_context.ClassContext -> " (an object type)"
     | Name_context.TraitContext -> " (a trait)"
     | Name_context.ModuleNamespace -> " (a module)"
+    | Name_context.PackageNamespace -> " (a package)"
   in
   User_error.make
     Error_code.(to_enum UnboundName)

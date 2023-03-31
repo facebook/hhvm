@@ -8,13 +8,14 @@
 type t =
   | FunctionNamespace
   | ConstantNamespace
+  | ModuleNamespace
+  | PackageNamespace
   | TypeNamespace  (** Classes, interfaces, traits, records and type aliases.*)
   (* The following are all subsets of TypeNamespace, used when we can
      give a more specific naming error. E.g. `use Foo;` only allows
      traits. *)
   | TraitContext
   | ClassContext
-  | ModuleNamespace
 
 let to_string = function
   | FunctionNamespace -> "function"
@@ -23,3 +24,4 @@ let to_string = function
   | TraitContext -> "trait"
   | ClassContext -> "class"
   | ModuleNamespace -> "module"
+  | PackageNamespace -> "package"

@@ -46,6 +46,8 @@ let handle_unbound_name env (pos, name) kind =
       | TraitContext -> Typing_deps.Dep.Type name
       | ClassContext -> Typing_deps.Dep.Type name
       | ModuleNamespace -> Typing_deps.Dep.Module name
+      | PackageNamespace ->
+        failwith "impossible match case" (* TODO (T148526825) *)
     in
     Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
   end
@@ -92,6 +94,16 @@ let check_module_name env ((_, name) as id) =
 
 let check_module_if_present env id_opt =
   Option.iter id_opt ~f:(check_module_name env)
+
+let check_package_name env (pos, name) =
+  if
+    Package.Info.package_exists (Provider_context.get_package_info env.ctx) name
+  then
+    ()
+  else
+    Errors.add_naming_error
+    @@ Naming_error.Unbound_name
+         { pos; name; kind = Name_context.PackageNamespace }
 
 let check_type_name
     ?(kind = Name_context.TypeNamespace)
@@ -285,6 +297,9 @@ let handler ctx =
             ~kind:Name_context.ClassContext
             cname
         in
+        env
+      | Aast.Package pkg ->
+        let () = check_package_name env pkg in
         env
       | _ -> env
 

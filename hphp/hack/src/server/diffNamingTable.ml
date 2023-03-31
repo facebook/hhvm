@@ -23,6 +23,7 @@ let get_default_provider_context () =
     ~tcopt:hh_parser_options
     ~backend:provider_backend
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    ~package_info:Package.Info.empty
 
 let get_naming_table_and_errors provider_context path is_sqlite =
   let (sqlite_path, marshaled_blob_path) =

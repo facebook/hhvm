@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f1fc79f8b13cc9219b0058cb74b49af1>>
+// @generated SignedSource<<63697d94ce0ab2e6fdd7d7a4753a7fe9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,11 +41,12 @@ use crate::*;
 pub enum NameContext {
     FunctionNamespace,
     ConstantNamespace,
+    ModuleNamespace,
+    PackageNamespace,
     /// Classes, interfaces, traits, records and type aliases.
     TypeNamespace,
     TraitContext,
     ClassContext,
-    ModuleNamespace,
 }
 impl TrivialDrop for NameContext {}
 arena_deserializer::impl_deserialize_in_arena!(NameContext);

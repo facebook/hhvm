@@ -27,8 +27,16 @@ val get_package_name : package -> string
 
 val get_package_pos : package -> Pos.t
 
-val get_package_for_module : string -> package option
-
-val initialize_packages_info : string -> Errors.t
-
 val relationship : package -> package -> package_relationship
+
+module Info : sig
+  type t
+
+  val empty : t
+
+  val initialize : string -> Errors.t * t
+
+  val get_package_for_module : t -> string -> package option
+
+  val package_exists : t -> string -> bool
+end

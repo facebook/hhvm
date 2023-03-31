@@ -8,6 +8,7 @@
   folly_stubs
   lwt
   lsp
+  package
   server
   server_autocomplete_services
   server_env

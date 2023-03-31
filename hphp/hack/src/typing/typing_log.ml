@@ -510,7 +510,7 @@ let genv_as_value env genv =
     current_module;
     this_internal;
     this_support_dynamic_type;
-    get_package_for_module = _;
+    package_info = _;
   } =
     genv
   in

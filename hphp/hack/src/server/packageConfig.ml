@@ -21,11 +21,6 @@ let load_and_parse env : ServerEnv.env =
   if not @@ Sys.file_exists pkgs_config_abs_path then
     env
   else
-    let errors = Package.initialize_packages_info pkgs_config_abs_path in
+    let (errors, package_info) = Package.Info.initialize pkgs_config_abs_path in
     log_debug "Parsed %s" pkgs_config_abs_path;
-    ServerEnv.
-      {
-        env with
-        get_package_for_module = Some Package.get_package_for_module;
-        errorl = Errors.merge env.errorl errors;
-      }
+    ServerEnv.{ env with package_info; errorl = Errors.merge env.errorl errors }

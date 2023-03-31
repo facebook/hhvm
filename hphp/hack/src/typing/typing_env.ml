@@ -679,7 +679,8 @@ let set_current_module env m =
 let get_current_module env = Option.map env.genv.current_module ~f:snd
 
 let get_package_for_module env md =
-  Option.bind env.genv.get_package_for_module ~f:(fun f -> f md)
+  let info = env.genv.package_info in
+  Package.Info.get_package_for_module info md
 
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 

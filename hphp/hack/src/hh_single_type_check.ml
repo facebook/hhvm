@@ -2865,6 +2865,13 @@ let decl_and_run_mode
     in
     Typing_deps.add_dependency_callback ~name:"get_debug_trace" get_debug_trace
   | _ -> ());
+  let package_info =
+    match packages_config_path with
+    | None -> Package.Info.empty
+    | Some path ->
+      let (_errors, info) = Package.Info.initialize path in
+      info
+  in
   let ctx =
     if rust_provider_backend then (
       Provider_backend.set_rust_backend popt;
@@ -2873,23 +2880,12 @@ let decl_and_run_mode
         ~tcopt
         ~backend:(Provider_backend.get ())
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+        ~package_info
     ) else
       Provider_context.empty_for_test
         ~popt
         ~tcopt
         ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-  in
-  let get_package_for_module =
-    match packages_config_path with
-    | None -> (fun _ -> None)
-    | Some path ->
-      let _errors = Package.initialize_packages_info path in
-      Package.get_package_for_module
-  in
-  let ctx =
-    Provider_context.ctx_with_get_package_for_module
-      ctx
-      (Some get_package_for_module)
   in
 
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"

@@ -121,6 +121,7 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
           ~deps_mode
+          ~package_info:Package.Info.empty
       in
       let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
       let unbacked_naming_table = write_and_parse_test_files ctx in
@@ -145,6 +146,7 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
           ~deps_mode
+          ~package_info:Package.Info.empty
       in
       (* load_from_sqlite will call set_naming_db_path for the ctx it's given, but
          here is a fresh ctx with a fresh backend so we have to set it again. *)
@@ -170,6 +172,7 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
           ~deps_mode
+          ~package_info:Package.Info.empty
       in
       (try
          f

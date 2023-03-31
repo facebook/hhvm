@@ -99,6 +99,7 @@ let setup
       ~tcopt
       ~backend:(Provider_backend.get ())
       ~deps_mode
+      ~package_info:Package.Info.empty
   in
   let get_next = MultiWorker.next None [foo_path; bar_path] in
   let (file_infos, _errors, _failed_parsing) =
@@ -132,6 +133,7 @@ let setup
           ~tcopt:(Provider_context.get_tcopt ctx)
           ~backend:(Provider_backend.get ())
           ~deps_mode:(Provider_context.get_deps_mode ctx)
+          ~package_info:(Provider_context.get_package_info ctx)
       in
       (sqlite_ctx, Naming_table.load_from_sqlite sqlite_ctx db_name)
     ) else

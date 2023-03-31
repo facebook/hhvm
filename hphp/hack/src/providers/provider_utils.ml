@@ -91,16 +91,12 @@ let invalidate_local_decl_caches_for_entries
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
-  let ctx =
-    Provider_context.empty_for_tool
-      ~popt:env.ServerEnv.popt
-      ~tcopt:env.ServerEnv.tcopt
-      ~backend:(Provider_backend.get ())
-      ~deps_mode:env.ServerEnv.deps_mode
-  in
-  Provider_context.ctx_with_get_package_for_module
-    ctx
-    env.ServerEnv.get_package_for_module
+  Provider_context.empty_for_tool
+    ~popt:env.ServerEnv.popt
+    ~tcopt:env.ServerEnv.tcopt
+    ~backend:(Provider_backend.get ())
+    ~deps_mode:env.ServerEnv.deps_mode
+    ~package_info:env.ServerEnv.package_info
 
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =

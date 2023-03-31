@@ -97,6 +97,7 @@ let init
       ~tcopt
       ~backend:(Provider_backend.get ())
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      ~package_info:Package.Info.empty
   in
   let workers =
     make_workers

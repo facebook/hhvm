@@ -320,7 +320,7 @@ type env = {
   last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
-  get_package_for_module: (string -> Package.package option) option; [@opaque]
+  package_info: Package.Info.t; [@opaque]
       (** Function for determining which package a module belongs to *)
 }
 [@@deriving show]

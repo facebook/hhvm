@@ -48,6 +48,7 @@ let init root popt : Provider_context.t =
       ~tcopt
       ~backend:Provider_backend.Shared_memory
       ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      ~package_info:Package.Info.empty
   in
 
   (* Push local stacks here so we don't include shared memory in our timing. *)

@@ -577,6 +577,7 @@ let make_empty_ctx (istate : istate) : Provider_context.t =
     ~tcopt:istate.icommon.tcopt
     ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
     ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    ~package_info:Package.Info.empty
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
@@ -744,7 +745,8 @@ let handle_request :
                    ~tcopt:dstate.dcommon.tcopt
                    ~backend:
                      (Provider_backend.Local_memory dstate.dcommon.local_memory)
-                   ~deps_mode:(Typing_deps_mode.InMemoryMode None))
+                   ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+                   ~package_info:Package.Info.empty)
                 ~root:param.root
                 ~naming_table_load_info:param.naming_table_load_info
                 ~ignore_hh_version:param.ignore_hh_version

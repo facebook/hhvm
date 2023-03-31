@@ -182,6 +182,8 @@ Vec\map_async
   (function(Traversable<Tv1> $traversable, (function(Tv1): Awaitable<Tv2>) $async_func): Awaitable<vec<Tv2>>)
 Vec\map_with_key
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Tv2) $value_func): vec<Tv2>)
+Vec\map_with_key_async
+  (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Awaitable<Tv2>) $value_func): Awaitable<vec<Tv2>>)
 Vec\partition
   (function(Traversable<Tv> $traversable, (function(Tv): bool) $predicate): (vec<Tv>, vec<Tv>))
 Vec\partition_async

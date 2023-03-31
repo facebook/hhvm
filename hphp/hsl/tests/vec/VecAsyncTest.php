@@ -115,6 +115,48 @@ final class VecAsyncTest extends HackTest {
     expect($actual)->toEqual($expected);
   }
 
+  public static function provideTestMapWithKeyAsync(): vec<mixed> {
+    return vec[
+      tuple(vec[], async ($a, $b) ==> null, vec[]),
+      tuple(
+        vec[1, 2, 3],
+        async ($k, $v) ==> (string)$k.$v,
+        vec['01', '12', '23'],
+      ),
+      tuple(
+        Vector {'the', 'quick', 'brown', 'fox'},
+        async ($k, $v) ==> (string)$k.$v,
+        vec[
+          '0the',
+          '1quick',
+          '2brown',
+          '3fox',
+        ],
+      ),
+      tuple(
+        HackLibTestTraversables::getKeyedIterator(Vec\range(1, 5)),
+        async ($k, $v) ==> $k * $v,
+        vec[
+          0,
+          2,
+          6,
+          12,
+          20,
+        ],
+      ),
+    ];
+  }
+
+  <<DataProvider('provideTestMapWithKeyAsync')>>
+  public async function testMapWithKeyAsync<Tk as arraykey, Tv1, Tv2>(
+    KeyedTraversable<Tk, Tv1> $traversable,
+    (function(Tk, Tv1): Awaitable<Tv2>) $value_func,
+    vec<Tv2> $expected,
+  ): Awaitable<void> {
+    $result = await Vec\map_with_key_async($traversable, $value_func);
+    expect($result)->toEqual($expected);
+  }
+
   public static function provideTestPartitionAsync(): varray<mixed> {
     return varray[
       tuple(

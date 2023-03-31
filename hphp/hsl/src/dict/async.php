@@ -122,10 +122,10 @@ async function filter_with_key_async<Tk as arraykey, Tv>(
  * For non-async functions, see `Dict\map()`.
  *
  * Time complexity: O(n * f), where f is the complexity of the synchronous
- * portions of `$async_func`
+ * portions of `$value_func`
  * Space complexity: O(n)
  *
- * The IO operations for each of calls to `$async_func` will happen in
+ * The IO operations for each of calls to `$value_func` will happen in
  * parallel.
  */
 async function map_async<Tk as arraykey, Tv1, Tv2>(
@@ -153,10 +153,14 @@ async function map_async<Tk as arraykey, Tv1, Tv2>(
  * Returns a new dict where each value is the result of calling the given
  * async function on the original key and value.
  *
- * For non-async functions, see `Dict\map()`.
+ * For non-async functions, see `Dict\map_with_key()`.
  *
- * Time complexity: O(n * a), where a is the complexity of each Awaitable
+ * Time complexity: O(n * f), where f is the complexity of the synchronous
+ * portions of `$value_func`
  * Space complexity: O(n)
+ *
+ * The IO operations for each of calls to `$value_func` will happen in
+ * parallel.
  */
 async function map_with_key_async<Tk as arraykey, Tv1, Tv2>(
   KeyedTraversable<Tk, Tv1> $traversable,

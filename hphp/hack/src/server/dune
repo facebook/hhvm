@@ -144,20 +144,30 @@
    utils_core
    utils_exit
    utils_www_root
-   version
-
- )
-)
+   version))
 
 (library
  (name server_progress)
  (wrapped false)
  (modules serverProgress)
  (libraries
+   errors
    server_command_types
    server_files
+   watchman
  )
-)
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name server_progress_lwt)
+ (wrapped false)
+ (modules serverProgressLwt)
+ (libraries
+   server_progress
+ )
+ (preprocess
+  (pps lwt_ppx ppx_deriving.std)))
 
 (library
  (name server_notifier)

@@ -29,21 +29,21 @@ let expect_state (expected : string) : unit =
 let telemetry = Telemetry.create ()
 
 let try_with_tmp (f : root:Path.t -> unit Lwt.t) : unit Lwt.t =
-  let tmp = Tempfile.mkdtemp ~skip_mocking:true |> Path.to_string in
+  let tmp = Tempfile.mkdtemp ~skip_mocking:true in
   Lwt_utils.try_finally
     ~f:(fun () ->
       (* We want ServerFiles.errors_file to be placed in this test's temp directory *)
-      Unix.putenv "HH_TMPDIR" tmp;
+      ServerFiles.set_tmp_FOR_TESTING_ONLY tmp;
       (* We need ServerProgress.Errors to have a root (any root) so it knows how to name the errors file *)
       let root = Path.make "test" in
       ServerProgress.set_root root;
       Relative_path.set_path_prefix Relative_path.Root root;
-      (* To isolate tests, we have to reset ServerProgress.Errors global state. *)
+      (* To isolate tests, we have to reset ServerProgress.Errors global state in memory. *)
       ServerProgress.ErrorsWrite.unlink_at_server_stop ();
       let%lwt () = f ~root in
       Lwt.return_unit)
     ~finally:(fun () ->
-      Sys_utils.rm_dir_tree ~skip_mocking:true tmp;
+      Sys_utils.rm_dir_tree ~skip_mocking:true (Path.to_string tmp);
       Lwt.return_unit)
 
 let make_errors (errors : (string * string) list) : Errors.t =

@@ -112,4 +112,6 @@ module Codes = struct
   let internal_classname = 5649
 
   let async_lambda = 5650
+
+  let awaitable_awaitable = 5651
 end

@@ -579,3 +579,13 @@ let async_lambda pos =
     Lint_advice
     pos
     "Use `async ... ==> await ...` for lambdas that directly return `Awaitable`s, so stack traces include the lambda position."
+
+let awaitable_awaitable pos =
+  Lints.add
+    Codes.awaitable_awaitable
+    Lint_warning
+    pos
+    ("This lambda returns an Awaitable of Awaitable."
+    ^ " You probably want to use await inside this async lambda,"
+    ^ " so stack traces include the lambda position."
+    ^ " If this is intentional, please annotate the return type.")

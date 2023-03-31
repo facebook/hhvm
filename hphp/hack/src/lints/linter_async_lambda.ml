@@ -28,6 +28,37 @@ let is_awaitable env ty =
   | T.Tclass ((_, id), _, _) -> String.equal id SN.Classes.cAwaitable
   | _ -> false
 
+let is_awaitable_awaitable env ty =
+  let (env, ty) = Tast_env.expand_type env ty in
+  match T.get_node ty with
+  | T.Tclass ((_, id), _, [ty]) when String.equal id SN.Classes.cAwaitable ->
+    let (_env, ty) = Tast_env.expand_type env ty in
+    begin
+      match T.get_node ty with
+      | T.Tclass ((_, id), _, _) -> String.equal id SN.Classes.cAwaitable
+      | _ -> false
+    end
+  | _ -> false
+
+let is_fsync = function
+  | Ast_defs.FSync -> true
+  | _ -> false
+
+let is_await = function
+  | A.Await _ -> true
+  | _ -> false
+
+let simple_body = function
+  | [(_, A.Return (Some (ty, _, e)))] -> Some (ty, e)
+  | _ -> None
+
+let async_lambda_cond env ty e f_fun_kind =
+  is_awaitable env ty && (not (is_await e)) && is_fsync f_fun_kind
+
+let awaitable_awaitable_cond env = function
+  | (ty, None) -> is_awaitable_awaitable env ty
+  | _ -> false
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -37,27 +68,17 @@ let handler =
       | ( _,
           pos,
           A.(
-            ( Lfun
-                ( {
-                    f_fun_kind = Ast_defs.FSync;
-                    f_body = { fb_ast = [(_, Return (Some (ty, _, e)))] };
-                    _;
-                  },
-                  _ )
-            | Efun
-                {
-                  ef_fun =
-                    {
-                      f_fun_kind = Ast_defs.FSync;
-                      f_body = { fb_ast = [(_, Return (Some (ty, _, e)))] };
-                      _;
-                    };
-                  _;
-                } )) )
-        when is_awaitable env ty -> begin
-        match e with
-        | A.Await _ -> ()
-        | _ -> Lints_errors.async_lambda pos
-      end
+            ( Lfun ({ f_fun_kind; f_ret; f_body = { fb_ast }; _ }, _)
+            | Efun { ef_fun = { f_fun_kind; f_ret; f_body = { fb_ast }; _ }; _ }
+              )) ) ->
+        (match simple_body fb_ast with
+        | Some (ty, e) ->
+          if async_lambda_cond env ty e f_fun_kind then
+            Lints_errors.async_lambda pos
+          else if awaitable_awaitable_cond env f_ret then
+            Lints_errors.awaitable_awaitable pos
+        | None ->
+          if awaitable_awaitable_cond env f_ret then
+            Lints_errors.awaitable_awaitable pos)
       | _ -> ()
   end

@@ -17,6 +17,16 @@ let b_php = ("b.php", "<?hh\nfunction test_b(): string {}\n")
 let loop_php =
   ("loop.php", "<?hh\nfunction test_loop(): void {hh_loop_forever();}")
 
+let assert_substring (s : string) ~(substring : string) : unit =
+  if not (String.is_substring s ~substring) then
+    let msg =
+      Printf.sprintf
+        "Expected to find substring '%s' but only found:\n%s"
+        substring
+        s
+    in
+    failwith msg
+
 (** Shell out to HH_CLIENT_PATH and return its results once it's finished.
 In case of success return stdout; in case of failure return a human-readable
 representation that includes exit signal and stderr. *)
@@ -440,6 +450,268 @@ let test_errors_during () : bool Lwt.t =
   in
   Lwt.return_true
 
+let test_errors_kill () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
+        (* This test will rely upon b.php being typechecked in a separate bucket from loop.php.
+           To accomplish this: (1) we pass a custom hhi path to an empty directory so it doesn't
+           typecheck more than the two files we gave it, (2) we set parallel_type_checking_threshold
+           to 0 to ensure that it will use multiworkers, (3) we set max_workers to 4 so the bucket-dividing
+           algorithm will comfortably separate them. (it seems to have off-by-one oddities to just 2
+           max workers isn't enough.) *)
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "start";
+              "--no-load";
+              "--config";
+              "max_workers=4";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "parallel_type_checking_threshold=0";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* I was getting timeouts when I tried to "hh check" immediately after start,
+           because the client's rpc-connect wasn't getting a response until after the ten
+           minutes it takes to check loop.php.
+           So instead, I'll wait until the server is at least making some progress... *)
+        let%lwt () =
+          wait_for_progress
+            ~deadline:(Unix.gettimeofday () +. 60.0)
+            ~expected:"typechecking"
+        in
+        let%lwt hh_client =
+          hh_open
+            ~root
+            ~tmp
+            [|
+              "check";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+            |]
+        in
+        let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
+        (* Now, kill the server! *)
+        let%lwt server_pid = get_server_pid ~root in
+        Unix.kill server_pid Sys.sigkill;
+        (* read the remainding output from hh_client. It should detect the kill. *)
+        let%lwt stdout = Lwt_io.read hh_client#stdout in
+        assert_substring stdout ~substring:"Hh_server has terminated. [Killed]";
+        let errors_file = ServerFiles.errors_file root in
+        assert (Sys_utils.file_exists errors_file);
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_client_complete () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php] (fun ~tmp ~root ~hhi ->
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "start";
+              "--no-load";
+              "--config";
+              "max_workers=1";
+              "--config";
+              "produce_streaming_errors=true";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* will a client be able to consume streaming errors and see all of them? *)
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "check";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+            |]
+        in
+        assert_substring stdout ~substring:"Invalid return type (Typing[4336])";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_client_during () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
+        (* This test will rely upon b.php being typechecked in a separate bucket from loop.php.
+           To accomplish this: (1) we pass a custom hhi path to an empty directory so it doesn't
+           typecheck more than the two files we gave it, (2) we set parallel_type_checking_threshold
+           to 0 to ensure that it will use multiworkers, (3) we set max_workers to 4 so the bucket-dividing
+           algorithm will comfortably separate them. (it seems to have off-by-one oddities to just 2
+           max workers isn't enough.) *)
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "start";
+              "--no-load";
+              "--config";
+              "max_workers=4";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "parallel_type_checking_threshold=0";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* I was getting timeouts when I tried to "hh check" immediately after start,
+           because the client's rpc-connect wasn't getting a response until after the ten
+           minutes it takes to check loop.php.
+           So instead, I'll wait until the server is at least making some progress... *)
+        let%lwt () =
+          wait_for_progress
+            ~deadline:(Unix.gettimeofday () +. 60.0)
+            ~expected:"typechecking"
+        in
+        let args =
+          [|
+            "check";
+            "--config";
+            "ide_standalone=true";
+            "--error-format";
+            "plain";
+          |]
+        in
+        let%lwt hh_client = hh_open ~root ~tmp args in
+        let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
+        hh_client#kill Sys.sigkill;
+        let%lwt _state = hh_client#close in
+
+        (* For our next trick, we'll kick off another hh check.
+           It will presumably emit the error line pretty quickly (just by reading errors.bin).
+           Once it has, we'll "hh stop".
+           This should make our hh check terminate pretty quickly,
+           and its output should indicate that hh died. *)
+        let%lwt hh_client = hh_open ~root ~tmp args in
+        let%lwt () = hh_await_substring hh_client ~substring:"(Typing[" in
+        let%lwt _ = hh ~root ~tmp [| "stop" |] in
+        (* read the remainding output from hh_client *)
+        let%lwt stdout = Lwt_io.read hh_client#stdout in
+        assert_substring stdout ~substring:"Hh_server has terminated. [Stopped]";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_start () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php] (fun ~tmp ~root ~hhi ->
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "--no-load";
+              "--config";
+              "max_workers=1";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+              "--autostart-server";
+              "true";
+            |]
+        in
+        (* This check should cause the server to start up *)
+        assert_substring stdout ~substring:"Invalid return type (Typing[4336])";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_no_start () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php] (fun ~tmp ~root ~hhi ->
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "--config";
+              "max_workers=1";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+              "--autostart-server";
+              "false";
+            |]
+        in
+        (* This exercises synchronous failure when clientCheckStatus.go_streaming sees
+           no errors.bin, determines to call ClientConnect.connect, but the connection
+           attempt exits fast because of autostart-server false. *)
+        assert_substring stdout ~substring:"WEXITED";
+        assert_substring stdout ~substring:"no hh_server running";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_no_load () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php] (fun ~tmp ~root ~hhi ->
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "--config";
+              "max_workers=1";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+              "--autostart-server";
+              "true";
+              "--config";
+              "use_mini_state=true";
+              "--config";
+              "load_state_natively_v4=true";
+              "--config";
+              "require_saved_state=true";
+            |]
+        in
+        (* This exercises asynchronous failure when clientCheckStatus.go_streaming sees
+           no errors.bin, determines to call ClientConnect.connect which goes ahead,
+           then the server fails to load a saved-state (we didn't pass --no-load),
+           and the server exits, and ClientConnect.connect eventually gets that
+           server failure and reports it. *)
+        assert_substring stdout ~substring:"WEXITED";
+        assert_substring stdout ~substring:"Failed_to_load_should_abort";
+        assert_substring
+          stdout
+          ~substring:"LoadError.Find_hh_server_hash_failed";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -451,6 +723,12 @@ let () =
       ("test_kill_monitor", test_kill_monitor);
       ("test_errors_complete", test_errors_complete);
       ("test_errors_during", test_errors_during);
+      ("test_errors_kill", test_errors_kill);
+      ("test_client_complete", test_client_complete);
+      ("test_client_during", test_client_during);
+      ("test_start", test_start);
+      ("test_no_start", test_no_start);
+      ("test_no_load", test_no_load);
     ]
     |> List.map ~f:(fun (name, f) ->
            ( name,

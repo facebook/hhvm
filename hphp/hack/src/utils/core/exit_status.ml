@@ -43,16 +43,21 @@ type t =
   | EventLogger_broken_pipe
   | CantRunAI
   | Watchman_failed
-  (* It is faster to exit the server (and have the Monitor restart the server)
-   * on a Watchman fresh instance than to compute the files that have been
-   * deleted and do an incremental check.
-   *)
+      (** Watchman_failed is used both as an exit status from hh_client because this
+      means it can't safely compute streaming errors,
+      and also as an exit status from server/monitor because it'ss faster to exit the server
+      (and have the Monitor restart the server) on a Watchman fresh instance than to compute
+      the files that have been deleted and do an incremental check. *)
   | Watchman_fresh_instance
   | Watchman_invalid_result
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
   | Package_config_changed
+  | Typecheck_restarted
+      (** an exit status of hh_client check, e.g. because files-on-disk changed *)
+  | Typecheck_abandoned
+      (** an exit status of hh_client check, e.g. because the server was killed mid-check *)
   | Server_shutting_down_due_to_sigusr2
   | IDE_malformed_request
   | IDE_no_server
@@ -102,11 +107,19 @@ let exit_code = function
   | Uncaught_exception -> 221
   | Hhconfig_changed -> 4
   | Package_config_changed -> 4
+  | Typecheck_restarted ->
+    (* gen by clientCheck/clientCheckStatus, read by find_hh.sh *)
+    19
+  | Typecheck_abandoned ->
+    (* gen by clientCheck/clientCheckStatus, read by find_hh.sh *)
+    20
   | Unused_server -> 5
   | No_server_running_should_retry ->
-    6 (* gen by clientConnect, read by find_hh.sh *)
+    (* gen by clientConnect, read by find_hh.sh *)
+    6
   | Server_hung_up_should_retry ->
-    6 (* gen by clientConnect, read by find_hh.sh *)
+    (* gen by clientConnect, read by find_hh.sh *)
+    6
   | Out_of_time -> 7
   | Out_of_retries -> 7
   | Checkpoint_error -> 8

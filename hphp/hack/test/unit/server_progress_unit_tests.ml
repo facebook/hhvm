@@ -485,6 +485,178 @@ let test_async_read_start () : bool Lwt.t =
   in
   Lwt.return_true
 
+let env =
+  ClientEnv.
+    {
+      autostart = false;
+      config = [];
+      custom_hhi_path = None;
+      custom_telemetry_data = [];
+      error_format = Errors.Plain;
+      force_dormant_start = false;
+      from = "test";
+      show_spinner = false;
+      gen_saved_ignore_type_errors = false;
+      ignore_hh_version = true;
+      saved_state_ignore_hhconfig = true;
+      paths = [];
+      log_inference_constraints = false;
+      max_errors = None;
+      mode = ClientEnv.MODE_STATUS;
+      no_load = true;
+      save_64bit = None;
+      save_human_readable_64bit_dep_map = None;
+      output_json = false;
+      prefer_stdout = false;
+      prechecked = None;
+      mini_state = None;
+      remote = false;
+      root = Path.dummy_path;
+      sort_results = true;
+      stdin_name = None;
+      deadline = None;
+      watchman_debug_logging = false;
+      allow_non_opt_build = true;
+      desc = "testing";
+    }
+
+let test_check_success () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        ServerProgress.write ~include_in_logs:false "test1";
+        ServerProgress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false;
+        let env = { env with ClientEnv.root } in
+        let connect = ref false in
+        let connect_then_close () =
+          connect := true;
+          Lwt.return_unit
+        in
+        let check_future =
+          ClientCheckStatus.go_streaming env ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 1.0 in
+        (* It should have picked up the errors-file, and seen that it's valid, and be just waiting *)
+        assert (Lwt.is_sleeping check_future);
+        (* Now we'll complete the errors file. This should make our check complete. *)
+        ServerProgress.ErrorsWrite.complete
+          (Telemetry.create () |> Telemetry.string_ ~key:"hot" ~value:"potato");
+        let%lwt (exit_status, telemetry) = check_future in
+        let exit_status = Exit_status.show exit_status in
+        let telemetry = Telemetry.to_string telemetry in
+        Printf.eprintf "%s\n%s\n%!" exit_status telemetry;
+        String_asserter.assert_equals "Exit_status.No_error" exit_status "x";
+        Bool_asserter.assert_equals false !connect "!connect";
+        assert (String.is_substring telemetry ~substring:"\"hot\":\"potato\"");
+        assert (String.is_substring telemetry ~substring:"\"streaming\":true");
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_check_errors () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        ServerProgress.write ~include_in_logs:false "test1";
+        let env = { env with ClientEnv.root } in
+        let connect_then_close () = Lwt.return_unit in
+        let check_future =
+          ClientCheckStatus.go_streaming env ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        ServerProgress.ErrorsWrite.new_empty_file
+          ~clock:None
+          ~ignore_hh_version:false;
+        ServerProgress.ErrorsWrite.report (make_errors [("c", "oops")]);
+        ServerProgress.ErrorsWrite.complete telemetry;
+        let%lwt (exit_status, _telemetry) = check_future in
+        let exit_status = Exit_status.show exit_status in
+        String_asserter.assert_equals "Exit_status.Type_error" exit_status "x";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_check_connect_success () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        ServerProgress.write ~include_in_logs:false "test1";
+        let env = { env with ClientEnv.root } in
+        let (future1, trigger1) = Lwt.wait () in
+        let (future2, trigger2) = Lwt.wait () in
+        let connect = ref "A" in
+        let connect_then_close () =
+          connect := "B";
+          let%lwt () = future1 in
+          ServerProgress.ErrorsWrite.new_empty_file
+            ~clock:None
+            ~ignore_hh_version:false;
+          let%lwt () = future2 in
+          Lwt.return_unit
+        in
+
+        let check_future =
+          ClientCheckStatus.go_streaming env ~connect_then_close
+        in
+        let%lwt () = Lwt_unix.sleep 1.0 in
+        (* It should have found errors.bin absent, and is waiting on the callback *)
+        assert (Lwt.is_sleeping check_future);
+        String_asserter.assert_equals "B" !connect "!connect";
+        Lwt.wakeup_later trigger1 ();
+        (* Even though we created an error file, it won't proceed until the callback's done *)
+        let%lwt () = Lwt_unix.sleep 1.0 in
+        assert (Lwt.is_sleeping check_future);
+        Lwt.wakeup_later trigger2 ();
+        (* Now the check will happily have found errors.bin and is waiting on it. *)
+        let%lwt () = Lwt_unix.sleep 1.0 in
+        assert (Lwt.is_sleeping check_future);
+        (* Let us pretend that the server exit; this will trigger check to complete, and return exit status. *)
+        ServerProgress.ErrorsWrite.unlink_at_server_stop ();
+        let%lwt r =
+          try%lwt
+            let%lwt _ = check_future in
+            Lwt.return_error "expected exception"
+          with
+          | Exit_status.(Exit_with Typecheck_abandoned) -> Lwt.return_ok ()
+          | exn ->
+            let e = Exception.wrap exn in
+            Lwt.return_error (Exception.to_string e)
+        in
+        let () = Result.ok_or_failwith r in
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_check_connect_failure () : bool Lwt.t =
+  let%lwt () =
+    try_with_tmp (fun ~root ->
+        ServerProgress.write ~include_in_logs:false "test1";
+        let env = { env with ClientEnv.root } in
+        (* This is an async failure, so the exception is stored in check_future
+           rather than being returned from ClientCheckStatus.go itself *)
+        let connect_then_close () =
+          let%lwt () = Lwt_unix.sleep 0.1 in
+          failwith "nostart"
+        in
+        let check_future =
+          ClientCheckStatus.go_streaming env ~connect_then_close
+        in
+        let%lwt r =
+          try%lwt
+            let%lwt _ = check_future in
+            Lwt.return_error "expected exception"
+          with
+          | exn
+            when String.is_substring (Exn.to_string exn) ~substring:"nostart" ->
+            Lwt.return_ok ()
+          | exn ->
+            let e = Exception.wrap exn in
+            Lwt.return_error (Exception.to_string e)
+        in
+        let () = Result.ok_or_failwith r in
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -515,4 +687,10 @@ let () =
         (fun () -> Lwt_main.run (test_async_pid_killed ())) );
       ( "test_async_read_start",
         (fun () -> Lwt_main.run (test_async_read_start ())) );
+      ("test_check_success", (fun () -> Lwt_main.run (test_check_success ())));
+      ("test_check_errors", (fun () -> Lwt_main.run (test_check_errors ())));
+      ( "test_check_connect_success",
+        (fun () -> Lwt_main.run (test_check_connect_success ())) );
+      ( "test_check_connect_failure",
+        (fun () -> Lwt_main.run (test_check_connect_failure ())) );
     ]

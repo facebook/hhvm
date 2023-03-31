@@ -34,6 +34,8 @@
   server
   server_command_types
   server_monitor
+  server_progress
+  server_progress_lwt
   server_utils
   state_loader
   sys_utils

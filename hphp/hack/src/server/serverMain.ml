@@ -213,6 +213,11 @@ let query_notifier genv env query_kind start_time =
       ~root:(ServerArgs.root genv.options)
       ~raw_updates
   in
+  (* CARE! For streaming-errors to work in clientCheckStatus.ml, the test
+     which hh_server uses to determine "is there a non-empty set of changes which prompt me
+     to start a new check" must be at least as strict as the one in clientCheckStatus.
+     They're identical, in fact, because they both use the same watchman filter
+     (FilesToIgnore.watchman_server_expression_terms) and the same post-watchman-filter. *)
   let telemetry =
     telemetry
     |> Telemetry.duration ~key:"processed" ~start_time

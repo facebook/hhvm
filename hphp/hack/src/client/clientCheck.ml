@@ -177,6 +177,19 @@ let connect ?(use_priority_pipe = false) args =
  * so we need to be able to reconnect to retry. *)
 type connect_fun = unit -> ClientConnect.conn Lwt.t
 
+let connect_then_close (args : ClientEnv.client_check_env) : unit Lwt.t =
+  let%lwt ClientConnect.{ channels = (_ic, oc); _ } =
+    connect args ~use_priority_pipe:true
+  in
+  Out_channel.close oc;
+  (* The connection is derived from [Unix.open_connection]. Its docs explain:
+     "The two channels returned by [open_connection] share a descriptor
+      to a socket.  Therefore, when the connection is over, you should
+      call {!Stdlib.close_out} on the output channel, which will also close
+      the underlying socket.  Do not call {!Stdlib.close_in} on the input
+      channel; it will be collected by the GC eventually." *)
+  Lwt.return_unit
+
 let rpc_with_connection
     (args : ClientEnv.client_check_env)
     (command : 'a ServerCommandTypes.t)
@@ -718,33 +731,60 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       Lwt.return (Exit_status.No_error, telemetry)
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in
+      let prechecked = Option.value args.prechecked ~default:true in
       let%lwt ((), telemetry1) =
-        match args.prechecked with
-        | Some false -> rpc args Rpc.NO_PRECHECKED_FILES
-        | _ -> Lwt.return ((), Telemetry.create ())
+        if prechecked then
+          Lwt.return ((), Telemetry.create ())
+        else
+          rpc args Rpc.NO_PRECHECKED_FILES
       in
-      let%lwt (status, telemetry) =
-        rpc
-          args
-          (Rpc.STATUS
-             { ignore_ide; max_errors = args.max_errors; remote = args.remote })
+      (* We don't do streaming errors under [output_json]: our contract
+         with the outside world is that if a caller uses [output_json] then they
+         will never see [Exit_status.Typecheck_restarted], which streaming might show.
+
+         We don't do streaming errors under [not prechecked]. That's because the
+         [go_streaming] contract is to report on a typecheck that reflects all *file*
+         changes up until now; it has no guarantee that the typecheck will reflects our
+         preceding call to Rpc.NO_PRECHECKED_FILES. *)
+      let use_streaming =
+        local_config.ServerLocalConfig.ide_standalone
+        && (not args.output_json)
+        && prechecked
       in
-      let exit_status =
-        ClientCheckStatus.go
-          status
-          (args.output_json, args.prefer_stdout)
-          args.from
-          args.error_format
-          args.max_errors
-      in
-      let telemetry =
-        telemetry
-        |> Telemetry.object_ ~key:"no_prechecked" ~value:telemetry1
-        |> Telemetry.object_opt
-             ~key:"last_recheck_stats"
-             ~value:status.Rpc.Server_status.last_recheck_stats
-      in
-      Lwt.return (exit_status, telemetry)
+      if use_streaming then
+        let%lwt (exit_status, telemetry) =
+          ClientCheckStatus.go_streaming args ~connect_then_close:(fun () ->
+              connect_then_close args)
+        in
+        Lwt.return (exit_status, telemetry)
+      else
+        let%lwt (status, telemetry) =
+          rpc
+            args
+            (Rpc.STATUS
+               {
+                 ignore_ide;
+                 max_errors = args.max_errors;
+                 remote = args.remote;
+               })
+        in
+        let exit_status =
+          ClientCheckStatus.go
+            status
+            (args.output_json, args.prefer_stdout)
+            args.from
+            args.error_format
+            args.max_errors
+        in
+        let telemetry =
+          telemetry
+          |> Telemetry.bool_ ~key:"streaming" ~value:false
+          |> Telemetry.object_ ~key:"no_prechecked" ~value:telemetry1
+          |> Telemetry.object_opt
+               ~key:"last_recheck_stats"
+               ~value:status.Rpc.Server_status.last_recheck_stats
+        in
+        Lwt.return (exit_status, telemetry)
     | MODE_STATUS_SINGLE filenames ->
       let file_input filename =
         match filename with

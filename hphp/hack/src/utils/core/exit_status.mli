@@ -51,6 +51,10 @@ type t =
   | Hhconfig_deleted
   | Hhconfig_changed
   | Package_config_changed
+  | Typecheck_restarted
+      (** an exit status of hh_client check, e.g. because files-on-disk changed *)
+  | Typecheck_abandoned
+      (** an exit status of hh_client check, e.g. because the server was killed mid-check *)
   | Server_shutting_down_due_to_sigusr2
   | IDE_malformed_request
   | IDE_no_server

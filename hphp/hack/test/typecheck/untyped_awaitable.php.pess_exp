@@ -1,6 +1,0 @@
-File "untyped_awaitable.php.pess", line 13, characters 10-18:
-Invalid return type (Typing[4110])
-  File "untyped_awaitable.php.pess", line 12, characters 28-36:
-  Expected `dynamic`
-  File "untyped_awaitable.php.pess", line 6, characters 27-29:
-  But got `int`

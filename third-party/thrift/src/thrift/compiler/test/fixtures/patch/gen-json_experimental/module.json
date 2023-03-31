@@ -496,6 +496,16 @@
       },
       "MyDataEnsureStruct" : {
         "name" : "MyDataEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "fields" : {
           "data1" : {
             "name" : "data1",
@@ -655,6 +665,16 @@
       },
       "MyDataWithCustomDefaultEnsureStruct" : {
         "name" : "MyDataWithCustomDefaultEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "fields" : {
           "data1" : {
             "name" : "data1",
@@ -1087,6 +1107,16 @@
       },
       "MyStructEnsureStruct" : {
         "name" : "MyStructEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "fields" : {
           "structWithCustomDefault" : {
             "name" : "structWithCustomDefault",
@@ -2863,6 +2893,16 @@
       },
       "LateDefStructEnsureStruct" : {
         "name" : "LateDefStructEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 23
@@ -2962,6 +3002,16 @@
       },
       "RecursiveEnsureStruct" : {
         "name" : "RecursiveEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "fields" : {
           "nodes" : {
             "name" : "nodes",
@@ -3139,6 +3189,16 @@
       },
       "BarEnsureStruct" : {
         "name" : "BarEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "fields" : {
           "loop" : {
             "name" : "loop",
@@ -3272,6 +3332,16 @@
       },
       "LoopEnsureStruct" : {
         "name" : "LoopEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
         "fields" : {
           "bar" : {
             "name" : "bar",

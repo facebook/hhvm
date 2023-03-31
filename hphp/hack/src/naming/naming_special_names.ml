@@ -899,8 +899,6 @@ module StdlibFunctions = struct
 
   let array_unmark_legacy = "\\HH\\array_unmark_legacy"
 
-  let is_php_array = "\\HH\\is_php_array"
-
   let is_any_array = "\\HH\\is_any_array"
 
   let is_dict_or_darray = "\\HH\\is_dict_or_darray"

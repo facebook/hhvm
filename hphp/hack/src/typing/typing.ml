@@ -1901,7 +1901,6 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
   | None -> (env, lset)
 
 type legacy_arrays =
-  | PHPArray
   | HackDictOrDArray
   | HackVecOrVArray
 
@@ -1943,18 +1942,9 @@ let safely_refine_is_array env ty p pred_name arg_expr =
       in
       (* TODO(T69551141) handle type arguments for Tgeneric *)
       let tfresh = MakeType.generic r tfresh_name in
-      (* If we're refining the type for `is_array` we have a slightly more
-       * involved process. Let's separate out that logic so we can re-use it.
-       *)
-      let array_ty =
-        let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
-        let tv = tfresh in
-        MakeType.vec_or_dict r tk tv
-      in
       (* This is the refined type of e inside the branch *)
       let hint_ty =
         match ty with
-        | PHPArray -> array_ty
         | HackDictOrDArray -> MakeType.dict r tarrkey tfresh
         | HackVecOrVArray -> MakeType.vec r tfresh
       in
@@ -9572,9 +9562,6 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
         Happly
           ( (p, "\\HH\\AnyArray"),
             [(p, Happly ((p, "_"), [])); (p, Happly ((p, "_"), []))] ) )
-  | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
-    when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
-    safely_refine_is_array env PHPArray p f lv
   | Aast.Call
       ( ( _,
           _,

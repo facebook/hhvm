@@ -1,6 +1,0 @@
-File "is_php_array_supportdyn_refinement.bad.php", line 10, characters 5-6:
-Invalid argument (Typing[4110])
-  File "is_php_array_supportdyn_refinement.bad.php", line 4, characters 22-24:
-  Expected `null` or something of type `supportdyn<nonnull>`
-  File "is_php_array_supportdyn_refinement.bad.php", line 9, characters 13-27:
-  But got `T#1 as supportdyn<mixed>` from the argument to this \HH\is_php_array test

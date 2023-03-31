@@ -1,11 +1,11 @@
 File "lambda_as_awaitable_result.php", line 64, characters 10-45:
-Invalid return type (Typing[4110])
+Some elements in this collection are incompatible (Typing[4110])
   File "lambda_as_awaitable_result.php", line 63, characters 40-47:
   Expected `arraykey`
   File "lambda_as_awaitable_result.php", line 66, characters 5-7:
   But got `float`
 File "lambda_as_awaitable_result.php", line 64, characters 10-45:
-Invalid return type (Typing[4110])
+Some elements in this collection are incompatible (Typing[4110])
   File "lambda_as_awaitable_result.php", line 63, characters 40-47:
   Expected `arraykey`
   File "lambda_as_awaitable_result.php", line 67, characters 5-8:

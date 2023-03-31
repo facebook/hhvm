@@ -3259,6 +3259,38 @@ and exprs_expected (pos, ur, expected_tyl) env el =
     (env, te :: tel, ty :: tyl)
   | (el, []) -> exprs env el ~allow_awaitable:(*?*) false
 
+and coerce_nonlike_and_like
+    ~coerce_for_op ~coerce env pos reason ty ety ety_like =
+  let (env1, err1) =
+    Typing_coercion.coerce_type
+      ~coerce_for_op
+      ~coerce
+      pos
+      reason
+      env
+      ty
+      ety
+      Typing_error.Callback.unify_error
+  in
+  begin
+    match err1 with
+    | None -> (env1, None, false)
+    | Some _ ->
+      (* Now check against the pessimised type *)
+      let (env2, err2) =
+        Typing_coercion.coerce_type
+          ~coerce_for_op
+          ~coerce
+          pos
+          reason
+          env
+          ty
+          ety_like
+          Typing_error.Callback.unify_error
+      in
+      (env2, err2, true)
+  end
+
 and expr_
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
@@ -3317,7 +3349,9 @@ and expr_
     let do_pessimise_builtin =
       can_pessimise && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env)
     in
-    (* Under Sound Dynamic, for pessimisable builtins we add a like to the expected type.
+    (* Under Sound Dynamic, for pessimisable builtins we add a like to the expected type
+     * that is used to check the element expressions.
+     *
      * For non-pessimised builtins we also do this if the type is explicit
      * but if an element actually has a like type then this must be reflected
      * in the inferred type argument.
@@ -3329,20 +3363,45 @@ and expr_
       && explicit
       && not do_pessimise_builtin
     in
-    let pessimise_expected_element_type =
-      non_pessimised_builtin_explicit
-      || do_pessimise_builtin
-      || TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-         && Option.is_some bound
-    in
-    let (env, expected_with_implicit_like) =
+    (* The supertype is the type argument of the result.
+     * If there is an expected type then it's just this, but we might have to
+     * add a like to it if it's the explicit type argument and we have a non-pessimised builtin.
+     * Otherwise, we generate a fresh type variable and generate constraints against it.
+     *)
+    let (env, expected_with_implicit_like, supertype) =
       match expected with
-      | Some ety when pessimise_expected_element_type ->
-        let (env, ty) =
-          Typing_array_access.pessimise_type env ety.ExpectedTy.ty.et_type
-        in
-        (env, Some ExpectedTy.(make ety.pos ety.reason ty))
-      | _ -> (env, expected)
+      | Some ExpectedTy.{ pos; ty = ety; reason; _ } ->
+        (* If there is an explicit type, under Sound Dynamic we pessimise
+         * the expected element type regardless of whether we have a pessimised
+         * builtin or not.
+         *)
+        if explicit then
+          let (env, ty) =
+            if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+              Typing_array_access.pessimise_type env ety.et_type
+            else
+              (env, ety.et_type)
+          in
+          (env, Some ExpectedTy.(make pos reason ty), ety.et_type)
+        else begin
+          match Typing_utils.try_strip_dynamic env ety.et_type with
+          | None ->
+            (* Add an implicit like for pessimised builtins or when bounded *)
+            let (env, ty) =
+              if
+                TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+                && (do_pessimise_builtin || Option.is_some bound)
+              then
+                Typing_array_access.pessimise_type env ety.et_type
+              else
+                (env, ety.et_type)
+            in
+            (env, Some ExpectedTy.(make pos reason ty), ety.et_type)
+          | Some ty -> (env, expected, ty)
+        end
+      | None ->
+        let (env, ty) = Env.fresh_type_reason env use_pos r in
+        (env, None, ty)
     in
     (* Actually type the elements, given the expected element type *)
     let (env, exprs_and_tys) =
@@ -3352,97 +3411,83 @@ and expr_
         ~f:(expr_infer ~expected:expected_with_implicit_like)
     in
     let (exprs, tys) = List.unzip exprs_and_tys in
-    (* The supertype is the type argument of the result.
-         * If there is an expected type then it's just this, unless
-         * it's explicit and might have a like-type added.
-         * Otherwise, we generate a fresh type variable and generate constraints
-         * against it.
-    *)
-    let (env, supertype) =
-      match expected with
-      | Some ExpectedTy.{ ty; _ } when not non_pessimised_builtin_explicit ->
-        (env, ty.et_type)
-      | _ -> Env.fresh_type_reason env use_pos r
-    in
     let coerce_for_op =
       Option.is_some bound
       && not (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env))
     in
-    let env =
-      match expected with
-      (* If the expected type is from explicit and a like was added *)
-      | Some ExpectedTy.{ ty = { et_type = ty; _ }; reason; _ }
-        when non_pessimised_builtin_explicit ->
-        let (env, ty_err_opt) =
-          Typing_ops.sub_type
-            p
-            reason
-            env
-            ty
-            supertype
-            Typing_error.Callback.unify_error
-        in
-        Option.iter ty_err_opt ~f:Errors.add_typing_error;
-        env
-      | _ -> env
-    in
-
-    let (env, expected_supertype) =
-      if coerce_for_op then
-        ( env,
-          Some
-            (ExpectedTy.make_and_allow_coercion
-               use_pos
-               reason
-               { et_type = supertype; et_enforced = Enforced }) )
-      else if non_pessimised_builtin_explicit || Option.is_none expected then begin
-        let (env, supertype) =
-          if can_pessimise then
-            Typing_array_access.maybe_pessimise_type env supertype
-          else
-            (env, supertype)
-        in
-        (env, Some (ExpectedTy.make use_pos reason supertype))
-      end else
-        (env, expected_with_implicit_like)
-    in
+    (* Take the inferred type ty of each value and assert that it's a subtype
+     * of the (optionally with like type added) result type argument.
+     *)
     let subtype_value env ty =
-      let (env, ty_err_opt) =
-        if non_pessimised_builtin_explicit then begin
+      let (env, ty_err_opt, used_dynamic) =
+        if non_pessimised_builtin_explicit then
+          (* We have an explicit type argument for a non-pessimised builtin.
+           * We try first to check the value type against the non-pessimised type argument.
+           * If that fails, we try it against a pessimised type argument.
+           *)
           match expected_with_implicit_like with
-          | None ->
-            (env, None)
-            (* If we have an explicit type argument for a non-pessimised builtin,
-             * then we need to assert that this is a subtype of the
-             * inferred supertype. Example:
-             *   Pair<num,string>{ $x, $y }
-             * where $x has type ~int
-             *)
-          | Some ExpectedTy.{ pos; ty = ety; _ } ->
-            Typing_ops.sub_type
+          | Some ExpectedTy.{ pos; reason; ty = ety_like; coerce; _ } ->
+            coerce_nonlike_and_like
+              ~coerce_for_op
+              ~coerce
+              env
               pos
+              reason
+              ty
+              (MakeType.unenforced supertype)
+              ety_like
+            (* Shouldn't happen *)
+          | _ -> (env, None, false)
+        else
+          let (env, ety) =
+            if coerce_for_op then
+              (env, MakeType.enforced supertype)
+            else
+              match expected_with_implicit_like with
+              | None ->
+                let (env, supertype) =
+                  if can_pessimise then
+                    Typing_array_access.maybe_pessimise_type env supertype
+                  else
+                    (env, supertype)
+                in
+                (env, MakeType.unenforced supertype)
+              | Some e -> (env, e.ExpectedTy.ty)
+          in
+          let (env, ty_err_opt) =
+            Typing_coercion.coerce_type
+              ~coerce_for_op
+              ~coerce:None
+              use_pos
               reason
               env
               ty
-              ety.et_type
+              ety
               Typing_error.Callback.unify_error
-        end else
-          (env, None)
+          in
+          (env, ty_err_opt, false)
       in
       Option.iter ty_err_opt ~f:Errors.add_typing_error;
-      check_expected_ty_res
-        ~coerce_for_op
-        "Collection"
-        env
-        ty
-        expected_supertype
+      (env, ty_err_opt, used_dynamic)
     in
-    let (env, rev_ty_err_opts) =
-      List.fold_left tys ~init:(env, []) ~f:(fun (env, errs) ty ->
-          Result.fold
-            ~ok:(fun env -> (env, None :: errs))
-            ~error:(fun env -> (env, Some (ty, supertype) :: errs))
-          @@ subtype_value env ty)
+    let (env, rev_ty_err_opts, used_dynamic) =
+      List.fold_left
+        tys
+        ~init:(env, [], false)
+        ~f:(fun (env, errs, used_dynamic) ty ->
+          let (env, ty_err_opt, u) = subtype_value env ty in
+          match ty_err_opt with
+          | None -> (env, None :: errs, u || used_dynamic)
+          | Some _ -> (env, Some (ty, supertype) :: errs, u || used_dynamic))
+    in
+    (* used_dynamic is set if we had an explicit type argument t that is not
+     * a like type, but one of the inferred element types is of the form ~u.
+     * In this case we infer ~t as the element type for the whole collection. *)
+    let (env, result_type) =
+      if used_dynamic then
+        Typing_array_access.pessimise_type env supertype
+      else
+        (env, supertype)
     in
     let (env, result_type) =
       if
@@ -3454,8 +3499,8 @@ and expr_
         (env, Typing_utils.mk_tany env p)
       else
         match bound with
-        | Some ty -> Inter.intersect env ~r:(get_reason ty) ty supertype
-        | None -> (env, supertype)
+        | Some ty -> Inter.intersect env ~r:(get_reason ty) ty result_type
+        | None -> (env, result_type)
     in
     let exprs =
       List.map2_exn

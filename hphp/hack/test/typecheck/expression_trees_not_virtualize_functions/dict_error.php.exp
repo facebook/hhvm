@@ -1,5 +1,5 @@
 File "dict_error.php", line 55, characters 3-11:
-Invalid argument (Typing[4110])
+The values of this `dict` are incompatible (Typing[4110])
   File "dict_error.php", line 12, characters 33-78:
   Expected `Spliceable<DictError, mixed, TInfer#1>`
   File "dict_error.php", line 54, characters 15-24:

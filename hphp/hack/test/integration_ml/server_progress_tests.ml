@@ -8,8 +8,11 @@
 
 open Hh_prelude
 open Asserter
+open Server_progress_test_helpers
 
 let a_php = ("a.php", "<?hh\nfunction test_a(): void {}\n")
+
+let b_php = ("b.php", "<?hh\nfunction test_b(): string {}\n")
 
 let loop_php =
   ("loop.php", "<?hh\nfunction test_loop(): void {hh_loop_forever();}")
@@ -325,6 +328,118 @@ let test_kill_monitor () : bool Lwt.t =
   in
   Lwt.return_true
 
+let test_errors_complete () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php] (fun ~tmp ~root ~hhi ->
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "--no-load";
+              "--config";
+              "max_workers=1";
+              "--config";
+              "produce_streaming_errors=true";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* at this point we should have all errors available *)
+        let errors_file = ServerFiles.errors_file root in
+        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let { ServerProgress.ErrorsRead.pid; _ } =
+          ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
+        in
+        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let%lwt () = expect_qitem q "Errors [b.php=1]" in
+        let%lwt () = expect_qitem q "Complete [complete]" in
+        let%lwt () = expect_qitem q "closed" in
+        Unix.close fd;
+        (* a second client will also observe the files *)
+        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let { ServerProgress.ErrorsRead.pid; _ } =
+          ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
+        in
+        let q = ServerProgressLwt.watch_errors_file ~pid fd in
+        let%lwt () = expect_qitem q "Errors [b.php=1]" in
+        let%lwt () = expect_qitem q "Complete [complete]" in
+        let%lwt () = expect_qitem q "closed" in
+        Unix.close fd;
+        (* let's stop the server and verify that errors are absent *)
+        let%lwt _ = hh ~root ~tmp [| "stop" |] in
+        assert (not (Sys_utils.file_exists errors_file));
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
+let test_errors_during () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
+        (* This test will rely upon b.php being typechecked in a separate bucket from loop.php.
+           To accomplish this: (1) we pass a custom hhi path to an empty directory so it doesn't
+           typecheck more than the two files we gave it, (2) we set parallel_type_checking_threshold
+           to 0 to ensure that it will use multiworkers, (3) we set max_workers to 4 so the bucket-dividing
+           algorithm will comfortably separate them. (it seems to have off-by-one oddities to just 2
+           max workers isn't enough.) *)
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "start";
+              "--no-load";
+              "--config";
+              "max_workers=4";
+              "--config";
+              "produce_streaming_errors=true";
+              "--config";
+              "parallel_type_checking_threshold=0";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        (* the file loop_php causes the typechecker to spin, typechecking, for 10mins! *)
+        let%lwt () =
+          wait_for_progress
+            ~deadline:(Unix.gettimeofday () +. 60.0)
+            ~expected:"typechecking"
+        in
+        (* at this point we should have one error available *)
+        let errors_file = ServerFiles.errors_file root in
+        let fd1 = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let { ServerProgress.ErrorsRead.pid; _ } =
+          ServerProgress.ErrorsRead.openfile fd1
+          |> Result.ok
+          |> Option.value_exn
+        in
+        let q1 = ServerProgressLwt.watch_errors_file ~pid fd1 in
+        let%lwt () = expect_qitem q1 "Errors [b.php=1]" in
+        let%lwt () = expect_qitem q1 "nothing" in
+        (* and a second client should be able to observe it too *)
+        let fd2 = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let { ServerProgress.ErrorsRead.pid; _ } =
+          ServerProgress.ErrorsRead.openfile fd2
+          |> Result.ok
+          |> Option.value_exn
+        in
+        let q2 = ServerProgressLwt.watch_errors_file ~pid fd2 in
+        let%lwt () = expect_qitem q2 "Errors [b.php=1]" in
+        let%lwt () = expect_qitem q2 "nothing" in
+        (* let's stop the server and verify that errors are absent *)
+        let%lwt _ = hh ~root ~tmp [| "stop" |] in
+        assert (not (Sys_utils.file_exists errors_file));
+        (* each of the two clients will see that they're done. *)
+        let%lwt () = expect_qitem q1 "Stopped [unlink]" in
+        let%lwt () = expect_qitem q1 "closed" in
+        let%lwt () = expect_qitem q2 "Stopped [unlink]" in
+        let%lwt () = expect_qitem q2 "closed" in
+        Unix.close fd1;
+        Unix.close fd2;
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let () =
   Printexc.record_backtrace true;
   EventLogger.init_fake ();
@@ -334,6 +449,8 @@ let () =
       ("test_typechecking", test_typechecking);
       ("test_kill_server", test_kill_server);
       ("test_kill_monitor", test_kill_monitor);
+      ("test_errors_complete", test_errors_complete);
+      ("test_errors_during", test_errors_during);
     ]
     |> List.map ~f:(fun (name, f) ->
            ( name,

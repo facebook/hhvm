@@ -435,6 +435,8 @@ type t = {
       always lazily declares classes not already in cache. *)
   prefetch_deferred_files: bool;
       (** The whether to use the hook that prefetches files on an Eden checkout *)
+  produce_streaming_errors: bool;
+      (** whether hh_server should write errors to errors.bin file *)
   recheck_capture: RecheckCapture.t;
       (** Settings controlling how and whether we capture the recheck environment *)
   remote_nonce: Int64.t;
@@ -575,6 +577,7 @@ let default =
     parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
     prefetch_deferred_files = false;
+    produce_streaming_errors = false;
     recheck_capture = RecheckCapture.default;
     remote_nonce = Int64.zero;
     remote_type_check = RemoteTypeCheck.default;
@@ -1075,6 +1078,12 @@ let load_
       ~current_version
       config
   in
+  let produce_streaming_errors =
+    bool_
+      "produce_streaming_errors"
+      ~default:default.produce_streaming_errors
+      config
+  in
   let recheck_capture =
     RecheckCapture.load ~current_version ~default:default.recheck_capture config
   in
@@ -1458,6 +1467,7 @@ let load_
     parallel_type_checking_threshold;
     defer_class_declaration_threshold;
     prefetch_deferred_files;
+    produce_streaming_errors;
     recheck_capture;
     remote_nonce;
     remote_type_check;
@@ -1555,4 +1565,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       load_hack_64_distc_saved_state = options.load_hack_64_distc_saved_state;
       ide_should_use_hack_64_distc = options.ide_should_use_hack_64_distc;
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
+      produce_streaming_errors = options.produce_streaming_errors;
     }

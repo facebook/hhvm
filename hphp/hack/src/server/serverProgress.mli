@@ -104,6 +104,27 @@ val try_delete : unit -> unit
     (e.g. we might decide to write "no errors in file a.php" for a file which
     previously did have errors).
   * Within a single report, the error list has been sorted and de-duped.
+
+
+  LIFECYCLE SEMANTICS OF PRODUCING AND CONSUMING THE ERRORS-FILE
+
+  The code that produces errors-file lives in ServerMain.ml (which registers an on-exit
+  hook to delete the file), ServerTypeCheck.ml (to manage the previous and new
+  errors-file immediately before and after a typecheck is performed),
+  and typing_check_service.ml (to make the actual error reports).
+  1. When hh_server is launched, it either eventually exits or eventually writes
+  an errors.bin file with some clock value that came at or after its launch.
+  2. When files on disk are changed that pass FilesToIgnore.watchman_server_expression_terms
+  and FindUtils.post_watchman_filter, then eventually either a new errors.bin will
+  be written which reflects the clock after those files, or eventually it will terminate.
+
+  These invariants imply how the client should connect:
+  1. If there's no errors.bin, then doing an RPC connect to the server that succeeds
+  means that it's fine to just wait around waiting for an errors.bin to succeed.
+  (Except for one vulnerability: if the server handles the RPC but then crashes
+  before starting its first check).
+  2. If there is an errors.bin but files have changed on disk since error's watchclock,
+  it's fine for the client to just wait until a new errors.bin gets created.
 *)
 
 (** If we don't succeed in reading the next errors report, here's why. *)
@@ -121,6 +142,10 @@ type errors_file_error =
   | Build_id_mismatch
       (** The hh_server that produced these errors is incompatible with the current binary. *)
 [@@deriving show]
+
+val enable_error_production : bool -> unit
+
+val validate_errors_DELETE_THIS_SOON : expected:Errors.t -> string
 
 module ErrorsWrite : sig
   (** To be called at start of typechecking.

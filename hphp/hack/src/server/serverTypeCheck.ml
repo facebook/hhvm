@@ -194,20 +194,88 @@ let push_errors env ~rechecked ~phase new_errors =
 
 let erase_errors env = push_errors env Errors.empty
 
-let push_and_accumulate_errors :
-    env * Errors.t ->
-    rechecked:Relative_path.Set.t ->
-    Errors.t ->
-    phase:Errors.phase ->
-    env * Errors.t * seconds_since_epoch option =
- fun (env, errors_acc) ~rechecked new_errors ~phase ->
-  let (env, time_errors_pushed) =
-    push_errors env new_errors ~rechecked ~phase
-  in
+(** This function handles the three errors paradigms:
+* (1) env.errorl paradigm: it takes input [errors_acc], adds/updates/remove errors according to
+rechecked/new_errors/phase, and returns the updated list of all errors.
+* (2) persistent-connection paradigm: it sends error deltas over the persistent connection.
+* (3) errors-file: all [new_errors] are accumulated in errors.bin *)
+let push_and_accumulate_errors
+    ((env, errors_acc) : env * Errors.t)
+    ~(do_errors_file : bool)
+    ~(rechecked : Relative_path.Set.t)
+    (new_errors : Errors.t)
+    ~(phase : Errors.phase) : env * Errors.t * seconds_since_epoch option =
+  (* paradigm 1: env.errorl *)
   let errors =
     Errors.incremental_update ~old:errors_acc ~new_:new_errors ~rechecked phase
   in
+  (* paradigm 2: persistent-connection *)
+  let (env, time_errors_pushed) =
+    push_errors env new_errors ~rechecked ~phase
+  in
+  (* paradigm 3: errors-file *)
+  if do_errors_file then ServerProgress.ErrorsWrite.report new_errors;
+  (* return *)
   (env, errors, time_errors_pushed)
+
+(** This pushes all [phase] errors in errors, that aren't in [files],
+to the errors-file. *)
+let push_errors_outside_files
+    ?(phase : Errors.phase option)
+    (errors : Errors.t)
+    ~(files : Relative_path.Set.t) : unit =
+  let typing_errors_not_in_files_to_check =
+    errors
+    |> Errors.fold_errors
+         ~drop_fixmed:true
+         ?phase
+         ~init:[]
+         ~f:(fun path error acc ->
+           if Relative_path.Set.mem files path then
+             acc
+           else
+             (path, error) :: acc)
+    |> Errors.from_file_error_list
+  in
+  ServerProgress.ErrorsWrite.report typing_errors_not_in_files_to_check;
+  ()
+
+(** [validate_no_errors_outside_files ?phase errors files] validates that
+[errors] contains no [phase] errors other than those in [files].
+If [phase] is None, then it validates that [errors] contains no errors of any phase
+other than those in [files].
+If validation fails, all we do is log. *)
+let validate_no_errors_outside_files
+    ?(phase : Errors.phase option)
+    (errors : Errors.t)
+    ~(files : Relative_path.Set.t) : unit =
+  let witness_opt =
+    Errors.fold_errors
+      errors
+      ~drop_fixmed:true
+      ?phase
+      ~init:None
+      ~f:(fun path error acc ->
+        if Option.is_some acc || Relative_path.Set.mem files path then
+          acc
+        else
+          Some (path, error))
+  in
+  match witness_opt with
+  | None -> ()
+  | Some (path, error) ->
+    let error = error |> User_error.to_absolute |> Errors.to_string in
+    let phase = Option.value_map phase ~f:Errors.phase_to_string ~default:"" in
+    Hh_logger.log
+      "STREAMING-ERRORS unexpected %s error in %s:\n%s"
+      phase
+      (Relative_path.to_absolute path)
+      error;
+    HackEventLogger.invariant_violation_bug
+      ~path
+      ~pos:""
+      ~desc:("STREAMING-ERRORS unexpected extra error " ^ phase)
+      (Telemetry.create () |> Telemetry.string_ ~key:"witness" ~value:error)
 
 (** Remove files which failed parsing from [defs_per_file] files and
     discard any previous errors they had in [omitted_phases] *)
@@ -592,6 +660,7 @@ functor
               let (env, errors, _) =
                 push_and_accumulate_errors
                   acc
+                  ~do_errors_file:false
                   ~rechecked:path
                   Errors.empty
                   ~phase
@@ -619,8 +688,12 @@ functor
         push_and_accumulate_errors
           (env, errors)
           errorl
+          ~do_errors_file:false
           ~rechecked:files_to_parse
           ~phase:Errors.Parsing
+        (* Why didn't we push [errorl] to the errors-file?
+           Because [errorl] and [failed_parsing] are always empty!
+           TODO(ljw): clean up this code to reflect that fact. *)
       in
       let (env, errors) = clear_failed_parsing env errors failed_parsing in
       ( env,
@@ -837,13 +910,16 @@ functor
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
       let needs_recheck = Relative_path.Set.diff needs_recheck files_checked in
+      (* Here we do errors paradigm (1) env.errorl: merge in typecheck results, to flow into [env.errorl].
+         As for paradigms (2) persistent-connection and (3) errors-file, they're handled
+         inside [Typing_check_service.go_with_interrupt] because they want to push errors
+         as soon as they're discovered. *)
       let errors =
-        Errors.(
-          incremental_update
-            ~old:errors
-            ~new_:errorl'
-            ~rechecked:files_checked
-            Typing)
+        Errors.incremental_update
+          ~old:errors
+          ~new_:errorl'
+          ~rechecked:files_checked
+          Errors.Typing
       in
       let (env, _future) : ServerEnv.env * string Future.t option =
         ServerRecheckCapture.update_after_recheck
@@ -922,6 +998,10 @@ functor
                   ~f:ServerEnv.Init_telemetry.get)
       in
       let time_first_error = None in
+      let do_errors_file =
+        genv.local_config.ServerLocalConfig.produce_streaming_errors
+        && CheckKind.is_full
+      in
       let env =
         if CheckKind.is_full then
           { env with full_check_status = Full_check_started }
@@ -1029,14 +1109,31 @@ functor
         |> Telemetry.object_ ~key:"naming" ~value:naming_telemetry
       in
 
+      let rechecked =
+        defs_per_file_parsed
+        |> Relative_path.Map.keys
+        |> Relative_path.Set.of_list
+      in
+      if do_errors_file then begin
+        validate_no_errors_outside_files duplicate_name_errors ~files:rechecked;
+        (* If this validation is false, then I've misunderstood how duplicate
+           name errors are calculated! *)
+        validate_no_errors_outside_files
+          errors
+          ~files:rechecked
+          ~phase:Errors.Naming
+        (* If this validation is false, then we'll end up failing to push to the errors-file
+           those errors that are outside rechecked. Why do I think the validation is true?
+           For an error to have been existing, it must have been in env.errorl,
+           but all naming errors we know are also in env.failed_naming. Well, all of env.failed_naming
+           gets incorporated into files_to_parse, which is then present in rechecked. *)
+      end;
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
           duplicate_name_errors
-          ~rechecked:
-            (defs_per_file_parsed
-            |> Relative_path.Map.keys
-            |> Relative_path.Set.of_list)
+          ~do_errors_file
+          ~rechecked
           ~phase:Errors.Naming
       in
       let time_first_error =
@@ -1044,6 +1141,10 @@ functor
       in
 
       (* REDECL PHASE 1 ********************************************************)
+      (* The things we redecl `defs_per_file` come from the current content of
+         files changed `defs_per_files_parsed`, plus the previous content `add_old_decls`,
+         plus those that had duplicate names `failed_naming`, plus every def from a file mentioned
+         in one of the error reasons that has been changed `get_defs_to_redecl`. *)
       ServerProgress.write "determining changes";
       let deptable_unlocked =
         Typing_deps.allow_dependency_table_reads env.deps_mode true
@@ -1189,6 +1290,8 @@ functor
       in
 
       (* TYPE CHECKING *********************************************************)
+      (* The things we recheck are those from the fanout `do_redecl().fanout` plus every file
+         whose error reasons were in changed files `get_defs_to_recheck`. *)
       let type_check_start_t = Unix.gettimeofday () in
       ServerProgress.write "typechecking";
 
@@ -1243,6 +1346,23 @@ functor
           files_to_check
       in
 
+      (* The errors file must accumulate ALL errors. The call below to [do_type_checking ~files_to_check]
+         will necessarily report all errors in [files_to_check] using the Errors.Typing phase.
+         But there might be other Errors.Typing errors in env.errorl from a previous round of typecheck,
+         but which aren't in the current fanout i.e. not in [files_to_check]. We must report those too.
+         It remains open for discussion whether the user-experience would be better to have these
+         not-in-fanout errors reported here before the typecheck starts, or later after the typecheck
+         has finished. We'll report them here for now. *)
+      if do_errors_file then
+        push_errors_outside_files
+          errors
+          ~files:files_to_check
+          ~phase:Errors.Typing;
+      (* And what about the files in [files_to_check] which we were going to typecheck but then
+         the typecheck got interrupted  and they were returned from [do_typechecking] as [needs_recheck]?
+         Shouldn't we report those too into the errors-file? Well, there's no need to bother:
+         if there's anything in [needs_recheck] then the current errors-file will be marked as "incomplete"
+         and another round of ServerTypeCheck (hence another errors-file) will be created next. *)
       let to_recheck_count = Relative_path.Set.cardinal files_to_check in
       (* The intent of capturing the snapshot here is to increase the likelihood
           of the state-on-disk being the same as what the parser saw *)
@@ -1567,7 +1687,105 @@ let type_check :
     env * CheckStats.t * Telemetry.t =
  fun genv env kind start_time cgroup_steps ->
   ServerUtils.with_exit_on_exception @@ fun () ->
-  let type_check_result =
+  (*
+  (1) THE ENV MODEL FOR ERRORS...
+  env.{errorl, needs_recheck, disk_needs_parsing} are all persistent values that
+  might be adjusted as we go:
+  * disk_needs_parsing gets initialized in serverLazyInit, augmented in serverMain both
+    at the start of the loop and during watchman interrupts, and in serverTypeCheck it
+    gets reset to empty once we have computed files-to-parse and decls-to-refresh from it.
+    (files-to-recheck is computed from these two).
+  * needs_recheck gets augmented in serverTypeCheck from fanout/stale computation,
+    and gets discharged by the files we end up typechecking
+  * errorl starts out empty and it grows+shrinks during serverTypeCheck
+    through calls to "errorl = Errors.incremental_update ~errorl ~new_errors ~phase ~files_examined".
+    This will shrink those errors that had been in errorl before, and were in files_examined,
+    but are not in new_errors. It will replace others. It will grow others.
+    And it will leave remaining in errorl anything that was not touched by files_examined
+    or which came from a different phase.
+    To stress, say you have 10k errors and make a small change in one file,
+    it is very possible that those 10k other files are not checked and the bulk of errorl
+    just continues through a recheck loop. (However, we do gather every single file
+    mentioned in any of the *reasons* of those 10k files, and where those reasons intersect
+    with changed-files then that causes need to redecl and compute fanout, and also need
+    to recheck.)
+
+  (2) THE DIAGNOSTICS_PUSHER MODEL FOR ERRORS...
+  This is used for the persistent connection. It maintains its belief of what the persistent
+  client already knows, and pushes deltas. The less said about it, the better.
+
+  (3) THE STREAMING MODEL FOR ERRORS...
+  The errors-file grows monotonically: it has no "backsies", no way to remove an error
+  from it, short of deciding that the current errors-file is wrong and a new error-file must
+  be restarted.
+  * Hh_server, upon startup, must eventually produce an errors-file.
+  * Right here at the start of the type check, we restart the errors-file (because of the
+    potential that in the current typecheck we discover that some files no longer have errors).
+  * The typecheck fulfills the contract that every single error must be reported to the errors-file.
+    Not just newly discovered errors. Every error, even those from files that do not get rechecked.
+  * Right here at the end of the type check, if the type check was complete then we need to report
+    this fact right away in the errors-file so that the client "hh check" can finish "No errors!".
+    But if it was not complete (e.g. it got interrupted by watchman) then there is no need to finish
+    for the sake of the client: there will be an immediate next round of
+    ServerMain.recheck_until_no_changes_left, and it will call us again, and the errors-file
+    will be restarted on that next round, and the act of restarting will close the current errors-file.
+
+  How do we guarantee that hh_server produces an errors-file upon startup?
+  It boils down to ServerInitCommon.type_check, called as the final step of both
+  full init and saved-state init. Its design is to defer an initial typecheck
+  to the first round of [ServerTypeCheck.type_check] (i.e. us!) which it causes
+  to happen after its (synchronous, non-interruptible) init has finished. It does
+  this so that clients will be able to connect as soon as init has finished, and
+  observe/interrupt the deferred typecheck. It does this by setting
+  [env.full_check_status=Full_check_started], so that when ServerMain first enters
+  its main loop and calls [serve_one_iteration] for the first time, it will believe
+  that a full check is needed and hence call [ServerTypeCheck.type_check]. No matter
+  if we did a perfect saved-state-load so that [env.disk_needs_parsing] is empty,
+  no matter if we did a full init and [env.needs_recheck] contains every file in the
+  project, no matter what init path, the start of ServerMain main loop will always
+  start by calling [ServerTypeCheck.type_check]. And it's at this moment, right here,
+  that we'll lay down the first errors file.
+  *)
+  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
+  (* Restart the errors-file at the start of type_check. *)
+  if CheckKind.is_full_check kind then
+    ServerProgress.ErrorsWrite.new_empty_file
+      ~ignore_hh_version
+      ~clock:env.clock;
+
+  (* This is the main typecheck function. Its contract is to
+     (1) tweak env.errorl as needed based on what was rechecked , (2) write every single error to errors-file. *)
+  let (env, stats, telemetry) =
     type_check_unsafe genv env kind start_time cgroup_steps
   in
-  type_check_result
+
+  (* Update the errors-file as necessary... *)
+  let is_complete =
+    Relative_path.Set.is_empty env.needs_recheck
+    && Relative_path.Set.is_empty env.disk_needs_parsing
+  in
+  let validation_result =
+    match (kind, is_complete) with
+    | (CheckKind.Full, true) ->
+      (* We mark the errors-file as complete. Thus, anyone tailing it will
+         know that the typecheck has finished. *)
+      ServerProgress.ErrorsWrite.complete telemetry;
+      ServerProgress.validate_errors_DELETE_THIS_SOON ~expected:env.errorl
+    | (CheckKind.Full, false) ->
+      (* We don't do anything! If it's not complete, then necessarily ServerMain
+         will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
+         and then next round will call [ServerProgress.ErrorsWrite.new_empty_file]
+         which will put a "restarted" sentinel at the end of the current file as
+         well as starting a new file. Indeed it's *better* to place the "restarted"
+         sentinel at that future time rather than now, because it'll have a more
+         up-to-date watchclock at that time. *)
+      "<incomplete checks don't get validated>"
+    | (CheckKind.Lazy, _) -> "<lazy checks don't do streaming errors>"
+  in
+  let telemetry =
+    telemetry
+    |> Telemetry.string_
+         ~key:"streaming_errors_validation"
+         ~value:validation_result
+  in
+  (env, stats, telemetry)

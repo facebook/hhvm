@@ -173,9 +173,14 @@ type errors_file_error =
   | Build_id_mismatch
 [@@deriving show { with_path = false }]
 
+let is_production_enabled = ref true
+
+let enable_error_production (b : bool) : unit = is_production_enabled := b
+
 let errors_file () =
   match !root with
   | None -> failwith "ServerProgress.set_root must be called first"
+  | Some _ when not !is_production_enabled -> None
   | Some root when Path.equal root Path.dummy_path -> None
   | Some root -> Some (ServerFiles.errors_file root)
 
@@ -541,3 +546,92 @@ module ErrorsRead = struct
     | ErrorsFile.Report { errors; timestamp } -> Ok (errors, timestamp)
     | ErrorsFile.End { error; log_message; _ } -> Error (error, log_message)
 end
+
+let validate_errors_DELETE_THIS_SOON ~(expected : Errors.t) : string =
+  (* helper to combine batches of errors together *)
+  let rec reader fd acc =
+    match ErrorsRead.read_next_errors fd with
+    | Ok (errors, _timestamp) ->
+      let errors = Relative_path.Map.values errors |> List.concat in
+      reader fd (errors @ acc)
+    | Error _ -> acc
+  in
+
+  (* helper to diff two sorted lists: "list_diff ([],[]) xs ys" will return a pair
+     (only_xs, only_ys) with those elements that are only in xs, and those only in ys. *)
+  let rec list_diff (only_xs, only_ys) xs ys ~compare =
+    match (xs, ys) with
+    | ([], ys) -> (only_xs, ys @ only_ys)
+    | (xs, []) -> (xs @ only_xs, only_ys)
+    | (x :: xs, y :: ys) ->
+      let c = compare x y in
+      if c < 0 then
+        list_diff (x :: only_xs, ys) xs (y :: ys) ~compare
+      else if c > 0 then
+        list_diff (only_xs, y :: only_ys) (x :: xs) ys ~compare
+      else
+        list_diff (only_xs, only_ys) xs ys ~compare
+  in
+
+  (* helper to log up to first five errors, and return their codes *)
+  let code_and_log_first_five errors msg =
+    let len = List.length errors in
+    let errors = List.take errors 5 in
+    let codes = List.map errors ~f:User_error.get_code in
+    if len > 0 then
+      Hh_logger.log
+        "%s (%d errors)\n%s"
+        msg
+        len
+        (errors
+        |> List.map ~f:(fun { User_error.claim = (pos, msg); code; _ } ->
+               let suffix = Pos.filename pos |> Relative_path.suffix in
+               Printf.sprintf "  err [%d] %s %s" code suffix msg)
+        |> String.concat ~sep:"\n");
+    (len, codes)
+  in
+
+  match errors_file () with
+  | None -> "disabled"
+  | Some errors_file ->
+    (* The expected one needs to have fixmes droped, and duplicates dropped, and be sorted *)
+    let expected = Errors.get_sorted_error_list expected in
+    (* Our errors-file has already dropped fixmes, sorted-within-file, and dropped duplicates.
+       We'll do Errors.sort on it now to do a global sort by filename, to match "expected". *)
+    let fd = Unix.openfile errors_file [Unix.O_RDONLY; Unix.O_CREAT] 0o666 in
+    let fd_str = ErrorsWrite.show_fd fd in
+    let _ = ErrorsRead.openfile fd in
+    let actual = reader fd [] |> Errors.sort in
+    Unix.close fd;
+    (* They should be identical. Let's break down which errors are absent from the errors-file
+       which should be there, and which are extra and shouldn't be there. *)
+    let (absent, extra) =
+      list_diff ([], []) expected actual ~compare:Errors.compare
+    in
+    let (num_absent, codes_absent) =
+      code_and_log_first_five absent "Absent from errors_file"
+    in
+    let (num_extra, codes_extra) =
+      code_and_log_first_five extra "Extraneous in errors_file"
+    in
+    if num_absent = 0 && num_extra = 0 then begin
+      Hh_logger.log
+        "Errors-file: Good news everyone! file %s is correct for this typecheck"
+        fd_str;
+      "good"
+    end else begin
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"absent_count" ~value:num_absent
+        |> Telemetry.int_list ~key:"absent_codes" ~value:codes_absent
+        |> Telemetry.int_ ~key:"extra_count" ~value:num_extra
+        |> Telemetry.int_list ~key:"extra_codes" ~value:codes_extra
+      in
+      HackEventLogger.errors_file_mismatch (List.length expected) telemetry;
+      if num_absent = 0 then
+        "extra items"
+      else if num_extra = 0 then
+        "absent items"
+      else
+        "wrong items"
+    end

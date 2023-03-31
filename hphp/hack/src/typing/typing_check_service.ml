@@ -596,6 +596,7 @@ let merge
     ~(should_prefetch_deferred_files : bool)
     ~(batch_counts_by_worker_id : int SMap.t ref)
     ~(errors_so_far : int ref)
+    ~(check_info : check_info)
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_initial_count : int)
@@ -694,6 +695,10 @@ let merge
     ~unit:"files"
     ~extra:(Typing_service_delegate.get_progress !delegate_state);
 
+  (* Handle errors paradigm (3) - push updates to errors-file as soon as their batch is finished *)
+  if check_info.log_errors then
+    ServerProgress.ErrorsWrite.report produced_by_job.errors;
+  (* Handle errors paradigm (2) - push updates to lsp as well *)
   let (diag_pusher, time_errors_pushed) =
     possibly_push_new_errors_to_lsp_client
       ~progress
@@ -962,6 +967,7 @@ let process_in_parallel
            ~should_prefetch_deferred_files
            ~batch_counts_by_worker_id
            ~errors_so_far
+           ~check_info
            delegate_state
            workitems_to_process
            workitems_initial_count

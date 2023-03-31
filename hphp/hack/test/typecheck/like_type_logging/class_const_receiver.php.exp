@@ -9,7 +9,7 @@
 [Like_type_logger] {
   "pos":"class_const_receiver.php:9",
   "categories":{
-    "Expression":{"Like":6,"NonLike":1},
+    "Expression":{"Like":5,"NonLike":2},
     "Class_const_receiver":{"Like":1},
     "Return":{"NonLike":1}
   }

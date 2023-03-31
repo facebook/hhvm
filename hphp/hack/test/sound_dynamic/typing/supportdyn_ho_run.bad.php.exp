@@ -1,3 +1,5 @@
+File "supportdyn_ho_run.bad.php", line 18, characters 3-8:
+This call is invalid, this is not a function, it is a mixed value (Typing[4009])
 File "supportdyn_ho_run.bad.php", line 15, characters 3-8:
 Too few arguments (required 2 but got 1) (Typing[4104])
   File "supportdyn_ho_run.bad.php", line 10, characters 14-52:
@@ -13,16 +15,10 @@ Typing error (Typing[4110])
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
   Expected `dynamic`
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Type `~<expr#1> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "supportdyn_ho_run.bad.php", line 17, characters 6-7:
 Typing error (Typing[4110])
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
   Expected `dynamic`
-  File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Type `~<expr#1> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
-File "supportdyn_ho_run.bad.php", line 18, characters 3-8:
-Typing error (Typing[4110])
-  File "supportdyn_ho_run.bad.php", line 18, characters 3-8:
-  Expected `dynamic`, the result of calling a `dynamic` type as a function
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
   Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping

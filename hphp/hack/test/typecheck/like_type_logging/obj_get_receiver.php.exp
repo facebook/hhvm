@@ -5,7 +5,7 @@
 [Like_type_logger] {
   "pos":"obj_get_receiver.php:9",
   "categories":{
-    "Expression":{"Like":7,"NonLike":2},
+    "Expression":{"Like":6,"NonLike":3},
     "Obj_get_receiver":{"Like":1},
     "Return":{"NonLike":1}
   }

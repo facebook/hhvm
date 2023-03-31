@@ -388,6 +388,10 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
           } else if (*n < 0x800) {
             result.push_back(0b1100'0000 | ((*n >> 6) & 0b1'1111));
             c = 0b1000'0000 | (*n & 0b111111);
+          } else if (*n >= 0xd800 && *n <= 0xdfff) {
+            diags_->error(
+                literal.range.begin, "surrogate in `\\u` escape sequence");
+            return {};
           } else {
             result.push_back(0b1110'0000 | ((*n >> 12) & 0b1'1111));
             result.push_back(0b1000'0000 | ((*n >> 6) & 0b11'1111));
@@ -496,7 +500,8 @@ token lexer::get_next_token() {
         ? make_int_literal(1, 8)
         : token::make_int_literal(token_source_range(), 0);
   } else if (c == '"' || c == '\'') {
-    // Lex a string literal.
+    // Lex the boundaries of a string literal. The content is lexed by
+    // lex_string_literal.
     for (;;) {
       const char* p = std::find(ptr_, end(), c);
       if (!*p) {

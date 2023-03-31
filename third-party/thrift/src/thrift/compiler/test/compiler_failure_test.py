@@ -2516,3 +2516,11 @@ class CompilerFailureTest(unittest.TestCase):
         ret, out, err = self.run_thrift("foo.thrift")
         self.assertEqual(ret, 1)
         self.assertEqual(err, "[ERROR:foo.thrift:1] invalid `\\u` escape sequence\n")
+
+    def test_surrogate_in_unicode_escape(self):
+        write_file("foo.thrift", 'const string s = "\\ud800";')
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(
+            err, "[ERROR:foo.thrift:1] surrogate in `\\u` escape sequence\n"
+        )

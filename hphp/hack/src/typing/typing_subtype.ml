@@ -1517,6 +1517,20 @@ and simplify_subtype_i
         env
     | (r, Tunion (_ :: _ as tyl_super)) ->
       let simplify_sub_union env ty_sub tyl_super =
+        (* Identify cases heuristically where we just want to reduce t <: ~u to
+           t <: u with super-like set, and not also try t <: dynamic or run finish *)
+        let avoid_disjunctions env ty =
+          let (env, ty) = Env.expand_type env ty in
+          match (ty_sub, get_node ty) with
+          | (LoclType lty, Tnewtype (n2, _, _)) ->
+            (match get_node lty with
+            | Tnewtype (n1, _, _)
+              when String.equal n1 n2
+                   && not (String.equal n1 SN.Classes.cSupportDyn) ->
+              (env, true)
+            | _ -> (env, false))
+          | _ -> (env, false)
+        in
         let finish env =
           match ty_sub with
           | LoclType lty -> begin
@@ -1528,6 +1542,27 @@ and simplify_subtype_i
             | _ -> invalid_env env
           end
           | _ -> invalid_env env
+        in
+        let simplify_subtype_of_dynamic env =
+          simplify_subtype_i
+            ~subtype_env
+            ~sub_supportdyn
+            ~this_ty
+            ty_sub
+            (LoclType (MakeType.dynamic r))
+            env
+        in
+        let dyn_finish ty env =
+          let (env, avoid) = avoid_disjunctions env ty in
+          if avoid then
+            invalid_env env
+          else
+            simplify_subtype_of_dynamic env
+            |||
+            if is_tyvar ty then
+              invalid_env
+            else
+              finish
         in
         let stripped_dynamic =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
@@ -1549,17 +1584,7 @@ and simplify_subtype_i
             ty_sub
             (LoclType ty)
             env
-          ||| simplify_subtype_i
-                ~subtype_env
-                ~sub_supportdyn
-                ~this_ty
-                ty_sub
-                (LoclType (MakeType.dynamic r))
-          |||
-          if is_tyvar ty then
-            invalid_env
-          else
-            finish
+          ||| dyn_finish ty
         | _ ->
           (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
            * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
@@ -1594,12 +1619,7 @@ and simplify_subtype_i
                        ~super_like:true
                        ty_sub
                        (LoclType ty)
-                  ||| simplify_subtype_i
-                        ~subtype_env
-                        ~sub_supportdyn
-                        ~this_ty
-                        ty_sub
-                        (LoclType (MakeType.dynamic r))
+                  ||| dyn_finish ty
                 else
                   finish env
               | Some ty ->

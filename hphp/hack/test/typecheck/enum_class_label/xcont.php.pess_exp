@@ -1,6 +1,0 @@
-File "xcont.php.pess", line 70, characters 26-31:
-Invalid argument (Typing[4110])
-  File "BuiltinEnum.hhi", line 123, characters 109-142:
-  Expected `~HH\EnumClass\Label<_, _>`
-  File "xcont.php.pess", line 67, characters 104-139:
-  But got `HH\EnumClass\Label<this::TE, TParam>`

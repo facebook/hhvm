@@ -34,7 +34,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Mutable', 'Adapter', 'Wrapper']
+__all__ = ['UTF8STRINGS', 'Mutable', 'Annotation', 'Adapter', 'Wrapper']
 
 class Mutable:
 
@@ -118,6 +118,113 @@ class Mutable:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.java.types")
     return thrift.py3.converter.to_py3_struct(py3_types.Mutable, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class Annotation:
+  r"""
+  Attributes:
+   - java_annotation
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.java_annotation = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Annotation')
+    if self.java_annotation != None:
+      oprot.writeFieldBegin('java_annotation', TType.STRING, 1)
+      oprot.writeString(self.java_annotation.encode('utf-8')) if UTF8STRINGS and not isinstance(self.java_annotation, bytes) else oprot.writeString(self.java_annotation)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'java_annotation' in json_obj and json_obj['java_annotation'] is not None:
+      self.java_annotation = json_obj['java_annotation']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.java_annotation is not None:
+      value = pprint.pformat(self.java_annotation, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    java_annotation=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'java_annotation',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.java.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Annotation, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.java.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Annotation, self)
 
   def _to_py_deprecated(self):
     return self
@@ -378,6 +485,29 @@ Mutable.thrift_struct_annotations = {
 }
 Mutable.thrift_field_annotations = {
 }
+
+all_structs.append(Annotation)
+Annotation.thrift_spec = (
+  None, # 0
+  (1, TType.STRING, 'java_annotation', True, None, 2, ), # 1
+)
+
+Annotation.thrift_struct_annotations = {
+}
+Annotation.thrift_field_annotations = {
+}
+
+def Annotation__init__(self, java_annotation=None,):
+  self.java_annotation = java_annotation
+
+Annotation.__init__ = Annotation__init__
+
+def Annotation__setstate__(self, state):
+  state.setdefault('java_annotation', None)
+  self.__dict__ = state
+
+Annotation.__getstate__ = lambda self: self.__dict__.copy()
+Annotation.__setstate__ = Annotation__setstate__
 
 all_structs.append(Adapter)
 Adapter.thrift_spec = (

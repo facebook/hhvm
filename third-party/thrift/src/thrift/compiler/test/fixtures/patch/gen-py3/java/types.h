@@ -27,6 +27,16 @@ inline void reset_field<::facebook::thrift::annotation::java::Mutable>(
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::java::Annotation>(
+    ::facebook::thrift::annotation::java::Annotation& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.java_annotation_ref().copy_from(default_inst<::facebook::thrift::annotation::java::Annotation>().java_annotation_ref());
+      return;
+  }
+}
+
+template<>
 inline void reset_field<::facebook::thrift::annotation::java::Adapter>(
     ::facebook::thrift::annotation::java::Adapter& obj, uint16_t index) {
   switch (index) {
@@ -55,6 +65,16 @@ inline void reset_field<::facebook::thrift::annotation::java::Wrapper>(
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::java::Mutable>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::java::Annotation>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

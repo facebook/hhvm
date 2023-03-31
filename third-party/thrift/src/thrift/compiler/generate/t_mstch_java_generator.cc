@@ -77,6 +77,20 @@ std::string get_constants_class_name(const t_program& prog) {
 }
 
 template <typename Node>
+mstch::node get_structed_annotation_attribute(
+    const Node* node, const char* uri, const std::string& key) {
+  if (auto annotation = node->find_structured_annotation_or_null(uri)) {
+    for (const auto& item : annotation->value()->get_map()) {
+      if (item.first->get_string() == key) {
+        return item.second->get_string();
+      }
+    }
+  }
+
+  return nullptr;
+}
+
+template <typename Node>
 std::string get_java_swift_name(const Node* node) {
   return node->get_annotation(
       "java.swift.name", java::mangle_java_name(node->get_name(), false));
@@ -557,10 +571,17 @@ class mstch_java_struct : public mstch_struct {
     return java::mangle_java_name(struct_->get_name(), true);
   }
   mstch::node has_java_annotations() {
-    return struct_->has_annotation("java.swift.annotations");
+    return struct_->has_annotation("java.swift.annotations") ||
+        struct_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
+        nullptr;
   }
   mstch::node java_annotations() {
-    return struct_->get_annotation("java.swift.annotations");
+    if (struct_->has_annotation("java.swift.annotations")) {
+      return struct_->get_annotation("java.swift.annotations");
+    }
+
+    return get_structed_annotation_attribute(
+        struct_, kJavaAnnotationUri, "java_annotation");
   }
   mstch::node exception_message() {
     const auto& field_name_to_use = struct_->get_annotation("message");
@@ -791,13 +812,13 @@ class mstch_java_field : public mstch_field {
   mstch::node has_wrapper() { return _has_wrapper(); }
 
   mstch::node get_structured_wrapper_class_name() {
-    return get_field_structed_annotation_attribute(
-        kJavaWrapperUri, "wrapperClassName");
+    return get_structed_annotation_attribute(
+        field_, kJavaWrapperUri, "wrapperClassName");
   }
 
   mstch::node get_structured_wrapper_type_class_name() {
-    return get_field_structed_annotation_attribute(
-        kJavaWrapperUri, "typeClassName");
+    return get_structed_annotation_attribute(
+        field_, kJavaWrapperUri, "typeClassName");
   }
 
   mstch::node has_adapter_or_wrapper() {
@@ -856,26 +877,13 @@ class mstch_java_field : public mstch_field {
   mstch::node has_field_adapter() { return _has_field_adapter(); }
 
   mstch::node get_field_adapter_type_class_name() {
-    return get_field_structed_annotation_attribute(
-        kJavaAdapterUri, "typeClassName");
+    return get_structed_annotation_attribute(
+        field_, kJavaAdapterUri, "typeClassName");
   }
 
   mstch::node get_field_adapter_class_name() {
-    return get_field_structed_annotation_attribute(
-        kJavaAdapterUri, "adapterClassName");
-  }
-
-  mstch::node get_field_structed_annotation_attribute(
-      const char* uri, const std::string& field) {
-    if (auto annotation = field_->find_structured_annotation_or_null(uri)) {
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == field) {
-          return item.second->get_string();
-        }
-      }
-    }
-
-    return nullptr;
+    return get_structed_annotation_attribute(
+        field_, kJavaAdapterUri, "adapterClassName");
   }
 
   mstch::node has_initial_value() {
@@ -994,9 +1002,7 @@ class mstch_java_field : public mstch_field {
       return "null";
     }
   }
-  mstch::node has_java_annotations() {
-    return field_->has_annotation("java.swift.annotations");
-  }
+
   mstch::node is_sensitive() {
     return field_->has_annotation("java.sensitive");
   }
@@ -1017,8 +1023,18 @@ class mstch_java_field : public mstch_field {
     }
     return constant_str;
   }
+  mstch::node has_java_annotations() {
+    return field_->has_annotation("java.swift.annotations") ||
+        field_->find_structured_annotation_or_null(kJavaAnnotationUri) !=
+        nullptr;
+  }
   mstch::node java_annotations() {
-    return field_->get_annotation("java.swift.annotations");
+    if (field_->has_annotation("java.swift.annotations")) {
+      return field_->get_annotation("java.swift.annotations");
+    }
+
+    return get_structed_annotation_attribute(
+        field_, kJavaAnnotationUri, "java_annotation");
   }
 };
 

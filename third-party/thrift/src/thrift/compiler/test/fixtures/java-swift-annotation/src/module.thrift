@@ -20,22 +20,27 @@ include "thrift/annotation/java.thrift"
 
 typedef map<i32, i64> (java.swift.type = "com.foo.FastIntLongMap") FMap
 
+@java.Annotation{
+  java_annotation = "@com.foo.Enabled @com.bar.AnotherAnnotation(val = 1)",
+}
 struct MyStruct {
   1: i64 intField;
-  2: string stringField (java.swift.annotations = '@com.foo.Bar("BAZ")');
-  3: string detailField (java.swift.annotations = "@com.foo.Ignored");
-  4: FMap detailMap (java.swift.annotations = "@com.foo.Ignored");
+  @java.Annotation{java_annotation = '@com.foo.Bar("BAZ")'}
+  2: string stringField;
+  @java.Annotation{java_annotation = "@com.foo.Ignored"}
+  3: string detailField;
+  @java.Annotation{java_annotation = "@com.foo.Ignored"}
+  4: FMap detailMap;
   5: string titi (java.swift.name = "toto");
   6: string password (java.sensitive = "true");
-} (
-  java.swift.annotations = "@com.foo.Enabled @com.bar.AnotherAnnotation(val = 1)",
-)
+}
 
 @java.Mutable
+@java.Annotation{java_annotation = "@com.foo.Enabled"}
 struct MyMutableStruct {
   1: i64 intField;
   2: string stringField;
-} (java.swift.annotations = "@com.foo.Enabled")
+}
 
 struct MyMapping {
   1: map<i64, string> (java.swift.type = "com.foo.FastLongStringMap") lsMap;

@@ -29,6 +29,15 @@ namespace py thrift.annotation.java
 @scope.Struct
 struct Mutable {}
 
+// When this annotation is applied, thrift compiler will annotate corresponding java entity the given java annotation.
+@scope.Field
+@scope.Struct
+@scope.Union
+@scope.Exception
+struct Annotation {
+  1: string java_annotation;
+}
+
 // An annotation that is applied to a Typedef or field that maps it a Java type Adapter.
 // For example:
 // @java.Adapter{adapterClassName="com.facebook.thrift.TimestampAdapter", typeClassName="java.time.Instant"}

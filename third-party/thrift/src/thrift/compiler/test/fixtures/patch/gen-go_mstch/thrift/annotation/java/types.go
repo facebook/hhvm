@@ -98,6 +98,141 @@ func (x *Mutable) Read(p thrift.Protocol) error {
 }
 
 
+type Annotation struct {
+    JavaAnnotation string `thrift:"java_annotation,1" json:"java_annotation" db:"java_annotation"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Annotation{}
+
+
+func NewAnnotation() *Annotation {
+    return (&Annotation{})
+}
+
+func (x *Annotation) GetJavaAnnotationNonCompat() string {
+    return x.JavaAnnotation
+}
+
+func (x *Annotation) GetJavaAnnotation() string {
+    return x.JavaAnnotation
+}
+
+func (x *Annotation) SetJavaAnnotation(value string) *Annotation {
+    x.JavaAnnotation = value
+    return x
+}
+
+
+func (x *Annotation) writeField1(p thrift.Protocol) error {  // JavaAnnotation
+    if err := p.WriteFieldBegin("java_annotation", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetJavaAnnotationNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Annotation) readField1(p thrift.Protocol) error {  // JavaAnnotation
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetJavaAnnotation(result)
+    return nil
+}
+
+func (x *Annotation) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Annotation.Set* methods instead or set the fields directly.
+type AnnotationBuilder struct {
+    obj *Annotation
+}
+
+func NewAnnotationBuilder() *AnnotationBuilder {
+    return &AnnotationBuilder{
+        obj: NewAnnotation(),
+    }
+}
+
+func (x *AnnotationBuilder) JavaAnnotation(value string) *AnnotationBuilder {
+    x.obj.JavaAnnotation = value
+    return x
+}
+
+func (x *AnnotationBuilder) Emit() *Annotation {
+    var objCopy Annotation = *x.obj
+    return &objCopy
+}
+
+func (x *Annotation) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Annotation"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Annotation) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // java_annotation
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
 type Adapter struct {
     AdapterClassName string `thrift:"adapterClassName,1" json:"adapterClassName" db:"adapterClassName"`
     TypeClassName string `thrift:"typeClassName,2" json:"typeClassName" db:"typeClassName"`

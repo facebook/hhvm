@@ -28,6 +28,55 @@
         "is_union" : false,
         "lineno" : 29
       },
+      "Annotation" : {
+        "name" : "Annotation",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Exception" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Exception",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "java_annotation" : {
+            "name" : "java_annotation",
+            "key" : 1,
+            "lineno" : 38,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 33
+      },
       "Adapter" : {
         "name" : "Adapter",
         "structured_annotations": {
@@ -60,21 +109,21 @@
           "adapterClassName" : {
             "name" : "adapterClassName",
             "key" : 1,
-            "lineno" : 42,
+            "lineno" : 51,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 45,
+            "lineno" : 54,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 37
+        "lineno" : 46
       },
       "Wrapper" : {
         "name" : "Wrapper",
@@ -92,21 +141,21 @@
           "wrapperClassName" : {
             "name" : "wrapperClassName",
             "key" : 1,
-            "lineno" : 51,
+            "lineno" : 60,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 54,
+            "lineno" : 63,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 48
+        "lineno" : 57
       }
       },
   "source_path" : "thrift/annotation/java",

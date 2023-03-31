@@ -89,6 +89,8 @@ constexpr auto kCppFrozen2ExcludeUri =
 
 // java
 constexpr auto kJavaMutableUri = "facebook.com/thrift/annotation/java/Mutable";
+constexpr auto kJavaAnnotationUri =
+    "facebook.com/thrift/annotation/java/Annotation";
 constexpr auto kJavaAdapterUri = "facebook.com/thrift/annotation/java/Adapter";
 constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
 

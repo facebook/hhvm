@@ -2170,7 +2170,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "label": "$mylambda",
                             "kind": 6,
-                            "detail": "local variable",
+                            "detail": "(function(int $n): int)",
                             "sortText": "$mylambda",
                             "insertTextFormat": 1,
                             "textEdit": {
@@ -2198,7 +2198,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 params={
                     "label": "$mylambda",
                     "kind": 6,
-                    "detail": "local variable",
+                    "detail": "(function(int $n): int)",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {
@@ -2216,7 +2216,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result={
                     "label": "$mylambda",
                     "kind": 6,
-                    "detail": "local variable",
+                    "detail": "(function(int $n): int)",
                     "insertTextFormat": 1,
                     "textEdit": {
                         "range": {

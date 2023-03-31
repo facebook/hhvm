@@ -1490,19 +1490,18 @@ class local_vars =
       self#go ctx tast;
       (results, id_at_cursor)
 
-    method add env id ty =
+    method add id ty =
       (* If we already have a position for this identifier, don't overwrite it with
          results from after the cursor position. *)
       if not (Local_id.Map.mem id results && Option.is_some id_at_cursor) then
-        let ty = LoclTy ty in
-        results <- Local_id.Map.add id (get_pos_for env ty) results
+        results <- Local_id.Map.add id ty results
 
     method! on_fun_ env f = if fun_contains_cursor f then super#on_fun_ env f
 
     method! on_method_ env m =
       if method_contains_cursor m then (
         if not m.Aast.m_static then
-          self#add env Typing_defs.this (Tast_env.get_self_ty_exn env);
+          self#add Typing_defs.this (Tast_env.get_self_ty_exn env);
         super#on_method_ env m
       )
 
@@ -1514,7 +1513,7 @@ class local_vars =
         if matches_auto_complete_suffix name then
           id_at_cursor <- Some (pos, name)
         else
-          self#add env id ty
+          self#add id ty
       | Aast.(Binop { bop = Ast_defs.Eq _; lhs = e1; rhs = e2 }) ->
         (* Process the rvalue before the lvalue, since the lvalue is annotated
            with its type after the assignment. *)
@@ -1522,13 +1521,13 @@ class local_vars =
         self#on_expr env e1
       | _ -> super#on_expr env e
 
-    method! on_fun_param env fp =
+    method! on_fun_param _env fp =
       let id = Local_id.make_unscoped fp.Aast.param_name in
       let ty = fp.Aast.param_annotation in
-      self#add env id ty
+      self#add id ty
   end
 
-let compute_complete_local ctx tast =
+let compute_complete_local env ctx tast =
   let (locals, id_at_cursor) = (new local_vars)#get_locals ctx tast in
   let id_at_cursor = Option.value id_at_cursor ~default:(Pos.none, "") in
   let replace_pos = replace_pos_of_id id_at_cursor in
@@ -1541,16 +1540,16 @@ let compute_complete_local ctx tast =
   in
 
   Local_id.Map.iter
-    (fun id pos ->
+    (fun id ty ->
       let kind = SearchUtils.SI_LocalVariable in
       let name = Local_id.get_name id in
       if String.is_prefix name ~prefix:id_prefix then
         let complete =
           {
-            res_decl_pos = pos;
+            res_decl_pos = get_pos_for env (LoclTy ty);
             res_replace_pos = replace_pos;
             res_base_class = None;
-            res_detail = kind_to_string kind;
+            res_detail = Tast_env.print_ty env ty;
             res_label = name;
             res_insert_text = InsertLiterally name;
             res_fullname = name;
@@ -1628,7 +1627,7 @@ let visitor
 
     method! on_Lvar env ((_, name) as lid) =
       if is_auto_complete (Local_id.get_name name) then
-        compute_complete_local ctx toplevel_tast;
+        compute_complete_local env ctx toplevel_tast;
       super#on_Lvar env lid
 
     method! on_Class_get env cid mid prop_or_method =

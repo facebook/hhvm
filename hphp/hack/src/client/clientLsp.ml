@@ -2161,6 +2161,20 @@ let ide_rpc
 
 let kickoff_shell_out_and_maybe_cancel
     (state : state) (shellable_type : Lost_env.shellable_type) : state =
+  let compose_shellout_cmd
+      ~(from : string) (server_cmd : string) (cmd_arg : string) : string array =
+    let from = Printf.sprintf "clientLsp:%s" from in
+    [|
+      "--from";
+      from;
+      server_cmd;
+      cmd_arg;
+      "--json";
+      "--prefer-stdout";
+      "--autostart-server";
+      "false";
+    |]
+  in
   match state with
   | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
     (* If there's an existing shell process, cancel it *)
@@ -2173,36 +2187,33 @@ let kickoff_shell_out_and_maybe_cancel
         match shellable_type with
         | Lost_env.FindRefs (_, filename, line, col) ->
           let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
-          [|
-            "--from";
-            "clientLsp:find-refs";
-            "--ide-find-refs";
-            file_line_col;
-            "--json";
-            "--prefer-stdout";
-          |]
+          let cmd =
+            compose_shellout_cmd
+              ~from:"find-refs"
+              "--ide-find-refs"
+              file_line_col
+          in
+          cmd
         | Lost_env.GoToImpl (_, filename, line, col) ->
           let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
-          [|
-            "--from";
-            "clientLsp:go-to-impl";
-            "--ide-go-to-impl";
-            file_line_col;
-            "--json";
-            "--prefer-stdout";
-          |]
+          let cmd =
+            compose_shellout_cmd
+              ~from:"go-to-impl"
+              "--ide-go-to-impl"
+              file_line_col
+          in
+          cmd
         | Lost_env.Rename (_, filename, line, col, new_name) ->
           let file_line_col_symbol =
             Printf.sprintf "%s:%d:%d:%s" filename line col new_name
           in
-          [|
-            "--from";
-            "clientLsp:rename";
-            "--ide-refactor";
-            file_line_col_symbol;
-            "--json";
-            "--prefer-stdout";
-          |]
+          let cmd =
+            compose_shellout_cmd
+              ~from:"rename"
+              "--ide-refactor"
+              file_line_col_symbol
+          in
+          cmd
       end
     in
     let process =

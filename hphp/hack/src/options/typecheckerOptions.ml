@@ -247,7 +247,7 @@ let enable_enum_supertyping t = t.GlobalOptions.po_enable_enum_supertyping
 
 let everything_sdt t = t.GlobalOptions.tco_everything_sdt
 
-let pessimise_builtins t = t.GlobalOptions.tco_pessimise_builtins
+let pessimise_builtins t = t.GlobalOptions.tco_enable_sound_dynamic
 
 let explicit_consistent_constructors t =
   t.GlobalOptions.tco_explicit_consistent_constructors

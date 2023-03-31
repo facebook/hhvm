@@ -1,10 +1,4 @@
 File "inout.bad.php", line 5, characters 13-17:
-Invalid argument to an `inout` parameter (Typing[4110])
-  File "inout.bad.php", line 4, characters 22-24:
-  Expected `int`
-  File "inout.bad.php", line 3, characters 20-23:
-  But got `dynamic`
-File "inout.bad.php", line 5, characters 13-17:
 Expected argument marked `inout` to be contained in a local or a value-typed container (e.g. vec, dict, keyset, array). To use `inout` here, assign to/from a temporary local variable. (Typing[4208])
   File "inout.bad.php", line 4, characters 14-25:
   This is a dynamic value or an object of type Vector<int>

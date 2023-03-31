@@ -19,10 +19,7 @@ public final class ModuleConstants {
 
     public static final String NAME = "Mark Zuckerberg";
 
-    public static final String MULTI_LINE_STRING = "This
-is a
-multi line string.
-";
+    public static final String MULTI_LINE_STRING = "This\nis a\nmulti line string.\n";
 
     public static final List<Map<String, Integer>> STATES = ImmutableList.<Map<String, Integer>>builder()
         .add(ImmutableMap.<String, Integer>builder()
@@ -146,14 +143,14 @@ multi line string.
         .build();
 
     public static final List<String> ESCAPED_STRINGS = ImmutableList.<String>builder()
-        .add("")
-        .add("")
+        .add("\x01")
+        .add("\x1f")
         .add(" ")
         .add("'")
         .add("\"")
         .add("\n")
         .add("\r")
-        .add("	")
+        .add("\x09")
         .add("a")
         .add("«")
         .add("j")

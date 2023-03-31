@@ -20,10 +20,7 @@ public class Constants {
 
   public static final String name = "Mark Zuckerberg";
 
-  public static final String multi_line_string = "This
-is a
-multi line string.
-";
+  public static final String multi_line_string = "This\nis a\nmulti line string.\n";
 
   public static final List<Map<String,Integer>> states = new ArrayList<Map<String,Integer>>();
   static {
@@ -303,14 +300,14 @@ multi line string.
 
   public static final List<String> escaped_strings = new ArrayList<String>();
   static {
-    escaped_strings.add("");
-    escaped_strings.add("");
+    escaped_strings.add("\x01");
+    escaped_strings.add("\x1f");
     escaped_strings.add(" ");
     escaped_strings.add("'");
     escaped_strings.add("\"");
     escaped_strings.add("\n");
     escaped_strings.add("\r");
-    escaped_strings.add("	");
+    escaped_strings.add("\x09");
     escaped_strings.add("a");
     escaped_strings.add("«");
     escaped_strings.add("j");

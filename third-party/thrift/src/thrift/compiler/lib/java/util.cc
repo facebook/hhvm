@@ -80,33 +80,22 @@ std::string mangle_java_constant_name(const std::string& ref) {
 std::string quote_java_string(const std::string& unescaped) {
   std::ostringstream quoted;
   quoted << '\"';
-  for (std::string::size_type i = 0; i < unescaped.size();) {
-    switch (unescaped[i]) {
-      case '\\': {
-        quoted << unescaped[i];
-        ++i;
-        assert(i <= unescaped.size());
-        if (i == unescaped.size()) {
-          throw std::runtime_error(
-              "compiler error: leading backslash missing escape sequence: " +
-              unescaped);
-        }
-        assert(unescaped[i] != 'x');
-        quoted << unescaped[i++];
+  for (unsigned char c : unescaped) {
+    switch (c) {
+      case '\n':
+        quoted << "\\n";
         break;
-      }
       case '"':
-        quoted << '\\' << unescaped[i];
-        ++i;
+        quoted << "\\\"";
         break;
       default: {
-        unsigned char c = unescaped[i];
-        if (c >= 0xf8) {
+        if (c < 0x20) {
+          quoted << fmt::format("\\x{:02x}", c);
+        } else if (c >= 0xf8) {
           quoted << fmt::format("\\u{:04x}", c);
         } else {
-          quoted << unescaped[i];
+          quoted << c;
         }
-        ++i;
         break;
       }
     }

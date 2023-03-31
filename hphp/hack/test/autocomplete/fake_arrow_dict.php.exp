@@ -89,7 +89,7 @@ Dict\map_keys
 Dict\map_with_key
   (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Tv2) $value_func): dict<Tk, Tv2>)
 Dict\map_with_key_async
-  (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Awaitable<Tv2>) $async_func): Awaitable<dict<Tk, Tv2>>)
+  (function(KeyedTraversable<Tk, Tv1> $traversable, (function(Tk, Tv1): Awaitable<Tv2>) $value_func): Awaitable<dict<Tk, Tv2>>)
 Dict\merge
   (function(KeyedTraversable<Tk, Tv> $first, KeyedContainer<Tk, Tv> $rest...): dict<Tk, Tv>)
 Dict\partition

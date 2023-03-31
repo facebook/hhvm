@@ -97,6 +97,7 @@ let test () =
       ~interrupt
       ~memory_cap:None
       ~longlived_workers:false
+      ~use_hh_distc_instead_of_hulk:false
       ~check_info
   in
   assert (Option.is_none diag_pusher);

@@ -139,6 +139,14 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name hh_distc_ffi)
+  (wrapped false)
+  (modules
+    hh_distc_ffi)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
   (name hulk_rpc_ffi)
   (wrapped false)
   (modules

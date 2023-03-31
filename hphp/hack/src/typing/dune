@@ -445,6 +445,7 @@
   cgroupprofiler
   core_kernel
   decl_counters
+  hh_distc_ffi
   decl_service
   deferred_decl
   diagnostic_pusher

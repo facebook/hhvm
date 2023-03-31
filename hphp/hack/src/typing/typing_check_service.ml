@@ -857,6 +857,40 @@ let on_cancelled
   in
   add_next []
 
+let process_with_hh_distc ~(interrupt : 'a MultiWorker.interrupt_config) :
+    typing_result =
+  (* TODO: Plumb extra --config name=value args through to spawn() *)
+  (* TODO: Poll interrupts *)
+  let _ = interrupt in
+  (* TODO: the following is a bug! I'm not exactly sure how to get root here... *)
+  let root = Wwwroot.interpret_command_line_root_parameter [] in
+  Tempfile.with_tempdir (fun ss_dir ->
+      let handle =
+        Hh_distc_ffi.spawn (Path.to_string root) (Path.to_string ss_dir)
+        |> Result.ok_or_failwith
+      in
+      let rec busy_loop () =
+        if Hh_distc_ffi.is_finished handle then
+          Hh_distc_ffi.join handle
+        else
+          (* TODO: Replace with interrupts *)
+          let () = Unix.sleepf 0.1 in
+          busy_loop ()
+      in
+
+      match busy_loop () with
+      | Ok errors ->
+        (* TODO: Update Dep Graph using dep graph stored in dir/hh_mini_saved_state.hhdg *)
+        (* TODO: Cleanup dir *)
+        {
+          errors;
+          dep_edges = Typing_deps.dep_edges_make ();
+          telemetry = Telemetry.create ();
+        }
+      | Error msg ->
+        Hh_logger.log "Error with hh_distc: %s" msg;
+        failwith msg)
+
 (**
   `next` and `merge` both run in the master process and update mutable
   state in order to track work in progress and work remaining.
@@ -1122,6 +1156,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(use_hh_distc_instead_of_hulk : bool)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
     HackEventLogger.ProfileTypeCheck.get_typecheck_info
@@ -1171,7 +1206,15 @@ let go_with_interrupt
         env,
         cancelled_fnl,
         diagnostic_pusher ) =
-    if should_process_sequentially opts fnl then begin
+    if BigList.length fnl > 100_000 && use_hh_distc_instead_of_hulk then
+      let typing_result = process_with_hh_distc ~interrupt in
+      ( typing_result,
+        delegate_state,
+        telemetry,
+        interrupt.MultiThreadedCall.env,
+        [],
+        (None, None) )
+    else if should_process_sequentially opts fnl then begin
       Hh_logger.log "Type checking service will process files sequentially";
       let (typing_result, diagnostic_pusher) =
         process_sequentially
@@ -1231,6 +1274,7 @@ let go
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(use_hh_distc_instead_of_hulk : bool)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
@@ -1244,6 +1288,7 @@ let go
       ~interrupt
       ~memory_cap
       ~longlived_workers
+      ~use_hh_distc_instead_of_hulk
       ~check_info
   in
   assert (List.is_empty cancelled);

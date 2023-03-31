@@ -1,8 +1,12 @@
 MyEnum::TYPE_D
+  INSERT MyEnum::TYPE_D
   class constant
 MyEnum::TYPE_C
+  INSERT MyEnum::TYPE_C
   class constant
 MyEnum::TYPE_B
+  INSERT MyEnum::TYPE_B
   class constant
 MyEnum::TYPE_A
+  INSERT MyEnum::TYPE_A
   class constant

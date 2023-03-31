@@ -1,20 +1,30 @@
 use
+  INSERT use
   keyword
 require class
+  INSERT require class
   keyword
 require implements
+  INSERT require implements
   keyword
 require extends
+  INSERT require extends
   keyword
 final
+  INSERT final
   keyword
 private
+  INSERT private
   keyword
 abstract
+  INSERT abstract
   keyword
 const
+  INSERT const
   keyword
 protected
+  INSERT protected
   keyword
 public
+  INSERT public
   keyword

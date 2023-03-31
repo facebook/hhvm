@@ -1,6 +1,9 @@
 fun_instance
+  INSERT fun_instance()
   function(): void
 class
+  INSERT class
   classname<this>
 fun_method
+  INSERT fun_method()
   function(): void

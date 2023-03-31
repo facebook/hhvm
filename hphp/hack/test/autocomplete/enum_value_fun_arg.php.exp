@@ -1,6 +1,9 @@
 TYPE_C
+  INSERT TYPE_C
   class constant
 TYPE_B
+  INSERT TYPE_B
   class constant
 TYPE_A
+  INSERT TYPE_A
   class constant

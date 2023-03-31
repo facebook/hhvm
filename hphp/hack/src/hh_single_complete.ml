@@ -284,6 +284,13 @@ let handle_mode mode filenames ctx (sienv : SearchUtils.si_env) naming_table =
             begin
               let open AutocompleteTypes in
               Printf.printf "%s\n" r.res_label;
+              List.iter r.res_additional_edits ~f:(fun (s, _) ->
+                  Printf.printf "  INSERT %s\n" s);
+              Printf.printf
+                "  INSERT %s\n"
+                (match r.res_insert_text with
+                | InsertLiterally s -> s
+                | InsertAsSnippet { snippet; _ } -> snippet);
               Printf.printf "  %s\n" r.res_detail;
               match r.res_documentation with
               | Some doc ->

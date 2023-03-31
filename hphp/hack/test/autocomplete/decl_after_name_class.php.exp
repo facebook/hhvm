@@ -1,4 +1,6 @@
 extends
+  INSERT extends
   keyword
 implements
+  INSERT implements
   keyword

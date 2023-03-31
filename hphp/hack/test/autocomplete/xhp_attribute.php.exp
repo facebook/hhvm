@@ -1,4 +1,6 @@
 name
+  INSERT name
   ?string
 color
+  INSERT color
   ?string

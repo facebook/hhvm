@@ -1,6 +1,9 @@
 0
+  INSERT 0
   literal
 'bar'
+  INSERT 'bar'
   literal
 'herp'
+  INSERT 'herp'
   literal

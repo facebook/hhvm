@@ -1,16 +1,24 @@
 enum
+  INSERT enum
   keyword
 newtype
+  INSERT newtype
   keyword
 type
+  INSERT type
   keyword
 interface
+  INSERT interface
   keyword
 trait
+  INSERT trait
   keyword
 class
+  INSERT class
   keyword
 async
+  INSERT async
   keyword
 function
+  INSERT function
   keyword

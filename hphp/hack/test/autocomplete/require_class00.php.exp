@@ -1,6 +1,9 @@
 require class
+  INSERT require class
   keyword
 require implements
+  INSERT require implements
   keyword
 require extends
+  INSERT require extends
   keyword

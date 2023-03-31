@@ -1,4 +1,6 @@
 $baz
+  INSERT $baz
   local variable
 $bar
+  INSERT $bar
   local variable

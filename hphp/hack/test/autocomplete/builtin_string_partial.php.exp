@@ -1,5 +1,7 @@
 string
+  INSERT string
   builtin
   A sequence of characters.
 StringBuilder
+  INSERT StringBuilder
   class

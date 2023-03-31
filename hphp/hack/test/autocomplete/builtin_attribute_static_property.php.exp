@@ -1,7 +1,9 @@
 __LateInit
+  INSERT __LateInit
   built-in attribute
   Marks a property as late initialized. Normally properties are required to be initialized in the constructor.
 __Soft
+  INSERT __Soft
   built-in attribute
   A runtime type mismatch on this parameter/property will not throw a TypeError/Error. This is useful for migrating partial code where you're unsure about the type.
   

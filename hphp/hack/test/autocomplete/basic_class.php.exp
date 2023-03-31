@@ -1,2 +1,3 @@
 frob
+  INSERT frob()
   function(): void

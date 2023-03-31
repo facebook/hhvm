@@ -1,4 +1,6 @@
 foo
+  INSERT foo
   literal
 foobar
+  INSERT foobar
   literal

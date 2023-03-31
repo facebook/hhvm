@@ -1,6 +1,9 @@
 'a_abc'
+  INSERT 'a_abc'
   literal
 'a_def'
+  INSERT 'a_def'
   literal
 'b_abc'
+  INSERT 'b_abc'
   literal

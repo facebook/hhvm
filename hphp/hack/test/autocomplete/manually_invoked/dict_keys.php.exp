@@ -1,4 +1,6 @@
 bar
+  INSERT bar(${1:\$in})
   (function(dict<string, string> $in): string)
 foo
+  INSERT foo()
   (function(): string)

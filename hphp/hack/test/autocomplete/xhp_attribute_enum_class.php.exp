@@ -1,6 +1,9 @@
 MyEnum::TYPE_C
+  INSERT MyEnum::TYPE_C
   enum
 MyEnum::TYPE_B
+  INSERT MyEnum::TYPE_B
   enum
 MyEnum::TYPE_A
+  INSERT MyEnum::TYPE_A
   enum

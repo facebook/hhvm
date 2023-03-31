@@ -1,4 +1,6 @@
 false
+  INSERT false
   literal
 true
+  INSERT true
   literal

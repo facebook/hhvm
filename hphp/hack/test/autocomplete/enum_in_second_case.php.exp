@@ -1,4 +1,6 @@
 MyEnum::TYPE_C
+  INSERT MyEnum::TYPE_C
   class constant
 MyEnum::TYPE_B
+  INSERT MyEnum::TYPE_B
   class constant

@@ -25,7 +25,8 @@ folly::AsyncSocket::WriteResult TAsyncSocketIntercepted::performWrite(
     uint32_t count,
     folly::WriteFlags flags,
     uint32_t* countWritten,
-    uint32_t* partialWritten) {
+    uint32_t* partialWritten,
+    folly::AsyncSocket::WriteRequestTag writeTag) {
   std::vector<iovec> newiov;
   std::string corruptedDataHolder;
   if (params_.get() && params_->corruptLastWriteByte_) {
@@ -46,7 +47,7 @@ folly::AsyncSocket::WriteResult TAsyncSocketIntercepted::performWrite(
     vec = newiov.data();
   }
   WriteResult writeRes = folly::AsyncSocket::performWrite(
-      vec, count, flags, countWritten, partialWritten);
+      vec, count, flags, countWritten, partialWritten, std::move(writeTag));
   totalBytesWritten_ += writeRes.writeReturn;
   return writeRes;
 }

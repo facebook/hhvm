@@ -125,6 +125,18 @@ struct ResourceData : public PeriodicStatsDataBase {
     return cpuPressureAvg300Pct_;
   }
 
+  [[nodiscard]] double getIoPressureAvg10Pct() const {
+    return ioPressureAvg10Pct_;
+  }
+
+  [[nodiscard]] double getIoPressureAvg60Pct() const {
+    return ioPressureAvg60Pct_;
+  }
+
+  [[nodiscard]] double getIoPressureAvg300Pct() const {
+    return ioPressureAvg300Pct_;
+  }
+
   // Gets the total memory of the system in bytes
   uint64_t getTotalMemBytes() const {
     return totalMemBytes_;
@@ -288,16 +300,22 @@ struct ResourceData : public PeriodicStatsDataBase {
     totalMemBytes_ = totalMemBytes;
   }
 
+  void setCpuPressureStats(double avg10, double avg60, double avg300) {
+    cpuPressureAvg10Pct_ = avg10;
+    cpuPressureAvg60Pct_ = avg60;
+    cpuPressureAvg300Pct_ = avg300;
+  }
+
   void setMemPressureStats(double avg10, double avg60, double avg300) {
     memPressureAvg10Pct_ = avg10;
     memPressureAvg60Pct_ = avg60;
     memPressureAvg300Pct_ = avg300;
   }
 
-  void setCpuPressureStats(double avg10, double avg60, double avg300) {
-    cpuPressureAvg10Pct_ = avg10;
-    cpuPressureAvg60Pct_ = avg60;
-    cpuPressureAvg300Pct_ = avg300;
+  void setIoPressureStats(double avg10, double avg60, double avg300) {
+    ioPressureAvg10Pct_ = avg10;
+    ioPressureAvg60Pct_ = avg60;
+    ioPressureAvg300Pct_ = avg300;
   }
 
   /**
@@ -361,6 +379,10 @@ struct ResourceData : public PeriodicStatsDataBase {
   double memPressureAvg10Pct_{0};
   double memPressureAvg60Pct_{0};
   double memPressureAvg300Pct_{0};
+
+  double ioPressureAvg10Pct_{0};
+  double ioPressureAvg60Pct_{0};
+  double ioPressureAvg300Pct_{0};
 };
 
 /**

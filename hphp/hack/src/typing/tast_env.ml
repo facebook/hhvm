@@ -164,8 +164,6 @@ let is_visible = Typing_visibility.is_visible
 
 let assert_nontrivial = Typing_equality_check.assert_nontrivial
 
-let assert_nullable = Typing_equality_check.assert_nullable
-
 let hint_to_ty env = Decl_hint.hint env.Typing_env_types.decl_env
 
 let localize env ety_env dty =

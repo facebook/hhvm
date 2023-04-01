@@ -13,6 +13,3 @@ val assert_nontrivial :
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   unit
-
-val assert_nullable :
-  Pos.t -> Ast_defs.bop -> Typing_env_types.env -> Typing_defs.locl_ty -> unit

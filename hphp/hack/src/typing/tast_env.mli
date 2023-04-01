@@ -155,11 +155,6 @@ val is_visible :
 val assert_nontrivial :
   Pos.t -> Ast_defs.bop -> env -> Tast.ty -> Tast.ty -> unit
 
-(** Assert that the type of a value involved in a strict (non-)equality
-    comparsion to null is nullable (otherwise it is known to always
-    return true or false). *)
-val assert_nullable : Pos.t -> Ast_defs.bop -> env -> Tast.ty -> unit
-
 (** Return the declaration-phase type the given hint represents. *)
 val hint_to_ty : env -> Aast.hint -> Typing_defs.decl_ty
 

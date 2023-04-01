@@ -144,8 +144,3 @@ let rec assert_nontrivial p bop env ty1 ty2 =
           | Tunapplied_alias _ | Tneg _ ) ),
         _ ) ->
       ())
-
-let assert_nullable _p _bop env ty =
-  let (_, ty) = Env.expand_type env ty in
-  match deref ty with
-  | (_, _) -> ()

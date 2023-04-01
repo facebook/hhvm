@@ -9046,7 +9046,13 @@ and call
           let capability =
             Typing_coeffects.get_type ft.ft_implicit_params.capability
           in
-          if not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)) then
+          let should_skip_check =
+            (not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)))
+            (* When inside an expression tree, expressions are virtualized and
+               thus never executed. Safe to skip coeffect checks in this case. *)
+            || Env.is_in_expr_tree env
+          in
+          if should_skip_check then
             (env, None)
           else
             let env_capability =

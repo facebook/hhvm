@@ -4,7 +4,7 @@ Invalid argument (Typing[4110])
   Expected `ExampleInt`
   File "splice_err2.php", line 6, characters 8-26:
   But got `TInfer#1 = ExampleString`
-  File "expr_tree.hhi", line 25, characters 45-50:
+  File "expr_tree.hhi", line 25, characters 47-52:
     via this generic `TInfer`
   File "expr_tree.hhi", line 211, characters 44-49:
     via this generic `TInfer`

@@ -16,12 +16,15 @@ module SN = Naming_special_names
 let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
   (* gate the check behavior on coeffects TC option *)
   let tcopt = Env.get_tcopt env in
-  if
-    TypecheckerOptions.local_coeffects tcopt
-    && not
-         (TypecheckerOptions.enable_sound_dynamic tcopt
-         && Tast.is_under_dynamic_assumptions env.checked)
-  then (
+  let should_skip_check =
+    (not @@ TypecheckerOptions.local_coeffects tcopt)
+    || TypecheckerOptions.enable_sound_dynamic tcopt
+       && Tast.is_under_dynamic_assumptions env.checked
+    (* When inside an expression tree, expressions are virtualized and
+       thus never executed. Safe to skip coeffect checks in this case. *)
+    || Env.is_in_expr_tree env
+  in
+  if not should_skip_check then (
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in
     let err_opt = mk_err_opt available required in

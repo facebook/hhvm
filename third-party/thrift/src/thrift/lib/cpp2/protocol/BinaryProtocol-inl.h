@@ -189,7 +189,7 @@ inline uint32_t BinaryProtocolWriter::writeRaw(const folly::IOBuf& str) {
 }
 
 inline void BinaryProtocolWriter::checkBinarySize(uint64_t size) {
-  // We can't deserialize binary/string over 2GB, enforing the same limit on
+  // We can't deserialize binary/string over 2GB, enforcing the same limit on
   // serializing for consistency
   constexpr uint64_t limit = std::numeric_limits<int32_t>::max();
   if (size > limit) {
@@ -220,16 +220,13 @@ inline uint32_t BinaryProtocolWriter::writeBinaryImpl(const folly::IOBuf& str) {
 }
 
 inline void BinaryProtocolWriter::rewriteDouble(double dub, int64_t offset) {
-  auto cursor = RWCursor(out_);
-  cursor.advanceToEnd();
-  cursor -= offset;
+  auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(offset);
   cursor.writeBE(folly::bit_cast<uint64_t>(dub));
 }
 
 inline folly::io::Cursor BinaryProtocolWriter::tail(size_t n) {
-  auto cursor = RWCursor(out_);
-  cursor.advanceToEnd();
-  return {cursor - n, n};
+  auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(n);
+  return {cursor, n};
 }
 
 /**

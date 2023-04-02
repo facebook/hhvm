@@ -50,9 +50,7 @@ inline uint32_t CompactV1ProtocolWriter::writeDouble(double dub) {
 }
 
 inline void CompactV1ProtocolWriter::rewriteDouble(double dub, int64_t offset) {
-  auto cursor = RWCursor(out_);
-  cursor.advanceToEnd();
-  cursor -= offset;
+  auto cursor = out_.tail<folly::io::CursorAccess::PRIVATE>(offset);
   cursor.writeLE(folly::bit_cast<uint64_t>(dub));
 }
 

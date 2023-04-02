@@ -194,7 +194,7 @@ struct Class : AtomicCountable {
 
     LowStringPtr name;
    private:
-    mutable LowStringPtr m_mangledName = nullptr;
+    mutable AtomicLowPtr<const StringData> m_mangledName = nullptr;
 
    public:
     /* Most derived class that declared this property. */
@@ -222,7 +222,7 @@ struct Class : AtomicCountable {
       if (m_mangledName == nullptr) {
         m_mangledName = PreClass::manglePropName(baseCls->name(), name, attrs);
       }
-      assertx(m_mangledName);
+      assertx(m_mangledName.get());
       return m_mangledName;
     }
   };

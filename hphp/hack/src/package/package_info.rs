@@ -76,6 +76,7 @@ mod test {
     fn test_parsing_basic_file() {
         let contents = include_str!("tests/package-1.toml");
         let info = PackageInfo::from_text(contents).unwrap();
+        assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
         assert_eq!(foo.uses.as_ref().unwrap()[0].get_ref(), "a.*");
@@ -111,6 +112,7 @@ mod test {
     fn test_multiline_uses() {
         let contents = include_str!("tests/package-2.toml");
         let info = PackageInfo::from_text(contents).unwrap();
+        assert!(info.errors.is_empty());
 
         let foo = &info.packages()["foo"];
         let foo_uses = &foo.uses.as_ref().unwrap();

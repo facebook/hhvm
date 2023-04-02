@@ -55,7 +55,9 @@ impl Config {
                 if let Some(deployed) = pkgs {
                     let missing_pkgs =
                         find_missing_packages_from_deployment(&self.packages, deployed);
-                    errors.push(Error::incomplete_deployment(deployment, missing_pkgs));
+                    if !missing_pkgs.is_empty() {
+                        errors.push(Error::incomplete_deployment(deployment, missing_pkgs));
+                    }
                 }
             };
         let mut errors = vec![];

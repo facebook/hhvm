@@ -178,13 +178,6 @@ bool MaskRef::isStringMapMask() const {
   return mask.includes_string_map_ref() || mask.excludes_string_map_ref();
 }
 
-// Thrift Map Mask supports integer and string key similar to
-// https://docs.hhvm.com/hack/built-in-types/arraykey.
-enum class ArrayKey {
-  Integer = 0,
-  String = 1,
-};
-
 ArrayKey getArrayKeyFromValue(const Value& v) {
   if (v.is_byte() || v.is_i16() || v.is_i32() || v.is_i64()) {
     return ArrayKey::Integer;
@@ -433,7 +426,6 @@ void throwIfContainsMapMask(const Mask& mask) {
   }
 }
 
-// Returns the MapId for the given key.
 MapId findMapIdByValueAddress(const Mask& mask, const Value& newKey) {
   MapId mapId = MapId{reinterpret_cast<int64_t>(&newKey)};
   if (!(mask.includes_map_ref() || mask.excludes_map_ref())) {

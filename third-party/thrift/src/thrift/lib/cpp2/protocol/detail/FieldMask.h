@@ -39,6 +39,13 @@ namespace apache::thrift::protocol::detail {
 // Runtime and compile time representations for a map id.
 enum class MapId : int64_t {};
 
+// Thrift Map Mask supports integer and string key similar to
+// https://docs.hhvm.com/hack/built-in-types/arraykey.
+enum class ArrayKey {
+  Integer = 0,
+  String = 1,
+};
+
 // Returns mask == allMask() but faster
 inline bool isAllMask(const Mask& mask) {
   return mask.excludes_ref() && mask.excludes_ref()->empty();
@@ -482,6 +489,18 @@ void compare_impl(
     mask[fieldId] = field_mask_constants::allMask();
   });
 }
+
+// Returns the ArrayKey of the given Value key. If the Value key contains
+// a non-integer or non-string value, it throws.
+ArrayKey getArrayKeyFromValue(const Value& v);
+
+// Returns the MapId of the given Value key. If the Value key
+// contains a non-integer valie, it throws.
+MapId getMapIdFromValue(const Value& v);
+
+// Returns the string of the given Value key. If the Value key contains a
+// non-string value, it throws.
+std::string getStringFromValue(const Value& v);
 
 // Returns the MapId in map mask of the given Value key.
 // If it doesn't exist, it returns the new MapId (pointer to the key).

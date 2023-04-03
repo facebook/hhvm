@@ -86,3 +86,7 @@ struct MapStruct {
   @thrift.Box
   2: optional Bar bar;
 }
+
+struct InvalidMapMaskKeyStruct {
+  1: map<double, i32> field1;
+}

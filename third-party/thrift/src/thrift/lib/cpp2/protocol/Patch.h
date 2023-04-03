@@ -69,6 +69,12 @@ ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch);
 // Extracting mask from a temporary patch is dangerous and should be disallowed.
 ExtractedMasks extractMaskViewFromPatch(Object&& patch) = delete;
 
+/// Constructs read and write Thrift Mask that only contain fields that are
+/// modified by the Patch. It will construct nested Mask for map and object
+/// patches. For map, it only supports integer or string key. If the type of key
+/// map is not integer or string, it throws.
+ExtractedMasks extractMaskFromPatch(const protocol::Object& patch);
+
 template <type::StandardProtocol Protocol>
 std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
     const protocol::Object& patch, const folly::IOBuf& buf);

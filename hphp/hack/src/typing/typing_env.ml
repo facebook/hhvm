@@ -989,8 +989,13 @@ let with_inside_expr_tree env expr_tree_hint f =
 
 let with_outside_expr_tree env f =
   let old_in_expr_tree = env.in_expr_tree in
+  let dsl =
+    match old_in_expr_tree with
+    | Some { dsl = (_, Happly (cls, _)) } -> Some cls
+    | _ -> None
+  in
   let env = outside_expr_tree env in
-  let (env, r1, r2) = f env in
+  let (env, r1, r2) = f env dsl in
   let env = { env with in_expr_tree = old_in_expr_tree } in
   (env, r1, r2)
 

@@ -1,8 +1,10 @@
 File "nested_splicing2.php", line 6, characters 20-23:
 Splice syntax `${...}` cannot be nested. (Parsing[1002])
 File "nested_splicing2.php", line 6, characters 20-23:
-Typing error (Typing[4110])
+This value cannot be spliced into an expression tree (Typing[4110])
   File "nested_splicing2.php", line 6, characters 20-23:
   Expected `Spliceable<_, _, _>` because this is being spliced into another Expression Tree
   File "nested_splicing2.php", line 6, characters 22-22:
   But got `int`
+  File "nested_splicing2.php", line 6, characters 22-22:
+  Hack values need to be lifted to compatible types before splicing. See https://docs.hhvm.com/hack/expression-trees/splicing for more information.

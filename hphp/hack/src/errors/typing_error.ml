@@ -8143,6 +8143,14 @@ and Reasons_callback : sig
 
   val unify_error_at : Pos.t -> t
 
+  val expr_tree_splice_error :
+    Pos.t ->
+    expr_pos:Pos_or_decl.t ->
+    contextual_reasons:Pos_or_decl.t Message.t list Lazy.t option ->
+    dsl_opt:string option ->
+    docs_url:string option Lazy.t ->
+    t
+
   val bad_enum_decl : Pos.t -> t
 
   val bad_conditional_support_dynamic :
@@ -8436,6 +8444,44 @@ end = struct
     of_error
     @@ Error.primary
     @@ Primary.Unify_error { pos; msg_opt = None; reasons_opt = None }
+
+  let expr_tree_splice_error
+      pos ~expr_pos ~contextual_reasons ~dsl_opt ~docs_url =
+    let msg =
+      match dsl_opt with
+      | Some dsl_name ->
+        Printf.sprintf
+          "This value cannot be spliced into a `%s` expression tree"
+        @@ Utils.strip_ns dsl_name
+      | None -> "This value cannot be spliced into an expression tree"
+    in
+    let reason =
+      lazy
+        begin
+          let (lazy docs_url) = docs_url in
+          let docs_url =
+            Option.value
+              docs_url
+              ~default:"https://docs.hhvm.com/hack/expression-trees/splicing"
+          in
+          let msg =
+            Printf.sprintf
+              "Hack values need to be lifted to compatible types before splicing. See %s for more information."
+              docs_url
+          in
+
+          (expr_pos, msg)
+        end
+    in
+    let error =
+      append_reason ~reason
+      @@ of_error
+      @@ Error.primary
+      @@ Primary.Unify_error { pos; msg_opt = Some msg; reasons_opt = None }
+    in
+    match contextual_reasons with
+    | None -> error
+    | Some reasons -> with_reasons ~reasons error
 
   let bad_enum_decl pos =
     retain_code

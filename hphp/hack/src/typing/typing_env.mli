@@ -207,7 +207,8 @@ val with_origin2 :
 val with_inside_expr_tree :
   env -> Aast_defs.hint -> (env -> env * 'a * 'b) -> env * 'a * 'b
 
-val with_outside_expr_tree : env -> (env -> env * 'a * 'b) -> env * 'a * 'b
+val with_outside_expr_tree :
+  env -> (env -> Aast.class_name option -> env * 'a * 'b) -> env * 'a * 'b
 
 val inside_expr_tree : env -> Aast_defs.hint -> env
 

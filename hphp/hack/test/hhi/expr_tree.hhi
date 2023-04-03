@@ -197,7 +197,7 @@ class ExampleDsl {
   public function splice<T>(
     ?ExprPos $_,
     string $_key,
-    Spliceable<ExampleDsl, ExampleDsl::TAst, T> $_,
+    ExampleDslExpression<T> $_,
   )[]: ExampleDsl::TAst {
     throw new Exception();
   }
@@ -276,3 +276,5 @@ interface ExampleVoid {}
 interface ExampleFunction<T> {
   public function __unwrap(): T;
 }
+
+type ExampleDslExpression<T> = Spliceable<ExampleDsl, ExampleDsl::TAst, T>;

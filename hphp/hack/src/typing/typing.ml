@@ -4938,7 +4938,8 @@ and expr_
       (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
       (mk (Reason.Rshape_literal p, Tshape (Missing_origin, Closed_shape, fdm)))
   | ET_Splice e ->
-    Typing_env.with_outside_expr_tree env (fun env -> et_splice env p e)
+    Typing_env.with_outside_expr_tree env (fun env dsl_name ->
+        et_splice env dsl_name p e)
   | EnumClassLabel (None, s) ->
     let (env, expect_label, lty_opt) =
       match expected with
@@ -5970,7 +5971,59 @@ and expression_tree env p et =
        })
     ty_runtime_expr
 
-and et_splice env p e =
+and et_splice env dsl_opt p e =
+  let open Option.Let_syntax in
+  let dsl_opt =
+    let* (_, dsl_name) = dsl_opt in
+    return dsl_name
+  in
+  (* Error Reporting:
+     The unification error reported by checking against `Spliceable<_, _, _>`
+     is confusing to users. We improve the error message by including
+     contextual information we pull from the definition of the DSL class.
+
+     Particularly we:
+       - Use the type specified in the DSL classes splice method
+       - If there is a docs url attached to the class, use it *)
+  let rec contextual_reasons ~ty env =
+    let* dsl_name = dsl_opt in
+    let* cls = Env.get_class env dsl_name in
+    let* { ce_type = (lazy fun_ty); _ } =
+      Env.get_member true env cls SN.ExpressionTrees.splice
+    in
+    (* Pull the type of third argument to `MyDsl::splice()`.
+       If we change the number of arguments this method takes, we will need to
+       update this match expression *)
+    let* splice_ty =
+      match get_node fun_ty with
+      | Tfun { ft_params = [_; _; splice_ty]; _ } ->
+        return @@ splice_ty.fp_type.et_type
+      | _ -> None
+    in
+    return @@ lazy (error_reason ~splice_ty ~ty ~dsl_name env)
+  and error_reason ~splice_ty ~ty ~dsl_name env =
+    let err_splice_ty =
+      Printf.sprintf
+        "Expected `%s` because you are splicing into a `%s` expression or block"
+        (Typing_print.with_blank_tyvars (fun () ->
+             Typing_print.full_strip_ns_decl env splice_ty))
+        (Utils.strip_ns dsl_name)
+    in
+    let err_ty =
+      Printf.sprintf "But got `%s`"
+      @@ Typing_print.with_blank_tyvars (fun () ->
+             Typing_print.full_strip_ns env ty)
+    in
+    Typing_reason.to_string err_splice_ty (get_reason splice_ty)
+    @ Typing_reason.to_string err_ty (get_reason ty)
+  in
+  let docs_url =
+    lazy
+      (let* dsl_name = dsl_opt in
+       let* cls = Env.get_class env dsl_name in
+       Cls.get_docs_url cls)
+  in
+
   let (env, te, ty) = expr env e ~allow_awaitable:(*?*) false in
   let (env, ty_visitor) = Env.fresh_type env p in
   let (env, ty_res) = Env.fresh_type env p in
@@ -5984,9 +6037,17 @@ and et_splice env p e =
     else
       raw_spliceable_type
   in
+
+  let (_, expr_pos, _) = e in
   let (env, ty_err_opt) =
     SubType.sub_type env ty spliceable_type
-    @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+    @@ Some
+         (Typing_error.Reasons_callback.expr_tree_splice_error
+            p
+            ~expr_pos:(Pos_or_decl.of_raw_pos expr_pos)
+            ~contextual_reasons:(contextual_reasons ~ty env)
+            ~dsl_opt
+            ~docs_url)
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   make_result env p (Aast.ET_Splice te) ty_infer

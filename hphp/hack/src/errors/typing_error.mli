@@ -1862,6 +1862,14 @@ module Reasons_callback : sig
 
   val unify_error_at : Pos.t -> t
 
+  val expr_tree_splice_error :
+    Pos.t ->
+    expr_pos:Pos_or_decl.t ->
+    contextual_reasons:Pos_or_decl.t Message.t list Lazy.t option ->
+    dsl_opt:string option ->
+    docs_url:string option Lazy.t ->
+    t
+
   val bad_enum_decl : Pos.t -> t
 
   val bad_conditional_support_dynamic :

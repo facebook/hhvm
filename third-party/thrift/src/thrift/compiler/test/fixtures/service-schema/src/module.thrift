@@ -15,8 +15,9 @@
  */
 
 include "thrift/annotation/thrift.thrift"
-// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
 include "thrift/lib/thrift/schema.thrift"
+
+namespace java.swift test.fixtures.service_schema
 
 @thrift.GenerateRuntimeSchema
 service PrimitivesService {

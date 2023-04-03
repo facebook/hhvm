@@ -67,8 +67,8 @@ namespace apache::thrift::stress {
   }
 
   ClientConnectionConfig connCfg{};
-  connCfg.serverHost =
-      folly::SocketAddress(FLAGS_server_host, FLAGS_server_port);
+  connCfg.serverHost = folly::SocketAddress(
+      FLAGS_server_host, FLAGS_server_port, /* allowNameLookup */ true);
   connCfg.security = security;
   connCfg.certPath = FLAGS_client_cert_path;
   connCfg.keyPath = FLAGS_client_key_path;

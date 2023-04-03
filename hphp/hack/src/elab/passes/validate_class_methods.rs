@@ -19,9 +19,9 @@ impl Pass for ValidateClassMethodsPass {
         for method in class.methods.iter() {
             let Id(pos, name) = &method.name;
             if seen.contains(name as &str) {
-                env.emit_error(NamingError::AlreadyBound {
+                env.emit_error(NamingError::MethodNameAlreadyBound {
                     pos: pos.clone(),
-                    name: name.clone(),
+                    meth_name: name.clone(),
                 });
             }
             seen.insert(name);
@@ -142,7 +142,9 @@ mod tests {
         class.transform(&env, &mut ValidateClassMethodsPass);
         assert!(matches!(
             env.into_errors().as_slice(),
-            [NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
+            [NamingPhaseError::Naming(
+                NamingError::MethodNameAlreadyBound { .. }
+            )]
         ));
     }
 

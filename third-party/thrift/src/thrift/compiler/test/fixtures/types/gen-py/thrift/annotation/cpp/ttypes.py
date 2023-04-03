@@ -31,7 +31,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'RefType', 'EnumUnderlyingType', 'Ref', 'Lazy', 'DisableLazyChecksum', 'Adapter', 'PackIsset', 'MinimizePadding', 'TriviallyRelocatable', 'ScopedEnumAsUnionType', 'StrongType', 'FieldInterceptor', 'UseOpEncode', 'EnumType', 'Frozen2Exclude', 'Type']
+__all__ = ['UTF8STRINGS', 'RefType', 'EnumUnderlyingType', 'Type', 'Ref', 'Lazy', 'DisableLazyChecksum', 'Adapter', 'PackIsset', 'MinimizePadding', 'TriviallyRelocatable', 'ScopedEnumAsUnionType', 'StrongType', 'FieldInterceptor', 'UseOpEncode', 'EnumType', 'Frozen2Exclude', 'Frozen2RequiresCompleteContainerParams']
 
 class RefType:
   Unique = 0
@@ -76,6 +76,116 @@ class EnumUnderlyingType:
     "U16": 3,
     "U32": 4,
   }
+
+class Type:
+  r"""
+  Changes the native type of a Thrift object.
+  `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+  
+  Attributes:
+   - name
+   - template
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.name = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.template = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Type')
+    if self.name != None:
+      oprot.writeFieldBegin('name', TType.STRING, 1)
+      oprot.writeString(self.name.encode('utf-8')) if UTF8STRINGS and not isinstance(self.name, bytes) else oprot.writeString(self.name)
+      oprot.writeFieldEnd()
+    if self.template != None:
+      oprot.writeFieldBegin('template', TType.STRING, 2)
+      oprot.writeString(self.template.encode('utf-8')) if UTF8STRINGS and not isinstance(self.template, bytes) else oprot.writeString(self.template)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.name is not None:
+      value = pprint.pformat(self.name, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    name=%s' % (value))
+    if self.template is not None:
+      value = pprint.pformat(self.template, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    template=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'name',
+      'template',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.cpp.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Type, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.cpp.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Type, self)
+
+  def _to_py_deprecated(self):
+    return self
 
 class Ref:
   r"""
@@ -1319,20 +1429,15 @@ class Frozen2Exclude:
   def _to_py_deprecated(self):
     return self
 
-class Type:
+class Frozen2RequiresCompleteContainerParams:
   r"""
-  Changes the native type of a Thrift object.
-  `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
-  
-  Attributes:
-   - name
-   - template
+  Indicates that the container params must be complete at the time this type is instantiated.
+  Only required in rare cases where the build fails with a frozen-related assert failure.
   """
 
   thrift_spec = None
   thrift_field_annotations = None
   thrift_struct_annotations = None
-  __init__ = None
   @staticmethod
   def isUnion():
     return False
@@ -1349,16 +1454,6 @@ class Type:
       (fname, ftype, fid) = iprot.readFieldBegin()
       if ftype == TType.STOP:
         break
-      if fid == 1:
-        if ftype == TType.STRING:
-          self.name = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-        else:
-          iprot.skip(ftype)
-      elif fid == 2:
-        if ftype == TType.STRING:
-          self.template = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-        else:
-          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -1371,29 +1466,13 @@ class Type:
     if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
       oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
       return
-    oprot.writeStructBegin('Type')
-    if self.name != None:
-      oprot.writeFieldBegin('name', TType.STRING, 1)
-      oprot.writeString(self.name.encode('utf-8')) if UTF8STRINGS and not isinstance(self.name, bytes) else oprot.writeString(self.name)
-      oprot.writeFieldEnd()
-    if self.template != None:
-      oprot.writeFieldBegin('template', TType.STRING, 2)
-      oprot.writeString(self.template.encode('utf-8')) if UTF8STRINGS and not isinstance(self.template, bytes) else oprot.writeString(self.template)
-      oprot.writeFieldEnd()
+    oprot.writeStructBegin('Frozen2RequiresCompleteContainerParams')
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
   def __repr__(self):
     L = []
     padding = ' ' * 4
-    if self.name is not None:
-      value = pprint.pformat(self.name, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    name=%s' % (value))
-    if self.template is not None:
-      value = pprint.pformat(self.template, indent=0)
-      value = padding.join(value.splitlines(True))
-      L.append('    template=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -1407,8 +1486,6 @@ class Type:
 
   def __dir__(self):
     return (
-      'name',
-      'template',
     )
 
   # Override the __hash__ function for Python3 - t10434117
@@ -1418,16 +1495,45 @@ class Type:
     import importlib
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.cpp.thrift_types")
-    return thrift.python.converter.to_python_struct(python_types.Type, self)
+    return thrift.python.converter.to_python_struct(python_types.Frozen2RequiresCompleteContainerParams, self)
 
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.annotation.cpp.types")
-    return thrift.py3.converter.to_py3_struct(py3_types.Type, self)
+    return thrift.py3.converter.to_py3_struct(py3_types.Frozen2RequiresCompleteContainerParams, self)
 
   def _to_py_deprecated(self):
     return self
+
+all_structs.append(Type)
+Type.thrift_spec = (
+  None, # 0
+  (1, TType.STRING, 'name', True, None, 2, ), # 1
+  (2, TType.STRING, 'template', True, None, 2, ), # 2
+)
+
+Type.thrift_struct_annotations = {
+}
+Type.thrift_field_annotations = {
+  2: {
+    "cpp.name": "template_",
+  },
+}
+
+def Type__init__(self, name=None, template=None,):
+  self.name = name
+  self.template = template
+
+Type.__init__ = Type__init__
+
+def Type__setstate__(self, state):
+  state.setdefault('name', None)
+  state.setdefault('template', None)
+  self.__dict__ = state
+
+Type.__getstate__ = lambda self: self.__dict__.copy()
+Type.__setstate__ = Type__setstate__
 
 all_structs.append(Ref)
 Ref.thrift_spec = (
@@ -1645,34 +1751,14 @@ Frozen2Exclude.thrift_struct_annotations = {
 Frozen2Exclude.thrift_field_annotations = {
 }
 
-all_structs.append(Type)
-Type.thrift_spec = (
-  None, # 0
-  (1, TType.STRING, 'name', True, None, 2, ), # 1
-  (2, TType.STRING, 'template', True, None, 2, ), # 2
+all_structs.append(Frozen2RequiresCompleteContainerParams)
+Frozen2RequiresCompleteContainerParams.thrift_spec = (
 )
 
-Type.thrift_struct_annotations = {
+Frozen2RequiresCompleteContainerParams.thrift_struct_annotations = {
 }
-Type.thrift_field_annotations = {
-  2: {
-    "cpp.name": "template_",
-  },
+Frozen2RequiresCompleteContainerParams.thrift_field_annotations = {
 }
-
-def Type__init__(self, name=None, template=None,):
-  self.name = name
-  self.template = template
-
-Type.__init__ = Type__init__
-
-def Type__setstate__(self, state):
-  state.setdefault('name', None)
-  state.setdefault('template', None)
-  self.__dict__ = state
-
-Type.__getstate__ = lambda self: self.__dict__.copy()
-Type.__setstate__ = Type__setstate__
 
 fix_spec(all_structs)
 del all_structs

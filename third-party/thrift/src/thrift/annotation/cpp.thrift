@@ -25,6 +25,17 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.cpp
 namespace go thrift.annotation.cpp
 namespace py thrift.annotation.cpp
 
+/**
+ * Changes the native type of a Thrift object.
+ * `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+ */
+@scope.Typedef
+@scope.Field
+struct Type {
+  1: string name;
+  2: string template (cpp.name = "template_");
+}
+
 enum RefType {
   Unique = 0,
   Shared = 1,
@@ -239,12 +250,8 @@ struct EnumType {
 struct Frozen2Exclude {}
 
 /**
- * Changes the native type of a Thrift object.
- * `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+ * Indicates that the container params must be complete at the time this type is instantiated.
+ * Only required in rare cases where the build fails with a frozen-related assert failure.
  */
 @scope.Typedef
-@scope.Field
-struct Type {
-  1: string name;
-  2: string template (cpp.name = "template_");
-}
+struct Frozen2RequiresCompleteContainerParams {}

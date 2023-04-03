@@ -74,6 +74,12 @@ bool is_custom_type(const t_field& field) {
 }
 
 bool container_supports_incomplete_params(const t_type& type) {
+  if (t_typedef::get_first_structured_annotation_or_null(
+          &type,
+          "facebook.com/thrift/annotation/cpp/Frozen2RequiresCompleteContainerParams")) {
+    return false;
+  }
+
   if (t_typedef::get_first_annotation_or_null(
           &type,
           {
@@ -104,87 +110,33 @@ bool container_supports_incomplete_params(const t_type& type) {
     }
     return types;
   }();
-  auto cpp_template = t_typedef::get_first_annotation_or_null(
-      &type,
-      {
-          "cpp.template",
-          "cpp2.template",
-      });
-  if (cpp_template && template_exceptions.count(*cpp_template)) {
-    return true;
+  {
+    auto cpp_template = t_typedef::get_first_annotation_or_null(
+        &type,
+        {
+            "cpp.template",
+            "cpp2.template",
+        });
+    if (cpp_template && template_exceptions.count(*cpp_template)) {
+      return true;
+    }
+  }
+  {
+    auto cpp_type = t_typedef::get_first_annotation_or_null(
+        &type,
+        {
+            "cpp.type",
+            "cpp2.type",
+        });
+    if (cpp_type) {
+      auto cpp_template = cpp_type->substr(0, cpp_type->find('<'));
+      if (template_exceptions.count(cpp_template)) {
+        return true;
+      }
+    }
   }
 
   return false;
-}
-
-std::unordered_map<t_struct*, std::vector<t_struct*>>
-gen_struct_dependency_graph(
-    const t_program* program, const std::vector<t_struct*>& objects) {
-  auto edges =
-      std::unordered_map<t_struct*, std::vector<t_struct*>>(objects.size());
-  for (t_struct* obj : objects) {
-    std::vector<t_struct*> deps;
-    for (auto& f : obj->fields()) {
-      // Ignore ref fields.
-      if (cpp2::is_explicit_ref(&f)) {
-        continue;
-      }
-
-      auto add_dependency = [&](const t_type* type) {
-        if (type != nullptr) {
-          type = type->get_true_type();
-          if (const auto strct = dynamic_cast<const t_struct*>(type)) {
-            // We're only interested in types defined in the current program.
-            if (!strct->is_exception() && strct->program() == program) {
-              // TODO(afuller): Remove const cast, once the return type also has
-              // const elements.
-              deps.emplace_back(const_cast<t_struct*>(strct));
-            }
-          }
-        }
-      };
-
-      // This awkward "resolve-then-check-if-resolved" formulation is to handle
-      // the (malformed) case where a type definition exists for the field but
-      // doesn't actually resolve to an actual type.
-      auto ftype = f.type();
-      ftype.resolve();
-      if (ftype.resolved()) {
-        auto t = ftype->get_true_type();
-        if (auto map = dynamic_cast<t_map const*>(t)) {
-          // We don't add non-custom type `std::map` to dependency graph since
-          // all known implementations support incomplete types (though as UB).
-          if (!cpp2::container_supports_incomplete_params(*map)) {
-            add_dependency(map->get_key_type());
-            add_dependency(map->get_val_type());
-          }
-        } else if (auto set = dynamic_cast<t_set const*>(t)) {
-          // We don't add non-custom type `std::set` to dependency graph since
-          // all known implementations support incomplete types (though as UB).
-          if (!cpp2::container_supports_incomplete_params(*set)) {
-            add_dependency(set->get_elem_type());
-          }
-        } else if (auto list = dynamic_cast<t_list const*>(t)) {
-          // We don't add non-custom type `std::vector` to dependency graph
-          // since it supports incomplete types (as of C++17).
-          if (!cpp2::container_supports_incomplete_params(*list)) {
-            add_dependency(list->get_elem_type());
-          }
-        } else {
-          add_dependency(t);
-        }
-      }
-    }
-
-    // Order all deps in the order they are defined in.
-    std::sort(
-        deps.begin(), deps.end(), [](const t_struct* a, const t_struct* b) {
-          return a->src_range().begin.offset() < b->src_range().begin.offset();
-        });
-
-    edges[obj] = std::move(deps);
-  };
-  return edges;
 }
 
 namespace {
@@ -199,40 +151,54 @@ bool has_dependent_adapter(const t_type& node) {
 } // namespace
 
 std::unordered_map<const t_type*, std::vector<const t_type*>>
-gen_adapter_dependency_graph(
-    const t_program* program,
-    const std::vector<const t_type*>& objects,
-    const std::vector</* const */ t_typedef*>& typedefs) {
-  std::unordered_set<const t_type*> named_typedefs(
-      typedefs.begin(), typedefs.end());
+gen_dependency_graph(
+    const t_program* program, const std::vector<const t_type*>& types) {
   std::unordered_map<const t_type*, std::vector<const t_type*>> edges(
-      objects.size());
-  for (const auto* obj : objects) {
+      types.size());
+  for (const auto* obj : types) {
     auto& deps = edges[obj];
-    auto add_dependency = [&](const t_type* type, bool include_structs) {
-      // We want to unwrap the unnamed typedefs used to store unstructured
-      // annotations since we depend on the underlying type.
-      if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
-        if (!named_typedefs.count(typedf)) {
-          type = typedf->get_type();
 
-          // Make sure it's still a type we care about
-          if (!dynamic_cast<t_typedef const*>(type) &&
-              !(dynamic_cast<t_struct const*>(type) &&
-                (include_structs ||
-                 has_dependent_adapter(*type->get_true_type())))) {
+    std::function<void(const t_type*, bool)> add_dependency =
+        [&](const t_type* type, bool include_structs) {
+          if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
+            // Resolve unnamed typedefs
+            if (typedf->typedef_kind() != t_typedef::kind::defined) {
+              type = typedf->get_type();
+            }
+          }
+
+          if (auto map = dynamic_cast<t_map const*>(type)) {
+            add_dependency(
+                map->get_key_type(),
+                include_structs && !container_supports_incomplete_params(*map));
+            return add_dependency(
+                map->get_val_type(),
+                include_structs && !container_supports_incomplete_params(*map));
+          } else if (auto set = dynamic_cast<t_set const*>(type)) {
+            return add_dependency(
+                set->get_elem_type(),
+                include_structs && !container_supports_incomplete_params(*set));
+          } else if (auto list = dynamic_cast<t_list const*>(type)) {
+            return add_dependency(
+                list->get_elem_type(),
+                include_structs &&
+                    !container_supports_incomplete_params(*list));
+          } else if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
+            // Transitively depend on true type if necessary, since typedefs
+            // generally don't depend on their underlying types.
+            add_dependency(typedf->get_true_type(), include_structs);
+          } else if (!(dynamic_cast<t_struct const*>(type) &&
+                       (include_structs || has_dependent_adapter(*type)))) {
             return;
           }
-        }
-      }
 
-      // We're only interested in types defined in the current program.
-      if (type->program() != program) {
-        return;
-      }
+          // We're only interested in types defined in the current program.
+          if (type->program() != program) {
+            return;
+          }
 
-      deps.emplace_back(type);
-    };
+          deps.emplace_back(type);
+        };
 
     if (auto* typedf = dynamic_cast<t_typedef const*>(obj)) {
       // The adjacency list of a typedef is the list of structs and typedefs
@@ -240,64 +206,19 @@ gen_adapter_dependency_graph(
       // typedef or struct has an adapter annotation without adaptedType
       // specified.
       const auto* type = &*typedf->type();
-      bool has_adapter = gen::cpp::type_resolver::find_first_adapter(*typedf);
-      if (has_adapter) {
-        if (auto* annotation =
-                typedf->find_structured_annotation_or_null(kCppAdapterUri)) {
-          if (annotation->get_value_from_structured_annotation_or_null(
-                  "adaptedType")) {
-            has_adapter = false;
-          }
-        }
-      }
-      if (dynamic_cast<t_typedef const*>(type) ||
-          (dynamic_cast<t_struct const*>(type) &&
-           (has_adapter ||
-            gen::cpp::type_resolver::find_first_adapter(
-                *typedf->get_true_type())))) {
-        add_dependency(type, has_adapter);
-      }
+      add_dependency(type, has_dependent_adapter(*typedf));
     } else if (auto* strct = dynamic_cast<t_struct const*>(obj)) {
-      // The adjacency list of a struct is the typedefs named in its fields.
-      cpp2::for_each_transitive_field(strct, [&](const t_field* field) {
-        const auto* type = field->get_type();
-        // Resolve placeholder typedefs
-        if (auto typedf = dynamic_cast<t_typedef const*>(type)) {
-          if (!named_typedefs.count(typedf)) {
-            type = typedf->get_type();
-          }
+      // The adjacency list of a struct is the structs and typedefs named in its
+      // fields.
+      for (const auto& field : strct->fields()) {
+        auto ftype = field.type();
+        ftype.resolve();
+        if (!ftype.resolved()) {
+          continue;
         }
-
-        if (dynamic_cast<t_typedef const*>(type)) {
-          add_dependency(type, false);
-        } else if (auto struct_field = dynamic_cast<t_struct const*>(type);
-                   struct_field && has_dependent_adapter(*struct_field)) {
-          add_dependency(type, true);
-        } else if (auto map = dynamic_cast<t_map const*>(type)) {
-          // Container depends on typedefs even if it supports incomplete types
-          if (auto* key_type =
-                  dynamic_cast<t_typedef const*>(map->get_key_type())) {
-            add_dependency(key_type, false);
-          }
-          if (auto* val_type =
-                  dynamic_cast<t_typedef const*>(map->get_val_type())) {
-            add_dependency(val_type, false);
-          }
-        } else if (auto set = dynamic_cast<t_set const*>(type)) {
-          // Container depends on typedefs even if it supports incomplete types
-          if (auto* elem_type =
-                  dynamic_cast<t_typedef const*>(set->get_elem_type())) {
-            add_dependency(elem_type, false);
-          }
-        } else if (auto list = dynamic_cast<t_list const*>(type)) {
-          // Container depends on typedefs even if it supports incomplete types
-          if (auto* elem_type =
-                  dynamic_cast<t_typedef const*>(list->get_elem_type())) {
-            add_dependency(elem_type, false);
-          }
-        }
-        return true;
-      });
+        const auto* type = &*ftype;
+        add_dependency(type, !cpp2::is_explicit_ref(&field));
+      }
     } else {
       assert(false);
     }
@@ -308,22 +229,6 @@ gen_adapter_dependency_graph(
     });
   };
   return edges;
-}
-
-std::unordered_map<const t_type*, std::vector<const t_type*>>
-gen_dependency_graph(
-    const t_program* program, const std::vector<const t_type*>& nodes) {
-  auto deps = gen_adapter_dependency_graph(program, nodes, program->typedefs());
-  auto struct_deps = gen_struct_dependency_graph(program, program->objects());
-  for (auto& [k, v] : struct_deps) {
-    deps[k].insert(deps[k].end(), v.begin(), v.end());
-    // Order all deps in the order they are defined in.
-    std::sort(
-        deps[k].begin(), deps[k].end(), [](const t_type* a, const t_type* b) {
-          return a->src_range().begin.offset() < b->src_range().begin.offset();
-        });
-  }
-  return deps;
 }
 
 namespace {

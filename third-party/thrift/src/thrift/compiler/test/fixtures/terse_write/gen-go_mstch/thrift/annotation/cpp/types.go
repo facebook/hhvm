@@ -149,6 +149,195 @@ func EnumUnderlyingTypePtr(v EnumUnderlyingType) *EnumUnderlyingType {
 }
 
 
+type Type struct {
+    Name string `thrift:"name,1" json:"name" db:"name"`
+    Template string `thrift:"template,2" json:"template" db:"template"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &Type{}
+
+
+func NewType() *Type {
+    return (&Type{})
+}
+
+func (x *Type) GetNameNonCompat() string {
+    return x.Name
+}
+
+func (x *Type) GetName() string {
+    return x.Name
+}
+
+func (x *Type) GetTemplateNonCompat() string {
+    return x.Template
+}
+
+func (x *Type) GetTemplate() string {
+    return x.Template
+}
+
+func (x *Type) SetName(value string) *Type {
+    x.Name = value
+    return x
+}
+
+func (x *Type) SetTemplate(value string) *Type {
+    x.Template = value
+    return x
+}
+
+
+
+func (x *Type) writeField1(p thrift.Protocol) error {  // Name
+    if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetNameNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Type) writeField2(p thrift.Protocol) error {  // Template
+    if err := p.WriteFieldBegin("template", thrift.STRING, 2); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.GetTemplateNonCompat()
+    if err := p.WriteString(item); err != nil {
+    return err
+}
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Type) readField1(p thrift.Protocol) error {  // Name
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetName(result)
+    return nil
+}
+
+func (x *Type) readField2(p thrift.Protocol) error {  // Template
+    result, err := p.ReadString()
+if err != nil {
+    return err
+}
+
+    x.SetTemplate(result)
+    return nil
+}
+
+func (x *Type) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use Type.Set* methods instead or set the fields directly.
+type TypeBuilder struct {
+    obj *Type
+}
+
+func NewTypeBuilder() *TypeBuilder {
+    return &TypeBuilder{
+        obj: NewType(),
+    }
+}
+
+func (x *TypeBuilder) Name(value string) *TypeBuilder {
+    x.obj.Name = value
+    return x
+}
+
+func (x *TypeBuilder) Template(value string) *TypeBuilder {
+    x.obj.Template = value
+    return x
+}
+
+func (x *TypeBuilder) Emit() *Type {
+    var objCopy Type = *x.obj
+    return &objCopy
+}
+
+func (x *Type) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Type"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := x.writeField2(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Type) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        case 1:  // name
+            if err := x.readField1(p); err != nil {
+                return err
+            }
+        case 2:  // template
+            if err := x.readField2(p); err != nil {
+                return err
+            }
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
 type Ref struct {
     Type RefType `thrift:"type,1" json:"type" db:"type"`
 }
@@ -1800,140 +1989,40 @@ func (x *Frozen2Exclude) Read(p thrift.Protocol) error {
 }
 
 
-type Type struct {
-    Name string `thrift:"name,1" json:"name" db:"name"`
-    Template string `thrift:"template,2" json:"template" db:"template"`
+type Frozen2RequiresCompleteContainerParams struct {
 }
 // Compile time interface enforcer
-var _ thrift.Struct = &Type{}
+var _ thrift.Struct = &Frozen2RequiresCompleteContainerParams{}
 
 
-func NewType() *Type {
-    return (&Type{})
+func NewFrozen2RequiresCompleteContainerParams() *Frozen2RequiresCompleteContainerParams {
+    return (&Frozen2RequiresCompleteContainerParams{})
 }
 
-func (x *Type) GetNameNonCompat() string {
-    return x.Name
-}
-
-func (x *Type) GetName() string {
-    return x.Name
-}
-
-func (x *Type) GetTemplateNonCompat() string {
-    return x.Template
-}
-
-func (x *Type) GetTemplate() string {
-    return x.Template
-}
-
-func (x *Type) SetName(value string) *Type {
-    x.Name = value
-    return x
-}
-
-func (x *Type) SetTemplate(value string) *Type {
-    x.Template = value
-    return x
-}
-
-
-
-func (x *Type) writeField1(p thrift.Protocol) error {  // Name
-    if err := p.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetNameNonCompat()
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *Type) writeField2(p thrift.Protocol) error {  // Template
-    if err := p.WriteFieldBegin("template", thrift.STRING, 2); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
-    }
-
-    item := x.GetTemplateNonCompat()
-    if err := p.WriteString(item); err != nil {
-    return err
-}
-
-    if err := p.WriteFieldEnd(); err != nil {
-        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
-    }
-    return nil
-}
-
-func (x *Type) readField1(p thrift.Protocol) error {  // Name
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetName(result)
-    return nil
-}
-
-func (x *Type) readField2(p thrift.Protocol) error {  // Template
-    result, err := p.ReadString()
-if err != nil {
-    return err
-}
-
-    x.SetTemplate(result)
-    return nil
-}
-
-func (x *Type) String() string {
+func (x *Frozen2RequiresCompleteContainerParams) String() string {
     return fmt.Sprintf("%+v", x)
 }
 
 
-// Deprecated: Use Type.Set* methods instead or set the fields directly.
-type TypeBuilder struct {
-    obj *Type
+// Deprecated: Use Frozen2RequiresCompleteContainerParams.Set* methods instead or set the fields directly.
+type Frozen2RequiresCompleteContainerParamsBuilder struct {
+    obj *Frozen2RequiresCompleteContainerParams
 }
 
-func NewTypeBuilder() *TypeBuilder {
-    return &TypeBuilder{
-        obj: NewType(),
+func NewFrozen2RequiresCompleteContainerParamsBuilder() *Frozen2RequiresCompleteContainerParamsBuilder {
+    return &Frozen2RequiresCompleteContainerParamsBuilder{
+        obj: NewFrozen2RequiresCompleteContainerParams(),
     }
 }
 
-func (x *TypeBuilder) Name(value string) *TypeBuilder {
-    x.obj.Name = value
-    return x
-}
-
-func (x *TypeBuilder) Template(value string) *TypeBuilder {
-    x.obj.Template = value
-    return x
-}
-
-func (x *TypeBuilder) Emit() *Type {
-    var objCopy Type = *x.obj
+func (x *Frozen2RequiresCompleteContainerParamsBuilder) Emit() *Frozen2RequiresCompleteContainerParams {
+    var objCopy Frozen2RequiresCompleteContainerParams = *x.obj
     return &objCopy
 }
 
-func (x *Type) Write(p thrift.Protocol) error {
-    if err := p.WriteStructBegin("Type"); err != nil {
+func (x *Frozen2RequiresCompleteContainerParams) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("Frozen2RequiresCompleteContainerParams"); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
-    }
-
-    if err := x.writeField1(p); err != nil {
-        return err
-    }
-
-    if err := x.writeField2(p); err != nil {
-        return err
     }
 
     if err := p.WriteFieldStop(); err != nil {
@@ -1946,7 +2035,7 @@ func (x *Type) Write(p thrift.Protocol) error {
     return nil
 }
 
-func (x *Type) Read(p thrift.Protocol) error {
+func (x *Frozen2RequiresCompleteContainerParams) Read(p thrift.Protocol) error {
     if _, err := p.ReadStructBegin(); err != nil {
         return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
     }
@@ -1962,14 +2051,6 @@ func (x *Type) Read(p thrift.Protocol) error {
         }
 
         switch id {
-        case 1:  // name
-            if err := x.readField1(p); err != nil {
-                return err
-            }
-        case 2:  // template
-            if err := x.readField2(p); err != nil {
-                return err
-            }
         default:
             if err := p.Skip(typ); err != nil {
                 return err

@@ -56,26 +56,9 @@ const std::string& get_name(const Node* node) {
 bool is_custom_type(const t_field& field);
 bool is_custom_type(const t_type& type);
 
-std::unordered_map<t_struct*, std::vector<t_struct*>>
-gen_struct_dependency_graph(
-    const t_program* program, const std::vector<t_struct*>& objects);
-
-/*
- *  For sorting structured types and typedefs with the following rules:
- *    typedefs are defined before they are used in any field type
- *    classes are complete before they are used in a typedef with an adapter
- *       annotation (required by the current trait implementation)
- */
-std::unordered_map<const t_type*, std::vector<const t_type*>>
-gen_adapter_dependency_graph(
-    const t_program* program,
-    const std::vector<const t_type*>& objects,
-    const std::vector</* const */ t_typedef*>& typedefs);
-
-// Combines previous two dependency graphs and repeats sort to keep order stable
 std::unordered_map<const t_type*, std::vector<const t_type*>>
 gen_dependency_graph(
-    const t_program* program, const std::vector<const t_type*>& objects);
+    const t_program* program, const std::vector<const t_type*>& types);
 
 inline std::vector<std::string> get_gen_namespace_components(
     const t_program& program) {

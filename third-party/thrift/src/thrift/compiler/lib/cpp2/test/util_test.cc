@@ -401,7 +401,7 @@ TEST_F(UtilTest, gen_adapter_dependency_graph) {
         }
       }
       std::shuffle(objects.begin(), objects.end(), gen);
-      auto deps = cpp2::gen_adapter_dependency_graph(&p, objects, typedefs);
+      auto deps = cpp2::gen_dependency_graph(&p, objects);
       auto sorted_objects = cpp2::topological_sort<const t_type*>(
           objects.begin(), objects.end(), deps);
       ASSERT_EQ(sorted_objects.size(), expected.size()) << name;
@@ -454,16 +454,17 @@ TEST_F(UtilTest, simple_struct_dependency_graph) {
     }
   )");
 
-  auto edges =
-      cpp2::gen_struct_dependency_graph(program.get(), program->objects());
+  std::vector<const t_type*> objects(
+      program->objects().begin(), program->objects().end());
+  auto edges = cpp2::gen_dependency_graph(program.get(), objects);
 
   // We should really define some sort of "EXPECT_GRAPH_ISOMORPHIC" primitive,
   // but since that's hard we'll just use a simplistic/brute-force approach.
   EXPECT_EQ(edges.size(), 2);
 
   // Technically redundant, but making explicit
-  t_struct* first_node = nullptr;
-  t_struct* second_node = nullptr;
+  const t_type* first_node = nullptr;
+  const t_type* second_node = nullptr;
 
   for (const auto& vertex_with_destinations : edges) {
     const std::string& name = vertex_with_destinations.first->name();
@@ -499,16 +500,17 @@ TEST_F(UtilTest, struct_dependency_graph_with_bad_type) {
     }
   )");
 
-  auto edges =
-      cpp2::gen_struct_dependency_graph(program.get(), program->objects());
+  std::vector<const t_type*> objects(
+      program->objects().begin(), program->objects().end());
+  auto edges = cpp2::gen_dependency_graph(program.get(), objects);
 
   // We should really define some sort of "EXPECT_GRAPH_ISOMORPHIC" primitive,
   // but since that's hard we'll just use a simplistic/brute-force approach.
   EXPECT_EQ(edges.size(), 2);
 
   // Technically redundant, but making explicit
-  t_struct* first_node = nullptr;
-  t_struct* second_node = nullptr;
+  const t_type* first_node = nullptr;
+  const t_type* second_node = nullptr;
 
   for (const auto& vertex_with_destinations : edges) {
     const std::string& name = vertex_with_destinations.first->name();
@@ -526,6 +528,72 @@ TEST_F(UtilTest, struct_dependency_graph_with_bad_type) {
 
   EXPECT_TRUE(edges.at(first_node).empty());
   ASSERT_THAT(edges.at(second_node), testing::ElementsAre(first_node));
+}
+
+TEST_F(UtilTest, structs_and_typedefs_dependency_graph) {
+  auto source_mgr = source_manager();
+  auto program = dedent_and_parse_to_program(source_mgr, R"(
+    struct ContainsList {
+      1: list<S> (cpp.template = "dependent") l;
+    }
+    struct TransitiveContainsDependentList {
+      1: Dependent l;
+    }
+    struct TransitiveContainsList {
+      1: Independent l;
+    }
+    struct TransitiveContainsStruct {
+      1: AlsoS s;
+    }
+    struct TransitiveContainsStructRef {
+      1: AlsoS s (cpp.ref);
+    }
+    typedef list<S> (cpp.template = "dependent") Dependent
+    typedef list<S> Independent
+    typedef S AlsoS
+
+    struct S {}
+  )");
+
+  std::vector<const t_type*> objects(
+      program->objects().begin(), program->objects().end());
+  objects.insert(
+      objects.end(), program->typedefs().begin(), program->typedefs().end());
+  auto edges = cpp2::gen_dependency_graph(program.get(), objects);
+
+  EXPECT_EQ(edges.size(), 9);
+
+  for (const auto& [node, deps] : edges) {
+    const std::string& name = node->name();
+    if (name == "S") {
+      EXPECT_EQ(deps.size(), 0);
+    } else if (name == "ContainsList") {
+      EXPECT_EQ(deps.size(), 1);
+      EXPECT_EQ(deps.at(0)->name(), "S");
+    } else if (name == "TransitiveContainsList") {
+      EXPECT_EQ(deps.size(), 1);
+      EXPECT_EQ(deps.at(0)->name(), "Independent");
+    } else if (name == "TransitiveContainsDependentList") {
+      EXPECT_EQ(deps.size(), 2);
+      EXPECT_EQ(deps.at(0)->name(), "Dependent");
+      EXPECT_EQ(deps.at(1)->name(), "S");
+    } else if (name == "TransitiveContainsStruct") {
+      EXPECT_EQ(deps.size(), 2);
+      EXPECT_EQ(deps.at(0)->name(), "AlsoS");
+      EXPECT_EQ(deps.at(1)->name(), "S");
+    } else if (name == "TransitiveContainsStructRef") {
+      EXPECT_EQ(deps.size(), 1);
+      EXPECT_EQ(deps.at(0)->name(), "AlsoS");
+    } else if (name == "Dependent") {
+      EXPECT_EQ(deps.size(), 0);
+    } else if (name == "Independent") {
+      EXPECT_EQ(deps.size(), 0);
+    } else if (name == "AlsoS") {
+      EXPECT_EQ(deps.size(), 0);
+    } else {
+      FAIL() << "Wrong graph node: " << name;
+    }
+  }
 }
 
 } // namespace

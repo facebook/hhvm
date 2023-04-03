@@ -19,6 +19,7 @@ public class PrimitivesServiceRpcServerHandler
   private final PrimitivesService.Reactive _delegate;
 
   private final java.util.List<com.facebook.thrift.payload.Reader> _initReaders;
+  private final java.util.List<com.facebook.thrift.payload.Reader> _methodThatThrowsReaders;
 
   private final java.util.List<com.facebook.swift.service.ThriftEventHandler> _eventHandlers;
 
@@ -41,6 +42,8 @@ public class PrimitivesServiceRpcServerHandler
 
     _methodMap.put("init", this);
     _initReaders = _create_init_request_readers();
+    _methodMap.put("methodThatThrows", this);
+    _methodThatThrowsReaders = _create_methodThatThrows_request_readers();
 
 
   }
@@ -145,6 +148,137 @@ oprot.writeI64(_iter0);
 
           return _internalResponse;
   }
+  private static java.util.List<com.facebook.thrift.payload.Reader> _create_methodThatThrows_request_readers() {
+    java.util.List<com.facebook.thrift.payload.Reader> _readerList = new java.util.ArrayList<>();
+
+
+    return _readerList;
+  }
+
+  private static com.facebook.thrift.payload.Writer _create_methodThatThrows_response_writer(
+      final java.lang.Object _r,
+      final com.facebook.swift.service.ContextChain _chain,
+      final int _seqId) {
+      return oprot -> {
+      try {
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        
+        test.fixtures.service_schema.Result _iter0 = (test.fixtures.service_schema.Result)_r;
+        oprot.writeFieldBegin(com.facebook.thrift.util.RpcPayloadUtil.I32_FIELD);
+oprot.writeI32(_iter0 == null ? 0 : _iter0.getValue());
+        oprot.writeFieldEnd();
+
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWrite(_r);
+      } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  }
+
+  private static com.facebook.thrift.payload.Writer _create_methodThatThrows_exception_writer(
+      final Throwable _t,
+      final com.facebook.swift.service.ContextChain _chain,
+      final int _seqId,
+      final short _fieldId) {
+      return oprot -> {
+      try {
+        _chain.declaredUserException(_t);
+        oprot.writeStructBegin(com.facebook.thrift.util.RpcPayloadUtil.TSTRUCT);
+
+        oprot.writeFieldBegin(
+            new TField("responseField", TType.STRUCT, _fieldId));
+        com.facebook.thrift.payload.ThriftSerializable _iter0 = (com.facebook.thrift.payload.ThriftSerializable)_t;
+        _iter0.write0(oprot);
+
+        oprot.writeFieldEnd();
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+
+        _chain.postWriteException(_t);
+      } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  }
+
+  private static reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload>
+    _domethodThatThrows(
+    PrimitivesService.Reactive _delegate,
+    com.facebook.thrift.payload.ServerRequestPayload _payload,
+    java.util.List<com.facebook.thrift.payload.Reader> _readers,
+    com.facebook.swift.service.ContextChain _chain) {
+          _chain.preRead();
+          java.util.List<java.lang.Object>_data = _payload.getData(_readers);
+          java.util.Iterator<java.lang.Object> _iterator = _data.iterator();
+
+
+          _chain.postRead(_data);
+
+          reactor.core.publisher.Mono<test.fixtures.service_schema.Result> _delegateResponse = null;
+
+          if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _delegateResponse = reactor.core.publisher.Mono.defer(() ->
+              _delegate.methodThatThrows());
+            _delegateResponse = _delegateResponse.publishOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          } else {
+            _delegateResponse = _delegate.methodThatThrows();
+          }
+
+          reactor.core.publisher.Mono<com.facebook.thrift.payload.ServerResponsePayload> _internalResponse =
+            _delegateResponse.map(_response -> {
+              _chain.preWrite(_response);
+              com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload =
+                com.facebook.thrift.util.RpcPayloadUtil.createServerResponsePayload(
+                  _payload,
+                  _create_methodThatThrows_response_writer(_response, _chain, _payload.getMessageSeqId()));
+
+                return _serverResponsePayload;
+            })
+            .switchIfEmpty(
+              reactor.core.publisher.Mono.fromSupplier(
+                () -> {
+                  org.apache.thrift.TApplicationException _tApplicationException =
+                    new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "method methodThatThrows returned null");
+                  return com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(), _chain);
+                }
+              )
+            )
+            .<com.facebook.thrift.payload.ServerResponsePayload>onErrorResume(_t -> {
+                _chain.preWriteException(_t);
+                if (_t instanceof test.fixtures.service_schema.CustomException) {
+                    com.facebook.thrift.payload.Writer _exceptionWriter = _create_methodThatThrows_exception_writer(_t, _chain, _payload.getMessageSeqId(), (short) 1);
+                    com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload =
+                      com.facebook.thrift.util.RpcPayloadUtil.createServerResponsePayload(
+                          _payload,
+                          _exceptionWriter,
+                          _t.getMessage());
+
+                    return reactor.core.publisher.Mono.just(_serverResponsePayload);
+                }
+                else {
+                // exception is not of user declared type
+                String _errorMessage = String.format("Internal error processing methodThatThrows: %s", _t.getMessage() == null ? "<null>" : _t.getMessage());
+                org.apache.thrift.TApplicationException _tApplicationException =
+                    new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.INTERNAL_ERROR, _errorMessage);
+                _tApplicationException.initCause(_t);
+                com.facebook.thrift.payload.ServerResponsePayload _serverResponsePayload =
+                    com.facebook.thrift.util.RpcPayloadUtil.fromTApplicationException(_tApplicationException, _payload.getRequestRpcMetadata(),  _chain);
+
+                return reactor.core.publisher.Mono.just(_serverResponsePayload);
+                }
+            });
+          if (com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _internalResponse = _internalResponse.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+          }
+
+          return _internalResponse;
+  }
 
 
   @java.lang.Override
@@ -197,6 +331,9 @@ oprot.writeI64(_iter0);
       switch (_name) {
         case "init":
           _result = _doinit(_delegate, _payload, _initReaders, _chain);
+        break;
+        case "methodThatThrows":
+          _result = _domethodThatThrows(_delegate, _payload, _methodThatThrowsReaders, _chain);
         break;
         default: {
             _chain.preRead();

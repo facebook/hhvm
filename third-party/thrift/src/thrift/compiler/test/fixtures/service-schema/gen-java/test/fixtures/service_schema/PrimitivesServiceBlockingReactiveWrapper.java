@@ -45,4 +45,25 @@ public class PrimitivesServiceBlockingReactiveWrapper
         return _m;
     }
 
+    @java.lang.Override
+    public reactor.core.publisher.Mono<test.fixtures.service_schema.Result> methodThatThrows() {
+        reactor.core.publisher.Mono<test.fixtures.service_schema.Result> _m = reactor.core.publisher.Mono.create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _sink.success(_delegate.methodThatThrows());
+            } catch (Throwable _e) {
+                _sink.error(_e);
+            }
+        });
+
+        if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+        }
+
+        return _m;
+    }
+
 }

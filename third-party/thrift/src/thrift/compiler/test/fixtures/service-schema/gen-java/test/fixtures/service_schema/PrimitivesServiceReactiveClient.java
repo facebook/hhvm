@@ -33,8 +33,11 @@ public class PrimitivesServiceReactiveClient
   private static final TField _init_PARAM0_FIELD_DESC = new TField("param0", TType.I64, (short)1);
   private static final TField _init_PARAM1_FIELD_DESC = new TField("param1", TType.I64, (short)2);
   private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _init_EXCEPTION_READERS = java.util.Collections.emptyMap();
+  private static final java.util.Map<Short, com.facebook.thrift.payload.Reader> _methodThatThrows_EXCEPTION_READERS = new HashMap<>();
+  private static final com.facebook.thrift.payload.Reader _methodThatThrows_EXCEPTION_READER0 = Readers.wrap(test.fixtures.service_schema.CustomException.asReader());
 
   static {
+    _methodThatThrows_EXCEPTION_READERS.put((short)1, _methodThatThrows_EXCEPTION_READER0);
   }
 
   public PrimitivesServiceReactiveClient(org.apache.thrift.ProtocolId _protocolId, reactor.core.publisher.Mono<? extends com.facebook.thrift.client.RpcClient> _rpcClient) {
@@ -126,6 +129,54 @@ public class PrimitivesServiceReactiveClient
   @java.lang.Override
   public reactor.core.publisher.Mono<Long> init(final long param0, final long param1) {
     return init(param0, param1,  com.facebook.thrift.client.RpcOptions.EMPTY);
+  }
+
+  private com.facebook.thrift.payload.Writer _createmethodThatThrowsWriter() {
+    return oprot -> {
+      try {
+
+      } catch (Throwable _e) {
+        com.facebook.thrift.util.NettyUtil.releaseIfByteBufTProtocol(oprot);
+        throw reactor.core.Exceptions.propagate(_e);
+      }
+    };
+  }
+
+  private static final com.facebook.thrift.payload.Reader _methodThatThrows_READER = Readers.wrap(test.fixtures.service_schema.Result.asReader());
+
+  @java.lang.Override
+  public reactor.core.publisher.Mono<com.facebook.thrift.client.ResponseWrapper<test.fixtures.service_schema.Result>> methodThatThrowsWrapper( final com.facebook.thrift.client.RpcOptions rpcOptions) {
+    return _rpcClient
+      .flatMap(_rpc -> {
+        org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
+                .setName("method_that_throws")
+                .setKind(org.apache.thrift.RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE)
+                .setOtherMetadata(getHeaders(rpcOptions))
+                .setProtocol(_protocolId)
+                .build();
+
+            com.facebook.thrift.payload.ClientRequestPayload<test.fixtures.service_schema.Result> _crp =
+                com.facebook.thrift.payload.ClientRequestPayload.create(
+                    "PrimitivesService",
+                    _createmethodThatThrowsWriter(),
+                    _methodThatThrows_READER,
+                    _methodThatThrows_EXCEPTION_READERS,
+                    _metadata,
+                    java.util.Collections.emptyMap());
+
+            return _rpc
+                .singleRequestSingleResponse(_crp, rpcOptions).doOnNext(_p -> {if(_p.getException() != null) throw com.facebook.thrift.util.ExceptionUtil.propagate(_p);});
+      });
+  }
+
+  @java.lang.Override
+  public reactor.core.publisher.Mono<test.fixtures.service_schema.Result> methodThatThrows( final com.facebook.thrift.client.RpcOptions rpcOptions) {
+    return methodThatThrowsWrapper( rpcOptions).map(_p -> _p.getData());
+  }
+
+  @java.lang.Override
+  public reactor.core.publisher.Mono<test.fixtures.service_schema.Result> methodThatThrows() {
+    return methodThatThrows( com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 
 

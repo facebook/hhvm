@@ -12,6 +12,136 @@
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/module_data.h"
 
 
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::cpp2::Result>::size;
+folly::Range<::cpp2::Result const*> const TEnumTraits<::cpp2::Result>::values = folly::range(TEnumDataStorage<::cpp2::Result>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::Result>::names = folly::range(TEnumDataStorage<::cpp2::Result>::names);
+
+bool TEnumTraits<::cpp2::Result>::findName(type value, folly::StringPiece* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<::cpp2::Result>::findValue(folly::StringPiece name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+
+}} // apache::thrift
+
+namespace cpp2 {
+#ifndef ANDROID
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+const _Result_EnumMapFactory::ValuesToNamesMapType _Result_VALUES_TO_NAMES = _Result_EnumMapFactory::makeValuesToNamesMap();
+FOLLY_POP_WARNING
+#endif
+} // cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::cpp2::CustomException>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::CustomException>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+const folly::StringPiece CustomException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CustomException>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece CustomException::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<CustomException>::name;
+}
+
+CustomException::CustomException(const CustomException&) = default;
+CustomException& CustomException::operator=(const CustomException&) = default;
+CustomException::CustomException() {
+}
+
+
+CustomException::~CustomException() {}
+
+CustomException::CustomException(FOLLY_MAYBE_UNUSED CustomException&& other) noexcept :
+    __fbthrift_field_name(std::move(other.__fbthrift_field_name)),
+    __isset(other.__isset) {
+}
+
+CustomException& CustomException::operator=(FOLLY_MAYBE_UNUSED CustomException&& other) noexcept {
+    this->__fbthrift_field_name = std::move(other.__fbthrift_field_name);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+CustomException::CustomException(apache::thrift::FragileConstructor, ::std::string name__arg) :
+    __fbthrift_field_name(std::move(name__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void CustomException::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  __isset = {};
+}
+
+void CustomException::__fbthrift_clear_terse_fields() {
+}
+
+bool CustomException::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool CustomException::operator==(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool CustomException::operator<(FOLLY_MAYBE_UNUSED const CustomException& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.name_ref() == rhs.name_ref())) {
+    return lhs.name_ref() < rhs.name_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED CustomException& a, FOLLY_MAYBE_UNUSED CustomException& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
+  swap(a.__isset, b.__isset);
+}
+
+template void CustomException::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CustomException::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CustomException::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CustomException::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CustomException::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CustomException::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CustomException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CustomException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // cpp2
+
 namespace cpp2 { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }

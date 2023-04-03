@@ -12,6 +12,19 @@
 namespace apache {
 namespace thrift {
 namespace detail {
+
+template <>
+struct VisitByFieldId<::cpp2::CustomException> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).name_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::CustomException");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

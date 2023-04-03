@@ -81,6 +81,22 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
             RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
+
+        @ThriftMethod(value = "method_that_throws",
+                      exception = { 
+                          @ThriftException(type=test.fixtures.service_schema.CustomException.class, id=1)
+                      })
+        ListenableFuture<test.fixtures.service_schema.Result> methodThatThrows();
+
+        default ListenableFuture<test.fixtures.service_schema.Result> methodThatThrows(
+            RpcOptions rpcOptions) {
+            throw new UnsupportedOperationException();
+        }
+
+        default ListenableFuture<ResponseWrapper<test.fixtures.service_schema.Result>> methodThatThrowsWrapper(
+            RpcOptions rpcOptions) {
+            throw new UnsupportedOperationException();
+        }
     }
     @java.lang.Override void close();
 
@@ -100,6 +116,22 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         @com.facebook.swift.codec.ThriftField(value=1, name="param0", requiredness=Requiredness.NONE) final long param0,
         @com.facebook.swift.codec.ThriftField(value=2, name="param1", requiredness=Requiredness.NONE) final long param1,
         RpcOptions rpcOptions) throws org.apache.thrift.TException {
+        throw new UnsupportedOperationException();
+    }
+
+    @ThriftMethod(value = "method_that_throws",
+                  exception = { 
+                      @ThriftException(type=test.fixtures.service_schema.CustomException.class, id=1)
+                  })
+    test.fixtures.service_schema.Result methodThatThrows() throws test.fixtures.service_schema.CustomException, org.apache.thrift.TException;
+
+    default test.fixtures.service_schema.Result methodThatThrows(
+        RpcOptions rpcOptions) throws test.fixtures.service_schema.CustomException, org.apache.thrift.TException {
+        throw new UnsupportedOperationException();
+    }
+
+    default ResponseWrapper<test.fixtures.service_schema.Result> methodThatThrowsWrapper(
+        RpcOptions rpcOptions) throws test.fixtures.service_schema.CustomException, org.apache.thrift.TException {
         throw new UnsupportedOperationException();
     }
 
@@ -131,6 +163,20 @@ public interface PrimitivesService extends java.io.Closeable, com.facebook.thrif
         }
 
         default reactor.core.publisher.Mono<ResponseWrapper<Long>> initWrapper(final long param0, final long param1, RpcOptions rpcOptions) {
+            throw new UnsupportedOperationException();
+        }
+
+        @ThriftMethod(value = "method_that_throws",
+                  exception = { 
+                      @ThriftException(type=test.fixtures.service_schema.CustomException.class, id=1)
+                  })
+        reactor.core.publisher.Mono<test.fixtures.service_schema.Result> methodThatThrows();
+
+        default reactor.core.publisher.Mono<test.fixtures.service_schema.Result> methodThatThrows(RpcOptions rpcOptions) {
+            throw new UnsupportedOperationException();
+        }
+
+        default reactor.core.publisher.Mono<ResponseWrapper<test.fixtures.service_schema.Result>> methodThatThrowsWrapper(RpcOptions rpcOptions) {
             throw new UnsupportedOperationException();
         }
 

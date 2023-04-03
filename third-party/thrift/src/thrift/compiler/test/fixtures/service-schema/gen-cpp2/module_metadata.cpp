@@ -25,8 +25,64 @@ using ThriftService = ::apache::thrift::metadata::ThriftService;
 using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
+void EnumMetadata<::cpp2::Result>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.enums()->emplace("module.Result", ::apache::thrift::metadata::ThriftEnum{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
+  enum_metadata.name() = "module.Result";
+  using EnumTraits = TEnumTraits<::cpp2::Result>;
+  for (std::size_t i = 0; i != EnumTraits::size; ++i) {
+    enum_metadata.elements()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+  }
+}
 
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_CustomException = res.first->second;
+  module_CustomException.name() = "module.CustomException";
+  module_CustomException.is_union() = false;
+  static const auto* const
+  module_CustomException_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_CustomException_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_CustomException.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
+void ExceptionMetadata<::cpp2::CustomException>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.exceptions()->emplace("module.CustomException", ::apache::thrift::metadata::ThriftException{});
+  if (!res.second) {
+    return;
+  }
+  ::apache::thrift::metadata::ThriftException& module_CustomException = res.first->second;
+  module_CustomException.name() = "module.CustomException";
+  static const auto* const
+  module_CustomException_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_CustomException_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    module_CustomException.fields()->push_back(std::move(field));
+  }
+}
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
   ::apache::thrift::metadata::ThriftFunction func;
   func.name() = "init";
@@ -49,6 +105,22 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "method_that_throws";
+  auto func_ret_type = std::make_unique<Enum<::cpp2::Result>>("module.Result");
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_PrimitivesService_method_that_throws_e_1;
+  module_PrimitivesService_method_that_throws_e_1.id() = 1;
+  module_PrimitivesService_method_that_throws_e_1.name() = "e";
+  module_PrimitivesService_method_that_throws_e_1.is_optional() = false;
+  auto module_PrimitivesService_method_that_throws_e_1_type = std::make_unique<Struct<::cpp2::CustomException>>("module.CustomException");
+  module_PrimitivesService_method_that_throws_e_1_type->writeAndGenType(*module_PrimitivesService_method_that_throws_e_1.type(), metadata);
+  func.exceptions()->push_back(std::move(module_PrimitivesService_method_that_throws_e_1));
+  ExceptionMetadata<::cpp2::CustomException>::gen(metadata);
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
@@ -65,6 +137,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   module_PrimitivesService.name() = "module.PrimitivesService";
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_PrimitivesService);

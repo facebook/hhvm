@@ -55,8 +55,7 @@ class t_scope {
 
   // Return the t_named associated with the given Thrift URI, or nullptr.
   const t_named* find_def(const std::string& uri) {
-    auto itr = defs_.find(uri);
-    return itr != defs_.end() ? itr->second : nullptr;
+    return find_or_null(defs_, uri);
   }
 
   void add_type(std::string name, const t_type* type) {

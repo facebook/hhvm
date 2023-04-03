@@ -48,4 +48,21 @@ public class PrimitivesServiceReactiveAsyncWrapper
     return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.initWrapper(param0,param1, rpcOptions));
   }
 
+  @java.lang.Override
+  public com.google.common.util.concurrent.ListenableFuture<test.fixtures.service_schema.Result> methodThatThrows() {
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.methodThatThrows());
+  }
+
+  @java.lang.Override
+  public com.google.common.util.concurrent.ListenableFuture<test.fixtures.service_schema.Result> methodThatThrows(
+    com.facebook.thrift.client.RpcOptions rpcOptions) {
+      return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.methodThatThrows( rpcOptions));
+  }
+
+  @java.lang.Override
+  public com.google.common.util.concurrent.ListenableFuture<com.facebook.thrift.client.ResponseWrapper<test.fixtures.service_schema.Result>> methodThatThrowsWrapper(
+    com.facebook.thrift.client.RpcOptions rpcOptions) {
+    return com.facebook.thrift.util.FutureUtil.toListenableFuture(_delegate.methodThatThrowsWrapper( rpcOptions));
+  }
+
 }

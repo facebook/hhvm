@@ -211,12 +211,14 @@ std::unique_ptr<t_const_value> gen_type(
       break;
     case t_type::type::t_enum: {
       if (defns_schema && program && generator) {
-        auto foundType =
-            dynamic_cast<const t_enum*>(program->scope()->find_def(type.uri()));
-        if (foundType) {
-          auto enum_schema = generator->gen_schema(*foundType);
-          add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
+        auto raw_type = program->scope()->find_def(type.uri());
+        if (!raw_type) {
+          raw_type = program->scope()->find_type(type.get_scoped_name());
         }
+
+        auto found_type = dynamic_cast<const t_enum*>(raw_type);
+        auto enum_schema = generator->gen_schema(*found_type);
+        add_as_definition(*defns_schema, "enumDef", std::move(enum_schema));
       }
       auto enm = val();
       enm->set_map();
@@ -227,6 +229,9 @@ std::unique_ptr<t_const_value> gen_type(
     case t_type::type::t_struct: {
       if (defns_schema && program && generator) {
         auto raw_type = program->scope()->find_def(type.uri());
+        if (!raw_type) {
+          raw_type = program->scope()->find_type(type.get_scoped_name());
+        }
         auto is_union = dynamic_cast<const t_union*>(raw_type);
         if (is_union) {
           auto union_schema = generator->gen_schema(*is_union);

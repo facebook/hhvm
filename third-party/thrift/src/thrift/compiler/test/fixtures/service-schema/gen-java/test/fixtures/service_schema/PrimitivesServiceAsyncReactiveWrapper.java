@@ -29,4 +29,9 @@ public class PrimitivesServiceAsyncReactiveWrapper
         return com.facebook.thrift.util.FutureUtil.toMono(() -> _delegate.init(param0, param1));
     }
 
+    @java.lang.Override
+    public reactor.core.publisher.Mono<test.fixtures.service_schema.Result> methodThatThrows() {
+        return com.facebook.thrift.util.FutureUtil.toMono(() -> _delegate.methodThatThrows());
+    }
+
 }

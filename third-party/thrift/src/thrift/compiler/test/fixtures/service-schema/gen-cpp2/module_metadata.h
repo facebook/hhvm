@@ -23,6 +23,21 @@ namespace detail {
 namespace md {
 
 template <>
+class EnumMetadata<::cpp2::Result> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::cpp2::CustomException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class ExceptionMetadata<::cpp2::CustomException> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
+template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
@@ -33,6 +48,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService
   friend class ServiceMetadata;
 
   static void gen_init(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_method_that_throws(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

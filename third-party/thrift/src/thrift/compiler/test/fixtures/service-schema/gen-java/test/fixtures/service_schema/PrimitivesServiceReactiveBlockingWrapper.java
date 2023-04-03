@@ -51,5 +51,28 @@ public class PrimitivesServiceReactiveBlockingWrapper
         throw com.facebook.thrift.util.ExceptionUtil.wrap(t);
       }
   }
+  @java.lang.Override
+  public test.fixtures.service_schema.Result methodThatThrows() throws test.fixtures.service_schema.CustomException, org.apache.thrift.TException {
+      return methodThatThrowsWrapper(com.facebook.thrift.client.RpcOptions.EMPTY).getData();
+  }
+
+  @java.lang.Override
+  public test.fixtures.service_schema.Result methodThatThrows(
+        com.facebook.thrift.client.RpcOptions rpcOptions) throws test.fixtures.service_schema.CustomException, org.apache.thrift.TException {
+      return methodThatThrowsWrapper(rpcOptions).getData();
+  }
+
+  @java.lang.Override
+  public com.facebook.thrift.client.ResponseWrapper<test.fixtures.service_schema.Result> methodThatThrowsWrapper(
+    com.facebook.thrift.client.RpcOptions rpcOptions) throws test.fixtures.service_schema.CustomException, org.apache.thrift.TException {
+      try {
+        return _delegate.methodThatThrowsWrapper(rpcOptions).block();
+      } catch (Throwable t) {
+        if (t instanceof test.fixtures.service_schema.CustomException) {
+          throw (test.fixtures.service_schema.CustomException)t;
+        }
+        throw com.facebook.thrift.util.ExceptionUtil.wrap(t);
+      }
+  }
 
 }

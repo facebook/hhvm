@@ -12,6 +12,14 @@
 namespace apache {
 namespace thrift {
 namespace detail {
+
+template <>
+struct ForEachField<::cpp2::CustomException> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).name_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

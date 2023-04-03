@@ -2802,10 +2802,12 @@ let decl_and_run_mode
   in
   let files =
     if use_canonical_filenames () then
-      files
-      |> List.map ~f:Sys_utils.realpath
-      |> List.map ~f:(fun s -> Option.value_exn s)
-      |> List.map ~f:Relative_path.create_detect_prefix
+      let canonicalize_path path =
+        match Sys_utils.realpath path with
+        | Some path -> Relative_path.create_detect_prefix path
+        | None -> failwith ("Couldn't resolve realpath of " ^ path)
+      in
+      files |> List.map ~f:canonicalize_path
     else
       files |> List.map ~f:(Relative_path.create Relative_path.Dummy)
   in

@@ -199,14 +199,17 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   void ensurePatchable() {
     if (data_.assign().has_value()) {
-      // Ensure even unknown fields are cleared, and ensure is used as a
-      // complete replacement.
-      *data_.clear() = true;
-      for_each_field_id<T>([&](auto id) { // ensure
+      for_each_field_id<T>([&](auto id) {
+        using Id = decltype(id);
         auto&& field = op::get<>(id, *data_.assign());
-        if (!isAbsent(field) &&
-            !op::isEmpty<op::get_type_tag<T, decltype(id)>>(*field)) {
-          op::get<>(id, *data_.ensure()) = *field;
+        auto&& prior = getRawPatch<Id>(data_.patchPrior());
+        auto&& ensure = op::get<>(id, *data_.ensure());
+        auto&& after = getRawPatch<Id>(data_.patch());
+        if (isAbsent(field)) {
+          prior.toThrift().clear() = true;
+        } else {
+          ensure = {};
+          after.assign(std::move(*field));
         }
       });
       // Unset assign.

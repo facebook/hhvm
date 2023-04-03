@@ -126,14 +126,7 @@ TEST(StructPatchTest, AssignSplit) {
   // For the patch to break apart the assign and check the result;
   patch.patchIfSet<ident::optI64Val>();
   EXPECT_FALSE(patch.toThrift().assign().has_value());
-  EXPECT_TRUE(*patch.toThrift().clear());
-  op::for_each_field_id<MyStruct>([&](auto id) {
-    if (auto&& field = op::get<>(id, *patch.toThrift().ensure())) {
-      EXPECT_TRUE((op::equal<op::get_type_tag<MyStruct, decltype(id)>>(
-          *field, *op::get<>(id, original))))
-          << "for field id " << static_cast<int>(id.value);
-    }
-  });
+  EXPECT_FALSE(*patch.toThrift().clear());
   test::expectPatch(patch, {}, original);
 }
 
@@ -987,13 +980,12 @@ TEST(StructPatchTest, EnsureStructValPatchable) {
 
   MyStruct foo;
   patch.apply(foo);
-  EXPECT_EQ(foo.structVal()->data3(), "");
+  EXPECT_EQ(foo.structVal(), data);
 
+  // Ensure will be no-op since data2 is non-optional field
   patch.patchIfSet<ident::structVal>().ensure<ident::data2>(42);
   patch.apply(foo);
-  EXPECT_EQ(foo.structVal()->data2(), 42);
-  // FIXME: ensuring one field should not clear the other field
-  EXPECT_FALSE(foo.structVal()->data3().has_value());
+  EXPECT_EQ(foo.structVal(), data);
 }
 
 TEST(StructPatchTest, EnsureOptStructValPatchable) {
@@ -1006,12 +998,11 @@ TEST(StructPatchTest, EnsureOptStructValPatchable) {
   MyStruct foo;
   foo.optStructVal().ensure();
   patch.apply(foo);
-  EXPECT_EQ(foo.optStructVal()->data2(), 42);
+  EXPECT_EQ(foo.optStructVal(), data);
 
   patch.patchIfSet<ident::optStructVal>().ensure<ident::data2>(42);
   patch.apply(foo);
-  // FIXME: ensuring one field should not clear the parent field
-  EXPECT_FALSE(foo.optStructVal().has_value());
+  EXPECT_EQ(foo.optStructVal(), data);
 }
 
 } // namespace

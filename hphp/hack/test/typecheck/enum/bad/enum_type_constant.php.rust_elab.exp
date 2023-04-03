@@ -1,6 +1,0 @@
-File "enum_type_constant.php", line 6, characters 15-22:
-Invalid type hint (Typing[4062])
-  File "enum_type_constant.php", line 6, characters 18-22:
-  You are trying to access the type constant `class` but this is an int
-  File "enum_type_constant.php", line 3, characters 15-17:
-  Definition is here

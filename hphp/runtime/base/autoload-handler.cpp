@@ -94,7 +94,6 @@ FactsStore* getFactsForRequest() {
 void AutoloadHandler::requestInit() {
   assertx(!m_map);
   assertx(!m_facts);
-  assertx(!m_req_map);
   assertx(m_onPostAutoloadFunc.isNull());
   m_facts = getFactsForRequest();
   if (RuntimeOption::RepoAuthoritative) {
@@ -108,17 +107,7 @@ void AutoloadHandler::requestInit() {
 void AutoloadHandler::requestShutdown() {
   m_map = nullptr;
   m_facts = nullptr;
-  m_req_map = nullptr;
   m_onPostAutoloadFunc.setNull();
-}
-
-bool AutoloadHandler::setMap(const Array& map, String root) {
-  assertx(!RuntimeOption::RepoAuthoritative);
-
-  m_req_map = req::make_unique<UserAutoloadMap>(
-      UserAutoloadMap::fromFullMap(map, std::move(root)));
-  m_map = m_req_map.get();
-  return true;
 }
 
 namespace {

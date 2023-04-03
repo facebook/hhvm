@@ -209,7 +209,7 @@ let query_notifier genv env query_kind start_time =
   let telemetry = Telemetry.duration telemetry ~key:"pumped" ~start_time in
   Program.exit_if_critical_update genv ~raw_updates;
   let updates =
-    FindUtils.post_watchman_filter
+    FindUtils.post_watchman_filter_from_fully_qualified_raw_updates
       ~root:(ServerArgs.root genv.options)
       ~raw_updates
   in

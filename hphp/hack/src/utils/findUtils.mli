@@ -27,6 +27,14 @@ files that satisfy FilesToIgnore.watchman_server_expression_terms, and once watc
 has given us its raw updates, then we must put them through this function.
 If this function says there are any changes, then hh_server will necessarily take some
 action in its recheck loop -- maybe do a recheck, or maybe restart because
-.hhconfig has changed or similar. *)
-val post_watchman_filter :
+.hhconfig has changed or similar.
+
+This function takes as input a set of strings representing fully-qualified pathnames
+that came out of watchman. They might be symlinks, e.g. if we watch root ~/dir,
+and watchman tells us that ~/dir/a.php has changed, it might be that a.php
+is really a symlink to something outside the root. This function accordingly
+takes in the fully-qualified pathnames from watchman, resolves symlinks,
+excludes the ones where the resolved paths are outside root, and runs the same
+file_filter as above. *)
+val post_watchman_filter_from_fully_qualified_raw_updates :
   root:Path.t -> raw_updates:SSet.t -> Relative_path.Set.t

@@ -228,6 +228,13 @@ let go_streaming_on_fd
 
 (** Gets all files-changed since [clock] which match the standard hack
 predicate [FilesToIgnore.watchman_server_expression_terms].
+The returns are relative to the watchman root.
+CARE! This is not the same as a Relative_path.t. For instance if root
+contains a symlink root/a.php ~> /tmp/b.php and the symlink itself
+changed, then watchman would report a change on "a.php" but Relative_path.t
+by definition only refers to paths after symlinks have been resolved
+which in this case would be (Relative_path.Tmp,"b.php").
+
 The caller must explicitly pass in [~fail_on_new_instance:false]
 and [~fail_during_state:false] so that the callsite is self-documenting
 about what it will do during these two scenarios. (no other options
@@ -236,7 +243,7 @@ let watchman_get_raw_updates_since
     ~(root : Path.t)
     ~(clock : Watchman.clock)
     ~(fail_on_new_instance : bool)
-    ~(fail_during_state : bool) : (SSet.t, string) result Lwt.t =
+    ~(fail_during_state : bool) : (string list, string) result Lwt.t =
   if fail_on_new_instance then
     failwith "Not yet implemented: fail_on_new_instance";
   if fail_during_state then failwith "Not yet implemented: fail_during_state";
@@ -281,7 +288,6 @@ let watchman_get_raw_updates_since
       Hh_logger.log "watchman parse failure: %s\nRESPONSE:%s\n" msg stdout;
       Lwt.return_error msg
     | Ok (json, files) ->
-      let files = SSet.of_list files in
       let has_changed = ref false in
       let json_str =
         Hh_json.json_truncate ~max_array_elt_count:10 ~has_changed json
@@ -492,8 +498,18 @@ let rec keep_trying_to_open
         progress_callback None;
         Printf.eprintf "Watchman failure.\n%s\n%!" e;
         raise Exit_status.(Exit_with Exit_status.Watchman_failed)
-      | Ok raw_updates ->
-        let updates = FindUtils.post_watchman_filter ~root ~raw_updates in
+      | Ok relative_raw_updates ->
+        let raw_updates =
+          relative_raw_updates
+          |> List.map ~f:(fun file ->
+                 Filename.concat (Path.to_string root) file)
+          |> SSet.of_list
+        in
+        let updates =
+          FindUtils.post_watchman_filter_from_fully_qualified_raw_updates
+            ~root
+            ~raw_updates
+        in
         if Relative_path.Set.is_empty updates then begin
           (* If there was an existing errors.bin, and no files have changed since then,
              then use it! *)

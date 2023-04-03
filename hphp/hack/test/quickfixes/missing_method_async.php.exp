@@ -1,4 +1,4 @@
-Add stub method `IFoo::genBar`
+Add stubs for missing interface methods
 
 <?hh
 
@@ -8,7 +8,6 @@ interface IFoo {
 
 class Foo implements IFoo {
   public async function genBar(): Awaitable<int> {}
-
 
   public function otherMethod(): void {}
 }

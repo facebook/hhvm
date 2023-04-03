@@ -23,7 +23,7 @@ let stub_method_action
     (parent_name : string)
     ((meth_name, meth) : string * Typing_defs.class_elt) : Pos.t Quickfix.t =
   let new_text =
-    Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth
+    Typing_skeleton.of_method ~is_static ~is_override:true meth_name meth ^ "\n"
   in
   let title =
     Printf.sprintf

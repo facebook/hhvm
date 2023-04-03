@@ -1,4 +1,4 @@
-Add stub method `FooParent::explicitCapabilityMethods`
+Add stubs for missing inherited methods
 
 <?hh
 
@@ -9,5 +9,4 @@ abstract class FooParent {
 class Foo extends FooParent {
   <<__Override>>
   public function explicitCapabilityMethods()[globals, write_props]: int {}
-
 }

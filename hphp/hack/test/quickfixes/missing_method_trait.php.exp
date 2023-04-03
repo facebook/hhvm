@@ -2,15 +2,17 @@ Add stubs for missing inherited methods
 
 <?hh
 
-abstract class FooParent {
+trait FooTrait {
   abstract public function bar(): void;
   abstract public function baz(): void;
 }
 
-class Foo extends FooParent {
+class Foo {
   <<__Override>>
   public function bar(): void {}
 
   <<__Override>>
   public function baz(): void {}
+
+  use FooTrait;
 }

@@ -269,27 +269,6 @@ let check_class_elt_visibility env parent_class_elt class_elt on_error =
   let (lazy pos) = class_elt.ce_pos in
   check_visibility env parent_vis c_vis parent_pos pos on_error
 
-let stub_meth_quickfix
-    ~(class_name : string)
-    ~(parent_name : string)
-    ~(meth_name : string)
-    (meth : class_elt)
-    ~(is_override : bool)
-    (member_kind : MemberKind.t) : Pos.t Quickfix.t =
-  let title =
-    Printf.sprintf
-      "Add stub method %s"
-      (Markdown_lite.md_codify (Utils.strip_ns parent_name ^ "::" ^ meth_name))
-  in
-  let new_text =
-    Typing_skeleton.of_method
-      meth_name
-      meth
-      ~is_static:(MemberKind.is_static member_kind)
-      ~is_override
-  in
-  Quickfix.make_classish ~title ~new_text ~classish_name:class_name
-
 let get_member member_kind class_ =
   match member_kind with
   | MemberKind.Property -> Cls.get_prop class_
@@ -298,27 +277,133 @@ let get_member member_kind class_ =
   | MemberKind.Static_method -> Cls.get_smethod class_
   | MemberKind.Constructor _ -> (fun _ -> fst (Cls.construct class_))
 
-let member_not_implemented_error
-    class_name parent_name member_name class_elt parent_pos member_kind =
-  let (lazy defn_pos) = class_elt.ce_pos in
-  let quickfixes =
-    [
-      stub_meth_quickfix
-        ~class_name
-        ~parent_name
-        ~meth_name:member_name
-        class_elt
-        member_kind
-        ~is_override:false;
-    ]
+type missing_member_info = {
+  member_name: string;
+  member_kind: MemberKind.t;
+  parent_class_elt: class_elt;
+  parent_pos: Pos.t;
+  is_override: bool;
+}
+
+let stub_all_methods_quickfix
+    ~(class_name : string)
+    ~(title : string)
+    (methods : missing_member_info list) : Pos.t Quickfix.t =
+  let method_texts =
+    List.map
+      methods
+      ~f:(fun { member_name; parent_class_elt; member_kind; is_override; _ } ->
+        let is_static = MemberKind.is_static member_kind in
+        Typing_skeleton.of_method
+          member_name
+          parent_class_elt
+          ~is_static
+          ~is_override)
   in
-  let err =
-    Typing_error.(
-      primary
-      @@ Primary.Member_not_implemented
-           { pos = parent_pos; member_name; decl_pos = defn_pos; quickfixes })
+  let new_text = String.concat method_texts in
+  Quickfix.make_classish ~title ~new_text ~classish_name:class_name
+
+(* Emit an error for every missing method or property in this
+   class. Offer a single quickfix for adding all the missing
+   methods. *)
+let members_missing_error
+    env
+    (class_pos : Pos.t)
+    (class_ : Cls.t)
+    (members : missing_member_info list) : unit =
+  let (missing_methods, missing_props) =
+    List.partition_tf members ~f:(fun { member_kind; _ } ->
+        MemberKind.is_functional member_kind)
   in
-  Errors.add_typing_error err
+
+  let (class_methods, interface_methods) =
+    List.partition_tf missing_methods ~f:(fun { is_override; _ } -> is_override)
+  in
+
+  List.iteri
+    interface_methods
+    ~f:(fun i { parent_pos; member_name; parent_class_elt; _ } ->
+      let quickfixes =
+        match i with
+        | 0 ->
+          [
+            stub_all_methods_quickfix
+              ~class_name:(Cls.name class_)
+              ~title:"Add stubs for missing interface methods"
+              interface_methods;
+          ]
+        | _ -> []
+      in
+      let (lazy defn_pos) = parent_class_elt.ce_pos in
+
+      let err =
+        Typing_error.(
+          primary
+          @@ Primary.Member_not_implemented
+               {
+                 pos = parent_pos;
+                 member_name;
+                 decl_pos = defn_pos;
+                 quickfixes;
+               })
+      in
+      Errors.add_typing_error err);
+
+  List.iteri class_methods ~f:(fun i { member_name; parent_class_elt; _ } ->
+      let quickfixes =
+        match i with
+        | 0 ->
+          [
+            stub_all_methods_quickfix
+              ~class_name:(Cls.name class_)
+              ~title:"Add stubs for missing inherited methods"
+              class_methods;
+          ]
+        | _ -> []
+      in
+
+      let trace =
+        lazy
+          (Ancestor_route.describe_route
+             env
+             ~classish:(Cls.name class_)
+             ~ancestor:parent_class_elt.ce_origin)
+      in
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Implement_abstract
+               {
+                 is_final = Cls.final class_;
+                 pos = class_pos;
+                 decl_pos = Lazy.force parent_class_elt.ce_pos;
+                 trace;
+                 kind = `meth;
+                 name = member_name;
+                 quickfixes;
+               }));
+
+  List.iter missing_props ~f:(fun { member_name; parent_class_elt; _ } ->
+      let trace =
+        lazy
+          (Ancestor_route.describe_route
+             env
+             ~classish:(Cls.name class_)
+             ~ancestor:parent_class_elt.ce_origin)
+      in
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Implement_abstract
+               {
+                 is_final = Cls.final class_;
+                 pos = class_pos;
+                 decl_pos = Lazy.force parent_class_elt.ce_pos;
+                 trace;
+                 kind = `prop;
+                 name = member_name;
+                 quickfixes = [];
+               }))
 
 let check_subtype_methods
     env ~check_return on_error (r_ancestor, ft_ancestor) (r_child, ft_child) ()
@@ -1216,50 +1301,6 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Cenum ->
       ()
 
-let check_abstract_member_in_concrete_class
-    env (class_pos, class_) (member_kind, class_elt_name, class_elt) =
-  let is_final = Cls.final class_ in
-  if
-    (Ast_defs.is_c_concrete (Cls.kind class_) || is_final)
-    && Typing_defs_flags.ClassElt.is_abstract class_elt.ce_flags
-  then
-    let trace =
-      lazy
-        (Ancestor_route.describe_route
-           env
-           ~classish:(Cls.name class_)
-           ~ancestor:class_elt.ce_origin)
-    in
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Implement_abstract
-             {
-               is_final;
-               pos = class_pos;
-               decl_pos = Lazy.force class_elt.ce_pos;
-               trace;
-               kind =
-                 (if MemberKind.is_functional member_kind then
-                   `meth
-                 else
-                   `prop);
-               name = class_elt_name;
-               quickfixes =
-                 (if MemberKind.is_functional member_kind then
-                   [
-                     stub_meth_quickfix
-                       ~class_name:(Cls.name class_)
-                       ~parent_name:class_elt.ce_origin
-                       ~meth_name:class_elt_name
-                       class_elt
-                       member_kind
-                       ~is_override:true;
-                   ]
-                 else
-                   []);
-             })
-
 let eager_resolve_member_via_req_class
     env parent_class_elt class_ member_kind member_name =
   let member_element_opt = get_member member_kind class_ member_name in
@@ -1321,7 +1362,7 @@ let check_class_against_parent_class_elt
       parent = (parent_name_pos, parent_class);
       errors_if_not_overriden;
     }
-    env =
+    env : missing_member_info list * Typing_env_types.env =
   add_member_dep
     env
     class_
@@ -1354,38 +1395,57 @@ let check_class_against_parent_class_elt
         (class_pos, class_)
         parent_class
         (member_kind, member_name, parent_class_elt);
-      check_abstract_member_in_concrete_class
-        env
-        (class_pos, class_)
-        (member_kind, member_name, class_elt);
       errors_if_not_overriden
       |> List.iter ~f:(fun err -> err |> Lazy.force |> Errors.add_typing_error);
-      env
+
+      let is_final = Cls.final class_ in
+      let missing_members =
+        if
+          (Ast_defs.is_c_concrete (Cls.kind class_) || is_final)
+          && Typing_defs_flags.ClassElt.is_abstract class_elt.ce_flags
+        then
+          [
+            {
+              member_name;
+              parent_class_elt;
+              parent_pos = parent_name_pos;
+              member_kind;
+              is_override = true;
+            };
+          ]
+        else
+          []
+      in
+
+      (missing_members, env)
     ) else
       (* We can skip this check if the class elements have the same origin, as we are
          essentially comparing a method against itself *)
-      check_override
-        ~check_member_unique:true
-        env
-        member_name
-        member_kind
-        class_
-        parent_class
-        parent_class_elt
-        class_elt
-        (on_error (parent_name_pos, Cls.name parent_class))
+      ( [],
+        check_override
+          ~check_member_unique:true
+          env
+          member_name
+          member_kind
+          class_
+          parent_class
+          parent_class_elt
+          class_elt
+          (on_error (parent_name_pos, Cls.name parent_class)) )
   | None ->
     (* The only case when a member belongs to a parent but not the child is if the parent is an
        interface and the child is a concrete class. Otherwise, the member would have been inherited.
        In this case, this is an error because the concrete class fails to implement the parent interface. *)
-    member_not_implemented_error
-      (Cls.name class_)
-      (Cls.name parent_class)
-      member_name
-      parent_class_elt
-      parent_name_pos
-      member_kind;
-    env
+    ( [
+        {
+          member_name;
+          parent_class_elt;
+          parent_pos = parent_name_pos;
+          member_kind;
+          is_override = false;
+        };
+      ],
+      env )
 
 (**
  * [check_static_member_intersection class_ class_pos parent_members] looks for
@@ -1467,20 +1527,29 @@ let check_members_from_all_parents
     ((class_pos : Pos.t), class_)
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t)
     (parent_members : ParentClassEltSet.t MemberNameMap.t MemberKindMap.t) =
-  let check member_kind member_map env =
-    let check member_name class_elts env =
-      let check =
-        check_class_against_parent_class_elt
-          on_error
-          (class_pos, class_)
-          member_kind
-          member_name
+  let check member_kind member_map (acc, env) =
+    let check member_name class_elts (acc, env) =
+      let check elt (acc, env) =
+        let (missing, env) =
+          check_class_against_parent_class_elt
+            on_error
+            (class_pos, class_)
+            member_kind
+            member_name
+            elt
+            env
+        in
+        (acc @ missing, env)
       in
-      ParentClassEltSet.fold ~f:check class_elts ~init:env
+      ParentClassEltSet.fold ~f:check class_elts ~init:(acc, env)
     in
-    MemberNameMap.fold check member_map env
+    MemberNameMap.fold check member_map (acc, env)
   in
-  let env = MemberKindMap.fold check parent_members env in
+  let (missing_members, env) =
+    MemberKindMap.fold check parent_members ([], env)
+  in
+
+  members_missing_error env class_pos class_ missing_members;
   check_static_member_intersection class_ class_pos parent_members;
   env
 

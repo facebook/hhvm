@@ -160,7 +160,7 @@ let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
   in
 
   Printf.sprintf
-    "\n%s  %s %s%sfunction %s(%s)%s: %s {}\n\n"
+    "\n%s  %s %s%sfunction %s(%s)%s: %s {}\n"
     (if is_override then
       "  <<__Override>>\n"
     else

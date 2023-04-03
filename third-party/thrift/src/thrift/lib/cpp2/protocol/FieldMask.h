@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <folly/Range.h>
+#include <thrift/lib/cpp2/protocol/FieldMaskRef.h>
 #include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 #include <thrift/lib/cpp2/type/detail/Wrap.h>
 #include <thrift/lib/thrift/gen-cpp2/field_mask_constants.h>
@@ -60,7 +61,7 @@ template <typename Struct>
 void ensure(const Mask& mask, Struct& t) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  return detail::ensure_fields(detail::MaskRef{mask, false}, t);
+  return detail::ensure_fields(MaskRef{mask, false}, t);
 }
 
 // Clears masked fields in the thrift struct.
@@ -70,7 +71,7 @@ template <typename Struct>
 void clear(const Mask& mask, Struct& t) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  return detail::clear_fields(detail::MaskRef{mask, false}, t);
+  return detail::clear_fields(MaskRef{mask, false}, t);
 }
 
 // Copys masked fields from one thrift struct to another.
@@ -80,7 +81,7 @@ template <typename Struct>
 void copy(const Mask& mask, const Struct& src, Struct& dst) {
   static_assert(is_thrift_struct_v<Struct>, "not a thrift struct");
   detail::throwIfContainsMapMask(mask);
-  detail::copy_fields(detail::MaskRef{mask, false}, src, dst);
+  detail::copy_fields(MaskRef{mask, false}, src, dst);
 }
 
 // Logical operators that can construct a new mask

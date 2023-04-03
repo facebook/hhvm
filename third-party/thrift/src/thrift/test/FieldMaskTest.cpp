@@ -23,6 +23,7 @@ using apache::thrift::protocol::allMask;
 using apache::thrift::protocol::asValueStruct;
 using apache::thrift::protocol::Mask;
 using apache::thrift::protocol::MaskBuilder;
+using apache::thrift::protocol::MaskRef;
 using apache::thrift::protocol::noneMask;
 using namespace apache::thrift::protocol::detail;
 

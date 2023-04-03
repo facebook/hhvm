@@ -62,12 +62,12 @@ Mask reverseMask(Mask mask) {
 }
 
 void clear(const Mask& mask, protocol::Object& obj) {
-  (detail::MaskRef{mask, false}).clear(obj);
+  (MaskRef{mask, false}).clear(obj);
 }
 
 void copy(
     const Mask& mask, const protocol::Object& src, protocol::Object& dst) {
-  (detail::MaskRef{mask, false}).copy(src, dst);
+  (MaskRef{mask, false}).copy(src, dst);
 }
 
 namespace {

@@ -27,8 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticContentCache StaticContentCache::TheCache;
-std::shared_ptr<FileCache> StaticContentCache::TheFileCache;
+std::shared_ptr<VirtualFileSystem> StaticContentCache::TheFileCache;
 
 static StaticString s_file{"file"}, s_line{"line"};
 
@@ -37,12 +36,14 @@ void StaticContentCache::load() {
                          RuntimeOption::ServerExecutionMode());
 
   if (RuntimeOption::RepoAuthoritative && !RuntimeOption::FileCache.empty()) {
+    TheFileCache = std::make_shared<VirtualFileSystem>(
+      RuntimeOption::FileCache, RuntimeOption::SourceRoot);
+
     if (StructuredLog::enabled() &&
         StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
-      CacheManager::setLogger([](bool existsCheck, const std::string& name) {
+      TheFileCache->setLogger([](const std::string& path) {
         auto record = StructuredLogEntry{};
-        record.setInt("existsCheck", existsCheck);
-        record.setStr("file", name);
+        record.setStr("file", path);
         bool needsCppStack = true;
         if (!g_context.isNull()) {
           VMRegAnchor _;
@@ -73,21 +74,10 @@ void StaticContentCache::load() {
       });
     }
 
-    TheFileCache = std::make_shared<FileCache>();
-    TheFileCache->loadMmap(RuntimeOption::FileCache.c_str());
-
     Logger::Verbose("loaded file cache from %s",
-                 RuntimeOption::FileCache.c_str());
+                    RuntimeOption::FileCache.c_str());
     return;
   }
-}
-
-bool StaticContentCache::find(const std::string &name, const char *&data,
-                              int &len, bool &compressed) const {
-  if (TheFileCache) {
-    return (data = TheFileCache->read(name.c_str(), len, compressed));
-  }
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

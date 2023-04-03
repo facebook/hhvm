@@ -123,8 +123,7 @@ String File::TranslatePathWithFileCache(const String& filename) {
   String translated = TranslatePath(canonicalized);
   if (!translated.empty() && access(translated.data(), F_OK) < 0 &&
       StaticContentCache::TheFileCache) {
-    if (StaticContentCache::TheFileCache->exists(canonicalized.data(),
-                                                 false)) {
+    if (StaticContentCache::TheFileCache->exists(canonicalized.toCppString())) {
       // we use file cache's file name to make stat() work
       translated = String(RuntimeOption::FileCache);
     }
@@ -140,13 +139,13 @@ String File::TranslateCommand(const String& cmd) {
 bool File::IsVirtualDirectory(const String& filename) {
   return
     StaticContentCache::TheFileCache &&
-    StaticContentCache::TheFileCache->dirExists(filename.data(), false);
+    StaticContentCache::TheFileCache->dirExists(filename.toCppString());
 }
 
 bool File::IsVirtualFile(const String& filename) {
   return
     StaticContentCache::TheFileCache &&
-    StaticContentCache::TheFileCache->fileExists(filename.data(), false);
+    StaticContentCache::TheFileCache->fileExists(filename.toCppString());
 }
 
 req::ptr<File> File::Open(const String& filename, const String& mode,

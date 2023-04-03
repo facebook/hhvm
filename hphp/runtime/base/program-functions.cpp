@@ -2495,7 +2495,7 @@ void hphp_process_init(bool skipModules) {
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");
 
-  StaticContentCache::TheCache.load();
+  StaticContentCache::load();
 
   if (RuntimeOption::RepoAuthoritative &&
       !RuntimeOption::EvalJitSerdesFile.empty() &&

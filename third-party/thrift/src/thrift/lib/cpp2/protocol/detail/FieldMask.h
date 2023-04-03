@@ -486,5 +486,5 @@ void compare_impl(
 // Returns the MapId in map mask of the given Value key.
 // If it doesn't exist, it returns the new MapId (pointer to the key).
 // Assumes the map mask uses pointers to keys.
-MapId findMapIdByValue(const Mask& mask, const Value& key);
+MapId findMapIdByValueAddress(const Mask& mask, const Value& key);
 } // namespace apache::thrift::protocol::detail

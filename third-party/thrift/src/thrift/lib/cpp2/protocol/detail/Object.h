@@ -554,9 +554,9 @@ MaskedDecodeResultValue parseValueWithMask(
       for (uint32_t i = 0; i < size; i++) {
         auto keyValue = parseValue(prot, keyType, string_to_binary);
         MaskRef nextRead =
-            readMask.get(findMapIdByValue(readMask.mask, keyValue));
+            readMask.get(findMapIdByValueAddress(readMask.mask, keyValue));
         MaskRef nextWrite =
-            writeMask.get(findMapIdByValue(writeMask.mask, keyValue));
+            writeMask.get(findMapIdByValueAddress(writeMask.mask, keyValue));
         MaskedDecodeResultValue nestedResult =
             parseValueWithMask<KeepExcludedData>(
                 prot,

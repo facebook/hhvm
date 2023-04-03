@@ -540,7 +540,7 @@ void insertNextMask(
     bool recursive,
     const F& getIncludesRef) {
   if (recursive) {
-    auto nextMasks = extractMaskFromPatch(nextPatch.as_object());
+    auto nextMasks = extractMaskViewFromPatch(nextPatch.as_object());
     insertMask(masks.read, readId, nextMasks.read, getIncludesRef);
     insertMask(masks.write, writeId, nextMasks.write, getIncludesRef);
   } else {
@@ -555,8 +555,10 @@ void insertFieldsToMask(
   auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map_ref(); };
   auto removeHandler = [&](const auto* container) {
     for (const auto& key : *container) {
-      auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
-      auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
+      auto readId =
+          static_cast<int64_t>(findMapIdByValueAddress(masks.read, key));
+      auto writeId =
+          static_cast<int64_t>(findMapIdByValueAddress(masks.write, key));
       insertMask(masks.read, readId, allMask(), getIncludesMapRef);
       insertMask(masks.write, writeId, allMask(), getIncludesMapRef);
     }
@@ -574,8 +576,10 @@ void insertFieldsToMask(
     }
   } else if (const auto* map = patchFields.if_map()) {
     for (const auto& [key, value] : *map) {
-      auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
-      auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
+      auto readId =
+          static_cast<int64_t>(findMapIdByValueAddress(masks.read, key));
+      auto writeId =
+          static_cast<int64_t>(findMapIdByValueAddress(masks.write, key));
       insertNextMask(
           masks, value, readId, writeId, recursive, getIncludesMapRef);
     }
@@ -589,7 +593,7 @@ void insertFieldsToMask(
 }
 
 // TODO: Handle EnsureUnion
-ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
+ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch) {
   ExtractedMasks masks = {noneMask(), noneMask()};
   // If Assign, it is a write operation
   if (findOp(patch, PatchOp::Assign)) {
@@ -643,8 +647,8 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
 
 } // namespace detail
 
-ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
-  return detail::extractMaskFromPatch(patch);
+ExtractedMasks extractMaskViewFromPatch(const protocol::Object& patch) {
+  return detail::extractMaskViewFromPatch(patch);
 }
 
 template <type::StandardProtocol Protocol>
@@ -662,7 +666,7 @@ std::unique_ptr<folly::IOBuf> applyPatchToSerializedData(
       Protocol == type::StandardProtocol::Binary,
       BinaryProtocolWriter,
       CompactProtocolWriter>;
-  auto masks = protocol::extractMaskFromPatch(patch);
+  auto masks = protocol::extractMaskViewFromPatch(patch);
   MaskedDecodeResult result =
       parseObject<ProtocolReader>(buf, masks.read, masks.write);
   applyPatch(patch, result.included);

@@ -98,21 +98,21 @@ class PatchTest : public testing::Test {
   template <typename P>
   static ExtractedMasks getMasks(const P& patchStruct) {
     Object patchObj = convertPatchToObject(patchStruct);
-    return extractMaskFromPatch(patchObj);
+    return extractMaskViewFromPatch(patchObj);
   }
 
   static bool isMaskNoop(const protocol::Object& patchObj) {
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     return masks.read == noneMask() && masks.write == noneMask();
   }
 
   static bool isMaskReadWriteOperation(const protocol::Object& patchObj) {
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     return masks.read == allMask() && masks.write == allMask();
   }
 
   static bool isMaskWriteOperation(const protocol::Object& patchObj) {
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     return masks.read == noneMask() && masks.write == allMask();
   }
 
@@ -437,7 +437,7 @@ TEST_F(PatchTest, List) {
     EXPECT_EQ(
         std::vector<Value>{asValueStruct<type::binary_t>("testbest")}, patched);
     // It is a map mask as Patch can't distinguish between list and map.
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     EXPECT_EQ(masks.read, masks.write);
     auto mask = masks.read.includes_map_ref().value();
     EXPECT_EQ(mask.size(), 1);
@@ -492,7 +492,7 @@ TEST_F(PatchTest, List) {
         std::vector<Value>{},
         *applyContainerPatch(patchObj, value).listValue_ref());
     // It is a map mask as Remove can't distinguish between list, set, and map.
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     EXPECT_EQ(masks.read, masks.write);
     auto mask = masks.read.includes_map_ref().value();
     EXPECT_EQ(mask.size(), 1);
@@ -627,7 +627,7 @@ TEST_F(PatchTest, Set) {
         std::set<Value>{},
         *applyContainerPatch(patchObj, value).setValue_ref());
     // It is a map mask as Remove can't distinguish between list, set, and
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     EXPECT_EQ(masks.read, masks.write);
     auto mask = masks.read.includes_map_ref().value();
     EXPECT_EQ(mask.size(), 1);
@@ -723,7 +723,7 @@ TEST_F(PatchTest, Map) {
   auto checkMapMask =
       [&](auto&& patchObj,
           const std::unordered_set<std::string_view>& expectKeys) {
-        auto masks = extractMaskFromPatch(patchObj);
+        auto masks = extractMaskViewFromPatch(patchObj);
         EXPECT_EQ(masks.read, masks.write);
         auto mask = masks.read.includes_map_ref().value();
         EXPECT_EQ(mask.size(), expectKeys.size());
@@ -924,7 +924,7 @@ TEST_F(PatchTest, EnsureAndPatchObject) {
       makePatch(op::PatchOp::EnsureStruct, ensure),
       op::PatchOp::PatchAfter,
       fieldPatch);
-  auto masks = extractMaskFromPatch(patchObj);
+  auto masks = extractMaskViewFromPatch(patchObj);
 
   // To ensure field 1, we need to read/write this field
   Mask mask;
@@ -1067,7 +1067,7 @@ TEST_F(PatchTest, Struct) {
             ->members()
             .ensure()[1]);
 
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     EXPECT_EQ(masks.read, masks.write);
 
     Mask expectedMask;
@@ -1112,7 +1112,7 @@ TEST_F(PatchTest, Struct) {
             ->members()
             .ensure()[1]);
 
-    auto masks = extractMaskFromPatch(patchObj);
+    auto masks = extractMaskViewFromPatch(patchObj);
     EXPECT_EQ(masks.read, masks.write);
     Mask expectedMask;
     expectedMask.includes_ref().emplace()[1] = allMask();
@@ -1376,7 +1376,7 @@ TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
   }
 }
 
-TEST_F(PatchTest, ExtractMaskFromPatchNested) {
+TEST_F(PatchTest, extractMaskViewFromPatchNested) {
   // patch = Patch{"key": Clear,
   //               "key2": Patch{"a": BoolPatch = true,
   //                             "b": Patch{1: BytePatch - 1}}}
@@ -1410,7 +1410,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchNested) {
   // writeMask = includes_map{"key": allMask()
   //                         "key2": includes_map{"a": allMask(),
   //                                              "b": includes{1: allMask()}}}
-  auto masks = extractMaskFromPatch(patchObj);
+  auto masks = extractMaskViewFromPatch(patchObj);
   auto readMask = masks.read.includes_map_ref().value();
   EXPECT_EQ(readMask.size(), 1);
   for (auto& [key, value] : readMask) {
@@ -1448,7 +1448,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchNested) {
   }
 }
 
-TEST_F(PatchTest, ExtractMaskFromPatchEdgeCase) {
+TEST_F(PatchTest, extractMaskViewFromPatchEdgeCase) {
   // patch = Patch{1: Put{true}}
   Value boolPatch;
   boolPatch.objectValue_ref() =
@@ -1468,14 +1468,14 @@ TEST_F(PatchTest, ExtractMaskFromPatchEdgeCase) {
       op::PatchOp::Put,
       asValueStruct<type::set<type::i32_t>>({}));
 
-  auto masks = extractMaskFromPatch(patchObj);
+  auto masks = extractMaskViewFromPatch(patchObj);
   EXPECT_EQ(masks.read, masks.write);
   Mask expectedMask;
   expectedMask.includes_ref().emplace()[1] = allMask();
   EXPECT_EQ(masks.read, expectedMask);
 }
 
-TEST_F(PatchTest, ExtractMaskFromPatchFieldPatch) {
+TEST_F(PatchTest, extractMaskViewFromPatchFieldPatch) {
   // Test the case when writeMask is allMask but needs to process FieldPatch.
   // patch = Clear, Patch{1: Put{true}}
   Value boolPatch;
@@ -1489,7 +1489,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchFieldPatch) {
       op::PatchOp::Clear,
       asValueStruct<type::bool_t>(true));
 
-  auto masks = extractMaskFromPatch(patchObj);
+  auto masks = extractMaskViewFromPatch(patchObj);
   // writeMask is allMask and readMask should include only field 1.
   EXPECT_EQ(masks.write, allMask());
   Mask expectedMask;

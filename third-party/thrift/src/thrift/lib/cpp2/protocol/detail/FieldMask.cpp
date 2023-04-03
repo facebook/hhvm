@@ -434,7 +434,7 @@ void throwIfContainsMapMask(const Mask& mask) {
 }
 
 // Returns the MapId for the given key.
-MapId findMapIdByValue(const Mask& mask, const Value& newKey) {
+MapId findMapIdByValueAddress(const Mask& mask, const Value& newKey) {
   MapId mapId = MapId{reinterpret_cast<int64_t>(&newKey)};
   if (!(mask.includes_map_ref() || mask.excludes_map_ref())) {
     return mapId;

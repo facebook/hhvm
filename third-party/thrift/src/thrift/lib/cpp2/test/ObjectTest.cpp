@@ -1131,7 +1131,7 @@ void testParseObjectWithMapMask(bool testSerialize) {
       .includes_map_ref()
       .emplace()[(int64_t)&keyFoo] = allMask();
   // This is treated as allMask() as the type is set. It tests the edge case
-  // that a set field may have a map mask, since extractMaskFromPatch cannot
+  // that a set field may have a map mask, since extractMaskViewFromPatch cannot
   // determine if a patch is for map or set for some operators.
   includes[2].excludes_map_ref().emplace()[99] = allMask();
 

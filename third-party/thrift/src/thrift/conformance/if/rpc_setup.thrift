@@ -15,6 +15,7 @@
  */
 
 namespace cpp2 apache.thrift.conformance
+namespace go thrift.conformance.rpc_setup
 namespace php apache_thrift
 namespace py thrift.conformance.rpc_setup
 namespace py.asyncio thrift_asyncio.conformance.rpc_setup

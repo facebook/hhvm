@@ -15,6 +15,7 @@
  */
 
 namespace cpp2 apache.thrift.conformance
+namespace go thrift.conformance.test_suite
 namespace php apache_thrift
 namespace py thrift.conformance.test_suite
 namespace py.asyncio thrift_asyncio.conformance.test_suite

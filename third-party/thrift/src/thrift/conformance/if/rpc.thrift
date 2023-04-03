@@ -17,6 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.conformance
+namespace go thrift.conformance.rpc
 namespace php apache_thrift
 namespace py thrift.conformance.rpc
 namespace py.asyncio thrift_asyncio.conformance.rpc

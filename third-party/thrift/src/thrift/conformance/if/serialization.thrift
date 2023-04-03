@@ -15,6 +15,7 @@
  */
 
 namespace cpp2 apache.thrift.conformance
+namespace go thrift.conformance.serialization
 namespace php apache_thrift
 namespace py thrift.conformance.serialization
 namespace py.asyncio thrift_asyncio.conformance.serialization

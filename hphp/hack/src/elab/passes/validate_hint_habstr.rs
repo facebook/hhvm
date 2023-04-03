@@ -120,9 +120,12 @@ impl ValidateHintHabstrPass {
         if name.to_lowercase() == sn::typehints::THIS {
             env.emit_error(NamingError::ThisReserved(pos.clone()))
         }
+
         // Raise an error for wildcard top-level tparams
-        else if name == sn::typehints::WILDCARD && (!nested || is_hk) {
-            env.emit_error(NamingError::WildcardHintDisallowed(pos.clone()))
+        if name == sn::typehints::WILDCARD {
+            if !nested || is_hk {
+                env.emit_error(NamingError::WildcardHintDisallowed(pos.clone()))
+            }
         } else if name.is_empty() || !name.starts_with('T') {
             env.emit_error(NamingError::StartWithT(pos.clone()))
         }

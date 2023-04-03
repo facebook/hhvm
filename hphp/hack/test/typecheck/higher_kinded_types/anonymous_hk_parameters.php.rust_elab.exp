@@ -1,13 +1,3 @@
-File "anonymous_hk_parameters.php", line 11, characters 14-14:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
-File "anonymous_hk_parameters.php", line 14, characters 15-15:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
-File "anonymous_hk_parameters.php", line 14, characters 17-17:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
-File "anonymous_hk_parameters.php", line 17, characters 15-15:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
-File "anonymous_hk_parameters.php", line 17, characters 22-22:
-Please make your type parameter start with the letter `T` (capital) (Naming[2042])
 File "anonymous_hk_parameters.php", line 5, characters 12-12:
 Wildcard typehints are not allowed in this position (Naming[2084])
 File "anonymous_hk_parameters.php", line 8, characters 12-12:

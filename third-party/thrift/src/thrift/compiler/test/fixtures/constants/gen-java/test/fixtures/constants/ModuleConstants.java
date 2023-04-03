@@ -149,7 +149,7 @@ public final class ModuleConstants {
         .add("'")
         .add("\"")
         .add("\n")
-        .add("\r")
+        .add("\x0d")
         .add("\x09")
         .add("a")
         .add("«")

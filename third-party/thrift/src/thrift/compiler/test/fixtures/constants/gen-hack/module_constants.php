@@ -572,7 +572,7 @@ class module_CONSTANTS implements \IThriftConstants {
       "'",
       "\"",
       "\n",
-      "\r",
+      "\x0d",
       "\x09",
       "a",
       "«",

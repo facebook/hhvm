@@ -306,7 +306,7 @@ public class Constants {
     escaped_strings.add("'");
     escaped_strings.add("\"");
     escaped_strings.add("\n");
-    escaped_strings.add("\r");
+    escaped_strings.add("\x0d");
     escaped_strings.add("\x09");
     escaped_strings.add("a");
     escaped_strings.add("«");

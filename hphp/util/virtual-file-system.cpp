@@ -54,7 +54,7 @@ constexpr Blob::Magic kMagic{ 'H', 'V', 'F', 'S' };
 
 constexpr Blob::Version kCurrentVersion = 1;
 
-constexpr size_t kFileSizeLimit      = 1ull << 34;
+constexpr size_t kFileSizeLimit      = 1ull << 36;
 constexpr size_t kDirectorySizeLimit = 1ull << 30;
 constexpr size_t kIndexSizeLimit     = 1ull << 26;
 constexpr size_t kIndexDataSizeLimit = 1ull << 29;

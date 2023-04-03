@@ -174,6 +174,12 @@ let type_check
       match env.prechecked_files with
       | Prechecked_files_disabled -> true
       | _ -> false);
+    (* Streaming errors aren't supported for these niche cases: for simplicity, the only
+       code that sets up and tears down streaming errors is in [ServerTypeCheck.type_check].
+       Our current code calls into typing_check_service.ml without having done that set up,
+       and so we will override whatever was set before and disable it now. *)
+    Hh_logger.log "Streaming errors disabled for eager init";
+    ServerProgress.enable_error_production false;
 
     let count = List.length files_to_check in
     let logstring =

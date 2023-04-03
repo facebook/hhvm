@@ -705,6 +705,8 @@ let make_remote_server_api
           memtrace_dir = None;
         }
       in
+      (* It doesn't make sense for a remote worker to produce errors.bin itself. *)
+      ServerProgress.enable_error_production false;
       (* TODO: use the telemetry *)
       let { Typing_check_service.errors; telemetry; _ } =
         Typing_check_service.go

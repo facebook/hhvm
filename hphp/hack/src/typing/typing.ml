@@ -4518,11 +4518,6 @@ and expr_
     make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf, is_prop)) ty
   (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (_, pm, Id m), nullflavor, prop_or_method) ->
-    let nullsafe =
-      match nullflavor with
-      | OG_nullthrows -> None
-      | OG_nullsafe -> Some p
-    in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let env = might_throw env in
     (* We typecheck Obj_get by checking whether it is a subtype of
@@ -4540,8 +4535,8 @@ and expr_
     in
     let lty1 = LoclType ty1 in
     let ((env, ty_err_opt), result_ty, ty_mismatch_opt) =
-      match nullsafe with
-      | None ->
+      match nullflavor with
+      | OG_nullthrows ->
         let (env, ty_err_opt) =
           Type.sub_type_i
             p1
@@ -4555,7 +4550,7 @@ and expr_
           mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
         in
         ((env, ty_err_opt), mem_ty, ty_mismatch)
-      | Some _ ->
+      | OG_nullsafe ->
         (* In that case ty1 is a subtype of ?Thas_member(m, #1)
            and the result is ?#1 if ty1 is nullable. *)
         let r = Reason.Rnullsafe_op p in

@@ -1130,6 +1130,17 @@ impl ::fbthrift::metadata::ThriftAnnotations for ContainerStruct {
             12 => {
             },
             2 => {
+
+                if type_id == ::std::any::TypeId::of::<cpp::types::Type>() {
+                    let mut tmp = Some(cpp::types::Type {
+                        name: ::std::default::Default::default(),
+                        template: "std::list".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
             },

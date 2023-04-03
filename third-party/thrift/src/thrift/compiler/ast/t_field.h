@@ -178,6 +178,7 @@ class t_field final : public t_named {
   }
 
   const t_type* get_type() const { return type().get_type(); }
+  void set_type(t_type_ref type) { type_ = type; }
   int32_t get_key() const { return id(); }
   void set_implicit_id(t_field_id id) { id_ = id; }
 };

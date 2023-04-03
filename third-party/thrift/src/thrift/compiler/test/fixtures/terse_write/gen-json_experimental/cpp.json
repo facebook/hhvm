@@ -438,6 +438,47 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 238
+      },
+      "Type" : {
+        "name" : "Type",
+        "structured_annotations": {
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      },
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Changes the native type of a Thrift object.\n`name` and `template` correspond to `cpp.type` and `cpp.template` respecively.\n",
+        "fields" : {
+          "name" : {
+            "name" : "name",
+            "key" : 1,
+            "lineno" : 248,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  },
+          "template" : {
+            "name" : "template",
+            "key" : 2,
+            "lineno" : 249,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 245
       }
       },
   "source_path" : "thrift/annotation/cpp",

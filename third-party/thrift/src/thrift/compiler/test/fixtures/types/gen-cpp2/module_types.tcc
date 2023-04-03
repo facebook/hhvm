@@ -5290,7 +5290,7 @@ _readField_IntTypedef_field:
   }
 _readField_UintTypedef_field:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::uint32_t>::readWithContext(*iprot, this->__fbthrift_field_UintTypedef_field, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::apache::thrift::fixtures::types::UintTypedef>::readWithContext(*iprot, this->__fbthrift_field_UintTypedef_field, _readState);
     
   }
  this->__isset.set(2, true);
@@ -5367,7 +5367,7 @@ uint32_t TypedefStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("UintTypedef_field", apache::thrift::protocol::T_I32, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::uint32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_UintTypedef_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::apache::thrift::fixtures::types::UintTypedef>::serializedSize<false>(*prot_, this->__fbthrift_field_UintTypedef_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -5387,7 +5387,7 @@ uint32_t TypedefStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("UintTypedef_field", apache::thrift::protocol::T_I32, 3);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::uint32_t>::serializedSize<false>(*prot_, this->__fbthrift_field_UintTypedef_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::apache::thrift::fixtures::types::UintTypedef>::serializedSize<false>(*prot_, this->__fbthrift_field_UintTypedef_field);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -5416,7 +5416,7 @@ uint32_t TypedefStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 3, kPrevFieldId>(*prot_, "UintTypedef_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, std::uint32_t>::write(*prot_, this->__fbthrift_field_UintTypedef_field);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::apache::thrift::fixtures::types::UintTypedef>::write(*prot_, this->__fbthrift_field_UintTypedef_field);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

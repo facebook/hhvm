@@ -377,10 +377,60 @@ void generate_enum_schema(
       });
 }
 
+template <typename Node>
+void lower_type_annotations(
+    diagnostic_context&, mutator_context& mCtx, Node& node) {
+  std::map<std::string, std::string> unstructured;
+
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kCppTypeUri)) {
+    if (auto type =
+            annot->get_value_from_structured_annotation_or_null("name")) {
+      unstructured.insert({"cpp.type", type->get_string()});
+    } else if (
+        auto tmplate =
+            annot->get_value_from_structured_annotation_or_null("template")) {
+      unstructured.insert({"cpp.template", tmplate->get_string()});
+    }
+  }
+
+  if (unstructured.empty()) {
+    return;
+  }
+
+  const t_type* node_type = node.get_type();
+  if (node_type->is_container() ||
+      (node_type->is_typedef() &&
+       static_cast<const t_typedef*>(node_type)->typedef_kind() !=
+           t_typedef::kind::defined) ||
+      (node_type->is_base_type() && !node_type->annotations().empty())) {
+    // This is a new type we can modify in place
+    for (auto& pair : unstructured) {
+      const_cast<t_type*>(node_type)->set_annotation(pair.first, pair.second);
+    }
+  } else {
+    // Wrap in an unnamed typedef :(
+    auto& program = mCtx.program();
+    auto unnamed = t_typedef::make_unnamed(
+        &program, node_type->get_name(), t_type_ref::from_ptr(node_type));
+    for (auto& pair : unstructured) {
+      unnamed->set_annotation(pair.first, pair.second);
+    }
+    node.set_type(t_type_ref::from_ptr(unnamed.get()));
+    program.add_unnamed_typedef(std::move(unnamed));
+  }
+}
+
 ast_mutators standard_mutators() {
   ast_mutators mutators;
   {
     auto& initial = mutators[standard_mutator_stage::initial];
+    initial.add_field_visitor([](auto& ctx, auto& mCtx, auto& node) {
+      lower_type_annotations(ctx, mCtx, node);
+    });
+    initial.add_typedef_visitor([](auto& ctx, auto& mCtx, auto& node) {
+      lower_type_annotations(ctx, mCtx, node);
+    });
     initial.add_interaction_visitor(
         &propagate_process_in_event_base_annotation);
     initial.add_function_visitor(&remove_param_list_field_qualifiers);

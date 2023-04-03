@@ -1919,7 +1919,7 @@ class TypedefStruct_struct_traits {
   struct __fbthrift_member_UintTypedef_field {
     using owner = ::apache::thrift::fixtures::types::TypedefStruct;
     using name = __fbthrift_strings_module::__fbthrift_hash_5ab816af8034a41718cabc63bd821ab7283b905d4770d0a2952ce8e00bb38520;
-    using type = std::uint32_t;
+    using type = ::apache::thrift::fixtures::types::UintTypedef;
     using tag = ::apache::thrift::ident::UintTypedef_field;
     static constexpr ::apache::thrift::field_id_t id = 3;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;

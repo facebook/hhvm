@@ -237,3 +237,14 @@ struct EnumType {
  */
 @scope.Structured
 struct Frozen2Exclude {}
+
+/**
+ * Changes the native type of a Thrift object.
+ * `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+ */
+@scope.Typedef
+@scope.Field
+struct Type {
+  1: string name;
+  2: string template (cpp.name = "template_");
+}

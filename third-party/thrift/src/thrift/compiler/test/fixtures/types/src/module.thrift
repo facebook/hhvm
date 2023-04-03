@@ -30,7 +30,8 @@ struct decorated_struct {
 
 struct ContainerStruct {
   12: list<i32> fieldA;
-  2: list<i32> (cpp.template = "std::list") fieldB;
+  @cpp.Type{template = "std::list"}
+  2: list<i32> fieldB;
   3: list<i32> (cpp.template = "std::deque") fieldC;
   4: list<i32> (cpp.template = "folly::fbvector") fieldD;
   5: list<i32> (cpp.template = "folly::small_vector") fieldE;
@@ -222,7 +223,8 @@ struct AllocatorAware2 {
 } (cpp.allocator = "some_allocator")
 
 typedef i32 IntTypedef
-typedef IntTypedef UintTypedef (cpp.type = "std::uint32_t")
+@cpp.Type{name = "std::uint32_t"}
+typedef IntTypedef UintTypedef
 
 struct TypedefStruct {
   1: i32 i32_field;

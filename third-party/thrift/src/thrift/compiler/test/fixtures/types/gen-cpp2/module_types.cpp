@@ -3812,7 +3812,7 @@ TypedefStruct& TypedefStruct::operator=(FOLLY_MAYBE_UNUSED TypedefStruct&& other
 }
 
 
-TypedefStruct::TypedefStruct(apache::thrift::FragileConstructor, ::std::int32_t i32_field__arg, ::apache::thrift::fixtures::types::IntTypedef IntTypedef_field__arg, std::uint32_t UintTypedef_field__arg) :
+TypedefStruct::TypedefStruct(apache::thrift::FragileConstructor, ::std::int32_t i32_field__arg, ::apache::thrift::fixtures::types::IntTypedef IntTypedef_field__arg, ::apache::thrift::fixtures::types::UintTypedef UintTypedef_field__arg) :
     __fbthrift_field_i32_field(std::move(i32_field__arg)),
     __fbthrift_field_IntTypedef_field(std::move(IntTypedef_field__arg)),
     __fbthrift_field_UintTypedef_field(std::move(UintTypedef_field__arg)) {
@@ -3826,7 +3826,7 @@ void TypedefStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_i32_field = ::std::int32_t();
   this->__fbthrift_field_IntTypedef_field = ::apache::thrift::fixtures::types::IntTypedef();
-  this->__fbthrift_field_UintTypedef_field = std::uint32_t();
+  this->__fbthrift_field_UintTypedef_field = ::apache::thrift::fixtures::types::UintTypedef();
   __isset = {};
 }
 

@@ -579,7 +579,7 @@ using ::apache::thrift::detail::operator>=;
 
 typedef ::std::string TBinary;
 typedef ::std::int32_t IntTypedef;
-typedef ::apache::thrift::fixtures::types::IntTypedef UintTypedef;
+typedef std::uint32_t UintTypedef;
 
 class empty_struct final  {
  private:
@@ -6900,7 +6900,7 @@ class TypedefStruct final  {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  TypedefStruct(apache::thrift::FragileConstructor, ::std::int32_t i32_field__arg, ::apache::thrift::fixtures::types::IntTypedef IntTypedef_field__arg, std::uint32_t UintTypedef_field__arg);
+  TypedefStruct(apache::thrift::FragileConstructor, ::std::int32_t i32_field__arg, ::apache::thrift::fixtures::types::IntTypedef IntTypedef_field__arg, ::apache::thrift::fixtures::types::UintTypedef UintTypedef_field__arg);
 
   TypedefStruct(TypedefStruct&&) noexcept;
 
@@ -6914,7 +6914,7 @@ class TypedefStruct final  {
  private:
   ::apache::thrift::fixtures::types::IntTypedef __fbthrift_field_IntTypedef_field;
  private:
-  std::uint32_t __fbthrift_field_UintTypedef_field;
+  ::apache::thrift::fixtures::types::UintTypedef __fbthrift_field_UintTypedef_field;
  private:
   apache::thrift::detail::isset_bitset<3, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -7003,42 +7003,42 @@ class TypedefStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_IntTypedef_field), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> UintTypedef_field_ref() const& {
     return {this->__fbthrift_field_UintTypedef_field, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> UintTypedef_field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_UintTypedef_field), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> UintTypedef_field_ref() & {
     return {this->__fbthrift_field_UintTypedef_field, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> UintTypedef_field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_UintTypedef_field), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> UintTypedef_field() const& {
     return {this->__fbthrift_field_UintTypedef_field, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> UintTypedef_field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_UintTypedef_field), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> UintTypedef_field() & {
     return {this->__fbthrift_field_UintTypedef_field, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = std::uint32_t>
+  template <typename..., typename T = ::apache::thrift::fixtures::types::UintTypedef>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> UintTypedef_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_UintTypedef_field), __isset.at(2), __isset.bit(2)};
   }
@@ -7063,12 +7063,12 @@ class TypedefStruct final  {
     return __fbthrift_field_IntTypedef_field;
   }
 
-  std::uint32_t get_UintTypedef_field() const {
+  ::apache::thrift::fixtures::types::UintTypedef get_UintTypedef_field() const {
     return __fbthrift_field_UintTypedef_field;
   }
 
   [[deprecated("Use `FOO.UintTypedef_field_ref() = BAR;` instead of `FOO.set_UintTypedef_field(BAR);`")]]
-  std::uint32_t& set_UintTypedef_field(std::uint32_t UintTypedef_field_) {
+  ::apache::thrift::fixtures::types::UintTypedef& set_UintTypedef_field(::apache::thrift::fixtures::types::UintTypedef UintTypedef_field_) {
     UintTypedef_field_ref() = UintTypedef_field_;
     return __fbthrift_field_UintTypedef_field;
   }

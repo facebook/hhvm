@@ -86,6 +86,7 @@ constexpr auto kCppUseOpEncodeUri =
     "facebook.com/thrift/annotation/cpp/UseOpEncode";
 constexpr auto kCppFrozen2ExcludeUri =
     "facebook.com/thrift/annotation/cpp/Frozen2Exclude";
+constexpr auto kCppTypeUri = "facebook.com/thrift/annotation/cpp/Type";
 
 // java
 constexpr auto kJavaMutableUri = "facebook.com/thrift/annotation/java/Mutable";

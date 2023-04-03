@@ -444,6 +444,53 @@
           "column" : 25
         }
       }
+    },
+    "Type" : {
+      "lineno" : 245,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "name" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 248,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 248,
+              "column" : 18
+            }
+          }
+        },
+        "template" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 249,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 249,
+              "column" : 47
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 245,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 250,
+          "column" : 2
+        }
+      }
     }
   }
 }

@@ -1567,3 +1567,159 @@ func (p *Frozen2Exclude) String() string {
   return fmt.Sprintf("Frozen2Exclude({})")
 }
 
+// Changes the native type of a Thrift object.
+// `name` and `template` correspond to `cpp.type` and `cpp.template` respecively.
+// 
+// Attributes:
+//  - Name
+//  - Template
+type Type struct {
+  Name string `thrift:"name,1" db:"name" json:"name"`
+  Template string `thrift:"template,2" db:"template" json:"template"`
+}
+
+func NewType() *Type {
+  return &Type{}
+}
+
+
+func (p *Type) GetName() string {
+  return p.Name
+}
+
+func (p *Type) GetTemplate() string {
+  return p.Template
+}
+type TypeBuilder struct {
+  obj *Type
+}
+
+func NewTypeBuilder() *TypeBuilder{
+  return &TypeBuilder{
+    obj: NewType(),
+  }
+}
+
+func (p TypeBuilder) Emit() *Type{
+  return &Type{
+    Name: p.obj.Name,
+    Template: p.obj.Template,
+  }
+}
+
+func (t *TypeBuilder) Name(name string) *TypeBuilder {
+  t.obj.Name = name
+  return t
+}
+
+func (t *TypeBuilder) Template(template string) *TypeBuilder {
+  t.obj.Template = template
+  return t
+}
+
+func (t *Type) SetName(name string) *Type {
+  t.Name = name
+  return t
+}
+
+func (t *Type) SetTemplate(template string) *Type {
+  t.Template = template
+  return t
+}
+
+func (p *Type) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Type)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Name = v
+  }
+  return nil
+}
+
+func (p *Type)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Template = v
+  }
+  return nil
+}
+
+func (p *Type) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Type"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Type) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:name: ", p), err) }
+  if err := oprot.WriteString(string(p.Name)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.name (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:name: ", p), err) }
+  return err
+}
+
+func (p *Type) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("template", thrift.STRING, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:template: ", p), err) }
+  if err := oprot.WriteString(string(p.Template)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.template (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:template: ", p), err) }
+  return err
+}
+
+func (p *Type) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  nameVal := fmt.Sprintf("%v", p.Name)
+  templateVal := fmt.Sprintf("%v", p.Template)
+  return fmt.Sprintf("Type({Name:%s Template:%s})", nameVal, templateVal)
+}
+

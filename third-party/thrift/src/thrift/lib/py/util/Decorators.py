@@ -69,11 +69,8 @@ def make_unknown_function_exception(name):
 
 def process_main(asyncio=False):
     """Decorator for process method."""
-    if asyncio and six.PY3:
+    if asyncio:
         from asyncio import Future
-    elif asyncio:
-        # pyre-fixme[21]: Could not find module `trollius`.
-        from trollius import Future
 
     def _decorator(func):
         def nested(self, iprot, oprot, server_ctx=None):

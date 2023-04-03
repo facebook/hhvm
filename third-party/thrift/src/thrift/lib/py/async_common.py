@@ -24,6 +24,8 @@ Look for them in TAsyncioServer and TTrolliusServer respectively.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import asyncio
+
 import logging
 import struct
 import warnings
@@ -42,12 +44,6 @@ from thrift.transport.THeaderTransport import (
     THeaderTransport,
 )
 from thrift.transport.TTransport import TTransportBase, TTransportException
-
-if six.PY3:
-    import asyncio
-else:
-    # pyre-fixme[21]: Could not find module `trollius`.
-    import trollius as asyncio
 
 # We support the deprecated FRAMED transport for old fb303
 # clients that were otherwise failing miserably.
@@ -216,7 +212,6 @@ class WrappedTransport(TWriteOnlyBuffer):
             )
 
 
-# pyre-fixme[11]: Annotation `Protocol` is not defined as a type.
 class FramedProtocol(asyncio.Protocol):
     """Unpacks Thrift frames and reads them asynchronously."""
 

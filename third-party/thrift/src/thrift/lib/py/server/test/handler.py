@@ -14,10 +14,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-try:
-    import asyncio
-except Exception:
-    import trollius as asyncio
+import asyncio
 
 from thrift_asyncio.sleep import Sleep as AsyncSleep
 from thrift_asyncio.sleep.ttypes import OverflowResult

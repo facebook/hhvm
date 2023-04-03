@@ -18,6 +18,7 @@ type client_mode =
   | MODE_CODEMOD_SDT of {
       path_to_jsonl: string;
       strategy: [ `CodemodSdtCumulative | `CodemodSdtIndependent ];
+      log_remotely: bool;
     }
   | MODE_COLORING of string
   | MODE_COVERAGE of string

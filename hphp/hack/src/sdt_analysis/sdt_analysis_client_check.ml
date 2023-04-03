@@ -28,8 +28,13 @@ module Reverts = struct
 end
 
 let apply_all
-    ~get_error_count ~get_patches ~apply_patches ~path_to_jsonl ~strategy =
-  let remote_logging = RemoteLogging.create ~strategy in
+    ~get_error_count
+    ~get_patches
+    ~apply_patches
+    ~path_to_jsonl
+    ~strategy
+    ~log_remotely =
+  let remote_logging = RemoteLogging.create ~strategy ~log_remotely in
   let%lwt (baseline_error_count, init_telemetry) = get_error_count () in
 
   let handle_codemod_group codemod_line =

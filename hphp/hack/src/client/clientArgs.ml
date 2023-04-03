@@ -215,9 +215,11 @@ let parse_check_args cmd =
         " automatically start hh_server if it's not running (default: true)" );
       ( "--codemod-sdt",
         (let path_to_jsonl = ref "" in
+         let log_remotely = ref false in
          Arg.Tuple
            [
              Arg.String (( := ) path_to_jsonl);
+             Arg.Bool (( := ) log_remotely);
              Arg.String
                (function
                | "cumulative-groups" ->
@@ -226,6 +228,7 @@ let parse_check_args cmd =
                       {
                         path_to_jsonl = !path_to_jsonl;
                         strategy = `CodemodSdtCumulative;
+                        log_remotely = !log_remotely;
                       }
                | "independent-groups" ->
                  set_mode
@@ -233,6 +236,7 @@ let parse_check_args cmd =
                       {
                         path_to_jsonl = !path_to_jsonl;
                         strategy = `CodemodSdtIndependent;
+                        log_remotely = !log_remotely;
                       }
                | s ->
                  raise

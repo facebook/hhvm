@@ -12,4 +12,5 @@ val apply_all :
   apply_patches:(ServerRefactorTypes.patch list -> 'a) ->
   path_to_jsonl:string ->
   strategy:[< `CodemodSdtCumulative | `CodemodSdtIndependent ] ->
+  log_remotely:bool ->
   (Exit_status.t * Telemetry.t) Lwt.t

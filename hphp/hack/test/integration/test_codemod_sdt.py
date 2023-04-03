@@ -13,17 +13,25 @@ class TestCodemodSdt(common_tests.CommonTestDriver):
     def filename(self):
         return os.path.join(self.repo_dir, "integration_test_codemod_sdt1.php")
 
-    def codemod_sdt(self, codemod_jsonl: str, codemod_sdt_args: List[str]) -> None:
+    def codemod_sdt(self, codemod_jsonl: str, codemod_sdt_args: List[str]) -> str:
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as f:
             f.write(codemod_jsonl)
             f.flush()
             codemod_file = f.name
 
             self.start_hh_server()
-            self.check_cmd(
-                expected_output=None,
-                options=["--codemod-sdt", codemod_file, *codemod_sdt_args],
+            log_remotely_arg = "false"
+            stdout, stderr, ret_code = self.run_check(
+                options=[
+                    "--codemod-sdt",
+                    codemod_file,
+                    log_remotely_arg,
+                    *codemod_sdt_args,
+                ],
             )
+            if ret_code != 0:
+                self.fail(f"codemod failed: {ret_code=} {stderr=}")
+            return stdout
 
     def expect_contents(self, expected):
         with open(self.filename(), "r") as f:
@@ -37,7 +45,8 @@ class TestCodemodSdt(common_tests.CommonTestDriver):
 {"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"integration_test_codemod_sdt1.php","sid":"\\C"},{"kind":"(Cinterface)","path":"integration_test_codemod_sdt1.php","sid":"\\I"}]}
 {"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"integration_test_codemod_sdt1.php","sid":"\\D"},{"kind":"(Cinterface)","path":"integration_test_codemod_sdt1.php","sid":"\\I"}]}
         """.strip()
-        self.codemod_sdt(codemod_jsonl, ["cumulative-groups"])
+        stdout = self.codemod_sdt(codemod_jsonl, ["cumulative-groups"])
+        self.assertIn('"patches_json"', stdout, msg="logging probably works")
         self.expect_contents(
             """<?hh
 

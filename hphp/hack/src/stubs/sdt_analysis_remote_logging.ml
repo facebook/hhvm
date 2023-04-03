@@ -7,6 +7,6 @@
  *)
 type t = unit
 
-let create ~strategy:_ = ()
+let create ~strategy:_ ~log_remotely:_ = ()
 
 let submit_patch_result _ ~patched_ids:_ ~error_count:_ = ()

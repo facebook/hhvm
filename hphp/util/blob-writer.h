@@ -576,7 +576,7 @@ struct Reader {
       T res;
       dataBlob.decoder(res);
       if (Compare().equal(candidate_key, key)) {
-        return { res };
+        return { std::move(res) };
       }
     }
     return {};

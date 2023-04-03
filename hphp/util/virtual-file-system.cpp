@@ -18,6 +18,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/blob-writer.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/trace.h"
 
 #include <folly/FileUtil.h>
@@ -182,6 +183,17 @@ void VirtualFileSystemWriter::finish() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+ServiceData::ExportedCounter* s_contentSize =
+  ServiceData::createCounter("misc.vfs-content-size");
+ServiceData::ExportedCounter* s_fileCount =
+  ServiceData::createCounter("misc.vfs-file-count");
+
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // Reader state
 struct VirtualFileSystem::Data : Blob::Reader<Chunks, Indexes> {
   Blob::CaseSensitiveHashMapIndex pathToEntryIndex;
@@ -192,9 +204,57 @@ struct VirtualFileSystem::Data : Blob::Reader<Chunks, Indexes> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+VirtualFileSystem::Entry::Entry(Entry&& o) noexcept
+  : type(o.type), location(o.location) {
+  switch (type) {
+    case EntryType::DIRECTORY:
+      std::swap(m_list, o.m_list);
+      break;
+    case EntryType::REGULAR_FILE:
+      std::swap(m_content, o.m_content);
+      break;
+    case EntryType::EMPTY_FILE:
+      break;
+  }
+}
+
+VirtualFileSystem::Entry& VirtualFileSystem::Entry::operator=(
+    VirtualFileSystem::Entry&& o) {
+  type = o.type;
+  location = o.location;
+
+  switch (type) {
+    case EntryType::DIRECTORY:
+      std::swap(m_list, o.m_list);
+      break;
+    case EntryType::REGULAR_FILE:
+      std::swap(m_content, o.m_content);
+      break;
+    case EntryType::EMPTY_FILE:
+      break;
+  }
+  return *this;
+}
+
 VirtualFileSystem::Entry::~Entry() {
-  if (type == EntryType::DIRECTORY) {
-    delete m_list;
+  switch (type) {
+    case EntryType::DIRECTORY:
+      if (m_list) {
+        delete m_list;
+      }
+      break;
+    case EntryType::REGULAR_FILE:
+      if (m_content) {
+        // If we used the swappable readonly arena we can not free the memory
+        auto arena = get_swappable_readonly_arena();
+        if (!arena) {
+          free(m_content);
+          s_contentSize->addValue(-fileSize());
+        }
+      }
+      break;
+    case EntryType::EMPTY_FILE:
+      break;
   }
 }
 
@@ -238,6 +298,7 @@ Optional<VirtualFileSystem::Content> VirtualFileSystem::content(
            size);
     auto arena = get_swappable_readonly_arena();
     content = static_cast<char*>(arena ? arena->allocate(size) : malloc(size));
+    s_contentSize->addValue(size);
     m_data->fd.pread(content, size,
       m_data->offsets.get(Chunks::FILES) + entry->location.offset);
     entry->m_content = content;
@@ -324,7 +385,10 @@ const VirtualFileSystem::Entry* VirtualFileSystem::get(const std::string& path) 
     m_logger(relPath);
   }
 
-  auto insertRes = data.pathToEntryCache.insert(relPath, *entry);
+  auto insertRes = data.pathToEntryCache.insert(relPath, std::move(*entry));
+  if (insertRes.second) {
+    s_fileCount->increment();
+  }
   return &insertRes.first->second;
 }
 

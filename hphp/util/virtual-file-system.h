@@ -65,6 +65,11 @@ struct VirtualFileSystem {
     : type(type), location(location) {}
     Entry(): Entry(EntryType::EMPTY_FILE, Blob::Bounds { 0, 0 }) {};
 
+    Entry(const Entry& entry) = delete;
+    Entry& operator=(const Entry&) = delete;
+    Entry(Entry&& entry) noexcept;
+    Entry& operator=(Entry&& entry);
+
     EntryType type;
 
     size_t fileSize() const {

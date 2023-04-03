@@ -36,11 +36,11 @@ namespace {
 }
 
 RepoAutoloadMap::RepoAutoloadMap(
-    RepoFile::CaseInsensitiveHashMapIndex types,
-    RepoFile::CaseInsensitiveHashMapIndex functions,
-    RepoFile::CaseSensitiveHashMapIndex constants,
-    RepoFile::CaseInsensitiveHashMapIndex typeAliases,
-    RepoFile::CaseSensitiveHashMapIndex modules)
+    Blob::CaseInsensitiveHashMapIndex types,
+    Blob::CaseInsensitiveHashMapIndex functions,
+    Blob::CaseSensitiveHashMapIndex constants,
+    Blob::CaseInsensitiveHashMapIndex typeAliases,
+    Blob::CaseSensitiveHashMapIndex modules)
   : m_types{std::move(types)},
     m_functions{std::move(functions)},
     m_constants{std::move(constants)},
@@ -69,7 +69,7 @@ RepoAutoloadMap::RepoAutoloadMap(
 
 template <typename Compare>
 static Optional<AutoloadMap::FileResult> getPathFromSymbol(
-    const RepoFile::HashMapIndex<Compare>& map,
+    const Blob::HashMapIndex<Compare>& map,
     const String& name) {
   auto info = RepoFile::findUnitInfo(map, name.get());
   if (!info) {
@@ -84,7 +84,7 @@ static Optional<AutoloadMap::FileResult> getPathFromSymbol(
 
 template <typename Compare>
 static Optional<fs::path> getPathFromSymbol(
-    const RepoFile::HashMapIndex<Compare>& map,
+    const Blob::HashMapIndex<Compare>& map,
     std::string_view name) {
   auto fileRes = getPathFromSymbol(map, StrNR(makeStaticString(name)));
   if (!fileRes) return {};

@@ -25,13 +25,12 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/util/blob-writer.h"
 #include "hphp/util/build-info.h"
-#include "hphp/util/htonll.h"
 #include "hphp/util/lock-free-ptr-wrapper.h"
 
 #include "hphp/zend/zend-string.h"
 
-#include <folly/FileUtil.h>
 #include <folly/String.h>
 
 #include <sys/types.h>
@@ -47,6 +46,13 @@ namespace HPHP {
 
 namespace {
 
+enum class RepoFileChunks {
+  UNIT_EMITTERS,
+  GLOBAL_DATA,
+
+  SIZE // Leave last!
+};
+
 enum class RepoFileIndexes {
   UNIT_SYMBOLS,
   UNIT_INFOS,
@@ -58,164 +64,6 @@ enum class RepoFileIndexes {
   PATH_TO_UNIT_INFO,
 
   SIZE // Leave last!
-};
-
-uint8_t  hostToFile(uint8_t v)  { return v; }
-uint16_t hostToFile(uint16_t v) { return htons(v); }
-uint32_t hostToFile(uint32_t v) { return htonl(v); }
-uint64_t hostToFile(uint64_t v) { return htonll(v); }
-
-uint8_t  fileToHost(uint8_t v)  { return v; }
-uint16_t fileToHost(uint16_t v) { return ntohs(v); }
-uint32_t fileToHost(uint32_t v) { return ntohl(v); }
-uint64_t fileToHost(uint64_t v) { return ntohll(v); }
-
-// Wrapper around file descriptor for automatic closing and wrapping
-// operations in a nicer interface.
-struct FD {
-  FD() : m_fd{-1} {}
-  FD(const std::string& path, int flags) : m_path{path}
-  {
-    auto fd = folly::openNoInt(m_path.c_str(), flags, 0644);
-    if (fd < 0) {
-      auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
-        "Unable to open {}: {}", m_path, error
-      );
-    }
-    m_fd = fd;
-  }
-  ~FD() { if (isOpen()) ::close(m_fd); }
-
-  bool isOpen() const { return m_fd >= 0; }
-
-  void write(const void* data, size_t size) const {
-    auto const written = folly::writeFull(m_fd, data, size);
-    if (written == size) return;
-    if (written < 0) {
-      auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
-        "Failed writing {} bytes to {}: {}",
-        size, m_path, error
-      );
-    }
-    always_assert_flog(
-      false,
-      "Partial write to {} (expected {}, actual {})",
-      m_path, size, written
-    );
-  }
-
-  // Write an integer in network byte-order
-  template <typename T> void writeInt(T v) const {
-    v = hostToFile(v);
-    this->write(&v, sizeof(v));
-  }
-
-  void read(void* data, size_t size) const {
-    auto const read = folly::readFull(m_fd, data, size);
-    if (read == size) return;
-    if (read < 0) {
-      auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
-        "Failed reading {} bytes from {}: {}",
-        size, m_path, error
-      );
-    }
-    always_assert_flog(
-      false,
-      "Partial read from {} (expected {}, actual {})",
-      m_path, size, read
-    );
-  }
-
-  // Read a network byte-order integer
-  template <typename T> std::remove_cv_t<T> readInt() const {
-    std::remove_cv_t<T> v;
-    this->read(&v, sizeof(v));
-    return fileToHost(v);
-  }
-
-  void pread(void* data, size_t size, size_t offset) const {
-    auto const read = folly::preadFull(m_fd, data, size, offset);
-    if (read == size) return;
-    if (read < 0) {
-      auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
-        "Failed reading {} bytes from {} at {}: {}",
-        size, m_path, offset, error
-      );
-    }
-    always_assert_flog(
-      false,
-      "Partial read from {} at {} (expected {}, actual {})",
-      m_path, offset, size, read
-    );
-  }
-
-  void seek(size_t offset) const {
-    auto const actualOffset = ::lseek(m_fd, offset, SEEK_SET);
-    if (actualOffset == offset) return;
-    if (actualOffset < 0) {
-      auto const error = folly::errnoStr(errno);
-      always_assert_flog(
-        false,
-        "Failed to seek to {} in {}: {}",
-        offset, m_path, error
-      );
-    }
-    always_assert_flog(
-      false,
-      "Partial seek in {} (expected {}, actual {})",
-      m_path, offset, actualOffset
-    );
-  }
-
-  uint64_t fileSize() const {
-    auto const size = ::lseek(m_fd, 0, SEEK_END);
-    if (size >= 0) return size;
-    auto const error = folly::errnoStr(errno);
-    always_assert_flog(
-      false,
-      "Failed to seek to end of {}: {}",
-      m_path, error
-    );
-  }
-
-  struct Blob {
-    std::unique_ptr<char[]> buffer;
-    BlobDecoder decoder;
-  };
-
-  Blob readBlob(size_t offset, size_t size) const {
-    auto buffer = std::make_unique<char[]>(size);
-    if (size > 0) this->pread(buffer.get(), size, offset);
-    BlobDecoder decoder{buffer.get(), size};
-    return { std::move(buffer), std::move(decoder) };
-  }
-
-  FD(const FD&) = delete;
-  FD& operator=(const FD&) = delete;
-
-  FD(FD&& o) noexcept
-    : m_fd{o.m_fd}
-    , m_path{std::move(o.m_path)}
-  {
-    o.m_fd = -1;
-  }
-
-  FD& operator=(FD&& o) {
-    std::swap(m_fd, o.m_fd);
-    std::swap(m_path, o.m_path);
-    return *this;
-  }
-private:
-  int m_fd;
-  std::string m_path;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -237,9 +85,9 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-constexpr std::array<char, 4> kMagic{ 'H', 'H', 'B', 'C' };
+constexpr Blob::Magic kMagic{ 'H', 'H', 'B', 'C' };
 
-constexpr uint16_t kCurrentVersion = 1;
+constexpr Blob::Version kCurrentVersion = 1;
 
 // Arbitrary limits on the size of various sections. The sizes are all
 // 64-bits, but we don't allow the full range so that a corrupted file
@@ -248,47 +96,8 @@ constexpr uint16_t kCurrentVersion = 1;
 // ever do, we can just raise them.
 constexpr size_t kUnitEmitterSizeLimit       = 1ull << 33;
 constexpr size_t kGlobalDataSizeLimit        = 1ull << 28;
-constexpr size_t kIndexSizeLimit             = 1ull << 31;
-
-// Blob of data containing the sizes of the various sections. This is
-// stored near the beginning of the file and can be used to compute
-// offsets for the sections. Since we don't know the sizes until after
-// we write everything, we have to write these as fixed size integers.
-struct SizeHeader {
-  uint64_t unitEmittersSize      = 0;
-  uint64_t globalDataSize        = 0;
-  uint64_t indexSizes[uint32_t(RepoFileIndexes::SIZE) * 2] = { 0 };
-
-  constexpr static size_t kFileSize =
-    sizeof(unitEmittersSize) +
-    sizeof(globalDataSize) +
-    sizeof(indexSizes);
-
-  void write(const FD& fd) const {
-    fd.writeInt(unitEmittersSize);
-    fd.writeInt(globalDataSize);
-    for (auto i = 0; i < uint32_t(RepoFileIndexes::SIZE) * 2; i++) {
-      fd.writeInt(indexSizes[i]);
-    }
-  }
-
-  void read(const FD& fd) {
-    unitEmittersSize      = fd.readInt<decltype(unitEmittersSize)>();
-    globalDataSize        = fd.readInt<decltype(globalDataSize)>();
-    for (auto i = 0; i < uint32_t(RepoFileIndexes::SIZE) * 2; i++) {
-      indexSizes[i]       =
-        fd.readInt<std::remove_reference<decltype(indexSizes[0])>::type>();
-    }
-  }
-
-  void setIndexSizes(RepoFileIndexes index, uint64_t indexSize,
-                     uint64_t dataSize) {
-    // We must write indexes from the lowest to highest
-    assertx(uint32_t(index) == 0 || indexSizes[(uint32_t(index) - 1) * 2] != 0);
-    indexSizes[uint32_t(index) * 2] = indexSize;
-    indexSizes[uint32_t(index) * 2 + 1] = dataSize;
-  }
-};
+constexpr size_t kIndexSizeLimit             = 1ull << 28;
+constexpr size_t kIndexDataSizeLimit         = 1ull << 31;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -300,130 +109,6 @@ const StringData* relativePathToSourceRoot(const StringData* path) {
                             path->size() - RO::SourceRoot.size());
   }
   return path;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * The Hash Map Index.
- * Contains two part the index and the data.
- * The index is just the buckets and contains the offset where to find the data
- * for that bucket. Each offset is stored using fixed with uint32_t. So we can
- * seek into it.
- * The data for each bucket is 0 or more items. Starts with the key and then the
- * item data.
- *
- * Layout:
- * Index (N + 1 offsets)
- * -----------------------------------------------------------------------------
- * | offset 0  | offset 1 | offset 2 | offset 3 | ...                          |
- * -----------------------------------------------------------------------------
- * Data (N buckets)
- * -----------------------------------------------------------------------------
- * | key0, item0 data, key1, item1 data | | key2, item2 data | ...             |
- * -----------------------------------------------------------------------------
- *
- * How to read:
- * h = hash(key)
- * bucket = h % N
- * // We read the current bucket and next bucket to know when our bucket ends
- * start_offset, end_offset = read(bucket, 2)
- * blob = read(start_offset, end_offset - start_offset)
- * // iterate through blob and check if the key is there. If it is return data
- * while (blob.remaining() > 0)
- *   candidate_key = blob.read()
- *   data = blob.read()
- *   if (key == candidate_key)
- *     return data
- * return null
- */
-template <typename T, typename D, typename L, typename KF, typename VF>
-void writeHashMapIndex(D data, RepoFileIndexes index, L& list, KF key_lambda,
-                       VF value_lambda) {
-  assertx(data);
-  BlobEncoder indexBlob;
-  BlobEncoder dataBlob;
-  auto num_buckets = list.size();
-
-  struct Item {
-    const StringData* key;
-    T* value;
-  };
-  using Bucket = std::vector<Item>;
-  auto buckets = std::vector<Bucket>(num_buckets);
-
-  for (auto const& it : list) {
-    auto key = key_lambda(it);
-    auto hash = key->hash();
-    auto bucket = hash % num_buckets;
-    buckets[bucket].push_back(Item { key, value_lambda(it) });
-  }
-  for (auto const& bucket : buckets) {
-    auto offset = dataBlob.size();
-    indexBlob.fixedWidth(uint32_t(offset));
-    for (auto& item : bucket) {
-      dataBlob(item.key->toCppString())(*item.value);
-      FTRACE(2, "writeHashMapIndex item {} {} {} {}\n", uint32_t(index),
-             item.key, offset, dataBlob.size() - offset);
-    }
-    FTRACE(1, "writeHashMapIndex {} {} {}\n", uint32_t(index), offset,
-           dataBlob.size() - offset);
-  }
-  indexBlob.fixedWidth(uint32_t(dataBlob.size()));
-
-  data->fd.write(indexBlob.data(), indexBlob.size());
-  data->fd.write(dataBlob.data(), dataBlob.size());
-  data->sizes.setIndexSizes(index, indexBlob.size(), dataBlob.size());
-}
-
-/**
- * The Hash List Index.
- * Contains two part the index and the data.
- * The index is just the offsets so we can find the data. Each offset is stored
- * using fixed with uint32_t. So we can seek into it.
- * The data for each bucket contains the data for that item
- *
- * Layout:
- * Index (N + 1 offsets)
- * -----------------------------------------------------------------------------
- * | offset 0  | offset 1 | offset 2 | offset 3 | ...                          |
- * -----------------------------------------------------------------------------
- * Data (N buckets)
- * -----------------------------------------------------------------------------
- * | item0 data | item1 data | item2 data | ...                                |
- * -----------------------------------------------------------------------------
- *
- * How to read:
- * // We read the current offset and next offset to know when our data ends
- * start_offset, end_offset = read(id, 2)
- * blob = read(start_offset, end_offset - start_offset)
- * return blob.read()
- */
-template <typename D, typename T>
-std::vector<RepoBounds> writeListIndex(D data, RepoFileIndexes index,
-                                       std::vector<T> list) {
-  assertx(data);
-  BlobEncoder indexBlob;
-  BlobEncoder dataBlob;
-
-  std::vector<RepoBounds> bounds;
-  bounds.reserve(list.size());
-  size_t offset = 0;
-  for (auto& item : list) {
-    indexBlob.fixedWidth(uint32_t(dataBlob.size()));
-    dataBlob(item);
-    auto size = dataBlob.size() - offset;
-    bounds.push_back(RepoBounds { offset, size });
-    FTRACE(1, "writeListIndex {} {} {}\n", uint32_t(index), offset, size);
-    offset += size;
-  }
-  indexBlob.fixedWidth(uint32_t(dataBlob.size()));
-
-  data->fd.write(indexBlob.data(), indexBlob.size());
-  data->fd.write(dataBlob.data(), dataBlob.size());
-  data->sizes.setIndexSizes(index, indexBlob.size(), dataBlob.size());
-
-  return bounds;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -458,17 +143,11 @@ void RepoUnitInfo::serde(BlobDecoder& sd) {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Builder state
-struct RepoFileBuilder::Data {
-  FD fd;
-  std::string sourceFilename;
-  std::string destFilename;
-  uint64_t sizeHeaderOffset = 0;
-  SizeHeader sizes;
-
+struct RepoFileBuilder::Data : Blob::Writer<RepoFileChunks, RepoFileIndexes> {
   struct UnitEmitterIndex {
     const StringData* path;
     int64_t sn;
-    RepoBounds location;
+    Blob::Bounds location;
   };
   std::vector<UnitEmitterIndex> unitEmittersIndex;
 };
@@ -478,28 +157,7 @@ struct RepoFileBuilder::Data {
 RepoFileBuilder::RepoFileBuilder(const std::string& path)
   : m_data{std::make_unique<Data>()}
 {
-  m_data->sourceFilename = folly::sformat("{}.part", path);
-  m_data->destFilename = path;
-  m_data->fd = FD{
-    m_data->sourceFilename,
-    O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY
-  };
-
-  m_data->fd.write(kMagic.data(), sizeof(kMagic));
-  m_data->fd.writeInt(kCurrentVersion);
-
-  auto const repoSchema = repoSchemaId();
-  always_assert(repoSchema.size() < 256);
-  m_data->fd.writeInt((uint8_t)repoSchema.size());
-  m_data->fd.write(repoSchema.data(), repoSchema.size());
-
-  m_data->sizeHeaderOffset =
-    sizeof(kMagic) + sizeof(kCurrentVersion) +
-    sizeof(uint8_t) + repoSchema.size();
-  // Sizes go here: We don't know the sizes yet, so we'll just write
-  // zeros. Afterwards we'll go back and overwrite it with the actual
-  // sizes.
-  m_data->sizes.write(m_data->fd);
+  m_data->header(path, kMagic, kCurrentVersion);
 }
 
 RepoFileBuilder::~RepoFileBuilder() {
@@ -523,12 +181,11 @@ void RepoFileBuilder::add(const EncodedUE& ue) {
     RepoFileBuilder::Data::UnitEmitterIndex{
       path,
       ue.sn,
-      { m_data->sizes.unitEmittersSize, size }
+      { m_data->sizes.get(RepoFileChunks::UNIT_EMITTERS), size }
     }
   );
 
-  m_data->fd.write(ue.blob.data(), size);
-  m_data->sizes.unitEmittersSize += size;
+  m_data->write(RepoFileChunks::UNIT_EMITTERS, ue.blob.data(), size);
 }
 
 void RepoFileBuilder::finish(const RepoGlobalData& global,
@@ -539,13 +196,13 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
   {
     BlobEncoder encoder;
     encoder(global);
-    m_data->fd.write(encoder.data(), encoder.size());
-    m_data->sizes.globalDataSize = encoder.size();
-    always_assert(m_data->sizes.globalDataSize <= kGlobalDataSizeLimit);
+    m_data->write(RepoFileChunks::GLOBAL_DATA, encoder.data(), encoder.size());
+    always_assert(
+      m_data->sizes.get(RepoFileChunks::GLOBAL_DATA) <= kGlobalDataSizeLimit);
   }
 
   // Unit Symbols
-  std::vector<RepoBounds> unitSymbolsBounds;
+  std::vector<Blob::Bounds> unitSymbolsBounds;
   {
     std::vector<RepoUnitSymbols> list(m_data->unitEmittersIndex.size());
 
@@ -561,12 +218,11 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
     add_symbols(autoloadMap.getTypeAliases(), RepoSymbolType::TYPE_ALIAS);
     add_symbols(autoloadMap.getModules(), RepoSymbolType::MODULE);
 
-    unitSymbolsBounds = writeListIndex(m_data.get(),
-                                       RepoFileIndexes::UNIT_SYMBOLS, list);
+    unitSymbolsBounds = m_data->listIndex(RepoFileIndexes::UNIT_SYMBOLS, list);
   }
 
   // Unit Infos
-  std::vector<RepoBounds> unitInfosBounds;
+  std::vector<Blob::Bounds> unitInfosBounds;
   {
     std::vector<RepoUnitInfo> list(m_data->unitEmittersIndex.size());
     for (auto const& unit : m_data->unitEmittersIndex) {
@@ -578,65 +234,42 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
       };
     }
 
-    unitInfosBounds = writeListIndex(m_data.get(), RepoFileIndexes::UNIT_INFOS,
-                                     list);
+    unitInfosBounds = m_data->listIndex(RepoFileIndexes::UNIT_INFOS, list);
   }
 
   // Repo Autoload Map
-  // Symbol to RepoBounds for the UnitInfo
+  // Symbol to Blob::Bounds for the UnitInfo
   {
-    auto key_lambda = [](auto const& it) { return it.first; };
+    auto key_lambda = [](auto const& it) { return it.first->toCppString(); };
     auto value_lambda = [&](auto const& it) {
       return &unitInfosBounds[it.second];
     };
 
-    writeHashMapIndex<RepoBounds>(m_data.get(),
-                                  RepoFileIndexes::AUTOLOAD_TYPES,
-                                  autoloadMap.getTypes(),
-                                  key_lambda, value_lambda);
-    writeHashMapIndex<RepoBounds>(m_data.get(),
-                                  RepoFileIndexes::AUTOLOAD_FUNCS,
-                                  autoloadMap.getFuncs(),
-                                  key_lambda, value_lambda);
-    writeHashMapIndex<RepoBounds>(m_data.get(),
-                                  RepoFileIndexes::AUTOLOAD_CONSTANTS,
-                                  autoloadMap.getConstants(),
-                                  key_lambda, value_lambda);
-    writeHashMapIndex<RepoBounds>(m_data.get(),
-                                  RepoFileIndexes::AUTOLOAD_TYPEALIASES,
-                                  autoloadMap.getTypeAliases(),
-                                  key_lambda, value_lambda);
-    writeHashMapIndex<RepoBounds>(m_data.get(),
-                                  RepoFileIndexes::AUTOLOAD_MODULES,
-                                  autoloadMap.getModules(),
-                                  key_lambda, value_lambda);
+    m_data->hashMapIndex<Blob::Bounds, stringiHashCompare>(
+      RepoFileIndexes::AUTOLOAD_TYPES, autoloadMap.getTypes(),
+      key_lambda, value_lambda);
+    m_data->hashMapIndex<Blob::Bounds, stringiHashCompare>(
+      RepoFileIndexes::AUTOLOAD_FUNCS, autoloadMap.getFuncs(),
+      key_lambda, value_lambda);
+    m_data->hashMapIndex<Blob::Bounds, stringHashCompare>(
+      RepoFileIndexes::AUTOLOAD_CONSTANTS, autoloadMap.getConstants(),
+      key_lambda, value_lambda);
+    m_data->hashMapIndex<Blob::Bounds, stringiHashCompare>(
+      RepoFileIndexes::AUTOLOAD_TYPEALIASES, autoloadMap.getTypeAliases(),
+      key_lambda, value_lambda);
+    m_data->hashMapIndex<Blob::Bounds, stringHashCompare>(
+      RepoFileIndexes::AUTOLOAD_MODULES, autoloadMap.getModules(),
+      key_lambda, value_lambda);
   }
 
-  // Path to RepoBounds for the UnitInfo
-  writeHashMapIndex<RepoBounds>(m_data.get(),
-                                RepoFileIndexes::PATH_TO_UNIT_INFO,
-                                m_data->unitEmittersIndex,
-                                [](auto const& unit) { return unit.path; },
-                                [&](auto const& unit) {
-                                  return &unitInfosBounds[unit.sn];
-                                });
+  // Path to Blob::Bounds for the UnitInfo
+  m_data->hashMapIndex<Blob::Bounds, stringHashCompare>(
+    RepoFileIndexes::PATH_TO_UNIT_INFO, m_data->unitEmittersIndex,
+    [](auto const& unit) { return unit.path->toCppString(); },
+    [&](auto const& unit) { return &unitInfosBounds[unit.sn]; });
 
-  // All the sizes are updated, so now go patch the size table.
-  m_data->fd.seek(m_data->sizeHeaderOffset);
-  m_data->sizes.write(m_data->fd);
-
-  auto const source = m_data->sourceFilename;
-  auto const dest = m_data->destFilename;
-  m_data.reset();
-
-  // Signify completion of the file by renaming it to its final name.
-  if (::rename(source.c_str(), dest.c_str()) < 0) {
-    auto const error = folly::errnoStr(errno);
-    always_assert_flog(
-      "Unable to rename {} to {}: {}",
-      source, dest, error
-    );
-  }
+  auto data = std::move(m_data);
+  data->finish();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -655,23 +288,12 @@ RepoFileBuilder::EncodedUE::EncodedUE(const UnitEmitter& ue)
 namespace {
 
 // Reader state
-struct RepoFileData {
-  FD fd;
-
-  std::string path;
-
-  SizeHeader sizes;
-  uint64_t fileSize = 0;
-
-  uint64_t unitEmittersOffset = 0;
-  uint64_t globalDataOffset = 0;
-  uint64_t indexOffsets[uint32_t(RepoFileIndexes::SIZE) * 2] = { 0 };
-
+struct RepoFileData : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
   RepoGlobalData globalData;
 
-  RepoFile::CaseSensitiveHashMapIndex pathToUnitInfoBoundsIndex;
-  RepoFile::ListIndex unitInfosIndex;
-  RepoFile::ListIndex unitSymbolsIndex;
+  Blob::CaseSensitiveHashMapIndex pathToUnitInfoBoundsIndex;
+  Blob::ListIndex unitInfosIndex;
+  Blob::ListIndex unitSymbolsIndex;
 
   std::atomic<bool> loadedGlobalTables{false};
 
@@ -686,86 +308,6 @@ struct RepoFileData {
 
 std::unique_ptr<RepoFileData> s_repoFileData{};
 
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T, typename Compare>
-Optional<T> getFromIndex(const RepoFileData& data,
-    const RepoFile::HashMapIndex<Compare>& map, const StringData* key) {
-  if (map.size == 0) {
-    return {};
-  }
-
-  auto hash = key->hash();
-  auto bucket = hash % map.size;
-
-  FTRACE(1, "getFromIndex Hash {} {} {} {}\n", key, hash, bucket, map.size);
-
-  uint32_t currentOffset;
-  uint32_t nextOffset;
-  assertx(sizeof(currentOffset) * bucket < map.indexBounds.size);
-  assertx(sizeof(currentOffset) * bucket + sizeof(currentOffset) * 2
-          <= map.indexBounds.size);
-  auto indexBlob = data.fd.readBlob(
-    map.indexBounds.offset + sizeof(currentOffset) * bucket,
-    sizeof(currentOffset) * 2);
-  indexBlob.decoder.fixedWidth(currentOffset);
-  indexBlob.decoder.fixedWidth(nextOffset);
-
-  FTRACE(2, "getFromIndex Hash {} {} {}\n", currentOffset, nextOffset,
-         map.dataBounds.size);
-  assertx(currentOffset <= map.dataBounds.size);
-  assertx(nextOffset <= map.dataBounds.size);
-
-  if (currentOffset == nextOffset) {
-    return {};
-  }
-
-  auto dataBlob = data.fd.readBlob(map.dataBounds.offset + currentOffset,
-                                   nextOffset - currentOffset);
-
-  auto compare = Compare();
-  while (dataBlob.decoder.remaining() > 0) {
-    FTRACE(3, "getFromIndex Hash {}\n", dataBlob.decoder.remaining());
-    std::string candidate_key;
-    dataBlob.decoder(candidate_key);
-    const String candidate_key_str = candidate_key;
-
-    T res;
-    dataBlob.decoder(res);
-    if (compare(candidate_key_str.get(), key)) {
-      return { res };
-    }
-  }
-  return {};
-}
-
-template <typename T>
-Optional<T> getFromIndex(const RepoFileData& data,
-                         const RepoFile::ListIndex& list, int64_t index) {
-  if (index < 0 || index >= list.size) {
-    return {};
-  }
-
-  uint32_t currentOffset;
-  uint32_t nextOffset;
-  assertx(sizeof(currentOffset) * index < list.indexBounds.size);
-  assertx(sizeof(currentOffset) * index + sizeof(currentOffset) * 2
-          <= list.indexBounds.size);
-  auto indexBlob = data.fd.readBlob(
-    list.indexBounds.offset + sizeof(currentOffset) * index,
-    sizeof(currentOffset) * 2);
-  indexBlob.decoder.fixedWidth(currentOffset);
-  indexBlob.decoder.fixedWidth(nextOffset);
-
-  assertx(currentOffset < list.dataBounds.size);
-  assertx(nextOffset <= list.dataBounds.size);
-  auto dataBlob = data.fd.readBlob(list.dataBounds.offset + currentOffset,
-                                   nextOffset - currentOffset);
-  T res;
-  dataBlob.decoder(res);
-  return { res };
-}
-
 const RepoUnitInfo& getUnitInfoFromUnitSn(const RepoFileData& data,
                                           int64_t unitSn) {
   auto index = data.unitInfosIndex;
@@ -776,14 +318,14 @@ const RepoUnitInfo& getUnitInfoFromUnitSn(const RepoFileData& data,
     return acc->second;
   }
 
-  auto res = getFromIndex<RepoUnitInfo>(data, index, unitSn);
+  auto res = data.getFromIndex<RepoUnitInfo>(index, unitSn);
   assertx(res);
   auto insertRes = data.snToUnitInfo.insert(unitSn, *res);
   return insertRes.first->second;
 }
 
 const RepoUnitInfo& getUnitInfoFromBounds(const RepoFileData& data,
-                                          const RepoBounds& bounds) {
+                                          const Blob::Bounds& bounds) {
   FTRACE(1, "getUnitInfoFromBounds {} {} {} {}\n", bounds.offset, bounds.size,
          data.unitInfosIndex.dataBounds.offset,
          data.unitInfosIndex.dataBounds.size);
@@ -803,7 +345,7 @@ const RepoUnitInfo& getUnitInfoFromBounds(const RepoFileData& data,
 }
 
 RepoUnitSymbols getUnitSymbolsFromBounds(const RepoFileData& data,
-                                         const RepoBounds& bounds) {
+                                         const Blob::Bounds& bounds) {
   FTRACE(1, "getUnitSymbolsFromBounds {} {} {} {}\n", bounds.offset,
          bounds.size, data.unitSymbolsIndex.dataBounds.offset,
          data.unitSymbolsIndex.dataBounds.size);
@@ -823,9 +365,9 @@ RepoUnitSymbols getUnitSymbolsFromBounds(const RepoFileData& data,
 
 template <typename Compare>
 const RepoUnitInfo* findUnitInfoFromKey(
-    const RepoFileData& data, const RepoFile::HashMapIndex<Compare>& map,
+    const RepoFileData& data, const Blob::HashMapIndex<Compare>& map,
     const StringData* key) {
-  auto bounds = getFromIndex<RepoBounds>(data, map, key);
+  auto bounds = data.getFromIndex<Blob::Bounds>(map, key->toCppString());
   if (!bounds) {
     return nullptr;
   }
@@ -844,33 +386,6 @@ const RepoUnitInfo* findUnitInfoFromPath(const RepoFileData& data,
   return findUnitInfoFromKey(data, data.pathToUnitInfoBoundsIndex, searchPath);
 }
 
-template <typename Compare>
-RepoFile::HashMapIndex<Compare> readHashMapIndexHeader(const RepoFileData& data,
-    RepoFileIndexes index) {
-  auto i = uint32_t(index);
-  auto indexOffset = data.indexOffsets[i * 2];
-  auto indexSize = data.sizes.indexSizes[i * 2];
-  auto dataOffset = data.indexOffsets[i * 2 + 1];
-  auto dataSize = data.sizes.indexSizes[i * 2 + 1];
-  size_t size = (indexSize / sizeof(uint32_t)) - 1;
-  return RepoFile::HashMapIndex<Compare>(size,
-    RepoBounds { indexOffset, indexSize }, RepoBounds { dataOffset, dataSize });
-}
-
-RepoFile::ListIndex readListIndexHeader(const RepoFileData& data,
-                                        RepoFileIndexes index) {
-  auto i = uint32_t(index);
-  auto indexOffset = data.indexOffsets[i * 2];
-  auto indexSize = data.sizes.indexSizes[i * 2];
-  auto dataOffset = data.indexOffsets[i * 2 + 1];
-  auto dataSize = data.sizes.indexSizes[i * 2 + 1];
-  FTRACE(1, "readListIndexHeader {} {} {} {} {}\n", uint32_t(index), indexOffset,
-         indexSize, dataOffset, dataSize);
-  size_t size = (indexSize / sizeof(uint32_t)) - 1;
-  return RepoFile::ListIndex(size, RepoBounds { indexOffset, indexSize },
-                             RepoBounds { dataOffset, dataSize });
-}
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -878,93 +393,21 @@ RepoFile::ListIndex readListIndexHeader(const RepoFileData& data,
 void RepoFile::init(const std::string& path) {
   assertx(!s_repoFileData);
   s_repoFileData = std::make_unique<RepoFileData>();
-  s_repoFileData->path = path;
-
   auto& data = *s_repoFileData;
-  data.fd = FD{path, O_CLOEXEC | O_RDONLY};
+  data.init(path, kMagic, kCurrentVersion);
 
-  {
-    std::remove_cv_t<decltype(kMagic)> magic;
-    data.fd.read(magic.data(), sizeof(magic));
-    always_assert_flog(
-      magic == kMagic,
-      "Incorrect magic bytes in {}",
-      path
-    );
-  }
+  data.check(RepoFileChunks::UNIT_EMITTERS, 0);
+  data.check(RepoFileChunks::GLOBAL_DATA, kGlobalDataSizeLimit);
 
-  {
-    auto const version = data.fd.readInt<decltype(kCurrentVersion)>();
-    always_assert_flog(
-      version == kCurrentVersion,
-      "Unsupported version in {} (expected {}, got {})",
-      path, kCurrentVersion, version
-    );
-  }
-
-  auto const repoSchemaSize = data.fd.readInt<uint8_t>();
-
-  {
-    std::string repoSchema;
-    repoSchema.resize(repoSchemaSize);
-    data.fd.read(repoSchema.data(), repoSchema.size());
-    always_assert_flog(
-      repoSchema == repoSchemaId(),
-      "Mismatched repo-schema in {} (expected {}, got {})",
-      path, repoSchemaId(), repoSchema
-    );
-  }
-
-  {
-    data.sizes.read(data.fd);
-    data.fileSize = data.fd.fileSize();
-
-    auto offset =
-      sizeof(kMagic) + sizeof(kCurrentVersion) +
-      sizeof(uint8_t) + repoSchemaSize +
-      SizeHeader::kFileSize;
-
-    auto const check = [&] (const char* what, size_t size, size_t limit) {
-      always_assert_flog(
-        size <= limit,
-        "Invalid section size for {}: {} is {} (larger than limit of {})",
-        path, what, size, limit
-      );
-      always_assert_flog(
-        offset <= data.fileSize,
-        "Corrupted size table for {}: "
-        "calculated offset {} for {} is greater than file size {}",
-        path, offset, what, data.fileSize
-      );
-    };
-
-    check("unit-emitters", 0, 0);
-    data.unitEmittersOffset = offset;
-    offset += data.sizes.unitEmittersSize;
-
-    check("global data", data.sizes.globalDataSize, kGlobalDataSizeLimit);
-    data.globalDataOffset = offset;
-    offset += data.sizes.globalDataSize;
-
-    for (auto i = 0; i < uint32_t(RepoFileIndexes::SIZE) * 2; i++) {
-      check("index", data.sizes.indexSizes[i], kIndexSizeLimit);
-      data.indexOffsets[i] = offset;
-      offset += data.sizes.indexSizes[i];
-    }
-
-    always_assert_flog(
-      offset == data.fileSize,
-      "Corrupted size table for {}: "
-      "calculated end of data offset {} does not match file size {}",
-      path, offset, data.fileSize
-    );
+  for (auto i = 0; i < uint32_t(RepoFileIndexes::SIZE); i++) {
+    data.check(RepoFileIndexes(i), kIndexSizeLimit, kIndexDataSizeLimit);
   }
 
   // We load global data eagerly
   {
     auto blob = data.fd.readBlob(
-      data.globalDataOffset,
-      data.sizes.globalDataSize
+      data.offsets.get(RepoFileChunks::GLOBAL_DATA),
+      data.sizes.get(RepoFileChunks::GLOBAL_DATA)
     );
     blob.decoder(data.globalData);
     blob.decoder.assertDone();
@@ -994,27 +437,23 @@ void RepoFile::loadGlobalTables(bool loadAutoloadMap) {
   assertx(!s_repoFileData->loadedGlobalTables.load());
   auto& data = *s_repoFileData;
 
-  data.unitSymbolsIndex = readListIndexHeader(data,
-                                              RepoFileIndexes::UNIT_SYMBOLS);
-  data.unitInfosIndex = readListIndexHeader(data, RepoFileIndexes::UNIT_INFOS);
+  data.unitSymbolsIndex = data.listIndex(RepoFileIndexes::UNIT_SYMBOLS);
+  data.unitInfosIndex = data.listIndex(RepoFileIndexes::UNIT_INFOS);
 
-  data.pathToUnitInfoBoundsIndex = readHashMapIndexHeader<string_data_same>(
-    data, RepoFileIndexes::PATH_TO_UNIT_INFO);
+  data.pathToUnitInfoBoundsIndex = data.hashMapIndex<stringHashCompare>(
+    RepoFileIndexes::PATH_TO_UNIT_INFO);
 
   // Repo autoload map
   if (loadAutoloadMap) {
     AutoloadHandler::setRepoAutoloadMap(
       std::make_unique<RepoAutoloadMap>(
-        readHashMapIndexHeader<string_data_isame>(data,
-          RepoFileIndexes::AUTOLOAD_TYPES),
-        readHashMapIndexHeader<string_data_isame>(data,
-          RepoFileIndexes::AUTOLOAD_FUNCS),
-        readHashMapIndexHeader<string_data_same>(data,
+        data.hashMapIndex<stringiHashCompare>(RepoFileIndexes::AUTOLOAD_TYPES),
+        data.hashMapIndex<stringiHashCompare>(RepoFileIndexes::AUTOLOAD_FUNCS),
+        data.hashMapIndex<stringHashCompare>(
           RepoFileIndexes::AUTOLOAD_CONSTANTS),
-        readHashMapIndexHeader<string_data_isame>(data,
+        data.hashMapIndex<stringiHashCompare>(
           RepoFileIndexes::AUTOLOAD_TYPEALIASES),
-        readHashMapIndexHeader<string_data_same>(data,
-          RepoFileIndexes::AUTOLOAD_MODULES)
+        data.hashMapIndex<stringHashCompare>(RepoFileIndexes::AUTOLOAD_MODULES)
       )
     );
   }
@@ -1039,7 +478,8 @@ RepoFile::loadUnitEmitter(const StringData* path,
   }
 
   auto blob = data.fd.readBlob(
-    data.unitEmittersOffset + info->emitterLocation.offset,
+    data.offsets.get(RepoFileChunks::UNIT_EMITTERS) +
+      info->emitterLocation.offset,
     info->emitterLocation.size
   );
 
@@ -1072,8 +512,9 @@ void RepoFile::readRawFromUnit(int64_t unitSn, Token token,
   auto info = getUnitInfoFromUnitSn(data, unitSn);
   assertx(token <= info.emitterLocation.size);
   always_assert(token + len <= info.emitterLocation.size);
-  data.fd.pread(
-    ptr, len, data.unitEmittersOffset + info.emitterLocation.offset + token
+  data.fd.pread(ptr, len,
+    data.offsets.get(RepoFileChunks::UNIT_EMITTERS) +
+      info.emitterLocation.offset + token
   );
 }
 
@@ -1104,8 +545,8 @@ const StringData* RepoFile::findUnitPath(const SHA1& sha1) {
 }
 
 template <typename Compare>
-const RepoUnitInfo* RepoFile::findUnitInfo(const HashMapIndex<Compare>& map,
-                                           const StringData* key) {
+const RepoUnitInfo* RepoFile::findUnitInfo(
+    const Blob::HashMapIndex<Compare>& map, const StringData* key) {
   // We need to check here because sometime people call this before RepoFileData
   // has been inited
   if (map.size == 0) {
@@ -1120,11 +561,11 @@ const RepoUnitInfo* RepoFile::findUnitInfo(const HashMapIndex<Compare>& map,
 
 template
 const RepoUnitInfo* RepoFile::findUnitInfo(
-  const CaseInsensitiveHashMapIndex& map, const StringData* key);
+  const Blob::CaseInsensitiveHashMapIndex& map, const StringData* key);
 
 template
 const RepoUnitInfo* RepoFile::findUnitInfo(
-  const CaseSensitiveHashMapIndex& map, const StringData* key);
+  const Blob::CaseSensitiveHashMapIndex& map, const StringData* key);
 
 
 const RepoUnitSymbols* RepoFile::findUnitSymbols(const StringData* path) {

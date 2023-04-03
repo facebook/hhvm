@@ -36,7 +36,9 @@ impl Pass for ValidateClassMethodsPass {
                 ua == sn::user_attributes::MEMOIZE || ua == sn::user_attributes::MEMOIZE_LSB
             })
         {
-            env.emit_error(NastCheckError::AbstractMethodMemoize(method.span.clone()))
+            env.emit_error(NastCheckError::AbstractMethodMemoize(
+                method.name.pos().clone(),
+            ))
         }
         Continue(())
     }

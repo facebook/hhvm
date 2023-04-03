@@ -1,4 +1,0 @@
-File "memoize_lsb_abstract_method.php", line 4, characters 3-63:
-Abstract methods cannot be memoized. (NastCheck[3087])
-File "memoize_lsb_abstract_method.php", line 5, characters 35-35:
-Abstract methods cannot be memoized. (NastCheck[3087])

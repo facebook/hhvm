@@ -1,2 +1,0 @@
-File "test_ok_yield_return.php", line 15, characters 5-13:
-You cannot return a value in a generator (a generator is a function that uses `yield`) (NastCheck[3019])

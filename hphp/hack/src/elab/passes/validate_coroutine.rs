@@ -7,8 +7,8 @@ use bitflags::bitflags;
 use nast::AsExpr;
 use nast::Expr;
 use nast::Expr_;
-use nast::FunDef;
 use nast::FunKind;
+use nast::Fun_;
 use nast::Method_;
 use nast::Pos;
 use nast::Stmt;
@@ -84,7 +84,7 @@ impl Pass for ValidateCoroutinePass {
         Continue(())
     }
 
-    fn on_ty_expr_top_down(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
+    fn on_ty_expr_bottom_up(&mut self, env: &Env, elem: &mut Expr) -> ControlFlow<()> {
         match elem.2 {
             Expr_::Await(..) if self.is_sync() => {
                 env.emit_error(NastCheckError::AwaitInSyncFunction {
@@ -103,9 +103,9 @@ impl Pass for ValidateCoroutinePass {
         Continue(())
     }
 
-    fn on_ty_fun_def_top_down(&mut self, _: &Env, elem: &mut FunDef) -> ControlFlow<()> {
-        self.set_fun_kind(elem.fun.fun_kind);
-        self.func_pos = Some(elem.name.pos().clone());
+    fn on_ty_fun__top_down(&mut self, _: &Env, elem: &mut Fun_) -> ControlFlow<()> {
+        self.set_fun_kind(elem.fun_kind);
+        self.func_pos = Some(elem.span.clone());
         Continue(())
     }
 }

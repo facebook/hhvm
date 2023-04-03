@@ -6201,10 +6201,6 @@ end = struct
     | Intersection of t list
     | With_code of t * Error_code.t
 
-  let show _ = "<implement error>"
-
-  let pp _ _ = ()
-
   let iter t ~on_prim ~on_snd =
     let rec aux = function
       | Primary prim -> on_prim prim
@@ -6333,6 +6329,42 @@ end = struct
   let both t1 t2 = Multiple [t1; t2]
 
   let with_code t ~code = With_code (t, code)
+
+  (* TODO: this is not actually showing the [Error.t]! It will actually show the
+     error evaluated at [Pos.none] without any quickfixes.
+     This may be quite expensive. In short, you should only be using this for
+     debugging and when you don't need to understand the structure of the
+     various callbacks etc. *)
+  let show t =
+    let show_message show_pos (pos, str) =
+      Format.sprintf "(%s, %s)" (show_pos pos) str
+    in
+    let show_error (code, message, reasons, _) =
+      let pos_to_string p = Pos.string @@ Pos.to_absolute p in
+      let msg_string = show_message pos_to_string @@ Lazy.force message in
+      let reasons = Lazy.force reasons in
+      let reasons_string =
+        List.fold_left
+          ~f:(fun acc msg ->
+            Format.sprintf "%s, %s" acc
+            @@ show_message
+                 Pos_or_decl.show_as_absolute_file_line_characters
+                 msg)
+          ~init:""
+          reasons
+      in
+      Format.(
+        open_hovbox 2;
+        sprintf
+          {|{@ code: %i;@ message: %s;@ reasons: %s }@]|}
+          (Error_code.to_enum code)
+          msg_string
+          reasons_string)
+    in
+    let res = eval t ~current_span:Pos.none in
+    Eval_result.to_string res show_error
+
+  let pp _ _ = ()
 end
 
 and Secondary : sig

@@ -1181,6 +1181,10 @@ static int start_server(const std::string &username, int xhprof) {
     nSlabs = RO::EvalNumReservedSlabs * (2ull << 20) / kSlabSize;
   }
   setup_local_arenas(reqHeapSpec, nSlabs);
+
+  if (RuntimeOption::RepoAuthoritative) {
+    setup_swappable_readonly_arena(RuntimeOption::EvalHHBCArenaChunkSize);
+  }
 #endif
 
   HttpServer::Server->runOrExitProcess();

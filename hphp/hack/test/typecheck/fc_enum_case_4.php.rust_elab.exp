@@ -1,6 +1,0 @@
-File "fc_enum_case_4.php", line 17, characters 11-12:
-`switch` statement nonexhaustive; the following cases are missing: `BAZ` (Typing[4019])
-  File "fc_enum_case_4.php", line 5, characters 6-8:
-  Enum declared here
-File "fc_enum_case_4.php", line 23, characters 10-17:
-Switching on enum `Bar` but using constant from `Baz` (Typing[4023])

@@ -1,4 +1,0 @@
-File "interface_memoize.php", line 4, characters 3-29:
-`__Memoize` is not allowed on interface methods (Parsing[1002])
-File "interface_memoize.php", line 4, characters 19-21:
-Abstract methods cannot be memoized. (NastCheck[3087])

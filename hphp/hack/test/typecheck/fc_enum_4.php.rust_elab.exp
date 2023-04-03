@@ -1,2 +1,0 @@
-File "fc_enum_4.php", line 4, characters 6-8:
-Enums must be `int` or `string` or `arraykey`, not `bool` (Typing[4024])

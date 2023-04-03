@@ -1,4 +1,0 @@
-File "class_as_enum_constant2.php", line 14, characters 3-17:
-Enum element cannot be named `class` (Parsing[1002])
-File "class_as_enum_constant2.php", line 14, characters 3-7:
-Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class (Naming[2070])

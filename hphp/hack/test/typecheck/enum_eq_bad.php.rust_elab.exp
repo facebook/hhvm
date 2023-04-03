@@ -1,6 +1,0 @@
-File "enum_eq_bad.php", line 17, characters 7-15:
-This equality test has incompatible types (Typing[4157])
-  File "enum_eq_bad.php", line 4, characters 9-11:
-  This is a value of type E
-  File "enum_eq_bad.php", line 9, characters 9-11:
-  This is a value of type F

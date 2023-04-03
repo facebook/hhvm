@@ -1,4 +1,0 @@
-File "missing_tparam4.php", line 5, characters 11-13:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-  File "missing_tparam4.php", line 3, characters 9-11:
-  Definition is here

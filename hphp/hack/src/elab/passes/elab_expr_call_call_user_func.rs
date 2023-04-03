@@ -42,10 +42,11 @@ impl Pass for ElabExprCallCallUserFuncPass {
                 let (param_kind, head_expr) = fn_param_exprs.remove(0);
                 // raise an error if this is an inout param
                 if let ParamKind::Pinout(pk_pos) = &param_kind {
-                    let pos = Pos::merge(pk_pos, &fn_expr.1).unwrap();
+                    let pos = Pos::merge(pk_pos, &head_expr.1).unwrap();
                     env.emit_error(NastCheckError::InoutInTransformedPseudofunction {
                         pos,
-                        fn_name: sn::std_lib_functions::CALL_USER_FUNC.to_string(),
+                        fn_name: core_utils_rust::strip_ns(sn::std_lib_functions::CALL_USER_FUNC)
+                            .to_string(),
                     })
                 }
                 // use the first argument as the function expression

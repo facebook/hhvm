@@ -1,4 +1,0 @@
-File "fc_enum_case_5.php", line 10, characters 11-12:
-All cases already covered; a redundant `default` case prevents detecting future errors. If your goal is to guard against invalid values for this type, do an `is` check before the switch. (Typing[4022])
-  File "fc_enum_case_5.php", line 3, characters 6-8:
-  Enum declared here

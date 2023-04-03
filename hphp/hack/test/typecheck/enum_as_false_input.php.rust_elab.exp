@@ -1,8 +1,0 @@
-File "enum_as_false_input.php", line 23, characters 10-24:
-Invalid return type (Typing[4110])
-  File "enum_as_false_input.php", line 22, characters 27-35:
-  Expected `DerpyEnum`
-  File "enum_as_false_input.php", line 17, characters 6-13:
-  But got `BaitEnum`; implicitly defined constant `::class` is a string that contains the fully qualified name of `BaitEnum`
-  File "enum_as_false_input.php", line 23, characters 10-17:
-    where the class `BaitEnum` was referenced here

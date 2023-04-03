@@ -1,2 +1,0 @@
-File "fc_enum_15.php", line 3, characters 6-8:
-Enums must be `int` or `string` or `arraykey`, not `mixed` (Typing[4024])

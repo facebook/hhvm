@@ -1,6 +1,0 @@
-File "fc_enum_9.php", line 13, characters 10-25:
-Invalid return type (Typing[4110])
-  File "fc_enum_9.php", line 12, characters 42-44:
-  Expected `int`
-  File "fc_enum_9.php", line 3, characters 6-8:
-  But got `arraykey` arising from an implicit `as arraykey` constraint on this type

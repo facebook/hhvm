@@ -1,6 +1,0 @@
-File "switch_default.php", line 12, characters 5-12:
-Default case in `switch` must be terminal (Parsing[1002])
-File "switch_default.php", line 11, characters 11-15:
-`switch` statement nonexhaustive; the following cases are missing: `B` (Typing[4019])
-  File "switch_default.php", line 4, characters 6-15:
-  Enum declared here

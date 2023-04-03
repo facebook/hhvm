@@ -1,4 +1,0 @@
-File "fc_enum_case_2.php", line 18, characters 10-17:
-Redundant `case` statement (Typing[4021])
-  File "fc_enum_case_2.php", line 12, characters 10-17:
-  `FOO` already handled here

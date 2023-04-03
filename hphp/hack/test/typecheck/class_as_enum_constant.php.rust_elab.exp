@@ -1,6 +1,4 @@
 File "class_as_enum_constant.php", line 14, characters 3-17:
 Enum element cannot be named `class` (Parsing[1002])
-File "class_as_enum_constant.php", line 12, characters 6-14:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
 File "class_as_enum_constant.php", line 14, characters 3-7:
 Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class (Naming[2070])

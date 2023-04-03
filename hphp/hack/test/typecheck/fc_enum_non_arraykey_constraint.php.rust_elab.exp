@@ -1,4 +1,2 @@
 File "fc_enum_non_arraykey_constraint.php", line 4, characters 6-9:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
-File "fc_enum_non_arraykey_constraint.php", line 4, characters 6-9:
 Enums must be `int` or `string` or `arraykey`, not `?string` (Typing[4024])

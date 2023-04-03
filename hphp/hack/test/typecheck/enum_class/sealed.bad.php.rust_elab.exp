@@ -1,8 +1,0 @@
-File "sealed.bad.php", line 4, characters 12-15:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "sealed.bad.php", line 9, characters 12-14:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "sealed.bad.php", line 9, characters 12-14:
-You cannot extend sealed enum class `Base` (Typing[4238])
-  File "sealed.bad.php", line 4, characters 12-15:
-  Declaration is here

@@ -1,6 +1,0 @@
-File "as_mut_collections.php", line 7, characters 6-8:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
-File "as_mut_collections.php", line 24, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])
-File "as_mut_collections.php", line 36, characters 3-20:
-Only value types and arrays can be converted to mutable. This value can never be a primitive. (Typing[4434])

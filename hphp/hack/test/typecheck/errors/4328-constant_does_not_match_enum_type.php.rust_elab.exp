@@ -1,8 +1,0 @@
-File "4328-constant_does_not_match_enum_type.php", line 4, characters 6-8:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
-File "4328-constant_does_not_match_enum_type.php", line 5, characters 3-3:
-Constant does not match the type of the enum it is in (Typing[4328])
-  File "4328-constant_does_not_match_enum_type.php", line 4, characters 12-17:
-  Expected `string`
-  File "4328-constant_does_not_match_enum_type.php", line 5, characters 7-7:
-  But got `int`

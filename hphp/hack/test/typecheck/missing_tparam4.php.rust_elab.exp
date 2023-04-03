@@ -1,5 +1,3 @@
-File "missing_tparam4.php", line 5, characters 6-8:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
 File "missing_tparam4.php", line 5, characters 11-13:
 Wrong number of type arguments (expected 1, got 0) (Typing[4101])
   File "missing_tparam4.php", line 3, characters 9-11:

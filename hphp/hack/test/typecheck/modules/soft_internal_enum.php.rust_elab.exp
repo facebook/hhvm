@@ -1,4 +1,0 @@
-File "soft_internal_enum.php--use.php", line 4, characters 15-21:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
-File "soft_internal_enum.php--use.php", line 6, characters 21-30:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

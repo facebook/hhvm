@@ -1,6 +1,0 @@
-File "missing_enum_value.php", line 4, characters 6-8:
-`HH\BuiltinEnum` is an implementation internal class that cannot be used directly (Naming[2053])
-File "missing_enum_value.php", line 10, characters 13-23:
-No class constant `Nonexistent` in `Foo` (Typing[4090])
-  File "missing_enum_value.php", line 4, characters 6-8:
-  Declaration of `Foo` is here

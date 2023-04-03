@@ -1,8 +1,0 @@
-File "enum_class_internal.php--test.php", line 4, characters 21-21:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "enum_class_internal.php--test.php", line 8, characters 21-21:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "enum_class_internal.php--test.php", line 12, characters 21-21:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "enum_class_internal.php--test.php", line 16, characters 21-21:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

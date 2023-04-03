@@ -1,8 +1,0 @@
-File "typing.multiple.extends.vshape.good.php", line 4, characters 12-13:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "typing.multiple.extends.vshape.good.php", line 9, characters 12-13:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "typing.multiple.extends.vshape.good.php", line 16, characters 12-13:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])
-File "typing.multiple.extends.vshape.good.php", line 23, characters 12-13:
-`HH\BuiltinEnumClass` is an implementation internal class that cannot be used directly (Naming[2053])

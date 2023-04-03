@@ -211,6 +211,7 @@ namespace Trace {
       TM(vasm_copy)     \
       TM(vasm_graph_color) \
       TM(vasm_phi)      \
+      TM(vfs)           \
       TM(watchman)      \
       TM(xenon)         \
       TM(xls)           \

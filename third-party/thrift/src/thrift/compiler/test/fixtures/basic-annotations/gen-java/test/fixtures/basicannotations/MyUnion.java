@@ -51,7 +51,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
                 default:
                 throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
-        } catch (Exception t) {
+        } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
         }
     }

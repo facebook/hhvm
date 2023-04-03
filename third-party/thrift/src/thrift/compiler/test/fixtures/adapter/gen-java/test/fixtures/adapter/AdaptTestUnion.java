@@ -72,7 +72,7 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
                 default:
                 throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
-        } catch (Exception t) {
+        } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
         }
     }

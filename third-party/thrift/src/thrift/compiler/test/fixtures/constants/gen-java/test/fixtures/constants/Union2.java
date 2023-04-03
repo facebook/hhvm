@@ -87,7 +87,7 @@ public final class Union2 implements com.facebook.thrift.payload.ThriftSerializa
                 default:
                 throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
             }
-        } catch (Exception t) {
+        } catch (java.lang.Exception t) {
             throw new IllegalArgumentException("invalid type " + _field.getClass().getName() + " for field " + _id);
         }
     }

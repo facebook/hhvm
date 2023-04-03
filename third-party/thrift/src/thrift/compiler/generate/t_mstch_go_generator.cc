@@ -657,15 +657,11 @@ class mstch_go_typedef : public mstch_typedef {
     // Special handling for the following two scenarios:
     //   1. t_placeholder_typedef is not an actual typedef, but a
     //   dummy hack/workaround in Thrift compiler AST.
-    //   2. Type resolution is a bit wonky in the AST - occasionally there are
-    //   multiple identical typedefs in a typedef chain (parent/child).
+    //   2. Unnamed typedef to hold unstructured annotations.
     //
     // In either case, we want to skip a few steps down the chain to the
     // "actual" types if order to generate code properly.
-    auto parentName = typedef_->get_scoped_name();
-    auto childName = typedef_->get_type()->get_scoped_name();
-    return typedef_->typedef_kind() != t_typedef::kind::defined ||
-        parentName == childName;
+    return typedef_->typedef_kind() != t_typedef::kind::defined;
   }
 
  private:

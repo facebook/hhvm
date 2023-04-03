@@ -69,6 +69,7 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/builtin-symbol-map.h"
@@ -2489,6 +2490,8 @@ void hphp_process_init(bool skipModules) {
 
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");
+
+  StaticContentCache::TheCache.load();
 
   if (RuntimeOption::RepoAuthoritative &&
       !RuntimeOption::EvalJitSerdesFile.empty() &&

@@ -19,7 +19,7 @@
   }}{{^value:nonzero?}}False{{/value:nonzero?}}{{/value:bool?}}{{!
 }}{{#value:integer?}}cv_integer={{value:integer_value}}{{/value:integer?}}{{!
 }}{{#value:double?}}cv_double={{value:double_value}}{{/value:double?}}{{!
-}}{{#value:string?}}cv_string={{value:py3_string_value}}{{/value:string?}}{{!
+}}{{#value:string?}}cv_string="{{value:string_value}}"{{/value:string?}}{{!
 }}{{#value:map?}}cv_map=[{{#value:map_elements}}_fbthrift_metadata.ThriftConstValuePair(key={{#element:key}}{{ > metadata/const_value }}{{/element:key}}, value={{#element:value}}{{ > metadata/const_value }}{{/element:value}}), {{/value:map_elements}}]{{/value:map?}}{{!
 }}{{#value:list?}}cv_list=[{{#value:list_elements}}{{ > metadata/const_value }}, {{/value:list_elements}}]{{/value:list?}}{{/value:const_struct?}}{{!
 }}{{#value:const_struct?}}cv_struct={{> metadata/const_struct }}{{/value:const_struct?}})

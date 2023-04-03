@@ -194,14 +194,14 @@ constexpr char const * const module_constants::escaped_a_;
 }
 
 ::std::vector<::std::string> const& module_constants::escaped_strings() {
-  static folly::Indestructible<::std::vector<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral(""),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral(""),
+  static folly::Indestructible<::std::vector<::std::string>> const instance{std::initializer_list<::std::string>{apache::thrift::StringTraits<std::string>::fromStringLiteral("\001"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("\037"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral(" "),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("'"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("\""),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("\n"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("\r"),
-  apache::thrift::StringTraits<std::string>::fromStringLiteral("	"),
+  apache::thrift::StringTraits<std::string>::fromStringLiteral("\011"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("a"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("\302\253"),
   apache::thrift::StringTraits<std::string>::fromStringLiteral("j"),

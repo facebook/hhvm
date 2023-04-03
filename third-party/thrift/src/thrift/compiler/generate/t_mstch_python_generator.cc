@@ -1010,7 +1010,6 @@ class python_mstch_const_value : public mstch_const_value {
     register_methods(
         this,
         {
-            {"value:py3_string_value", &python_mstch_const_value::string_value},
             {"value:py3_enum_value_name",
              &python_mstch_const_value::py3_enum_value_name},
             {"value:py3_binary?", &python_mstch_const_value::is_binary},
@@ -1064,37 +1063,6 @@ class python_mstch_const_value : public mstch_const_value {
       return py3::get_py3_name(*const_value_->get_enum_value());
     }
     return mstch::node();
-  }
-
-  mstch::node string_value() {
-    if (type_ != cv::CV_STRING) {
-      return mstch::node();
-    }
-    std::string string_val = const_value_->get_string();
-    if (string_val.find('\n') == std::string::npos) {
-      if (string_val.find('"') == std::string::npos) {
-        return "\"" + string_val + "\"";
-      }
-      if (string_val.find('\'') == std::string::npos) {
-        return "'" + string_val + "'";
-      }
-    }
-    const auto& front = string_val.front();
-    const auto& back = string_val.back();
-
-    if (front != '"' && back != '"') {
-      return "\"\"\"" + string_val + "\"\"\"";
-    }
-    if (front != '\'' && back != '\'') {
-      return "'''" + string_val + "'''";
-    }
-    if (front == '"') { // and back = '\''
-      string_val.pop_back(); // remove the last '\''
-      return "'''" + string_val + "'''\"'\"";
-    }
-    // the only possible case left: back = '"' and front = '\''
-    string_val.pop_back(); // remove the last '"'
-    return "\"\"\"" + string_val + "\"\"\"'\"'";
   }
 
   mstch::node list_elem_type() {

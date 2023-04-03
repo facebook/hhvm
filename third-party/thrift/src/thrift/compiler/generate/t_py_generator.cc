@@ -1069,7 +1069,7 @@ string t_py_generator::render_string(string value, EscapeFlag flag) {
   std::string escaped;
   escaped.reserve(value.size());
   for (unsigned char c : value) {
-    if (c >= 0xf8) {
+    if (c < 0x20 || c >= 0xf8) {
       escaped.append(fmt::format("\\x{:02x}", c));
     } else if (c == '"' && (flag & EscapeQuote) != 0) {
       escaped.append("\\\"");

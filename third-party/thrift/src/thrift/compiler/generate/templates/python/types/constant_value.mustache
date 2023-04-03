@@ -35,7 +35,7 @@ file.
 }}{{/value:integer?}}{{!
 }}{{#value:double?}}float({{value:double_value}}){{/value:double?}}{{!
 }}{{#value:string?}}{{!
-    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}{{value:py3_string_value}}{{!
+    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}"{{value:string_value}}"{{!
 }}{{/value:string?}}{{!
 }}{{#value:const_struct?}}{{!
     }}{{#value:const_struct_type}}{{!

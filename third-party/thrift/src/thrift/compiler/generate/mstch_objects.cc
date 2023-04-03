@@ -308,17 +308,27 @@ mstch::node mstch_const_value::string_value() {
   std::string escaped;
   escaped.reserve(str.size());
   for (unsigned char c : str) {
-    if (c >= 0x80) {
-      // Use octal escape sequences because they are the most portable across
-      // languages. Hexadecimal ones have a problem of consuming all hex digits
-      // after \x in C++, e.g. \xcafefe is a single escape sequence.
-      escaped.append(fmt::format("\\{:03o}", c));
-    } else if (c == '"') {
-      escaped.append("\\\"");
-    } else if (c == '\n') {
-      escaped.append("\\n");
-    } else {
-      escaped.push_back(c);
+    switch (c) {
+      case '"':
+        escaped.append("\\\"");
+        break;
+      case '\r':
+        escaped.append("\\r");
+        break;
+      case '\n':
+        escaped.append("\\n");
+        break;
+      default:
+        if (c < 0x20 || c >= 0x80) {
+          // Use octal escape sequences because they are the most portable
+          // across languages. Hexadecimal ones have a problem of consuming
+          // all hex digits after \x in C++, e.g. \xcafefe is a single escape
+          // sequence.
+          escaped.append(fmt::format("\\{:03o}", c));
+        } else {
+          escaped.push_back(c);
+        }
+        break;
     }
   }
   return escaped;

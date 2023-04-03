@@ -34,6 +34,9 @@ val lsp_position_to_fc : Lsp.position -> File_content.position
 
 val lsp_range_to_fc : Lsp.range -> File_content.range
 
+val lsp_range_to_pos :
+  line_to_offset:(int -> int) -> Relative_path.t -> Lsp.range -> Pos.t
+
 val lsp_edit_to_fc :
   Lsp.DidChange.textDocumentContentChangeEvent -> File_content.text_edit
 
@@ -56,8 +59,6 @@ val symbol_to_lsp_call_item :
   Relative_path.t SymbolOccurrence.t ->
   Relative_path.t SymbolDefinition.t option ->
   Lsp.CallHierarchyItem.t
-
-val lsp_range_contains : outer:Lsp.range -> Lsp.range -> bool
 
 val pos_compare : Lsp.position -> Lsp.position -> int
 

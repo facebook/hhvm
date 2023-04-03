@@ -17,22 +17,6 @@ type candidate = {
   placeholder_n: int;
 }
 
-let lsp_range_contains_pos (range : Lsp.range) pos =
-  let (start_line, start_character, end_line, end_character) =
-    Pos.destruct_range pos
-  in
-  Lsp.(
-    let start_contains =
-      range.start.line < start_line
-      || range.start.line = start_line
-         && range.start.character <= start_character
-    in
-    let end_contains =
-      range.end_.line > end_line
-      || (range.end_.line = end_line && range.end_.character >= end_character)
-    in
-    start_contains && end_contains)
-
 let lsp_range_of_pos (pos : Pos.t) : Lsp.range =
   let (first_line, first_col) = Pos.line_column pos in
   let (last_line, last_col) = Pos.end_line_column pos in
@@ -66,7 +50,7 @@ let might_be_expression_lambda ~f_body:Aast.{ fb_ast } ~pos ~source_text =
       true
   | _ -> false
 
-let positions_visitor (range : Lsp.range) ~source_text =
+let positions_visitor (selection : Pos.t) ~source_text =
   let stmt_pos = ref Pos.none in
   let expression_lambda_pos = ref None in
   let placeholder_n = ref 0 in
@@ -129,7 +113,7 @@ let positions_visitor (range : Lsp.range) ~source_text =
         super#on_expr env expr
       | _ ->
         if
-          lsp_range_contains_pos range pos
+          Pos.contains selection pos
           && (not @@ Pos.equal !stmt_pos Pos.none)
           && not
                (Option.map !expression_lambda_pos ~f:(fun lpos ->
@@ -149,11 +133,8 @@ let positions_visitor (range : Lsp.range) ~source_text =
 (** ensures that `positions_visitor` only traverses
 functions and methods such that
 the function body contains the selected range *)
-let top_visitor (range : Lsp.range) ~source_text =
-  let should_traverse span =
-    let outer = Lsp_helpers.pos_to_lsp_range span in
-    Lsp_helpers.lsp_range_contains ~outer range
-  in
+let top_visitor (selection : Pos.t) ~source_text =
+  let should_traverse outer = Pos.contains outer selection in
   object
     inherit [candidate option] Tast_visitor.reduce
 
@@ -162,16 +143,14 @@ let top_visitor (range : Lsp.range) ~source_text =
     method plus = Option.first_some
 
     method! on_method_ env meth =
-      let span = meth.Aast.m_span in
-      if should_traverse span then
-        (positions_visitor range ~source_text)#on_method_ env meth
+      if should_traverse meth.Aast.m_span then
+        (positions_visitor selection ~source_text)#on_method_ env meth
       else
         None
 
     method! on_fun_def env fun_def =
-      let span = Aast.(fun_def.fd_fun.f_span) in
-      if should_traverse span then
-        (positions_visitor range ~source_text)#on_fun_def env fun_def
+      if should_traverse Aast.(fun_def.fd_fun.f_span) then
+        (positions_visitor selection ~source_text)#on_fun_def env fun_def
       else
         None
   end
@@ -211,15 +190,24 @@ let command_or_action_of_candidate
   Lsp.CodeAction.Action code_action
 
 let find ~(range : Lsp.range) ~path ~entry ctx tast =
-  let is_range_selection =
+  let is_selection =
     Lsp.(
       range.start.line < range.end_.line
       || range.start.line = range.end_.line
          && range.start.character < range.end_.character)
   in
   match entry.Provider_context.source_text with
-  | Some source_text when is_range_selection ->
-    (top_visitor range ~source_text)#go ctx tast
+  | Some source_text when is_selection ->
+    let line_to_offset line =
+      Full_fidelity_source_text.position_to_offset source_text (line, 0)
+    in
+    let selection =
+      Lsp_helpers.lsp_range_to_pos
+        ~line_to_offset
+        entry.Provider_context.path
+        range
+    in
+    (top_visitor selection ~source_text)#go ctx tast
     |> Option.map ~f:(command_or_action_of_candidate ~source_text ~path)
     |> Option.to_list
   | _ -> []

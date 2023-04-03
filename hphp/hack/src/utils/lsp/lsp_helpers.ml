@@ -54,6 +54,22 @@ let lsp_range_to_fc (range : Lsp.range) : File_content.range =
     ed = lsp_position_to_fc range.Lsp.end_;
   }
 
+let lsp_range_to_pos ~line_to_offset path (range : Lsp.range) : Pos.t =
+  let pos_fname = Relative_path.suffix path in
+  let lexing_of endpoint =
+    let pos_bol = line_to_offset endpoint.Lsp.line in
+    Lexing.
+      {
+        pos_fname;
+        pos_lnum = endpoint.Lsp.line;
+        pos_bol;
+        pos_cnum = pos_bol + endpoint.Lsp.character;
+      }
+  in
+  let start = lexing_of range.Lsp.start in
+  let end_ = lexing_of range.Lsp.end_ in
+  Pos.make_from_lexing_pos path start end_
+
 let lsp_edit_to_fc (edit : Lsp.DidChange.textDocumentContentChangeEvent) :
     File_content.text_edit =
   {
@@ -115,19 +131,6 @@ let pos_to_lsp_range (p : 'a Pos.pos) : range =
     { line = line_end; character = character_end }
   in
   { start = start_position; end_ = end_position }
-
-let lsp_range_contains ~(outer : range) (inner : range) =
-  let start_is_leq =
-    outer.start.line < inner.start.line
-    || outer.start.line = inner.start.line
-       && outer.start.character <= inner.start.character
-  in
-  let end_is_geq =
-    outer.end_.line > inner.end_.line
-    || outer.end_.line = inner.start.line
-       && outer.end_.character >= inner.end_.character
-  in
-  start_is_leq && end_is_geq
 
 let symbol_to_lsp_call_item
     (sym_occ : Relative_path.t SymbolOccurrence.t)

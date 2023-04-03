@@ -130,3 +130,35 @@ MyDsl`while(true) {}`; // Bad: statement
 MyDsl`() ==> { while true() {} }`; // OK: statements are allowed in lambdas
 MyDsl`class Foo {}`; // Bad: top-level declaration.
 ```
+
+## Expression Tree Blocks
+
+There are times when it is desirable to include statements as part of an expression tree. One way to accomplish this is to create a lambda that is immediately invoked.
+
+```hack
+<<file:__EnableUnstableFeatures('expression_trees')>>
+
+function example1(): void {
+  $num = ExampleDsl`1 + 1`;
+  ExampleDsl`() ==> {
+    $n = ${$num};
+    return $n + $n;
+  }()`;
+}
+```
+
+This can be rewritten using expression tree blocks, eliminating the need to create a lambda and invoke it.
+
+```hack
+<<file:__EnableUnstableFeatures('expression_trees', 'expression_tree_blocks')>>
+
+function example2(): void {
+  $num = ExampleDsl`1 + 1`;
+  ExampleDsl`{
+    $n = ${$num};
+    return $n + $n;
+  }`;
+}
+```
+
+Note that expression tree blocks are syntactic sugar. It will be expanded to the longer form for both type checking and the visitor runtime.

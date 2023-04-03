@@ -58,6 +58,9 @@ struct WideFunc {
   static WideFunc mut(Func* func) { return WideFunc(func, true); }
   static const WideFunc cns(const Func* func) { return WideFunc(func, false); }
 
+  static BlockVec uncompress(const CompressedBytecode&);
+  static CompressedBytecode compress(const BlockVec&);
+
   ~WideFunc();
 
   operator Func*() { return m_func; }

@@ -33,7 +33,7 @@ namespace {
 
 TRACE_SET_MOD(hhbbc_mem);
 
-using Buffer = CompactVector<char>;
+using Buffer = CompressedBytecode;
 
 static_assert(std::is_same<LSString, LowStringPtr>::value);
 
@@ -516,6 +516,20 @@ void WideFunc::release() {
   m_func = nullptr;
   m_mut = false;
   m_blocks.clear();
+}
+
+
+BlockVec WideFunc::uncompress(const CompressedBytecode& b) {
+  auto pos = size_t{0};
+  auto d = decodeBlockVec(b, pos);
+  assertx(pos == b.size());
+  return d;
+}
+
+CompressedBytecode WideFunc::compress(const BlockVec& v) {
+  Buffer buffer;
+  encodeBlockVec(buffer, v);
+  return buffer;
 }
 
 //////////////////////////////////////////////////////////////////////

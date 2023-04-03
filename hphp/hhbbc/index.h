@@ -62,9 +62,11 @@ extern const Type TCell;
 
 namespace php {
 struct Class;
+struct ClassBytecode;
 struct Prop;
 struct Const;
 struct Func;
+struct FuncBytecode;
 struct Unit;
 struct Program;
 struct TypeAlias;
@@ -769,11 +771,24 @@ struct Index {
       std::vector<TypeMapping> typeMappings;
     };
 
+    struct FuncBytecodeMeta {
+      R<php::FuncBytecode> bc;
+      LSString name;
+      LSString methCallerUnit; // nullptr if not associated with a MethCaller
+    };
+
+    struct ClassBytecodeMeta {
+      R<php::ClassBytecode> bc;
+      LSString name;
+    };
+
     static std::vector<SString> makeDeps(const php::Class&);
 
     std::vector<ClassMeta> classes;
     std::vector<UnitMeta> units;
     std::vector<FuncMeta> funcs;
+    std::vector<ClassBytecodeMeta> classBC;
+    std::vector<FuncBytecodeMeta> funcBC;
   };
 
   /*

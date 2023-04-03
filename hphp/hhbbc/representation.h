@@ -229,6 +229,9 @@ struct Local {
 
 using BlockVec = CompactVector<copy_ptr<Block>>;
 
+using CompressedBytecode = CompactVector<char>;
+using CompressedBytecodePtr = copy_ptr<CompactVector<char>>;
+
 /*
  * Separate out the fields that need special attention when copying,
  * so that Func can just have default copy/move semantics.
@@ -254,7 +257,6 @@ struct FuncBase {
    */
   bool isNative;
 
-protected:
   /*
    * All owning pointers to blocks are in this vector, which has the
    * blocks in an unspecified order.  Blocks use BlockIds to represent
@@ -262,9 +264,7 @@ protected:
    *
    * Use WideFunc to access this data.
    */
-  copy_ptr<CompactVector<char>> rawBlocks;
-
-  friend struct WideFunc;
+  CompressedBytecodePtr rawBlocks;
 };
 
 /*
@@ -428,6 +428,20 @@ struct Func : FuncBase {
    */
   UserAttributeMap userAttributes;
 
+  template <typename SerDe> void serde(SerDe&, Class* c = nullptr);
+};
+
+/*
+ * Bytecode for a function (global function or class method). While
+ * using extern-worker, this is stored separately and not within
+ * php::Func.
+ */
+struct FuncBytecode {
+  FuncBytecode() = default;
+  explicit FuncBytecode(CompressedBytecodePtr bc) : bc{std::move(bc)} {}
+
+  CompressedBytecodePtr bc;
+
   /*
    * Bytecode is stored using copy_ptr, which allows multiple
    * functions to share the same bytecode if they're the same. This
@@ -436,13 +450,12 @@ struct Func : FuncBase {
    *
    * If s_reuser is non-nullptr during deserializing, it will be used
    * to try to find similar bytecode and reuse it, restoring the
-   * sharding of copy_ptr (and maybe more).
+   * sharing of copy_ptr (and maybe more).
    */
-  using BytecodeReuser =
-    folly_concurrent_hash_map_simd<SHA1, copy_ptr<CompactVector<char>>>;
-  static BytecodeReuser* s_reuser;
+  using Reuser = folly_concurrent_hash_map_simd<SHA1, CompressedBytecodePtr>;
+  static Reuser* s_reuser;
 
-  template <typename SerDe> void serde(SerDe&, Class* c = nullptr);
+  template <typename SerDe> void serde(SerDe&);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -610,6 +623,11 @@ struct Class : ClassBase {
   template <typename SerDe> void serde(SerDe&);
 };
 
+struct ClassBytecode {
+  CompactVector<FuncBytecode> methodBCs;
+  template <typename SerDe> void serde(SerDe&);
+};
+
 struct Constant {
   LSString name;
   TypedValue val;
@@ -716,7 +734,9 @@ bool check(const Program&);
 MAKE_COPY_PTR_BLOB_SERDE_HELPER(HHBBC::php::Block)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Unit)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Func)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::FuncBytecode)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Class)
+MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::ClassBytecode)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Constant)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::TypeAlias)
 MAKE_UNIQUE_PTR_BLOB_SERDE_HELPER(HHBBC::php::Module)

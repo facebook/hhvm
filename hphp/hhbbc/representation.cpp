@@ -23,7 +23,7 @@ namespace HPHP::HHBBC::php {
 
 //////////////////////////////////////////////////////////////////////
 
-Func::BytecodeReuser* Func::s_reuser = nullptr;
+FuncBytecode::Reuser* FuncBytecode::s_reuser = nullptr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -125,25 +125,40 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
   SERDE_BITFIELD(hasParamsWithMultiUBs, sd);
   SERDE_BITFIELD(hasReturnWithMultiUBs, sd);
 
+  // Bytecode is not serialized automatically. If you want it to be
+  // serialized, you must manually move it out of the Func and into a
+  // FuncBytecode. To catch any situation where this is forgotten,
+  // assert that the bytecode is always reset here (if for some reason
+  // you don't want to serialize it at all, just reset it beforehand).
+  assertx(!rawBlocks);
+}
+
+template <typename SerDe> void FuncBytecode::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
+
   if constexpr (SerDe::deserializing) {
-    sd(WideFunc::mut(this).blocks());
-    if (s_reuser) {
+    bc = CompressedBytecodePtr{
+      WideFunc::compress(sd.template make<BlockVec>())
+    };
+    if (bc->empty()) {
+      bc.reset();
+    } else if (s_reuser) {
       // The above call to WideFunc deserialized the bytecode and
-      // compressed it into rawBlocks. This is always a new copy. If a
-      // reuser is provided, we can try to find an existing identical
-      // bytecode block and share that. Hash the compressed bytecode
-      // and look it up in the table. We use SHA1, so we can use
-      // equality of the hash as a proxy for equality of the bytecode.
+      // compressed it. This is always a new copy. If a reuser is
+      // provided, we can try to find an existing identical bytecode
+      // block and share that. Hash the compressed bytecode and look
+      // it up in the table. We use SHA1, so we can use equality of
+      // the hash as a proxy for equality of the bytecode.
       SHA1 sha1{string_sha1(
-        folly::StringPiece{rawBlocks->data(), rawBlocks->size()}
+        folly::StringPiece{bc->data(), bc->size()}
       )};
       // Insert it. If one already exists, we'll get that back
       // instead. In either case, assign it back to this func.
-      auto reused = s_reuser->emplace(sha1, std::move(rawBlocks)).first->second;
-      rawBlocks = std::move(reused);
+      auto reused = s_reuser->emplace(sha1, std::move(bc)).first->second;
+      bc = std::move(reused);
     }
   } else {
-    sd(WideFunc::cns(this).blocks());
+    sd(bc ? WideFunc::uncompress(*bc) : BlockVec{});
   }
 }
 
@@ -191,6 +206,11 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
   SERDE_BITFIELD(hasReifiedGenerics, sd);
   SERDE_BITFIELD(hasConstProp, sd);
   SERDE_BITFIELD(sampleDynamicConstruct, sd);
+}
+
+template <typename SerDe> void ClassBytecode::serde(SerDe& sd) {
+  ScopedStringDataIndexer _;
+  sd(methodBCs);
 }
 
 template <typename SerDe> void Constant::serde(SerDe& sd) {
@@ -265,6 +285,9 @@ template void Local::serde(BlobDecoder&);
 template void Func::serde(BlobEncoder&, Class*);
 template void Func::serde(BlobDecoder&, Class*);
 
+template void FuncBytecode::serde(BlobEncoder&);
+template void FuncBytecode::serde(BlobDecoder&);
+
 template void Prop::serde(BlobEncoder&);
 template void Prop::serde(BlobDecoder&);
 
@@ -273,6 +296,9 @@ template void Const::serde(BlobDecoder&);
 
 template void Class::serde(BlobEncoder&);
 template void Class::serde(BlobDecoder&);
+
+template void ClassBytecode::serde(BlobEncoder&);
+template void ClassBytecode::serde(BlobDecoder&);
 
 template void Constant::serde(BlobEncoder&);
 template void Constant::serde(BlobDecoder&);

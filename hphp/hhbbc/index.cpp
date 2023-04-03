@@ -3574,7 +3574,8 @@ struct Index::IndexData {
   std::unique_ptr<coro::AsyncValue<Ref<Config>>> configRef;
 
   // Maps unit/class/func name to the extern-worker ref representing
-  // php::Program data for that.
+  // php::Program data for that. Any associated bytecode is stored
+  // separately.
   SStringToOneT<UniquePtrRef<php::Unit>>   unitRefs;
   ISStringToOneT<UniquePtrRef<php::Class>> classRefs;
   ISStringToOneT<UniquePtrRef<php::Func>>  funcRefs;
@@ -3588,6 +3589,12 @@ struct Index::IndexData {
   // FuncInfo2. The FuncInfo2 for methods are stored in their parent
   // ClassInfo2.
   ISStringToOneT<UniquePtrRef<FuncInfo2>> funcInfoRefs;
+
+  // Maps class/func names to the extern-worker ref representing the
+  // bytecode for that class or (global) function. The bytecode of all
+  // of a class' methods are stored together.
+  ISStringToOneT<UniquePtrRef<php::ClassBytecode>> classBytecodeRefs;
+  ISStringToOneT<UniquePtrRef<php::FuncBytecode>> funcBytecodeRefs;
 
   // Func family entries representing all methods with a particular
   // name.
@@ -5769,6 +5776,7 @@ struct FlattenJob {
    */
   using Output = Multi<
     Variadic<std::unique_ptr<php::Class>>,
+    Variadic<std::unique_ptr<php::ClassBytecode>>,
     Variadic<std::unique_ptr<ClassInfo2>>,
     Variadic<std::unique_ptr<php::Func>>,
     Variadic<std::unique_ptr<FuncInfo2>>,
@@ -5788,9 +5796,14 @@ struct FlattenJob {
    * provided type-mappings and list of missing types is used for
    * type-constraint resolution (if a type isn't in a type mapping and
    * isn't a missing type, it is assumed to be a object type).
+   *
+   * Bytecode needs to be provided for every provided class. The
+   * bytecode must be provided in the same order as the bytecode's
+   * associated class.
    */
   static Output run(Variadic<std::unique_ptr<php::Class>> classes,
                     Variadic<std::unique_ptr<php::Class>> deps,
+                    Variadic<std::unique_ptr<php::ClassBytecode>> classBytecode,
                     Variadic<std::unique_ptr<php::Func>> funcs,
                     std::vector<TypeMapping> typeMappings,
                     std::vector<SString> missingTypes) {
@@ -5805,6 +5818,27 @@ struct FlattenJob {
     }
     typeMappings.clear();
     missingTypes.clear();
+
+    // Bytecode should have been provided for every class provided.
+    always_assert(
+      classBytecode.vals.size() == (classes.vals.size() + deps.vals.size())
+    );
+    // Store the provided bytecode in the matching php::Class.
+    for (size_t i = 0,
+         size = classBytecode.vals.size(),
+         classesSize = classes.vals.size();
+         i < size; ++i) {
+      auto& cls = i < classesSize
+        ? classes.vals[i]
+        : deps.vals[i - classesSize];
+      auto& bytecode = classBytecode.vals[i];
+
+      always_assert(bytecode->methodBCs.size() == cls->methods.size());
+      for (size_t j = 0, bcSize = bytecode->methodBCs.size(); j < bcSize; ++j) {
+        cls->methods[j]->rawBlocks = std::move(bytecode->methodBCs[j].bc);
+      }
+    }
+    classBytecode.vals.clear();
 
     // Some classes might be dependencies of another. Moreover, some
     // classes might share dependencies. Topologically sort all of the
@@ -6022,14 +6056,28 @@ struct FlattenJob {
     }
 
     Variadic<std::unique_ptr<FuncInfo2>> funcInfos;
+    funcInfos.vals.reserve(funcs.vals.size());
     for (auto& func : funcs.vals) {
       outMeta.funcTypeUses.emplace_back();
       update_type_constraints(index, *func, &outMeta.funcTypeUses.back());
       funcInfos.vals.emplace_back(make_func_info(index, *func));
     }
 
+    // Provide any updated bytecode back to the caller.
+    Variadic<std::unique_ptr<php::ClassBytecode>> outBytecode;
+    outBytecode.vals.reserve(outClasses.vals.size());
+    for (auto& cls : outClasses.vals) {
+      auto bytecode = std::make_unique<php::ClassBytecode>();
+      bytecode->methodBCs.reserve(cls->methods.size());
+      for (auto& method : cls->methods) {
+        bytecode->methodBCs.emplace_back(std::move(method->rawBlocks));
+      }
+      outBytecode.vals.emplace_back(std::move(bytecode));
+    }
+
     return std::make_tuple(
       std::move(outClasses),
+      std::move(outBytecode),
       std::move(outInfos),
       std::move(funcs),
       std::move(funcInfos),
@@ -7446,6 +7494,7 @@ private:
     };
 
     auto mf = php::WideFunc::mut(cloned.get());
+    assertx(!mf.blocks().empty());
     for (size_t bid = 0; bid < mf.blocks().size(); bid++) {
       auto const b = mf.blocks()[bid].mutate();
       for (size_t ix = 0; ix < b->hhbcs.size(); ix++) {
@@ -8950,6 +8999,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
   struct ClassUpdate {
     SString name;
     UniquePtrRef<php::Class> cls;
+    UniquePtrRef<php::ClassBytecode> bytecode;
     UniquePtrRef<ClassInfo2> cinfo;
     SString unitToAddTo;
     ISStringSet typeUses;
@@ -8987,6 +9037,9 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
       | as<std::vector>();
     auto deps = from(work.deps)
       | map([&] (SString c) { return index.classRefs.at(c); })
+      | as<std::vector>();
+    auto bytecode = (from(work.classes) + from(work.deps))
+      | map([&] (SString c) { return index.classBytecodeRefs.at(c); })
       | as<std::vector>();
     auto funcs = from(work.funcs)
       | map([&] (SString f) { return index.funcRefs.at(f); })
@@ -9051,6 +9104,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           std::make_tuple(
             std::move(classes),
             std::move(deps),
+            std::move(bytecode),
             std::move(funcs),
             std::move(typeMappingsRef),
             std::move(missingTypesRef)
@@ -9062,8 +9116,10 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
     // Every flattening job is a single work-unit, so we should only
     // ever get one result for each one.
     assertx(results.size() == 1);
-    auto& [clsRefs, cinfoRefs, funcRefs, finfoRefs, classMetaRef] = results[0];
+    auto& [clsRefs, bytecodeRefs, cinfoRefs, funcRefs, finfoRefs, classMetaRef]
+      = results[0];
     assertx(clsRefs.size() == cinfoRefs.size());
+    assertx(clsRefs.size() == bytecodeRefs.size());
     assertx(funcRefs.size() == work.funcs.size());
     assertx(funcRefs.size() == finfoRefs.size());
 
@@ -9093,6 +9149,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
         ClassUpdate{
           name,
           std::move(clsRefs[outputIdx]),
+          std::move(bytecodeRefs[outputIdx]),
           std::move(cinfoRefs[outputIdx]),
           nullptr,
           std::move(clsMeta.classTypeUses[outputIdx]),
@@ -9123,6 +9180,7 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
           ClassUpdate{
             name,
             std::move(clsRefs[outputIdx]),
+            std::move(bytecodeRefs[outputIdx]),
             std::move(cinfoRefs[outputIdx]),
             unit,
             std::move(clsMeta.classTypeUses[outputIdx])
@@ -9202,6 +9260,18 @@ SubclassMetadata flatten_classes(IndexData& index, IndexFlattenMetadata meta) {
                 u->name,
                 std::move(u->cinfo)
               ).second
+            );
+          }
+        }
+      },
+      [&] {
+        for (auto& updates : allUpdates) {
+          for (auto& update : updates) {
+            auto u = boost::get<ClassUpdate>(&update);
+            if (!u) continue;
+            index.classBytecodeRefs.insert_or_assign(
+              u->name,
+              std::move(u->bytecode)
             );
           }
         }
@@ -11924,6 +11994,9 @@ IndexFlattenMetadata make_remote(IndexData& index,
   trace_time tracer("make remote");
   tracer.ignore_client_stats();
 
+  assertx(input.classes.size() == input.classBC.size());
+  assertx(input.funcs.size() == input.funcBC.size());
+
   index.executor = std::move(executor);
   index.client = std::move(client);
   index.disposeClient = std::move(dispose);
@@ -12052,6 +12125,66 @@ IndexFlattenMetadata make_remote(IndexData& index,
     flattenMeta.allFuncs.emplace_back(func.name);
   }
 
+  for (auto& bc : input.classBC) {
+    FTRACE(5, "class bytecode {} -> {}\n", bc.name, bc.bc.id().toString());
+
+    always_assert_flog(
+      index.classRefs.count(bc.name),
+      "Class bytecode for non-existent class {}",
+      bc.name
+    );
+    always_assert_flog(
+      index.classBytecodeRefs.emplace(bc.name, std::move(bc.bc)).second,
+      "Duplicate class bytecode: {}",
+      bc.name
+    );
+  }
+
+  for (auto& bc : input.funcBC) {
+    FTRACE(5, "func bytecode {} -> {}\n", bc.name, bc.bc.id().toString());
+
+    always_assert_flog(
+      index.funcRefs.count(bc.name),
+      "Func bytecode for non-existent func {}",
+      bc.name
+    );
+
+    if (bc.methCallerUnit) {
+      // Only record this bytecode if it's associated meth-caller was
+      // kept.
+      auto const it = methCallerUnits.find(bc.name);
+      always_assert_flog(
+        it != end(methCallerUnits),
+        "Bytecode for func {} is marked as meth-caller, "
+        "but func is not a meth-caller",
+        bc.name
+      );
+      auto const unit = it->second;
+      if (bc.methCallerUnit != unit) {
+        FTRACE(
+          4,
+          "Bytecode for meth-caller func {} in unit {} "
+          "skipped because the meth-caller was dropped\n",
+          bc.name, bc.methCallerUnit
+        );
+        continue;
+      }
+    } else {
+      always_assert_flog(
+        !methCallerUnits.count(bc.name),
+        "Bytecode for func {} is not marked as meth-caller, "
+        "but func is a meth-caller",
+        bc.name
+      );
+    }
+
+    always_assert_flog(
+      index.funcBytecodeRefs.emplace(bc.name, std::move(bc.bc)).second,
+      "Duplicate func bytecode: {}",
+      bc.name
+    );
+  }
+
   return flattenMeta;
 }
 
@@ -12072,8 +12205,10 @@ struct AggregateJob {
   struct Bundle {
     std::vector<std::unique_ptr<php::Class>> classes;
     std::vector<std::unique_ptr<ClassInfo2>> classInfos;
+    std::vector<std::unique_ptr<php::ClassBytecode>> classBytecode;
     std::vector<std::unique_ptr<php::Func>> funcs;
     std::vector<std::unique_ptr<FuncInfo2>> funcInfos;
+    std::vector<std::unique_ptr<php::FuncBytecode>> funcBytecode;
     std::vector<std::unique_ptr<php::Unit>> units;
     std::vector<FuncFamilyGroup> funcFamilies;
 
@@ -12081,8 +12216,10 @@ struct AggregateJob {
       ScopedStringDataIndexer _;
       sd(classes)
         (classInfos)
+        (classBytecode)
         (funcs)
         (funcInfos)
+        (funcBytecode)
         (units)
         (funcFamilies)
         ;
@@ -12091,15 +12228,19 @@ struct AggregateJob {
 
   static Bundle run(Variadic<std::unique_ptr<php::Class>> classes,
                     Variadic<std::unique_ptr<ClassInfo2>> classInfos,
+                    Variadic<std::unique_ptr<php::ClassBytecode>> classBytecode,
                     Variadic<std::unique_ptr<php::Func>> funcs,
                     Variadic<std::unique_ptr<FuncInfo2>> funcInfos,
+                    Variadic<std::unique_ptr<php::FuncBytecode>> funcBytecode,
                     Variadic<std::unique_ptr<php::Unit>> units,
                     Variadic<FuncFamilyGroup> funcFamilies) {
     Bundle bundle;
     bundle.classes.reserve(classes.vals.size());
     bundle.classInfos.reserve(classInfos.vals.size());
+    bundle.classBytecode.reserve(classBytecode.vals.size());
     bundle.funcs.reserve(funcs.vals.size());
     bundle.funcInfos.reserve(funcInfos.vals.size());
+    bundle.funcBytecode.reserve(funcBytecode.vals.size());
     bundle.units.reserve(units.vals.size());
     bundle.funcFamilies.reserve(funcFamilies.vals.size());
     for (auto& c : classes.vals) {
@@ -12108,11 +12249,17 @@ struct AggregateJob {
     for (auto& c : classInfos.vals) {
       bundle.classInfos.emplace_back(std::move(c));
     }
+    for (auto& b : classBytecode.vals) {
+      bundle.classBytecode.emplace_back(std::move(b));
+    }
     for (auto& f : funcs.vals) {
       bundle.funcs.emplace_back(std::move(f));
     }
     for (auto& f : funcInfos.vals) {
       bundle.funcInfos.emplace_back(std::move(f));
+    }
+    for (auto& b : funcBytecode.vals) {
+      bundle.funcBytecode.emplace_back(std::move(b));
     }
     for (auto& u : units.vals) {
       bundle.units.emplace_back(std::move(u));
@@ -12791,12 +12938,22 @@ void make_local(IndexData& index) {
       if (!seen.emplace(name).second) continue;
       items.emplace_back(name);
     }
+    for (auto const& [name, ref] : index.classBytecodeRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
     for (auto const& [name, ref] : index.funcRefs) {
       totalSize += ref.id().m_size;
       if (!seen.emplace(name).second) continue;
       items.emplace_back(name);
     }
     for (auto const& [name, ref] : index.funcInfoRefs) {
+      totalSize += ref.id().m_size;
+      if (!seen.emplace(name).second) continue;
+      items.emplace_back(name);
+    }
+    for (auto const& [name, ref] : index.funcBytecodeRefs) {
       totalSize += ref.id().m_size;
       if (!seen.emplace(name).second) continue;
       items.emplace_back(name);
@@ -12825,10 +12982,10 @@ void make_local(IndexData& index) {
 
   // We're going to be downloading all bytecode, so to avoid wasted
   // memory, try to re-use identical bytecode.
-  Optional<php::Func::BytecodeReuser> reuser;
+  Optional<php::FuncBytecode::Reuser> reuser;
   reuser.emplace();
-  php::Func::s_reuser = reuser.get_pointer();
-  SCOPE_EXIT { php::Func::s_reuser = nullptr; };
+  php::FuncBytecode::s_reuser = reuser.get_pointer();
+  SCOPE_EXIT { php::FuncBytecode::s_reuser = nullptr; };
 
   std::mutex lock;
   auto program = std::make_unique<php::Program>();
@@ -12852,8 +13009,10 @@ void make_local(IndexData& index) {
 
     std::vector<UniquePtrRef<php::Class>> classes;
     std::vector<UniquePtrRef<ClassInfo2>> classInfos;
+    std::vector<UniquePtrRef<php::ClassBytecode>> classBytecode;
     std::vector<UniquePtrRef<php::Func>> funcs;
     std::vector<UniquePtrRef<FuncInfo2>> funcInfos;
+    std::vector<UniquePtrRef<php::FuncBytecode>> funcBytecode;
     std::vector<UniquePtrRef<php::Unit>> units;
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
 
@@ -12872,8 +13031,10 @@ void make_local(IndexData& index) {
         }
       }
       if (auto const r = folly::get_optional(index.classRefs, name)) {
+        auto const bytecode = index.classBytecodeRefs.at(name);
         if (ids.emplace(r->id()).second) {
           classes.emplace_back(*r);
+          classBytecode.emplace_back(bytecode);
         }
       }
       if (auto const r = folly::get_optional(index.classInfoRefs, name)) {
@@ -12882,8 +13043,10 @@ void make_local(IndexData& index) {
         }
       }
       if (auto const r = folly::get_optional(index.funcRefs, name)) {
+        auto const bytecode = index.funcBytecodeRefs.at(name);
         if (ids.emplace(r->id()).second) {
           funcs.emplace_back(*r);
+          funcBytecode.emplace_back(bytecode);
         }
       }
       if (auto const r = folly::get_optional(index.funcInfoRefs, name)) {
@@ -12913,8 +13076,10 @@ void make_local(IndexData& index) {
           std::make_tuple(
             std::move(classes),
             std::move(classInfos),
+            std::move(classBytecode),
             std::move(funcs),
             std::move(funcInfos),
+            std::move(funcBytecode),
             std::move(units),
             std::move(funcFamilies)
           )
@@ -12928,14 +13093,18 @@ void make_local(IndexData& index) {
     } else {
       // If we're using subprocess mode, we don't need to aggregate
       // and we can just download the items directly.
-      auto [c, cinfo, f, finfo, u, ff] = HPHP_CORO_AWAIT(coro::collect(
-        index.client->load(std::move(classes)),
-        index.client->load(std::move(classInfos)),
-        index.client->load(std::move(funcs)),
-        index.client->load(std::move(funcInfos)),
-        index.client->load(std::move(units)),
-        index.client->load(std::move(funcFamilies))
-      ));
+      auto [c, cinfo, cbc, f, finfo, fbc, u, ff] =
+        HPHP_CORO_AWAIT(coro::collect(
+          index.client->load(std::move(classes)),
+          index.client->load(std::move(classInfos)),
+          index.client->load(std::move(classBytecode)),
+          index.client->load(std::move(funcs)),
+          index.client->load(std::move(funcInfos)),
+          index.client->load(std::move(funcBytecode)),
+          index.client->load(std::move(units)),
+          index.client->load(std::move(funcFamilies))
+        )
+      );
       chunk.classes.insert(
         end(chunk.classes),
         std::make_move_iterator(begin(c)),
@@ -12946,6 +13115,11 @@ void make_local(IndexData& index) {
         std::make_move_iterator(begin(cinfo)),
         std::make_move_iterator(end(cinfo))
       );
+      chunk.classBytecode.insert(
+        end(chunk.classBytecode),
+        std::make_move_iterator(begin(cbc)),
+        std::make_move_iterator(end(cbc))
+      );
       chunk.funcs.insert(
         end(chunk.funcs),
         std::make_move_iterator(begin(f)),
@@ -12955,6 +13129,11 @@ void make_local(IndexData& index) {
         end(chunk.funcInfos),
         std::make_move_iterator(begin(finfo)),
         std::make_move_iterator(end(finfo))
+      );
+      chunk.funcBytecode.insert(
+        end(chunk.funcBytecode),
+        std::make_move_iterator(begin(fbc)),
+        std::make_move_iterator(end(fbc))
       );
       chunk.units.insert(
         end(chunk.units),
@@ -12967,6 +13146,25 @@ void make_local(IndexData& index) {
         std::make_move_iterator(end(ff))
       );
     }
+
+    always_assert(chunk.classBytecode.size() == chunk.classes.size());
+    for (size_t i = 0, size = chunk.classes.size(); i < size; ++i) {
+      auto& bytecode = chunk.classBytecode[i];
+      auto& cls = chunk.classes[i];
+      always_assert(cls->methods.size() == bytecode->methodBCs.size());
+      for (size_t j = 0, methSize = cls->methods.size(); j < methSize; ++j) {
+        always_assert(!cls->methods[j]->rawBlocks);
+        cls->methods[j]->rawBlocks = std::move(bytecode->methodBCs[j].bc);
+      }
+    }
+    chunk.classBytecode.clear();
+
+    always_assert(chunk.funcBytecode.size() == chunk.funcs.size());
+    for (size_t i = 0, size = chunk.funcs.size(); i < size; ++i) {
+      auto& bytecode = chunk.funcBytecode[i];
+      chunk.funcs[i]->rawBlocks = std::move(bytecode->bc);
+    }
+    chunk.funcBytecode.clear();
 
     // And add it to our php::Program.
     {
@@ -13018,6 +13216,8 @@ void make_local(IndexData& index) {
   decltype(index.classInfoRefs){}.swap(index.classInfoRefs);
   decltype(index.funcInfoRefs){}.swap(index.funcInfoRefs);
   decltype(index.funcFamilyRefs){}.swap(index.funcFamilyRefs);
+  decltype(index.classBytecodeRefs){}.swap(index.classBytecodeRefs);
+  decltype(index.funcBytecodeRefs){}.swap(index.funcBytecodeRefs);
 
   // Done with any extern-worker stuff at this point:
   index.configRef.reset();
@@ -13050,7 +13250,7 @@ void make_local(IndexData& index) {
   );
   index.disposeClient = decltype(index.disposeClient){};
 
-  php::Func::s_reuser = nullptr;
+  php::FuncBytecode::s_reuser = nullptr;
   reuser.reset();
 
   buckets.clear();

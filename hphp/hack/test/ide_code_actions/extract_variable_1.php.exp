@@ -5,12 +5,12 @@
       "changes":{
         "FILE.php":[
           {
-            "newText":"$placeholder0 = 1 * 2;\n  ",
-            "range":{"end":{"character":2,"line":3},"start":{"character":2,"line":3}}
+            "newText":"$placeholder0 = 1 * 2;\n    ",
+            "range":{"end":{"character":4,"line":4},"start":{"character":4,"line":4}}
           },
           {
             "newText":"$placeholder0",
-            "range":{"end":{"character":27,"line":3},"start":{"character":22,"line":3}}
+            "range":{"end":{"character":29,"line":4},"start":{"character":24,"line":4}}
           }
         ]
       }

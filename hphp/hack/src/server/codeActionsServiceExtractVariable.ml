@@ -149,38 +149,31 @@ let positions_visitor (range : Lsp.range) ~source_text =
 (** ensures that `positions_visitor` only traverses
 functions and methods such that
 the function body contains the selected range *)
-let top_visitor ctx (range : Lsp.range) ~source_text =
+let top_visitor (range : Lsp.range) ~source_text =
   let should_traverse span =
     let outer = Lsp_helpers.pos_to_lsp_range span in
     Lsp_helpers.lsp_range_contains ~outer range
   in
   object
-    inherit [candidate option] Tast_visitor.reduce as super
+    inherit [candidate option] Tast_visitor.reduce
 
     method zero = None
 
     method plus = Option.first_some
 
-    method! on_class_ env class_ =
-      let acc = super#on_class_ env class_ in
-      (* strip vars and consts because it doesn't make sense to "Extract Variable" there *)
-      let class_ = Aast.{ class_ with c_vars = []; c_consts = [] } in
-      class_.Aast.c_methods
-      |> List.fold ~init:acc ~f:(fun acc meth ->
-             let class_ = Aast.{ class_ with c_methods = [meth] } in
-             let span = meth.Aast.m_span in
-             if Option.is_none acc && should_traverse span then
-               (positions_visitor range ~source_text)#go ctx [Aast.Class class_]
-             else
-               acc)
+    method! on_method_ env meth =
+      let span = meth.Aast.m_span in
+      if should_traverse span then
+        (positions_visitor range ~source_text)#on_method_ env meth
+      else
+        None
 
     method! on_fun_def env fun_def =
-      let acc = super#on_fun_def env fun_def in
       let span = Aast.(fun_def.fd_fun.f_span) in
-      if Option.is_none acc && should_traverse span then
-        (positions_visitor range ~source_text)#go ctx [Aast.Fun fun_def]
+      if should_traverse span then
+        (positions_visitor range ~source_text)#on_fun_def env fun_def
       else
-        acc
+        None
   end
 
 let command_or_action_of_candidate
@@ -225,11 +218,8 @@ let find ~(range : Lsp.range) ~path ~entry ctx tast =
          && range.start.character < range.end_.character)
   in
   match entry.Provider_context.source_text with
-  | None -> []
-  | Some source_text ->
-    if is_range_selection then
-      (top_visitor ctx range ~source_text)#go ctx tast
-      |> Option.map ~f:(command_or_action_of_candidate ~source_text ~path)
-      |> Option.to_list
-    else
-      []
+  | Some source_text when is_range_selection ->
+    (top_visitor range ~source_text)#go ctx tast
+    |> Option.map ~f:(command_or_action_of_candidate ~source_text ~path)
+    |> Option.to_list
+  | _ -> []

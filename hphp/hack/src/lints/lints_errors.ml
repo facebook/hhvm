@@ -589,3 +589,12 @@ let awaitable_awaitable pos =
     ^ " You probably want to use await inside this async lambda,"
     ^ " so stack traces include the lambda position."
     ^ " If this is intentional, please annotate the return type.")
+
+let cast_non_primitive pos =
+  Lints.add
+    Codes.cast_non_primitive
+    Lint_error
+    pos
+    ("Casting a non-primitive to a primitive rarely yields a "
+    ^ "useful value. Did you mean to extract a value from this object "
+    ^ "before casting it, or to do a null-check?")

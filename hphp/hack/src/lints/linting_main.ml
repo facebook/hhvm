@@ -42,6 +42,7 @@ let typed_linters =
     Linter_branches_return_same_value.handler;
     Linter_internal_class.handler;
     Linter_async_lambda.handler;
+    Linter_cast_non_primitive.handler;
   ]
   @ Linting_service.typed_linters
 

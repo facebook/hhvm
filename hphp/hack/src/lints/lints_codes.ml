@@ -114,4 +114,6 @@ module Codes = struct
   let async_lambda = 5650
 
   let awaitable_awaitable = 5651
+
+  let cast_non_primitive = 5652
 end

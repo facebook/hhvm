@@ -172,8 +172,34 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
 (* The main loop *)
 (*****************************************************************************)
 
-(** Query the notifier of changed files. *)
-let query_notifier genv env query_kind start_time =
+(** Query for changed files. This is a hard to understand method...
+[let (env, changes, new_clock, may_be_stale, telemetry) = query_notifier genv env query_kind start_time].
+
+CARE! [query_kind] is hard to understand...
+* [`Sync] -- a watchman sync query, i.e. guarantees to have picked up all updates
+  up to the moment it was invoked. Watchman does this by writing a dummy file
+  and waiting until the OS notifies about it; the OS guarantees to send notifications in order.
+* [`Async] -- picks up changes that watchman has pushed over the subscription, but we don't
+  do a sync, so therefore there might be changes on disk that watchman will tell us about
+  in future.
+* [`Skip] -- CARE! Despite its name, this also behaves much like [`Async].
+
+The return value [may_be_stale] indicates that the most recent watchman event that got pushed
+was not a "sync" to the dummy file. This will never be true for [`Sync] query kind (which deliberately
+waits for the sync), but it might be true or false for [`Async] and [`Skip]. The caller can
+use this as a hint that we don't know whether there are more disk changes.
+Personally, I've never actually seen it be true. It's surfaced to the user in clientCheckStatus.ml
+with the message "this may be stale, probably due to watchman being unresponsive". *)
+let query_notifier
+    (genv : ServerEnv.genv)
+    (env : ServerEnv.env)
+    (query_kind : [> `Async | `Skip | `Sync ])
+    (start_time : float) :
+    ServerEnv.env
+    * Relative_path.Set.t
+    * Watchman.clock option
+    * bool
+    * Telemetry.t =
   let telemetry =
     Telemetry.create () |> Telemetry.duration ~key:"start" ~start_time
   in
@@ -296,11 +322,14 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   in
 
   (* When a new client connects, we use the synchronous notifier.
-   * This is to get synchronous file system changes when invoking
-   * hh_client in terminal.
-   *
-   * NB: This also uses synchronous notify on establishing a persistent
-   * connection. This is harmless, but could maybe be filtered away. *)
+      This is to get synchronous file system changes when invoking
+      hh_client in terminal.
+
+     CARE! The [`Skip] option doesn't in fact skip. It will still
+     retrieve queued-up watchman updates.
+
+      NB: This also uses synchronous notify on establishing a persistent
+      connection. This is harmless, but could maybe be filtered away. *)
   let query_kind =
     match select_outcome with
     | ClientProvider.Select_new _ -> `Sync
@@ -312,14 +341,19 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
       else
         `Skip
     | ClientProvider.Select_persistent ->
-      (* Do not process any disk changes when there are pending persistent
-       * client requests - some of them might be edits, and we don't want to
-       * do analysis on mid-edit state of the world *)
+      (* Do not aggressively process any disk changes when there are pending persistent
+         client requests - some of them might be edits, and we don't want to
+         do analysis on mid-edit state of the world. (Nevertheless, [`Skip] still may
+         pick up updates...) *)
       `Skip
   in
   let (env, updates, clock, updates_stale, query_telemetry) =
     query_notifier genv env query_kind start_time
   in
+  (* The response from [query_notifier] is tricky to unpick...
+     * For [`Sync | `Async] it will always return [clock=Some] and updates may be empty or not.
+     * For [`Skip] it might return [clock=Some] and updates empty or not; or it might
+       return [clock=None] with updates empty. *)
   let telemetry =
     telemetry
     |> Telemetry.object_ ~key:"query" ~value:query_telemetry
@@ -336,12 +370,12 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   in
   (* saving any file is our trigger to start full recheck *)
   let env =
-    match query_kind with
-    | `Skip -> env
-    | _ ->
-      if not (Option.equal String.equal clock env.clock) then
-        Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
+    if Option.is_some clock && not (Option.equal String.equal clock env.clock)
+    then begin
+      Hh_logger.log "Recheck at watchclock %s" (ServerEnv.show_clock clock);
       { env with clock }
+    end else
+      env
   in
   let env =
     if Relative_path.Set.is_empty updates then

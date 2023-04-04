@@ -74,5 +74,27 @@ public class PrimitivesServiceReactiveBlockingWrapper
         throw com.facebook.thrift.util.ExceptionUtil.wrap(t);
       }
   }
+  @java.lang.Override
+  public void returnVoidMethod( final long id) throws org.apache.thrift.TException {
+      returnVoidMethodWrapper(id, com.facebook.thrift.client.RpcOptions.EMPTY);
+  }
+
+  @java.lang.Override
+  public void returnVoidMethod(
+        final long id,
+        com.facebook.thrift.client.RpcOptions rpcOptions) throws org.apache.thrift.TException {
+      returnVoidMethodWrapper(id,rpcOptions);
+  }
+
+  @java.lang.Override
+  public com.facebook.thrift.client.ResponseWrapper<Void> returnVoidMethodWrapper(
+    final long id,
+    com.facebook.thrift.client.RpcOptions rpcOptions) throws org.apache.thrift.TException {
+      try {
+        return _delegate.returnVoidMethodWrapper(id, rpcOptions).block();
+      } catch (Throwable t) {
+        throw com.facebook.thrift.util.ExceptionUtil.wrap(t);
+      }
+  }
 
 }

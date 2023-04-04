@@ -49,6 +49,7 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService
 
   static void gen_init(ThriftMetadata& metadata, ThriftService& context);
   static void gen_method_that_throws(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_return_void_method(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

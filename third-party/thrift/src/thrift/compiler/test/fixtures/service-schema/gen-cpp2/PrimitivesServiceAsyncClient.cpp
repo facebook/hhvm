@@ -14,6 +14,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_presult;
 typedef apache::thrift::ThriftPresult<false> PrimitivesService_method_that_throws_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::cpp2::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::CustomException>> PrimitivesService_method_that_throws_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_return_void_method_pargs;
+typedef apache::thrift::ThriftPresult<true> PrimitivesService_return_void_method_presult;
 } // cpp2
 template <typename Protocol_, typename RpcOptions>
 void apache::thrift::Client<::cpp2::PrimitivesService>::initT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_param0, ::std::int64_t p_param1) {
@@ -42,6 +44,22 @@ void apache::thrift::Client<::cpp2::PrimitivesService>::method_that_throwsT(Prot
   static ::apache::thrift::MethodMetadata::Data* methodMetadata =
         new ::apache::thrift::MethodMetadata::Data(
                 "method_that_throws",
+                ::apache::thrift::FunctionQualifier::Unspecified,
+                "PrimitivesService");
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
+}
+
+template <typename Protocol_, typename RpcOptions>
+void apache::thrift::Client<::cpp2::PrimitivesService>::return_void_methodT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id) {
+
+  ::cpp2::PrimitivesService_return_void_method_pargs args;
+  args.get<0>().value = &p_id;
+  auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
+  auto writer = [&](Protocol_* p) { args.write(p); };
+
+  static ::apache::thrift::MethodMetadata::Data* methodMetadata =
+        new ::apache::thrift::MethodMetadata::Data(
+                "return_void_method",
                 ::apache::thrift::FunctionQualifier::Unspecified,
                 "PrimitivesService");
   apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, std::forward<RpcOptions>(rpcOptions), std::move(callback), contextStack, std::move(header), channel_.get(), ::apache::thrift::MethodMetadata::from_static(methodMetadata), writer, sizer);
@@ -427,6 +445,194 @@ folly::exception_wrapper apache::thrift::Client<::cpp2::PrimitivesService>::recv
 
 folly::exception_wrapper apache::thrift::Client<::cpp2::PrimitivesService>::recv_instance_wrapped_method_that_throws(::cpp2::Result& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_wrapped_method_that_throws(_return, state);
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::return_void_method(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return_void_method(rpcOptions, std::move(callback), p_id);
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::return_void_method(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_id) {
+  auto [ctx, header] = return_void_methodCtx(&rpcOptions);
+  apache::thrift::RequestCallback::Context callbackContext;
+  callbackContext.protocolId =
+      apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto* contextStack = ctx.get();
+  if (callback) {
+    callbackContext.ctx = std::move(ctx);
+  }
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  return_void_methodImpl(rpcOptions, std::move(header), contextStack, std::move(wrappedCallback), p_id);
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::return_void_methodImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_id, bool stealRpcOptions) {
+  switch (apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolWriter writer;
+      if (stealRpcOptions) {
+        return_void_methodT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback), p_id);
+      } else {
+        return_void_methodT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback), p_id);
+      }
+      break;
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolWriter writer;
+      if (stealRpcOptions) {
+        return_void_methodT(&writer, std::move(rpcOptions), std::move(header), contextStack, std::move(callback), p_id);
+      } else {
+        return_void_methodT(&writer, rpcOptions, std::move(header), contextStack, std::move(callback), p_id);
+      }
+      break;
+    }
+    default:
+    {
+      apache::thrift::detail::ac::throw_app_exn("Could not find Protocol");
+    }
+  }
+}
+
+std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> apache::thrift::Client<::cpp2::PrimitivesService>::return_void_methodCtx(apache::thrift::RpcOptions* rpcOptions) {
+  auto header = std::make_shared<apache::thrift::transport::THeader>(
+      apache::thrift::transport::THeader::ALLOW_BIG_FRAMES);
+  header->setProtocolId(channel_->getProtocolId());
+  if (rpcOptions) {
+    header->setHeaders(rpcOptions->releaseWriteHeaders());
+  }
+
+  auto ctx = apache::thrift::ContextStack::createWithClientContext(
+      handlers_,
+      getServiceName(),
+      "PrimitivesService.return_void_method",
+      *header);
+
+  return {std::move(ctx), std::move(header)};
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::sync_return_void_method(::std::int64_t p_id) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  sync_return_void_method(rpcOptions, p_id);
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::sync_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
+  apache::thrift::ClientReceiveState returnState;
+  apache::thrift::ClientSyncCallback<false> callback(&returnState);
+  auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+  auto evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
+  auto ctxAndHeader = return_void_methodCtx(&rpcOptions);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  callback.waitUntilDone(
+    evb,
+    [&] {
+      return_void_methodImpl(rpcOptions, std::move(ctxAndHeader.second), ctxAndHeader.first.get(), std::move(wrappedCallback), p_id);
+    });
+
+  if (returnState.isException()) {
+    returnState.exception().throw_exception();
+  }
+  returnState.resetProtocolId(protocolId);
+  returnState.resetCtx(std::move(ctxAndHeader.first));
+  SCOPE_EXIT {
+    if (returnState.header() && !returnState.header()->getHeaders().empty()) {
+      rpcOptions.setReadHeaders(returnState.header()->releaseHeaders());
+    }
+  };
+  return folly::fibers::runInMainContext([&] {
+      recv_return_void_method(returnState);
+  });
+}
+
+
+folly::Future<folly::Unit> apache::thrift::Client<::cpp2::PrimitivesService>::future_return_void_method(::std::int64_t p_id) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return future_return_void_method(rpcOptions, p_id);
+}
+
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::PrimitivesService>::semifuture_return_void_method(::std::int64_t p_id) {
+  ::apache::thrift::RpcOptions rpcOptions;
+  return semifuture_return_void_method(rpcOptions, p_id);
+}
+
+folly::Future<folly::Unit> apache::thrift::Client<::cpp2::PrimitivesService>::future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
+  folly::Promise<folly::Unit> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::FutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_return_void_method, channel_);
+  return_void_method(rpcOptions, std::move(callback), p_id);
+  return future;
+}
+
+folly::SemiFuture<folly::Unit> apache::thrift::Client<::cpp2::PrimitivesService>::semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
+  auto callbackAndFuture = makeSemiFutureCallback(recv_wrapped_return_void_method, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  return_void_method(rpcOptions, std::move(callback), p_id);
+  return std::move(callbackAndFuture.second);
+}
+
+folly::Future<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PrimitivesService>::header_future_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
+  folly::Promise<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> promise;
+  auto future = promise.getFuture();
+  auto callback = std::make_unique<apache::thrift::HeaderFutureCallback<folly::Unit>>(std::move(promise), recv_wrapped_return_void_method, channel_);
+  return_void_method(rpcOptions, std::move(callback), p_id);
+  return future;
+}
+
+folly::SemiFuture<std::pair<folly::Unit, std::unique_ptr<apache::thrift::transport::THeader>>> apache::thrift::Client<::cpp2::PrimitivesService>::header_semifuture_return_void_method(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_id) {
+  auto callbackAndFuture = makeHeaderSemiFutureCallback(recv_wrapped_return_void_method, channel_);
+  auto callback = std::move(callbackAndFuture.first);
+  return_void_method(rpcOptions, std::move(callback), p_id);
+  return std::move(callbackAndFuture.second);
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::return_void_method(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_id) {
+  return_void_method(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), p_id);
+}
+
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
+folly::exception_wrapper apache::thrift::Client<::cpp2::PrimitivesService>::recv_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state) {
+  if (state.isException()) {
+    return std::move(state.exception());
+  }
+  if (!state.hasResponseBuffer()) {
+    return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
+  }
+
+  using result = ::cpp2::PrimitivesService_return_void_method_presult;
+  switch (state.protocolId()) {
+    case apache::thrift::protocol::T_BINARY_PROTOCOL:
+    {
+      apache::thrift::BinaryProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state);
+    }
+    case apache::thrift::protocol::T_COMPACT_PROTOCOL:
+    {
+      apache::thrift::CompactProtocolReader reader;
+      return apache::thrift::detail::ac::recv_wrapped<result>(
+          &reader, state);
+    }
+    default:
+    {
+    }
+  }
+  return folly::make_exception_wrapper<apache::thrift::TApplicationException>("Could not find Protocol");
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::recv_return_void_method(::apache::thrift::ClientReceiveState& state) {
+  auto ew = recv_wrapped_return_void_method(state);
+  if (ew) {
+    ew.throw_exception();
+  }
+}
+
+void apache::thrift::Client<::cpp2::PrimitivesService>::recv_instance_return_void_method(::apache::thrift::ClientReceiveState& state) {
+  recv_return_void_method(state);
+}
+
+folly::exception_wrapper apache::thrift::Client<::cpp2::PrimitivesService>::recv_instance_wrapped_return_void_method(::apache::thrift::ClientReceiveState& state) {
+  return recv_wrapped_return_void_method(state);
 }
 
 

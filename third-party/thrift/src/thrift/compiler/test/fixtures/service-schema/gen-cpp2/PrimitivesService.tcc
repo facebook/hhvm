@@ -15,6 +15,8 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_init_presult;
 typedef apache::thrift::ThriftPresult<false> PrimitivesService_method_that_throws_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::enumeration, ::cpp2::Result*>, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::CustomException>> PrimitivesService_method_that_throws_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> PrimitivesService_return_void_method_pargs;
+typedef apache::thrift::ThriftPresult<true> PrimitivesService_return_void_method_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
 void PrimitivesServiceAsyncProcessor::setUpAndProcess_init(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
   if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
@@ -170,6 +172,74 @@ void PrimitivesServiceAsyncProcessor::throw_wrapped_method_that_throws(apache::t
       req->includeEnvelope(), prot.protocolType(), protoSeqId, apache::thrift::MessageType::T_REPLY, "method_that_throws");
   payload.transform(reqCtx->getHeader()->getWriteTransforms());
   return req->sendReply(std::move(payload));
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void PrimitivesServiceAsyncProcessor::setUpAndProcess_return_void_method(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, FOLLY_MAYBE_UNUSED apache::thrift::concurrency::ThreadManager* tm) {
+  if (!setUpRequestProcessing(req, ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, iface_)) {
+    return;
+  }
+  auto scope = iface_->getRequestExecutionScope(ctx, apache::thrift::concurrency::NORMAL);
+  ctx->setRequestExecutionScope(std::move(scope));
+  processInThread(std::move(req), std::move(serializedRequest), ctx, eb, tm, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, &PrimitivesServiceAsyncProcessor::executeRequest_return_void_method<ProtocolIn_, ProtocolOut_>, this);
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::thrift::ServerRequest&& serverRequest) {
+  // make sure getRequestContext is null
+  // so async calls don't accidentally use it
+  iface_->setRequestContext(nullptr);
+  ::cpp2::PrimitivesService_return_void_method_pargs args;
+  ::std::int64_t uarg_id{0};
+  args.get<0>().value = &uarg_id;
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "PrimitivesService.return_void_method", serverRequest.requestContext()));
+  try {
+    deserializeRequest<ProtocolIn_>(args, "return_void_method", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
+  }
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ew
+        , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
+        , serverRequest.requestContext()
+        , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
+        , "return_void_method");
+    return;
+  }
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
+    apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
+    , std::move(ctxStack)
+    , return_return_void_method<ProtocolIn_,ProtocolOut_>
+    , throw_wrapped_return_void_method<ProtocolIn_, ProtocolOut_>
+    , serverRequest.requestContext()->getProtoSeqId()
+    , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
+    , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
+    , serverRequest.requestContext()
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
+    );
+  iface_->async_tm_return_void_method(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+apache::thrift::SerializedResponse PrimitivesServiceAsyncProcessor::return_return_void_method(apache::thrift::ContextStack* ctx) {
+  ProtocolOut_ prot;
+  ::cpp2::PrimitivesService_return_void_method_presult result;
+  return serializeResponse(&prot, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void PrimitivesServiceAsyncProcessor::throw_wrapped_return_void_method(apache::thrift::ResponseChannelRequest::UniquePtr req,FOLLY_MAYBE_UNUSED int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "return_void_method");
+    return;
+  }
 }
 
 

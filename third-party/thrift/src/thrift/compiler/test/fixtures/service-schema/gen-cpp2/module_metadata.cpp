@@ -121,6 +121,21 @@ void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>
   func.is_oneway() = false;
   service.functions()->push_back(std::move(func));
 }
+void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_return_void_method(FOLLY_MAYBE_UNUSED ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  func.name() = "return_void_method";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type(), metadata);
+  ::apache::thrift::metadata::ThriftField module_PrimitivesService_return_void_method_id_1;
+  module_PrimitivesService_return_void_method_id_1.id() = 1;
+  module_PrimitivesService_return_void_method_id_1.name() = "id";
+  module_PrimitivesService_return_void_method_id_1.is_optional() = false;
+  auto module_PrimitivesService_return_void_method_id_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
+  module_PrimitivesService_return_void_method_id_1_type->writeAndGenType(*module_PrimitivesService_return_void_method_id_1.type(), metadata);
+  func.arguments()->push_back(std::move(module_PrimitivesService_return_void_method_id_1));
+  func.is_oneway() = false;
+  service.functions()->push_back(std::move(func));
+}
 
 void ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
   const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata(), *response.services());
@@ -138,6 +153,7 @@ const ThriftServiceContextRef* ServiceMetadata<::apache::thrift::ServiceHandler<
   static const ThriftFunctionGenerator functions[] = {
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_init,
     ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_method_that_throws,
+    ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>>::gen_return_void_method,
   };
   for (auto& function_gen : functions) {
     function_gen(metadata, module_PrimitivesService);

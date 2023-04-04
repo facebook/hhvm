@@ -69,10 +69,20 @@ class ServiceHandler<::cpp2::PrimitivesService> : public apache::thrift::ServerI
   virtual folly::coro::Task<::cpp2::Result> co_method_that_throws(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_method_that_throws(std::unique_ptr<apache::thrift::HandlerCallback<::cpp2::Result>> callback);
+  virtual void sync_return_void_method(::std::int64_t /*id*/);
+  [[deprecated("Use sync_return_void_method instead")]] virtual void return_void_method(::std::int64_t /*id*/);
+  virtual folly::Future<folly::Unit> future_return_void_method(::std::int64_t p_id);
+  virtual folly::SemiFuture<folly::Unit> semifuture_return_void_method(::std::int64_t p_id);
+#if FOLLY_HAS_COROUTINES
+  virtual folly::coro::Task<void> co_return_void_method(::std::int64_t p_id);
+  virtual folly::coro::Task<void> co_return_void_method(apache::thrift::RequestParams params, ::std::int64_t p_id);
+#endif
+  virtual void async_tm_return_void_method(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id);
  private:
   static ::cpp2::PrimitivesServiceServiceInfoHolder __fbthrift_serviceInfoHolder;
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_init{apache::thrift::detail::si::InvocationType::AsyncTm};
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_method_that_throws{apache::thrift::detail::si::InvocationType::AsyncTm};
+  std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_return_void_method{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
 
 } // namespace apache::thrift
@@ -85,6 +95,7 @@ class PrimitivesServiceSvNull : public ::apache::thrift::ServiceHandler<Primitiv
  public:
   ::std::int64_t init(::std::int64_t /*param0*/, ::std::int64_t /*param1*/) override;
   ::cpp2::Result method_that_throws() override;
+  void return_void_method(::std::int64_t /*id*/) override;
 };
 
 class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessorBase {
@@ -120,6 +131,14 @@ class PrimitivesServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncP
   static apache::thrift::SerializedResponse return_method_that_throws(apache::thrift::ContextStack* ctx, ::cpp2::Result const& _return);
   template <class ProtocolIn_, class ProtocolOut_>
   static void throw_wrapped_method_that_throws(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void setUpAndProcess_return_void_method(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm);
+  template <typename ProtocolIn_, typename ProtocolOut_>
+  void executeRequest_return_void_method(apache::thrift::ServerRequest&& serverRequest);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static apache::thrift::SerializedResponse return_return_void_method(apache::thrift::ContextStack* ctx);
+  template <class ProtocolIn_, class ProtocolOut_>
+  static void throw_wrapped_return_void_method(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx);
  public:
   PrimitivesServiceAsyncProcessor(::apache::thrift::ServiceHandler<::cpp2::PrimitivesService>* iface) :
       iface_(iface) {}

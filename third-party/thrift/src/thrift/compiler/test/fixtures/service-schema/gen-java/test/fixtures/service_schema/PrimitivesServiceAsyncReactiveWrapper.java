@@ -34,4 +34,9 @@ public class PrimitivesServiceAsyncReactiveWrapper
         return com.facebook.thrift.util.FutureUtil.toMono(() -> _delegate.methodThatThrows());
     }
 
+    @java.lang.Override
+    public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id) {
+        return com.facebook.thrift.util.FutureUtil.toMono(() -> _delegate.returnVoidMethod(id));
+    }
+
 }

@@ -66,4 +66,26 @@ public class PrimitivesServiceBlockingReactiveWrapper
         return _m;
     }
 
+    @java.lang.Override
+    public reactor.core.publisher.Mono<Void> returnVoidMethod(final long id) {
+        reactor.core.publisher.Mono<Void> _m = reactor.core.publisher.Mono.<Void>create(_sink -> {
+            try {
+                reactor.util.context.ContextView _contextView = _sink.contextView();
+                com.facebook.nifty.core.RequestContext
+                    .tryContextView(_contextView)
+                    .ifPresent(com.facebook.nifty.core.RequestContexts::setCurrentContext);
+                _delegate.returnVoidMethod(id);
+                _sink.success();
+            } catch (Throwable _e) {
+                throw reactor.core.Exceptions.propagate(_e);
+            }
+        });
+
+        if (!com.facebook.thrift.util.resources.RpcResources.isForceExecutionOffEventLoop()) {
+            _m = _m.subscribeOn(com.facebook.thrift.util.resources.RpcResources.getOffLoopScheduler());
+        }
+
+        return _m;
+    }
+
 }

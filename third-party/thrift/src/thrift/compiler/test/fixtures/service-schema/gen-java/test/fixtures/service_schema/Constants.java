@@ -39,6 +39,11 @@ public final class Constants {
         .build()).build()).setExceptions(ImmutableList.<com.facebook.thrift.type.Field>builder()
         .add(new com.facebook.thrift.type.Field.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("e").build()).setId((short)1).setQualifier(com.facebook.thrift.type.FieldQualifier.FILL).setType(new com.facebook.thrift.type_swift.TypeStruct.Builder().setName(com.facebook.thrift.standard_type.TypeName.fromExceptionType(com.facebook.thrift.standard_type.TypeUri.fromUri(""))).build()).build())
         .build()).build())
+        .add(new com.facebook.thrift.type.Function.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("return_void_method").build()).setQualifier(com.facebook.thrift.type.FunctionQualifier.UNSPECIFIED).setReturnTypes(ImmutableList.<com.facebook.thrift.type.ReturnType>builder()
+        .add(com.facebook.thrift.type.ReturnType.fromThriftType(new com.facebook.thrift.type_swift.TypeStruct.Builder().setName(com.facebook.thrift.standard_type.TypeName).build()))
+        .build()).setParamlist(new com.facebook.thrift.type.Paramlist.Builder().setFields(ImmutableList.<com.facebook.thrift.type.Field>builder()
+        .add(new com.facebook.thrift.type.Field.Builder().setAttrs(new com.facebook.thrift.type.DefinitionAttrs.Builder().setName("id").build()).setId((short)1).setQualifier(com.facebook.thrift.type.FieldQualifier.FILL).setType(new com.facebook.thrift.type_swift.TypeStruct.Builder().setName(com.facebook.thrift.standard_type.TypeName.fromI64Type(com.facebook.thrift.standard_type.Void.UNUSED)).build()).build())
+        .build()).build()).build())
         .build()).build()))
         .build()).build();
 }

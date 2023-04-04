@@ -216,31 +216,32 @@ let parse_check_args cmd =
       ( "--codemod-sdt",
         (let path_to_jsonl = ref "" in
          let log_remotely = ref false in
+         let tag = ref "" in
          Arg.Tuple
            [
              Arg.String (( := ) path_to_jsonl);
              Arg.Bool (( := ) log_remotely);
+             (* arbitrary description used to distinguish this run *)
+             Arg.String (( := ) tag);
              Arg.String
-               (function
-               | "cumulative-groups" ->
+               (fun raw_strategy ->
+                 let strategy =
+                   match raw_strategy with
+                   | "cumulative-groups" -> `CodemodSdtCumulative
+                   | "independent-groups" -> `CodemodSdtIndependent
+                   | s ->
+                     raise
+                     @@ Arg.Bad
+                          (Format.sprintf "invalid --codemod-sdt mode: %s" s)
+                 in
                  set_mode
                  @@ MODE_CODEMOD_SDT
                       {
-                        path_to_jsonl = !path_to_jsonl;
-                        strategy = `CodemodSdtCumulative;
-                        log_remotely = !log_remotely;
-                      }
-               | "independent-groups" ->
-                 set_mode
-                 @@ MODE_CODEMOD_SDT
-                      {
-                        path_to_jsonl = !path_to_jsonl;
-                        strategy = `CodemodSdtIndependent;
-                        log_remotely = !log_remotely;
-                      }
-               | s ->
-                 raise
-                 @@ Arg.Bad (Format.sprintf "invalid --codemod-sdt mode: %s" s));
+                        csdt_path_to_jsonl = !path_to_jsonl;
+                        csdt_strategy = strategy;
+                        csdt_log_remotely = !log_remotely;
+                        csdt_tag = !tag;
+                      });
            ]),
         "apply codemod for adding <<__NoAutoDynamic>>" );
       ( "--color",

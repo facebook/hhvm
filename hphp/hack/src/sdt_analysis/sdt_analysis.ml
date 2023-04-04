@@ -67,7 +67,19 @@ let patches_of_codemod_line line =
   let ids =
     nadables |> List.map ~f:(fun nadable -> nadable.Summary.id |> H.Id.sid_of_t)
   in
-  (patches, ids)
+  let target_kind =
+    nadables
+    |> List.hd
+    |> Option.map
+         ~f:
+           Summary.(
+             fun nadable ->
+               match nadable.kind with
+               | ClassLike _ -> `ClassLike
+               | Function -> `Function)
+    |> Option.value ~default:`ClassLike
+  in
+  (patches, ids, target_kind)
 
 module StandaloneApi = struct
   let dump_persisted ~db_dir =

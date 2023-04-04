@@ -45,8 +45,9 @@ class TestCodemodSdt(common_tests.CommonTestDriver):
 {"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"integration_test_codemod_sdt1.php","sid":"\\C"},{"kind":"(Cinterface)","path":"integration_test_codemod_sdt1.php","sid":"\\I"}]}
 {"entry_kind":"add_no_auto_dynamic_attr","items":[{"kind":"((Cclass Concrete))","path":"integration_test_codemod_sdt1.php","sid":"\\D"},{"kind":"(Cinterface)","path":"integration_test_codemod_sdt1.php","sid":"\\I"}]}
         """.strip()
-        stdout = self.codemod_sdt(codemod_jsonl, ["cumulative-groups"])
+        stdout = self.codemod_sdt(codemod_jsonl, ["the-tag", "cumulative-groups"])
         self.assertIn('"patches_json"', stdout, msg="logging probably works")
+        self.assertIn('"the-tag"', stdout, msg="logging probably works")
         self.expect_contents(
             """<?hh
 

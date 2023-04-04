@@ -16,9 +16,10 @@ type refactor_mode =
 type client_mode =
   | MODE_AUTO_COMPLETE
   | MODE_CODEMOD_SDT of {
-      path_to_jsonl: string;
-      strategy: [ `CodemodSdtCumulative | `CodemodSdtIndependent ];
-      log_remotely: bool;
+      csdt_path_to_jsonl: string;
+      csdt_strategy: [ `CodemodSdtCumulative | `CodemodSdtIndependent ];
+      csdt_log_remotely: bool;
+      csdt_tag: string;
     }
   | MODE_COLORING of string
   | MODE_COVERAGE of string

@@ -20,7 +20,8 @@ val create_handler :
   db_dir:string -> worker_id:int -> Provider_context.t -> Tast_visitor.handler
 
 val patches_of_codemod_line :
-  string -> ServerRefactorTypes.patch list * string list
+  string ->
+  ServerRefactorTypes.patch list * string list * [ `ClassLike | `Function ]
 
 module StandaloneApi : sig
   (* solve constraints from `db_dir` and log the solution to stdout *)

@@ -33,12 +33,15 @@ let apply_all
     ~apply_patches
     ~path_to_jsonl
     ~strategy
-    ~log_remotely =
-  let remote_logging = RemoteLogging.create ~strategy ~log_remotely in
+    ~log_remotely
+    ~tag =
+  let remote_logging = RemoteLogging.create ~strategy ~log_remotely ~tag in
   let%lwt (baseline_error_count, init_telemetry) = get_error_count () in
 
-  let handle_codemod_group codemod_line =
-    let%lwt ((patches, patched_ids), telemetry) = get_patches codemod_line in
+  let handle_codemod_group codemod_line ~line_index =
+    let%lwt ((patches, patched_ids, target_kind), telemetry) =
+      get_patches codemod_line
+    in
     if List.is_empty patches then
       Lwt.return telemetry
     else begin
@@ -56,7 +59,9 @@ let apply_all
       RemoteLogging.submit_patch_result
         remote_logging
         ~patched_ids
-        ~error_count:error_count_diff;
+        ~target_kind
+        ~error_count:error_count_diff
+        ~line_index;
       if should_revert then (
         Reverts.apply reverts;
         let%lwt (error_count, more_telemetry) = get_error_count () in
@@ -68,13 +73,13 @@ let apply_all
   in
 
   let combine_line_results acc line =
-    let%lwt acc = acc in
-    let%lwt telem = handle_codemod_group line in
-    Telemetry.add acc telem |> Lwt.return
+    let%lwt (telem_acc, line_index) = acc in
+    let%lwt telem = handle_codemod_group line ~line_index in
+    Lwt.return (Telemetry.add telem_acc telem, line_index + 1)
   in
 
-  let%lwt telemetry =
-    let init = Lwt.return init_telemetry in
+  let%lwt (telemetry, _) =
+    let init = Lwt.return (init_telemetry, 0) in
     In_channel.with_file
       path_to_jsonl
       ~f:(In_channel.fold_lines ~init ~f:combine_line_results)

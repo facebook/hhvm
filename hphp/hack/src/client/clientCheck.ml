@@ -933,7 +933,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
             go ()
       in
       go ()
-    | MODE_CODEMOD_SDT { path_to_jsonl; strategy; log_remotely } ->
+    | MODE_CODEMOD_SDT
+        { csdt_path_to_jsonl; csdt_strategy; csdt_log_remotely; csdt_tag } ->
       let status_cmd =
         Rpc.STATUS
           { ignore_ide = true; max_errors = args.max_errors; remote = false }
@@ -951,9 +952,10 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
         ~get_error_count
         ~get_patches
         ~apply_patches
-        ~path_to_jsonl
-        ~strategy
-        ~log_remotely
+        ~path_to_jsonl:csdt_path_to_jsonl
+        ~strategy:csdt_strategy
+        ~log_remotely:csdt_log_remotely
+        ~tag:csdt_tag
     | MODE_REWRITE_LAMBDA_PARAMETERS files ->
       let%lwt conn = connect args in
       let%lwt (patches, telemetry) =

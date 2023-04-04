@@ -3,5 +3,6 @@
 # https://github.com/devcontainers/images/tree/main/src/universal
 FROM mcr.microsoft.com/devcontainers/base:focal
 
-RUN apt-get install -y cmake
+
+RUN apt-get update && apt-get install -y cmake
 

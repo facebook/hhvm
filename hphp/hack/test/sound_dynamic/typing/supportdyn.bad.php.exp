@@ -20,18 +20,18 @@ Typing error (Typing[4062])
   You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
   File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
+File "supportdyn.bad.php", line 13, characters 3-5:
+Typing error (Typing[4062])
+  File "supportdyn.bad.php", line 13, characters 9-9:
+  You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
+  File "supportdyn.bad.php", line 6, characters 26-32:
+  Definition is here
 File "supportdyn.bad.php", line 26, characters 27-30:
 Invalid type hint (Typing[4062])
   File "supportdyn.bad.php", line 26, characters 30-30:
   You are trying to access the type constant `C` but this is a nonnull value
   File "supportdynamic.hhi", line 6, characters 29-29:
   Definition is here
-File "supportdyn.bad.php", line 13, characters 3-5:
-Typing error (Typing[4110])
-  File "supportdyn.bad.php", line 13, characters 3-9:
-  Expected `null` (use of `?->` operator)
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
 File "supportdyn.bad.php", line 15, characters 3-5:
 Typing error (Typing[4110])
   File "supportdyn.bad.php", line 15, characters 3-9:

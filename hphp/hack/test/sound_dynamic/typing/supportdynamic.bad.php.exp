@@ -20,6 +20,12 @@ Typing error (Typing[4062])
   You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
   File "supportdynamic.bad.php", line 3, characters 26-32:
   Definition is here
+File "supportdynamic.bad.php", line 10, characters 3-5:
+Typing error (Typing[4062])
+  File "supportdynamic.bad.php", line 10, characters 9-9:
+  You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
+  File "supportdynamic.bad.php", line 3, characters 26-32:
+  Definition is here
 File "supportdynamic.bad.php", line 23, characters 27-30:
 Invalid type hint (Typing[4062])
   File "supportdynamic.bad.php", line 23, characters 30-30:
@@ -30,12 +36,6 @@ File "supportdynamic.bad.php", line 26, characters 16-39:
 Wrong number of type arguments (expected 1, got 2) (Typing[4101])
   File "supportdynamic.hhi", line 6, characters 11-20:
   Definition is here
-File "supportdynamic.bad.php", line 10, characters 3-5:
-Typing error (Typing[4110])
-  File "supportdynamic.bad.php", line 10, characters 3-9:
-  Expected `null` (use of `?->` operator)
-  File "supportdynamic.bad.php", line 3, characters 26-32:
-  But got `nonnull`
 File "supportdynamic.bad.php", line 12, characters 3-5:
 Typing error (Typing[4110])
   File "supportdynamic.bad.php", line 12, characters 3-9:

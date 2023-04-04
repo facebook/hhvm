@@ -1089,12 +1089,12 @@ and simplify_subtype_i
                ~subtype_env
                ~sub_supportdyn
                ty_sub
-               (LoclType lty_super)
+               (ConstraintType cty_super)
           ||| simplify_subtype_i
                 ~subtype_env
                 ~sub_supportdyn
                 ty_sub
-                (ConstraintType cty_super)
+                (LoclType lty_super)
           ||| default_subtype
         | LoclType lty ->
           (match deref lty with
@@ -1122,12 +1122,12 @@ and simplify_subtype_i
                  ~subtype_env
                  ~sub_supportdyn
                  ty_sub
-                 (LoclType lty_super)
+                 (ConstraintType cty_super)
             ||| simplify_subtype_i
                   ~subtype_env
                   ~sub_supportdyn
                   ty_sub
-                  (ConstraintType cty_super)
+                  (LoclType lty_super)
             ||| default_subtype))
       | (r_super, Tdestructure { d_required; d_optional; d_variadic; d_kind })
         ->

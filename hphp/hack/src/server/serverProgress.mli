@@ -15,26 +15,55 @@ val set_root : Path.t -> unit
 to disable progress-logging and error-streaming. *)
 val disable : unit -> unit
 
+type disposition =
+  | DStopped
+      (** Hh_server has failed in some way, so will be unable to handle future work until it's been fixed. *)
+  | DWorking
+      (** Hh_server is working on something, e.g. doing a typecheck or handling a request in ServerRpc *)
+  | DReady
+      (** Hh_server is ready to handle requests, i.e. not doing any work. *)
+[@@deriving show]
+
 (** Progress is a file in /tmp/hh_server/<repo>.progress.json which is written
 by monitor+server. It lives from the moment the monitor starts up until the
-moment it finally dies or is killed. You should only read it by the `read`
-call, since that protects against races. Anyone at any time can read this
-file to learn the current state. The state is represented solely as a
-human-readable string to be shown to the user in the CLI or VSCode status bar.
-It specifically shouldn't be acted upon in code -- it's slightly handwavey
-in places (e.g. there's an interval from when a server dies until the monitor
-realizes that fact where attempting to read will say "unknown"). *)
+moment it finally dies or is killed. You should only read it by the [read]
+call, since that protects against races. It also protects against server death,
+because if you try to [read] a progress.json that had been created by a now-dead
+server PID then it detects that fact and returns an "unknown" status.
+
+The state fields [disposition] and [message] are intended to be shown to the
+user, not acted upon in code -- they're slightly handwavey in places (e.g. there's
+an interval from when a server dies until the monitor realizes that fact when
+[read] will return "unknown"). *)
 type t = {
-  pid: int;
+  pid: int;  (** pid of the process that wrote this status *)
+  disposition: disposition;
   message: string;  (** e.g. "typechecking 5/15 files" *)
   timestamp: float;
 }
 
+(** Reads the current progress.json file. If there is none, or if there is one
+but it came from a dead PID, or if it was corrupt, this function synthesizes
+a [DStopped] response with a appropriate human-readable message that reflects
+on the precise reason, but simply says "stopped" in the typical case of absent
+file or dead PID. *)
 val read : unit -> t
 
-(* This is basically signature of "Printf.printf" *)
-val write : ?include_in_logs:bool -> ('a, unit, string, unit) format4 -> 'a
+(** [write ~include_in_logs ~disposition fmt_string] writes
+[disposition] and the formatted string [fmt_string] to progress.json.
+The signature [('a, unit, string, unit) format4 -> 'a]
+is simply the signature of [Printf.printf].
 
+Default disposition is [DWorking]. If you want to indicate that the server is stopped
+or ready, you must provide a disposition explicitly. *)
+val write :
+  ?include_in_logs:bool ->
+  ?disposition:disposition ->
+  ('a, unit, string, unit) format4 ->
+  'a
+
+(** Shorthand for [write ~include_in_logs:false ~disposition:DWorking "%s" message]
+for the message "<operation> <done_count>/<total_count> <unit> <percent done> <extra>". *)
 val write_percentage :
   operation:string ->
   done_count:int ->

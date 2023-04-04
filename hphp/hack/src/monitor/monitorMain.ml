@@ -709,6 +709,7 @@ let update_status_ (env : env msg_update) monitor_config :
           ~is_oom;
         ServerProgress.write
           "%s"
+          ~disposition:ServerProgress.DStopped
           (Option.value_map
              exit_status
              ~f:Exit_status.show

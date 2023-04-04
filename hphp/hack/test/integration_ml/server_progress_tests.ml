@@ -190,15 +190,21 @@ will keep polling the ServerProgress every 0.1s up to 'deadline' until it finds 
 and will raise an exception if it doesn't. *)
 let rec wait_for_progress ~(deadline : float) ~(expected : string) : unit Lwt.t
     =
-  let { ServerProgress.message; _ } = ServerProgress.read () in
-  if String.is_substring message ~substring:expected then
+  let { ServerProgress.message; disposition; _ } = ServerProgress.read () in
+  let actual =
+    Printf.sprintf
+      "[%s] %s"
+      (ServerProgress.show_disposition disposition)
+      message
+  in
+  if String.is_substring actual ~substring:expected then
     Lwt.return_unit
   else if Float.(Unix.gettimeofday () > deadline) then
     failwith
       (Printf.sprintf
          "Timeout waiting for status '%s'; got '%s'"
          expected
-         message)
+         actual)
   else
     let%lwt () = Lwt_unix.sleep 0.1 in
     wait_for_progress ~deadline ~expected
@@ -234,14 +240,16 @@ let test_start_stop () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"ready"
+            ~expected:"[DReady] ready"
         in
         let%lwt _ = hh ~root ~tmp [| "stop" |] in
         (* The progress file should be cleanly deleted *)
         if Sys_utils.file_exists (ServerFiles.server_progress_file root) then
           failwith "expected progress file to be deleted";
         let%lwt () =
-          wait_for_progress ~deadline:0. ~expected:"unknown hh_server state"
+          wait_for_progress
+            ~deadline:0.
+            ~expected:"[DStopped] unknown hh_server state"
         in
         Lwt.return_unit)
   in
@@ -268,7 +276,7 @@ let test_typechecking () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"typechecking"
+            ~expected:"[DWorking] typechecking"
         in
         Lwt.return_unit)
   in
@@ -296,7 +304,7 @@ let test_kill_server () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"server stopped"
+            ~expected:"[DStopped] server stopped"
         in
         if not (Sys_utils.file_exists (ServerFiles.server_progress_file root))
         then
@@ -329,7 +337,7 @@ let test_kill_monitor () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"unknown hh_server state"
+            ~expected:"[DStopped] unknown hh_server state"
         in
         if not (Sys_utils.file_exists (ServerFiles.server_progress_file root))
         then
@@ -413,7 +421,7 @@ let test_errors_during () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"typechecking"
+            ~expected:"[DWorking] typechecking"
         in
         (* at this point we should have one error available *)
         let errors_file = ServerFiles.errors_file root in
@@ -483,7 +491,7 @@ let test_errors_kill () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"typechecking"
+            ~expected:"[DWorking] typechecking"
         in
         let%lwt hh_client =
           hh_open
@@ -579,7 +587,7 @@ let test_client_during () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"typechecking"
+            ~expected:"[DWorking] typechecking"
         in
         let args =
           [|

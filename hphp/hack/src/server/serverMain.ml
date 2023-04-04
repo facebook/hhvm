@@ -714,27 +714,22 @@ let serve_one_iteration genv env client_provider =
    * And if the selected_client was a request, then once we discover the nature
    * of that request then ServerCommand.handle will send its own status updates too.
    *)
-  ServerProgress.write
-    ~include_in_logs:false
-    "%s"
-    (match selected_client with
-    | ClientProvider.Select_nothing ->
-      if env.ide_idle then
+  begin
+    match selected_client with
+    | ClientProvider.(Select_nothing | Select_exception _) when not env.ide_idle
+      ->
+      ServerProgress.write ~include_in_logs:false "HackIDE:active"
+    | ClientProvider.(Select_nothing | Select_exception _) ->
+      ServerProgress.write
+        ~include_in_logs:false
+        ~disposition:ServerProgress.DReady
         "ready"
-      else
-        "HackIDE:active"
-    | ClientProvider.Select_exception e ->
-      Printf.sprintf
-        "%s, exception during client selection: %s"
-        (if env.ide_idle then
-          "ready"
-        else
-          "HackIDE:active")
-        (Exception.get_ctor_string e)
-    | ClientProvider.Not_selecting_hg_updating -> "hg-transaction"
+    | ClientProvider.Not_selecting_hg_updating ->
+      ServerProgress.write ~include_in_logs:false "hg-transaction"
     | ClientProvider.Select_new _
     | ClientProvider.Select_persistent ->
-      "working");
+      ServerProgress.write ~include_in_logs:false "working"
+  end;
   let env = idle_if_no_client env selected_client in
   let stage =
     if Option.is_some env.init_env.why_needed_full_check then

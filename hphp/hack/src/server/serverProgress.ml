@@ -9,10 +9,19 @@
 
 open Hh_prelude
 
-(** These are human-readable messages, shown at command-line and within the editor. *)
+type disposition =
+  | DStopped [@value 1]
+  | DWorking [@value 2]
+  | DReady [@value 3]
+[@@deriving show { with_path = false }, enum]
+
+let _unused = (min_disposition, max_disposition)
+(* to suppress "unused" warning *)
+
 type t = {
-  pid: int;  (** pid of the process that wrote this status *)
-  message: string;  (** e.g. "typechecking 5/15 files" *)
+  pid: int;
+  disposition: disposition;
+  message: string;
   timestamp: float;
 }
 
@@ -38,7 +47,7 @@ let try_delete () : unit =
 
 (** This writes to the specified progress file. It first acquires
 an exclusive (writer) lock. (Locks on unix are advisory; we trust
-read_progress_file below to also acquire a lock). It overwrites
+[read] below to also acquire a lock). It overwrites
 whatever was there before. In case of failure, it logs but is
 silent. That's on the principle that defects in
 progress-reporting should never break hh_server. *)
@@ -47,12 +56,14 @@ let write_file (t : t) : unit =
   | None -> ()
   | Some server_progress_file ->
     let open Hh_json in
+    let { pid; disposition; message; timestamp } = t in
     let content =
       JSON_Object
         [
-          ("pid", int_ t.pid);
-          ("progress", string_ t.message);
-          ("timestamp", float_ t.timestamp);
+          ("pid", int_ pid);
+          ("disposition", int_ (disposition_to_enum disposition));
+          ("progress", string_ message);
+          ("timestamp", float_ timestamp);
         ]
       |> json_to_multiline
     in
@@ -68,13 +79,14 @@ let write_file (t : t) : unit =
 
 (** This reads the specified progress file, which is assumed to exist.
 It first acquires a non-exclusive (reader) lock. (Locks on unix are
-advisory; we trust write_progress_file above to also acquire a writer
+advisory; we trust [write_file] above to also acquire a writer
 lock).  If there are failures, we log, and return a human-readable
 string that indicates why. *)
 let read () : t =
   let unknown =
     {
       pid = 0;
+      disposition = DStopped;
       message = "unknown hh_server state";
       timestamp = Unix.gettimeofday ();
     }
@@ -89,10 +101,15 @@ let read () : t =
        let pid = Hh_json_helpers.Jget.int_exn json "pid" in
        let message = Hh_json_helpers.Jget.string_exn json "progress" in
        let timestamp = Hh_json_helpers.Jget.float_exn json "timestamp" in
+       let disposition =
+         Hh_json_helpers.Jget.int_opt json "disposition"
+         |> Option.bind ~f:disposition_of_enum
+         |> Option.value ~default:DReady
+       in
        (* If the status had been left behind on disk by a process that terminated without deleting it,
           well, we'll return the same 'unknown' as if the file didn't exist. *)
        if Proc.is_alive ~pid ~expected:"" then
-         { pid; message; timestamp }
+         { pid; message; disposition; timestamp }
        else
          unknown
      with
@@ -106,12 +123,12 @@ let read () : t =
       HackEventLogger.server_progress_read_exn ~server_progress_file e;
       unknown)
 
-let write ?(include_in_logs = true) fmt =
+let write ?(include_in_logs = true) ?(disposition = DWorking) fmt =
   let f message =
     begin
       if include_in_logs then Hh_logger.log "[progress] %s" message;
       let timestamp = Unix.gettimeofday () in
-      write_file { pid = Unix.getpid (); message; timestamp }
+      write_file { pid = Unix.getpid (); disposition; message; timestamp }
     end
   in
   Printf.ksprintf f fmt

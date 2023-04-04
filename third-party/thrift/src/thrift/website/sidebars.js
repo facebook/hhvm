@@ -347,7 +347,6 @@ module.exports = {
         'fb/server/threading-models',
         'fb/server/thrift-server-features',
         'fb/server/async-handling',
-        'fb/server/resource-pools',
         'fb/server/configuration',
         {
           type: 'category',
@@ -372,6 +371,17 @@ module.exports = {
             'fb/server/overload-protection/cpuconcurrencycontroller',
             'fb/server/overload-protection/adaptive-concurrency',
             'fb/server/overload-protection/queue-timeouts'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Resource Pools',
+          link: {
+            type: 'doc',
+            id: 'fb/server/resource-pools/index',
+          },
+          items: [
+            'fb/server/resource-pools/api'
           ]
         }
       ]

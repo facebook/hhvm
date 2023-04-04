@@ -4,5 +4,5 @@
 FROM mcr.microsoft.com/devcontainers/base:focal
 
 
-RUN apt-get update && apt-get install -y cmake
+RUN apt-get update && apt-get install -y devscripts equivs
 

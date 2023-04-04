@@ -263,12 +263,15 @@ type stopped_reason = {
 }
 
 type notification =
+  | Full_index_fallback
+      (** The daemon is falling back to performing a full index of the repo to build a naming table.*)
   | Done_init of (Processing_files.t, stopped_reason) result
   | Processing_files of Processing_files.t
   | Done_processing
 
 let notification_to_string (n : notification) : string =
   match n with
+  | Full_index_fallback -> "Full_index_fallback"
   | Done_init (Ok p) ->
     Printf.sprintf "Done_init(%s)" (Processing_files.to_string p)
   | Done_init (Error edata) ->

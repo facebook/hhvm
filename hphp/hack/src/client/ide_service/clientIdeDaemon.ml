@@ -48,6 +48,8 @@ type common_state = {
   tcopt: TypecheckerOptions.t;  (** typechecker options *)
   local_memory: Provider_backend.local_memory; [@opaque]
       (** Local_memory backend; includes decl caches *)
+  fall_back_to_full_index: bool;
+      (** fall back to a full index naming table build if loading the saved state fails. *)
 }
 [@@deriving show]
 
@@ -222,6 +224,7 @@ let write_message
   | Unix.Unix_error (Unix.EPIPE, fn, param) ->
     raise @@ Outfd_write_error (fn, param)
 
+(** Load the naming table specified by [naming_table_load_info], or download one based on [root]. *)
 let load_saved_state
     (ctx : Provider_context.t)
     ~(root : Path.t)
@@ -487,6 +490,9 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
       ~workers:None
   in
   let sienv = { sienv with SearchUtils.sie_log_timings = true } in
+  let fall_back_to_full_index =
+    ServerConfig.ide_fall_back_to_full_index config
+  in
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor
@@ -508,7 +514,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   log_debug "initialize1.done";
   {
     start_time;
-    dcommon = { hhi_root; sienv; popt; tcopt; local_memory };
+    dcommon =
+      { hhi_root; sienv; popt; tcopt; local_memory; fall_back_to_full_index };
     dfiles =
       {
         open_files;
@@ -702,14 +709,13 @@ during [During_init], we are able to handle a few requests but will reject
 others. Our caller [handle_one_message] is actually the one that transitions
 us from [During_init] to either [Failed_init] or [Initialized]. Once in one
 of those states, we never thereafter transition state. *)
-let handle_request :
-    type a.
-    message_queue ->
-    state ->
-    string ->
-    a ClientIdeMessage.t ->
-    (state * (a, Lsp.Error.t) result) Lwt.t =
- fun message_queue state _tracking_id message ->
+let handle_request
+    (type a)
+    (message_queue : message_queue)
+    (state : state)
+    (_tracking_id : string)
+    ~(out_fd : Lwt_unix.file_descr)
+    (message : a ClientIdeMessage.t) : (state * (a, Lsp.Error.t) result) Lwt.t =
   let open ClientIdeMessage in
   match (state, message) with
   (***********************************************************)
@@ -751,10 +757,32 @@ let handle_request :
                 ~naming_table_load_info:param.naming_table_load_info
                 ~ignore_hh_version:param.ignore_hh_version
             in
+            let%lwt fall_back_result =
+              match result with
+              | Error (reason, e) when dstate.dcommon.fall_back_to_full_index ->
+                (* TODO(toyang): what to do with [reason] and [e] here? *)
+                log "Falling back to complete index";
+                let%lwt () =
+                  write_message
+                    ~out_fd
+                    ~message:
+                      (ClientIdeMessage.Notification
+                         ClientIdeMessage.Full_index_fallback)
+                in
+                (* TODO(toyang): this sleep is a placeholder for the actual complete index. We're just returning the error for now. *)
+                let%lwt () = Lwt_unix.sleep 60. in
+                log "Completed index";
+                Lwt.return_error (reason, e)
+              | Ok _
+              | Error _ ->
+                Lwt.return result
+            in
             (* if the following push fails, that must be because the queues
                have been shut down, in which case there's nothing to do. *)
             let (_succeeded : bool) =
-              Lwt_message_queue.push message_queue (LoadedState result)
+              Lwt_message_queue.push
+                message_queue
+                (LoadedState fall_back_result)
             in
             Lwt.return_unit);
         log
@@ -1148,7 +1176,7 @@ let handle_one_message_exn
       let%lwt (state, response) =
         try%lwt
           let%lwt (s, r) =
-            handle_request message_queue state tracking_id message
+            handle_request message_queue state tracking_id ~out_fd message
           in
           Lwt.return (s, r)
         with

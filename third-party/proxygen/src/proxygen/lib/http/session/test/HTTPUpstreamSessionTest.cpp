@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPSessionTest.h>
 #include <proxygen/lib/http/session/test/MockByteEventTracker.h>
+#include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 #include <proxygen/lib/test/TestAsyncTransport.h>
 #include <string>
@@ -361,6 +362,14 @@ class HTTPUpstreamTest
         }));
 
     return byteEventTracker;
+  }
+
+  std::unique_ptr<MockSessionObserver> setMockSessionObserver() {
+    auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
+        MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+    EXPECT_CALL(*observer, attached(_));
+    httpSession_->addObserver(observer.get());
+    return observer;
   }
 
   void onTransactionAttached(const HTTPSessionBase&) override {
@@ -3018,6 +3027,48 @@ TEST_F(HTTP2UpstreamSessionTest, HTTPPriority) {
   httpSession_->dropConnection();
 }
 
+TEST_F(HTTP2UpstreamSessionTest, Observer_Attach_Detach_Destroy) {
+
+  // Test attached/detached callbacks when adding/removing observers
+  {
+    auto observer = setMockSessionObserver();
+    EXPECT_CALL(*observer, detached(_));
+    httpSession_->removeObserver(observer.get());
+  }
+
+  // Test destroyed callback when session is destroyed
+  {
+
+    auto observer = setMockSessionObserver();
+    httpSession_->addObserver(observer.get());
+
+    auto egressCodec = makeServerCodec();
+    folly::IOBufQueue output(folly::IOBufQueue::cacheChainLength());
+    egressCodec->generateSettings(output);
+    HTTPMessage resp;
+    resp.setStatusCode(200);
+    egressCodec->generateHeader(output, 1, resp);
+    auto buf = makeBuf(100);
+    egressCodec->generateBody(
+        output, 1, std::move(buf), HTTPCodec::NoPadding, true /* eom */);
+    std::unique_ptr<folly::IOBuf> input = output.move();
+    input->coalesce();
+
+    auto handler = openTransaction();
+
+    handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
+      EXPECT_EQ(200, msg->getStatusCode());
+    });
+    handler->expectBody();
+    handler->expectEOM();
+    handler->expectDetachTransaction();
+    HTTPMessage req = getGetRequest();
+    handler->sendRequest(req);
+    readAndLoop(input->data(), input->length());
+    EXPECT_CALL(*observer, destroyed(_, _));
+    httpSession_->destroy();
+  }
+}
 // Register and instantiate all our type-paramterized tests
 REGISTER_TYPED_TEST_SUITE_P(HTTPUpstreamTest, ImmediateEof);
 

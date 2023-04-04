@@ -101,7 +101,9 @@ HTTPSession::HTTPSession(const WheelTimerInstance& wheelTimer,
       resetSocketOnShutdown_(false),
       inLoopCallback_(false),
       pendingPause_(false),
-      writeBufSplit_(false) {
+      writeBufSplit_(false),
+      sessionObserverAccessor_(this),
+      sessionObserverContainer_(&sessionObserverAccessor_) {
   setByteEventTracker(std::make_shared<ByteEventTracker>(this));
   initialReceiveWindow_ = receiveStreamWindowSize_ = receiveSessionWindowSize_ =
       codec_->getDefaultWindowSize();

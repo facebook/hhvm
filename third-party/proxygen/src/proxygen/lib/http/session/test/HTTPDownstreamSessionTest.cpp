@@ -27,6 +27,7 @@
 #include <proxygen/lib/http/session/test/HTTPSessionTest.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockByteEventTracker.h>
+#include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 #include <proxygen/lib/test/TestAsyncTransport.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -447,6 +448,14 @@ class HTTPDownstreamTest : public testing::Test {
         }));
 
     return byteEventTracker;
+  }
+
+  std::unique_ptr<MockSessionObserver> setMockSessionObserver() {
+    auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
+        MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+    EXPECT_CALL(*observer, attached(_));
+    httpSession_->addObserver(observer.get());
+    return observer;
   }
 
  protected:
@@ -4332,4 +4341,37 @@ TEST_F(HTTP2DownstreamSessionTest, CancelPingProbesOnRequest) {
   // Session idle times out
   EXPECT_EQ(httpSession_->getConnectionCloseReason(),
             ConnectionCloseReason::TIMEOUT);
+}
+
+TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
+
+  // Test attached/detached callbacks when adding/removing observers
+  {
+    auto observer = setMockSessionObserver();
+    EXPECT_CALL(*observer, detached(_));
+    httpSession_->removeObserver(observer.get());
+  }
+
+  // Test destroyed callback when session is destroyed
+  {
+    auto observer = setMockSessionObserver();
+    auto handler = addSimpleStrictHandler();
+    handler->expectHeaders();
+    handler->expectEOM([&handler]() {
+      handler->sendReplyWithBody(200 /* status code */,
+                                 100 /* content size */,
+                                 true /* keepalive */,
+                                 true /* sendEOM */,
+                                 false /*trailers*/);
+    });
+    handler->expectDetachTransaction();
+    HTTPSession::DestructorGuard g(httpSession_);
+    HTTPMessage req = getGetRequest();
+    sendRequest(req);
+    flushRequestsAndLoop(true, milliseconds(0));
+
+    EXPECT_CALL(*observer, destroyed(_, _));
+    expectDetachSession();
+    httpSession_->closeWhenIdle();
+  }
 }

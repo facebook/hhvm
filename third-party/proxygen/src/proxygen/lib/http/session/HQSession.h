@@ -670,7 +670,9 @@ class HQSession
         dropping_(false),
         inLoopCallback_(false),
         unidirectionalReadDispatcher_(*this, direction),
-        createTime_(std::chrono::steady_clock::now()) {
+        createTime_(std::chrono::steady_clock::now()),
+        sessionObserverAccessor_(this),
+        sessionObserverContainer_(&sessionObserverAccessor_) {
     codec_.add<HTTPChecks>();
     // dummy, ingress, egress
     codecStack_.reserve(kMaxCodecStackDepth);
@@ -1895,6 +1897,39 @@ class HQSession
   // Lookup maps for matching ingress push streams to push ids
   folly::F14FastMap<quic::StreamId, hq::PushId> streamIdToPushId_;
   std::string userAgent_;
+
+  /**
+   * Accessor implementation for HTTPSessionObserver.
+   */
+  class ObserverAccessor : public HTTPSessionObserverAccessor {
+   public:
+    explicit ObserverAccessor(HTTPSessionBase* sessionBasePtr)
+        : sessionBasePtr_(sessionBasePtr) {
+    }
+    ~ObserverAccessor() override = default;
+    const HTTPSessionBase* getSessionBase() {
+      return sessionBasePtr_;
+    }
+
+   private:
+    HTTPSessionBase* sessionBasePtr_{nullptr};
+  };
+
+  ObserverAccessor sessionObserverAccessor_;
+
+  // Container of observers for a HTTP session
+  //
+  // This member MUST be last in the list of members to ensure it is destroyed
+  // first, before any other members are destroyed. This ensures that observers
+  // can inspect any session state available through public methods
+  // when destruction of the session begins.
+  HTTPSessionObserverContainer sessionObserverContainer_;
+
+  HTTPSessionObserverContainer* getHTTPSessionObserverContainer()
+      const override {
+    return const_cast<HTTPSessionObserverContainer*>(
+        &sessionObserverContainer_);
+  }
 }; // HQSession
 
 std::ostream& operator<<(std::ostream& os, HQSession::DrainState drainState);

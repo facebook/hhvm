@@ -13,6 +13,8 @@
 #include <folly/io/async/AsyncUDPSocket.h>
 #include <folly/io/async/SSLContext.h>
 #include <proxygen/lib/http/codec/HTTPCodecFilter.h>
+#include <proxygen/lib/http/observer/HTTPSessionObserverContainer.h>
+#include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/HTTPSessionActivityTracker.h>
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/utils/Time.h>
@@ -521,6 +523,56 @@ class HTTPSessionBase : public wangle::ManagedConnection {
 
   void setIngressTimeoutAfterEom(bool setIngressTimeoutAfterEom) noexcept {
     setIngressTimeoutAfterEom_ = setIngressTimeoutAfterEom;
+  }
+
+  /**
+   * Adds an observer.
+   *
+   * If the observer is already added, this is a no-op.
+   *
+   * @param observer     Observer to add.
+   */
+  bool addObserver(HTTPSessionObserverContainer::Observer* observer) {
+    if (auto list = getHTTPSessionObserverContainer()) {
+      list->addObserver(observer);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Removes an observer.
+   *
+   * @param observer     Observer to remove.
+   * @return             Whether the observer was found and removed.
+   */
+  bool removeObserver(HTTPSessionObserverContainer::Observer* observer) {
+    if (auto list = getHTTPSessionObserverContainer()) {
+      list->removeObserver(observer);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Returns the HTTPSessionObserverContainer or nullptr if not available.
+   *
+   * HTTPSession implementations that support observers should override this
+   * function and return the session observer container that they hold in
+   * memory.
+
+   *
+   * We have a default implementation to ensure that there is no risk of a
+   * pure-virtual function being called during constructon or destruction of
+   * the session. If this was to occur the derived class which implements this
+   * function may be unavailable leading to undefined behavior. While this is
+   * true for any pure-virtual function, the potential for this issue is
+   * greater for observers.
+   */
+  [[nodiscard]] virtual HTTPSessionObserverContainer*
+  getHTTPSessionObserverContainer() const {
+    return nullptr;
   }
 
  protected:

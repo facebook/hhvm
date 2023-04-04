@@ -25,6 +25,7 @@
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
+#include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -200,6 +201,15 @@ bool HQUpstreamSessionTest::flush(bool eof,
      */
   }
   return done;
+}
+
+std::unique_ptr<MockSessionObserver>
+HQUpstreamSessionTest::setMockSessionObserver() {
+  auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
+      MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+  EXPECT_CALL(*observer, attached(_));
+  hqSession_->addObserver(observer.get());
+  return observer;
 }
 
 StrictMock<MockController>& HQUpstreamSessionTest::getMockController() {
@@ -1173,6 +1183,22 @@ TEST_P(HQUpstreamSessionTest, ExtraSettings) {
 
   EXPECT_EQ(*socketDriver_->streams_[kConnectionStreamId].error,
             HTTP3::ErrorCode::HTTP_FRAME_UNEXPECTED);
+}
+
+TEST_P(HQUpstreamSessionTest, Observer_Attach_Detach_Destroyed) {
+
+  // Test attached/detached callbacks when adding/removing observers
+  {
+    auto observer = setMockSessionObserver();
+    EXPECT_CALL(*observer, detached(_));
+    hqSession_->removeObserver(observer.get());
+  }
+
+  {
+    auto observer = setMockSessionObserver();
+    EXPECT_CALL(*observer, destroyed(_, _));
+    hqSession_->dropConnection();
+  }
 }
 
 // Test Cases for which Settings are not sent in the test SetUp

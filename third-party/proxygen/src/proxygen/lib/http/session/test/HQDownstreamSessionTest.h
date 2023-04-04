@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
+#include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <wangle/acceptor/ConnectionManager.h>
@@ -187,6 +188,8 @@ class HQDownstreamSessionTest : public HQSessionTest {
   void expectTransactionTimeout(
       testing::StrictMock<proxygen::MockHTTPHandler>& handler,
       folly::Function<void()> fn = folly::Function<void()>());
+
+  std::unique_ptr<proxygen::MockSessionObserver> setMockSessionObserver();
 
   std::unordered_map<quic::StreamId, ClientStream> requests_;
   quic::StreamId nextStreamId_{0};

@@ -19,6 +19,7 @@
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <proxygen/lib/http/session/test/MockQuicSocketDriver.h>
+#include <proxygen/lib/http/session/test/MockSessionObserver.h>
 #include <proxygen/lib/http/session/test/TestUtils.h>
 #include <quic/api/test/MockQuicSocket.h>
 #include <quic/dsr/Types.h>
@@ -273,6 +274,15 @@ void HQDownstreamSessionTest::expectTransactionTimeout(
         handler.sendEOM();
       });
   handler.expectDetachTransaction();
+}
+
+std::unique_ptr<MockSessionObserver>
+HQDownstreamSessionTest::setMockSessionObserver() {
+  auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
+      MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+  EXPECT_CALL(*observer, attached(_));
+  hqSession_->addObserver(observer.get());
+  return observer;
 }
 
 TEST_P(HQDownstreamSessionTest, GetMaxPushIdOK) {
@@ -1538,6 +1548,22 @@ TEST_P(HQDownstreamSessionTest, ByteEvents) {
   EXPECT_CALL(callback, lastByteAcked(_));
   flushRequestsAndLoop();
   hqSession_->closeWhenIdle();
+}
+
+TEST_P(HQDownstreamSessionTest, Observer_Attach_Detach_Destroyed) {
+
+  // Test attached/detached callbacks when adding/removing observers
+  {
+    auto observer = setMockSessionObserver();
+    EXPECT_CALL(*observer, detached(_));
+    hqSession_->removeObserver(observer.get());
+  }
+
+  {
+    auto observer = setMockSessionObserver();
+    EXPECT_CALL(*observer, destroyed(_, _));
+    hqSession_->dropConnection();
+  }
 }
 
 TEST_P(HQDownstreamSessionTest, AppRateLimited) {

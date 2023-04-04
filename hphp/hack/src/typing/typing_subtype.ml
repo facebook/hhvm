@@ -2473,6 +2473,7 @@ and simplify_subtype_i
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
         let (sub_supportdyn', env, lty) = TUtils.strip_supportdyn env lty in
+        let sub_supportdyn = Option.is_some sub_supportdyn || sub_supportdyn' in
         (match deref lty with
         | (r_sub, Tshape (origin_sub, shape_kind_sub, fdm_sub)) ->
           if same_type_origin origin_super origin_sub then
@@ -2485,10 +2486,7 @@ and simplify_subtype_i
               ~env
               ~this_ty
               ~super_like
-              ( Option.is_some sub_supportdyn || sub_supportdyn',
-                r_sub,
-                shape_kind_sub,
-                fdm_sub )
+              (sub_supportdyn, r_sub, shape_kind_sub, fdm_sub)
               (super_supportdyn, r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
     | (_, Tvec_or_dict _) ->
@@ -2559,7 +2557,7 @@ and simplify_subtype_i
         default_subtype env
       | LoclType lty_sub ->
         (match deref lty_sub with
-        | (_r, Tnewtype (name_sub, [tyarg_sub], _))
+        | (r, Tnewtype (name_sub, [tyarg_sub], _))
           when String.equal name_sub SN.Classes.cSupportDyn ->
           env
           |> simplify_subtype
@@ -2567,7 +2565,7 @@ and simplify_subtype_i
                ~this_ty
                ~super_like
                ~super_supportdyn:true
-               ~sub_supportdyn
+               ~sub_supportdyn:(Some r)
                tyarg_sub
                tyarg_super
         | (_, (Tgeneric _ | Tvar _)) -> default_subtype env

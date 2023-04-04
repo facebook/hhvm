@@ -89,6 +89,7 @@ add_library(
   lib/cpp2/util.cc
   lib/go/util.cc
   lib/java/util.cc
+  lib/rust/util.cc
 )
 target_link_libraries(
   compiler

@@ -53,3 +53,30 @@ pub trait ThriftAnnotations: 'static {
         None
     }
 }
+
+/// Identical to [ThriftAnnotations] but is implemented on the unit type (), for which
+/// `get_structured_annotation` and `get_field_structured_annotation` will always return `None`.
+///
+/// This allows a method to take `<T: MaybeThriftAnnotations>` to express the logic of "give me a
+/// privacy aware Thrift struct OR a 'void' type to indicate no type".
+pub trait MaybeThriftAnnotations: 'static {
+    fn get_structured_annotation<T: Sized + 'static>() -> Option<T> {
+        None
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(_field_id: i16) -> Option<T> {
+        None
+    }
+}
+
+impl<S: ThriftAnnotations> MaybeThriftAnnotations for S {
+    fn get_structured_annotation<T: Sized + 'static>() -> Option<T> {
+        <S as ThriftAnnotations>::get_structured_annotation::<T>()
+    }
+
+    fn get_field_structured_annotation<T: Sized + 'static>(field_id: i16) -> Option<T> {
+        <S as ThriftAnnotations>::get_field_structured_annotation::<T>(field_id)
+    }
+}
+
+impl MaybeThriftAnnotations for () {}

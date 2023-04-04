@@ -1,55 +1,24 @@
 // @lint-ignore-every JSONSYNTAX because the format of this file is JSONC, not strict JSON
-// For format details, see https://aka.ms/vscode-remote/devcontainer.json or the definition README at
-// https://github.com/microsoft/vscode-dev-containers/tree/master/containers/docker-existing-dockerfile
+//
+// The devcontainer format is described at: https://containers.dev/implementors/json_reference/
 {
-  "name": "devcontainer-project",
-  "dockerFile": "Dockerfile",
-  "context": "${localWorkspaceFolder}",
-  "build": {
-    "args": {
-      "USER_UID": "${localEnv:USER_UID}",
-      "USER_GID": "${localEnv:USER_GID}"
-    },
-  },
+  "name": "HHVM",
 
-  // run arguments passed to docker
-  "runArgs": [
-    "--security-opt", "label=disable"
-  ],
+  // Use the Docker image described in the Dockerfile file in this repo.
+  //
+  // Docs:
+  // https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers#using-a-dockerfile
+  //
+  // Example repo:
+  // https://github.com/microsoft/vscode-dev-containers/tree/main/containers/docker-existing-dockerfile
+  "dockerFile": "Dockerfile",
 
   "hostRequirements": {
-    "storage": "64gb" 
-  },
- 
-  "containerEnv": {
-     // extensions to preload before other extensions
-    "PRELOAD_EXTENSIONS": "arrterian.nix-env-selector"
+    "storage": "64gb",
+    "memory": "32gb"
   },
 
-   // disable command overriding and updating remote user ID
-  "overrideCommand": false,
-  "userEnvProbe": "loginShell",
-  "updateRemoteUserUID": false,
+// cmake -DMYSQL_UNIX_SOCK_ADDR=/dev/null ..
+// cd ..
 
-  // build development environment on creation, make sure you already have shell.nix
-  // "onCreateCommand": "nix-shell --command 'echo done building nix dev environment'",
-
-  "updateContentCommand": "git submodule update --init --depth 1 --recursive",
-
-  // Add the IDs of extensions you want installed when the container is created.postCreateCommand
-  "extensions": [
-    // select nix environment
-    "arrterian.nix-env-selector",
-
-    // extra extensions
-    //"fsevenm.run-it-on",
-    //"jnoortheen.nix-ide",
-    //"ms-python.python"
-  ],
-
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [],
-
-  // Use 'postCreateCommand' to run commands after the container is created.
-  // "postCreateCommand": "go version",
 }

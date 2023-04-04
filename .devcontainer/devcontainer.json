@@ -18,7 +18,8 @@
   ],
 
   "hostRequirements": {
-    "storage": "64gb" 
+    "storage": "64gb",
+    "memory": "32gb"
   },
  
   "containerEnv": {

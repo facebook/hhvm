@@ -10,5 +10,9 @@ includes = ["c"]
 
 [packages.c]
 uses = [".*"]
-includes = ["a"]
+includes = []
 soft_includes=["b"]
+
+[deployments.d]
+packages=["c"]
+soft_packages=["b"]

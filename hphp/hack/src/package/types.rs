@@ -24,5 +24,6 @@ pub struct Package {
 #[derive(Debug, Deserialize)]
 pub struct Deployment {
     pub packages: Option<NameSet>,
+    pub soft_packages: Option<NameSet>,
     pub domains: Option<NameSet>,
 }

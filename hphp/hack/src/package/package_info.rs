@@ -165,12 +165,14 @@ mod test {
     }
 
     #[test]
-    fn test_soft_includes() {
+    fn test_soft() {
         let contents = include_str!("tests/package-5.toml");
         let info = PackageInfo::from_text(contents).unwrap();
-
         let c = &info.packages()["c"];
-        assert_eq!(c.includes.as_ref().unwrap()[0].get_ref(), "a");
         assert_eq!(c.soft_includes.as_ref().unwrap()[0].get_ref(), "b");
+
+        let d = &info.deployments().unwrap()["d"];
+        assert_eq!(d.packages.as_ref().unwrap()[0].get_ref(), "c");
+        assert_eq!(d.soft_packages.as_ref().unwrap()[0].get_ref(), "b");
     }
 }

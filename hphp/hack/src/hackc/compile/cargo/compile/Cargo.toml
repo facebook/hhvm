@@ -17,7 +17,7 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 bytecode_printer = { version = "0.0.0", path = "../../../bytecode_printer" }
 clap = { version = "4.1.4", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 decl_provider = { version = "0.0.0", path = "../../../decl_provider" }
-elaborate_namespaces_visitor = { version = "0.0.0", path = "../../../../naming/cargo/elaborate_namespaces" }
+elab = { version = "0.0.0", path = "../../../../elab" }
 emit_unit = { version = "0.0.0", path = "../../../emitter/cargo/emit_unit" }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }

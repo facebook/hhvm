@@ -85,7 +85,14 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
         extract_debugger_main(&namespace_env, &mut prog.0).map_err(Error::unrecoverable)?;
     }
 
-    prog.0 = flatten_ns(prog.0.drain(..));
+    // TODO: wind through flags.disable_toplevel_elaboration?
+    // This `flatten_ns` is not currently needed because unless
+    // `--disable-toplevel-elaboration` is set, we already do this while
+    // parsing.  We may want to move that functionality into elab and remove
+    // this flattening (and remove it from the parser?)
+    if true {
+        prog.0 = flatten_ns(prog.0.drain(..));
+    }
 
     closure_convert::convert_toplevel_prog(emitter, &mut prog.0, namespace_env)?;
 

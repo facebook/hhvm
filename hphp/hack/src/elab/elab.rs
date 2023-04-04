@@ -58,6 +58,28 @@ use pass::Pass;
 use relative_path::RelativePath;
 use transform::Transform;
 
+/// Provided for use in hackc, where we have an `ns_env` in hand already.
+/// Expected to behave the same as `elaborate_program` when `po_codegen` is
+/// `true`.
+pub fn elaborate_program_for_codegen(
+    ns_env: RcOc<namespace_env::Env>,
+    path: &RelativePath,
+    program: &mut nast::Program,
+) {
+    assert!(ns_env.is_codegen);
+    let tco = TypecheckerOptions {
+        po_codegen: true,
+        po_disable_xhp_element_mangling: ns_env.disable_xhp_element_mangling,
+        // Do not copy the auto_ns_map; it's not read in this crate except via
+        // elaborate_namespaces_visitor, which uses the one in `ns_env` here
+        ..Default::default()
+    };
+    elaborate_namespaces_visitor::elaborate_program(ns_env, program);
+    let env = make_env(&tco, path);
+    elaborate_common(&env, program);
+    assert!(env.into_errors().is_empty());
+}
+
 pub fn elaborate_program(
     tco: &TypecheckerOptions,
     path: &RelativePath,
@@ -65,8 +87,12 @@ pub fn elaborate_program(
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_program(ns_env(tco), program);
     let mut env = make_env(tco, path);
+    elaborate_common(&env, program);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
     lambda_captures::elaborate_program(&mut env, program);
-    elaborate(env, program)
+    elaborate_for_typechecking(env, program)
 }
 
 pub fn elaborate_fun_def(
@@ -76,8 +102,12 @@ pub fn elaborate_fun_def(
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_fun_def(ns_env(tco), f);
     let mut env = make_env(tco, path);
+    elaborate_common(&env, f);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
     lambda_captures::elaborate_fun_def(&mut env, f);
-    elaborate(env, f)
+    elaborate_for_typechecking(env, f)
 }
 
 pub fn elaborate_class_(
@@ -87,8 +117,12 @@ pub fn elaborate_class_(
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_class_(ns_env(tco), c);
     let mut env = make_env(tco, path);
+    elaborate_common(&env, c);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
     lambda_captures::elaborate_class_(&mut env, c);
-    elaborate(env, c)
+    elaborate_for_typechecking(env, c)
 }
 
 pub fn elaborate_module_def(
@@ -98,8 +132,12 @@ pub fn elaborate_module_def(
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_module_def(ns_env(tco), m);
     let mut env = make_env(tco, path);
+    elaborate_common(&env, m);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
     lambda_captures::elaborate_module_def(&mut env, m);
-    elaborate(env, m)
+    elaborate_for_typechecking(env, m)
 }
 
 pub fn elaborate_gconst(
@@ -109,8 +147,12 @@ pub fn elaborate_gconst(
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_gconst(ns_env(tco), c);
     let mut env = make_env(tco, path);
+    elaborate_common(&env, c);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
     lambda_captures::elaborate_gconst(&mut env, c);
-    elaborate(env, c)
+    elaborate_for_typechecking(env, c)
 }
 
 pub fn elaborate_typedef(
@@ -120,13 +162,17 @@ pub fn elaborate_typedef(
 ) -> Vec<NamingPhaseError> {
     elaborate_namespaces_visitor::elaborate_typedef(ns_env(tco), t);
     let mut env = make_env(tco, path);
+    elaborate_common(&env, t);
+    if tco.po_codegen {
+        return env.into_errors();
+    }
     lambda_captures::elaborate_typedef(&mut env, t);
-    elaborate(env, t)
+    elaborate_for_typechecking(env, t)
 }
 
 fn ns_env(tco: &TypecheckerOptions) -> RcOc<namespace_env::Env> {
     RcOc::new(namespace_env::Env::empty(
-        vec![],
+        tco.po_auto_namespace_map.clone(),
         tco.po_codegen,
         tco.po_disable_xhp_element_mangling,
     ))
@@ -155,7 +201,22 @@ fn make_env(tco: &TypecheckerOptions, rel_path: &RelativePath) -> Env {
     )
 }
 
-fn elaborate<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
+/// Run the passes which are common to codegen and typechecking.
+/// For now, these passes may not emit errors.
+fn elaborate_common<T: Transform>(env: &Env, node: &mut T) {
+    #[derive(Copy, Clone)]
+    struct NoopPass;
+    impl Pass for NoopPass {}
+    #[rustfmt::skip]
+    let mut passes = passes![
+        NoopPass
+    ];
+
+    node.transform(env, &mut passes);
+    env.assert_no_errors();
+}
+
+fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<NamingPhaseError> {
     #[rustfmt::skip]
     let mut passes = passes![
         // Stop on `Invalid` expressions

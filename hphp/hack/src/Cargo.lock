@@ -759,7 +759,7 @@ dependencies = [
  "bytecode_printer",
  "clap 4.1.11",
  "decl_provider",
- "elaborate_namespaces_visitor",
+ "elab",
  "emit_unit",
  "env",
  "error",

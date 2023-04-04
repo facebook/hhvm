@@ -96,6 +96,10 @@ impl Env {
         self.errors.borrow_mut().push(err.into())
     }
 
+    pub fn assert_no_errors(&self) {
+        assert!(self.errors.borrow().is_empty());
+    }
+
     pub fn into_errors(self) -> Vec<NamingPhaseError> {
         self.errors.into_inner()
     }

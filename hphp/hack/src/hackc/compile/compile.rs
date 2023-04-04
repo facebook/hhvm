@@ -332,6 +332,7 @@ fn emit_unit_from_text<'arena, 'decl>(
             .parser_options
             .po_disable_xhp_element_mangling,
     ));
+    let path = source_text.file_path_rc();
 
     let parse_result = parse_file(
         emitter.options(),
@@ -345,7 +346,7 @@ fn emit_unit_from_text<'arena, 'decl>(
 
     let ((unit, profile), codegen_t) = match parse_result {
         Ok(mut ast) => {
-            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
+            elab::elaborate_program_for_codegen(RcOc::clone(&namespace_env), &path, &mut ast);
             profile_rust::time(move || {
                 (
                     check_readonly_and_emit(emitter, namespace_env, &mut ast, profile),

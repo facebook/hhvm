@@ -54,6 +54,8 @@ type env = {
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
       (** This is only filled in after type-checking the function in question *)
+  loaded_packages: SSet.t;
+      (** The set of packages loaded via a "package <pkg>" expression *)
 }
 
 and genv = {

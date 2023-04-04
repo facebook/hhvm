@@ -1,0 +1,165 @@
+Parsing[1002] Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. [1]
+
+cross_package_access_with_package_syntax_invalid_conds.php--c.php:15:9
+    13 |       f1(); // error; function calls don't register package info
+    14 |     }
+[1] 15 |     if ($loaded = package pkg1) {
+    16 |       f1(); // error; assignments aren't allowed in conditionals
+    17 | 
+
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_invalid_conds.php--c.php:7:7
+     5 |   public function test() : void {
+     6 |     if (package pkg1 == package pkg4) {
+[1]  7 |       f1(); // error; comparison binops don't register package info
+     8 |     }
+     9 |     if (package pkg1 is bool) {
+
+cross_package_access_with_package_syntax_invalid_conds.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_invalid_conds.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+     4 | new module b.b1 {}  // package pkg2
+     5 | new module d {}     // package pkg4
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_invalid_conds.php--c.php:10:7
+     8 |     }
+     9 |     if (package pkg1 is bool) {
+[1] 10 |       f1(); // error; type ops don't register package info
+    11 |     }
+    12 |     if ($this->expect(package pkg1)) {
+
+cross_package_access_with_package_syntax_invalid_conds.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_invalid_conds.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+     4 | new module b.b1 {}  // package pkg2
+     5 | new module d {}     // package pkg4
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_invalid_conds.php--c.php:13:7
+    11 |     }
+    12 |     if ($this->expect(package pkg1)) {
+[1] 13 |       f1(); // error; function calls don't register package info
+    14 |     }
+    15 |     if ($loaded = package pkg1) {
+
+cross_package_access_with_package_syntax_invalid_conds.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_invalid_conds.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+     4 | new module b.b1 {}  // package pkg2
+     5 | new module d {}     // package pkg4
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_invalid_conds.php--c.php:16:7
+    14 |     }
+    15 |     if ($loaded = package pkg1) {
+[1] 16 |       f1(); // error; assignments aren't allowed in conditionals
+    17 | 
+    18 |       if ($loaded) {
+
+cross_package_access_with_package_syntax_invalid_conds.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_invalid_conds.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+     4 | new module b.b1 {}  // package pkg2
+     5 | new module d {}     // package pkg4
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_invalid_conds.php--c.php:19:9
+    17 | 
+    18 |       if ($loaded) {
+[1] 19 |         f1(); // error; cannot infer $loaded to be a package expression
+    20 |       }
+    21 |     }
+
+cross_package_access_with_package_syntax_invalid_conds.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_invalid_conds.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+     4 | new module b.b1 {}  // package pkg2
+     5 | new module d {}     // package pkg4
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+6 errors found.

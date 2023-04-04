@@ -584,6 +584,7 @@ let env_as_value env =
     inference_env;
     big_envs = _;
     fun_tast_info;
+    loaded_packages = _;
   } =
     env
   in

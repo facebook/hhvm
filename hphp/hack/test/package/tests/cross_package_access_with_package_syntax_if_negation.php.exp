@@ -1,0 +1,58 @@
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_if_negation.php--c.php:6:5
+     4 | public function test(): void {
+     5 |   if (!(package pkg1)) {
+[1]  6 |     f1();   // error; pkg1 is not loaded
+     7 |     return;
+     8 |   } else {
+
+cross_package_access_with_package_syntax_if_negation.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_if_negation.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+Typing[4472] Cannot access a public element from package 'pkg1' in package 'pkg3' [1]
+-> This is from module a, which is in package pkg1 [2]
+-> Module 'c' belongs to package 'pkg3' [3]
+-> And package 'pkg3' does not include package 'pkg1 [4]
+
+cross_package_access_with_package_syntax_if_negation.php--c.php:11:3
+     9 |     f1();  // ok
+    10 |   }
+[1] 11 |   f1(); // error; pakcage info unknown outside if/else branches
+    12 | }
+
+cross_package_access_with_package_syntax_if_negation.php--a.php:3:17
+     1 | <?hh
+     2 | module a;
+[2]  3 | public function f1(): void {}
+
+cross_package_access_with_package_syntax_if_negation.php--modules.php:3:12
+     1 | <?hh
+     2 | new module a {}     // package pkg1
+[3]  3 | new module c {}     // package pkg3 (include pkg2)
+
+../PACKAGES.toml:10:11
+     8 | includes = ["pkg1"]
+     9 | 
+[4] 10 | [packages.pkg3]
+    11 | uses = ["c"]
+    12 | includes = ["pkg2"]
+
+2 errors found.

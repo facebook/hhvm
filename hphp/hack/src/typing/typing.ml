@@ -58,6 +58,11 @@ type dyn_func_kind =
   | Supportdyn_function
   | Like_function
 
+type branch_info = {
+  lset: Local_id.Set.t;
+  pkgs: SSet.t;
+}
+
 (*****************************************************************************)
 (* Debugging *)
 (*****************************************************************************)
@@ -2585,13 +2590,15 @@ and stmt_ env pos st =
       branch
         env
         (fun env ->
-          let (env, lset) = condition env true te in
+          let (env, { lset; pkgs }) = condition env true te in
+          Env.with_packages env pkgs @@ fun env ->
           let refinement_map = refinement_annot_map env lset in
           let (env, b1) = block env b1 in
           let b1 = assert_refinement_env refinement_map b1 in
           (env, b1))
         (fun env ->
-          let (env, lset) = condition env false te in
+          let (env, { lset; pkgs }) = condition env false te in
+          Env.with_packages env pkgs @@ fun env ->
           let refinement_map = refinement_annot_map env lset in
           let (env, b2) = block env b2 in
           let b2 = assert_refinement_env refinement_map b2 in
@@ -2681,14 +2688,15 @@ and stmt_ env pos st =
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te, _) = expr env e in
-                let (env, _lset) = condition env true te in
+                let (env, { pkgs; _ }) = condition env true te in
+                Env.with_packages env pkgs @@ fun env ->
                 let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
                 let (env, tb) = block env b in
                 (env, tb))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
-          let (env, _lset) = condition env false te in
+          let (env, _) = condition env false te in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (tb, te)))
     in
@@ -2706,7 +2714,8 @@ and stmt_ env pos st =
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te, _) = expr env e in
-                let (env, lset) = condition env true te in
+                let (env, { lset; pkgs }) = condition env true te in
+                Env.with_packages env pkgs @@ fun env ->
                 let refinement_map = refinement_annot_map env lset in
                 (* TODO TAST: avoid repeated generation of block *)
                 let (env, tb) = block env b in
@@ -2720,7 +2729,7 @@ and stmt_ env pos st =
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
-          let (env, lset) = condition env false te in
+          let (env, { lset; _ }) = condition env false te in
           let refinement_map_at_exit = refinement_annot_map env lset in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te, tb, refinement_map_at_exit)))
@@ -2773,7 +2782,8 @@ and stmt_ env pos st =
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te2, _) = expr env e2 in
-                let (env, lset) = condition env true te2 in
+                let (env, { lset; pkgs }) = condition env true te2 in
+                Env.with_packages env pkgs @@ fun env ->
                 let refinement_map = refinement_annot_map env lset in
                 let (env, tb) = block env b in
                 let env =
@@ -2791,7 +2801,7 @@ and stmt_ env pos st =
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te2, _) = expr env e2 in
-          let (env, lset) = condition env false te2 in
+          let (env, { lset; _ }) = condition env false te2 in
           let refinement_map_at_exit = refinement_annot_map env lset in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te1, te2, te3, tb, refinement_map_at_exit)))
@@ -3192,7 +3202,7 @@ and lvalues env el =
 and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
   let (env, tc, tyc) = raw_expr env c ~allow_awaitable:false in
   let parent_lenv = env.lenv in
-  let (env, _lset) = condition env true tc in
+  let (env, _) = condition env true tc in
   let (env, te1, ty1) =
     match e1 with
     | None ->
@@ -3208,7 +3218,7 @@ and eif env ~(expected : ExpectedTy.t option) ?in_await p c e1 e2 =
   in
   let lenv1 = env.lenv in
   let env = { env with lenv = parent_lenv } in
-  let (env, _lset) = condition env false tc in
+  let (env, _) = condition env false tc in
   let (env, te2, ty2) = expr ?expected ?in_await env e2 ~allow_awaitable:true in
   let lenv2 = env.lenv in
   let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
@@ -4343,7 +4353,7 @@ and expr_
     let c = Ast_defs.(equal_bop bop Ampamp) in
     let (env, te1, _) = expr env e1 in
     let lenv = env.lenv in
-    let (env, _lset) = condition env c te1 in
+    let (env, _) = condition env c te1 in
     let (env, te2, _) = expr env e2 in
     let env = { env with lenv } in
     make_result
@@ -9538,11 +9548,13 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
   match e with
   | Aast.Hole (e, _, _, _) -> condition env tparamet e
   | Aast.True when not tparamet ->
-    (LEnv.drop_cont env C.Next, Local_id.Set.empty)
-  | Aast.False when tparamet -> (LEnv.drop_cont env C.Next, Local_id.Set.empty)
+    (LEnv.drop_cont env C.Next, { lset = Local_id.Set.empty; pkgs = SSet.empty })
+  | Aast.False when tparamet ->
+    (LEnv.drop_cont env C.Next, { lset = Local_id.Set.empty; pkgs = SSet.empty })
   | Aast.Call ((_, _, Aast.Id (_, func)), _, [(_, te)], None)
     when String.equal SN.StdlibFunctions.is_null func ->
-    condition_nullity ~nonnull:(not tparamet) env te
+    let (env, lset) = condition_nullity ~nonnull:(not tparamet) env te in
+    (env, { lset; pkgs = SSet.empty })
   | Aast.Binop
       {
         bop = Ast_defs.Eqeq | Ast_defs.Eqeqeq;
@@ -9555,15 +9567,18 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
         lhs = e;
         rhs = (_, _, Aast.Null);
       } ->
-    condition_nullity ~nonnull:(not tparamet) env e
+    let (env, lset) = condition_nullity ~nonnull:(not tparamet) env e in
+    (env, { lset; pkgs = SSet.empty })
   | Aast.Lvar _
   | Aast.Obj_get _
   | Aast.Class_get _
   | Aast.Binop { bop = Ast_defs.Eq None; _ } ->
     let (env, ety) = Env.expand_type env ty in
     (match get_node ety with
-    | Tprim Tbool -> (env, Local_id.Set.empty)
-    | _ -> condition_nullity ~nonnull:tparamet env te)
+    | Tprim Tbool -> (env, { lset = Local_id.Set.empty; pkgs = SSet.empty })
+    | _ ->
+      let (env, lset) = condition_nullity ~nonnull:tparamet env te in
+      (env, { lset; pkgs = SSet.empty }))
   | Aast.Binop
       { bop = (Ast_defs.Diff | Ast_defs.Diff2) as op; lhs = e1; rhs = e2 } ->
     let op =
@@ -9583,15 +9598,22 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
   | Aast.Binop
       { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
     when Bool.equal tparamet Ast_defs.(equal_bop bop Ampamp) ->
-    let (env, lset1) = condition env tparamet e1 in
+    let (env, { lset = lset1; pkgs = pkgs1 }) = condition env tparamet e1 in
     (* This is necessary in case there is an assignment in e2
      * We essentially redo what has been undone in the
      * `Binop (Ampamp|Barbar)` case of `expr` *)
     let (env, _, _) =
       expr env (Tast.to_nast_expr e2) ~allow_awaitable:(*?*) false
     in
-    let (env, lset2) = condition env tparamet e2 in
-    (env, Local_id.Set.union lset1 lset2)
+    let (env, { lset = lset2; pkgs = pkgs2 }) = condition env tparamet e2 in
+    let lset = Local_id.Set.union lset1 lset2 in
+    let pkgs =
+      if tparamet then
+        SSet.union pkgs1 pkgs2
+      else
+        SSet.empty
+    in
+    (env, { lset; pkgs })
   (* Disjunction of conditions. Matches the two following forms:
       if (cond1 || cond2)
       if (!(cond1 && cond2))
@@ -9599,7 +9621,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
   | Aast.Binop
       { bop = (Ast_defs.Ampamp | Ast_defs.Barbar) as bop; lhs = e1; rhs = e2 }
     when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
-    let (env, lset1, lset2) =
+    let (env, { lset = lset1; _ }, { lset = lset2; _ }) =
       branch
         env
         (fun env ->
@@ -9607,7 +9629,7 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
           condition env tparamet e1)
         (fun env ->
           (* ... Or cond1 is false and therefore cond2 must be true *)
-          let (env, _lset) = condition env (not tparamet) e1 in
+          let (env, _) = condition env (not tparamet) e1 in
           (* Similarly to the conjunction case, there might be an assignment in
              cond2 which we must account for. Again we redo what has been undone in
              the `Binop (Ampamp|Barbar)` case of `expr` *)
@@ -9616,25 +9638,30 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
           in
           condition env tparamet e2)
     in
-    (env, Local_id.Set.union lset1 lset2)
+    (env, { lset = Local_id.Set.union lset1 lset2; pkgs = SSet.empty })
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
-    safely_refine_is_array env HackDictOrDArray p f lv
+    let (env, lset) = safely_refine_is_array env HackDictOrDArray p f lv in
+    (env, { lset; pkgs = SSet.empty })
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
-    safely_refine_is_array env HackVecOrVArray p f lv
+    let (env, lset) = safely_refine_is_array env HackVecOrVArray p f lv in
+    (env, { lset; pkgs = SSet.empty })
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when String.equal f SN.StdlibFunctions.is_any_array ->
-    refine_for_is
-      ~hint_first:true
-      env
-      tparamet
-      lv
-      (Reason.Rpredicated (p, f))
-      ( p,
-        Happly
-          ( (p, "\\HH\\AnyArray"),
-            [(p, Happly ((p, "_"), [])); (p, Happly ((p, "_"), []))] ) )
+    let (env, lset) =
+      refine_for_is
+        ~hint_first:true
+        env
+        tparamet
+        lv
+        (Reason.Rpredicated (p, f))
+        ( p,
+          Happly
+            ( (p, "\\HH\\AnyArray"),
+              [(p, Happly ((p, "_"), [])); (p, Happly ((p, "_"), []))] ) )
+    in
+    (env, { lset; pkgs = SSet.empty })
   | Aast.Call
       ( ( _,
           _,
@@ -9646,11 +9673,17 @@ and condition env tparamet ((ty, p, e) as te : Tast.expr) =
     when tparamet
          && String.equal class_name SN.Shapes.cShapes
          && String.equal method_name SN.Shapes.keyExists ->
-    key_exists env p shape field
+    let (env, lset) = key_exists env p shape field in
+    (env, { lset; pkgs = SSet.empty })
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
   | Aast.Is (ivar, h) ->
-    refine_for_is ~hint_first:false env tparamet ivar (Reason.Ris (fst h)) h
-  | _ -> (env, Local_id.Set.empty)
+    let (env, lset) =
+      refine_for_is ~hint_first:false env tparamet ivar (Reason.Ris (fst h)) h
+    in
+    (env, { lset; pkgs = SSet.empty })
+  | Aast.Package (_, pkg) when tparamet ->
+    (env, { lset = Local_id.Set.empty; pkgs = SSet.singleton pkg })
+  | _ -> (env, { lset = Local_id.Set.empty; pkgs = SSet.empty })
 
 and string2 env idl =
   let (env, tel) =

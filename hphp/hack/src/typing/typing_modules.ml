@@ -114,7 +114,11 @@ let satisfies_package_deps env current target =
       | Includes ->
         None
       | (Soft_includes | Unrelated) as r ->
-        Some (get_package_pos current_pkg_info, r)))
+        if Env.is_package_loaded env (Package.get_package_name target_pkg_info)
+        then
+          None
+        else
+          Some (get_package_pos current_pkg_info, r)))
 
 let satisfies_pkg_rules env current target =
   match find_module_symbol env current with

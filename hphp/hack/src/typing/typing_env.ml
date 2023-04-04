@@ -678,13 +678,23 @@ let set_current_module env m =
 
 let get_current_module env = Option.map env.genv.current_module ~f:snd
 
+let set_internal env b = { env with genv = { env.genv with this_internal = b } }
+
+let get_internal env = env.genv.this_internal
+
 let get_package_for_module env md =
   let info = env.genv.package_info in
   Package.Info.get_package_for_module info md
 
-let set_internal env b = { env with genv = { env.genv with this_internal = b } }
+let is_package_loaded env package = SSet.mem package env.loaded_packages
 
-let get_internal env = env.genv.this_internal
+let with_packages env packages f =
+  let old_loaded_packages = env.loaded_packages in
+  let new_loaded_packages = SSet.union old_loaded_packages packages in
+  let env = { env with loaded_packages = new_loaded_packages } in
+  let (env, result) = f env in
+  let env = { env with loaded_packages = old_loaded_packages } in
+  (env, result)
 
 let get_typedef env x =
   let res =

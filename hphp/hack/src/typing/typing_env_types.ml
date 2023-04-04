@@ -64,6 +64,7 @@ type env = {
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   fun_tast_info: Tast.fun_tast_info option;
+  loaded_packages: SSet.t;
 }
 
 (** See the .mli file for the documentation of fields. *)
@@ -141,6 +142,7 @@ let empty ?origin ?(mode = FileInfo.Mstrict) ctx file ~droot =
     allow_wildcards = false;
     big_envs = ref [];
     fun_tast_info = None;
+    loaded_packages = SSet.empty;
   }
 
 let get_log_level env key =

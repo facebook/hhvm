@@ -34,7 +34,7 @@ static void setupTestData(int i, uint8_t* data, int& len) {
   ASSERT_EQ(0, i);
 }
 
-void checkEncoding(uint8_t* data, int len) {
+static void checkEncoding(uint8_t* data, int len) {
   for (int i = 0; i < len; i++) {
     ASSERT_TRUE(isalnum(data[i]) || data[i] == '/' || data[i] == '+');
   }

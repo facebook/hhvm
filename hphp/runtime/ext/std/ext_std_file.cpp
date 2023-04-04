@@ -920,8 +920,10 @@ Variant HHVM_FUNCTION(filesize,
     return false;
   }
   if (StaticContentCache::TheFileCache) {
-    auto sizeRes = StaticContentCache::TheFileCache->fileSize(filename.data());
-    if (sizeRes) return *sizeRes;
+    int64_t size =
+      StaticContentCache::TheFileCache->fileSize(filename.data(),
+        filename.data()[0] != '/');
+    if (size >= 0) return size;
   }
   struct stat sb;
   CHECK_SYSTEM(statSyscall(filename, &sb, true));
@@ -1096,9 +1098,9 @@ bool HHVM_FUNCTION(is_executable,
   */
 }
 
-static VirtualFileSystem::FileType lookupVirtualFile(const String& filename) {
+static VFileType lookupVirtualFile(const String& filename) {
   if (filename.empty() || !StaticContentCache::TheFileCache) {
-    return VirtualFileSystem::FileType::NOT_FOUND;
+    return VFileType::NotFound;
   }
 
   String cwd;
@@ -1113,15 +1115,10 @@ static VirtualFileSystem::FileType lookupVirtualFile(const String& filename) {
   }
 
   if (!isRelative || !root.compare(cwd.data())) {
-    if (StaticContentCache::TheFileCache->exists(filename.toCppString())) {
-      if (StaticContentCache::TheFileCache->dirExists(filename.toCppString())) {
-        return VirtualFileSystem::FileType::DIRECTORY;
-      }
-      return VirtualFileSystem::FileType::REGULAR_FILE;
-    }
+    return StaticContentCache::TheFileCache->getFileType(filename.data());
   }
 
-  return VirtualFileSystem::FileType::NOT_FOUND;
+  return VFileType::NotFound;
 }
 
 bool HHVM_FUNCTION(is_file,
@@ -1131,8 +1128,8 @@ bool HHVM_FUNCTION(is_file,
     return false;
   }
   auto vtype = lookupVirtualFile(filename);
-  if (vtype != VirtualFileSystem::FileType::NOT_FOUND) {
-    return vtype == VirtualFileSystem::FileType::REGULAR_FILE;
+  if (vtype != VFileType::NotFound) {
+    return vtype == VFileType::PlainFile;
   }
 
   struct stat sb;
@@ -1147,8 +1144,8 @@ bool HHVM_FUNCTION(is_dir,
     return false;
   }
   auto vtype = lookupVirtualFile(filename);
-  if (vtype != VirtualFileSystem::FileType::NOT_FOUND) {
-    return vtype == VirtualFileSystem::FileType::DIRECTORY;
+  if (vtype != VFileType::NotFound) {
+    return vtype == VFileType::Directory;
   }
 
   struct stat sb;
@@ -1177,7 +1174,7 @@ bool HHVM_FUNCTION(file_exists,
                    const String& filename) {
   CHECK_PATH_FALSE(filename, 1);
   auto vtype = lookupVirtualFile(filename);
-  if (vtype != VirtualFileSystem::FileType::NOT_FOUND) {
+  if (vtype != VFileType::NotFound) {
     return true;
   }
 
@@ -1261,7 +1258,7 @@ Variant HHVM_FUNCTION(realpath,
     return false;
   }
   if (StaticContentCache::TheFileCache &&
-      StaticContentCache::TheFileCache->exists(translated.data())) {
+      StaticContentCache::TheFileCache->exists(translated.data(), false)) {
     return translated;
   }
   // Zend doesn't support streams in realpath

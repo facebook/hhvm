@@ -762,14 +762,6 @@ void set_cold_file_dir(const char* dir) {
 #endif
 }
 
-static SwappableReadonlyArena* s_swappable_readonly_arena = nullptr;
-void setup_swappable_readonly_arena(uint32_t chunk_size) {
-  s_swappable_readonly_arena = new SwappableReadonlyArena(chunk_size);
-}
-SwappableReadonlyArena* get_swappable_readonly_arena() {
-  return s_swappable_readonly_arena;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

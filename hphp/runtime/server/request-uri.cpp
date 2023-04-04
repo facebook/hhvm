@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/static-content-cache.h"

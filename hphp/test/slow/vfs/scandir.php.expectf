@@ -1,7 +1,0 @@
-vec(5) {
-  string(1) "."
-  string(2) ".."
-  string(3) "bar"
-  string(7) "foo.dat"
-  string(7) "foo.txt"
-}

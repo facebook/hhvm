@@ -28,6 +28,7 @@
 
 #include "hphp/util/coro.h"
 #include "hphp/util/extern-worker.h"
+#include "hphp/util/file-cache.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/optional.h"
@@ -42,7 +43,6 @@ namespace hackc {
 }
 
 struct UnitIndex;
-struct VirtualFileSystemWriter;
 
 struct SymbolRefEdge {
   const StringData* sym;
@@ -70,7 +70,7 @@ struct Package {
   void addDirectory(const std::string& path);
   void addStaticDirectory(const std::string& path);
 
-  void writeVirtualFileSystem(const std::string& path);
+  std::shared_ptr<FileCache> getFileCache();
 
   // Configuration for index & parse workers. This should contain any runtime
   // options which can affect HackC (or the interface to it).
@@ -338,6 +338,7 @@ private:
   Optional<std::chrono::microseconds> m_ondemandMicros;
 
   folly_concurrent_hash_map_simd<std::string, bool> m_filesToParse;
+  std::shared_ptr<FileCache> m_fileCache;
   std::set<std::string> m_directories;
   std::set<std::string> m_staticDirectories;
   hphp_fast_set<std::string> m_extraStaticFiles;

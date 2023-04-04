@@ -14,33 +14,47 @@
    +----------------------------------------------------------------------+
 */
 
+// Owner of the mmapped file which is the cache.
+// Handles all read accesses.  No writing is permitted (WORM cache).
+
 #pragma once
 
-#include <memory>
-
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/util/file-cache.h"
+#include <cstdint>
+#include <string>
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-struct StaticContentCache {
-  static StaticContentCache TheCache;
-  static std::shared_ptr<FileCache> TheFileCache;
+struct MmapFile {
+  explicit MmapFile(const std::string& path);
+  ~MmapFile();
 
-public:
-  /**
-   * Load all registered static files from RuntimeOption::DocumentRoot.
-   */
-  void load();
+  MmapFile(const MmapFile&) = delete;
+  MmapFile& operator=(const MmapFile&) = delete;
 
-  /**
-   * Find a file from cache.
-   */
-  bool find(const std::string &name, const char *&data, int &len,
-            bool &compressed) const;
+  // Class behavior is undefined until this returns true.
+  // Read pointer is initialized to the beginning of the file.
+  bool init();
+
+  // Read next value from the file if possible.  Moves the read pointer.
+  bool readUInt64(uint64_t* value);
+  bool readString(std::string* str);
+
+  // Create a pointer to a given offset in the file.
+  bool makePointer(uint64_t offset, uint64_t length, const char** ptr) const;
+
+ private:
+  bool wouldExceedMem(uint64_t len) const;
+
+  std::string path_;
+  bool initialized_;
+
+  int backing_fd_;
+  void* backing_mem_;
+  void* backing_mem_end_;
+
+  off_t backing_mem_size_;
+  char* read_ptr_;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-}
+}  // namespace HPHP
 

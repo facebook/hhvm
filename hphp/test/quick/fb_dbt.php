@@ -29,7 +29,7 @@ abstract final class FbDebugBacktraceStatics {
 function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
 
   if (FbDebugBacktraceStatics::$real === null) {
-    FbDebugBacktraceStatics::$real = strlen(rtrim(realpath($_SERVER['PHP_ROOT']), '/').'/');
+    FbDebugBacktraceStatics::$real = strlen(realpath($_SERVER['PHP_ROOT']).'/');
   }
 
   if (!$bt) {  // fb_handle_error defaults to array() in PHP5
@@ -86,6 +86,6 @@ function g() {
 }
 
 <<__EntryPoint>> function main(): void {
-$_SERVER['PHP_ROOT'] = dirname(__FILE__)."/../..";
+$_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
 g();
 }

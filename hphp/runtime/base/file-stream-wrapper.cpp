@@ -44,9 +44,10 @@ req::ptr<MemFile> FileStreamWrapper::openFromCache(const String& filename,
     return nullptr;
   }
 
-  String path = File::TranslatePath(filename);
+  String relative =
+    FileCache::GetRelativePath(File::TranslatePath(filename).c_str());
   auto file = req::make<MemFile>();
-  bool ret = file->open(path, mode);
+  bool ret = file->open(relative, mode);
   if (ret) {
     return file;
   }

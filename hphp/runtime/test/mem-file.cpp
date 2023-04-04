@@ -47,17 +47,6 @@ bool makeTempFile(const string& contents, string* fn) {
   return true;
 }
 
-std::string makeTempDir() {
-  char dir_tmpl[] = "/tmp/hhvm_unit_test.XXXXXX";
-  const char* temp = mkdtemp(dir_tmpl);
-  EXPECT_NE(temp, nullptr);
-
-  std::string dir;
-  dir.assign(temp);
-  dir.append("/");
-  return dir;
-}
-
 }
 
 TEST(TestMemFile, DataConstructor) {
@@ -82,13 +71,7 @@ TEST(TestMemFile, DataConstructor) {
 }
 
 TEST(TestMemFile, BadReadFromCache) {
-  std::string path = makeTempDir();
-  path.append("file.cache");
-  auto writer = VirtualFileSystemWriter(path);
-  writer.finish();
-
-  StaticContentCache::TheFileCache =
-    std::make_shared<VirtualFileSystem>(path, "/var/www/");
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
   auto mf = req::make<MemFile>();
   ASSERT_FALSE(mf->open("/some/random/file", "r"));
@@ -102,52 +85,34 @@ TEST(TestMemFile, BadOpenModes) {
 }
 
 TEST(TestMemFile, EmptyFileInCache) {
-  std::string path = makeTempDir();
-  path.append("file.cache");
-  auto writer = VirtualFileSystemWriter(path);
-  writer.addFileWithoutContent("no/content/entry");
-  writer.finish();
-
-  StaticContentCache::TheFileCache =
-    std::make_shared<VirtualFileSystem>(path, "/var/www/");
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
+  StaticContentCache::TheFileCache->write("/no/content/entry");
 
   auto mf = req::make<MemFile>();
 
   // The file itself...
-  ASSERT_FALSE(mf->open("no/content/entry", "r"));
+  ASSERT_FALSE(mf->open("/no/content/entry", "r"));
 
   // ... and one of the automatically-created "directory" entries.
-  ASSERT_FALSE(mf->open("no/content", "r"));
+  ASSERT_FALSE(mf->open("/no/content", "r"));
 }
 
 TEST(TestMemFile, NotInCache) {
-  std::string path = makeTempDir();
-  path.append("file.cache");
-  auto writer = VirtualFileSystemWriter(path);
-  writer.finish();
-
-  StaticContentCache::TheFileCache =
-    std::make_shared<VirtualFileSystem>(path, "/var/www/");
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
 
   auto mf = req::make<MemFile>();
-  ASSERT_FALSE(mf->open("not/even/there", "r"));
+  ASSERT_FALSE(mf->open("/not/even/there", "r"));
 }
 
 TEST(TestMemFile, RealFileInCache) {
   string temp_fn;
   ASSERT_TRUE(makeTempFile("123abc", &temp_fn));
 
-  std::string path = makeTempDir();
-  path.append("file.cache");
-  auto writer = VirtualFileSystemWriter(path);
-  writer.addFile("content", temp_fn);
-  writer.finish();
-
-  StaticContentCache::TheFileCache =
-    std::make_shared<VirtualFileSystem>(path, "/var/www/");
+  StaticContentCache::TheFileCache = std::make_shared<FileCache>();
+  StaticContentCache::TheFileCache->write("/content", temp_fn.c_str());
 
   auto mf = req::make<MemFile>();
-  ASSERT_TRUE(mf->open("content", "r"));
+  ASSERT_TRUE(mf->open("/content", "r"));
 
   ASSERT_EQ(mf->getc(), '1');
   ASSERT_EQ(mf->getc(), '2');

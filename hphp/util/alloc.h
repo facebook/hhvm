@@ -457,10 +457,6 @@ inline void static_try_free(void* ptr, size_t size) {
   return lower_sized_free(ptr, size);
 }
 
-using SwappableReadonlyArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
-void setup_swappable_readonly_arena(uint32_t chunk_size);
-SwappableReadonlyArena* get_swappable_readonly_arena();
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

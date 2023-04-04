@@ -1,7 +1,0 @@
-int(9)
-int(9)
-
-Warning: filesize(): No such file or directory in %s/size.php on line 7
-bool(false)
-int(%d)
-int(9)

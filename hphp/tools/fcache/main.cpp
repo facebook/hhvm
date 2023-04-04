@@ -14,33 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
-
-#include <memory>
-
-#include "hphp/runtime/base/string-buffer.h"
+#include <stdio.h>
 #include "hphp/util/file-cache.h"
 
-namespace HPHP {
+using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
-struct StaticContentCache {
-  static StaticContentCache TheCache;
-  static std::shared_ptr<FileCache> TheFileCache;
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    printf("fcache filename\n");
+    return 0;
+  }
 
-public:
-  /**
-   * Load all registered static files from RuntimeOption::DocumentRoot.
-   */
-  void load();
+  const char *name =  argv[1];
 
-  /**
-   * Find a file from cache.
-   */
-  bool find(const std::string &name, const char *&data, int &len,
-            bool &compressed) const;
-};
-
-///////////////////////////////////////////////////////////////////////////////
+  FileCache fc;
+  fc.loadMmap(name);
+  fc.dump();
+  return 0;
 }
-

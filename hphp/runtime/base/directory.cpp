@@ -131,7 +131,7 @@ String ArrayDirectory::path() {
 
 CachedDirectory::CachedDirectory(const String& path) {
   assertx(File::IsVirtualDirectory(path));
-  m_files = StaticContentCache::TheFileCache->listDirectory(path.toCppString());
+  m_files = StaticContentCache::TheFileCache->readDirectory(path.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

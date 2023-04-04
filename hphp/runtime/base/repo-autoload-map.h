@@ -38,11 +38,11 @@ namespace HPHP {
 struct RepoAutoloadMap final : AutoloadMap {
 
   explicit RepoAutoloadMap(
-    Blob::CaseInsensitiveHashMapIndex types,
-    Blob::CaseInsensitiveHashMapIndex functions,
-    Blob::CaseSensitiveHashMapIndex constants,
-    Blob::CaseInsensitiveHashMapIndex typeAliases,
-    Blob::CaseSensitiveHashMapIndex modules);
+    RepoFile::CaseInsensitiveHashMapIndex types,
+    RepoFile::CaseInsensitiveHashMapIndex functions,
+    RepoFile::CaseSensitiveHashMapIndex constants,
+    RepoFile::CaseInsensitiveHashMapIndex typeAliases,
+    RepoFile::CaseSensitiveHashMapIndex modules);
 
   Optional<AutoloadMap::FileResult> getTypeOrTypeAliasFile(const String& typeName) override;
   Optional<AutoloadMap::FileResult> getTypeFile(const String& typeName) override;
@@ -84,11 +84,11 @@ struct RepoAutoloadMap final : AutoloadMap {
   Array getAllFiles() const override;
 
 private:
-  Blob::CaseInsensitiveHashMapIndex m_types;
-  Blob::CaseInsensitiveHashMapIndex m_functions;
-  Blob::CaseSensitiveHashMapIndex m_constants;
-  Blob::CaseInsensitiveHashMapIndex m_typeAliases;
-  Blob::CaseSensitiveHashMapIndex m_modules;
+  RepoFile::CaseInsensitiveHashMapIndex m_types;
+  RepoFile::CaseInsensitiveHashMapIndex m_functions;
+  RepoFile::CaseSensitiveHashMapIndex m_constants;
+  RepoFile::CaseInsensitiveHashMapIndex m_typeAliases;
+  RepoFile::CaseSensitiveHashMapIndex m_modules;
 };
 
 } // HPHP

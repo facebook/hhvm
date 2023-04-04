@@ -1135,10 +1135,6 @@ function hhvm_cmd(
       "\"" . test_repo($options, $test) . "/hhvm.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
     $cmd .= " -vRepo.Path=$hhbbc_repo";
-
-    $file_cache =
-      "\"" . test_repo($options, $test) . "/file.cache\"";
-    $cmd .= " -vServer.FileCache=$file_cache";
   }
 
   if ($options->jitsample is nonnull) {
@@ -1212,8 +1208,6 @@ function hphp_cmd(
     }
   }
 
-  $test_repo = test_repo($options, $test);
-
   return implode(" ", vec[
     hphpc_path($options),
     '--hphp',
@@ -1229,11 +1223,9 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableArgsInBacktraces=false',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
     '-vRuntime.Eval.EnableLogBridge=false',
-    '-vCachePHPFile=true',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
     '-l1',
-    '-o "' . $test_repo . '"',
-    '--file-cache="'.$test_repo.'/file.cache"',
+    '-o "' . test_repo($options, $test) . '"',
     "\"$test\"",
     "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),
     $extra_args,
@@ -3283,7 +3275,7 @@ function run_repo_test(
   $test_repo = test_repo($options, $test);
   if ($options->repo_out is nonnull) {
     // we may need to clean up after a previous run
-    $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc', 'file.cache'];
+    $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc'];
     foreach ($repo_files as $repo_file) {
       @unlink("$test_repo/$repo_file");
     }

@@ -22,6 +22,7 @@
 #include "hphp/util/rds-local.h"
 
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
 
@@ -125,6 +126,8 @@ struct RequestInfo {
   Profiler* m_profiler{nullptr};
 
   CodeCoverage m_coverage;
+
+  Recorder m_recorder;
 
   /* Set by DebuggerHook::attach(). */
   DebuggerHook* m_debuggerHook{nullptr};

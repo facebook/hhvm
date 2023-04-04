@@ -137,6 +137,7 @@ void RequestInfo::InvokeOOMKiller(int maxToKill) {
 void RequestInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
   m_coverage.onSessionInit();
+  m_recorder.onSessionInit();
 }
 
 bool RequestInfo::changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to) {
@@ -160,6 +161,7 @@ void RequestInfo::onSessionExit() {
 
   m_reqInjectionData.reset();
   m_coverage.onSessionExit();
+  m_recorder.onSessionExit();
 
   if (auto tmp = m_pendingException) {
     m_pendingException = nullptr;

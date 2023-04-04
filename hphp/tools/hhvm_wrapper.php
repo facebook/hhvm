@@ -42,7 +42,6 @@ function my_option_map(): OptionInfoMap {
                             'Do not use the default wrapper runtime options'},
 'perf:'           => Pair { '', 'Run perf record'},
 'record:'         => Pair { '', 'Directory in which to record executions for later replay'},
-'replay'          => Pair { '', 'Replay a previously recorded execution' },
   };
 }
 
@@ -174,15 +173,10 @@ function determine_flags(OptionMap $opts): string {
     }
   }
 
-  if ($opts->containsKey('record') && $opts->containsKey('replay')) {
-    error("Cannot record and replay simultaneously.");
-  } else if ($opts->containsKey('record')) {
+  if ($opts->containsKey('record')) {
     $flags .= '-v Eval.RecordReplay=true ';
     $flags .= '-v Eval.RecordSampleRate=1 ';
     $flags .= '-v Eval.RecordDir='.$opts['record'].' ';
-  } else if ($opts->containsKey('replay')) {
-    $flags .= '-v Eval.RecordReplay=true ';
-    $flags .= '-v Eval.Replay=true ';
   }
 
   $simple_args = Map {

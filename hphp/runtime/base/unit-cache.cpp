@@ -395,10 +395,6 @@ Optional<String> loadFileContents(const char* path,
     return {};
   }
 
-  if (UNLIKELY(RO::EvalRecordReplay && RO::EvalReplay)) {
-    return g_context->m_replayer.file(path);
-  }
-
   auto const fd = open(path, O_RDONLY);
   if (fd < 0) return {};
   auto file = req::make<PlainFile>(fd);

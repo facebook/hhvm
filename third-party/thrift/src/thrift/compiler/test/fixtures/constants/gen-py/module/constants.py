@@ -19,7 +19,10 @@ myInt = 1337
 
 name = "Mark Zuckerberg"
 
-multi_line_string = "This\x0ais a\x0amulti line string.\x0a"
+multi_line_string = """This
+is a
+multi line string.
+"""
 
 states = [
   {
@@ -255,7 +258,8 @@ escaped_strings = [
   " ",
   "'",
   "\"",
-  "\x0a",
+  """
+""",
   "\x0d",
   "\x09",
   "a",

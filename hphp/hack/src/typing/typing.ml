@@ -2591,10 +2591,40 @@ and stmt_ env pos st =
         env
         (fun env ->
           let (env, { lset; pkgs }) = condition env true te in
-          Env.with_packages env pkgs @@ fun env ->
-          let refinement_map = refinement_annot_map env lset in
-          let (env, b1) = block env b1 in
-          let b1 = assert_refinement_env refinement_map b1 in
+          let (env, b1) =
+            Env.with_packages env pkgs @@ fun env ->
+            let refinement_map = refinement_annot_map env lset in
+            let (env, b1) = block env b1 in
+            let b1 = assert_refinement_env refinement_map b1 in
+            (env, b1)
+          in
+          let rec get_loaded_packages_from_invariant (_, _, e) acc =
+            match e with
+            | Aast.Package (_, pkg) -> SSet.add pkg acc
+            | Aast.Binop { bop = Ast_defs.Ampamp; lhs; rhs } ->
+              get_loaded_packages_from_invariant lhs acc
+              |> get_loaded_packages_from_invariant rhs
+            | _ -> acc
+          in
+          (* Since `invariant(cond, msg)` is typed as `if (!cond) { invariant_violation(msg) }`,
+             revisit the branch and harvest packages loaded in `cond` if the branch contains an
+             invariant statement. *)
+          let env =
+            List.fold ~init:env b1 ~f:(fun env (_, tst) ->
+                match (te, tst) with
+                | ( (_, _, Aast.Unop (Ast_defs.Unot, e)),
+                    Aast.Expr (_, _, Call ((_, _, Id (_, s)), _, _, _)) )
+                  when String.equal
+                         s
+                         SN.AutoimportedFunctions.invariant_violation ->
+                  {
+                    env with
+                    loaded_packages =
+                      get_loaded_packages_from_invariant e SSet.empty
+                      |> SSet.union env.loaded_packages;
+                  }
+                | _ -> env)
+          in
           (env, b1))
         (fun env ->
           let (env, { lset; pkgs }) = condition env false te in

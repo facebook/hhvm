@@ -101,7 +101,7 @@ let satisfies_export_rules env current target =
 
 let satisfies_package_deps env current target =
   let current_pkg = Env.get_package_for_module env current in
-  let target_pkg = Option.bind target ~f:(Env.get_package_for_module env) in
+  let target_pkg = Env.get_package_for_module env target in
   match (current_pkg, target_pkg) with
   | (None, None) -> None
   | (None, Some _) -> Some (Pos.none, Package.Unrelated)
@@ -121,15 +121,22 @@ let satisfies_package_deps env current target =
           Some (get_package_pos current_pkg_info, r)))
 
 let satisfies_pkg_rules env current target =
-  match find_module_symbol env current with
-  | None
-  | Some (_, None) ->
+  match target with
+  | None ->
+    (* elements from the global module should always be accessible *)
     None
-  | Some (current_module_name, Some current_module_symbol) ->
-    (match satisfies_package_deps env current_module_name target with
-    | None -> None
-    | Some (current_package_pos, r) ->
-      Some ((current_package_pos, current_module_symbol.mdt_pos), r))
+  | Some target_module_name ->
+    (match find_module_symbol env current with
+    | None
+    | Some (_, None) ->
+      None
+    | Some (current_module_name, Some current_module_symbol) ->
+      (match
+         satisfies_package_deps env current_module_name target_module_name
+       with
+      | None -> None
+      | Some (current_package_pos, r) ->
+        Some ((current_package_pos, current_module_symbol.mdt_pos), r)))
 
 let can_access_public
     ~(env : Typing_env_types.env)

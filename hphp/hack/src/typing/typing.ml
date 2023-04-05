@@ -2316,7 +2316,12 @@ let rec bind_param
           when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
                && Env.get_support_dynamic_type env ->
           Some (Typing_utils.make_like env ty1)
-        | _ -> Some ty1
+        | _ ->
+          (* In implicit SD mode, all inout parameters are pessimised *)
+          if TypecheckerOptions.everything_sdt env.genv.tcopt then
+            Some (Typing_utils.make_like env ty1)
+          else
+            Some ty1
       end
     | _ -> None
   in
@@ -5666,6 +5671,29 @@ and closure_make
       Env.set_locals env like_locals
     else
       env
+  in
+  (* Inout parameters should be pessimised in implicit pessimisation mode *)
+  let ft =
+    if support_dynamic_type && TypecheckerOptions.everything_sdt env.genv.tcopt
+    then
+      {
+        ft with
+        ft_params =
+          List.map ft.ft_params ~f:(fun fp ->
+              match get_fp_mode fp with
+              | FPinout ->
+                {
+                  fp with
+                  fp_type =
+                    {
+                      fp.fp_type with
+                      et_type = Typing_utils.make_like env fp.fp_type.et_type;
+                    };
+                }
+              | _ -> fp);
+      }
+    else
+      ft
   in
   let env = Env.clear_params env in
   let non_variadic_ft_params =

@@ -83,9 +83,26 @@ let on_hint hint ~ctx =
           (Aast.Hshape Aast.{ nsi_allows_unknown_fields = true; _ } as hint_) )
         ->
         (pos, wrap_supportdyn pos hint_)
+      (* Return types and inout parameter types are pessimised *)
       | (pos, Aast.Hfun hint_fun) ->
+        let hf_param_tys =
+          match
+            List.map2
+              hint_fun.Aast.hf_param_info
+              hint_fun.Aast.hf_param_tys
+              ~f:(fun p ty ->
+                match p with
+                | Some { Aast.hfparam_kind = Ast_defs.Pinout _; _ } ->
+                  wrap_like ty
+                | _ -> ty)
+          with
+          | List.Or_unequal_lengths.Ok res -> res
+          (* Shouldn't happen *)
+          | List.Or_unequal_lengths.Unequal_lengths ->
+            hint_fun.Aast.hf_param_tys
+        in
         let hf_return_ty = wrap_like hint_fun.Aast.hf_return_ty in
-        let hint_ = Aast.(Hfun { hint_fun with hf_return_ty }) in
+        let hint_ = Aast.(Hfun { hint_fun with hf_return_ty; hf_param_tys }) in
         (pos, wrap_supportdyn pos hint_)
       | _ -> hint
     else

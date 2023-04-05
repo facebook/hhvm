@@ -1435,16 +1435,6 @@ struct Index {
                                       DependencyContextSet& deps);
 
   /*
-   * Rewrite the initial values of any AttrSystemInitialValue properties to
-   * something more suitable for its type-hint, and add AttrNoImplicitNullable
-   * where appropriate.
-   *
-   * This must be done before any analysis is done, as the initial values
-   * affects the analysis.
-   */
-  void rewrite_default_initial_values() const;
-
-  /*
    * Return true if the resolved function supports async eager return.
    */
   TriBool supports_async_eager_return(res::Func rfunc) const;

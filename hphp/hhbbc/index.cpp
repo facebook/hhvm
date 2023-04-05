@@ -1743,13 +1743,6 @@ struct ClassInfo2 {
   CompactVector<std::unique_ptr<FuncInfo2>> funcInfos;
 
   /*
-   * Copy of attrs from associated php::Class. Might be modified as a
-   * result of optimizations, in which case this copy takes precedence
-   * over the php::Class one.
-   */
-  Attr attrs;
-
-  /*
    * Track if this class has a property which might redeclare a property in a
    * parent class with an inequivalent type-hint.
    */
@@ -1831,7 +1824,6 @@ struct ClassInfo2 {
       (closures)
       (methodFamilies, string_data_lt{})
       (funcInfos)
-      (attrs)
       (hasBadRedeclareProp)
       (hasConstProp)
       (subHasConstProp)
@@ -4028,9 +4020,6 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
 }
 
 void add_class_to_index(IndexData& index, php::Class& c) {
-  assertx(!(c.attrs & AttrNoOverride));
-  assertx(!(c.attrs & AttrNoOverrideRegular));
-
   if (c.attrs & AttrEnum) {
     add_symbol_to_index(index.enums, &c, "enum");
   }
@@ -4218,30 +4207,31 @@ struct CheckClassInfoInvariantsJob {
   }
   static void fini() {}
 
-  static bool run(std::unique_ptr<ClassInfo2> cinfo) {
+  static bool run(std::unique_ptr<ClassInfo2> cinfo,
+                  std::unique_ptr<php::Class> cls) {
     // AttrNoOverride is a superset of AttrNoOverrideRegular
     always_assert(
-      IMPLIES(!(cinfo->attrs & AttrNoOverrideRegular),
-              !(cinfo->attrs & AttrNoOverride))
+      IMPLIES(!(cls->attrs & AttrNoOverrideRegular),
+              !(cls->attrs & AttrNoOverride))
     );
 
     // Override attrs and what we know about the subclasses should be in
     // agreement.
-    if (cinfo->attrs & AttrNoOverride) {
+    if (cls->attrs & AttrNoOverride) {
       always_assert(!cinfo->hasRegularSubclass);
       always_assert(!cinfo->hasNonRegularSubclass);
-    } else if (cinfo->attrs & AttrNoOverrideRegular) {
+    } else if (cls->attrs & AttrNoOverrideRegular) {
       always_assert(!cinfo->hasRegularSubclass);
     }
 
-    if (cinfo->attrs & AttrNoMock) {
+    if (cls->attrs & AttrNoMock) {
       always_assert(!cinfo->isMocked);
       always_assert(!cinfo->isSubMocked);
     }
 
     for (auto const& [name, mte] : cinfo->methods) {
       // Interface method tables should only contain its own methods.
-      if (cinfo->attrs & AttrInterface) {
+      if (cls->attrs & AttrInterface) {
         always_assert(mte.meth().cls->isame(cinfo->name));
       }
 
@@ -4251,7 +4241,7 @@ struct CheckClassInfoInvariantsJob {
       if (!is_special_method_name(name)) {
         // If the class isn't overridden, none of it's methods can be
         // either.
-        always_assert(IMPLIES(cinfo->attrs & AttrNoOverride,
+        always_assert(IMPLIES(cls->attrs & AttrNoOverride,
                               mte.attrs & AttrNoOverride));
       } else {
         always_assert(!(mte.attrs & AttrNoOverride));
@@ -4432,7 +4422,10 @@ void check_invariants(const IndexData& index) {
 
     auto inputs = from(work)
       | map([&] (SString name) {
-          return std::make_tuple(index.classInfoRefs.at(name));
+          return std::make_tuple(
+            index.classInfoRefs.at(name),
+            index.classRefs.at(name)
+          );
         })
       | as<std::vector>();
 
@@ -6407,7 +6400,6 @@ private:
     // properly when calculating subclass information in another pass.
     auto cinfo = std::make_unique<ClassInfo2>();
     cinfo->name = cls.name;
-    cinfo->attrs = cls.attrs;
     cinfo->hasConstProp = cls.hasConstProp;
     cinfo->hasReifiedParent = cls.hasReifiedGenerics;
     cinfo->hasReifiedGeneric = cls.userAttributes.count(s___Reified.get());
@@ -6417,18 +6409,18 @@ private:
     cinfo->isRegularClass = is_regular_class(cls);
 
     if (!is_closure_base(cls)) {
-      attribute_setter(cinfo->attrs, true, AttrNoOverride);
-      attribute_setter(cinfo->attrs, true, AttrNoOverrideRegular);
+      attribute_setter(cls.attrs, true, AttrNoOverride);
+      attribute_setter(cls.attrs, true, AttrNoOverrideRegular);
     } else {
       cinfo->hasRegularSubclass = true;
       cinfo->hasNonRegularSubclass = false;
-      attribute_setter(cinfo->attrs, false, AttrNoOverride);
-      attribute_setter(cinfo->attrs, false, AttrNoOverrideRegular);
+      attribute_setter(cls.attrs, false, AttrNoOverride);
+      attribute_setter(cls.attrs, false, AttrNoOverrideRegular);
     }
 
     // Assume this. If not a leaf, will be updated in
     // BuildSubclassList job.
-    attribute_setter(cinfo->attrs, true, AttrNoMock);
+    attribute_setter(cls.attrs, true, AttrNoMock);
 
     if (cls.parentName) {
       assertx(!is_closure_base(cls));
@@ -6462,7 +6454,7 @@ private:
 
       state.m_parents.emplace_back(&parent);
     } else if (!cinfo->hasReifiedGeneric) {
-      attribute_setter(cinfo->attrs, true, AttrNoReifiedInit);
+      attribute_setter(cls.attrs, true, AttrNoReifiedInit);
     }
     cinfo->baseList.emplace_back(cls.name);
 
@@ -6663,10 +6655,10 @@ private:
         always_assert(is_closure_name(cls.name));
         always_assert(state.m_parents.size() == 1);
         always_assert(state.m_parents[0]->name->isame(s_Closure.get()));
-        always_assert(!(cinfo->attrs & AttrNoReifiedInit));
+        always_assert(!(cls.attrs & AttrNoReifiedInit));
       } else {
         always_assert(state.m_parents.empty());
-        always_assert(cinfo->attrs & AttrNoReifiedInit);
+        always_assert(cls.attrs & AttrNoReifiedInit);
       }
       always_assert(cinfo->closures.empty());
       always_assert(cinfo->missingMethods.empty());
@@ -7946,8 +7938,6 @@ private:
     }
 
     cls.attrs |= AttrNoExpandTrait;
-    cinfo.attrs |= AttrNoExpandTrait;
-
     return newClosures;
   }
 
@@ -8107,6 +8097,21 @@ private:
   /*
    * Mark any properties in cls that definitely do not redeclare a
    * property in the parent with an inequivalent type-hint.
+   *
+   * Rewrite the initial values for any AttrSystemInitialValue
+   * properties. If the properties' type-hint does not admit null
+   * values, change the initial value to one that is not null
+   * (if possible). This is only safe to do so if the property is not
+   * redeclared in a derived class or if the redeclaration does not
+   * have a null system provided default value. Otherwise, a property
+   * can have a null value (even if its type-hint doesn't allow it)
+   * without the JIT realizing that its possible.
+   *
+   * Note that this ignores any unflattened traits. This is okay
+   * because properties pulled in from traits which match an already
+   * existing property can't change the initial value. The runtime
+   * will clear AttrNoImplicitNullable on any property pulled from the
+   * trait if it doesn't match an existing property.
    */
   static void optimize_properties(const LocalIndex& index,
                                   php::Class& cls,
@@ -8118,6 +8123,7 @@ private:
     cinfo.hasBadRedeclareProp = false;
     for (auto& prop : cls.properties) {
       assertx(!(prop.attrs & AttrNoBadRedeclare));
+      assertx(!(prop.attrs & AttrNoImplicitNullable));
 
       auto const noBadRedeclare = [&] {
         // Closures should never have redeclared properties.
@@ -8176,6 +8182,30 @@ private:
       } else {
         cinfo.hasBadRedeclareProp = true;
       }
+
+      auto const nullable = [&] {
+        if (isClosure) return true;
+        if (!(prop.attrs & AttrSystemInitialValue)) return false;
+        return prop.typeConstraint.defaultValue().m_type == KindOfNull;
+      }();
+
+      attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
+      if (!(prop.attrs & AttrSystemInitialValue)) continue;
+      if (prop.val.m_type == KindOfUninit) {
+        assertx(isClosure || bool(prop.attrs & AttrLateInit));
+        continue;
+      }
+
+      prop.val = [&] {
+        if (nullable) return make_tv<KindOfNull>();
+        // Give the 86reified_prop a special default value to avoid
+        // pessimizing the inferred type (we want it to always be a
+        // vec of a specific size).
+        if (prop.name == s_86reified_prop.get()) {
+          return get_default_value_of_reified_list(cls.userAttributes);
+        }
+        return prop.typeConstraint.defaultValue();
+      }();
     }
   }
 };
@@ -9488,6 +9518,11 @@ struct BuildSubclassListJob {
     };
     SStringToOneT<MethInfo> methods;
 
+    // The name of properties which might have null values even if the
+    // type-constraint doesn't allow it (due to system provided
+    // initial values).
+    SStringSet propsWithImplicitNullable;
+
     // The classes for whom isMocked would be true due to one of the
     // classes making up this Data. The classes in this set may not
     // necessarily be also part of this Data.
@@ -9507,6 +9542,7 @@ struct BuildSubclassListJob {
       sd(subclasses, string_data_lti{})
         (implInterfaces, string_data_lti{})
         (methods, string_data_lt{})
+        (propsWithImplicitNullable, string_data_lt{})
         (mockedClasses, string_data_lti{})
         (hasConstProp)
         (hasReifiedGeneric)
@@ -9579,6 +9615,7 @@ struct BuildSubclassListJob {
   using Output = Multi<
     Variadic<std::unique_ptr<ClassInfo2>>,
     Variadic<std::unique_ptr<Split>>,
+    Variadic<std::unique_ptr<php::Class>>,
     Variadic<FuncFamilyGroup>,
     OutputMeta
   >;
@@ -9595,6 +9632,7 @@ struct BuildSubclassListJob {
       Variadic<std::unique_ptr<ClassInfo2>> leafs,
       Variadic<std::unique_ptr<Split>> splits,
       Variadic<std::unique_ptr<Split>> splitDeps,
+      Variadic<std::unique_ptr<php::Class>> phpClasses,
       Variadic<EdgeToSplit> edges,
       Variadic<FuncFamilyGroup> funcFamilies) {
     // Store mappings of names to classes and edges.
@@ -9626,6 +9664,11 @@ struct BuildSubclassListJob {
         index.splits.emplace(split->name, split.get()).second
       );
     }
+    for (auto& cls : phpClasses.vals) {
+      always_assert(
+        index.classes.emplace(cls->name, cls.get()).second
+      );
+    }
     for (auto& group : funcFamilies.vals) {
       for (auto& ff : group.m_ffs) {
         auto const id = ff->m_id;
@@ -9646,7 +9689,8 @@ struct BuildSubclassListJob {
       process_roots(index, classes.vals, splits.vals);
 
       for (auto const& cinfo : classes.vals) {
-        if (!(cinfo->attrs & AttrInterface)) continue;
+        auto const& cls = index.cls(cinfo->name);
+        if (!(cls.attrs & AttrInterface)) continue;
         assertx(cinfo->subImplInterfaces);
 
         meta.interfaces.emplace_back(InterfaceConflicts{cinfo->name});
@@ -9699,9 +9743,23 @@ struct BuildSubclassListJob {
     Variadic<FuncFamilyGroup> funcFamilyGroups;
     group_func_families(index, funcFamilyGroups.vals, meta.newFuncFamilyIds);
 
+    // We only need to provide php::Class which correspond to a class
+    // which wasn't a dep.
+    phpClasses.vals.erase(
+      std::remove_if(
+        begin(phpClasses.vals),
+        end(phpClasses.vals),
+        [&] (const std::unique_ptr<php::Class>& c) {
+          return !index.top.count(c->name);
+        }
+      ),
+      end(phpClasses.vals)
+    );
+
     return std::make_tuple(
       std::move(classes),
       std::move(splits),
+      std::move(phpClasses),
       std::move(funcFamilyGroups),
       std::move(meta)
     );
@@ -9794,6 +9852,8 @@ protected:
     ISStringToOneT<ClassInfo2*> classInfos;
     // All splits, whether inputs or dependencies.
     ISStringToOneT<Split*> splits;
+    // All php::Class, whether inputs or dependencies.
+    ISStringToOneT<php::Class*> classes;
 
     // ClassInfos and splits which are inputs (IE, we want to
     // calculate data for).
@@ -9823,6 +9883,12 @@ protected:
     // created during processing, it will be inserted here (used to
     // determine outputs).
     std::vector<FuncFamily2::Id> newFuncFamilies;
+
+    php::Class& cls(SString name) {
+      auto const it = classes.find(name);
+      always_assert(it != end(classes));
+      return *it->second;
+    }
   };
 
   // Take all of the func families produced by this job and group them
@@ -10006,7 +10072,8 @@ protected:
       for (auto const iface : cinfo->declInterfaces) {
         onParent(iface, cinfo);
       }
-      if (!(cinfo->attrs & AttrNoExpandTrait)) {
+      auto const& cls = index.cls(cinfo->name);
+      if (!(cls.attrs & AttrNoExpandTrait)) {
         for (auto const trait : cinfo->usedTraits) {
           onParent(trait, cinfo);
         }
@@ -10217,8 +10284,10 @@ protected:
         );
       }
 
+      auto const& cls = index.cls(cinfo->name);
+
       if (debug) {
-        if (cinfo->attrs &
+        if (cls.attrs &
             (AttrInterface | AttrTrait | AttrEnum | AttrEnumClass)) {
           always_assert(cinfo->subImplInterfaces.has_value());
         }
@@ -10261,7 +10330,7 @@ protected:
         for (auto const iface : cinfo->declInterfaces) {
           data.mockedClasses.emplace(iface);
         }
-        if (!(cinfo->attrs & AttrNoExpandTrait)) {
+        if (!(cls.attrs & AttrNoExpandTrait)) {
           for (auto const trait : cinfo->usedTraits) {
             data.mockedClasses.emplace(trait);
           }
@@ -10283,6 +10352,12 @@ protected:
       } else {
         data.hasRegularSubclass = data.hasRegularClass;
         data.hasNonRegularSubclass = data.hasNonRegularClass;
+      }
+
+      for (auto const& prop : cls.properties) {
+        if (!(prop.attrs & (AttrStatic|AttrPrivate|AttrNoImplicitNullable))) {
+          data.propsWithImplicitNullable.emplace(prop.name);
+        }
       }
 
       return data;
@@ -10442,6 +10517,11 @@ protected:
           newInfo.privateAncestor = false;
         }
       }
+
+      data.propsWithImplicitNullable.insert(
+        begin(childData.propsWithImplicitNullable),
+        end(childData.propsWithImplicitNullable)
+      );
 
       data.mockedClasses.insert(
         begin(childData.mockedClasses),
@@ -10686,6 +10766,8 @@ protected:
       // for it.
       auto data = aggregate_data(index, cinfo->name);
 
+      auto& cls = index.cls(cinfo->name);
+
       // These are just copied directly from Data.
       cinfo->subHasConstProp = data.hasConstProp;
       cinfo->subHasReifiedGeneric = data.hasReifiedGeneric;
@@ -10695,33 +10777,33 @@ protected:
       // This class is mocked if its on the mocked classes list.
       cinfo->isMocked = data.mockedClasses.count(cinfo->name) > 0;
       cinfo->isSubMocked = data.isSubMocked || cinfo->isMocked;
-      attribute_setter(cinfo->attrs, !cinfo->isSubMocked, AttrNoMock);
+      attribute_setter(cls.attrs, !cinfo->isSubMocked, AttrNoMock);
 
       // We can use whether we saw regular/non-regular subclasses to
       // infer if this class is overridden.
       if (cinfo->hasRegularSubclass) {
-        attribute_setter(cinfo->attrs, false, AttrNoOverrideRegular);
-        attribute_setter(cinfo->attrs, false, AttrNoOverride);
+        attribute_setter(cls.attrs, false, AttrNoOverrideRegular);
+        attribute_setter(cls.attrs, false, AttrNoOverride);
       } else if (cinfo->hasNonRegularSubclass) {
-        attribute_setter(cinfo->attrs, true, AttrNoOverrideRegular);
-        attribute_setter(cinfo->attrs, false, AttrNoOverride);
+        attribute_setter(cls.attrs, true, AttrNoOverrideRegular);
+        attribute_setter(cls.attrs, false, AttrNoOverride);
       } else {
-        attribute_setter(cinfo->attrs, true, AttrNoOverrideRegular);
-        attribute_setter(cinfo->attrs, true, AttrNoOverride);
+        attribute_setter(cls.attrs, true, AttrNoOverrideRegular);
+        attribute_setter(cls.attrs, true, AttrNoOverride);
       }
 
       assertx(
         IMPLIES(
           cinfo->initialNoReifiedInit,
-          cinfo->attrs & AttrNoReifiedInit
+          cls.attrs & AttrNoReifiedInit
         )
       );
 
       attribute_setter(
-        cinfo->attrs,
+        cls.attrs,
         cinfo->initialNoReifiedInit ||
         (!cinfo->parent &&
-         (!data.hasReifiedGeneric || (cinfo->attrs & AttrInterface))),
+         (!data.hasReifiedGeneric || (cls.attrs & AttrInterface))),
         AttrNoReifiedInit
       );
 
@@ -10857,7 +10939,7 @@ protected:
               always_assert(!info.privateAncestor);
             }
           } else {
-            always_assert(!(cinfo->attrs & AttrNoOverride));
+            always_assert(!(cls.attrs & AttrNoOverride));
           }
         }
 
@@ -10945,6 +11027,36 @@ protected:
       if (cinfo->subImplInterfaces ||
           cinfo->implInterfaces != data.implInterfaces) {
         cinfo->subImplInterfaces = std::move(data.implInterfaces);
+      }
+
+      for (auto& prop : cls.properties) {
+        if (bool(prop.attrs & AttrNoImplicitNullable) &&
+            !(prop.attrs & (AttrStatic | AttrPrivate))) {
+          attribute_setter(
+            prop.attrs,
+            !data.propsWithImplicitNullable.count(prop.name),
+            AttrNoImplicitNullable
+          );
+        }
+
+        if (!(prop.attrs & AttrSystemInitialValue)) continue;
+        if (prop.val.m_type == KindOfUninit) {
+          assertx(prop.attrs & AttrLateInit);
+          continue;
+        }
+
+        prop.val = [&] {
+          if (!(prop.attrs & AttrNoImplicitNullable)) {
+            return make_tv<KindOfNull>();
+          }
+          // Give the 86reified_prop a special default value to
+          // avoid pessimizing the inferred type (we want it to
+          // always be a vec of a specific size).
+          if (prop.name == s_86reified_prop.get()) {
+            return get_default_value_of_reified_list(cls.userAttributes);
+          }
+          return prop.typeConstraint.defaultValue();
+        }();
       }
     }
 
@@ -11712,7 +11824,9 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
   // jobs in a round have completed. Otherwise we could update a ref
   // to a class at the same time another thread is reading it.
   struct Updates {
-    std::vector<std::pair<SString, UniquePtrRef<ClassInfo2>>> classes;
+    std::vector<
+      std::tuple<SString, UniquePtrRef<ClassInfo2>, UniquePtrRef<php::Class>>
+    > classes;
     std::vector<
       std::pair<SString, UniquePtrRef<BuildSubclassListJob::Split>>
     > splits;
@@ -11768,6 +11882,10 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
       | as<std::vector>();
     auto splitDeps = from(bucket.splitDeps)
       | map([&] (SString s) { return splitsToRefs.at(s); })
+      | as<std::vector>();
+    auto phpClasses =
+      (from(bucket.classes) + from(bucket.deps) + from(bucket.leafs))
+      | map([&] (SString c) { return index.classRefs.at(c); })
       | as<std::vector>();
 
     std::vector<Ref<FuncFamilyGroup>> funcFamilies;
@@ -11827,6 +11945,7 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
             std::move(leafs),
             std::move(splitRefs),
             std::move(splitDeps),
+            std::move(phpClasses),
             std::move(edges),
             std::move(funcFamilies)
           )
@@ -11837,9 +11956,10 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
     // Every job is a single work-unit, so we should only ever get one
     // result for each one.
     assertx(results.size() == 1);
-    auto& [cinfoRefs, outSplitRefs, ffRefs, outMetaRef] = results[0];
+    auto& [cinfoRefs, outSplitRefs, clsRefs, ffRefs, outMetaRef] = results[0];
     assertx(cinfoRefs.size() == bucket.classes.size());
     assertx(outSplitRefs.size() == bucket.splits.size());
+    assertx(clsRefs.size() == bucket.classes.size());
 
     auto outMeta = HPHP_CORO_AWAIT(index.client->load(std::move(outMetaRef)));
     assertx(outMeta.newFuncFamilyIds.size() == ffRefs.size());
@@ -11853,7 +11973,7 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
     updates.nameOnly.reserve(outMeta.nameOnly.size());
 
     for (size_t i = 0, size = bucket.classes.size(); i < size; ++i) {
-      updates.classes.emplace_back(bucket.classes[i], cinfoRefs[i]);
+      updates.classes.emplace_back(bucket.classes[i], cinfoRefs[i], clsRefs[i]);
     }
     for (size_t i = 0, size = bucket.splits.size(); i < size; ++i) {
       updates.splits.emplace_back(bucket.splits[i], outSplitRefs[i]);
@@ -11899,8 +12019,9 @@ std::vector<InterfaceConflicts> build_subclass_lists(IndexData& index,
       parallel::for_each(
         updates,
         [&] (const Updates& u) {
-          for (auto const& [name, ref] : u.classes) {
-            index.classInfoRefs.at(name) = ref;
+          for (auto const& [name, cinfo, cls] : u.classes) {
+            index.classInfoRefs.at(name) = cinfo;
+            index.classRefs.at(name) = cls;
           }
         }
       );
@@ -12555,8 +12676,6 @@ void make_class_infos_local(
       cinfo->hasRegularSubclass = rcinfo->hasRegularSubclass;
       cinfo->hasNonRegularSubclass = rcinfo->hasNonRegularSubclass;
 
-      const_cast<php::Class*>(cinfo->cls)->attrs = rcinfo->attrs;
-
       auto const noOverride = [&] (SString name) {
         if (auto const mte = folly::get_ptr(cinfo->methods, name)) {
           return bool(mte->attrs & AttrNoOverride);
@@ -12578,7 +12697,7 @@ void make_class_infos_local(
 
         auto expanded = false;
         if (!cinfo->methods.count(name)) {
-          if (!(rcinfo->attrs & (AttrAbstract|AttrInterface))) continue;
+          if (!(cinfo->cls->attrs & (AttrAbstract|AttrInterface))) continue;
           if (!rcinfo->hasRegularSubclass) continue;
           if (entry.m_regularIncomplete || entry.m_privateAncestor) continue;
           if (name == s_construct.get()) continue;
@@ -13417,167 +13536,6 @@ void Index::for_each_unit_class_mutable(php::Unit& unit,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Rewrite the initial values for any AttrSystemInitialValue properties. If the
- * properties' type-hint does not admit null values, change the initial value to
- * one (if possible) to one that is not null. This is only safe to do so if the
- * property is not redeclared in a derived class or if the redeclaration does
- * not have a null system provided default value. Otherwise, a property can have
- * a null value (even if its type-hint doesn't allow it) without the JIT
- * realizing that its possible.
- *
- * Note that this ignores any unflattened traits. This is okay because
- * properties pulled in from traits which match an already existing property
- * can't change the initial value. The runtime will clear AttrNoImplicitNullable
- * on any property pulled from the trait if it doesn't match an existing
- * property.
- */
-void Index::rewrite_default_initial_values() const {
-  trace_time tracer("rewrite default initial values", m_data->sample);
-
-  /*
-   * Use dataflow across the whole program class hierarchy. Start from the
-   * classes which have no derived classes and flow up the hierarchy. We flow
-   * the set of properties which have been assigned a null system provided
-   * default value. If a property with such a null value flows into a class
-   * which declares a property with the same name (and isn't static or private),
-   * than that property is forced to be null as well.
-   */
-  using PropSet = folly::F14FastSet<SString>;
-  using OutState = folly::F14FastMap<const ClassInfo*, PropSet>;
-  using Worklist = folly::F14FastSet<const ClassInfo*>;
-
-  OutState outStates;
-  outStates.reserve(m_data->allClassInfos.size());
-
-  // List of Class' still to process this iteration
-  using WorkList = std::vector<const ClassInfo*>;
-  using WorkSet = folly::F14FastSet<const ClassInfo*>;
-
-  WorkList workList;
-  WorkSet workSet;
-  auto const enqueue = [&] (const ClassInfo& cls) {
-    auto const result = workSet.insert(&cls);
-    if (!result.second) return;
-    workList.emplace_back(&cls);
-  };
-
-  // Start with all the leaf classes
-  for (auto const& cinfo : m_data->allClassInfos) {
-    if (!(cinfo->cls->attrs & AttrNoOverride)) continue;
-    enqueue(*cinfo);
-  }
-
-  WorkList oldWorkList;
-  int iter = 1;
-  while (!workList.empty()) {
-    FTRACE(
-      4, "rewrite_default_initial_values round #{}: {} items\n",
-      iter, workList.size()
-    );
-    ++iter;
-
-    std::swap(workList, oldWorkList);
-    workList.clear();
-    workSet.clear();
-    for (auto const& cinfo : oldWorkList) {
-      // Retrieve the set of properties which are flowing into this Class and
-      // have to be null.
-      auto inState = [&] () -> Optional<PropSet> {
-        PropSet in;
-        for (auto const& sub : cinfo->subclassList) {
-          if (sub == cinfo || sub->parent != cinfo) continue;
-          auto const it = outStates.find(sub);
-          if (it == outStates.end()) return std::nullopt;
-          in.insert(it->second.begin(), it->second.end());
-        }
-        return in;
-      }();
-      if (!inState) continue;
-
-      // Modify the in-state depending on the properties declared on this Class
-      auto const cls = cinfo->cls;
-      for (auto const& prop : cls->properties) {
-        if (prop.attrs & (AttrStatic | AttrPrivate)) {
-          // Private or static properties can't be redeclared
-          inState->erase(prop.name);
-          continue;
-        }
-        // Ignore properties which have actual user provided initial values or
-        // are LateInit.
-        if (!(prop.attrs & AttrSystemInitialValue) ||
-            (prop.attrs & AttrLateInit)) {
-          continue;
-        }
-        // Forced to be null, nothing to do
-        if (inState->count(prop.name) > 0) continue;
-
-        // Its not forced to be null. Find a better default value. If its null
-        // anyways, force any properties this redeclares to be null as well.
-        auto const defaultValue = prop.typeConstraint.defaultValue();
-        if (defaultValue.m_type == KindOfNull) inState->insert(prop.name);
-      }
-
-      // Push the in-state to the out-state.
-      auto const result = outStates.emplace(std::make_pair(cinfo, *inState));
-      if (result.second) {
-        if (cinfo->parent) enqueue(*cinfo->parent);
-      } else {
-        // There shouldn't be cycles in the inheritance tree, so the out state
-        // of Class', once set, should never change.
-        assertx(result.first->second == *inState);
-      }
-    }
-  }
-
-  // Now that we've processed all the classes, rewrite the property initial
-  // values, unless they are forced to be nullable.
-  for (auto& c : m_data->program->classes) {
-    if (is_closure(*c)) continue;
-
-    auto const out = [&] () -> Optional<PropSet> {
-      Optional<PropSet> props;
-      auto const range = m_data->classInfo.equal_range(c->name);
-      for (auto it = range.first; it != range.second; ++it) {
-        if (it->second->cls != c.get()) continue;
-        auto const outStateIt = outStates.find(it->second);
-        if (outStateIt == outStates.end()) return std::nullopt;
-        if (!props) props.emplace();
-        props->insert(outStateIt->second.begin(), outStateIt->second.end());
-      }
-      return props;
-    }();
-
-    for (auto& prop : c->properties) {
-      auto const nullable = [&] {
-        if (!(prop.attrs & (AttrStatic | AttrPrivate))) {
-          if (!out || out->count(prop.name)) return true;
-        }
-        if (!(prop.attrs & AttrSystemInitialValue)) return false;
-        return prop.typeConstraint.defaultValue().m_type == KindOfNull;
-      }();
-
-      attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
-      if (!(prop.attrs & AttrSystemInitialValue)) continue;
-      if (prop.val.m_type == KindOfUninit) {
-        assertx(prop.attrs & AttrLateInit);
-        continue;
-      }
-
-      prop.val = [&] {
-        if (nullable) return make_tv<KindOfNull>();
-        // Give the 86reified_prop a special default value to avoid
-        // pessimizing the inferred type (we want it to always be a
-        // vec of a specific size).
-        if (prop.name == s_86reified_prop.get()) {
-          return get_default_value_of_reified_list(c->userAttributes);
-        }
-        return prop.typeConstraint.defaultValue();
-      }();
-    }
-  }
-}
 
 void Index::preinit_bad_initial_prop_values() {
   trace_time tracer("preinit bad initial prop values", m_data->sample);

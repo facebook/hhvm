@@ -885,9 +885,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->parentName         = pce.parentName()->empty() ? nullptr
                                                       : pce.parentName();
   ret->attrs              = static_cast<Attr>(
-    (pce.attrs() &
-     ~(AttrNoOverride | AttrNoOverrideRegular | AttrNoBadRedeclare)
-    ) |
+    (pce.attrs() & ~(AttrNoOverride | AttrNoOverrideRegular)) |
     AttrUnique | AttrPersistent);
   ret->userAttributes     = pce.userAttributes();
   ret->hasReifiedGenerics = ret->userAttributes.find(s___Reified.get()) !=
@@ -928,7 +926,9 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
     ret->properties.push_back(
       php::Prop {
         prop.name(),
-        prop.attrs(),
+        static_cast<Attr>(
+          prop.attrs() & ~(AttrNoBadRedeclare | AttrNoImplicitNullable)
+        ),
         prop.userAttributes(),
         prop.docComment(),
         prop.userType(),

@@ -965,7 +965,6 @@ void whole_program(WholeProgramInput inputs,
   };
 
   assertx(check(index.program()));
-  index.rewrite_default_initial_values();
   index.use_class_dependencies(false);
   analyze_iteratively(index, AnalyzeMode::ConstPass);
   // Defer preresolve type-structures and initializing public static

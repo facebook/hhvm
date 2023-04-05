@@ -6,7 +6,7 @@
  *
  *)
 
-let spawn _ _ = failwith "start not implemented"
+let spawn _ _ _ = failwith "start not implemented"
 
 let join _ = failwith "join_handle not implemented"
 

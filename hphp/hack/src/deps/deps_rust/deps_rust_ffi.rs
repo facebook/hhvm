@@ -14,6 +14,7 @@ use std::path::Path;
 use dep::Dep;
 use deps_rust::dep_graph_delta_with;
 use deps_rust::dep_graph_delta_with_mut;
+use deps_rust::dep_graph_override;
 use deps_rust::dep_graph_with_default;
 use deps_rust::dep_graph_with_option;
 use deps_rust::DepSet;
@@ -148,6 +149,11 @@ ocaml_ffi! {
 
 // Functions to query the dependency graph
 ocaml_ffi! {
+    fn hh_custom_dep_graph_replace(mode: RawTypingDepsMode) {
+        // Safety: we don't call into OCaml again, so mode will remain valid.
+        dep_graph_override(mode);
+    }
+
     fn hh_custom_dep_graph_has_edge(mode: RawTypingDepsMode, dependent: Dep, dependency: Dep) -> bool {
         // Safety: we don't call into OCaml again, so mode will remain valid.
         dep_graph_with_default(mode, false, move |g| {

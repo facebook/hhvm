@@ -430,6 +430,10 @@ module CustomGraph = struct
     allow_reads_ref := flag;
     prev
 
+  external hh_custom_dep_graph_replace : Mode.t -> unit
+    = "hh_custom_dep_graph_replace"
+    [@@noalloc]
+
   external hh_custom_dep_graph_has_edge : Mode.t -> Dep.t -> Dep.t -> bool
     = "hh_custom_dep_graph_has_edge"
     [@@noalloc]
@@ -899,6 +903,11 @@ let add_idep mode dependent dependency =
   | InMemoryMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
   | HhFanoutRustMode _ -> HhFanout.add_idep mode dependent dependency
+
+let replace mode =
+  match mode with
+  | InMemoryMode _ -> CustomGraph.hh_custom_dep_graph_replace mode
+  | _ -> ()
 
 let dep_edges_make () : dep_edges = Some CustomGraph.DepEdgeSet.empty
 

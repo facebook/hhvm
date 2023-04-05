@@ -20,6 +20,7 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
+#include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/HTTPDirectResponseHandler.h>
 #include <proxygen/lib/http/session/HTTPDownstreamSession.h>
 #include <proxygen/lib/http/session/HTTPSession.h>
@@ -450,9 +451,9 @@ class HTTPDownstreamTest : public testing::Test {
     return byteEventTracker;
   }
 
-  std::unique_ptr<MockSessionObserver> setMockSessionObserver() {
-    auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
-        MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+  std::unique_ptr<MockSessionObserver> setMockSessionObserver(
+      MockSessionObserver::EventSet eventSet) {
+    auto observer = std::make_unique<NiceMock<MockSessionObserver>>(eventSet);
     EXPECT_CALL(*observer, attached(_));
     httpSession_->addObserver(observer.get());
     return observer;
@@ -4344,17 +4345,18 @@ TEST_F(HTTP2DownstreamSessionTest, CancelPingProbesOnRequest) {
 }
 
 TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
+  MockSessionObserver::EventSet eventSet;
 
   // Test attached/detached callbacks when adding/removing observers
   {
-    auto observer = setMockSessionObserver();
+    auto observer = setMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, detached(_));
     httpSession_->removeObserver(observer.get());
   }
 
   // Test destroyed callback when session is destroyed
   {
-    auto observer = setMockSessionObserver();
+    auto observer = setMockSessionObserver(eventSet);
     auto handler = addSimpleStrictHandler();
     handler->expectHeaders();
     handler->expectEOM([&handler]() {
@@ -4374,4 +4376,50 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
     expectDetachSession();
     httpSession_->closeWhenIdle();
   }
+}
+
+TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
+
+  // Add an observer subscribed to the RequestStarted event
+  MockSessionObserver::EventSet eventSet1;
+  auto observer_unsubscribed = setMockSessionObserver(eventSet1);
+  httpSession_->addObserver(observer_unsubscribed.get());
+
+  // Add an observer not subscribed to this event
+  MockSessionObserver::EventSet eventSet2;
+  eventSet2.enable(HTTPSessionObserverInterface::Events::requestStarted);
+  auto observer_subscribed = setMockSessionObserver(eventSet2);
+  httpSession_->addObserver(observer_subscribed.get());
+
+  EXPECT_CALL(*observer_unsubscribed, requestStarted(_, _)).Times(0);
+
+  // Subscribed observer expects to receive RequestStarted callback, with a
+  // request header x-meta-test-header and value "abc123"
+  EXPECT_CALL(*observer_subscribed, requestStarted(_, _))
+      .WillOnce(Invoke(
+          [](HTTPSessionObserverAccessor*,
+             const proxygen::HTTPSessionObserverInterface::RequestStartedEvent&
+                 event) {
+            auto hdrs = event.requestHeaders;
+            EXPECT_EQ(hdrs.getSingleOrEmpty("x-meta-test-header"), "abc123");
+          }));
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectEOM([&handler]() {
+    handler->sendReplyWithBody(200 /* status code */,
+                               100 /* content size */,
+                               true /* keepalive */,
+                               true /* sendEOM */,
+                               false /*trailers*/);
+  });
+  handler->expectDetachTransaction();
+  HTTPSession::DestructorGuard g(httpSession_);
+  HTTPMessage req = getGetRequest();
+  req.getHeaders().add("x-meta-test-header", "abc123");
+  sendRequest(req);
+
+  flushRequestsAndLoop(true, milliseconds(0));
+
+  expectDetachSession();
 }

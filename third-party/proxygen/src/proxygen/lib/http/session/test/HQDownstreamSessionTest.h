@@ -189,7 +189,8 @@ class HQDownstreamSessionTest : public HQSessionTest {
       testing::StrictMock<proxygen::MockHTTPHandler>& handler,
       folly::Function<void()> fn = folly::Function<void()>());
 
-  std::unique_ptr<proxygen::MockSessionObserver> setMockSessionObserver();
+  std::unique_ptr<proxygen::MockSessionObserver> setMockSessionObserver(
+      proxygen::MockSessionObserver::EventSet eventSet);
 
   std::unordered_map<quic::StreamId, ClientStream> requests_;
   quic::StreamId nextStreamId_{0};

@@ -2477,6 +2477,23 @@ void HQSession::HQStreamTransportBase::onHeadersComplete(
   //  in the HQDownstreamSession, which does not
   //  receive push promises. Will only be called once
   session_.setupOnHeadersComplete(&txn_, msg.get());
+
+  // Inform observers when request headers (i.e. ingress, from downstream
+  // client) are processed.
+  if (session_.direction_ == TransportDirection::DOWNSTREAM) {
+    auto msgPtr = msg.get();
+    if (msgPtr) {
+      HTTPSessionObserverInterface::RequestStartedEventBuilder builder;
+      auto requestStartedEvent =
+          builder.setHeaders(msgPtr->getHeaders()).build();
+      session_.sessionObserverContainer_.invokeInterfaceMethod<
+          HTTPSessionObserverInterface::Events::requestStarted>(
+          [&](auto observer, auto observed) {
+            observer->requestStarted(observed, requestStartedEvent);
+          });
+    }
+  }
+
   if (!txn_.getHandler()) {
     txn_.sendAbort();
     return;
@@ -2814,6 +2831,18 @@ void HQSession::HQStreamTransportBase::sendHeaders(HTTPTransaction* txn,
       sock->getState()->qLogger->addStreamStateUpdate(
           streamId, quic::kEOM, timeDiff);
     }
+  }
+
+  // If this is a client sending request headers to upstream
+  // invoke requestStarted event for attached observers.
+  if (session_.direction_ == TransportDirection::UPSTREAM) {
+    using Builder = HTTPSessionObserverInterface::RequestStartedEventBuilder;
+    session_.sessionObserverContainer_.invokeInterfaceMethod<
+        HTTPSessionObserverInterface::Events::requestStarted>(
+        [event = Builder().setHeaders(headers.getHeaders()).build()](
+            auto observer, auto observed) {
+          observer->requestStarted(observed, event);
+        });
   }
 }
 

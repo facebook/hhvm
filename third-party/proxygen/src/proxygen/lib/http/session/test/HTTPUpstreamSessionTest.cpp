@@ -16,6 +16,7 @@
 #include <proxygen/lib/http/codec/HTTPCodecFactory.h>
 #include <proxygen/lib/http/codec/test/MockHTTPCodec.h>
 #include <proxygen/lib/http/codec/test/TestUtils.h>
+#include <proxygen/lib/http/observer/HTTPSessionObserverInterface.h>
 #include <proxygen/lib/http/session/test/HTTPSessionMocks.h>
 #include <proxygen/lib/http/session/test/HTTPSessionTest.h>
 #include <proxygen/lib/http/session/test/MockByteEventTracker.h>
@@ -364,9 +365,10 @@ class HTTPUpstreamTest
     return byteEventTracker;
   }
 
-  std::unique_ptr<MockSessionObserver> setMockSessionObserver() {
-    auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
-        MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+  std::unique_ptr<MockSessionObserver> setMockSessionObserver(
+      MockSessionObserver::EventSet eventSet) {
+    auto observer = std::make_unique<NiceMock<MockSessionObserver>>(eventSet);
+    // MockSessionObserver::EventSetBuilder().enableAllEvents().build()
     EXPECT_CALL(*observer, attached(_));
     httpSession_->addObserver(observer.get());
     return observer;
@@ -3028,10 +3030,11 @@ TEST_F(HTTP2UpstreamSessionTest, HTTPPriority) {
 }
 
 TEST_F(HTTP2UpstreamSessionTest, Observer_Attach_Detach_Destroy) {
+  MockSessionObserver::EventSet eventSet;
 
   // Test attached/detached callbacks when adding/removing observers
   {
-    auto observer = setMockSessionObserver();
+    auto observer = setMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, detached(_));
     httpSession_->removeObserver(observer.get());
   }
@@ -3039,7 +3042,7 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_Attach_Detach_Destroy) {
   // Test destroyed callback when session is destroyed
   {
 
-    auto observer = setMockSessionObserver();
+    auto observer = setMockSessionObserver(eventSet);
     httpSession_->addObserver(observer.get());
 
     auto egressCodec = makeServerCodec();
@@ -3069,6 +3072,65 @@ TEST_F(HTTP2UpstreamSessionTest, Observer_Attach_Detach_Destroy) {
     httpSession_->destroy();
   }
 }
+
+TEST_F(HTTP2UpstreamSessionTest, Observer_RequestStarted) {
+
+  // Add an observer subscribed to the RequestStarted event
+  MockSessionObserver::EventSet eventSet1;
+  auto observer_unsubscribed = setMockSessionObserver(eventSet1);
+  httpSession_->addObserver(observer_unsubscribed.get());
+
+  // Add an observer not subscribed to this event
+  MockSessionObserver::EventSet eventSet2;
+  eventSet2.enable(HTTPSessionObserverInterface::Events::requestStarted);
+  auto observer_subscribed = setMockSessionObserver(eventSet2);
+  httpSession_->addObserver(observer_subscribed.get());
+
+  EXPECT_CALL(*observer_unsubscribed, requestStarted(_, _)).Times(0);
+
+  // expect to see a request started with header 'x-meta-test-header' having
+  // value 'abc123'
+  EXPECT_CALL(*observer_subscribed, requestStarted(_, _))
+      .WillOnce(Invoke(
+          [](HTTPSessionObserverAccessor*,
+             const proxygen::MockSessionObserver::RequestStartedEvent& event) {
+            auto hdrs = event.requestHeaders;
+            EXPECT_EQ(hdrs.getSingleOrEmpty("x-meta-test-header"), "abc123");
+          }));
+  auto egressCodec = makeServerCodec();
+  folly::IOBufQueue output(folly::IOBufQueue::cacheChainLength());
+
+  egressCodec->generateSettings(output);
+
+  // While we are testing for the presence of the expected request headers (in
+  // this test), We also add response headers to check we do not trigger
+  // "ingress" call back on the client
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  resp.getHeaders().set("header1", "value1");
+  egressCodec->generateHeader(output, 1, resp);
+  auto buf = makeBuf(100);
+  egressCodec->generateBody(
+      output, 1, std::move(buf), HTTPCodec::NoPadding, true /* eom */);
+  std::unique_ptr<folly::IOBuf> input = output.move();
+  input->coalesce();
+
+  auto handler = openTransaction();
+
+  handler->expectHeaders([&](std::shared_ptr<HTTPMessage> msg) {
+    EXPECT_EQ(200, msg->getStatusCode());
+    EXPECT_EQ(msg->getHeaders().getSingleOrEmpty("header1"), "value1");
+  });
+  handler->expectBody();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  HTTPMessage req = getGetRequest();
+  req.getHeaders().add("x-meta-test-header", "abc123");
+  handler->sendRequest(req);
+  readAndLoop(input->data(), input->length());
+  httpSession_->destroy();
+}
+
 // Register and instantiate all our type-paramterized tests
 REGISTER_TYPED_TEST_SUITE_P(HTTPUpstreamTest, ImmediateEof);
 

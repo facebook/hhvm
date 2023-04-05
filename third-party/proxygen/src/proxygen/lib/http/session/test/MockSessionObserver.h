@@ -26,6 +26,10 @@ class MockSessionObserver
                typename HTTPSessionObserverContainer::ObserverContainer::
                    ManagedObserver::DestroyContext*),
               (noexcept));
+  MOCK_METHOD(void,
+              requestStarted,
+              (HTTPSessionObserverAccessor*, const RequestStartedEvent&),
+              (noexcept));
   ~MockSessionObserver() override = default;
 };
 } // namespace proxygen

@@ -21,6 +21,7 @@ using HTTPSessionObserverContainerBaseT = folly::ObserverContainer<
         32 /* BitsetSize (max number of interface events) */>>;
 
 class HTTPSessionObserverContainer : public HTTPSessionObserverContainerBaseT {
+
   using HTTPSessionObserverContainerBaseT::HTTPSessionObserverContainerBaseT;
 
  public:

@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <glog/logging.h>
+#include <proxygen/lib/http/HTTPHeaders.h>
 #include <utility>
 
 namespace proxygen {
@@ -40,9 +42,48 @@ class HTTPSessionObserverAccessor {
  */
 class HTTPSessionObserverInterface {
  public:
-  enum class Events {};
+  enum class Events { requestStarted = 1 };
 
   virtual ~HTTPSessionObserverInterface() = default;
+
+  /**
+   * Event structures.
+   */
+
+  struct RequestStartedEvent {
+    const HTTPHeaders& requestHeaders;
+  };
+
+  class RequestStartedEventBuilder {
+   public:
+    RequestStartedEventBuilder& setHeaders(
+        const proxygen::HTTPHeaders& headers) {
+      headers_ = &headers;
+      return *this;
+    }
+
+    [[nodiscard]] proxygen::HTTPSessionObserverInterface::RequestStartedEvent
+    build() const {
+      return {*CHECK_NOTNULL(headers_)};
+    }
+
+   private:
+    const proxygen::HTTPHeaders* headers_{nullptr};
+  };
+
+  /**
+   * Events.
+   */
+
+  /**
+   * headersComplete() is invoked when all HTTP request headers are received.
+   *
+   * @param session  Http session.
+   * @param event    RequestStartedEvent with details.
+   */
+  virtual void requestStarted(HTTPSessionObserverAccessor* /* session */,
+                              const RequestStartedEvent& /* event */) noexcept {
+  }
 };
 
 } // namespace proxygen

@@ -204,14 +204,13 @@ bool HQUpstreamSessionTest::flush(bool eof,
 }
 
 std::unique_ptr<MockSessionObserver>
-HQUpstreamSessionTest::setMockSessionObserver() {
-  auto observer = std::make_unique<NiceMock<MockSessionObserver>>(
-      MockSessionObserver::EventSetBuilder().enableAllEvents().build());
+HQUpstreamSessionTest::setMockSessionObserver(
+    MockSessionObserver::EventSet eventSet) {
+  auto observer = std::make_unique<NiceMock<MockSessionObserver>>(eventSet);
   EXPECT_CALL(*observer, attached(_));
   hqSession_->addObserver(observer.get());
   return observer;
 }
-
 StrictMock<MockController>& HQUpstreamSessionTest::getMockController() {
   return controllerContainer_.mockController;
 }
@@ -1187,18 +1186,60 @@ TEST_P(HQUpstreamSessionTest, ExtraSettings) {
 
 TEST_P(HQUpstreamSessionTest, Observer_Attach_Detach_Destroyed) {
 
+  MockSessionObserver::EventSet eventSet;
+
   // Test attached/detached callbacks when adding/removing observers
   {
-    auto observer = setMockSessionObserver();
+    auto observer = setMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, detached(_));
     hqSession_->removeObserver(observer.get());
   }
 
   {
-    auto observer = setMockSessionObserver();
+    auto observer = setMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, destroyed(_, _));
     hqSession_->dropConnection();
   }
+}
+
+TEST_P(HQUpstreamSessionTest, Observer_RequestStarted) {
+  // Add an observer subscribed to the RequestStarted event
+  MockSessionObserver::EventSet eventSet1;
+  auto observer_unsubscribed = setMockSessionObserver(eventSet1);
+  hqSession_->addObserver(observer_unsubscribed.get());
+
+  // Add an observer not subscribed to this event
+  MockSessionObserver::EventSet eventSet2;
+  eventSet2.enable(HTTPSessionObserverInterface::Events::requestStarted);
+  auto observer_subscribed = setMockSessionObserver(eventSet2);
+  hqSession_->addObserver(observer_subscribed.get());
+
+  // expect to see a request started with header 'x-meta-test-header' having
+  // value 'abc123'
+  EXPECT_CALL(*observer_subscribed, requestStarted(_, _))
+      .WillOnce(Invoke(
+          [](HTTPSessionObserverAccessor*,
+             const proxygen::MockSessionObserver::RequestStartedEvent& event) {
+            auto hdrs = event.requestHeaders;
+            EXPECT_EQ(hdrs.getSingleOrEmpty("x-meta-test-header"), "abc123");
+          }));
+
+  auto handler = openTransaction();
+  HTTPMessage req = getGetRequest();
+  req.getHeaders().add("x-meta-test-header", "abc123");
+  handler->txn_->sendHeaders(req);
+  handler->txn_->sendEOM();
+  handler->expectHeaders();
+  handler->expectBody();
+  handler->expectEOM();
+  handler->expectDetachTransaction();
+  auto resp = makeResponse(200, 100);
+  sendResponse(handler->txn_->getID(),
+               *std::get<0>(resp),
+               std::move(std::get<1>(resp)),
+               true);
+  flushAndLoop();
+  hqSession_->closeWhenIdle();
 }
 
 // Test Cases for which Settings are not sent in the test SetUp

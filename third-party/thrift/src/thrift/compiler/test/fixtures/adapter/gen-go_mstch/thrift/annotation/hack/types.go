@@ -1420,3 +1420,84 @@ func (x *StructAsTrait) Read(p thrift.Protocol) error {
     return nil
 }
 
+
+type ModuleInternal struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &ModuleInternal{}
+
+
+func NewModuleInternal() *ModuleInternal {
+    return (&ModuleInternal{})
+}
+
+func (x *ModuleInternal) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use ModuleInternal.Set* methods instead or set the fields directly.
+type ModuleInternalBuilder struct {
+    obj *ModuleInternal
+}
+
+func NewModuleInternalBuilder() *ModuleInternalBuilder {
+    return &ModuleInternalBuilder{
+        obj: NewModuleInternal(),
+    }
+}
+
+func (x *ModuleInternalBuilder) Emit() *ModuleInternal {
+    var objCopy ModuleInternal = *x.obj
+    return &objCopy
+}
+
+func (x *ModuleInternal) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("ModuleInternal"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *ModuleInternal) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+

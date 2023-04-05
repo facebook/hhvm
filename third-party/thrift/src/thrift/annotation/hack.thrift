@@ -116,3 +116,13 @@ struct Attributes {
 @scope.Union
 @scope.Exception
 struct StructAsTrait {}
+
+// This annotation is to generate an entity as internal
+@scope.Struct
+@scope.Union
+@scope.Enum
+@scope.Field
+@scope.Typedef
+@scope.Function
+@scope.Service
+struct ModuleInternal {}

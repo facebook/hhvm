@@ -115,6 +115,8 @@ constexpr auto kHackStructTraitUri =
 constexpr auto kHackUnionEnumAttributesUri =
     "facebook.com/thrift/annotation/hack/UnionEnumAttributes";
 constexpr auto kHackWrapperUri = "facebook.com/thrift/annotation/hack/Wrapper";
+constexpr auto kHackModuleInternalUri =
+    "facebook.com/thrift/annotation/hack/ModuleInternal";
 
 constexpr auto kGeneratePatchUri = "facebook.com/thrift/op/GeneratePatch";
 constexpr auto kAssignOnlyPatchUri = "facebook.com/thrift/op/AssignOnlyPatch";

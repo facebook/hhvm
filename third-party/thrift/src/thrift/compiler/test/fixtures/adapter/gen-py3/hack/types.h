@@ -116,6 +116,13 @@ inline void reset_field<::facebook::thrift::annotation::hack::StructAsTrait>(
 }
 
 template<>
+inline void reset_field<::facebook::thrift::annotation::hack::ModuleInternal>(
+    ::facebook::thrift::annotation::hack::ModuleInternal& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::hack::FieldWrapper>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -198,6 +205,16 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::hack::StructAsTrait>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::hack::ModuleInternal>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

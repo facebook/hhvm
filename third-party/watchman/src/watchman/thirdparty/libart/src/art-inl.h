@@ -58,7 +58,7 @@ inline unsigned char art_tree<ValueType, KeyType>::keyAt(
 #if !ART_SANITIZE_ADDRESS
     // If we were built with -fsanitize=address, let ASAN catch this,
     // otherwise, make sure we blow up if the input depth is out of bounds.
-    assert(idx >= 0 && idx <= key_len);
+    assert(idx <= key_len);
 #endif
     return key[idx];
 }

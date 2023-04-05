@@ -11,6 +11,7 @@ use std::borrow::Cow;
 use std::hash::Hash;
 use std::io::Read;
 use std::io::Write;
+use std::num::NonZeroUsize;
 
 use anyhow::Result;
 use md5::Digest;
@@ -60,7 +61,7 @@ where
 {
     pub fn new(prefix: &'static str, evictability: Evictability, compression: Compression) -> Self {
         Self {
-            cache: Mutex::new(lru::LruCache::new(1000)),
+            cache: Mutex::new(lru::LruCache::new(NonZeroUsize::new(1000).unwrap())),
             evictable: matches!(evictability, Evictability::Evictable),
             compression,
             prefix,
@@ -373,7 +374,7 @@ where
 {
     pub fn new(prefix: &'static str, evictability: Evictability, compression: Compression) -> Self {
         Self {
-            cache: Mutex::new(lru::LruCache::new(1000)),
+            cache: Mutex::new(lru::LruCache::new(NonZeroUsize::new(1000).unwrap())),
             evictable: matches!(evictability, Evictability::Evictable),
             compression,
             prefix,

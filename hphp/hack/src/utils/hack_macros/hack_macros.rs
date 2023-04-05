@@ -1222,3 +1222,820 @@ mod emit {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use macro_test_util::assert_pat_eq;
+
+    use super::*;
+
+    #[test]
+    fn test_basic() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(pos = p, "#foo + $bar")),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = p;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Binop(Box::new(Binop {
+                        bop: Bop::Plus,
+                        lhs: {
+                            let tmp: Expr = foo;
+                            tmp
+                        },
+                        rhs: Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Lvar(Box::new(Lid(
+                                __hygienic_pos.clone(),
+                                (0isize, "$bar".to_owned()),
+                            ))),
+                        ),
+                    })),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex1() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(
+                pos = pos(),
+                r#"#obj_lvar->#meth_lvar(...#{lvar(args_var)})"#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = pos();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::ObjGet(Box::new((
+                                {
+                                    let tmp: Expr = obj_lvar;
+                                    tmp
+                                },
+                                {
+                                    let tmp: Expr = meth_lvar;
+                                    tmp
+                                },
+                                OgNullFlavor::OGNullthrows,
+                                PropOrMethod::IsMethod,
+                            ))),
+                        ),
+                        vec![],
+                        vec![],
+                        Some({
+                            let tmp: LocalId = args_var;
+                            Expr(
+                                (),
+                                pos().clone(),
+                                Expr_::Lvar(Box::new(Lid(pos().clone(), tmp))),
+                            )
+                        }),
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex2() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(
+                pos = pos(),
+                r#"\__SystemLib\dynamic_meth_caller(
+                       #{clone(cexpr)},
+                       #{clone(fexpr)},
+                       #efun,
+                       #force_val_expr
+                  )
+                "#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = pos();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(
+                                __hygienic_pos.clone(),
+                                "\\__SystemLib\\dynamic_meth_caller".to_owned(),
+                            ))),
+                        ),
+                        vec![],
+                        vec![
+                            (ParamKind::Pnormal, {
+                                let tmp: Expr = cexpr.clone();
+                                tmp
+                            }),
+                            (ParamKind::Pnormal, {
+                                let tmp: Expr = fexpr.clone();
+                                tmp
+                            }),
+                            (ParamKind::Pnormal, {
+                                let tmp: Expr = efun;
+                                tmp
+                            }),
+                            (ParamKind::Pnormal, {
+                                let tmp: Expr = force_val_expr;
+                                tmp
+                            }),
+                        ],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex3() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(
+                pos = pos(),
+                r#"\__SystemLib\meth_caller(#{str(clone(mangle_name))})"#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = pos();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(
+                                __hygienic_pos.clone(),
+                                "\\__SystemLib\\meth_caller".to_owned(),
+                            ))),
+                        ),
+                        vec![],
+                        vec![(ParamKind::Pnormal, {
+                            let tmp: String = mangle_name.to_owned();
+                            Expr((), pos().clone(), Expr_::String(tmp.into()))
+                        })],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex4() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(
+                pos = pos(),
+                r#"\HH\invariant(
+                       \is_a(#{clone(obj_lvar)}, #{str(clone(cls), pc)}),
+                       #{str(msg)}
+                   )
+                "#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = pos();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(
+                                __hygienic_pos.clone(),
+                                "\\HH\\invariant".to_owned(),
+                            ))),
+                        ),
+                        vec![],
+                        vec![
+                            (
+                                ParamKind::Pnormal,
+                                Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Call(Box::new((
+                                        Expr(
+                                            (),
+                                            __hygienic_pos.clone(),
+                                            Expr_::Id(Box::new(Id(
+                                                __hygienic_pos.clone(),
+                                                "\\is_a".to_owned(),
+                                            ))),
+                                        ),
+                                        vec![],
+                                        vec![
+                                            (ParamKind::Pnormal, {
+                                                let tmp: Expr = obj_lvar.clone();
+                                                tmp
+                                            }),
+                                            (ParamKind::Pnormal, {
+                                                let tmp: String = cls.to_owned();
+                                                Expr((), pc.clone(), Expr_::String(tmp.into()))
+                                            }),
+                                        ],
+                                        None,
+                                    ))),
+                                ),
+                            ),
+                            (ParamKind::Pnormal, {
+                                let tmp: String = msg;
+                                Expr((), pos().clone(), Expr_::String(tmp.into()))
+                            }),
+                        ],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex5() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(
+                pos = pos(),
+                r#"#obj_lvar->#{id(clone(fname), pf)}(...#{lvar(args_var)})"#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = pos();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::ObjGet(Box::new((
+                                {
+                                    let tmp: Expr = obj_lvar;
+                                    tmp
+                                },
+                                {
+                                    let tmp: String = fname.to_string();
+                                    Expr((), pf.clone(), Expr_::Id(Box::new(Id(pf.clone(), tmp))))
+                                },
+                                OgNullFlavor::OGNullthrows,
+                                PropOrMethod::IsMethod,
+                            ))),
+                        ),
+                        vec![],
+                        vec![],
+                        Some({
+                            let tmp: LocalId = args_var;
+                            Expr(
+                                (),
+                                pos().clone(),
+                                Expr_::Lvar(Box::new(Lid(pos().clone(), tmp))),
+                            )
+                        }),
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex6() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!("echo #{str(tail)}")),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = Pos::NONE;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "echo".to_owned()))),
+                        ),
+                        vec![],
+                        vec![(ParamKind::Pnormal, {
+                            let tmp: String = tail;
+                            Expr((), Pos::NONE.clone(), Expr_::String(tmp.into()))
+                        })],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex7() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!("parent::__xhpAttributeDeclaration()")),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = Pos::NONE;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::ClassConst(Box::new((
+                                ClassId(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    ClassId_::CIexpr(Expr(
+                                        (),
+                                        __hygienic_pos.clone(),
+                                        Expr_::Id(Box::new(Id(
+                                            __hygienic_pos.clone(),
+                                            "parent".to_owned(),
+                                        ))),
+                                    )),
+                                ),
+                                (
+                                    __hygienic_pos.clone(),
+                                    "__xhpAttributeDeclaration".to_owned(),
+                                ),
+                            ))),
+                        ),
+                        vec![],
+                        vec![],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex8() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!("#{id(s)}::__xhpAttributeDeclaration()")),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = Pos::NONE;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::ClassConst(Box::new((
+                                ClassId(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    ClassId_::CIexpr({
+                                        let tmp: String = s;
+                                        Expr(
+                                            (),
+                                            Pos::NONE.clone(),
+                                            Expr_::Id(Box::new(Id(Pos::NONE.clone(), tmp))),
+                                        )
+                                    }),
+                                ),
+                                (
+                                    __hygienic_pos.clone(),
+                                    "__xhpAttributeDeclaration".to_owned(),
+                                ),
+                            ))),
+                        ),
+                        vec![],
+                        vec![],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex9() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(
+                "if (#{lvar(clone(name))} is __uninitSentinel) { unset(#{lvar(name)}); }"
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = Pos::NONE;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::If(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Is(Box::new((
+                                {
+                                    let tmp: LocalId = name.clone();
+                                    Expr(
+                                        (),
+                                        Pos::NONE.clone(),
+                                        Expr_::Lvar(Box::new(Lid(Pos::NONE.clone(), tmp))),
+                                    )
+                                },
+                                Hint(
+                                    __hygienic_pos.clone(),
+                                    Box::new(Hint_::Happly(
+                                        Id(__hygienic_pos.clone(), "__uninitSentinel".to_owned()),
+                                        vec![],
+                                    )),
+                                ),
+                            ))),
+                        ),
+                        Block(vec![Stmt(
+                            __hygienic_pos.clone(),
+                            Stmt_::Expr(Box::new(Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Call(Box::new((
+                                    Expr(
+                                        (),
+                                        __hygienic_pos.clone(),
+                                        Expr_::Id(Box::new(Id(
+                                            __hygienic_pos.clone(),
+                                            "unset".to_owned(),
+                                        ))),
+                                    ),
+                                    vec![],
+                                    vec![(ParamKind::Pnormal, {
+                                        let tmp: LocalId = name;
+                                        Expr(
+                                            (),
+                                            Pos::NONE.clone(),
+                                            Expr_::Lvar(Box::new(Lid(Pos::NONE.clone(), tmp))),
+                                        )
+                                    })],
+                                    None,
+                                ))),
+                            ))),
+                        )]),
+                        Block(vec![Stmt(__hygienic_pos.clone(), Stmt_::Noop)]),
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex10() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(
+                pos = p(),
+                r#"if (\__SystemLib\__debugger_is_uninit(#{lvar(clone(name))})) {
+                       #{lvar(name)} = new __uninitSentinel();
+                     }
+                "#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = p();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::If(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Call(Box::new((
+                                Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Id(Box::new(Id(
+                                        __hygienic_pos.clone(),
+                                        "\\__SystemLib\\__debugger_is_uninit".to_owned(),
+                                    ))),
+                                ),
+                                vec![],
+                                vec![(ParamKind::Pnormal, {
+                                    let tmp: LocalId = name.clone();
+                                    Expr(
+                                        (),
+                                        p().clone(),
+                                        Expr_::Lvar(Box::new(Lid(p().clone(), tmp))),
+                                    )
+                                })],
+                                None,
+                            ))),
+                        ),
+                        Block(vec![Stmt(
+                            __hygienic_pos.clone(),
+                            Stmt_::Expr(Box::new(Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Binop(Box::new(Binop {
+                                    bop: Bop::Eq(None),
+                                    lhs: {
+                                        let tmp: LocalId = name;
+                                        Expr(
+                                            (),
+                                            p().clone(),
+                                            Expr_::Lvar(Box::new(Lid(p().clone(), tmp))),
+                                        )
+                                    },
+                                    rhs: Expr(
+                                        (),
+                                        __hygienic_pos.clone(),
+                                        Expr_::New(Box::new((
+                                            ClassId(
+                                                (),
+                                                __hygienic_pos.clone(),
+                                                ClassId_::CIexpr(Expr(
+                                                    (),
+                                                    __hygienic_pos.clone(),
+                                                    Expr_::Id(Box::new(Id(
+                                                        __hygienic_pos.clone(),
+                                                        "__uninitSentinel".to_owned(),
+                                                    ))),
+                                                )),
+                                            ),
+                                            vec![],
+                                            vec![],
+                                            None,
+                                            (),
+                                        ))),
+                                    ),
+                                })),
+                            ))),
+                        )]),
+                        Block(vec![Stmt(__hygienic_pos.clone(), Stmt_::Noop)]),
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex11() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(
+                pos = p(),
+                r#"
+                    try {
+                        #{stmts*};
+                    } catch (Throwable #{lvar(exnvar)}) {
+                        /* no-op */
+                    } finally {
+                        #{sets*};
+                    }
+                "#
+            )),
+            quote!({
+                use oxidized::ast::*;
+                let __hygienic_pos: Pos = p();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::Try(Box::new((
+                        Block(
+                            std::iter::empty()
+                                .chain(stmts.into_iter())
+                                .collect::<Vec<_>>(),
+                        ),
+                        vec![Catch(
+                            Id(__hygienic_pos.clone(), "Throwable".to_owned()),
+                            {
+                                let tmp: LocalId = exnvar;
+                                Lid(p().clone(), tmp)
+                            },
+                            Block(vec![]),
+                        )],
+                        FinallyBlock(
+                            std::iter::empty()
+                                .chain(sets.into_iter())
+                                .collect::<Vec<_>>(),
+                        ),
+                    ))),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_ex12() {
+        assert_pat_eq(
+            hack_stmts_impl.parse2(quote!(
+                r#"
+                    $r = self::$__xhpAttributeDeclarationCache;
+                    if ($r === null) {
+                        self::$__xhpAttributeDeclarationCache =
+                            __SystemLib\merge_xhp_attr_declarations(#{args*});
+                        $r = self::$__xhpAttributeDeclarationCache;
+                    }
+                    return $r;
+                "#
+            )),
+            {
+                let stmt1 = quote!(Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::Expr(Box::new(Expr(
+                        (),
+                        __hygienic_pos.clone(),
+                        Expr_::Binop(Box::new(Binop {
+                            bop: Bop::Eq(None),
+                            lhs: Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Lvar(Box::new(Lid(
+                                    __hygienic_pos.clone(),
+                                    (0isize, "$r".to_owned())
+                                )))
+                            ),
+                            rhs: Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::ClassGet(Box::new((
+                                    ClassId(
+                                        (),
+                                        __hygienic_pos.clone(),
+                                        ClassId_::CIexpr(Expr(
+                                            (),
+                                            __hygienic_pos.clone(),
+                                            Expr_::Id(Box::new(Id(
+                                                __hygienic_pos.clone(),
+                                                "self".to_owned()
+                                            )))
+                                        ))
+                                    ),
+                                    ClassGetExpr::CGstring((
+                                        __hygienic_pos.clone(),
+                                        "$__xhpAttributeDeclarationCache".to_owned()
+                                    )),
+                                    PropOrMethod::IsProp
+                                )))
+                            )
+                        }))
+                    )))
+                ));
+                let stmt2 = quote!(Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::If(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Binop(Box::new(Binop {
+                                bop: Bop::Eqeqeq,
+                                lhs: Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Lvar(Box::new(Lid(
+                                        __hygienic_pos.clone(),
+                                        (0isize, "$r".to_owned())
+                                    )))
+                                ),
+                                rhs: Expr((), __hygienic_pos.clone(), Expr_::Null)
+                            }))
+                        ),
+                        Block(vec![
+                            Stmt(
+                                __hygienic_pos.clone(),
+                                Stmt_::Expr(Box::new(Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Binop(Box::new(Binop {
+                                        bop: Bop::Eq(None),
+                                        lhs: Expr(
+                                            (),
+                                            __hygienic_pos.clone(),
+                                            Expr_::ClassGet(Box::new((
+                                                ClassId(
+                                                    (),
+                                                    __hygienic_pos.clone(),
+                                                    ClassId_::CIexpr(Expr(
+                                                        (),
+                                                        __hygienic_pos.clone(),
+                                                        Expr_::Id(Box::new(Id(
+                                                            __hygienic_pos.clone(),
+                                                            "self".to_owned()
+                                                        )))
+                                                    ))
+                                                ),
+                                                ClassGetExpr::CGstring((
+                                                    __hygienic_pos.clone(),
+                                                    "$__xhpAttributeDeclarationCache".to_owned()
+                                                )),
+                                                PropOrMethod::IsProp
+                                            )))
+                                        ),
+                                        rhs: Expr(
+                                            (),
+                                            __hygienic_pos.clone(),
+                                            Expr_::Call(Box::new((
+                                                Expr(
+                                                    (),
+                                                    __hygienic_pos.clone(),
+                                                    Expr_::Id(Box::new(Id(
+                                                        __hygienic_pos.clone(),
+                                                        "__SystemLib\\merge_xhp_attr_declarations"
+                                                            .to_owned()
+                                                    )))
+                                                ),
+                                                vec![],
+                                                std::iter::empty()
+                                                    .chain(args.into_iter())
+                                                    .collect::<Vec<_>>(),
+                                                None
+                                            )))
+                                        )
+                                    }))
+                                )))
+                            ),
+                            Stmt(
+                                __hygienic_pos.clone(),
+                                Stmt_::Expr(Box::new(Expr(
+                                    (),
+                                    __hygienic_pos.clone(),
+                                    Expr_::Binop(Box::new(Binop {
+                                        bop: Bop::Eq(None),
+                                        lhs: Expr(
+                                            (),
+                                            __hygienic_pos.clone(),
+                                            Expr_::Lvar(Box::new(Lid(
+                                                __hygienic_pos.clone(),
+                                                (0isize, "$r".to_owned())
+                                            )))
+                                        ),
+                                        rhs: Expr(
+                                            (),
+                                            __hygienic_pos.clone(),
+                                            Expr_::ClassGet(Box::new((
+                                                ClassId(
+                                                    (),
+                                                    __hygienic_pos.clone(),
+                                                    ClassId_::CIexpr(Expr(
+                                                        (),
+                                                        __hygienic_pos.clone(),
+                                                        Expr_::Id(Box::new(Id(
+                                                            __hygienic_pos.clone(),
+                                                            "self".to_owned()
+                                                        )))
+                                                    ))
+                                                ),
+                                                ClassGetExpr::CGstring((
+                                                    __hygienic_pos.clone(),
+                                                    "$__xhpAttributeDeclarationCache".to_owned()
+                                                )),
+                                                PropOrMethod::IsProp
+                                            )))
+                                        )
+                                    }))
+                                )))
+                            )
+                        ]),
+                        Block(vec![Stmt(__hygienic_pos.clone(), Stmt_::Noop)])
+                    )))
+                ));
+                let stmt3 = quote!(Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::Return(Box::new(Some(Expr(
+                        (),
+                        __hygienic_pos.clone(),
+                        Expr_::Lvar(Box::new(Lid(
+                            __hygienic_pos.clone(),
+                            (0isize, "$r".to_owned())
+                        )))
+                    ))))
+                ));
+                quote!({
+                    use oxidized::ast::*;
+                    let __hygienic_pos: Pos = Pos::NONE;
+                    #[allow(clippy::redundant_clone)]
+                    let __hygienic_tmp = vec![#stmt1, #stmt2, #stmt3];
+                    __hygienic_tmp
+                })
+            },
+        );
+    }
+}

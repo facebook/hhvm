@@ -33,14 +33,22 @@ pub fn assert_pat_eq<E: Display>(a: Result<TokenStream, E>, b: TokenStream) {
         loop {
             let t_a = ia.next();
             let t_b = ib.next();
-            if t_a.is_none() && t_b.is_none() {
-                break;
-            }
-            if t_a.is_none() || t_b.is_none() {
-                mismatch(t_a, t_b, ax, bx);
-            }
-            let t_a = t_a.unwrap();
-            let t_b = t_b.unwrap();
+
+            let (t_a, t_b) = match (t_a, t_b) {
+                (None, None) => break,
+                (None, Some(TokenTree::Punct(t))) if t.as_char() == ',' && ib.next().is_none() => {
+                    // Allow one side to have a trailing comma
+                    break;
+                }
+                (Some(TokenTree::Punct(t)), None) if t.as_char() == ',' && ia.next().is_none() => {
+                    // Allow one side to have a trailing comma
+                    break;
+                }
+                (t_a @ Some(_), t_b @ None) | (t_a @ None, t_b @ Some(_)) => {
+                    mismatch(t_a, t_b, ax, bx);
+                }
+                (Some(a), Some(b)) => (a, b),
+            };
 
             match (&t_a, &t_b) {
                 (TokenTree::Ident(a), TokenTree::Ident(b)) if a == b => {}

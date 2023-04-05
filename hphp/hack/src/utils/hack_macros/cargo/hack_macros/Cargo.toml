@@ -22,3 +22,6 @@ quote = "1.0"
 regex = "1.6.0"
 relative_path = { version = "0.0.0", path = "../../../rust/relative_path" }
 syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+
+[dev-dependencies]
+macro_test_util = { version = "0.0.0", path = "../../../test/macro_test_util" }

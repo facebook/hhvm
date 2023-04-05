@@ -2091,6 +2091,7 @@ name = "hack_macros"
 version = "0.0.0"
 dependencies = [
  "aast_parser",
+ "macro_test_util",
  "ocamlrep",
  "once_cell",
  "oxidized",

@@ -68,7 +68,11 @@ struct MyStruct {
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.
-struct LateDefStruct {}
+struct LateDefStruct {
+  // TODO: There is a bug that `apache::thrift::clear` won't unset field with empty struct
+  // we should remove this after the bug is fixed.
+  i32 field_do_not_use;
+}
 
 // AssignOnlyPatch annotation is required on struct level to avoid generating patchPrior
 // and patch operation support. Because they will require FieldPatch types to be present,

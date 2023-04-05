@@ -130,10 +130,11 @@ mod test {
     fn test_config_errors1() {
         let contents = include_str!("tests/package-3.toml");
         let info = PackageInfo::from_text(contents).unwrap();
-        assert_eq!(info.errors.len(), 2);
+        assert_eq!(info.errors.len(), 3);
         assert_eq!(info.errors[0].msg(), "Undefined package: baz");
+        assert_eq!(info.errors[1].msg(), "Undefined package: baz");
         assert_eq!(
-            info.errors[1].msg(),
+            info.errors[2].msg(),
             "This module can only be used in one package: b.*"
         );
     }
@@ -169,6 +170,22 @@ mod test {
         let contents = include_str!("tests/package-5.toml");
         let info = PackageInfo::from_text(contents).unwrap();
         let c = &info.packages()["c"];
+        let errors = info
+            .errors
+            .iter()
+            .map(|e| e.msg())
+            .collect::<std::collections::HashSet<_>>();
+        assert_eq!(
+            errors,
+            [
+                String::from("f must soft-deploy all nested soft-included packages. Missing b"),
+                String::from("g must deploy all nested included packages. Missing c")
+            ]
+            .iter()
+            .cloned()
+            .collect::<std::collections::HashSet<_>>()
+        );
+
         assert_eq!(c.soft_includes.as_ref().unwrap()[0].get_ref(), "b");
 
         let d = &info.deployments().unwrap()["d"];

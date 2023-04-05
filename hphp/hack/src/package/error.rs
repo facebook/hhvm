@@ -25,6 +25,7 @@ pub enum Error {
         name: String,
         span: (usize, usize),
         missing_pkgs: Vec<Spanned<String>>,
+        soft: bool,
     },
 }
 
@@ -50,11 +51,13 @@ impl Error {
     pub fn incomplete_deployment(
         deployment: &Spanned<String>,
         missing_pkgs: Vec<Spanned<String>>,
+        soft: bool,
     ) -> Self {
         Self::IncompleteDeployment {
             name: deployment.get_ref().into(),
             span: deployment.span(),
             missing_pkgs,
+            soft,
         }
     }
 
@@ -102,12 +105,16 @@ impl Display for Error {
                 write!(f, "This module can only be used in one package: {}", name)?;
             }
             Self::IncompleteDeployment {
-                name, missing_pkgs, ..
+                name,
+                missing_pkgs,
+                soft,
+                ..
             } => {
+                let soft_str = if *soft { "soft-" } else { "" };
                 write!(
                     f,
-                    "{} must deploy all nested included packages. Missing ",
-                    name
+                    "{} must {}deploy all nested {}included packages. Missing ",
+                    name, soft_str, soft_str
                 )?;
                 for (i, pkg) in missing_pkgs.iter().enumerate() {
                     if i == missing_pkgs.len() - 1 {

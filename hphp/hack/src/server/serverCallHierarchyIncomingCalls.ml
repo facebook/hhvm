@@ -53,7 +53,7 @@ let def_call_sites_to_incoming_call
   let open Lsp.CallHierarchyIncomingCalls in
   let from_ = Lsp_helpers.symbol_to_lsp_call_item o d in
   let fromRanges_ =
-    List.map (fun (_, p) -> Lsp_helpers.pos_to_lsp_range p) refs
+    List.map (fun (_, p) -> Lsp_helpers.hack_pos_to_lsp_range_adjusted p) refs
   in
   { from = from_; fromRanges = fromRanges_ }
 

@@ -17,14 +17,6 @@ type candidate = {
   placeholder_n: int;
 }
 
-let lsp_range_of_pos (pos : Pos.t) : Lsp.range =
-  let (first_line, first_col) = Pos.line_column pos in
-  let (last_line, last_col) = Pos.end_line_column pos in
-  {
-    Lsp.start = { Lsp.line = first_line - 1; character = first_col };
-    end_ = { Lsp.line = last_line - 1; character = last_col };
-  }
-
 let source_slice ~source_text ~start_pos ~length =
   let offset =
     let (first_line, first_col) = Pos.line_column start_pos in
@@ -162,7 +154,11 @@ let command_or_action_of_candidate
     source_slice ~source_text ~start_pos:pos ~length:(Pos.length pos)
   in
   let change_expression =
-    Lsp.TextEdit.{ range = lsp_range_of_pos pos; newText = placeholder }
+    Lsp.TextEdit.
+      {
+        range = Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal pos;
+        newText = placeholder;
+      }
   in
   let change_add_assignment =
     let (line, character) =

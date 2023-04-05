@@ -53,7 +53,20 @@ val apply_changes_unsafe :
 val sym_occ_kind_to_lsp_sym_info_kind :
   SymbolOccurrence.kind -> Lsp.SymbolInformation.symbolKind
 
-val pos_to_lsp_range : 'a Pos.pos -> Lsp.range
+(** Correctly handles our various positions:
+  * - real positions
+  * - .hhconfig error positions, which have dummy start/ends
+  * - and [Pos.none]
+  * Special handling is required, as the LSP
+  * specification requires line and character >= 0, and VSCode silently
+  * drops diagnostics that violate the spec in this way *)
+val hack_pos_to_lsp_range : equal:('a -> 'a -> bool) -> 'a Pos.pos -> Lsp.range
+
+(** You probably want [hack_pos_to_lsp_range].
+ * Equivalent to `[hack_pos_to_lsp_range] sans handling of special positions and with the following transformation:
+ * {r with start = {line = r.start.line + 1; character = r.start.character + 1}; end_ = {r.end_ with line = r.end_.line + 1}}
+ * where `r` is a range produced by [hack_pos_to_lsp_range] *)
+val hack_pos_to_lsp_range_adjusted : 'a Pos.pos -> Lsp.range
 
 val symbol_to_lsp_call_item :
   Relative_path.t SymbolOccurrence.t ->

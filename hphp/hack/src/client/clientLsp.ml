@@ -1086,21 +1086,6 @@ let rename_params_to_document_position (params : Lsp.Rename.params) :
       position = params.position;
     }
 
-let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
-    Lsp.range =
-  (* .hhconfig errors are Positions with a filename, but dummy start/end
-   * positions. Handle that case - and Pos.none - specially, as the LSP
-   * specification requires line and character >= 0, and VSCode silently
-   * drops diagnostics that violate the spec in this way *)
-  if Pos.equal_pos equal pos (Pos.make_from (Pos.filename pos)) then
-    { start = { line = 0; character = 0 }; end_ = { line = 0; character = 0 } }
-  else
-    let (line1, col1, line2, col2) = Pos.destruct_range pos in
-    {
-      start = { line = line1 - 1; character = col1 - 1 };
-      end_ = { line = line2 - 1; character = col2 - 1 };
-    }
-
 let ide_shell_out_pos_to_lsp_location (pos : ide_shell_out_pos) : Lsp.Location.t
     =
   Lsp.Location.
@@ -1118,7 +1103,7 @@ let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
   Lsp.Location.
     {
       uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
-      range = hack_pos_to_lsp_range ~equal:String.equal pos;
+      range = Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal pos;
     }
 
 let ide_range_to_lsp (range : Ide_api_types.range) : Lsp.range =
@@ -2437,7 +2422,8 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
     infos
     |> List.filter_map ~f:(fun { HoverService.pos; _ } -> pos)
     |> List.hd
-    |> Option.map ~f:(hack_pos_to_lsp_range ~equal:Relative_path.equal)
+    |> Option.map
+         ~f:(Lsp_helpers.hack_pos_to_lsp_range ~equal:Relative_path.equal)
   in
   if List.is_empty contents then
     None
@@ -3248,7 +3234,7 @@ let format_typeCoverage_result ~(equal : 'a -> 'a -> bool) results counts =
   TypeCoverageFB.(
     let coveredPercent = Coverage_level.get_percent counts in
     let hack_coverage_to_lsp (pos, level) =
-      let range = hack_pos_to_lsp_range ~equal pos in
+      let range = Lsp_helpers.hack_pos_to_lsp_range ~equal pos in
       match level with
       (* We only show diagnostics for completely untypechecked code. *)
       | Ide_api_types.Checked
@@ -3507,12 +3493,13 @@ let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
     | Replace insert_patch ->
       {
         TextEdit.range =
-          hack_pos_to_lsp_range ~equal:String.equal insert_patch.pos;
+          Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal insert_patch.pos;
         newText = insert_patch.text;
       }
     | Remove pos ->
       {
-        TextEdit.range = hack_pos_to_lsp_range ~equal:String.equal pos;
+        TextEdit.range =
+          Lsp_helpers.hack_pos_to_lsp_range ~equal:String.equal pos;
         newText = "";
       }
   in

@@ -19,7 +19,8 @@ let def_with_calling_occs_to_outgoing_call_option
     let call_to_ = Lsp_helpers.symbol_to_lsp_call_item h (Some def) in
     let fromRanges_ =
       List.map
-        (fun occ -> Lsp_helpers.pos_to_lsp_range occ.SymbolOccurrence.pos)
+        (fun occ ->
+          Lsp_helpers.hack_pos_to_lsp_range_adjusted occ.SymbolOccurrence.pos)
         occ_list
     in
     { call_to = call_to_; fromRanges = fromRanges_ }

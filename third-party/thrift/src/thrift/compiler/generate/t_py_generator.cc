@@ -1077,6 +1077,8 @@ string t_py_generator::render_string(string value, EscapeFlag flag) {
       escaped.append("\\\"");
     } else if (c == '\\' && (flag & EscapeBackslash) != 0) {
       escaped.append("\\\\");
+    } else if (c == '\\') {
+      escaped.append("\\\\");
     } else {
       escaped.push_back(c);
     }

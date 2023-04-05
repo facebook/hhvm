@@ -309,6 +309,9 @@ mstch::node mstch_const_value::string_value() {
   escaped.reserve(str.size());
   for (unsigned char c : str) {
     switch (c) {
+      case '\\':
+        escaped.append("\\\\");
+        break;
       case '"':
         escaped.append("\\\"");
         break;

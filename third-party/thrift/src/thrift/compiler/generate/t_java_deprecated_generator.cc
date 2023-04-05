@@ -426,11 +426,14 @@ string t_java_deprecated_generator::render_const_value(
         render << '"';
         for (unsigned char c : value->get_string()) {
           switch (c) {
-            case '\n':
-              render << "\\n";
+            case '\\':
+              render << "\\\\";
               break;
             case '"':
               render << "\\\"";
+              break;
+            case '\n':
+              render << "\\n";
               break;
             default:
               if (c < 0x20) {

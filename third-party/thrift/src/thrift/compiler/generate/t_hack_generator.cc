@@ -1833,6 +1833,9 @@ std::string t_hack_generator::render_string(const std::string& value) {
   result.push_back('"');
   for (unsigned char c : value) {
     switch (c) {
+      case '\\':
+        result.append("\\\\");
+        break;
       case '"':
         result.append("\\\"");
         break;

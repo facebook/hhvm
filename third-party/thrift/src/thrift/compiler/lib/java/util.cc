@@ -82,11 +82,14 @@ std::string quote_java_string(const std::string& unescaped) {
   quoted << '\"';
   for (unsigned char c : unescaped) {
     switch (c) {
-      case '\n':
-        quoted << "\\n";
+      case '\\':
+        quoted << "\\\\";
         break;
       case '"':
         quoted << "\\\"";
+        break;
+      case '\n':
+        quoted << "\\n";
         break;
       default: {
         if (c < 0x20) {

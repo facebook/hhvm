@@ -206,16 +206,14 @@ std::string camelcase(const std::string& name) {
   return camel.str();
 }
 
-// If we've got a string literal token from the AST then it will already be
-// partially quoted according to Thrift's rules - specifically `\` should be
-// passed through as-is since they'll be part of Thrift source-level escapted
-// sequence (which will likely also be Rust-compatible syntax).
 std::string quote(const std::string& data, bool do_backslash) {
   std::ostringstream quoted;
   quoted << '"';
 
   for (auto ch : data) {
-    if (ch == '\t') {
+    if (ch == '\\') {
+      quoted << "\\\\";
+    } else if (ch == '\t') {
       quoted << '\\' << 't';
     } else if (ch == '\r') {
       quoted << '\\' << 'r';

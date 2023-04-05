@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_f5023485 implements TypeList {
+public class __fbthrift_TypeList_a798b398 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -29,17 +29,17 @@ public class __fbthrift_TypeList_f5023485 implements TypeList {
     add("test.dev/fixtures/patch/Recursive", "test.fixtures.patch.Recursive");
     add("test.dev/fixtures/patch/Bar", "test.fixtures.patch.Bar");
     add("test.dev/fixtures/patch/Loop", "test.fixtures.patch.Loop");
-    add("test.dev/fixtures/patch/MyDataEnsureStruct", "test.fixtures.patch.MyDataEnsureStruct");
-    add("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch");
     add("test.dev/fixtures/patch/MyDataPatch", "test.fixtures.patch.MyDataPatch");
-    add("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct", "test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct");
-    add("test.dev/fixtures/patch/MyDataWithCustomDefaultFieldPatch", "test.fixtures.patch.MyDataWithCustomDefaultFieldPatch");
+    add("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch");
+    add("test.dev/fixtures/patch/MyDataEnsureStruct", "test.fixtures.patch.MyDataEnsureStruct");
     add("test.dev/fixtures/patch/MyDataWithCustomDefaultPatch", "test.fixtures.patch.MyDataWithCustomDefaultPatch");
-    add("test.dev/fixtures/patch/InnerUnionFieldPatch", "test.fixtures.patch.InnerUnionFieldPatch");
+    add("test.dev/fixtures/patch/MyDataWithCustomDefaultFieldPatch", "test.fixtures.patch.MyDataWithCustomDefaultFieldPatch");
+    add("test.dev/fixtures/patch/MyDataWithCustomDefaultEnsureStruct", "test.fixtures.patch.MyDataWithCustomDefaultEnsureStruct");
     add("test.dev/fixtures/patch/InnerUnionPatch", "test.fixtures.patch.InnerUnionPatch");
-    add("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch");
+    add("test.dev/fixtures/patch/InnerUnionFieldPatch", "test.fixtures.patch.InnerUnionFieldPatch");
     add("test.dev/fixtures/patch/MyUnionPatch", "test.fixtures.patch.MyUnionPatch");
-    add("test.dev/fixtures/patch/MyStructEnsureStruct", "test.fixtures.patch.MyStructEnsureStruct");
+    add("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch");
+    add("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch");
     add("test.dev/fixtures/patch/MyStructField10Patch", "test.fixtures.patch.MyStructField10Patch");
     add("test.dev/fixtures/patch/MyStructField23Patch", "test.fixtures.patch.MyStructField23Patch");
     add("test.dev/fixtures/patch/MyStructField26Patch", "test.fixtures.patch.MyStructField26Patch");
@@ -50,19 +50,17 @@ public class __fbthrift_TypeList_f5023485 implements TypeList {
     add("test.dev/fixtures/patch/MyStructField30Patch", "test.fixtures.patch.MyStructField30Patch");
     add("test.dev/fixtures/patch/MyStructField30Patch1", "test.fixtures.patch.MyStructField30Patch1");
     add("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch");
-    add("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch");
-    add("test.dev/fixtures/patch/LateDefStructEnsureStruct", "test.fixtures.patch.LateDefStructEnsureStruct");
-    add("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch");
+    add("test.dev/fixtures/patch/MyStructEnsureStruct", "test.fixtures.patch.MyStructEnsureStruct");
     add("test.dev/fixtures/patch/LateDefStructPatch", "test.fixtures.patch.LateDefStructPatch");
-    add("test.dev/fixtures/patch/RecursiveEnsureStruct", "test.fixtures.patch.RecursiveEnsureStruct");
+    add("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch");
+    add("test.dev/fixtures/patch/LateDefStructEnsureStruct", "test.fixtures.patch.LateDefStructEnsureStruct");
+    add("test.dev/fixtures/patch/RecursivePatch", "test.fixtures.patch.RecursivePatch");
     add("test.dev/fixtures/patch/RecursiveField1Patch", "test.fixtures.patch.RecursiveField1Patch");
     add("test.dev/fixtures/patch/RecursiveFieldPatch", "test.fixtures.patch.RecursiveFieldPatch");
-    add("test.dev/fixtures/patch/RecursivePatch", "test.fixtures.patch.RecursivePatch");
-    add("test.dev/fixtures/patch/BarEnsureStruct", "test.fixtures.patch.BarEnsureStruct");
-    add("test.dev/fixtures/patch/BarFieldPatch", "test.fixtures.patch.BarFieldPatch");
+    add("test.dev/fixtures/patch/RecursiveEnsureStruct", "test.fixtures.patch.RecursiveEnsureStruct");
     add("test.dev/fixtures/patch/BarPatch", "test.fixtures.patch.BarPatch");
-    add("test.dev/fixtures/patch/LoopEnsureStruct", "test.fixtures.patch.LoopEnsureStruct");
-    add("test.dev/fixtures/patch/LoopFieldPatch", "test.fixtures.patch.LoopFieldPatch");
+    add("test.dev/fixtures/patch/BarFieldPatch", "test.fixtures.patch.BarFieldPatch");
+    add("test.dev/fixtures/patch/BarEnsureStruct", "test.fixtures.patch.BarEnsureStruct");
     add("test.dev/fixtures/patch/LoopPatch", "test.fixtures.patch.LoopPatch");
     add("test.dev/fixtures/patch/MyEnum", "test.fixtures.patch.MyEnum");
   }

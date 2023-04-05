@@ -176,18 +176,18 @@ public class RecursiveEnsureStruct implements TBase, java.io.Serializable, Clone
         case NODES:
           if (__field.type == TType.MAP) {
             {
-              TMap _map274 = iprot.readMapBegin();
-              this.nodes = new HashMap<String,Recursive>(Math.max(0, 2*_map274.size));
-              for (int _i275 = 0; 
-                   (_map274.size < 0) ? iprot.peekMap() : (_i275 < _map274.size); 
-                   ++_i275)
+              TMap _map279 = iprot.readMapBegin();
+              this.nodes = new HashMap<String,Recursive>(Math.max(0, 2*_map279.size));
+              for (int _i280 = 0; 
+                   (_map279.size < 0) ? iprot.peekMap() : (_i280 < _map279.size); 
+                   ++_i280)
               {
-                String _key276;
-                Recursive _val277;
-                _key276 = iprot.readString();
-                _val277 = new Recursive();
-                _val277.read(iprot);
-                this.nodes.put(_key276, _val277);
+                String _key281;
+                Recursive _val282;
+                _key281 = iprot.readString();
+                _val282 = new Recursive();
+                _val282.read(iprot);
+                this.nodes.put(_key281, _val282);
               }
               iprot.readMapEnd();
             }
@@ -217,9 +217,9 @@ public class RecursiveEnsureStruct implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(NODES_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.nodes.size()));
-          for (Map.Entry<String, Recursive> _iter278 : this.nodes.entrySet())          {
-            oprot.writeString(_iter278.getKey());
-            _iter278.getValue().write(oprot);
+          for (Map.Entry<String, Recursive> _iter283 : this.nodes.entrySet())          {
+            oprot.writeString(_iter283.getKey());
+            _iter283.getValue().write(oprot);
           }
           oprot.writeMapEnd();
         }

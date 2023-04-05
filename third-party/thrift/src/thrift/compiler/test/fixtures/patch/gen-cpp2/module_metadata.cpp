@@ -280,58 +280,6 @@ StructMetadata<::test::fixtures::patch::Loop>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyDataEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyDataEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_MyDataEnsureStruct = res.first->second;
-  module_MyDataEnsureStruct.name() = "module.MyDataEnsureStruct";
-  module_MyDataEnsureStruct.is_union() = false;
-  static const auto* const
-  module_MyDataEnsureStruct_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "data1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "data2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
-  for (const auto& f : *module_MyDataEnsureStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_MyDataEnsureStruct.fields()->push_back(std::move(field));
-  }
-  module_MyDataEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyDataFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyDataFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_MyDataFieldPatch = res.first->second;
-  module_MyDataFieldPatch.name() = "module.MyDataFieldPatch";
-  module_MyDataFieldPatch.is_union() = false;
-  static const auto* const
-  module_MyDataFieldPatch_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "data1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-    {2, "data2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-  }};
-  for (const auto& f : *module_MyDataFieldPatch_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_MyDataFieldPatch.fields()->push_back(std::move(field));
-  }
-  module_MyDataFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("MyDataFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::test::fixtures::patch::MyDataPatchStruct>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.MyDataPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -361,55 +309,55 @@ StructMetadata<::test::fixtures::patch::MyDataPatchStruct>::gen(ThriftMetadata& 
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyDataWithCustomDefaultEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::MyDataFieldPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyDataFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyDataWithCustomDefaultEnsureStruct = res.first->second;
-  module_MyDataWithCustomDefaultEnsureStruct.name() = "module.MyDataWithCustomDefaultEnsureStruct";
-  module_MyDataWithCustomDefaultEnsureStruct.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataFieldPatch = res.first->second;
+  module_MyDataFieldPatch.name() = "module.MyDataFieldPatch";
+  module_MyDataFieldPatch.is_union() = false;
   static const auto* const
-  module_MyDataWithCustomDefaultEnsureStruct_fields = new std::array<EncodedThriftField, 2>{{
-    {1, "data1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {2, "data2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-  }};
-  for (const auto& f : *module_MyDataWithCustomDefaultEnsureStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_MyDataWithCustomDefaultEnsureStruct.fields()->push_back(std::move(field));
-  }
-  module_MyDataWithCustomDefaultEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyDataWithCustomDefaultFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_MyDataWithCustomDefaultFieldPatch = res.first->second;
-  module_MyDataWithCustomDefaultFieldPatch.name() = "module.MyDataWithCustomDefaultFieldPatch";
-  module_MyDataWithCustomDefaultFieldPatch.is_union() = false;
-  static const auto* const
-  module_MyDataWithCustomDefaultFieldPatch_fields = new std::array<EncodedThriftField, 2>{{
+  module_MyDataFieldPatch_fields = new std::array<EncodedThriftField, 2>{{
     {1, "data1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
     {2, "data2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
-  for (const auto& f : *module_MyDataWithCustomDefaultFieldPatch_fields) {
+  for (const auto& f : *module_MyDataFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_MyDataWithCustomDefaultFieldPatch.fields()->push_back(std::move(field));
+    module_MyDataFieldPatch.fields()->push_back(std::move(field));
   }
-  module_MyDataWithCustomDefaultFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("MyDataWithCustomDefaultFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  module_MyDataFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("MyDataFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::patch::MyDataEnsureStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyDataEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataEnsureStruct = res.first->second;
+  module_MyDataEnsureStruct.name() = "module.MyDataEnsureStruct";
+  module_MyDataEnsureStruct.is_union() = false;
+  static const auto* const
+  module_MyDataEnsureStruct_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "data1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "data2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_MyDataEnsureStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyDataEnsureStruct.fields()->push_back(std::move(field));
+  }
+  module_MyDataEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -442,28 +390,55 @@ StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>::gen
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::InnerUnionFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.InnerUnionFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyDataWithCustomDefaultFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_InnerUnionFieldPatch = res.first->second;
-  module_InnerUnionFieldPatch.name() = "module.InnerUnionFieldPatch";
-  module_InnerUnionFieldPatch.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataWithCustomDefaultFieldPatch = res.first->second;
+  module_MyDataWithCustomDefaultFieldPatch.name() = "module.MyDataWithCustomDefaultFieldPatch";
+  module_MyDataWithCustomDefaultFieldPatch.is_union() = false;
   static const auto* const
-  module_InnerUnionFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {1, "innerOption", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+  module_MyDataWithCustomDefaultFieldPatch_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "data1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {2, "data2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
-  for (const auto& f : *module_InnerUnionFieldPatch_fields) {
+  for (const auto& f : *module_MyDataWithCustomDefaultFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_InnerUnionFieldPatch.fields()->push_back(std::move(field));
+    module_MyDataWithCustomDefaultFieldPatch.fields()->push_back(std::move(field));
   }
-  module_InnerUnionFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("InnerUnionFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  module_MyDataWithCustomDefaultFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("MyDataWithCustomDefaultFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyDataWithCustomDefaultEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyDataWithCustomDefaultEnsureStruct = res.first->second;
+  module_MyDataWithCustomDefaultEnsureStruct.name() = "module.MyDataWithCustomDefaultEnsureStruct";
+  module_MyDataWithCustomDefaultEnsureStruct.is_union() = false;
+  static const auto* const
+  module_MyDataWithCustomDefaultEnsureStruct_fields = new std::array<EncodedThriftField, 2>{{
+    {1, "data1", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "data2", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_MyDataWithCustomDefaultEnsureStruct_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyDataWithCustomDefaultEnsureStruct.fields()->push_back(std::move(field));
+  }
+  module_MyDataWithCustomDefaultEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -496,30 +471,28 @@ StructMetadata<::test::fixtures::patch::InnerUnionPatchStruct>::gen(ThriftMetada
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyUnionFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyUnionFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::InnerUnionFieldPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.InnerUnionFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyUnionFieldPatch = res.first->second;
-  module_MyUnionFieldPatch.name() = "module.MyUnionFieldPatch";
-  module_MyUnionFieldPatch.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_InnerUnionFieldPatch = res.first->second;
+  module_InnerUnionFieldPatch.name() = "module.InnerUnionFieldPatch";
+  module_InnerUnionFieldPatch.is_union() = false;
   static const auto* const
-  module_MyUnionFieldPatch_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "option1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-    {2, "option2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-    {3, "option3", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionPatchStruct>>("module.InnerUnionPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+  module_InnerUnionFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "innerOption", false, std::make_unique<Struct<::apache::thrift::op::BinaryPatchStruct>>("patch.BinaryPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
-  for (const auto& f : *module_MyUnionFieldPatch_fields) {
+  for (const auto& f : *module_InnerUnionFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_MyUnionFieldPatch.fields()->push_back(std::move(field));
+    module_InnerUnionFieldPatch.fields()->push_back(std::move(field));
   }
-  module_MyUnionFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("MyUnionFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  module_InnerUnionFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("InnerUnionFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -552,60 +525,59 @@ StructMetadata<::test::fixtures::patch::MyUnionPatchStruct>::gen(ThriftMetadata&
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyStructEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStructEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::MyUnionFieldPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyUnionFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStructEnsureStruct = res.first->second;
-  module_MyStructEnsureStruct.name() = "module.MyStructEnsureStruct";
-  module_MyStructEnsureStruct.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_MyUnionFieldPatch = res.first->second;
+  module_MyUnionFieldPatch.name() = "module.MyUnionFieldPatch";
+  module_MyUnionFieldPatch.is_union() = false;
   static const auto* const
-  module_MyStructEnsureStruct_fields = new std::array<EncodedThriftField, 33>{{
-    {-32, "structWithCustomDefault", true, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefault>>("module.MyDataWithCustomDefault"), std::vector<ThriftConstStruct>{}},
-    {-31, "i32WithCustomDefault", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {-30, "mapMap", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{}},
-    {-29, "listMap", true, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{}},
-    {-28, "optMapVal", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
-    {-27, "optSetVal", true, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
-    {-26, "optListVal", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
-    {-25, "optLateStructVal", true, std::make_unique<Typedef>("module.LateDefStruct", std::make_unique<Struct<::test::fixtures::patch::LateDefStruct>>("module.LateDefStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {-24, "optStructVal", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
-    {-23, "optEnumVal", true, std::make_unique<Enum<::test::fixtures::patch::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
-    {-22, "optBinaryVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
-    {-21, "optStringVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {-20, "optDoubleVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
-    {-19, "optFloatVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{}},
-    {-18, "optI64Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {-17, "optI32Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {-16, "optI16Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
-    {-15, "optByteVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
-    {-14, "optBoolVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-    {-13, "lateStructVal", true, std::make_unique<Typedef>("module.LateDefStruct", std::make_unique<Struct<::test::fixtures::patch::LateDefStruct>>("module.LateDefStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-    {-12, "unionVal", true, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
-    {-11, "structVal", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
-    {-10, "enumVal", true, std::make_unique<Enum<::test::fixtures::patch::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
-    {-9, "binaryVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
-    {-8, "stringVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
-    {-7, "doubleVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
-    {-6, "floatVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{}},
-    {-5, "i64Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
-    {-4, "i32Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
-    {-3, "i16Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
-    {-2, "byteVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
-    {-1, "boolVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-    {1, "structWithFieldCustomDefault", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
+  module_MyUnionFieldPatch_fields = new std::array<EncodedThriftField, 3>{{
+    {1, "option1", false, std::make_unique<Struct<::apache::thrift::op::StringPatchStruct>>("patch.StringPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {2, "option2", false, std::make_unique<Struct<::apache::thrift::op::I32PatchStruct>>("patch.I32Patch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+    {3, "option3", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionPatchStruct>>("module.InnerUnionPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
-  for (const auto& f : *module_MyStructEnsureStruct_fields) {
+  for (const auto& f : *module_MyUnionFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_MyStructEnsureStruct.fields()->push_back(std::move(field));
+    module_MyUnionFieldPatch.fields()->push_back(std::move(field));
   }
-  module_MyStructEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
+  module_MyUnionFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("MyUnionFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::patch::MyStructPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyStructPatch", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MyStructPatch = res.first->second;
+  module_MyStructPatch.name() = "module.MyStructPatch";
+  module_MyStructPatch.is_union() = false;
+  static const auto* const
+  module_MyStructPatch_fields = new std::array<EncodedThriftField, 5>{{
+    {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
+    {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyStructEnsureStruct>>("module.MyStructEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_MyStructPatch_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MyStructPatch.fields()->push_back(std::move(field));
+  }
+  module_MyStructPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::StructPatchAdapter")}, {"underlyingName", cvString("MyStructPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -930,56 +902,60 @@ StructMetadata<::test::fixtures::patch::MyStructFieldPatchStruct>::gen(ThriftMet
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::MyStructPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.MyStructPatch", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::MyStructEnsureStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MyStructEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_MyStructPatch = res.first->second;
-  module_MyStructPatch.name() = "module.MyStructPatch";
-  module_MyStructPatch.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_MyStructEnsureStruct = res.first->second;
+  module_MyStructEnsureStruct.name() = "module.MyStructEnsureStruct";
+  module_MyStructEnsureStruct.is_union() = false;
   static const auto* const
-  module_MyStructPatch_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::MyStruct>>("module.MyStruct"), std::vector<ThriftConstStruct>{}},
-    {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::MyStructEnsureStruct>>("module.MyStructEnsureStruct"), std::vector<ThriftConstStruct>{}},
-    {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::MyStructFieldPatchStruct>>("module.MyStructFieldPatch"), std::vector<ThriftConstStruct>{}},
+  module_MyStructEnsureStruct_fields = new std::array<EncodedThriftField, 33>{{
+    {-32, "structWithCustomDefault", true, std::make_unique<Struct<::test::fixtures::patch::MyDataWithCustomDefault>>("module.MyDataWithCustomDefault"), std::vector<ThriftConstStruct>{}},
+    {-31, "i32WithCustomDefault", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {-30, "mapMap", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{}},
+    {-29, "listMap", true, std::make_unique<List>(std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE))), std::vector<ThriftConstStruct>{}},
+    {-28, "optMapVal", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {-27, "optSetVal", true, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)), std::vector<ThriftConstStruct>{}},
+    {-26, "optListVal", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)), std::vector<ThriftConstStruct>{}},
+    {-25, "optLateStructVal", true, std::make_unique<Typedef>("module.LateDefStruct", std::make_unique<Struct<::test::fixtures::patch::LateDefStruct>>("module.LateDefStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {-24, "optStructVal", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
+    {-23, "optEnumVal", true, std::make_unique<Enum<::test::fixtures::patch::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
+    {-22, "optBinaryVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {-21, "optStringVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {-20, "optDoubleVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
+    {-19, "optFloatVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{}},
+    {-18, "optI64Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {-17, "optI32Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {-16, "optI16Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+    {-15, "optByteVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {-14, "optBoolVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
+    {-13, "lateStructVal", true, std::make_unique<Typedef>("module.LateDefStruct", std::make_unique<Struct<::test::fixtures::patch::LateDefStruct>>("module.LateDefStruct"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {-12, "unionVal", true, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
+    {-11, "structVal", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
+    {-10, "enumVal", true, std::make_unique<Enum<::test::fixtures::patch::MyEnum>>("module.MyEnum"), std::vector<ThriftConstStruct>{}},
+    {-9, "binaryVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {-8, "stringVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{}},
+    {-7, "doubleVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{}},
+    {-6, "floatVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_FLOAT_TYPE), std::vector<ThriftConstStruct>{}},
+    {-5, "i64Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {-4, "i32Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {-3, "i16Val", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+    {-2, "byteVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {-1, "boolVal", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
+    {1, "structWithFieldCustomDefault", true, std::make_unique<Struct<::test::fixtures::patch::MyData>>("module.MyData"), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_MyStructPatch_fields) {
+  for (const auto& f : *module_MyStructEnsureStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_MyStructPatch.fields()->push_back(std::move(field));
+    module_MyStructEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_MyStructPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::StructPatchAdapter")}, {"underlyingName", cvString("MyStructPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::LateDefStructEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.LateDefStructEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_LateDefStructEnsureStruct = res.first->second;
-  module_LateDefStructEnsureStruct.name() = "module.LateDefStructEnsureStruct";
-  module_LateDefStructEnsureStruct.is_union() = false;
-  module_LateDefStructEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::LateDefStructFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.LateDefStructFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_LateDefStructFieldPatch = res.first->second;
-  module_LateDefStructFieldPatch.name() = "module.LateDefStructFieldPatch";
-  module_LateDefStructFieldPatch.is_union() = false;
-  module_LateDefStructFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("LateDefStructFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  module_MyStructEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1012,28 +988,56 @@ StructMetadata<::test::fixtures::patch::LateDefStructPatchStruct>::gen(ThriftMet
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::RecursiveEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.RecursiveEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::LateDefStructFieldPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.LateDefStructFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_RecursiveEnsureStruct = res.first->second;
-  module_RecursiveEnsureStruct.name() = "module.RecursiveEnsureStruct";
-  module_RecursiveEnsureStruct.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_LateDefStructFieldPatch = res.first->second;
+  module_LateDefStructFieldPatch.name() = "module.LateDefStructFieldPatch";
+  module_LateDefStructFieldPatch.is_union() = false;
+  module_LateDefStructFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("LateDefStructFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::patch::LateDefStructEnsureStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.LateDefStructEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_LateDefStructEnsureStruct = res.first->second;
+  module_LateDefStructEnsureStruct.name() = "module.LateDefStructEnsureStruct";
+  module_LateDefStructEnsureStruct.is_union() = false;
+  module_LateDefStructEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::test::fixtures::patch::RecursivePatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.RecursivePatch", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_RecursivePatch = res.first->second;
+  module_RecursivePatch.name() = "module.RecursivePatch";
+  module_RecursivePatch.is_union() = false;
   static const auto* const
-  module_RecursiveEnsureStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "nodes", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Typedef>("module.Recursive", std::make_unique<Struct<::test::fixtures::patch::Recursive>>("module.Recursive"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
+  module_RecursivePatch_fields = new std::array<EncodedThriftField, 5>{{
+    {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::Recursive>>("module.Recursive"), std::vector<ThriftConstStruct>{}},
+    {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveFieldPatchStruct>>("module.RecursiveFieldPatch"), std::vector<ThriftConstStruct>{}},
+    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveEnsureStruct>>("module.RecursiveEnsureStruct"), std::vector<ThriftConstStruct>{}},
+    {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveFieldPatchStruct>>("module.RecursiveFieldPatch"), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_RecursiveEnsureStruct_fields) {
+  for (const auto& f : *module_RecursivePatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_RecursiveEnsureStruct.fields()->push_back(std::move(field));
+    module_RecursivePatch.fields()->push_back(std::move(field));
   }
-  module_RecursiveEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
+  module_RecursivePatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::StructPatchAdapter")}, {"underlyingName", cvString("RecursivePatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1088,82 +1092,28 @@ StructMetadata<::test::fixtures::patch::RecursiveFieldPatchStruct>::gen(ThriftMe
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::RecursivePatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.RecursivePatch", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::RecursiveEnsureStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.RecursiveEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_RecursivePatch = res.first->second;
-  module_RecursivePatch.name() = "module.RecursivePatch";
-  module_RecursivePatch.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_RecursiveEnsureStruct = res.first->second;
+  module_RecursiveEnsureStruct.name() = "module.RecursiveEnsureStruct";
+  module_RecursiveEnsureStruct.is_union() = false;
   static const auto* const
-  module_RecursivePatch_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "assign", true, std::make_unique<Struct<::test::fixtures::patch::Recursive>>("module.Recursive"), std::vector<ThriftConstStruct>{}},
-    {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
-    {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveFieldPatchStruct>>("module.RecursiveFieldPatch"), std::vector<ThriftConstStruct>{}},
-    {5, "ensure", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveEnsureStruct>>("module.RecursiveEnsureStruct"), std::vector<ThriftConstStruct>{}},
-    {6, "patch", false, std::make_unique<Struct<::test::fixtures::patch::RecursiveFieldPatchStruct>>("module.RecursiveFieldPatch"), std::vector<ThriftConstStruct>{}},
+  module_RecursiveEnsureStruct_fields = new std::array<EncodedThriftField, 1>{{
+    {-1, "nodes", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Typedef>("module.Recursive", std::make_unique<Struct<::test::fixtures::patch::Recursive>>("module.Recursive"), std::vector<ThriftConstStruct>{})), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_RecursivePatch_fields) {
+  for (const auto& f : *module_RecursiveEnsureStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_RecursivePatch.fields()->push_back(std::move(field));
+    module_RecursiveEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_RecursivePatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::StructPatchAdapter")}, {"underlyingName", cvString("RecursivePatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::BarEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.BarEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_BarEnsureStruct = res.first->second;
-  module_BarEnsureStruct.name() = "module.BarEnsureStruct";
-  module_BarEnsureStruct.is_union() = false;
-  static const auto* const
-  module_BarEnsureStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "loop", true, std::make_unique<Typedef>("module.Loop", std::make_unique<Struct<::test::fixtures::patch::Loop>>("module.Loop"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
-  }};
-  for (const auto& f : *module_BarEnsureStruct_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_BarEnsureStruct.fields()->push_back(std::move(field));
-  }
-  module_BarEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
-  return res.first->second;
-}
-const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::BarFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.BarFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
-  if (!res.second) {
-    return res.first->second;
-  }
-  ::apache::thrift::metadata::ThriftStruct& module_BarFieldPatch = res.first->second;
-  module_BarFieldPatch.name() = "module.BarFieldPatch";
-  module_BarFieldPatch.is_union() = false;
-  static const auto* const
-  module_BarFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "loop", false, std::make_unique<Typedef>("module.LoopPatch", std::make_unique<Struct<::test::fixtures::patch::LoopPatchStruct>>("module.LoopPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
-  }};
-  for (const auto& f : *module_BarFieldPatch_fields) {
-    ::apache::thrift::metadata::ThriftField field;
-    field.id() = f.id;
-    field.name() = f.name;
-    field.is_optional() = f.is_optional;
-    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
-    field.structured_annotations() = f.structured_annotations;
-    module_BarFieldPatch.fields()->push_back(std::move(field));
-  }
-  module_BarFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("BarFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  module_RecursiveEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -1196,53 +1146,53 @@ StructMetadata<::test::fixtures::patch::BarPatchStruct>::gen(ThriftMetadata& met
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::LoopEnsureStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.LoopEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::BarFieldPatchStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.BarFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_LoopEnsureStruct = res.first->second;
-  module_LoopEnsureStruct.name() = "module.LoopEnsureStruct";
-  module_LoopEnsureStruct.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_BarFieldPatch = res.first->second;
+  module_BarFieldPatch.name() = "module.BarFieldPatch";
+  module_BarFieldPatch.is_union() = false;
   static const auto* const
-  module_LoopEnsureStruct_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "bar", true, std::make_unique<Struct<::test::fixtures::patch::Bar>>("module.Bar"), std::vector<ThriftConstStruct>{}},
+  module_BarFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
+    {-1, "loop", false, std::make_unique<Typedef>("module.LoopPatch", std::make_unique<Struct<::test::fixtures::patch::LoopPatchStruct>>("module.LoopPatch"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
   }};
-  for (const auto& f : *module_LoopEnsureStruct_fields) {
+  for (const auto& f : *module_BarFieldPatch_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_LoopEnsureStruct.fields()->push_back(std::move(field));
+    module_BarFieldPatch.fields()->push_back(std::move(field));
   }
-  module_LoopEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
+  module_BarFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("BarFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
-StructMetadata<::test::fixtures::patch::LoopFieldPatchStruct>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs()->emplace("module.LoopFieldPatch", ::apache::thrift::metadata::ThriftStruct{});
+StructMetadata<::test::fixtures::patch::BarEnsureStruct>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.BarEnsureStruct", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
     return res.first->second;
   }
-  ::apache::thrift::metadata::ThriftStruct& module_LoopFieldPatch = res.first->second;
-  module_LoopFieldPatch.name() = "module.LoopFieldPatch";
-  module_LoopFieldPatch.is_union() = false;
+  ::apache::thrift::metadata::ThriftStruct& module_BarEnsureStruct = res.first->second;
+  module_BarEnsureStruct.name() = "module.BarEnsureStruct";
+  module_BarEnsureStruct.is_union() = false;
   static const auto* const
-  module_LoopFieldPatch_fields = new std::array<EncodedThriftField, 1>{{
-    {-1, "bar", false, std::make_unique<Struct<::test::fixtures::patch::BarPatchStruct>>("module.BarPatch"), std::vector<ThriftConstStruct>{*cvStruct("thrift.InternBox", {}).cv_struct_ref(), }},
+  module_BarEnsureStruct_fields = new std::array<EncodedThriftField, 1>{{
+    {-1, "loop", true, std::make_unique<Typedef>("module.Loop", std::make_unique<Struct<::test::fixtures::patch::Loop>>("module.Loop"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
   }};
-  for (const auto& f : *module_LoopFieldPatch_fields) {
+  for (const auto& f : *module_BarEnsureStruct_fields) {
     ::apache::thrift::metadata::ThriftField field;
     field.id() = f.id;
     field.name() = f.name;
     field.is_optional() = f.is_optional;
     f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
     field.structured_annotations() = f.structured_annotations;
-    module_LoopFieldPatch.fields()->push_back(std::move(field));
+    module_BarEnsureStruct.fields()->push_back(std::move(field));
   }
-  module_LoopFieldPatch.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString("::apache::thrift::op::detail::FieldPatchAdapter")}, {"underlyingName", cvString("LoopFieldPatchStruct")}, {"extraNamespace", cvString("")}}).cv_struct_ref());
+  module_BarEnsureStruct.structured_annotations()->push_back(*cvStruct("cpp.Frozen2Exclude", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

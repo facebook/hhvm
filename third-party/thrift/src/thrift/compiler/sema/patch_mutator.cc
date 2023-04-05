@@ -317,11 +317,7 @@ void generate_struct_patch(
           ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
     // Add a 'field patch' and 'struct patch' using it.
     auto& generator = patch_generator::get_for(ctx, mctx);
-    generator.add_struct_patch(
-        *annot,
-        node,
-        generator.add_ensure_struct(*annot, node),
-        generator.add_field_patch(*annot, node));
+    generator.add_struct_patch(*annot, node);
   }
 }
 
@@ -331,8 +327,7 @@ void generate_union_patch(
           ctx.program().inherit_annotation_or_null(node, kGeneratePatchUri)) {
     // Add a 'field patch' and 'union patch' using it.
     auto& generator = patch_generator::get_for(ctx, mctx);
-    generator.add_union_patch(
-        *annot, node, generator.add_field_patch(*annot, node));
+    generator.add_union_patch(*annot, node);
   }
 }
 
@@ -399,7 +394,7 @@ t_struct& patch_generator::add_field_patch(
 }
 
 t_struct& patch_generator::add_union_patch(
-    const t_const& annot, t_union& value_type, t_type_ref patch_type) {
+    const t_const& annot, t_union& value_type) {
   PatchGen gen{
       {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
   gen.assign(value_type);
@@ -408,6 +403,7 @@ t_struct& patch_generator::add_union_patch(
     gen.set_adapter("AssignPatchAdapter");
     return gen;
   }
+  t_type_ref patch_type = add_field_patch(annot, value_type);
   gen.patchPrior(patch_type);
   gen.ensureUnion(value_type);
   gen.patchAfter(patch_type);
@@ -416,10 +412,7 @@ t_struct& patch_generator::add_union_patch(
 }
 
 t_struct& patch_generator::add_struct_patch(
-    const t_const& annot,
-    t_struct& value_type,
-    t_type_ref ensure_type,
-    t_type_ref patch_type) {
+    const t_const& annot, t_struct& value_type) {
   PatchGen gen{
       {annot, gen_suffix_struct(annot, value_type, "Patch"), program_}};
   gen.assign(value_type);
@@ -428,8 +421,9 @@ t_struct& patch_generator::add_struct_patch(
     gen.set_adapter("AssignPatchAdapter");
     return gen;
   }
+  t_type_ref patch_type = add_field_patch(annot, value_type);
   gen.patchPrior(patch_type);
-  gen.ensureStruct(ensure_type);
+  gen.ensureStruct(add_ensure_struct(annot, value_type));
   gen.patchAfter(patch_type);
   gen.set_adapter("StructPatchAdapter");
   return gen;

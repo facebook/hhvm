@@ -94,3 +94,15 @@ struct MapStruct {
 struct InvalidMapMaskKeyStruct {
   1: map<double, i32> field1;
 }
+
+@cpp.Frozen2Exclude
+@patch.AssignOnlyPatch
+struct IncludePatchStruct {
+  1: StructPatchTestInclude.MyDataPatch patch (py3.hidden);
+}
+
+@cpp.Frozen2Exclude
+@patch.AssignOnlyPatch
+union IncludePatchUnion {
+  1: StructPatchTestInclude.MyDataPatch patch (py3.hidden);
+} (py3.hidden)

@@ -494,98 +494,6 @@
         "is_union" : false,
         "lineno" : 106
       },
-      "MyDataEnsureStruct" : {
-        "name" : "MyDataEnsureStruct",
-        "structured_annotations": {
-          "cpp.Frozen2Exclude" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Frozen2Exclude",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : false
-      }
-        },
-        "fields" : {
-          "data1" : {
-            "name" : "data1",
-            "key" : 1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "string"
-                  },
-          "data2" : {
-            "name" : "data2",
-            "key" : 2,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i32"
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 22
-      },
-      "MyDataFieldPatch" : {
-        "name" : "MyDataFieldPatch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataFieldPatchStruct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "data1" : {
-            "name" : "data1",
-            "key" : 1,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "StringPatch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-            ,
-            "structured_annotations": {
-              "thrift.InternBox" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "InternBox",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : false
-          }
-                }
-          },
-          "data2" : {
-            "name" : "data2",
-            "key" : 2,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "I32Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-            ,
-            "structured_annotations": {
-              "thrift.InternBox" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "InternBox",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : false
-          }
-                }
-          }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 22
-      },
       "MyDataPatch" : {
         "name" : "MyDataPatch",
         "structured_annotations": {
@@ -652,40 +560,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyDataWithCustomDefaultEnsureStruct" : {
-        "name" : "MyDataWithCustomDefaultEnsureStruct",
-        "structured_annotations": {
-          "cpp.Frozen2Exclude" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Frozen2Exclude",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : false
-      }
-        },
-        "fields" : {
-          "data1" : {
-            "name" : "data1",
-            "key" : 1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "string"
-                  },
-          "data2" : {
-            "name" : "data2",
-            "key" : 2,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i32"
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 22
-      },
-      "MyDataWithCustomDefaultFieldPatch" : {
-        "name" : "MyDataWithCustomDefaultFieldPatch",
+      "MyDataFieldPatch" : {
+        "name" : "MyDataFieldPatch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -693,7 +569,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataWithCustomDefaultFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -739,6 +615,38 @@
           }
                 }
           }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyDataEnsureStruct" : {
+        "name" : "MyDataEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
+        "fields" : {
+          "data1" : {
+            "name" : "data1",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "string"
+                  },
+          "data2" : {
+            "name" : "data2",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -810,8 +718,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "InnerUnionFieldPatch" : {
-        "name" : "InnerUnionFieldPatch",
+      "MyDataWithCustomDefaultFieldPatch" : {
+        "name" : "MyDataWithCustomDefaultFieldPatch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -819,17 +727,38 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "InnerUnionFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataWithCustomDefaultFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
-          "innerOption" : {
-            "name" : "innerOption",
+          "data1" : {
+            "name" : "data1",
             "key" : 1,
             "lineno" : 22,
             "type" : {
   "type" : "struct",
-  "name" : "BinaryPatch",
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
+}
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
+          "data2" : {
+            "name" : "data2",
+            "key" : 2,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "I32Patch",
   "path" : "thrift/lib/thrift/patch.thrift"
 }
             ,
@@ -844,6 +773,38 @@
           }
                 }
           }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyDataWithCustomDefaultEnsureStruct" : {
+        "name" : "MyDataWithCustomDefaultEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
+        "fields" : {
+          "data1" : {
+            "name" : "data1",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "string"
+                  },
+          "data2" : {
+            "name" : "data2",
+            "key" : 2,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -926,8 +887,8 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyUnionFieldPatch" : {
-        "name" : "MyUnionFieldPatch",
+      "InnerUnionFieldPatch" : {
+        "name" : "InnerUnionFieldPatch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -935,59 +896,18 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyUnionFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "InnerUnionFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
-          "option1" : {
-            "name" : "option1",
+          "innerOption" : {
+            "name" : "innerOption",
             "key" : 1,
             "lineno" : 22,
             "type" : {
   "type" : "struct",
-  "name" : "StringPatch",
+  "name" : "BinaryPatch",
   "path" : "thrift/lib/thrift/patch.thrift"
-}
-            ,
-            "structured_annotations": {
-              "thrift.InternBox" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "InternBox",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : false
-          }
-                }
-          },
-          "option2" : {
-            "name" : "option2",
-            "key" : 2,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "I32Patch",
-  "path" : "thrift/lib/thrift/patch.thrift"
-}
-            ,
-            "structured_annotations": {
-              "thrift.InternBox" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "InternBox",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : false
-          }
-                }
-          },
-          "option3" : {
-            "name" : "option3",
-            "key" : 3,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "InnerUnionPatch"
 }
             ,
             "structured_annotations": {
@@ -1083,300 +1003,145 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructEnsureStruct" : {
-        "name" : "MyStructEnsureStruct",
+      "MyUnionFieldPatch" : {
+        "name" : "MyUnionFieldPatch",
         "structured_annotations": {
-          "cpp.Frozen2Exclude" : {
+          "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Frozen2Exclude",
+  "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : false
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyUnionFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
-          "structWithCustomDefault" : {
-            "name" : "structWithCustomDefault",
-            "key" : -32,
+          "option1" : {
+            "name" : "option1",
+            "key" : 1,
             "lineno" : 22,
-            "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "MyDataWithCustomDefault"
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
-          "i32WithCustomDefault" : {
-            "name" : "i32WithCustomDefault",
-            "key" : -31,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i32"
-                  },
-          "mapMap" : {
-            "name" : "mapMap",
-            "key" : -30,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-}
-                  },
-          "listMap" : {
-            "name" : "listMap",
-            "key" : -29,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "list",
-  "inner_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i32"
-}
-}
-                  },
-          "optMapVal" : {
-            "name" : "optMapVal",
-            "key" : -28,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "string"
-}
-                  },
-          "optSetVal" : {
-            "name" : "optSetVal",
-            "key" : -27,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "set",
-  "inner_type" : "string"
-}
-                  },
-          "optListVal" : {
-            "name" : "optListVal",
-            "key" : -26,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
-                  },
-          "optLateStructVal" : {
-            "name" : "optLateStructVal",
-            "key" : -25,
-            "lineno" : 22,
-            "required" : "optional",
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
             "type" : {
   "type" : "struct",
-  "name" : "LateDefStruct"
-}
-                  },
-          "optStructVal" : {
-            "name" : "optStructVal",
-            "key" : -24,
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
+          "option2" : {
+            "name" : "option2",
+            "key" : 2,
             "lineno" : 22,
-            "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "MyData"
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
-                  },
-          "optEnumVal" : {
-            "name" : "optEnumVal",
-            "key" : -23,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
-                  },
-          "optBinaryVal" : {
-            "name" : "optBinaryVal",
-            "key" : -22,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "binary"
-                  },
-          "optStringVal" : {
-            "name" : "optStringVal",
-            "key" : -21,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "string"
-                  },
-          "optDoubleVal" : {
-            "name" : "optDoubleVal",
-            "key" : -20,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "double"
-                  },
-          "optFloatVal" : {
-            "name" : "optFloatVal",
-            "key" : -19,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "float"
-                  },
-          "optI64Val" : {
-            "name" : "optI64Val",
-            "key" : -18,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i64"
-                  },
-          "optI32Val" : {
-            "name" : "optI32Val",
-            "key" : -17,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i32"
-                  },
-          "optI16Val" : {
-            "name" : "optI16Val",
-            "key" : -16,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i16"
-                  },
-          "optByteVal" : {
-            "name" : "optByteVal",
-            "key" : -15,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "byte"
-                  },
-          "optBoolVal" : {
-            "name" : "optBoolVal",
-            "key" : -14,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "bool"
-                  },
-          "lateStructVal" : {
-            "name" : "lateStructVal",
-            "key" : -13,
-            "lineno" : 22,
-            "required" : "optional",
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
             "type" : {
   "type" : "struct",
-  "name" : "LateDefStruct"
-}
-                  },
-          "unionVal" : {
-            "name" : "unionVal",
-            "key" : -12,
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          },
+          "option3" : {
+            "name" : "option3",
+            "key" : 3,
             "lineno" : 22,
-            "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "MyUnion"
+  "name" : "InnerUnionPatch"
 }
-                  },
-          "structVal" : {
-            "name" : "structVal",
-            "key" : -11,
-            "lineno" : 22,
-            "required" : "optional",
+            ,
+            "structured_annotations": {
+              "thrift.InternBox" : {
             "type" : {
   "type" : "struct",
-  "name" : "MyData"
-}
-                  },
-          "enumVal" : {
-            "name" : "enumVal",
-            "key" : -10,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
-                  },
-          "binaryVal" : {
-            "name" : "binaryVal",
-            "key" : -9,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "binary"
-                  },
-          "stringVal" : {
-            "name" : "stringVal",
-            "key" : -8,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "string"
-                  },
-          "doubleVal" : {
-            "name" : "doubleVal",
-            "key" : -7,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "double"
-                  },
-          "floatVal" : {
-            "name" : "floatVal",
-            "key" : -6,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "float"
-                  },
-          "i64Val" : {
-            "name" : "i64Val",
-            "key" : -5,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i64"
-                  },
-          "i32Val" : {
-            "name" : "i32Val",
-            "key" : -4,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i32"
-                  },
-          "i16Val" : {
-            "name" : "i16Val",
-            "key" : -3,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "i16"
-                  },
-          "byteVal" : {
-            "name" : "byteVal",
-            "key" : -2,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "byte"
-                  },
-          "boolVal" : {
-            "name" : "boolVal",
-            "key" : -1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : "bool"
-                  },
-          "structWithFieldCustomDefault" : {
-            "name" : "structWithFieldCustomDefault",
+  "name" : "InternBox",
+  "path" : "thrift/annotation/thrift.thrift"
+},
+            "value" : false
+          }
+                }
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyStructPatch" : {
+        "name" : "MyStructPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyStructPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
             "key" : 1,
             "lineno" : 22,
             "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "MyData"
+  "name" : "MyStruct"
+}
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldPatch"
+}
+                  },
+          "ensure" : {
+            "name" : "ensure",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructEnsureStruct"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldPatch"
 }
                   }
         },
@@ -2792,74 +2557,8 @@
         "is_union" : false,
         "lineno" : 23
       },
-      "MyStructPatch" : {
-        "name" : "MyStructPatch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyStructPatchStruct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "assign" : {
-            "name" : "assign",
-            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
-            "key" : 1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
-                  },
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears a value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 22,
-            "type" : "bool"
-                  },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldPatch"
-}
-                  },
-          "ensure" : {
-            "name" : "ensure",
-            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
-            "key" : 5,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructEnsureStruct"
-}
-                  },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldPatch"
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 23
-      },
-      "LateDefStructEnsureStruct" : {
-        "name" : "LateDefStructEnsureStruct",
+      "MyStructEnsureStruct" : {
+        "name" : "MyStructEnsureStruct",
         "structured_annotations": {
           "cpp.Frozen2Exclude" : {
         "type" : {
@@ -2870,21 +2569,290 @@
         "value" : false
       }
         },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 23
-      },
-      "LateDefStructFieldPatch" : {
-        "name" : "LateDefStructFieldPatch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
+        "fields" : {
+          "structWithCustomDefault" : {
+            "name" : "structWithCustomDefault",
+            "key" : -32,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
   "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "LateDefStructFieldPatchStruct", "extraNamespace": ""}
-      }
+  "name" : "MyDataWithCustomDefault"
+}
+                  },
+          "i32WithCustomDefault" : {
+            "name" : "i32WithCustomDefault",
+            "key" : -31,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  },
+          "mapMap" : {
+            "name" : "mapMap",
+            "key" : -30,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+}
+                  },
+          "listMap" : {
+            "name" : "listMap",
+            "key" : -29,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "i32"
+}
+}
+                  },
+          "optMapVal" : {
+            "name" : "optMapVal",
+            "key" : -28,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "string"
+}
+                  },
+          "optSetVal" : {
+            "name" : "optSetVal",
+            "key" : -27,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "set",
+  "inner_type" : "string"
+}
+                  },
+          "optListVal" : {
+            "name" : "optListVal",
+            "key" : -26,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i16"
+}
+                  },
+          "optLateStructVal" : {
+            "name" : "optLateStructVal",
+            "key" : -25,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "LateDefStruct"
+}
+                  },
+          "optStructVal" : {
+            "name" : "optStructVal",
+            "key" : -24,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyData"
+}
+                  },
+          "optEnumVal" : {
+            "name" : "optEnumVal",
+            "key" : -23,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "enum",
+  "name" : "MyEnum"
+}
+                  },
+          "optBinaryVal" : {
+            "name" : "optBinaryVal",
+            "key" : -22,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "binary"
+                  },
+          "optStringVal" : {
+            "name" : "optStringVal",
+            "key" : -21,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "string"
+                  },
+          "optDoubleVal" : {
+            "name" : "optDoubleVal",
+            "key" : -20,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "double"
+                  },
+          "optFloatVal" : {
+            "name" : "optFloatVal",
+            "key" : -19,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "float"
+                  },
+          "optI64Val" : {
+            "name" : "optI64Val",
+            "key" : -18,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i64"
+                  },
+          "optI32Val" : {
+            "name" : "optI32Val",
+            "key" : -17,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  },
+          "optI16Val" : {
+            "name" : "optI16Val",
+            "key" : -16,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i16"
+                  },
+          "optByteVal" : {
+            "name" : "optByteVal",
+            "key" : -15,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "byte"
+                  },
+          "optBoolVal" : {
+            "name" : "optBoolVal",
+            "key" : -14,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "bool"
+                  },
+          "lateStructVal" : {
+            "name" : "lateStructVal",
+            "key" : -13,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "LateDefStruct"
+}
+                  },
+          "unionVal" : {
+            "name" : "unionVal",
+            "key" : -12,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyUnion"
+}
+                  },
+          "structVal" : {
+            "name" : "structVal",
+            "key" : -11,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyData"
+}
+                  },
+          "enumVal" : {
+            "name" : "enumVal",
+            "key" : -10,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "enum",
+  "name" : "MyEnum"
+}
+                  },
+          "binaryVal" : {
+            "name" : "binaryVal",
+            "key" : -9,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "binary"
+                  },
+          "stringVal" : {
+            "name" : "stringVal",
+            "key" : -8,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "string"
+                  },
+          "doubleVal" : {
+            "name" : "doubleVal",
+            "key" : -7,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "double"
+                  },
+          "floatVal" : {
+            "name" : "floatVal",
+            "key" : -6,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "float"
+                  },
+          "i64Val" : {
+            "name" : "i64Val",
+            "key" : -5,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i64"
+                  },
+          "i32Val" : {
+            "name" : "i32Val",
+            "key" : -4,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i32"
+                  },
+          "i16Val" : {
+            "name" : "i16Val",
+            "key" : -3,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "i16"
+                  },
+          "byteVal" : {
+            "name" : "byteVal",
+            "key" : -2,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "byte"
+                  },
+          "boolVal" : {
+            "name" : "boolVal",
+            "key" : -1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : "bool"
+                  },
+          "structWithFieldCustomDefault" : {
+            "name" : "structWithFieldCustomDefault",
+            "key" : 1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyData"
+}
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -2956,8 +2924,24 @@
         "is_union" : false,
         "lineno" : 23
       },
-      "RecursiveEnsureStruct" : {
-        "name" : "RecursiveEnsureStruct",
+      "LateDefStructFieldPatch" : {
+        "name" : "LateDefStructFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "LateDefStructFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 23
+      },
+      "LateDefStructEnsureStruct" : {
+        "name" : "LateDefStructEnsureStruct",
         "structured_annotations": {
           "cpp.Frozen2Exclude" : {
         "type" : {
@@ -2968,19 +2952,69 @@
         "value" : false
       }
         },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 23
+      },
+      "RecursivePatch" : {
+        "name" : "RecursivePatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "RecursivePatchStruct", "extraNamespace": ""}
+      }
+        },
         "fields" : {
-          "nodes" : {
-            "name" : "nodes",
-            "key" : -1,
+          "assign" : {
+            "name" : "assign",
+            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
+            "key" : 1,
             "lineno" : 22,
             "required" : "optional",
             "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
   "type" : "struct",
   "name" : "Recursive"
 }
+                  },
+          "clear" : {
+            "name" : "clear",
+            "docstring" : "Clears a value. Applies first.\n",
+            "key" : 2,
+            "lineno" : 22,
+            "type" : "bool"
+                  },
+          "patchPrior" : {
+            "name" : "patchPrior",
+            "docstring" : "Patches any previously set values. Applies second.\n",
+            "key" : 3,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "RecursiveFieldPatch"
+}
+                  },
+          "ensure" : {
+            "name" : "ensure",
+            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
+            "key" : 5,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "RecursiveEnsureStruct"
+}
+                  },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
+            "key" : 6,
+            "lineno" : 22,
+            "type" : {
+  "type" : "struct",
+  "name" : "RecursiveFieldPatch"
 }
                   }
         },
@@ -3066,74 +3100,8 @@
         "is_union" : false,
         "lineno" : 23
       },
-      "RecursivePatch" : {
-        "name" : "RecursivePatch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "RecursivePatchStruct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "assign" : {
-            "name" : "assign",
-            "docstring" : "Assigns to a (set) value.\n\nIf set, all other operations are ignored.\n\nNote: Optional and union fields must be set before assigned.\n\n",
-            "key" : 1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "Recursive"
-}
-                  },
-          "clear" : {
-            "name" : "clear",
-            "docstring" : "Clears a value. Applies first.\n",
-            "key" : 2,
-            "lineno" : 22,
-            "type" : "bool"
-                  },
-          "patchPrior" : {
-            "name" : "patchPrior",
-            "docstring" : "Patches any previously set values. Applies second.\n",
-            "key" : 3,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "RecursiveFieldPatch"
-}
-                  },
-          "ensure" : {
-            "name" : "ensure",
-            "docstring" : "Initialize fields, using the given defaults. Applies third.\n",
-            "key" : 5,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "RecursiveEnsureStruct"
-}
-                  },
-          "patch" : {
-            "name" : "patch",
-            "docstring" : "Patches any set value, including newly set values. Applies last.\n",
-            "key" : 6,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "RecursiveFieldPatch"
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 23
-      },
-      "BarEnsureStruct" : {
-        "name" : "BarEnsureStruct",
+      "RecursiveEnsureStruct" : {
+        "name" : "RecursiveEnsureStruct",
         "structured_annotations": {
           "cpp.Frozen2Exclude" : {
         "type" : {
@@ -3145,54 +3113,20 @@
       }
         },
         "fields" : {
-          "loop" : {
-            "name" : "loop",
+          "nodes" : {
+            "name" : "nodes",
             "key" : -1,
             "lineno" : 22,
             "required" : "optional",
             "type" : {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : {
   "type" : "struct",
-  "name" : "Loop"
+  "name" : "Recursive"
+}
 }
                   }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 23
-      },
-      "BarFieldPatch" : {
-        "name" : "BarFieldPatch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "BarFieldPatchStruct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "loop" : {
-            "name" : "loop",
-            "key" : -1,
-            "lineno" : 22,
-            "type" : {
-  "type" : "struct",
-  "name" : "LoopPatch"
-}
-            ,
-            "structured_annotations": {
-              "thrift.InternBox" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "InternBox",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : false
-          }
-                }
-          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -3264,36 +3198,8 @@
         "is_union" : false,
         "lineno" : 23
       },
-      "LoopEnsureStruct" : {
-        "name" : "LoopEnsureStruct",
-        "structured_annotations": {
-          "cpp.Frozen2Exclude" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Frozen2Exclude",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-        "value" : false
-      }
-        },
-        "fields" : {
-          "bar" : {
-            "name" : "bar",
-            "key" : -1,
-            "lineno" : 22,
-            "required" : "optional",
-            "type" : {
-  "type" : "struct",
-  "name" : "Bar"
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 23
-      },
-      "LoopFieldPatch" : {
-        "name" : "LoopFieldPatch",
+      "BarFieldPatch" : {
+        "name" : "BarFieldPatch",
         "structured_annotations": {
           "cpp.Adapter" : {
         "type" : {
@@ -3301,17 +3207,17 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "LoopFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "BarFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
-          "bar" : {
-            "name" : "bar",
+          "loop" : {
+            "name" : "loop",
             "key" : -1,
             "lineno" : 22,
             "type" : {
   "type" : "struct",
-  "name" : "BarPatch"
+  "name" : "LoopPatch"
 }
             ,
             "structured_annotations": {
@@ -3325,6 +3231,34 @@
           }
                 }
           }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 23
+      },
+      "BarEnsureStruct" : {
+        "name" : "BarEnsureStruct",
+        "structured_annotations": {
+          "cpp.Frozen2Exclude" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Frozen2Exclude",
+  "path" : "thrift/annotation/cpp.thrift"
+},
+        "value" : false
+      }
+        },
+        "fields" : {
+          "loop" : {
+            "name" : "loop",
+            "key" : -1,
+            "lineno" : 22,
+            "required" : "optional",
+            "type" : {
+  "type" : "struct",
+  "name" : "Loop"
+}
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

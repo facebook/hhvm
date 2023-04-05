@@ -1001,5 +1001,20 @@ TEST(StructPatchTest, EnsureOptStructValPatchable) {
   EXPECT_EQ(foo.optStructVal(), data);
 }
 
+TEST(StructPatchTest, IncludePatch) {
+  MyData data;
+  data.data2() = 42;
+
+  test::patch::IncludePatchStruct patch1;
+  patch1.patch()->patch<ident::data2>() -= 10;
+  patch1.patch()->apply(data);
+  EXPECT_EQ(data.data2(), 32);
+
+  test::patch::IncludePatchUnion patch2;
+  patch2.patch_ref().emplace().patch<ident::data2>() += 10;
+  patch2.patch_ref()->apply(data);
+  EXPECT_EQ(data.data2(), 42);
+}
+
 } // namespace
 } // namespace apache::thrift

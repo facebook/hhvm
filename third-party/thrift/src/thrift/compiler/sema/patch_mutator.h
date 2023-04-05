@@ -82,11 +82,7 @@ class patch_generator {
   //     Patch patchAfter;
   //   }
   //
-  t_struct& add_struct_patch(
-      const t_const& annot,
-      t_struct& value_type,
-      t_type_ref ensure_type,
-      t_type_ref patch_type);
+  t_struct& add_struct_patch(const t_const& annot, t_struct& value_type);
 
   // Add a value patch representation for the given union and associate patch
   // type, and return a reference to it.
@@ -107,8 +103,7 @@ class patch_generator {
   //     Patch patchAfter;
   //   }
   //
-  t_struct& add_union_patch(
-      const t_const& annot, t_union& value_type, t_type_ref patch_type);
+  t_struct& add_union_patch(const t_const& annot, t_union& value_type);
 
   t_struct& add_ensure_struct(const t_const& annot, t_structured& node);
 

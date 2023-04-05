@@ -71,7 +71,7 @@ class StructMetadata<::test::fixtures::patch::Loop> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyDataEnsureStruct> {
+class StructMetadata<::test::fixtures::patch::MyDataPatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -81,17 +81,7 @@ class StructMetadata<::test::fixtures::patch::MyDataFieldPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyDataPatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyDataEnsureStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -101,7 +91,12 @@ class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -111,7 +106,7 @@ class StructMetadata<::test::fixtures::patch::InnerUnionPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyUnionFieldPatchStruct> {
+class StructMetadata<::test::fixtures::patch::InnerUnionFieldPatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -121,7 +116,12 @@ class StructMetadata<::test::fixtures::patch::MyUnionPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyStructEnsureStruct> {
+class StructMetadata<::test::fixtures::patch::MyUnionFieldPatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyStructPatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -176,17 +176,7 @@ class StructMetadata<::test::fixtures::patch::MyStructFieldPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyStructPatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::LateDefStructEnsureStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyStructEnsureStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -196,7 +186,17 @@ class StructMetadata<::test::fixtures::patch::LateDefStructPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::RecursiveEnsureStruct> {
+class StructMetadata<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::LateDefStructEnsureStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::RecursivePatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -211,17 +211,7 @@ class StructMetadata<::test::fixtures::patch::RecursiveFieldPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::RecursivePatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::BarEnsureStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::BarFieldPatchStruct> {
+class StructMetadata<::test::fixtures::patch::RecursiveEnsureStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -231,12 +221,12 @@ class StructMetadata<::test::fixtures::patch::BarPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::LoopEnsureStruct> {
+class StructMetadata<::test::fixtures::patch::BarFieldPatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::LoopFieldPatchStruct> {
+class StructMetadata<::test::fixtures::patch::BarEnsureStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

@@ -261,9 +261,9 @@ struct PatchGen : StructGen {
 
   // {kEnsureStructId}: {type} ensure;
   t_field& ensureStruct(t_type_ref type) {
-    return intern_box(
-        doc("Initialize fields, using the given defaults. Applies third.",
-            field(kEnsureStructId, type, "ensure")));
+    return doc(
+        "Initialize fields, using the given defaults. Applies third.",
+        field(kEnsureStructId, type, "ensure"));
   }
 
   // {kAddMapId}: {type} ensure;

@@ -5228,7 +5228,7 @@ class MyDataPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyDataPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyData> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct> ensure__arg, ::test::fixtures::patch::MyDataFieldPatch patch__arg);
+  MyDataPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyData> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataFieldPatch patch__arg);
 
   MyDataPatchStruct(MyDataPatchStruct&&) noexcept;
   MyDataPatchStruct(const MyDataPatchStruct& src);
@@ -5246,7 +5246,7 @@ class MyDataPatchStruct final  {
  private:
   ::test::fixtures::patch::MyDataFieldPatch __fbthrift_field_patchPrior;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct> __fbthrift_field_ensure;
+  ::test::fixtures::patch::MyDataEnsureStruct __fbthrift_field_ensure;
  private:
   ::test::fixtures::patch::MyDataFieldPatch __fbthrift_field_patch;
 
@@ -5375,44 +5375,44 @@ class MyDataPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patchPrior)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataFieldPatch>
@@ -5463,6 +5463,15 @@ class MyDataPatchStruct final  {
   bool& set_clear(bool clear_) {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
+  }
+  const ::test::fixtures::patch::MyDataEnsureStruct& get_ensure() const&;
+  ::test::fixtures::patch::MyDataEnsureStruct get_ensure() &&;
+
+  template <typename T_MyDataPatchStruct_ensure_struct_setter = ::test::fixtures::patch::MyDataEnsureStruct>
+  [[deprecated("Use `FOO.ensure_ref() = BAR;` instead of `FOO.set_ensure(BAR);`")]]
+  ::test::fixtures::patch::MyDataEnsureStruct& set_ensure(T_MyDataPatchStruct_ensure_struct_setter&& ensure_) {
+    ensure_ref() = std::forward<T_MyDataPatchStruct_ensure_struct_setter>(ensure_);
+    return __fbthrift_field_ensure;
   }
 
   template <class Protocol_>
@@ -5948,7 +5957,7 @@ class MyDataWithCustomDefaultPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyDataWithCustomDefaultPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyDataWithCustomDefault> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> ensure__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patch__arg);
+  MyDataWithCustomDefaultPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyDataWithCustomDefault> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patch__arg);
 
   MyDataWithCustomDefaultPatchStruct(MyDataWithCustomDefaultPatchStruct&&) noexcept;
   MyDataWithCustomDefaultPatchStruct(const MyDataWithCustomDefaultPatchStruct& src);
@@ -5966,7 +5975,7 @@ class MyDataWithCustomDefaultPatchStruct final  {
  private:
   ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch __fbthrift_field_patchPrior;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> __fbthrift_field_ensure;
+  ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct __fbthrift_field_ensure;
  private:
   ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch __fbthrift_field_patch;
 
@@ -6095,44 +6104,44 @@ class MyDataWithCustomDefaultPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patchPrior)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch>
@@ -6183,6 +6192,15 @@ class MyDataWithCustomDefaultPatchStruct final  {
   bool& set_clear(bool clear_) {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
+  }
+  const ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct& get_ensure() const&;
+  ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct get_ensure() &&;
+
+  template <typename T_MyDataWithCustomDefaultPatchStruct_ensure_struct_setter = ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>
+  [[deprecated("Use `FOO.ensure_ref() = BAR;` instead of `FOO.set_ensure(BAR);`")]]
+  ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct& set_ensure(T_MyDataWithCustomDefaultPatchStruct_ensure_struct_setter&& ensure_) {
+    ensure_ref() = std::forward<T_MyDataWithCustomDefaultPatchStruct_ensure_struct_setter>(ensure_);
+    return __fbthrift_field_ensure;
   }
 
   template <class Protocol_>
@@ -12595,6 +12613,98 @@ unsigned long MyStructField30PatchStruct::read(Protocol_* iprot) {
 using MyStructField30Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::MapPatchAdapter, ::test::fixtures::patch::MyStructField30PatchStruct>;
 
 
+class LateDefStructEnsureStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 0;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = LateDefStructEnsureStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  LateDefStructEnsureStruct() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  LateDefStructEnsureStruct(apache::thrift::FragileConstructor);
+
+  LateDefStructEnsureStruct(LateDefStructEnsureStruct&&) = default;
+
+  LateDefStructEnsureStruct(const LateDefStructEnsureStruct&) = default;
+
+
+  LateDefStructEnsureStruct& operator=(LateDefStructEnsureStruct&&) = default;
+
+  LateDefStructEnsureStruct& operator=(const LateDefStructEnsureStruct&) = default;
+
+ public:
+
+  bool operator==(const LateDefStructEnsureStruct&) const;
+  bool operator<(const LateDefStructEnsureStruct&) const;
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<LateDefStructEnsureStruct>;
+  friend void swap(LateDefStructEnsureStruct& a, LateDefStructEnsureStruct& b);
+};
+
+template <class Protocol_>
+unsigned long LateDefStructEnsureStruct::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
 class LateDefStructFieldPatchStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -12750,7 +12860,7 @@ class LateDefStructPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  LateDefStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::LateDefStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::LateDefStructFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct> ensure__arg, ::test::fixtures::patch::LateDefStructFieldPatch patch__arg);
+  LateDefStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::LateDefStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::LateDefStructFieldPatch patchPrior__arg, ::test::fixtures::patch::LateDefStructEnsureStruct ensure__arg, ::test::fixtures::patch::LateDefStructFieldPatch patch__arg);
 
   LateDefStructPatchStruct(LateDefStructPatchStruct&&) noexcept;
   LateDefStructPatchStruct(const LateDefStructPatchStruct& src);
@@ -12768,7 +12878,7 @@ class LateDefStructPatchStruct final  {
  private:
   ::test::fixtures::patch::LateDefStructFieldPatch __fbthrift_field_patchPrior;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct> __fbthrift_field_ensure;
+  ::test::fixtures::patch::LateDefStructEnsureStruct __fbthrift_field_ensure;
  private:
   ::test::fixtures::patch::LateDefStructFieldPatch __fbthrift_field_patch;
 
@@ -12897,44 +13007,44 @@ class LateDefStructPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patchPrior)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::LateDefStructFieldPatch>
@@ -12985,6 +13095,15 @@ class LateDefStructPatchStruct final  {
   bool& set_clear(bool clear_) {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
+  }
+  const ::test::fixtures::patch::LateDefStructEnsureStruct& get_ensure() const&;
+  ::test::fixtures::patch::LateDefStructEnsureStruct get_ensure() &&;
+
+  template <typename T_LateDefStructPatchStruct_ensure_struct_setter = ::test::fixtures::patch::LateDefStructEnsureStruct>
+  [[deprecated("Use `FOO.ensure_ref() = BAR;` instead of `FOO.set_ensure(BAR);`")]]
+  ::test::fixtures::patch::LateDefStructEnsureStruct& set_ensure(T_LateDefStructPatchStruct_ensure_struct_setter&& ensure_) {
+    ensure_ref() = std::forward<T_LateDefStructPatchStruct_ensure_struct_setter>(ensure_);
+    return __fbthrift_field_ensure;
   }
 
   template <class Protocol_>
@@ -14622,7 +14741,7 @@ class MyStructPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::MyStructFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct> ensure__arg, ::test::fixtures::patch::MyStructFieldPatch patch__arg);
+  MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::MyStructFieldPatch patchPrior__arg, ::test::fixtures::patch::MyStructEnsureStruct ensure__arg, ::test::fixtures::patch::MyStructFieldPatch patch__arg);
 
   MyStructPatchStruct(MyStructPatchStruct&&) noexcept;
   MyStructPatchStruct(const MyStructPatchStruct& src);
@@ -14640,7 +14759,7 @@ class MyStructPatchStruct final  {
  private:
   ::test::fixtures::patch::MyStructFieldPatch __fbthrift_field_patchPrior;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct> __fbthrift_field_ensure;
+  ::test::fixtures::patch::MyStructEnsureStruct __fbthrift_field_ensure;
  private:
   ::test::fixtures::patch::MyStructFieldPatch __fbthrift_field_patch;
 
@@ -14769,44 +14888,44 @@ class MyStructPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patchPrior)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::MyStructEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyStructFieldPatch>
@@ -14858,6 +14977,15 @@ class MyStructPatchStruct final  {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
   }
+  const ::test::fixtures::patch::MyStructEnsureStruct& get_ensure() const&;
+  ::test::fixtures::patch::MyStructEnsureStruct get_ensure() &&;
+
+  template <typename T_MyStructPatchStruct_ensure_struct_setter = ::test::fixtures::patch::MyStructEnsureStruct>
+  [[deprecated("Use `FOO.ensure_ref() = BAR;` instead of `FOO.set_ensure(BAR);`")]]
+  ::test::fixtures::patch::MyStructEnsureStruct& set_ensure(T_MyStructPatchStruct_ensure_struct_setter&& ensure_) {
+    ensure_ref() = std::forward<T_MyStructPatchStruct_ensure_struct_setter>(ensure_);
+    return __fbthrift_field_ensure;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -14884,98 +15012,6 @@ unsigned long MyStructPatchStruct::read(Protocol_* iprot) {
 }
 
 using MyStructPatch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::StructPatchAdapter, ::test::fixtures::patch::MyStructPatchStruct>;
-
-
-class LateDefStructEnsureStruct final  {
- private:
-  friend struct ::apache::thrift::detail::st::struct_private_access;
-  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
-
-  //  used by a static_assert in the corresponding source
-  static constexpr bool __fbthrift_cpp2_gen_json = false;
-  static const char* __fbthrift_thrift_uri();
-  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
-  static const folly::StringPiece __fbthrift_get_class_name();
-  using __fbthrift_reflection_ident_list = folly::tag_t<
-  >;
-
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0};
-  using __fbthrift_reflection_type_tags = folly::tag_t<
-  >;
-
-  static constexpr std::size_t __fbthrift_field_size_v = 0;
-
-  template<class T>
-  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
-
-  template<class T>
-  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
-
-  template<class T>
-  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
-
-  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
-    ::apache::thrift::detail::getFieldOrdinal<T,
-                                              __fbthrift_reflection_ident_list,
-                                              __fbthrift_reflection_type_tags>(
-      __fbthrift_reflection_field_id_list
-    )
-  >;
-  void __fbthrift_clear();
-  void __fbthrift_clear_terse_fields();
-  bool __fbthrift_is_empty() const;
-
- public:
-  using __fbthrift_cpp2_type = LateDefStructEnsureStruct;
-  static constexpr bool __fbthrift_cpp2_is_union =
-    false;
-
-
- public:
-
-  LateDefStructEnsureStruct() {
-  }
-  // FragileConstructor for use in initialization lists only.
-  [[deprecated("This constructor is deprecated")]]
-  LateDefStructEnsureStruct(apache::thrift::FragileConstructor);
-
-  LateDefStructEnsureStruct(LateDefStructEnsureStruct&&) = default;
-
-  LateDefStructEnsureStruct(const LateDefStructEnsureStruct&) = default;
-
-
-  LateDefStructEnsureStruct& operator=(LateDefStructEnsureStruct&&) = default;
-
-  LateDefStructEnsureStruct& operator=(const LateDefStructEnsureStruct&) = default;
-
- public:
-
-  bool operator==(const LateDefStructEnsureStruct&) const;
-  bool operator<(const LateDefStructEnsureStruct&) const;
-
-  template <class Protocol_>
-  unsigned long read(Protocol_* iprot);
-  template <class Protocol_>
-  uint32_t serializedSize(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
-  template <class Protocol_>
-  uint32_t write(Protocol_* prot_) const;
-
- private:
-  template <class Protocol_>
-  void readNoXfer(Protocol_* iprot);
-
-  friend class ::apache::thrift::Cpp2Ops<LateDefStructEnsureStruct>;
-  friend void swap(LateDefStructEnsureStruct& a, LateDefStructEnsureStruct& b);
-};
-
-template <class Protocol_>
-unsigned long LateDefStructEnsureStruct::read(Protocol_* iprot) {
-  auto _xferStart = iprot->getCursorPosition();
-  readNoXfer(iprot);
-  return iprot->getCursorPosition() - _xferStart;
-}
 
 
 class RecursiveEnsureStruct final  {
@@ -15527,7 +15563,7 @@ class RecursivePatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RecursivePatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Recursive> assign__arg, bool clear__arg, ::test::fixtures::patch::RecursiveFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct> ensure__arg, ::test::fixtures::patch::RecursiveFieldPatch patch__arg);
+  RecursivePatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Recursive> assign__arg, bool clear__arg, ::test::fixtures::patch::RecursiveFieldPatch patchPrior__arg, ::test::fixtures::patch::RecursiveEnsureStruct ensure__arg, ::test::fixtures::patch::RecursiveFieldPatch patch__arg);
 
   RecursivePatchStruct(RecursivePatchStruct&&) noexcept;
   RecursivePatchStruct(const RecursivePatchStruct& src);
@@ -15545,7 +15581,7 @@ class RecursivePatchStruct final  {
  private:
   ::test::fixtures::patch::RecursiveFieldPatch __fbthrift_field_patchPrior;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct> __fbthrift_field_ensure;
+  ::test::fixtures::patch::RecursiveEnsureStruct __fbthrift_field_ensure;
  private:
   ::test::fixtures::patch::RecursiveFieldPatch __fbthrift_field_patch;
 
@@ -15674,44 +15710,44 @@ class RecursivePatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patchPrior)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::RecursiveEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::RecursiveFieldPatch>
@@ -15762,6 +15798,15 @@ class RecursivePatchStruct final  {
   bool& set_clear(bool clear_) {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
+  }
+  const ::test::fixtures::patch::RecursiveEnsureStruct& get_ensure() const&;
+  ::test::fixtures::patch::RecursiveEnsureStruct get_ensure() &&;
+
+  template <typename T_RecursivePatchStruct_ensure_struct_setter = ::test::fixtures::patch::RecursiveEnsureStruct>
+  [[deprecated("Use `FOO.ensure_ref() = BAR;` instead of `FOO.set_ensure(BAR);`")]]
+  ::test::fixtures::patch::RecursiveEnsureStruct& set_ensure(T_RecursivePatchStruct_ensure_struct_setter&& ensure_) {
+    ensure_ref() = std::forward<T_RecursivePatchStruct_ensure_struct_setter>(ensure_);
+    return __fbthrift_field_ensure;
   }
 
   template <class Protocol_>
@@ -16316,7 +16361,7 @@ class BarPatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Bar> assign__arg, bool clear__arg, ::test::fixtures::patch::BarFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct> ensure__arg, ::test::fixtures::patch::BarFieldPatch patch__arg);
+  BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Bar> assign__arg, bool clear__arg, ::test::fixtures::patch::BarFieldPatch patchPrior__arg, ::test::fixtures::patch::BarEnsureStruct ensure__arg, ::test::fixtures::patch::BarFieldPatch patch__arg);
 
   BarPatchStruct(BarPatchStruct&&) noexcept;
   BarPatchStruct(const BarPatchStruct& src);
@@ -16334,7 +16379,7 @@ class BarPatchStruct final  {
  private:
   ::test::fixtures::patch::BarFieldPatch __fbthrift_field_patchPrior;
  private:
-  ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct> __fbthrift_field_ensure;
+  ::test::fixtures::patch::BarEnsureStruct __fbthrift_field_ensure;
  private:
   ::test::fixtures::patch::BarFieldPatch __fbthrift_field_patch;
 
@@ -16463,44 +16508,44 @@ class BarPatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patchPrior)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure_ref() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure_ref() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure_ref() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure_ref() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&> ensure() const& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> ensure() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<const T&&> ensure() const&& {
-    return ::apache::thrift::terse_intern_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> ensure() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_ensure)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&> ensure() & {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&>{this->__fbthrift_field_ensure, ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> ensure() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_ensure};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>
-  FOLLY_ERASE ::apache::thrift::terse_intern_boxed_field_ref<T&&> ensure() && {
-    return ::apache::thrift::terse_intern_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure), ::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>};
+  template <typename..., typename T = ::test::fixtures::patch::BarEnsureStruct>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> ensure() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_ensure)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::BarFieldPatch>
@@ -16551,6 +16596,15 @@ class BarPatchStruct final  {
   bool& set_clear(bool clear_) {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
+  }
+  const ::test::fixtures::patch::BarEnsureStruct& get_ensure() const&;
+  ::test::fixtures::patch::BarEnsureStruct get_ensure() &&;
+
+  template <typename T_BarPatchStruct_ensure_struct_setter = ::test::fixtures::patch::BarEnsureStruct>
+  [[deprecated("Use `FOO.ensure_ref() = BAR;` instead of `FOO.set_ensure(BAR);`")]]
+  ::test::fixtures::patch::BarEnsureStruct& set_ensure(T_BarPatchStruct_ensure_struct_setter&& ensure_) {
+    ensure_ref() = std::forward<T_BarPatchStruct_ensure_struct_setter>(ensure_);
+    return __fbthrift_field_ensure;
   }
 
   template <class Protocol_>

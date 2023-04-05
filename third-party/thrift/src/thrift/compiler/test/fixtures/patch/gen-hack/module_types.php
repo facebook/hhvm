@@ -3343,12 +3343,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'ensure' => shape(
-          'field' => dict[
-            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
               shape(
@@ -3973,12 +3968,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
           ],
         ),
         'ensure' => shape(
-          'field' => dict[
-            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
               shape(
@@ -11990,12 +11980,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'ensure' => shape(
-          'field' => dict[
-            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
               shape(
@@ -12449,12 +12434,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'ensure' => shape(
-          'field' => dict[
-            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
               shape(
@@ -13231,12 +13211,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'ensure' => shape(
-          'field' => dict[
-            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
               shape(
@@ -13811,12 +13786,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           ],
         ),
         'ensure' => shape(
-          'field' => dict[
-            '\thrift\annotation\InternBox' => \thrift\annotation\InternBox::fromShape(
-              shape(
-              )
-            ),
-          ],
+          'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Frozen2Exclude' => \thrift\annotation\cpp\Frozen2Exclude::fromShape(
               shape(

@@ -3210,9 +3210,7 @@ _readField_patchPrior:
 _readField_ensure:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::readWithContext(*iprot, ptr.mut(), _readState);
-    this->__fbthrift_field_ensure = std::move(ptr);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::readWithContext(*iprot, this->__fbthrift_field_ensure, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -3332,14 +3330,9 @@ uint32_t MyDataPatchStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::serializedSize<false>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("MyDataEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -3365,14 +3358,9 @@ uint32_t MyDataPatchStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataFieldPatchStruct>::serializedSize<true>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("MyDataEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -3414,17 +3402,11 @@ uint32_t MyDataPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::write(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->writeStructBegin("MyDataEnsureStruct");
-      xfer += prot_->writeStructEnd();
-      xfer += prot_->writeFieldStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -3905,9 +3887,7 @@ _readField_patchPrior:
 _readField_ensure:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::readWithContext(*iprot, ptr.mut(), _readState);
-    this->__fbthrift_field_ensure = std::move(ptr);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::readWithContext(*iprot, this->__fbthrift_field_ensure, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -4027,14 +4007,9 @@ uint32_t MyDataWithCustomDefaultPatchStruct::serializedSize(Protocol_ const* pro
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::serializedSize<false>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("MyDataWithCustomDefaultEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -4060,14 +4035,9 @@ uint32_t MyDataWithCustomDefaultPatchStruct::serializedSizeZC(Protocol_ const* p
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>::serializedSize<true>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("MyDataWithCustomDefaultEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -4109,17 +4079,11 @@ uint32_t MyDataWithCustomDefaultPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::write(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->writeStructBegin("MyDataWithCustomDefaultEnsureStruct");
-      xfer += prot_->writeStructEnd();
-      xfer += prot_->writeFieldStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -11688,9 +11652,7 @@ _readField_patchPrior:
 _readField_ensure:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::readWithContext(*iprot, ptr.mut(), _readState);
-    this->__fbthrift_field_ensure = std::move(ptr);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::readWithContext(*iprot, this->__fbthrift_field_ensure, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -11810,14 +11772,9 @@ uint32_t MyStructPatchStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::serializedSize<false>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("MyStructEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -11843,14 +11800,9 @@ uint32_t MyStructPatchStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructFieldPatchStruct>::serializedSize<true>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("MyStructEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -11892,17 +11844,11 @@ uint32_t MyStructPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::write(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->writeStructBegin("MyStructEnsureStruct");
-      xfer += prot_->writeStructEnd();
-      xfer += prot_->writeFieldStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::MyStructEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -12165,9 +12111,7 @@ _readField_patchPrior:
 _readField_ensure:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::readWithContext(*iprot, ptr.mut(), _readState);
-    this->__fbthrift_field_ensure = std::move(ptr);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::readWithContext(*iprot, this->__fbthrift_field_ensure, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -12287,14 +12231,9 @@ uint32_t LateDefStructPatchStruct::serializedSize(Protocol_ const* prot_) const 
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::serializedSize<false>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("LateDefStructEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -12320,14 +12259,9 @@ uint32_t LateDefStructPatchStruct::serializedSizeZC(Protocol_ const* prot_) cons
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructFieldPatchStruct>::serializedSize<true>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("LateDefStructEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -12369,17 +12303,11 @@ uint32_t LateDefStructPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::write(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->writeStructBegin("LateDefStructEnsureStruct");
-      xfer += prot_->writeStructEnd();
-      xfer += prot_->writeFieldStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::LateDefStructEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -12917,9 +12845,7 @@ _readField_patchPrior:
 _readField_ensure:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::readWithContext(*iprot, ptr.mut(), _readState);
-    this->__fbthrift_field_ensure = std::move(ptr);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::readWithContext(*iprot, this->__fbthrift_field_ensure, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -13039,14 +12965,9 @@ uint32_t RecursivePatchStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::serializedSize<false>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("RecursiveEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -13072,14 +12993,9 @@ uint32_t RecursivePatchStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveFieldPatchStruct>::serializedSize<true>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("RecursiveEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -13121,17 +13037,11 @@ uint32_t RecursivePatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::write(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->writeStructBegin("RecursiveEnsureStruct");
-      xfer += prot_->writeStructEnd();
-      xfer += prot_->writeFieldStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::RecursiveEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -13508,9 +13418,7 @@ _readField_patchPrior:
 _readField_ensure:
   {
     _readState.beforeSubobject(iprot);
-    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::readWithContext(*iprot, ptr.mut(), _readState);
-    this->__fbthrift_field_ensure = std::move(ptr);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::readWithContext(*iprot, this->__fbthrift_field_ensure, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -13630,14 +13538,9 @@ uint32_t BarPatchStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::serializedSize<false>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("BarEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -13663,14 +13566,9 @@ uint32_t BarPatchStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("patchPrior", apache::thrift::protocol::T_STRUCT, 3);
     xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::apache::thrift::op::detail::FieldPatchAdapter>(*prot_, this->__fbthrift_field_patchPrior, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarFieldPatchStruct>::serializedSize<true>(*prot_, ::apache::thrift::op::detail::FieldPatchAdapter::toThrift(this->__fbthrift_field_patchPrior));});
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(this->__fbthrift_field_ensure))) {
     xfer += prot_->serializedFieldSize("ensure", apache::thrift::protocol::T_STRUCT, 5);
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->serializedStructSize("BarEnsureStruct");
-      xfer += prot_->serializedSizeStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_ensure);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>(this->__fbthrift_field_patch))) {
     xfer += prot_->serializedFieldSize("patch", apache::thrift::protocol::T_STRUCT, 6);
@@ -13712,17 +13610,11 @@ uint32_t BarPatchStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(*this->__fbthrift_field_ensure))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(this->__fbthrift_field_ensure))) {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 5, kPrevFieldId>(*prot_, "ensure", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->__fbthrift_field_ensure) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::write(*prot_, *this->__fbthrift_field_ensure);
-    } else {
-      xfer += prot_->writeStructBegin("BarEnsureStruct");
-      xfer += prot_->writeStructEnd();
-      xfer += prot_->writeFieldStop();
-    }
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test::fixtures::patch::BarEnsureStruct>::write(*prot_, this->__fbthrift_field_ensure);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

@@ -939,8 +939,6 @@ struct is_terse_intern_boxed_field_ref<terse_intern_boxed_field_ref<T>>
 
 TEST(StructPatchTest, EnsureStruct) {
   MyDataPatch patch;
-  using EnsureType = folly::remove_cvref_t<decltype(patch.toThrift().ensure())>;
-  static_assert(is_terse_intern_boxed_field_ref<EnsureType>::value, "");
 
   patch.ensure<ident::data1>("10");
   patch.ensure<ident::data3>("20");
@@ -956,8 +954,6 @@ TEST(StructPatchTest, EnsureStruct) {
 
 TEST(StructPatchTest, EnsureUnion) {
   MyUnionPatch patch;
-  using EnsureType = folly::remove_cvref_t<decltype(patch.toThrift().ensure())>;
-  static_assert(is_terse_intern_boxed_field_ref<EnsureType>::value, "");
 
   patch.ensure<ident::option1>("10");
   patch.ensure<ident::option2>(20);

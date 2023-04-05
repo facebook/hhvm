@@ -1732,8 +1732,7 @@ MyDataPatchStruct& MyDataPatchStruct::operator=(const MyDataPatchStruct& other) 
 }
 
 MyDataPatchStruct::MyDataPatchStruct() :
-      __fbthrift_field_clear(),
-      __fbthrift_field_ensure(::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>())) {
+      __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
@@ -1761,7 +1760,7 @@ MyDataPatchStruct& MyDataPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyDataPatchSt
 }
 
 
-MyDataPatchStruct::MyDataPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyData> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct> ensure__arg, ::test::fixtures::patch::MyDataFieldPatch patch__arg) :
+MyDataPatchStruct::MyDataPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyData> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -1777,14 +1776,14 @@ void MyDataPatchStruct::__fbthrift_clear() {
   this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>());
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
 void MyDataPatchStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>());
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
@@ -1792,7 +1791,7 @@ bool MyDataPatchStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_assign) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
- this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(*this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
@@ -1807,7 +1806,7 @@ bool MyDataPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& r
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
     return false;
   }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataEnsureStruct>>(*lhs.__fbthrift_field_ensure, *rhs.__fbthrift_field_ensure)) {
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
     return false;
   }
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
@@ -1818,6 +1817,14 @@ bool MyDataPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& r
 
 bool MyDataPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::MyDataEnsureStruct& MyDataPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::MyDataEnsureStruct MyDataPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
 }
 
 
@@ -2159,8 +2166,7 @@ MyDataWithCustomDefaultPatchStruct& MyDataWithCustomDefaultPatchStruct::operator
 }
 
 MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct() :
-      __fbthrift_field_clear(),
-      __fbthrift_field_ensure(::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>())) {
+      __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
@@ -2188,7 +2194,7 @@ MyDataWithCustomDefaultPatchStruct& MyDataWithCustomDefaultPatchStruct::operator
 }
 
 
-MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyDataWithCustomDefault> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct> ensure__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patch__arg) :
+MyDataWithCustomDefaultPatchStruct::MyDataWithCustomDefaultPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyDataWithCustomDefault> assign__arg, bool clear__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patchPrior__arg, ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct ensure__arg, ::test::fixtures::patch::MyDataWithCustomDefaultFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -2204,14 +2210,14 @@ void MyDataWithCustomDefaultPatchStruct::__fbthrift_clear() {
   this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>());
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
 void MyDataWithCustomDefaultPatchStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>());
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
@@ -2219,7 +2225,7 @@ bool MyDataWithCustomDefaultPatchStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_assign) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
- this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(*this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
@@ -2234,7 +2240,7 @@ bool MyDataWithCustomDefaultPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyD
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
     return false;
   }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct>>(*lhs.__fbthrift_field_ensure, *rhs.__fbthrift_field_ensure)) {
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
     return false;
   }
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
@@ -2245,6 +2251,14 @@ bool MyDataWithCustomDefaultPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyD
 
 bool MyDataWithCustomDefaultPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyDataWithCustomDefaultPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct& MyDataWithCustomDefaultPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::MyDataWithCustomDefaultEnsureStruct MyDataWithCustomDefaultPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
 }
 
 
@@ -5936,8 +5950,7 @@ MyStructPatchStruct& MyStructPatchStruct::operator=(const MyStructPatchStruct& o
 }
 
 MyStructPatchStruct::MyStructPatchStruct() :
-      __fbthrift_field_clear(),
-      __fbthrift_field_ensure(::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>())) {
+      __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
@@ -5965,7 +5978,7 @@ MyStructPatchStruct& MyStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructP
 }
 
 
-MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::MyStructFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct> ensure__arg, ::test::fixtures::patch::MyStructFieldPatch patch__arg) :
+MyStructPatchStruct::MyStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::MyStructFieldPatch patchPrior__arg, ::test::fixtures::patch::MyStructEnsureStruct ensure__arg, ::test::fixtures::patch::MyStructFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -5981,14 +5994,14 @@ void MyStructPatchStruct::__fbthrift_clear() {
   this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>());
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
 void MyStructPatchStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::MyStructEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>());
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
@@ -5996,7 +6009,7 @@ bool MyStructPatchStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_assign) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
- this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(*this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
@@ -6011,7 +6024,7 @@ bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruc
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
     return false;
   }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructEnsureStruct>>(*lhs.__fbthrift_field_ensure, *rhs.__fbthrift_field_ensure)) {
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
     return false;
   }
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
@@ -6022,6 +6035,14 @@ bool MyStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructPatchStruc
 
 bool MyStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::MyStructEnsureStruct& MyStructPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::MyStructEnsureStruct MyStructPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
 }
 
 
@@ -6274,8 +6295,7 @@ LateDefStructPatchStruct& LateDefStructPatchStruct::operator=(const LateDefStruc
 }
 
 LateDefStructPatchStruct::LateDefStructPatchStruct() :
-      __fbthrift_field_clear(),
-      __fbthrift_field_ensure(::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>())) {
+      __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
@@ -6303,7 +6323,7 @@ LateDefStructPatchStruct& LateDefStructPatchStruct::operator=(FOLLY_MAYBE_UNUSED
 }
 
 
-LateDefStructPatchStruct::LateDefStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::LateDefStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::LateDefStructFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::LateDefStructEnsureStruct> ensure__arg, ::test::fixtures::patch::LateDefStructFieldPatch patch__arg) :
+LateDefStructPatchStruct::LateDefStructPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::LateDefStruct> assign__arg, bool clear__arg, ::test::fixtures::patch::LateDefStructFieldPatch patchPrior__arg, ::test::fixtures::patch::LateDefStructEnsureStruct ensure__arg, ::test::fixtures::patch::LateDefStructFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -6327,7 +6347,7 @@ bool LateDefStructPatchStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_assign) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
- this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(*this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
@@ -6342,7 +6362,7 @@ bool LateDefStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStruct
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
     return false;
   }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::test::fixtures::patch::LateDefStructEnsureStruct>>(*lhs.__fbthrift_field_ensure, *rhs.__fbthrift_field_ensure)) {
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
     return false;
   }
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
@@ -6353,6 +6373,14 @@ bool LateDefStructPatchStruct::operator==(FOLLY_MAYBE_UNUSED const LateDefStruct
 
 bool LateDefStructPatchStruct::operator<(FOLLY_MAYBE_UNUSED const LateDefStructPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::LateDefStructEnsureStruct& LateDefStructPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::LateDefStructEnsureStruct LateDefStructPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
 }
 
 
@@ -6789,8 +6817,7 @@ RecursivePatchStruct& RecursivePatchStruct::operator=(const RecursivePatchStruct
 }
 
 RecursivePatchStruct::RecursivePatchStruct() :
-      __fbthrift_field_clear(),
-      __fbthrift_field_ensure(::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>())) {
+      __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
@@ -6818,7 +6845,7 @@ RecursivePatchStruct& RecursivePatchStruct::operator=(FOLLY_MAYBE_UNUSED Recursi
 }
 
 
-RecursivePatchStruct::RecursivePatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Recursive> assign__arg, bool clear__arg, ::test::fixtures::patch::RecursiveFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct> ensure__arg, ::test::fixtures::patch::RecursiveFieldPatch patch__arg) :
+RecursivePatchStruct::RecursivePatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Recursive> assign__arg, bool clear__arg, ::test::fixtures::patch::RecursiveFieldPatch patchPrior__arg, ::test::fixtures::patch::RecursiveEnsureStruct ensure__arg, ::test::fixtures::patch::RecursiveFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -6834,14 +6861,14 @@ void RecursivePatchStruct::__fbthrift_clear() {
   this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>());
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
 void RecursivePatchStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::RecursiveEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>());
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
@@ -6849,7 +6876,7 @@ bool RecursivePatchStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_assign) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
- this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(*this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
@@ -6864,7 +6891,7 @@ bool RecursivePatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursivePatchStr
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
     return false;
   }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::test::fixtures::patch::RecursiveEnsureStruct>>(*lhs.__fbthrift_field_ensure, *rhs.__fbthrift_field_ensure)) {
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
     return false;
   }
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
@@ -6875,6 +6902,14 @@ bool RecursivePatchStruct::operator==(FOLLY_MAYBE_UNUSED const RecursivePatchStr
 
 bool RecursivePatchStruct::operator<(FOLLY_MAYBE_UNUSED const RecursivePatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::RecursiveEnsureStruct& RecursivePatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::RecursiveEnsureStruct RecursivePatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
 }
 
 
@@ -7187,8 +7222,7 @@ BarPatchStruct& BarPatchStruct::operator=(const BarPatchStruct& other) {
 }
 
 BarPatchStruct::BarPatchStruct() :
-      __fbthrift_field_clear(),
-      __fbthrift_field_ensure(::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>())) {
+      __fbthrift_field_clear() {
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
@@ -7216,7 +7250,7 @@ BarPatchStruct& BarPatchStruct::operator=(FOLLY_MAYBE_UNUSED BarPatchStruct&& ot
 }
 
 
-BarPatchStruct::BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Bar> assign__arg, bool clear__arg, ::test::fixtures::patch::BarFieldPatch patchPrior__arg, ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct> ensure__arg, ::test::fixtures::patch::BarFieldPatch patch__arg) :
+BarPatchStruct::BarPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::Bar> assign__arg, bool clear__arg, ::test::fixtures::patch::BarFieldPatch patchPrior__arg, ::test::fixtures::patch::BarEnsureStruct ensure__arg, ::test::fixtures::patch::BarFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -7232,14 +7266,14 @@ void BarPatchStruct::__fbthrift_clear() {
   this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>());
+  ::apache::thrift::clear(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
 void BarPatchStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-  this->__fbthrift_field_ensure = ::apache::thrift::detail::boxed_value<::test::fixtures::patch::BarEnsureStruct>::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>());
+  ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_ensure);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
 }
 
@@ -7247,7 +7281,7 @@ bool BarPatchStruct::__fbthrift_is_empty() const {
   return !(this->__fbthrift_field_assign) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_clear) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>(this->__fbthrift_field_patchPrior) &&
- this->__fbthrift_field_ensure && ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(*this->__fbthrift_field_ensure) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(this->__fbthrift_field_ensure) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::adapted<::apache::thrift::op::detail::FieldPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::BarFieldPatchStruct>>>(this->__fbthrift_field_patch);
 }
 
@@ -7262,7 +7296,7 @@ bool BarPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) co
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patchPrior, rhs.__fbthrift_field_patchPrior)) {
     return false;
   }
-  if (!::apache::thrift::op::equal<::apache::thrift::type::struct_t<::test::fixtures::patch::BarEnsureStruct>>(*lhs.__fbthrift_field_ensure, *rhs.__fbthrift_field_ensure)) {
+  if (!(lhs.ensure_ref() == rhs.ensure_ref())) {
     return false;
   }
   if (::apache::thrift::adapt_detail::not_equal<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch)) {
@@ -7273,6 +7307,14 @@ bool BarPatchStruct::operator==(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) co
 
 bool BarPatchStruct::operator<(FOLLY_MAYBE_UNUSED const BarPatchStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::test::fixtures::patch::BarEnsureStruct& BarPatchStruct::get_ensure() const& {
+  return __fbthrift_field_ensure;
+}
+
+::test::fixtures::patch::BarEnsureStruct BarPatchStruct::get_ensure() && {
+  return std::move(__fbthrift_field_ensure);
 }
 
 

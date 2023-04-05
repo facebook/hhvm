@@ -66,6 +66,12 @@ type t =
       var_name: string;
       did_you_mean: (string * Pos.t) option;
     }
+  | Undefined_in_expr_tree of {
+      pos: Pos.t;
+      var_name: string;
+      dsl: string option;
+      did_you_mean: (string * Pos.t) option;
+    }
   | This_reserved of Pos.t
   | Start_with_T of Pos.t
   | Already_bound of {

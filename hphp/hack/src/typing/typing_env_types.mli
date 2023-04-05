@@ -25,6 +25,12 @@ type expr_tree_env = {
           SomeDSL`1 + 1`
 
           This hint would reference `SomeDsl` *)
+  outer_locals: Typing_local_types.t;
+      (** The set of locals defined outside the expression tree. Ex:
+        $x = 10;
+        SomeDSL`1 + 1`;
+
+        `$x` would be in this set *)
 }
 
 type env = {

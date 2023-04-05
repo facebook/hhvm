@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<933d6bb82926d54f9663423cb675c2ef>>
+// @generated SignedSource<<b4db1a77ae361ea735ba3f424e133314>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -157,6 +157,13 @@ pub enum NamingError {
     Undefined {
         pos: pos::Pos,
         var_name: String,
+        did_you_mean: Option<(String, pos::Pos)>,
+    },
+    #[rust_to_ocaml(name = "Undefined_in_expr_tree")]
+    UndefinedInExprTree {
+        pos: pos::Pos,
+        var_name: String,
+        dsl: Option<String>,
         did_you_mean: Option<(String, pos::Pos)>,
     },
     #[rust_to_ocaml(name = "This_reserved")]

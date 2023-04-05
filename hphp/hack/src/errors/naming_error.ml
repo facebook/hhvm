@@ -75,6 +75,12 @@ type t =
       var_name: string;
       did_you_mean: (string * Pos.t) option;
     }
+  | Undefined_in_expr_tree of {
+      pos: Pos.t;
+      var_name: string;
+      dsl: string option;
+      did_you_mean: (string * Pos.t) option;
+    }
   | This_reserved of Pos.t
   | Start_with_T of Pos.t
   | Already_bound of {
@@ -578,6 +584,38 @@ let undefined pos var_name did_you_mean =
     ( pos,
       Format.sprintf "Variable %s is undefined, or not always defined."
       @@ Markdown_lite.md_codify var_name )
+    reasons
+    ~quickfixes
+
+let undefined_in_expr_tree pos var_name dsl did_you_mean =
+  let (reasons, quickfixes) =
+    Option.value_map
+      ~default:([], [])
+      did_you_mean
+      ~f:(fun (did_you_mean, did_you_mean_pos) ->
+        ( [
+            ( Pos_or_decl.of_raw_pos did_you_mean_pos,
+              Printf.sprintf "Did you forget to splice in `%s`?" did_you_mean );
+          ],
+          [
+            Quickfix.make
+              ~title:("Splice in " ^ did_you_mean)
+              ~new_text:(Printf.sprintf "${%s}" did_you_mean)
+              pos;
+          ] ))
+  in
+  let dsl =
+    match dsl with
+    | Some dsl -> Printf.sprintf "`%s` expression tree" @@ Utils.strip_ns dsl
+    | None -> "expression tree"
+  in
+  User_error.make
+    Error_code.(to_enum Undefined)
+    ( pos,
+      Format.sprintf
+        "Variable %s is undefined in this %s."
+        (Markdown_lite.md_codify var_name)
+        dsl )
     reasons
     ~quickfixes
 
@@ -1351,3 +1389,5 @@ let to_user_error = function
     unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion
   | Tparam_non_shadowing_reuse { pos; tparam_name } ->
     tparam_non_shadowing_reuse pos tparam_name
+  | Undefined_in_expr_tree { pos; var_name; dsl; did_you_mean } ->
+    undefined_in_expr_tree pos var_name dsl did_you_mean

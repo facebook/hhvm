@@ -44,7 +44,10 @@ let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
 [@@@warning "+32"]
 
-type expr_tree_env = { dsl: Aast.hint }
+type expr_tree_env = {
+  dsl: Aast.hint;
+  outer_locals: Typing_local_types.t;
+}
 
 (** See the .mli file for the documentation of fields. *)
 type env = {

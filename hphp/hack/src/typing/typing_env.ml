@@ -986,7 +986,12 @@ let with_origin2 env origin f =
   (env, r1, r2)
 
 let inside_expr_tree env expr_tree_hint =
-  { env with in_expr_tree = Some { dsl = expr_tree_hint } }
+  let outer_locals =
+    match next_cont_opt env with
+    | None -> Local_id.Map.empty
+    | Some cont -> cont.LEnvC.local_types
+  in
+  { env with in_expr_tree = Some { dsl = expr_tree_hint; outer_locals } }
 
 let outside_expr_tree env = { env with in_expr_tree = None }
 
@@ -1001,7 +1006,7 @@ let with_outside_expr_tree env f =
   let old_in_expr_tree = env.in_expr_tree in
   let dsl =
     match old_in_expr_tree with
-    | Some { dsl = (_, Happly (cls, _)) } -> Some cls
+    | Some { dsl = (_, Happly (cls, _)); outer_locals = _ } -> Some cls
     | _ -> None
   in
   let env = outside_expr_tree env in
@@ -1163,34 +1168,69 @@ let unset_local env local =
 
 let tany _env = Typing_defs.make_tany ()
 
-let get_local_in_ctx ?error_if_undef_at_pos:p x ctx_opt =
-  let not_found_is_ok x ctx = Fake.is_valid ctx.LEnvC.fake_members x in
-  let error_if_pos_provided posopt ctx =
-    match posopt with
-    | Some p ->
-      let lid = LID.to_string x in
-      let suggest_most_similar lid =
-        (* Ignore fake locals *)
-        let all_locals =
-          LID.Map.fold
-            (fun k v acc ->
-              if LID.is_user_denotable k then
-                (k, v) :: acc
-              else
-                acc)
-            ctx.LEnvC.local_types
-            []
-        in
-        let var_name (k, _) = LID.to_string k in
-        match most_similar lid all_locals var_name with
-        | Some (k, (_, pos, _)) -> Some (LID.to_string k, pos)
-        | None -> None
-      in
-      Errors.add_naming_error
-      @@ Naming_error.Undefined
-           { pos = p; var_name = lid; did_you_mean = suggest_most_similar lid }
-    | None -> ()
+let local_undefined_error ~env p x ctx =
+  let open Option.Let_syntax in
+  (* When inside an expression tree, the user may forget to splice in a
+     variable. If that happens we want to suggest splicing in that
+     variable. *)
+  let all_outer_locals () =
+    Option.value ~default:[]
+    @@ let* { outer_locals; dsl } = env.in_expr_tree in
+       let locals =
+         LID.Map.fold
+           (fun k ((_, p, _) as v) acc ->
+             (* $this doesn't have a position. In general best to avoid
+                suggestions that lack positions. *)
+             if LID.is_user_denotable k && (not @@ Pos.equal p Pos.none) then
+               (k, v, Some dsl) :: acc
+             else
+               acc)
+           outer_locals
+           []
+       in
+       return locals
   in
+  match p with
+  | Some p ->
+    let lid = LID.to_string x in
+    let suggest_most_similar lid =
+      (* Ignore fake locals *)
+      let all_locals =
+        LID.Map.fold
+          (fun k v acc ->
+            if LID.is_user_denotable k then
+              (k, v, None) :: acc
+            else
+              acc)
+          ctx.LEnvC.local_types
+          (* Prefer suggesting variables within the current scope *)
+          (all_outer_locals ())
+      in
+      let var_name (k, _, _) = LID.to_string k in
+      match most_similar lid all_locals var_name with
+      | Some (k, (_, pos, _), dsl) -> (Some (LID.to_string k, pos), dsl)
+      | None -> (None, None)
+    in
+    let (most_similar, in_dsl) = suggest_most_similar lid in
+    let error =
+      match in_dsl with
+      | None ->
+        Naming_error.Undefined
+          { pos = p; var_name = lid; did_you_mean = most_similar }
+      | Some dsl ->
+        let dsl =
+          match dsl with
+          | (_, Happly ((_, cls), _)) -> Some cls
+          | _ -> None
+        in
+        Naming_error.Undefined_in_expr_tree
+          { pos = p; var_name = lid; dsl; did_you_mean = most_similar }
+    in
+    Errors.add_naming_error error
+  | None -> ()
+
+let get_local_in_ctx ~undefined_err_fun x ctx_opt =
+  let not_found_is_ok x ctx = Fake.is_valid ctx.LEnvC.fake_members x in
   match ctx_opt with
   | None ->
     (* If the continuation is absent, we are in dead code so the variable should
@@ -1204,19 +1244,20 @@ let get_local_in_ctx ?error_if_undef_at_pos:p x ctx_opt =
         if not_found_is_ok x ctx then
           ()
         else
-          error_if_pos_provided p ctx
+          undefined_err_fun x ctx
       | Some _ -> ()
     end;
     lcl
 
-let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx_opt =
-  match get_local_in_ctx ?error_if_undef_at_pos x ctx_opt with
+let get_local_ty_in_ctx env ~undefined_err_fun x ctx_opt =
+  match get_local_in_ctx ~undefined_err_fun x ctx_opt with
   | None -> (false, mk (Reason.Rnone, tany env), Pos.none)
   | Some (x, pos, _) -> (true, x, pos)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
+  let undefined_err_fun = local_undefined_error ~env p in
   let next_cont = next_cont_opt env in
-  get_local_ty_in_ctx env ?error_if_undef_at_pos:p x next_cont
+  get_local_ty_in_ctx env ~undefined_err_fun x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
   let (mut, ty, _) =
@@ -1239,7 +1280,10 @@ let get_locals ?(quiet = false) env plids =
         else
           Some p
       in
-      match get_local_in_ctx ?error_if_undef_at_pos lid next_cont with
+      let undefined_err_fun =
+        local_undefined_error ~env error_if_undef_at_pos
+      in
+      match get_local_in_ctx ~undefined_err_fun lid next_cont with
       | None -> locals
       | Some ty_eid -> LID.Map.add lid ty_eid locals)
 

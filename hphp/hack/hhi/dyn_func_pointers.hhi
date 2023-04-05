@@ -9,6 +9,7 @@
  */
 
 namespace HH {
+  <<__NoAutoDynamic>>
   function dynamic_fun(string $func_name)[]: dynamic;
   function dynamic_class_meth(string $cls_name, string $meth_name)[]: dynamic;
   function dynamic_meth_caller(string $cls_name, string $meth_name)[]: dynamic;

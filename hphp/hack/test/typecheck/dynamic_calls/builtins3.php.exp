@@ -1,6 +1,6 @@
 File "builtins3.php", line 7, characters 33-38:
 Invalid argument (Typing[4110])
-  File "dyn_func_pointers.hhi", line 12, characters 24-29:
+  File "dyn_func_pointers.hhi", line 13, characters 24-29:
   Expected `string`
   File "builtins3.php", line 3, characters 25-29:
   But got `mixed`

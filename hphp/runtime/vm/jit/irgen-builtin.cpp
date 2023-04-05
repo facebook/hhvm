@@ -21,13 +21,16 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -83,6 +86,85 @@ struct ParamPrep {
 // Will turn into either an int or a double in zend_convert_scalar_to_number.
 bool type_converts_to_number(Type ty) {
   return ty.subtypeOfAny(TDbl, TInt, TNull, TObj, TRes, TStr, TBool);
+}
+
+/*
+ * Warning: The logic for handling the tokens %%, %s in the format string
+ * in this function should mimic one in the string_printf implementation in
+ * zend-printf.cpp, which is invoked in the slow path. If you make any changes
+ * here, please ensure that the two implementations will be in sync.
+ */
+jit::vector<SSATmp*> tokenize(
+    IRGS& env, const StringData* format, SSATmp* args) {
+  assertx(args->isA(TVec));
+  auto const numArgs = [&]() -> Optional<uint32_t> {
+    auto const rat = args->type().arrSpec().type();
+    if (!rat || rat->tag() != RepoAuthType::Array::Tag::Tuple) {
+      return std::nullopt;
+    }
+    return rat->size();
+  }();
+
+  jit::vector<SSATmp*> result;
+  if (!numArgs.has_value()) {
+    return result;
+  }
+
+  if (format->empty()) {
+    return result;
+  }
+
+  int size = 256 - kStringOverhead;
+  StringBuffer buf(size);
+  jit::vector<const StringData*> tokens;
+  size_t numStrTokens = 0;
+  for (auto it = format->slice().begin(); it != format->slice().end(); ++it) {
+    char ch = *it;
+    if (ch != '%') {
+      buf.append(ch);
+      continue;
+    }
+
+    it++;
+    if (it != format->slice().end()) {
+      if (*it == '%') {
+        buf.append('%');
+        continue;
+      }
+
+      if (*it != 's') {
+        return jit::vector<SSATmp*>();
+      }
+
+      if (!buf.empty()) {
+        tokens.push_back(makeStaticString(buf.detach()));
+      }
+      // Use a nullptr placeholder that will be replaced with the corresponding
+      // token from args
+      ++numStrTokens;
+      tokens.push_back(nullptr);
+    }
+  }
+
+  if (!buf.empty()) {
+    tokens.push_back(makeStaticString(buf.detach()));
+  }
+
+  if (numArgs < numStrTokens) {
+    return result;
+  }
+
+  size_t argIdx = 0;
+  for (auto const token : tokens) {
+    if (!token) {
+      auto index = env.unit.cns(argIdx++);
+      auto elem = gen(env, LdVecElem, args, index);
+      result.push_back(gen(env, ConvTVToStr, ConvNoticeData{}, elem));
+    } else {
+      result.push_back(cns(env, token));
+    }
+  }
+  return result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -459,6 +541,51 @@ SSATmp* opt_ceil(IRGS& env, const ParamPrep& params) {
   // May throw
   auto const dbl = gen(env, ConvTVToDbl, val);
   return gen(env, Ceil, dbl);
+}
+
+SSATmp* genConcat(IRGS& env, std::vector<SSATmp*>&& tokens) {
+  if (tokens.empty()) {
+    return nullptr;
+  }
+
+  auto lhs = tokens[0];
+  size_t frontier = 1;
+  while (frontier < tokens.size()) {
+    auto const remaining = tokens.size() - frontier;
+    if (remaining < 3) {
+      switch(remaining) {
+        case 0:
+          always_assert(false);
+        case 1:
+          lhs = gen(env, ConcatStrStr, lhs, tokens[frontier]);
+          break;
+        case 2:
+          lhs = gen(env, ConcatStr3, lhs, tokens[frontier], tokens[frontier+1]);
+          break;
+      }
+      frontier += remaining;
+    } else {
+      lhs = gen(env, ConcatStr4, lhs, tokens[frontier], tokens[frontier+1], tokens[frontier+2]);
+      frontier += 3;
+    }
+  }
+
+  return lhs;
+}
+
+SSATmp* opt_vsprintf_l(IRGS& env, const ParamPrep& params) {
+  auto const format = params[1].value;
+  auto const args = params[2].value;
+  if (!format->hasConstVal(TStr) || !args->isA(TVec)) {
+    return nullptr;
+  }
+
+  auto tokens = tokenize(env, format->strVal(), args);
+  if (tokens.empty()) {
+    return nullptr;
+  }
+
+  return genConcat(env, std::move(tokens));
 }
 
 SSATmp* opt_floor(IRGS& env, const ParamPrep& params) {
@@ -1151,6 +1278,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\Lib\\_Private\\Native\\last", opt_container_last},
   {"HH\\Lib\\_Private\\Native\\first_key", opt_container_first_key},
   {"HH\\Lib\\_Private\\Native\\last_key", opt_container_last_key},
+  {"HH\\Lib\\_Private\\_Str\\vsprintf_l", opt_vsprintf_l},
   {"HH\\fun_get_function", opt_fun_get_function},
   {"HH\\class_meth_get_class", opt_class_meth_get_class},
   {"HH\\class_meth_get_method", opt_class_meth_get_method},

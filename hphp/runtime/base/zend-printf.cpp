@@ -305,6 +305,12 @@ inline static int getnumber(const char *buffer, int *pos) {
  *  "s"   argument is a string
  *  "x"   integer argument is printed as lowercase hexadecimal
  *  "X"   integer argument is printed as uppercase hexadecimal
+ *
+ * Warning: The logic for handling the tokens %%, %s in the format string
+ * in this function should mimic the implementation in the tokenize function in
+ * irgen-builtin.cpp which is invoked in the fast path of certain builtins like
+ * Str\format. If you make any changes here, please ensure that the two
+ * implementations will be in sync.
  */
 String string_printf(const char *format, int len, const Array& args) {
   Array vargs = args;

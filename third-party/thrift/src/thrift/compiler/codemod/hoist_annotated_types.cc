@@ -51,7 +51,7 @@ class hoist_annotated_types {
     auto len = sm_.get_file(prog_.path()).text.size() - 1;
     std::vector<std::string> typedefs;
     for (const auto& [k, v] : typedefs_) {
-      typedefs.push_back(fmt::format("typedef {} {}", v, k));
+      typedefs.push_back(fmt::format("typedef {} {}", v.name, k));
     }
     fm_.add(
         {len,
@@ -72,8 +72,13 @@ class hoist_annotated_types {
         if (!needs_replacement(t.elem_type())) {
           return;
         }
-        replacement =
-            fmt::format("list<{}>", maybe_create_typedef(t.elem_type()));
+        auto name = maybe_create_typedef(t.elem_type());
+        replacement = fmt::format("list<{}>", name);
+        // We modify the AST in case we're visiting a nested type, so that the
+        // outer type will render correctly without us needing to propagate this
+        // state.
+        const_cast<t_type_ref&>(t.elem_type()) =
+            t_type_ref::from_ptr(typedefs_.at(name).ptr);
         break;
       }
       case t_type::type::t_set: {
@@ -81,8 +86,10 @@ class hoist_annotated_types {
         if (!needs_replacement(t.elem_type())) {
           return;
         }
-        replacement =
-            fmt::format("set<{}>", maybe_create_typedef(t.elem_type()));
+        auto name = maybe_create_typedef(t.elem_type());
+        replacement = fmt::format("set<{}>", name);
+        const_cast<t_type_ref&>(t.elem_type()) =
+            t_type_ref::from_ptr(typedefs_.at(name).ptr);
         break;
       }
       case t_type::type::t_map: {
@@ -90,6 +97,16 @@ class hoist_annotated_types {
         if (!needs_replacement(t.key_type()) &&
             !needs_replacement(t.val_type())) {
           return;
+        }
+        auto name = maybe_create_typedef(t.key_type());
+        if (auto it = typedefs_.find(name); it != typedefs_.end()) {
+          const_cast<t_type_ref&>(t.key_type()) =
+              t_type_ref::from_ptr(it->second.ptr);
+        }
+        name = maybe_create_typedef(t.val_type());
+        if (auto it = typedefs_.find(name); it != typedefs_.end()) {
+          const_cast<t_type_ref&>(t.val_type()) =
+              t_type_ref::from_ptr(it->second.ptr);
         }
         replacement = fmt::format(
             "map<{}, {}>",
@@ -212,9 +229,11 @@ class hoist_annotated_types {
     }
     auto name = name_typedef(type);
     if (typedefs_.count(name)) {
-      assert(typedefs_[name] == render_type(type));
+      assert(typedefs_[name].name == render_type(type));
     } else {
-      typedefs_[name] = render_type(type);
+      auto typedf = std::make_unique<t_typedef>(&prog_, name, type);
+      typedefs_[name] = {render_type(type), typedf.get()};
+      prog_.add_def(std::move(typedf));
     }
     return name;
   }
@@ -264,7 +283,11 @@ class hoist_annotated_types {
   }
 
  private:
-  std::map<std::string, std::string> typedefs_;
+  struct Typedef {
+    std::string name;
+    t_typedef* ptr;
+  };
+  std::map<std::string, Typedef> typedefs_;
   codemod::file_manager fm_;
   source_manager sm_;
   t_program& prog_;

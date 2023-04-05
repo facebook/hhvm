@@ -42,6 +42,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 struct S {
                     1: list<S (annotated)> (annotated) foo;
                     2: map<string, map<i32, i32> (annotated)> bar;
+                    3: set<set<i16 (annotated)> (annotated)> nested;
                 }
 
                 service X {
@@ -65,6 +66,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 struct S {
                     1: list<S_annotated_1_475> (annotated) foo;
                     2: map<string, map_i32_i32_annotated_1_475> bar;
+                    3: set<set_fooi16_annotated_1_475_annotated_1_475> nested;
                 }
 
                 service X {
@@ -76,8 +78,10 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 // The following were automatically generated and may benefit from renaming.
                 typedef S (annotated = '1') S_annotated_1_475
                 typedef S (moar_annotated = '1') S_moar_annotated_1_475
+                typedef i16 (annotated = '1') i16_annotated_1_475
                 typedef i32 (cpp.type = 'uint32_t') i32_cpptype_uint32_t_475
                 typedef map<i32, i32> (annotated = '1') map_i32_i32_annotated_1_475
+                typedef set<foo.i16_annotated_1_475> (annotated = '1') set_fooi16_annotated_1_475_annotated_1_475
                 """
             ),
         )

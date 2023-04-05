@@ -864,7 +864,7 @@ struct RuntimeOption {
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, MemInfoCheckCgroup2,         true)                            \
   F(bool, AllowScopeBinding,           false)                           \
-  F(bool, TranslateHackC,              false)                           \
+  F(bool, TranslateHackC,              true)                            \
   F(bool, VerifyTranslateHackC,        false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \

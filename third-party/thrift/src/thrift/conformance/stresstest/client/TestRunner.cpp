@@ -100,7 +100,6 @@ StressTestStats TestRunner::run(std::unique_ptr<StressTestBase> test) {
   ClientRunner runner(cfg_);
   // run the test
   runner.run(test.get());
-  runner.stop();
   // collect and print statistics
   return StressTestStats{
       .memoryStats = runner.getMemoryStats(),
@@ -134,7 +133,6 @@ void TestRunner::runContinuously(std::unique_ptr<StressTestBase> test) {
 
   // run the test
   runner.run(test.get());
-  runner.stop();
 }
 
 void TestRunner::scheduleContinuousStats(ClientRunner& runner) {

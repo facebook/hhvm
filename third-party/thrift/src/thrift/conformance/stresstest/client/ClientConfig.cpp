@@ -48,6 +48,7 @@ DEFINE_int64(
     "How often to poll in secs stats when running continuously");
 DEFINE_bool(io_uring, false, "Flag to enable io_uring on the client");
 DEFINE_int64(runtime_s, 10, "Runtime of test in seconds");
+DEFINE_int64(warmup_s, 2, "Warmup time of test in seconds");
 
 namespace apache::thrift::stress {
 

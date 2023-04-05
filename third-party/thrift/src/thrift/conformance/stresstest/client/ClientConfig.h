@@ -33,6 +33,7 @@ DECLARE_bool(continuous);
 DECLARE_int64(stats_interval);
 DECLARE_bool(io_uring);
 DECLARE_int64(runtime_s);
+DECLARE_int64(warmup_s);
 
 namespace apache::thrift::stress {
 

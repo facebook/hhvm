@@ -43,6 +43,17 @@ class TestDoneTimeout : public folly::HHWheelTimer::Callback {
   bool& testDone_;
 };
 
+class WarmupDoneTimeout : public folly::HHWheelTimer::Callback {
+ public:
+  explicit WarmupDoneTimeout(ClientRpcStats& stats) : stats_(stats) {}
+  void timeoutExpired() noexcept override {
+    stats_.numSuccess = 0;
+    stats_.numFailure = 0;
+    stats_.latencyHistogram.clear();
+  }
+  ClientRpcStats& stats_;
+};
+
 std::unique_ptr<folly::EventBaseBackendBase> getIOUringBackend() {
   return std::make_unique<folly::IoUringBackend>(getIoUringOptions());
 }
@@ -55,7 +66,8 @@ class ClientThread : public folly::HHWheelTimer::Callback {
  public:
   explicit ClientThread(const ClientConfig& cfg, size_t index)
       : memoryHistogram_(50, 0, 1024 * 1024 * 1024 /* 1GB */),
-        testDoneTimeout_(testDone_) {
+        testDoneTimeout_(testDone_),
+        warmupDoneTimeout_(rpcStats_) {
     continuous_ = cfg.continuous;
 
     auto ebm = folly::EventBaseManager::get();
@@ -86,18 +98,20 @@ class ClientThread : public folly::HHWheelTimer::Callback {
         [clients = std::move(clients_)]() {});
   }
 
-  void run(const StressTestBase* test) {
+  folly::SemiFuture<folly::Unit> run(const StressTestBase* test) {
     if (!continuous_) {
       thread_->getEventBase()->timer().scheduleTimeout(
-          &testDoneTimeout_, std::chrono::seconds(FLAGS_runtime_s));
+          &testDoneTimeout_,
+          std::chrono::seconds(FLAGS_warmup_s + FLAGS_runtime_s));
+    }
+    if (FLAGS_warmup_s >= 0) {
+      thread_->getEventBase()->timer().scheduleTimeout(
+          &warmupDoneTimeout_, std::chrono::seconds(FLAGS_warmup_s));
     }
     for (auto& client : clients_) {
       scope_.add(
           runInternal(client.get(), test).scheduleOn(thread_->getEventBase()));
     }
-  }
-
-  folly::SemiFuture<folly::Unit> stop() {
     return scope_.joinAsync()
         .semi()
         .via(thread_->getEventBase())
@@ -146,6 +160,7 @@ class ClientThread : public folly::HHWheelTimer::Callback {
   bool continuous_{false};
   bool testDone_{false};
   TestDoneTimeout testDoneTimeout_;
+  WarmupDoneTimeout warmupDoneTimeout_;
 };
 
 ClientRunner::ClientRunner(const ClientConfig& config)
@@ -161,21 +176,12 @@ ClientRunner::~ClientRunner() {
 
 void ClientRunner::run(const StressTestBase* test) {
   CHECK(!started_) << "ClientRunner was already started";
+  std::vector<folly::SemiFuture<folly::Unit>> starts;
   for (auto& clientThread : clientThreads_) {
-    clientThread->run(test);
+    starts.push_back(clientThread->run(test));
   }
+  folly::collect(std::move(starts)).get();
   started_ = true;
-}
-
-void ClientRunner::stop() {
-  CHECK(started_ && !stopped_)
-      << "ClientRunner was not started or is already stopped";
-  std::vector<folly::SemiFuture<folly::Unit>> stops;
-  for (auto& clientThread : clientThreads_) {
-    stops.push_back(clientThread->stop());
-  }
-  folly::collect(std::move(stops)).get();
-  stopped_ = true;
 }
 
 ClientRpcStats ClientRunner::getRpcStats() const {

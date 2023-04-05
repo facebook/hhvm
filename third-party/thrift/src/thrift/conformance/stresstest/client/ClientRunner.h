@@ -48,7 +48,6 @@ class ClientRunner {
   ~ClientRunner();
 
   void run(const StressTestBase* test);
-  void stop();
 
   ClientRpcStats getRpcStats() const;
   ClientThreadMemoryStats getMemoryStats() const;

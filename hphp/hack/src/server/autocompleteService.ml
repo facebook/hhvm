@@ -142,6 +142,23 @@ let get_class_elt_types ~is_method env class_ cid elts =
   |> List.filter ~f:is_visible
   |> List.map ~f:(fun (id, { ce_type = (lazy ty); _ }) -> (id, ty))
 
+let get_class_req_attrs env pctx classname cid =
+  let req_attrs cls =
+    Cls.props cls
+    |> List.filter ~f:(fun (_, ce) ->
+           Tast_env.is_visible
+             ~is_method:false
+             env
+             (ce.ce_visibility, get_ce_lsb ce)
+             cid
+             cls)
+    |> List.filter ~f:(fun (_, ce) ->
+           Xhp_attribute.opt_is_required (Typing_defs.get_ce_xhp_attr ce))
+    |> List.map ~f:(fun (name, _) -> Utils.strip_xhp_ns name)
+  in
+  Decl_provider.get_class pctx classname
+  |> Option.value_map ~default:[] ~f:req_attrs
+
 let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
     =
   (match ty with
@@ -164,6 +181,17 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
         | None -> Printf.sprintf "${%d}" (i + 1))
   in
   String.concat ~sep:", " param_templates
+
+let insert_text_for_xhp_req_attrs tag attrs =
+  if List.length attrs > 0 then
+    let snippet =
+      List.mapi attrs ~f:(fun i name ->
+          Format.sprintf "%s={${%d}}" name (i + 1))
+      |> String.concat ~sep:" "
+    in
+    InsertAsSnippet { snippet = tag ^ " " ^ snippet; fallback = tag }
+  else
+    InsertLiterally tag
 
 (* If we're autocompleting a call (function or method), insert a
    template for the arguments as well as function name. *)
@@ -1461,6 +1489,65 @@ let find_global_results
                })
     | _ -> ()
 
+let complete_xhp_tag
+    ~(id : Pos.t * string)
+    ~(does_autocomplete_snippet : bool)
+    ~(sienv : SearchUtils.si_env)
+    ~(pctx : Provider_context.t) : unit =
+  let tast_env = Tast_env.empty pctx in
+  let query_text = strip_suffix (snd id) in
+  let query_text = Utils.strip_ns query_text in
+  auto_complete_for_global := query_text;
+  let absolute_none = Pos.none |> Pos.to_absolute in
+  let results =
+    SymbolIndex.find_matching_symbols
+      ~sienv
+      ~query_text
+      ~max_results
+      ~kind_filter:None
+      ~context:(Some Acid)
+  in
+  List.iter results ~f:(fun r ->
+      let (res_label, res_fullname) =
+        (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
+      in
+      let (res_detail, res_insert_text) =
+        (kind_to_string r.si_kind, InsertLiterally res_label)
+      in
+      let res_insert_text =
+        match r.si_kind with
+        | SI_XHP
+        | SI_Class
+          when does_autocomplete_snippet ->
+          let attrs =
+            get_class_req_attrs
+              tast_env
+              pctx
+              (Utils.add_ns res_fullname)
+              (Some (Aast.CI id))
+          in
+          insert_text_for_xhp_req_attrs res_label attrs
+        | _ -> res_insert_text
+      in
+      (* Figure out how to display them *)
+      let complete =
+        {
+          res_decl_pos = absolute_none;
+          res_replace_pos = replace_pos_of_id ~strip_xhp_colon:true id;
+          res_base_class = None;
+          res_detail;
+          res_label;
+          res_insert_text;
+          res_fullname;
+          res_kind = r.si_kind;
+          res_documentation = None;
+          res_filter_text = None;
+          res_additional_edits = [];
+        }
+      in
+      add_res complete);
+  autocomplete_is_complete := List.length !autocomplete_items < max_results
+
 let auto_complete_suffix_finder =
   object
     inherit [_] Aast.reduce
@@ -1716,7 +1803,12 @@ let visitor
 
     method! on_Xml env sid attrs el =
       autocomplete_id sid;
-      self#complete_global env sid Acid ~strip_xhp_colon:true;
+      if is_auto_complete (snd sid) then
+        complete_xhp_tag
+          ~id:sid
+          ~does_autocomplete_snippet:(List.length attrs <= 0)
+          ~sienv
+          ~pctx:ctx;
 
       let cid = Aast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)

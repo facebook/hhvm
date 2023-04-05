@@ -41,8 +41,6 @@ and constraint_kind =
   | Constraint_super
 [@@transform.opaque]
 
-and reified = bool
-
 and abstraction =
   | Concrete
   | Abstract

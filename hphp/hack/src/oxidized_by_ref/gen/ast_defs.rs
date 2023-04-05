@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ef09a5bce06710c70a67eb167b093422>>
+// @generated SignedSource<<f427e293843f8825a2841b7dc2415dcc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -94,7 +94,6 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeFieldName<'arena>);
 pub use oxidized::ast_defs::Abstraction;
 pub use oxidized::ast_defs::ClassishKind;
 pub use oxidized::ast_defs::ConstraintKind;
-pub use oxidized::ast_defs::Reified;
 pub use oxidized::ast_defs::Variance;
 
 #[derive(

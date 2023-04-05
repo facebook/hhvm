@@ -13,7 +13,7 @@ bumpalo = { version = "3.11.1", features = ["collections"] }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
 global_state = { version = "0.0.0", path = "../../../emitter/cargo/global_state" }
-hack_macro = { version = "0.0.0", path = "../../../utils/cargo/hack_macro" }
+hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/hack_macros" }
 hash = { version = "0.0.0", path = "../../../../utils/hash" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { version = "0.0.0", path = "../../../utils/cargo/hhbc_string_utils" }

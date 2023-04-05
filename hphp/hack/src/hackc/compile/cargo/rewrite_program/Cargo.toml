@@ -13,7 +13,7 @@ closure_convert = { version = "0.0.0", path = "../closure_convert" }
 constant_folder = { version = "0.0.0", path = "../../../emitter/cargo/constant_folder" }
 env = { version = "0.0.0", path = "../../../emitter/cargo/env" }
 error = { version = "0.0.0", path = "../../../error/cargo/error" }
-hack_macro = { version = "0.0.0", path = "../../../utils/cargo/hack_macro" }
+hack_macros = { version = "0.0.0", path = "../../../../utils/hack_macros/cargo/hack_macros" }
 hhbc = { version = "0.0.0", path = "../../../hhbc/cargo/hhbc" }
 ocamlrep = { version = "0.1.0", git = "https://github.com/facebook/ocamlrep/", branch = "main" }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }

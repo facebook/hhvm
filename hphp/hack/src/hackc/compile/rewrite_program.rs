@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
-use hack_macro::hack_stmt;
+use hack_macros::hack_stmt;
 use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
 use oxidized::ast;

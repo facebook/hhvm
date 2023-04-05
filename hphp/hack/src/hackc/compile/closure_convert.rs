@@ -10,7 +10,7 @@ use error::Error;
 use error::Result;
 use global_state::ClosureEnclosingClassInfo;
 use global_state::GlobalState;
-use hack_macro::hack_expr;
+use hack_macros::hack_expr;
 use hash::IndexSet;
 use hhbc::Coeffects;
 use hhbc_string_utils as string_utils;

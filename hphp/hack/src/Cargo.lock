@@ -724,7 +724,7 @@ dependencies = [
  "env",
  "error",
  "global_state",
- "hack_macro",
+ "hack_macros",
  "hash",
  "hhbc",
  "hhbc_string_utils",
@@ -1578,7 +1578,7 @@ dependencies = [
  "env",
  "error",
  "ffi",
- "hack_macro",
+ "hack_macros",
  "hash",
  "hhbc",
  "hhbc_string_utils",
@@ -2087,7 +2087,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hack_macro"
+name = "hack_macros"
 version = "0.0.0"
 dependencies = [
  "aast_parser",
@@ -4323,7 +4323,7 @@ dependencies = [
  "constant_folder",
  "env",
  "error",
- "hack_macro",
+ "hack_macros",
  "hhbc",
  "ocamlrep",
  "oxidized",

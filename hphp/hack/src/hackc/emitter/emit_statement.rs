@@ -9,7 +9,7 @@ use env::Env;
 use error::Error;
 use error::Result;
 use ffi::Slice;
-use hack_macro::hack_expr;
+use hack_macros::hack_expr;
 use hhbc::FCallArgs;
 use hhbc::FCallArgsFlags;
 use hhbc::IsTypeOp;

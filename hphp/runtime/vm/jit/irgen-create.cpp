@@ -404,7 +404,20 @@ void emitNewKeysetArray(IRGS& env, uint32_t numArgs) {
 }
 
 void emitNewVec(IRGS& env, uint32_t numArgs) {
+  if (numArgs == 0) {
+    push(env, cns(env, ArrayData::CreateVec()));
+    return;
+  }
+
+  jit::vector<RepoAuthType> types(numArgs, RepoAuthType(RepoAuthType::Tag::InitCell));
   auto const array = gen(env, AllocVec, VanillaVecData { numArgs });
+
+  auto genAssert = [&]() {
+    using A = RepoAuthType::Array;
+    auto rat = A::tuple(A::Empty::No, types);
+    gen(env, AssertType, Type::Vec(rat), array);
+  };
+
   if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitPackedElements) {
     gen(
       env,
@@ -418,19 +431,22 @@ void emitNewVec(IRGS& env, uint32_t numArgs) {
     );
     discard(env, numArgs);
     push(env, array);
+    genAssert();
     return;
   }
 
   for (int i = 0; i < numArgs; ++i) {
+    auto src = popC(env, DataTypeGeneric);
     gen(
       env,
       InitVecElem,
       IndexData { static_cast<uint32_t>(numArgs - i - 1) },
       array,
-      popC(env, DataTypeGeneric)
+      src
     );
   }
   push(env, array);
+  genAssert();
 }
 
 void emitNewStructDict(IRGS& env, const ImmVector& immVec) {

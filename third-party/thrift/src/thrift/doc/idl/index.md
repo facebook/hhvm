@@ -168,11 +168,11 @@ delimiter ::=  ["," | ";"]
 
 ## Thrift Files
 
-A Thrift file starts with an optional package declaration and a, possibly empty, sequence of include statements and namespace directives. It is followed by a sequence of definitions which can also be empty. There can be at most one package declaration and it is normally placed at the beginning of a source file.
+A Thrift file starts with an optional package declaration and a, possibly empty, sequence of include and namespace directives. It is followed by a sequence of definitions which can also be empty. There can be at most one package declaration and it is normally placed at the beginning of a source file.
 
 ```grammar
 thrift_file ::=
-  (include_statement | package_declaration | namespace_directive)*
+  (include_directive | package_declaration | namespace_directive)*
   definition*
 ```
 
@@ -223,13 +223,13 @@ service PeopleSearch {
 }
 ```
 
-### Include Statements
+### Include Directives
 
 ```grammar
-include_statement ::=  ("include" | "cpp_include" | "hs_include") string_literal
+include_directive ::=  ("include" | "cpp_include" | "hs_include") string_literal
 ```
 
-Include statements allow the use of constants, types, and services from other Thrift files by prefixing the name (without extension) of the included Thrift file followed by a period. `cpp_include` instructs the compiler to emit an include in generated C++ code and `hs_include` does the same for Haskell.
+Include directives allow the use of constants, types, and services from other Thrift files by prefixing the name (without extension) of the included Thrift file followed by a period. `cpp_include` instructs the compiler to emit an include in generated C++ code and `hs_include` does the same for Haskell.
 
 ```thrift
 include "common/if/search_types.thrift"
@@ -248,7 +248,7 @@ struct PeopleSearchResponse {
 
 If there is a circular dependency between files, a compile-time error is reported. So `a.thrift` cannot include itself, and cannot include `b.thrift` if `b.thrift` includes `a.thrift`. Including multiple files with a common ancestor is okay - so `a.thrift` can include `b.thrift` and `c.thrift` when both `b.thrift` and `c.thrift` include `d.thrift`.
 
-### Package Declaration {#package}
+### Package Declaration
 
 A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](../features/universal-name.md) prefix.
 

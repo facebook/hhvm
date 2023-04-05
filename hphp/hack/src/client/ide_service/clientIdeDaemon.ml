@@ -391,6 +391,64 @@ let load_saved_state
   in
   Lwt.return result
 
+(** Performs a full index of [root], building a naming table in hh_server's
+temporary directory, and then loading that naming table.
+
+This is an alternative to [load_saved_state] to produce a naming table. *)
+let build_naming_table
+    (ctx : Provider_context.t) ~(root : Path.t) ~(hhi_root : Path.t) :
+    load_saved_state_result Lwt.t =
+  let output = Path.make @@ ServerFiles.client_ide_naming_table root in
+  log
+    "Beginning full index naming table build with destination %s"
+    (Path.to_string output);
+  let progress =
+    Naming_table_builder_ffi_externs.build
+      ~www:root
+      ~custom_hhi_path:hhi_root
+      ~output
+  in
+  let rec poll_build_until_complete () : int Lwt.t =
+    match Naming_table_builder_ffi_externs.poll_exn progress with
+    | Some exit_status -> Lwt.return exit_status
+    | None ->
+      let%lwt () = Lwt_unix.sleep 0.1 in
+      poll_build_until_complete ()
+  in
+  try%lwt
+    let%lwt exit_status = poll_build_until_complete () in
+    if exit_status = 0 then begin
+      log "[full-index] Successfully build naming table from full index.";
+      log "[full-index] Loading naming-table... %s" (Path.to_string output);
+      let naming_table =
+        Naming_table.load_from_sqlite ctx (Path.to_string output)
+      in
+      log "[full-index] Loaded naming-table. %s" (Path.to_string output);
+      Lwt.return_ok (naming_table, [])
+    end else begin
+      log
+        "[full-index] Naming table build failed with nonzero exit status: %d"
+        exit_status;
+      let data =
+        Some
+          (Hh_json.JSON_Object
+             [("naming_table_builder_exit_status", Hh_json.int_ exit_status)])
+      in
+      let reason =
+        ClientIdeUtils.make_bug_reason "full_index_non_zero_exit" ~data
+      in
+      let error =
+        ClientIdeUtils.make_bug_error "full_index_non_zero_exit" ~data
+      in
+      Lwt.return_error (reason, error)
+    end
+  with
+  | exn ->
+    let exn = Exception.wrap exn in
+    let reason = ClientIdeUtils.make_bug_reason "full_index_exn" ~exn in
+    let e = ClientIdeUtils.make_bug_error "full_index_exn" ~exn in
+    Lwt.return_error (reason, e)
+
 let log_startup_time (component : string) (start_time : float) : float =
   let now = Unix.gettimeofday () in
   HackEventLogger.serverless_ide_startup ~component ~start_time;
@@ -743,25 +801,34 @@ let handle_request
         (* We're going to kick off the asynchronous part of initializing now.
            Once it's done, it will appear as a LoadedState message on the queue. *)
         Lwt.async (fun () ->
+            let ctx =
+              Provider_context.empty_for_tool
+                ~popt:dstate.dcommon.popt
+                ~tcopt:dstate.dcommon.tcopt
+                ~backend:
+                  (Provider_backend.Local_memory dstate.dcommon.local_memory)
+                ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+                ~package_info:Package.Info.empty
+            in
             (* following method never throws *)
             let%lwt result =
               load_saved_state
-                (Provider_context.empty_for_tool
-                   ~popt:dstate.dcommon.popt
-                   ~tcopt:dstate.dcommon.tcopt
-                   ~backend:
-                     (Provider_backend.Local_memory dstate.dcommon.local_memory)
-                   ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-                   ~package_info:Package.Info.empty)
+                ctx
                 ~root:param.root
                 ~naming_table_load_info:param.naming_table_load_info
                 ~ignore_hh_version:param.ignore_hh_version
             in
             let%lwt fall_back_result =
               match result with
-              | Error (reason, e) when dstate.dcommon.fall_back_to_full_index ->
-                (* TODO(toyang): what to do with [reason] and [e] here? *)
-                log "Falling back to complete index";
+              | Error (_reason, e) when dstate.dcommon.fall_back_to_full_index
+                ->
+                (* fall back is only intended for repos where we *don't* expect
+                   to be able to load a saved state -- if we're in this branch, we
+                   don't worry about the error loading saved state because we
+                   didn't expect to load one. *)
+                log
+                  "Falling back to full index naming table build because failed to load saved state. Failure reason: %s"
+                  e.Lsp.Error.message;
                 let%lwt () =
                   write_message
                     ~out_fd
@@ -769,10 +836,14 @@ let handle_request
                       (ClientIdeMessage.Notification
                          ClientIdeMessage.Full_index_fallback)
                 in
-                (* TODO(toyang): this sleep is a placeholder for the actual complete index. We're just returning the error for now. *)
-                let%lwt () = Lwt_unix.sleep 60. in
+                let%lwt full_index_result =
+                  build_naming_table
+                    ctx
+                    ~root:param.root
+                    ~hhi_root:dstate.dcommon.hhi_root
+                in
                 log "Completed index";
-                Lwt.return_error (reason, e)
+                Lwt.return full_index_result
               | Ok _
               | Error _ ->
                 Lwt.return result

@@ -35,8 +35,8 @@ type t = {
   (* A list of extra paths to search for declarations *)
   extra_paths: Path.t list;
   warn_on_non_opt_build: bool;
+  (* clientIdeDaemon will fall back to performing a full index of files to construct a naming table if it fails to load one. *)
   ide_fall_back_to_full_index: bool;
-      (** clientIdeDaemon will fall back to performing a full index of files to construct a naming table if it fails to load one. *)
 }
 [@@deriving show]
 

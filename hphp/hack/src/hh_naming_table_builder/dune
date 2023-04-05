@@ -20,4 +20,5 @@
  (wrapped false)
  (modules naming_table_builder_ffi_externs)
  (libraries
-  naming_table_builder_ffi))
+  naming_table_builder_ffi
+  sys_utils))

@@ -17,6 +17,7 @@
   server_highlight_refs
   server_search
   state_loader
+  naming_table_builder_ffi_externs
   sys_utils)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

@@ -53,42 +53,49 @@ TEST_F(RecentRequestCounterTest, testGetCurrentBucket) {
   currentTick += 512;
   auto counts = counter.get();
   EXPECT_EQ(getCurrentServerTickCallCount, 2);
-  EXPECT_EQ(counts[0].first, 0);
+  EXPECT_EQ(counts[0].arrivalCount, 0);
 }
 
 TEST_F(RecentRequestCounterTest, testIncrement) {
   auto counter = create();
   counter.increment();
   auto counts = counter.get();
-  EXPECT_EQ(counts[0].first, 1);
+  EXPECT_EQ(counts[0].arrivalCount, 1);
 
   counter.increment();
   ++currentTick;
   counter.increment();
   counts = counter.get();
   // arrived requests
-  EXPECT_EQ(counts[0].first, 1);
-  EXPECT_EQ(counts[1].first, 2);
+  EXPECT_EQ(counts[0].arrivalCount, 1);
+  EXPECT_EQ(counts[1].arrivalCount, 2);
 
   // active requests
-  EXPECT_EQ(counts[0].second, 3);
-  EXPECT_EQ(counts[1].second, 2);
+  EXPECT_EQ(counts[0].activeCount, 3);
+  EXPECT_EQ(counts[1].activeCount, 2);
 }
 
 TEST_F(RecentRequestCounterTest, testGetReturnsMostRecentBucketFirst) {
   auto counter = create();
   counter.increment();
+  counter.incrementOverloadCount();
   currentTick = 256;
   counter.increment();
   counter.increment();
+  counter.incrementOverloadCount();
+  counter.incrementOverloadCount();
   auto counts = counter.get();
   // arrived requests
-  EXPECT_EQ(counts[0].first, 2);
-  EXPECT_EQ(counts[256].first, 1);
+  EXPECT_EQ(counts[0].arrivalCount, 2);
+  EXPECT_EQ(counts[256].arrivalCount, 1);
 
   // active requests
-  EXPECT_EQ(counts[0].second, 3);
-  EXPECT_EQ(counts[256].second, 1);
+  EXPECT_EQ(counts[0].activeCount, 3);
+  EXPECT_EQ(counts[256].activeCount, 1);
+
+  // overload error requests
+  EXPECT_EQ(counts[0].overloadCount, 2);
+  EXPECT_EQ(counts[256].overloadCount, 1);
 }
 
 TEST_F(RecentRequestCounterTest, testTooManyDecrement) {
@@ -97,9 +104,9 @@ TEST_F(RecentRequestCounterTest, testTooManyDecrement) {
   counter.decrement();
   auto counts = counter.get();
   // arrived requests
-  EXPECT_EQ(counts[0].first, 0);
+  EXPECT_EQ(counts[0].arrivalCount, 0);
   // active requests
-  EXPECT_EQ(counts[0].second, 0);
+  EXPECT_EQ(counts[0].activeCount, 0);
 }
 
 TEST_F(RecentRequestCounterTest, testIncrementDecrement) {
@@ -113,11 +120,28 @@ TEST_F(RecentRequestCounterTest, testIncrementDecrement) {
   counter.decrement();
   auto counts = counter.get();
   // arrived requests
-  EXPECT_EQ(counts[0].first, 0);
-  EXPECT_EQ(counts[1].first, 0);
-  EXPECT_EQ(counts[2].first, 3);
+  EXPECT_EQ(counts[0].arrivalCount, 0);
+  EXPECT_EQ(counts[1].arrivalCount, 0);
+  EXPECT_EQ(counts[2].arrivalCount, 3);
   // active requests
-  EXPECT_EQ(counts[0].second, 0);
-  EXPECT_EQ(counts[1].second, 2);
-  EXPECT_EQ(counts[2].second, 2);
+  EXPECT_EQ(counts[0].activeCount, 0);
+  EXPECT_EQ(counts[1].activeCount, 2);
+  EXPECT_EQ(counts[2].activeCount, 2);
+}
+
+TEST_F(RecentRequestCounterTest, testIncrementOverloadCount) {
+  auto counter = create();
+  {
+    counter.incrementOverloadCount();
+    auto counts = counter.get();
+    EXPECT_EQ(counts[0].overloadCount, 1);
+  }
+  {
+    counter.incrementOverloadCount();
+    ++currentTick;
+    counter.incrementOverloadCount();
+    auto counts = counter.get();
+    EXPECT_EQ(counts[0].overloadCount, 1);
+    EXPECT_EQ(counts[1].overloadCount, 2);
+  }
 }

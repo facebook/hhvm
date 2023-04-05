@@ -1843,10 +1843,12 @@ folly::SemiFuture<ThriftServer::ServerSnapshot> ThriftServer::getServerSnapshot(
             size_t numConnections = 0;
             for (const auto& workerSnapshot : workerSnapshots) {
               for (uint64_t i = 0; i < ret.recentCounters.size(); ++i) {
-                ret.recentCounters[i].first +=
-                    workerSnapshot.recentCounters[i].first;
-                ret.recentCounters[i].second +=
-                    workerSnapshot.recentCounters[i].second;
+                ret.recentCounters[i].arrivalCount +=
+                    workerSnapshot.recentCounters[i].arrivalCount;
+                ret.recentCounters[i].activeCount +=
+                    workerSnapshot.recentCounters[i].activeCount;
+                ret.recentCounters[i].overloadCount +=
+                    workerSnapshot.recentCounters[i].overloadCount;
               }
               numRequests += workerSnapshot.requests.size();
               numConnections += workerSnapshot.connections.size();

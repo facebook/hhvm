@@ -649,6 +649,7 @@ void ThriftRocketServerHandler::handleRequestOverloadedServer(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::LOADSHEDDING, errorMessage),
       errorCode);
+  requestsRegistry_->getRequestCounter().incrementOverloadCount();
 }
 
 void ThriftRocketServerHandler::handleAppError(

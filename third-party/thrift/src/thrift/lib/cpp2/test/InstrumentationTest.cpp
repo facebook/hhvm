@@ -728,8 +728,8 @@ TEST_F(RequestInstrumentationTest, snapshotRecentRequestCountsTest) {
 
   auto snapshot = getServerSnapshot();
   // arrived requests
-  EXPECT_EQ(snapshot.recentCounters[0].first, 1);
-  EXPECT_EQ(snapshot.recentCounters[100].first, 1);
+  EXPECT_EQ(snapshot.recentCounters[0].arrivalCount, 1);
+  EXPECT_EQ(snapshot.recentCounters[100].arrivalCount, 1);
 }
 
 class RecentRequestsTest : public RequestInstrumentationTest,
@@ -756,17 +756,17 @@ TEST_P(RecentRequestsTest, Exclude) {
   auto snapshot = getServerSnapshot();
   // there were 3 requests that arrived but one should be excluded
   int expectedArrived = 2;
-  EXPECT_EQ(snapshot.recentCounters.at(0).first, expectedArrived);
+  EXPECT_EQ(snapshot.recentCounters.at(0).arrivalCount, expectedArrived);
   // there is one active request
-  EXPECT_EQ(snapshot.recentCounters.at(0).second, 1);
+  EXPECT_EQ(snapshot.recentCounters.at(0).activeCount, 1);
 
   handler()->stopRequests();
   f.wait();
 
   snapshot = getServerSnapshot();
-  EXPECT_EQ(snapshot.recentCounters.at(0).first, expectedArrived);
+  EXPECT_EQ(snapshot.recentCounters.at(0).arrivalCount, expectedArrived);
   // there are no active requests
-  EXPECT_EQ(snapshot.recentCounters.at(0).second, 0);
+  EXPECT_EQ(snapshot.recentCounters.at(0).activeCount, 0);
 }
 
 INSTANTIATE_TEST_CASE_P(

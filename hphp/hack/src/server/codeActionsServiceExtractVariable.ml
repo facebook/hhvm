@@ -46,9 +46,15 @@ let positions_visitor (selection : Pos.t) ~source_text =
   let stmt_pos = ref Pos.none in
   let expression_lambda_pos = ref None in
   let placeholder_n = ref 0 in
-  let reset () =
-    expression_lambda_pos := None;
-    placeholder_n := 0
+  let expr_positions_overlapping_selection = ref [] in
+  let ensure_selection_common_root =
+    (* filter out invalid selection like this:
+          (1 + 2) +  3
+               ^-----^ selection
+    *)
+    Option.filter ~f:(fun candidate ->
+        List.for_all !expr_positions_overlapping_selection ~f:(fun p ->
+            Pos.(contains candidate.pos p || contains p candidate.pos)))
   in
 
   object
@@ -59,12 +65,10 @@ let positions_visitor (selection : Pos.t) ~source_text =
     method plus = Option.first_some
 
     method! on_method_ env meth =
-      reset ();
-      super#on_method_ env meth
+      ensure_selection_common_root @@ super#on_method_ env meth
 
     method! on_fun_def env fd =
-      reset ();
-      super#on_fun_def env fd
+      ensure_selection_common_root @@ super#on_fun_def env fd
 
     method! on_lid env lid =
       let name = Local_id.get_name @@ snd lid in
@@ -89,6 +93,10 @@ let positions_visitor (selection : Pos.t) ~source_text =
 
     method! on_expr env expr =
       let (_, pos, expr_) = expr in
+      if Pos.overlaps selection pos then
+        expr_positions_overlapping_selection :=
+          pos :: !expr_positions_overlapping_selection;
+
       match expr_ with
       | Aast.(Binop { bop = Ast_defs.Eq _; lhs = (_, lhs_pos, _); rhs = _ }) ->
         let acc = super#on_expr env expr in

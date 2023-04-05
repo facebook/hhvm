@@ -13,3 +13,7 @@ let join _ = failwith "join_handle not implemented"
 let cancel _ = failwith "cancel not implemented"
 
 let is_finished _ = failwith "is_finished not implemented"
+
+let get_fd _ = failwith "get_fd not implemented"
+
+let recv _ = failwith "recv not implemented"

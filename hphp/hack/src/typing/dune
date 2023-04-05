@@ -454,6 +454,7 @@
   nast
   gc_utils
   global_options
+  hh_distc_types
   heap_global_storage
   procs_bucket
   counters
@@ -474,5 +475,13 @@
  (wrapped false)
  (modules delta tast_typecheck)
  (libraries core_kernel typing utils_core)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name hh_distc_types)
+ (wrapped false)
+ (modules hh_distc_types)
+ (libraries errors)
  (preprocess
   (pps ppx_deriving.std)))

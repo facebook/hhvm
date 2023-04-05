@@ -869,16 +869,45 @@ let process_with_hh_distc ~(interrupt : 'a MultiWorker.interrupt_config) :
         Hh_distc_ffi.spawn (Path.to_string root) (Path.to_string ss_dir)
         |> Result.ok_or_failwith
       in
-      let rec busy_loop () =
-        if Hh_distc_ffi.is_finished handle then
-          Hh_distc_ffi.join handle
-        else
-          (* TODO: Replace with interrupts *)
-          let () = Unix.sleepf 0.1 in
-          busy_loop ()
+      let fd = Hh_distc_ffi.get_fd handle in
+      let rec drain_events (done_count, total_count) =
+        match Hh_distc_ffi.recv handle |> Result.ok_or_failwith with
+        | Some (Hh_distc_types.Errors _errors) ->
+          (* TODO write errors to streaming error file *)
+          drain_events (done_count, total_count)
+        | Some (Hh_distc_types.TypingStart total_count) ->
+          drain_events (done_count, total_count)
+        | Some (Hh_distc_types.TypingProgress n) ->
+          let done_count = done_count + n in
+          drain_events (done_count, total_count)
+        | None -> (done_count, total_count)
       in
-
-      match busy_loop () with
+      let buf = Bytes.create 1 in
+      let select_timeout = -1.0 in
+      let rec event_loop (done_count, total_count) =
+        (* hh_distc sends a byte each time new events are ready. *)
+        (* TODO add fd to interrupts or something? *)
+        let (_ready, _, _) = Unix.select [fd] [] [] select_timeout in
+        (* TODO only read from fd if it was ready *)
+        let n = Unix.recv fd buf 0 1 [] in
+        match n with
+        | 0 ->
+          ServerProgress.write "hh_distc done";
+          Hh_distc_ffi.join handle
+        | _ ->
+          let (done_count, total_count) =
+            drain_events (done_count, total_count)
+          in
+          ServerProgress.write_percentage
+            ~operation:"hh_distc checking"
+            ~done_count
+            ~total_count
+            ~unit:"files"
+            ~extra:None;
+          event_loop (done_count, total_count)
+      in
+      ServerProgress.write "hh_distc running";
+      match event_loop (0, 0) with
       | Ok errors ->
         (* TODO: Update Dep Graph using dep graph stored in dir/hh_mini_saved_state.hhdg *)
         (* TODO: Cleanup dir *)

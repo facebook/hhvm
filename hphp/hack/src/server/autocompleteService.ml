@@ -1336,7 +1336,6 @@ let find_global_results
     ~(completion_type : SearchUtils.autocomplete_type option)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
-    ~(strip_xhp_colon : bool)
     ~(pctx : Provider_context.t) : unit =
   (* First step: Check obvious cases where autocomplete is not warranted.   *)
   (*                                                                        *)
@@ -1406,12 +1405,7 @@ let find_global_results
      * memory and performance.
      *)
     List.iter results ~f:(fun r ->
-        let (res_label, res_fullname) =
-          if strip_xhp_colon then
-            (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
-          else
-            (r.si_name, r.si_fullname)
-        in
+        let (res_label, res_fullname) = (r.si_name, r.si_fullname) in
         (* Only load func details if the flag sie_resolve_signatures is true *)
         let (res_detail, res_insert_text) =
           if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
@@ -1448,7 +1442,7 @@ let find_global_results
         let complete =
           {
             res_decl_pos;
-            res_replace_pos = replace_pos_of_id ~strip_xhp_colon id;
+            res_replace_pos = replace_pos_of_id id;
             res_base_class = None;
             res_detail;
             res_label;
@@ -1661,10 +1655,7 @@ let visitor
     inherit Tast_visitor.iter as super
 
     method complete_global
-        ?(strip_xhp_colon = false)
-        (env : Tast_env.env)
-        (id : sid)
-        (ac_type : autocomplete_type) : unit =
+        (env : Tast_env.env) (id : sid) (ac_type : autocomplete_type) : unit =
       if is_auto_complete (snd id) then
         let completion_type = Some ac_type in
         find_global_results
@@ -1672,7 +1663,6 @@ let visitor
           ~id
           ~completion_type
           ~autocomplete_context
-          ~strip_xhp_colon
           ~sienv
           ~pctx:ctx
 

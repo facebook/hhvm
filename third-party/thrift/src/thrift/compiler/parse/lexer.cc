@@ -347,8 +347,8 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
     }
     // Lex escape sequences.
     ++p;
-    c = '\\';
-    switch (*p++) {
+    c = *p++;
+    switch (c) {
       case 'a':
         c = '\a';
         break;
@@ -374,10 +374,8 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
         result.push_back(c);
         break;
       case '\'':
-        c = '\'';
         break;
       case '"':
-        c = '"';
         break;
       case 'x':
         if (auto n = lex_hex_integer(p, end, 2)) {
@@ -409,6 +407,12 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
         diags_->error(literal.range.begin, "invalid `\\u` escape sequence");
         return {};
       default:
+        if ((c < 'A' || c > 'Z') && c != '\n') {
+          diags_->error(
+              literal.range.begin, "invalid escape sequence `\\{}`", c);
+          return {};
+        }
+        c = '\\';
         --p; // Put an unparsed character back.
         break;
     }

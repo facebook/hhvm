@@ -116,7 +116,7 @@ AeadCookieCipher::getTokenOrRetry(Buf clientHello, Buf appToken) const {
 }
 
 folly::Optional<CookieState> AeadCookieCipher::decrypt(Buf cookie) const {
-  auto plaintext = tokenCipher_.decrypt(std::move(cookie));
+  auto plaintext = tokenCipher_->decrypt(std::move(cookie));
   if (plaintext) {
     return detail::decodeCookie(std::move(*plaintext));
   } else {
@@ -136,7 +136,7 @@ Buf AeadCookieCipher::getStatelessResponse(
       std::move(appToken));
 
   auto encoded = detail::encodeCookie(state);
-  auto cookie = tokenCipher_.encrypt(std::move(encoded));
+  auto cookie = tokenCipher_->encrypt(std::move(encoded));
   if (!cookie) {
     throw std::runtime_error("could not encrypt cookie");
   }

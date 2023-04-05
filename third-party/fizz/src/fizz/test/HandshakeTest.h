@@ -115,7 +115,10 @@ class HandshakeTest : public Test {
     ticketCipher->setPolicy(std::move(policy));
     serverContext_->setTicketCipher(std::move(ticketCipher));
 
-    cookieCipher_ = std::make_shared<AES128CookieCipher>();
+    auto tokenCipher = std::make_unique<Aead128GCMTokenCipher>(
+        std::vector<std::string>({"Fizz Cookie Cipher v1"}));
+    cookieCipher_ =
+        std::make_shared<AES128CookieCipher>(std::move(tokenCipher));
     auto cookieSeed = RandomGenerator<32>().generateRandom();
     cookieCipher_->setCookieSecrets({{range(cookieSeed)}});
     cookieCipher_->setContext(serverContext_.get());

@@ -6,11 +6,13 @@
  *  LICENSE file in the root directory of this source tree.
  */
 
+#pragma once
+
 #include <boost/variant.hpp>
 
-#include <fizz/server/AeadTokenCipher.h>
 #include <fizz/server/CookieCipher.h>
 #include <fizz/server/FizzServerContext.h>
+#include <fizz/server/TokenCipher.h>
 
 namespace fizz {
 namespace server {
@@ -25,14 +27,16 @@ struct StatelessHelloRetryRequest {
 
 class AeadCookieCipher : public CookieCipher {
  public:
-  AeadCookieCipher()
-      : tokenCipher_(std::vector<std::string>({"Fizz Cookie Cipher v1"})) {}
+  explicit AeadCookieCipher(std::unique_ptr<TokenCipher> tokenCipher)
+      : tokenCipher_{std::move(tokenCipher)} {
+    DCHECK_NOTNULL(tokenCipher_.get());
+  }
 
   /**
    * Set cookie secrets to use for cookie encryption/decryption.
    */
   bool setCookieSecrets(const std::vector<folly::ByteRange>& cookieSecrets) {
-    return tokenCipher_.setSecrets(cookieSecrets);
+    return tokenCipher_->setSecrets(cookieSecrets);
   }
 
   /**
@@ -56,7 +60,7 @@ class AeadCookieCipher : public CookieCipher {
  private:
   Buf getStatelessResponse(const ClientHello& chlo, Buf appToken) const;
 
-  Aead128GCMTokenCipher tokenCipher_;
+  std::unique_ptr<TokenCipher> tokenCipher_;
 
   const FizzServerContext* context_ = nullptr;
 };

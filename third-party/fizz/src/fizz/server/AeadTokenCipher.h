@@ -12,16 +12,14 @@
 #include <fizz/crypto/Sha256.h>
 #include <fizz/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/record/Types.h>
+#include <fizz/server/TokenCipher.h>
 #include <folly/Optional.h>
 #include <folly/io/IOBuf.h>
 
 namespace fizz {
 namespace server {
 
-/**
- * Used to encrypt and decrypt various tokens (for example PSKs).
- */
-class Aead128GCMTokenCipher {
+class Aead128GCMTokenCipher : public TokenCipher {
  public:
   static constexpr size_t kMinTokenSecretLength = 32;
 
@@ -38,23 +36,22 @@ class Aead128GCMTokenCipher {
   explicit Aead128GCMTokenCipher(std::vector<std::string> contextStrings)
       : contextStrings_(std::move(contextStrings)) {}
 
-  ~Aead128GCMTokenCipher() {
+  ~Aead128GCMTokenCipher() override {
     clearSecrets();
   }
 
   /**
-   * Set secrets to use for token encryption/decryption.
    * The first one will be used for encryption.
    * All secrets must be at least kMinTokenSecretLength long.
    */
-  bool setSecrets(const std::vector<folly::ByteRange>& tokenSecrets);
+  bool setSecrets(const std::vector<folly::ByteRange>& tokenSecrets) override;
 
   folly::Optional<Buf> encrypt(
       Buf plaintext,
-      folly::IOBuf* associatedData = nullptr) const;
+      folly::IOBuf* associatedData = nullptr) const override;
 
   folly::Optional<Buf> decrypt(Buf, folly::IOBuf* associatedData = nullptr)
-      const;
+      const override;
 
  private:
   using Secret = std::vector<uint8_t>;

@@ -38,7 +38,7 @@ class AeadTokenCipherTest : public Test {
     cipher_->setSecrets(secrets);
   }
 
-  std::unique_ptr<Aead128GCMTokenCipher> cipher_;
+  std::unique_ptr<TokenCipher> cipher_;
   std::vector<folly::ByteRange> secrets;
 };
 

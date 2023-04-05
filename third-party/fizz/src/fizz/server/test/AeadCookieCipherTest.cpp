@@ -9,6 +9,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <fizz/server/AeadTokenCipher.h>
 #include <fizz/server/CookieTypes.h>
 
 #include <fizz/crypto/test/TestUtil.h>
@@ -43,7 +44,9 @@ class AeadCookieCipherTest : public Test {
   void SetUp() override {
     context_ = std::make_shared<FizzServerContext>();
     context_->setSupportedVersions({ProtocolVersion::tls_1_3});
-    cipher_ = std::make_shared<AES128CookieCipher>();
+    auto tokenCipher = std::make_unique<Aead128GCMTokenCipher>(
+        std::vector<std::string>({"Fizz Cookie Cipher v1"}));
+    cipher_ = std::make_shared<AES128CookieCipher>(std::move(tokenCipher));
     cipher_->setContext(context_.get());
 
     auto s = toIOBuf(secret);

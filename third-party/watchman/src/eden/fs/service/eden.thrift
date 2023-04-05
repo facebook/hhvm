@@ -123,7 +123,7 @@ enum EdenErrorType {
 }
 
 exception EdenError {
-  1: required string message;
+  1: string message;
   2: optional i32 errorCode;
   3: EdenErrorType errorType;
 } (message = 'message')

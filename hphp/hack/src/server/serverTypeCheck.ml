@@ -654,7 +654,7 @@ functor
         ~f:(fun path acc ->
           let path = Relative_path.Set.singleton path in
           List.fold_left
-            Errors.[Naming; Decl; Typing]
+            [Errors.Naming; Errors.Decl; Errors.Typing]
             ~init:acc
             ~f:(fun acc phase ->
               let (env, errors, _) =
@@ -919,7 +919,12 @@ functor
       (* Here we do errors paradigm (1) env.errorl: merge in typecheck results, to flow into [env.errorl].
          As for paradigms (2) persistent-connection and (3) errors-file, they're handled
          inside [Typing_check_service.go_with_interrupt] because they want to push errors
-         as soon as they're discovered. *)
+         as soon as they're discovered.
+
+         This code is honestly a bit mysterious: errorl' includes mostly [phase=Errors.Typing] errors,
+         but in places where it called Ast_provider then it also includes [phase=Errors.Parsing] errors.
+         The following call will erase from [errors] all pre-existing [Errors.Typing] that came
+         in [files_checked]. But shouldn't it also erase pre-existing [Errors.Parsing] ones too? *)
       let errors =
         Errors.incremental_update
           ~old:errors
@@ -1353,17 +1358,23 @@ functor
       in
 
       (* The errors file must accumulate ALL errors. The call below to [do_type_checking ~files_to_check]
-         will necessarily report all errors in [files_to_check] using the Errors.Typing phase.
+         will report all errors in [files_to_check] mostly using the Errors.Typing phase, but also
+         Errors.Parsing phase for those that arose from ast_provider.ml.
          But there might be other Errors.Typing errors in env.errorl from a previous round of typecheck,
          but which aren't in the current fanout i.e. not in [files_to_check]. We must report those too.
          It remains open for discussion whether the user-experience would be better to have these
          not-in-fanout errors reported here before the typecheck starts, or later after the typecheck
          has finished. We'll report them here for now. *)
-      if do_errors_file then
+      if do_errors_file then begin
         push_errors_outside_files
           errors
           ~files:files_to_check
-          ~phase:Errors.Typing;
+          ~phase:Errors.Parsing;
+        push_errors_outside_files
+          errors
+          ~files:files_to_check
+          ~phase:Errors.Typing
+      end;
       (* And what about the files in [files_to_check] which we were going to typecheck but then
          the typecheck got interrupted  and they were returned from [do_typechecking] as [needs_recheck]?
          Shouldn't we report those too into the errors-file? Well, there's no need to bother:

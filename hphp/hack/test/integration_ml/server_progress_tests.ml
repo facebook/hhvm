@@ -518,6 +518,61 @@ let test_errors_kill () : bool Lwt.t =
   in
   Lwt.return_true
 
+let test_errors_existing () : bool Lwt.t =
+  let%lwt () =
+    try_with_server [] (fun ~tmp ~root ~hhi ->
+        let%lwt _stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "--no-load";
+              "--config";
+              "produce_streaming_errors=true";
+              "--custom-hhi-path";
+              Path.to_string hhi;
+            |]
+        in
+        Sys_utils.write_file
+          ~file:(Path.concat root "a.php" |> Path.to_string)
+          "<?hh\nfunction f():int {return 1}\n";
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "check";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+            |]
+        in
+        Sys_utils.write_file
+          ~file:(Path.concat root "b.php" |> Path.to_string)
+          "<?hh\nfunction g():int {}\n";
+        assert_substring
+          stdout
+          ~substring:"A semicolon `;` is expected here. (Parsing[1002])";
+        let%lwt stdout =
+          hh
+            ~root
+            ~tmp
+            [|
+              "check";
+              "--config";
+              "ide_standalone=true";
+              "--error-format";
+              "plain";
+            |]
+        in
+        assert_substring
+          stdout
+          ~substring:"A semicolon `;` is expected here. (Parsing[1002])";
+        Lwt.return_unit)
+  in
+  Lwt.return_true
+
 let test_client_complete () : bool Lwt.t =
   let%lwt () =
     try_with_server [b_php] (fun ~tmp ~root ~hhi ->
@@ -732,6 +787,7 @@ let () =
       ("test_errors_complete", test_errors_complete);
       ("test_errors_during", test_errors_during);
       ("test_errors_kill", test_errors_kill);
+      ("test_errors_existing", test_errors_existing);
       ("test_client_complete", test_client_complete);
       ("test_client_during", test_client_during);
       ("test_start", test_start);

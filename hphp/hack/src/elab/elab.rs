@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![feature(box_patterns)]
-#![feature(let_chains)]
+#![cfg_attr(not(rust_lib_feature = "let_chains"), feature(let_chains))]
 
 /// Used to combine multiple types implementing `Pass` into nested `Passes` types
 /// without requiring them to hand write it so :

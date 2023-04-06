@@ -124,7 +124,7 @@ impl ValidateHintHabstrPass {
         // Raise an error for wildcard top-level tparams
         if name == sn::typehints::WILDCARD {
             if !nested || is_hk {
-                env.emit_error(NamingError::WildcardHintDisallowed(pos.clone()))
+                env.emit_error(NamingError::WildcardTparamDisallowed(pos.clone()))
             }
         } else if name.is_empty() || !name.starts_with('T') {
             env.emit_error(NamingError::StartWithT(pos.clone()))

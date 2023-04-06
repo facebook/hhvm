@@ -1,8 +1,0 @@
-File "class_const_visibility_bad.php", line 7, characters 10-13:
-Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Foo::bar` instead (Naming[2113])
-File "class_const_visibility_bad.php", line 8, characters 8-14:
-Invalid argument (Typing[4110])
-  File "class_const_visibility_bad.php", line 4, characters 31-33:
-  Expected `int`
-  File "class_const_visibility_bad.php", line 8, characters 8-14:
-  But got `string`

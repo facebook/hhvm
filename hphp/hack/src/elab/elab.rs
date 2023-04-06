@@ -384,8 +384,6 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
         passes::validate_shape_name::ValidateShapeNamePass::default(),
 
-        passes::validate_function_pointer::ValidateFunctionPointerPass::default(),
-
         passes::validate_php_lambda::ValidatePhpLambdaPass::default(),
 
         passes::validate_xhp_attribute::ValidateXhpAttributePass::default(),

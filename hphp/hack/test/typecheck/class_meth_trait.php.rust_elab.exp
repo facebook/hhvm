@@ -1,2 +1,0 @@
-File "class_meth_trait.php--file2.php", line 7, characters 5-8:
-Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `MyTestClass::genTest` instead (Naming[2113])

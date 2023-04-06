@@ -24,7 +24,6 @@ Errors:
   [193:9-13] Cannot use dynamic class or method name in strict mode
   [194:10-14] Cannot use dynamic class or method name in strict mode
   [195:10-14] Cannot use dynamic class or method name in strict mode
-  [10:40-44] Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Foo::class` instead
   [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`

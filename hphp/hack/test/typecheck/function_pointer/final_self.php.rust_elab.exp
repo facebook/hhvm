@@ -1,2 +1,0 @@
-File "final_self.php", line 16, characters 5-8:
-Cannot use `self::` in a function pointer in a non-final class due to class context ambiguity. Consider using `Foo::foo` instead (Naming[2113])

@@ -64,27 +64,23 @@ impl Config {
              deployment: &Spanned<String>,
              pkgs: &Option<NameSet>,
              soft_pkgs: &Option<NameSet>| {
-                if let Some(deployed) = pkgs {
-                    let soft_deployed = soft_pkgs.clone().unwrap_or_default();
-                    let (missing_pkgs, missing_soft_pkgs) = find_missing_packages_from_deployment(
-                        &self.packages,
-                        deployed,
-                        &soft_deployed,
-                    );
-                    if !missing_pkgs.is_empty() {
-                        errors.push(Error::incomplete_deployment(
-                            deployment,
-                            missing_pkgs,
-                            false,
-                        ));
-                    }
-                    if !missing_soft_pkgs.is_empty() {
-                        errors.push(Error::incomplete_deployment(
-                            deployment,
-                            missing_soft_pkgs,
-                            true,
-                        ));
-                    }
+                let deployed = pkgs.as_ref().unwrap_or_default();
+                let soft_deployed = soft_pkgs.as_ref().unwrap_or_default();
+                let (missing_pkgs, missing_soft_pkgs) =
+                    find_missing_packages_from_deployment(&self.packages, deployed, soft_deployed);
+                if !missing_pkgs.is_empty() {
+                    errors.push(Error::incomplete_deployment(
+                        deployment,
+                        missing_pkgs,
+                        false,
+                    ));
+                }
+                if !missing_soft_pkgs.is_empty() {
+                    errors.push(Error::incomplete_deployment(
+                        deployment,
+                        missing_soft_pkgs,
+                        true,
+                    ));
                 }
             };
         let mut errors = vec![];
@@ -246,7 +242,7 @@ fn find_cycles(packages: &PackageMap) -> HashSet<Vec<Spanned<String>>> {
                 ..
             }) = packages.get(current_package)
             {
-                for next_package in next_packages {
+                for next_package in next_packages.iter() {
                     let next_package = next_package.get_ref().as_str();
                     if let Some(idx) = state.package_location_in_path.get(next_package) {
                         let cycle = normalize_cycle(&state.path[*idx..], packages);

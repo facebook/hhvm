@@ -3627,6 +3627,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hash",
+ "once_cell",
  "serde",
  "toml",
 ]

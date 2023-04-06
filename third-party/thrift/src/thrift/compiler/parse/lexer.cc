@@ -349,14 +349,11 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
     ++p;
     c = *p++;
     switch (c) {
-      case 'a':
-        c = '\a';
+      case '\\':
         break;
-      case 'b':
-        c = '\b';
+      case '\'':
         break;
-      case 'f':
-        c = '\f';
+      case '"':
         break;
       case 'n':
         c = '\n';
@@ -366,15 +363,6 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
         break;
       case 't':
         c = '\t';
-        break;
-      case 'v':
-        c = '\v';
-        break;
-      case '\\':
-        break;
-      case '\'':
-        break;
-      case '"':
         break;
       case 'x':
         if (auto n = lex_hex_integer(p, end, 2)) {

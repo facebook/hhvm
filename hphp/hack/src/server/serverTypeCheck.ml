@@ -192,8 +192,6 @@ let push_errors env ~rechecked ~phase new_errors =
   let env = { env with diagnostic_pusher } in
   (env, time_errors_pushed)
 
-let erase_errors env = push_errors env Errors.empty
-
 (** This function handles the three errors paradigms:
 * (1) env.errorl paradigm: it takes input [errors_acc], adds/updates/remove errors according to
 rechecked/new_errors/phase, and returns the updated list of all errors.
@@ -280,28 +278,14 @@ let validate_no_errors_outside_files
 (** Remove files which failed parsing from [defs_per_file] files and
     discard any previous errors they had in [omitted_phases] *)
 let wont_do_failed_parsing defs_per_file ~stop_at_errors env =
-  let omitted_phases = [Errors.Typing] in
-  let failed_parsing = Relative_path.Set.empty in
   (* TODO(ljw): push through above constants in this method *)
   if stop_at_errors then
     let (env, time_first_erased) =
-      List.fold
-        omitted_phases
-        ~init:(env, None)
-        ~f:(fun (env, time_first_erased) phase ->
-          let (env, time_erased) =
-            erase_errors env ~rechecked:failed_parsing ~phase
-          in
-          let time_first_erased =
-            Option.first_some time_first_erased time_erased
-          in
-          (env, time_first_erased))
-    in
-    let defs_per_file =
-      Relative_path.Set.filter defs_per_file ~f:(fun k ->
-          not
-          @@ Relative_path.(
-               Set.mem failed_parsing k && Set.mem env.editor_open_files k))
+      push_errors
+        env
+        Errors.empty
+        ~rechecked:Relative_path.Set.empty
+        ~phase:Errors.Typing
     in
     (env, defs_per_file, time_first_erased)
   else

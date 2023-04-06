@@ -10,3 +10,15 @@ Invalid return type (Typing[4336])
   Expected `int`
   File "implicit_return.bad.php", line 5, characters 16-17:
   But got `void` because this function does not always return a value
+File "implicit_return.bad.php", line 7, characters 10-24:
+Invalid return type (Typing[4336])
+  File "implicit_return.bad.php", line 7, characters 30-36:
+  Expected `dynamic`
+  File "implicit_return.bad.php", line 7, characters 10-24:
+  But got `void` because this function does not always return a value
+File "implicit_return.bad.php", line 9, characters 16-36:
+Invalid return type (Typing[4336])
+  File "implicit_return.bad.php", line 9, characters 51-57:
+  Expected `dynamic`
+  File "implicit_return.bad.php", line 9, characters 16-36:
+  But got `void` because this function does not always return a value

@@ -307,18 +307,9 @@ let implicit_return env pos ~expected ~actual ~hint_pos ~is_async =
       Wellformedness (Wellformedness.Missing_return { pos; hint_pos; is_async }))
   in
   let (env, ty_err_opt) =
-    if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-      Typing_utils.sub_type
-        env
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        actual
-        expected
-      @@ Some (Typing_error.Reasons_callback.of_primary_error error)
-    else
-      Typing_ops.sub_type pos reason env actual expected
-      @@ Typing_error.Callback.of_primary_error error
+    Typing_ops.sub_type pos reason env actual expected
+    @@ Typing_error.Callback.of_primary_error error
   in
-
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
   env
 

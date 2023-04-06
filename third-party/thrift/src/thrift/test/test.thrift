@@ -49,6 +49,8 @@ const list<string> escapes = [
   "\u0800",
   "\uffff",
   "\uABCD",
+  "con\
+tinued",
 ];
 
 const string multi_line_string = "This

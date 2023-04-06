@@ -349,6 +349,9 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
     ++p;
     c = *p++;
     switch (c) {
+      case '\n':
+        begin = p;
+        continue;
       case '\\':
         break;
       case '\'':
@@ -394,7 +397,7 @@ boost::optional<std::string> lexer::lex_string_literal(token literal) {
         diags_->error(literal.range.begin, "invalid `\\u` escape sequence");
         return {};
       default:
-        if ((c < 'A' || c > 'Z') && c != '\n') {
+        if (c < 'A' || c > 'Z') {
           diags_->error(
               literal.range.begin, "invalid escape sequence `\\{}`", c);
           return {};

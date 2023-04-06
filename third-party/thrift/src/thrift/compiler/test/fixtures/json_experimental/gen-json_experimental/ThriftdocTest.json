@@ -170,7 +170,7 @@
       "MULTI_LINE_STR": {
         "name": "MULTI_LINE_STR",
         "type": "string",
-        "value": "Line 1\nLine 2\n...\\\nLast",
+        "value": "Line 1\nLine 2\n...Last",
         "docstring": "String const split on multiple lines by '\\'\n",
         "lineno": 285
       },

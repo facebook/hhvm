@@ -164,7 +164,8 @@ TEST(constants, escapes) {
           "\u07ff",
           "\u0800",
           "\uffff",
-          "\uABCD"}));
+          "\uABCD",
+          "continued"}));
 }
 
 TEST(constants, multi_line_string) {

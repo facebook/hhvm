@@ -958,8 +958,6 @@ struct RuntimeOption {
   F(bool, JitForceVMRegSync,           false)                           \
   /* Log the profile used to optimize array-like gets and sets. */      \
   F(bool, LogArrayAccessProfile,      false)                            \
-  /* Log the profile used to target iterator specialization. */         \
-  F(bool, LogArrayIterProfile,        false)                            \
   /* We use PGO to target specialization for "foreach" iterator loops.  \
    * We specialize if the chosen specialization covers this fraction    \
    * of profiled loops. If the value is > 1.0, we won't specialize. */  \

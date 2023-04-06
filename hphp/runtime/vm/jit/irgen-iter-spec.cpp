@@ -206,63 +206,7 @@ namespace HPHP::jit::irgen {
 
 namespace {
 
-//////////////////////////////////////////////////////////////////////
-// Basic logging.
-
 const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
-
-void logArrayIterProfile(
-    IRGS& env, const IterArgs& data,
-    ArrayLayout layout = ArrayLayout::Top(),
-    IterSpecialization type = IterSpecialization::generic()) {
-  // We generate code for thousands of loops each time we call retranslateAll.
-  // We don't want production webservers to log when they do so.
-  if (!RO::EvalLogArrayIterProfile) return;
-
-  auto const marker  = makeMarker(env, curSrcKey(env));
-  auto const profile = TargetProfile<ArrayIterProfile>(
-    env.context,
-    makeMarker(env, curSrcKey(env)),
-    s_ArrayIterProfile.get()
-  );
-  if (!profile.optimizing()) return;
-  if (env.inlineState.conjure) return;
-
-  auto func_str = "(unknown)";
-  auto file_str = "(unknown)";
-  auto line_int = 0;
-  if (marker.hasFunc()) {
-    auto const func = marker.func();
-    func_str = func->fullName()->data();
-    file_str = func->filename()->data();
-    line_int = marker.sk().lineNumber();
-  }
-
-  std::vector<std::string> inline_state_string;
-  std::vector<folly::StringPiece> inline_state;
-  for (auto const& state : env.inlineState.bcStateStack) {
-    inline_state_string.push_back(show(state));
-    inline_state.push_back(inline_state_string.back());
-  }
-
-  auto const specialization = type.specialized ? show(type) : "(none)";
-
-  StructuredLogEntry entry;
-  entry.setStr("marker", marker.show());
-  entry.setStr("profile", profile.data().toString());
-  entry.setStr("source_func", func_str);
-  entry.setStr("source_file", file_str);
-  entry.setInt("source_line", line_int);
-  entry.setInt("prof_count", curProfCount(env));
-  entry.setInt("inline_depth", env.inlineState.depth);
-  entry.setVec("inline_state", inline_state);
-  entry.setInt("specialized", type.specialized ? 1 : 0);
-  entry.setStr("specialization", specialization);
-  entry.setStr("layout", layout.describe());
-  entry.setStr("iter_init_data", IterData(data).show());
-
-  StructuredLog::log("hhvm_array_iterators", entry);
-}
 
 //////////////////////////////////////////////////////////////////////
 // Simple getters for IterSpecialization.
@@ -785,7 +729,6 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
       iter->iter_type = IterSpecialization::generic();
     }
     assertx(!env.iters[body]->iter_type.specialized);
-    logArrayIterProfile(env, data);
   };
 
   // We don't need to specialize on key type for value-only iterators.
@@ -853,7 +796,6 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
     env.iters[body] = std::make_unique<SpecializedIterator>(def);
   }
 
-  logArrayIterProfile(env, data, layout, iter_type);
   env.irb->appendBlock(main);
 }
 

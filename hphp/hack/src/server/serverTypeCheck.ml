@@ -305,7 +305,7 @@ let wont_do_failed_parsing
   else
     (env, defs_per_file, None)
 
-let parsing genv env to_check cgroup_steps =
+let indexing genv env to_check cgroup_steps =
   let (ide_files, disk_files) =
     Relative_path.Set.partition
       (Relative_path.Set.mem env.editor_open_files)
@@ -333,20 +333,18 @@ let parsing genv env to_check cgroup_steps =
     MultiWorker.next genv.workers (Relative_path.Set.elements disk_files)
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  let (defs_per_file, errors, failed_parsing) =
+  let defs_per_file =
     CgroupProfiler.step_start_end cgroup_steps "parsing" @@ fun _cgroup_step ->
-    ( Direct_decl_service.go
-        ctx
-        genv.workers
-        ~ide_files
-        ~get_next
-        ~trace:true
-        ~cache_decls:
-          (* Not caching here, otherwise oldification done in redo_type_decl will
-             oldify the new version (and override the real old versions. *)
-          false,
-      Errors.empty,
-      Relative_path.Set.empty )
+    Direct_decl_service.go
+      ctx
+      genv.workers
+      ~ide_files
+      ~get_next
+      ~trace:true
+      ~cache_decls:
+        (* Not caching here, otherwise oldification done in redo_type_decl will
+           oldify the new version (and override the real old versions. *)
+        false
   in
 
   SearchServiceRunner.update_fileinfo_map
@@ -372,7 +370,7 @@ let parsing genv env to_check cgroup_steps =
     }
   in
 
-  (env, defs_per_file, errors, failed_parsing)
+  (env, defs_per_file)
 
 let get_interrupt_config genv env =
   MultiThreadedCall.{ handlers = env.interrupt_handlers genv; env }
@@ -674,32 +672,33 @@ functor
       time_errors_pushed: seconds_since_epoch option;
     }
 
-    let do_parsing
+    let do_indexing
         (genv : genv)
         (env : env)
         ~(errors : Errors.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(cgroup_steps : CgroupProfiler.step_group) :
         ServerEnv.env * parsing_result =
-      let (env, defs_per_file_parsed, errorl, failed_parsing) =
-        parsing genv env files_to_parse cgroup_steps
+      let (env, defs_per_file_parsed) =
+        indexing genv env files_to_parse cgroup_steps
       in
+      (* TODO(ljw): clean up Errors.empty and Relative_path.Set.empty in this function *)
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
-          errorl
+          Errors.empty
           ~do_errors_file:false
           ~rechecked:files_to_parse
           ~phase:Errors.Parsing
-        (* Why didn't we push [errorl] to the errors-file?
-           Because [errorl] and [failed_parsing] are always empty!
-           TODO(ljw): clean up this code to reflect that fact. *)
+        (* Why didn't we push to the errors-file? Because there are no errors! *)
       in
-      let (env, errors) = clear_failed_parsing env errors failed_parsing in
+      let (env, errors) =
+        clear_failed_parsing env errors Relative_path.Set.empty
+      in
       ( env,
         {
           parse_errors = errors;
-          failed_parsing;
+          failed_parsing = Relative_path.Set.empty;
           defs_per_file_parsed;
           time_errors_pushed;
         } )
@@ -1078,7 +1077,7 @@ functor
               defs_per_file_parsed;
               time_errors_pushed;
             } ) =
-        do_parsing genv env ~errors ~files_to_parse ~cgroup_steps
+        do_indexing genv env ~errors ~files_to_parse ~cgroup_steps
       in
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed

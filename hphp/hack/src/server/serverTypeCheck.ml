@@ -604,36 +604,6 @@ functor
       in
       SSet.union new_classes old_classes
 
-    type parsing_result = {
-      parse_errors: Errors.t;
-      defs_per_file_parsed: FileInfo.t Relative_path.Map.t;
-      time_errors_pushed: seconds_since_epoch option;
-    }
-
-    let do_indexing
-        (genv : genv)
-        (env : env)
-        ~(errors : Errors.t)
-        ~(files_to_parse : Relative_path.Set.t)
-        ~(cgroup_steps : CgroupProfiler.step_group) :
-        ServerEnv.env * parsing_result =
-      let (env, defs_per_file_parsed) =
-        indexing genv env files_to_parse cgroup_steps
-      in
-      (* TODO(ljw): clean up Errors.empty. The behavior of the following function is to remove
-         any [phase=Errors.Parsing] from "errors" that are in [files_to_parse]. They might
-         have gotten there on a previous typecheck if [do_typing] put them in. *)
-      let (env, errors, time_errors_pushed) =
-        push_and_accumulate_errors
-          (env, errors)
-          Errors.empty
-          ~do_errors_file:false
-          ~rechecked:files_to_parse
-          ~phase:Errors.Parsing
-        (* Why didn't we push to the errors-file? Because there are no errors! *)
-      in
-      (env, { parse_errors = errors; defs_per_file_parsed; time_errors_pushed })
-
     type naming_result = {
       duplicate_name_errors: Errors.t;
       failed_naming: Relative_path.Set.t;
@@ -1001,10 +971,19 @@ functor
         Telemetry.duration telemetry ~key:"parse_start" ~start_time
       in
       let errors = env.errorl in
-      let ( env,
-            { parse_errors = errors; defs_per_file_parsed; time_errors_pushed }
-          ) =
-        do_indexing genv env ~errors ~files_to_parse ~cgroup_steps
+      let (env, defs_per_file_parsed) =
+        indexing genv env files_to_parse cgroup_steps
+      in
+      (* The following function removes from [errors] any [phase=Errors.Parsing] errors
+         whose filename is in the set [files_to_parse]. How might they have gotten there? ...
+         from [do_typing] in a previous typecheck. *)
+      let (env, errors, time_errors_pushed) =
+        push_and_accumulate_errors
+          (env, errors)
+          Errors.empty
+          ~do_errors_file:false
+          ~rechecked:files_to_parse
+          ~phase:Errors.Parsing
       in
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed

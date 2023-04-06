@@ -366,6 +366,11 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
    */
   std::shared_ptr<fizz::server::FizzServerContext> recreateFizzContext();
 
+  /**
+   * Hook for checking allowlisted client addresses
+   */
+  virtual bool isPeerAddressAllowlisted(const folly::SocketAddress&);
+
  protected:
   using OnDataAvailableParams =
       folly::AsyncUDPSocket::ReadCallback::OnDataAvailableParams;

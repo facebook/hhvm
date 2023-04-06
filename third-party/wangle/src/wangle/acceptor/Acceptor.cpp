@@ -246,6 +246,10 @@ bool Acceptor::canAccept(const SocketAddress& /*address*/) {
   return true;
 }
 
+bool Acceptor::isPeerAddressAllowlisted(const SocketAddress& /*address*/) {
+  return true;
+}
+
 void Acceptor::connectionAccepted(
     folly::NetworkSocket fdNetworkSocket,
     const SocketAddress& clientAddr,

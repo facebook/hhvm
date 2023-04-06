@@ -108,7 +108,7 @@ string_literal ::=  '"' (dstring_char | escape_seq)* '"' |
 dstring_char   ::=  <any source character except "\\" or '"'>
 sstring_char   ::=  <any source character except "\\" or "'">
 escape_seq     ::=  simple_escape | hex_escape | unicode_escape
-simple_escape  ::=  "\\" ("\\" | "'" | "\"" | "n" | "r" | "t")
+simple_escape  ::=  "\\" ("\n" | "\\" | "'" | "\"" | "n" | "r" | "t")
 hex_escape     ::=  "\\x" hex_digit hex_digit
 unicode_escape ::=  "\\u" hex_digit hex_digit hex_digit hex_digit
 
@@ -130,6 +130,8 @@ escape sequences:
 | `\uhhhh`        | Unicode scalar value *hhhh*   |
 
 where `h` denotes a hexadecimal digit.
+
+A backslash (`\`) at the end of a line in a multiline string is removed from the string together with the newline character (U+000A).
 
 Here are some examples of literals in Thrift:
 

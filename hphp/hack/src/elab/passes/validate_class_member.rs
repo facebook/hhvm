@@ -5,6 +5,7 @@
 
 use nast::Class_;
 use nast::Id;
+use nast::Pos;
 use nast::Sid;
 
 use crate::prelude::*;
@@ -24,15 +25,16 @@ impl Pass for ValidateClassMemberPass {
 // We use the same namespace as constants within the class so we cannot have
 // a const and type const with the same name.
 fn error_if_repeated_name<'a>(env: &Env, names: impl Iterator<Item = &'a Sid>) {
-    let mut seen = hash::HashSet::<&str>::default();
+    let mut seen = hash::HashMap::<&str, Pos>::default();
     for Id(pos, name) in names {
-        if seen.contains(name as &str) {
-            env.emit_error(NamingError::AlreadyBound {
+        if let Some(prev_pos) = seen.insert(name, pos.clone()) {
+            env.emit_error(NamingError::ErrorNameAlreadyBound {
                 pos: pos.clone(),
+                prev_pos: prev_pos.clone(),
                 name: name.clone(),
+                prev_name: name.clone(),
             });
         }
-        seen.insert(name);
     }
 }
 
@@ -133,7 +135,9 @@ mod tests {
         class.transform(&env, &mut ValidateClassMemberPass);
         assert!(matches!(
             env.into_errors().as_slice(),
-            [NamingPhaseError::Naming(NamingError::AlreadyBound { .. })]
+            [NamingPhaseError::Naming(
+                NamingError::ErrorNameAlreadyBound { .. }
+            )]
         ));
     }
 }

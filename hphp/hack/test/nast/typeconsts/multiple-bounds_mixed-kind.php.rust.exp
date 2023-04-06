@@ -1,5 +1,6 @@
 Errors:
-  [6:23-25] Argument already bound: `T2`
+  [6:23-25] Name already bound: `T2`
+  [5:23-25] Previous definition is here
 [(Class
     { c_span = [3:1-7:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
       c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Abstract); 

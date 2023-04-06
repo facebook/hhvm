@@ -78,7 +78,7 @@ impl Pass for ElabConstExprPass {
             let Expr(_, pos, expr_) = elem;
             let invalid = |expr_: &mut Expr_| {
                 let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
-                let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
+                let inner_expr = Expr(Default::default(), pos.clone(), inner_expr_);
                 *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
                 Break(())
             };
@@ -220,7 +220,7 @@ impl Pass for ElabConstExprPass {
             let Expr(_, pos, expr_) = elem;
             let invalid = |expr_: &mut Expr_| {
                 let inner_expr_ = std::mem::replace(expr_, Expr_::Null);
-                let inner_expr = elab_utils::expr::from_expr_(inner_expr_);
+                let inner_expr = Expr(Default::default(), pos.clone(), inner_expr_);
                 *expr_ = Expr_::Invalid(Box::new(Some(inner_expr)));
                 Break(())
             };

@@ -94,10 +94,12 @@ constexpr Blob::Version kCurrentVersion = 1;
 // won't cause us to try to pre-allocate huge amounts of memory. These
 // limits were sized so that we should never exceed them, but if we
 // ever do, we can just raise them.
-constexpr size_t kUnitEmitterSizeLimit       = 1ull << 33;
-constexpr size_t kGlobalDataSizeLimit        = 1ull << 28;
-constexpr size_t kIndexSizeLimit             = 1ull << 28;
-constexpr size_t kIndexDataSizeLimit         = 1ull << 31;
+constexpr size_t kUnitEmitterSizeLimit = 1ull << 33;
+constexpr size_t kGlobalDataSizeLimit  = 1ull << 28;
+constexpr size_t kIndexSizeLimit       = 1ull << 28;
+
+// If you hit this limit you also need to change Blob::HashMapIndex::Bucket.
+constexpr size_t kIndexDataSizeLimit   = std::numeric_limits<uint32_t>::max();
 
 ////////////////////////////////////////////////////////////////////////////////
 

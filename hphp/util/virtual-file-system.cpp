@@ -54,10 +54,17 @@ constexpr Blob::Magic kMagic{ 'H', 'V', 'F', 'S' };
 
 constexpr Blob::Version kCurrentVersion = 1;
 
+// Arbitrary limits on the size of various sections. The sizes are all
+// 64-bits, but we don't allow the full range so that a corrupted file
+// won't cause us to try to pre-allocate huge amounts of memory. These
+// limits were sized so that we should never exceed them, but if we
+// ever do, we can just raise them.
 constexpr size_t kFileSizeLimit      = 1ull << 36;
-constexpr size_t kDirectorySizeLimit = 1ull << 30;
-constexpr size_t kIndexSizeLimit     = 1ull << 26;
-constexpr size_t kIndexDataSizeLimit = 1ull << 29;
+constexpr size_t kDirectorySizeLimit = 1ull << 31;
+constexpr size_t kIndexSizeLimit     = 1ull << 27;
+
+// If you hit this limit you also need to change Blob::HashMapIndex::Bucket.
+constexpr size_t kIndexDataSizeLimit = std::numeric_limits<uint32_t>::max();
 
 enum class Chunks {
   FILES,

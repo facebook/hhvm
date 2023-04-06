@@ -10,6 +10,7 @@ use nast::Expr;
 use nast::Expr_;
 use nast::Fun_;
 use nast::Method_;
+use nast::Pos;
 use nast::UserAttribute;
 use oxidized::ast_defs::Bop;
 
@@ -36,17 +37,19 @@ fn check_deprecated_static(user_attrs: &[UserAttribute], env: &Env) {
         .find(|ua| ua.name.name() == sn::user_attributes::DEPRECATED)
         .iter()
         .for_each(|ua| match ua.params.as_slice() {
-            [msg, ..] if !is_static_string(msg) => {
-                env.emit_error(NastCheckError::AttributeParamType {
-                    pos: ua.name.pos().clone(),
-                    x: "static string literal".to_string(),
-                })
+            [msg, ..] => {
+                if let Some(pos) = is_static_string(msg) {
+                    env.emit_error(NastCheckError::AttributeParamType {
+                        pos,
+                        x: "static string literal".to_string(),
+                    })
+                }
             }
             _ => (),
         })
 }
 
-fn is_static_string(expr: &Expr) -> bool {
+fn is_static_string(expr: &Expr) -> Option<Pos> {
     let mut exprs = vec![expr];
     while let Some(expr) = exprs.pop() {
         match &expr.2 {
@@ -59,8 +62,8 @@ fn is_static_string(expr: &Expr) -> bool {
                 exprs.push(rhs);
             }
             Expr_::String(..) => (),
-            _ => return false,
+            _ => return Some(expr.1.clone()),
         }
     }
-    true
+    None
 }

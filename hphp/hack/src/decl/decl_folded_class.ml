@@ -646,7 +646,10 @@ let typeconst_fold
         ttc_synthesized = false;
         ttc_name = stc.stc_name;
         ttc_kind =
-          maybe_add_supportdyn_bound ctx (fst stc.stc_name) stc.stc_kind;
+          (if stc.stc_is_ctx then
+            stc.stc_kind
+          else
+            maybe_add_supportdyn_bound ctx (fst stc.stc_name) stc.stc_kind);
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;

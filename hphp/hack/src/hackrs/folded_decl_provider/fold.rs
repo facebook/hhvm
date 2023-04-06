@@ -226,7 +226,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let ptc_enforceable = ptc.and_then(|tc| tc.enforceable.as_ref());
         let ptc_reifiable = ptc.and_then(|tc| tc.reifiable.as_ref());
         let mut kind = stc.kind.clone();
-        self.maybe_add_supportdyn_bound(stc.name.pos(), &mut kind);
+        if !stc.is_ctx {
+            self.maybe_add_supportdyn_bound(stc.name.pos(), &mut kind);
+        }
         let type_const = TypeConst {
             is_synthesized: false,
             name: stc.name.clone(),

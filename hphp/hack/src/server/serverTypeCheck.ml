@@ -639,35 +639,8 @@ functor
       in
       SSet.union new_classes old_classes
 
-    let clear_failed_parsing env errors failed_parsing =
-      (* In most cases, set of files processed in a phase is a superset
-       * of files from previous phase - i.e if we run decl on file A, we'll also
-       * run its typing.
-       * In few cases we might choose not to run further stages for files that
-       * failed parsing (see ~stop_at_errors). We need to manually clear out
-       * error lists for those files. *)
-      Relative_path.Set.fold
-        failed_parsing
-        ~init:(env, errors)
-        ~f:(fun path acc ->
-          let path = Relative_path.Set.singleton path in
-          List.fold_left
-            [Errors.Naming; Errors.Decl; Errors.Typing]
-            ~init:acc
-            ~f:(fun acc phase ->
-              let (env, errors, _) =
-                push_and_accumulate_errors
-                  acc
-                  ~do_errors_file:false
-                  ~rechecked:path
-                  Errors.empty
-                  ~phase
-              in
-              (env, errors)))
-
     type parsing_result = {
       parse_errors: Errors.t;
-      failed_parsing: Relative_path.Set.t;
       defs_per_file_parsed: FileInfo.t Relative_path.Map.t;
       time_errors_pushed: seconds_since_epoch option;
     }
@@ -682,7 +655,9 @@ functor
       let (env, defs_per_file_parsed) =
         indexing genv env files_to_parse cgroup_steps
       in
-      (* TODO(ljw): clean up Errors.empty and Relative_path.Set.empty in this function *)
+      (* TODO(ljw): clean up Errors.empty. The behavior of the following function is to remove
+         any [phase=Errors.Parsing] from "errors" that are in [files_to_parse]. They might
+         have gotten there on a previous typecheck if [do_typing] put them in. *)
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
@@ -692,16 +667,7 @@ functor
           ~phase:Errors.Parsing
         (* Why didn't we push to the errors-file? Because there are no errors! *)
       in
-      let (env, errors) =
-        clear_failed_parsing env errors Relative_path.Set.empty
-      in
-      ( env,
-        {
-          parse_errors = errors;
-          failed_parsing = Relative_path.Set.empty;
-          defs_per_file_parsed;
-          time_errors_pushed;
-        } )
+      (env, { parse_errors = errors; defs_per_file_parsed; time_errors_pushed })
 
     type naming_result = {
       duplicate_name_errors: Errors.t;
@@ -1071,12 +1037,8 @@ functor
       in
       let errors = env.errorl in
       let ( env,
-            {
-              parse_errors = errors;
-              failed_parsing;
-              defs_per_file_parsed;
-              time_errors_pushed;
-            } ) =
+            { parse_errors = errors; defs_per_file_parsed; time_errors_pushed }
+          ) =
         do_indexing genv env ~errors ~files_to_parse ~cgroup_steps
       in
       let time_first_error =
@@ -1333,7 +1295,8 @@ functor
           ~stop_at_errors
           ~omitted_phases:[Errors.Typing]
           env
-          failed_parsing
+          Relative_path.Set.empty
+        (* TODO(ljw): push through Relative_path.Set.empty *)
       in
       let time_first_error =
         Option.first_some time_first_error time_erased_errors

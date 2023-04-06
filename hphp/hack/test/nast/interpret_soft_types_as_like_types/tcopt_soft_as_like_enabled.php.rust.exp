@@ -1,0 +1,27 @@
+Errors:
+  [4:48-51] Cannot use experimental feature: like-types
+  [4:57-61] Cannot use experimental feature: like-types
+[(Stmt
+    ([2:1-6:2],
+     (Expr
+        ((), [2:1-6:2],
+         (Eif (((), [2:1-2], (Id ([2:1-2], "\\<"))), (Some ((), [2:3-5], (Id ([2:3-5], "\\hh")))),
+            ((), [4:1-6:2],
+             (Efun
+                { ef_fun =
+                  { f_span = [4:1-6:2]; f_readonly_this = None; f_annotation = (); 
+                    f_readonly_ret = None; f_ret = ((), (Some ([4:57-61], (Hlike ([4:58-61], (Hprim Tint))))));
+                    f_params =
+                    [{ param_annotation = (); param_type_hint = ((), (Some ([4:48-51], (Hlike ([4:48-51], (Hprim Tint)))))); 
+                       param_is_variadic = false; param_pos = [4:52-54]; 
+                       param_name = "$x"; param_expr = None; param_readonly = None; 
+                       param_callconv = Pnormal; param_user_attributes = [{ ua_name = ([4:39-45], "__Soft"); ua_params = [] }]; 
+                       param_visibility = None }
+                      ];
+                    f_ctxs = None; f_unsafe_ctxs = None;
+                    f_body = { fb_ast = [([5:3-17], (Return (Some ((), [5:10-16], (Binop { bop = Plus; lhs = ((), [5:10-12], (Lvar ([5:10-12], $x))); rhs = ((), [5:15-16], (Int "1")) })))))] };
+                    f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
+                    f_doc_comment = None };
+                  ef_use = []; ef_closure_class_name = None }))
+            ))))))
+  ]

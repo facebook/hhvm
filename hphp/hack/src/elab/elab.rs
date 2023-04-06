@@ -407,6 +407,8 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         passes::validate_expr_array_get::ValidateExprArrayGetPass::default(),
 
         passes::validate_expr_list::ValidateExprListPass::default(),
+
+        passes::validate_like_hint::ValidateLikeHintPass::default(),
     ];
 
     node.transform(&env, &mut passes);

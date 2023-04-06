@@ -28,6 +28,7 @@ bitflags! {
         const ERROR_PHP_LAMBDAS = 1 << 9;
         const INFER_FLOWS = 1 << 10;
         const ENABLE_ENUM_SUPERTYPING = 1 << 11;
+        const EVERYTHING_SDT = 1 << 12;
     }
 }
 
@@ -47,6 +48,7 @@ impl Flags {
         flags.set(Self::HKT_ENABLED, tco.tco_higher_kinded_types);
         flags.set(Self::IS_SYSTEMLIB, tco.tco_is_systemlib);
         flags.set(Self::LIKE_TYPE_HINTS_ENABLED, tco.tco_like_type_hints);
+        flags.set(Self::EVERYTHING_SDT, tco.tco_everything_sdt);
         flags.set(Self::CONST_ATTRIBUTE, tco.tco_const_attribute);
         flags.set(Self::CONST_STATIC_PROPS, tco.tco_const_static_props);
         flags.set(Self::ERROR_PHP_LAMBDAS, tco.tco_error_php_lambdas);
@@ -130,6 +132,10 @@ impl Env {
 
     pub fn like_type_hints_enabled(&self) -> bool {
         self.flags.contains(Flags::LIKE_TYPE_HINTS_ENABLED)
+    }
+
+    pub fn everything_sdt(&self) -> bool {
+        self.flags.contains(Flags::EVERYTHING_SDT)
     }
 
     pub fn is_hhi(&self) -> bool {

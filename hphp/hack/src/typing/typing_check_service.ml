@@ -857,7 +857,8 @@ let on_cancelled
   in
   add_next []
 
-let process_with_hh_distc ~(interrupt : 'a MultiWorker.interrupt_config) :
+let process_with_hh_distc
+    ~(interrupt : 'a MultiWorker.interrupt_config) ~(check_info : check_info) :
     typing_result =
   (* TODO: Plumb extra --config name=value args through to spawn() *)
   (* TODO: Poll interrupts *)
@@ -875,8 +876,8 @@ let process_with_hh_distc ~(interrupt : 'a MultiWorker.interrupt_config) :
   let fd = Hh_distc_ffi.get_fd handle in
   let rec drain_events (done_count, total_count) =
     match Hh_distc_ffi.recv handle |> Result.ok_or_failwith with
-    | Some (Hh_distc_types.Errors _errors) ->
-      (* TODO write errors to streaming error file *)
+    | Some (Hh_distc_types.Errors errors) ->
+      if check_info.log_errors then ServerProgress.ErrorsWrite.report errors;
       drain_events (done_count, total_count)
     | Some (Hh_distc_types.TypingStart total_count) ->
       drain_events (done_count, total_count)
@@ -1237,7 +1238,7 @@ let go_with_interrupt
         cancelled_fnl,
         diagnostic_pusher ) =
     if BigList.length fnl > 100_000 && use_hh_distc_instead_of_hulk then
-      let typing_result = process_with_hh_distc ~interrupt in
+      let typing_result = process_with_hh_distc ~interrupt ~check_info in
       ( typing_result,
         delegate_state,
         telemetry,

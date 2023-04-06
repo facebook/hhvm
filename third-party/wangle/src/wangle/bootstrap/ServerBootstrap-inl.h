@@ -250,6 +250,18 @@ class ServerAcceptor : public Acceptor,
     Acceptor::dropConnections(pct);
   }
 
+  void dropEstablishedConnections(
+      double pct,
+      const std::function<bool(ManagedConnection*)>& filter) noexcept override {
+    auto ew = folly::make_exception_wrapper<AcceptorException>(
+        AcceptorException::ExceptionType::DROP_CONN_PCT,
+        "dropping some established connections",
+        pct);
+
+    acceptPipeline_->readException(ew);
+    Acceptor::dropEstablishedConnections(pct, filter);
+  }
+
   void forceStop() noexcept override {
     auto ew = folly::make_exception_wrapper<AcceptorException>(
         AcceptorException::ExceptionType::FORCE_STOP, "hard shutdown timeout");

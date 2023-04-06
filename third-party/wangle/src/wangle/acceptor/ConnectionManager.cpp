@@ -326,6 +326,24 @@ void ConnectionManager::dropConnections(double pct) {
   }
 }
 
+void ConnectionManager::dropEstablishedConnections(
+    double pct,
+    const std::function<bool(ManagedConnection*)>& filter) {
+  const size_t N = conns_.size();
+  const size_t numToDrop = N * folly::constexpr_clamp(pct, 0., 1.);
+  size_t droppedConns = 0;
+  auto it = conns_.iterator_to(conns_.front());
+  for (size_t i = 0; i < N && !conns_.empty() && it != idleIterator_ &&
+       droppedConns < numToDrop;
+       i++) {
+    ManagedConnection& conn = *(it++);
+    if (filter(&conn)) {
+      conn.dropConnection();
+      droppedConns++;
+    }
+  }
+}
+
 void ConnectionManager::reportActivity(ManagedConnection& conn) {
   conn.reportActivity();
   onActivated(conn);

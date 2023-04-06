@@ -275,10 +275,18 @@ class Acceptor : public folly::AsyncServerSocket::AcceptCallback,
    * Force-drop "pct" (0.0 to 1.0) of remaining client connections,
    * regardless of whether they are busy or idle.
    *
-   * Note: unlike dropAllConnections(), this function can be called
-   * from any thread.
+   * Note: unlike dropAllConnections(),
+   * this function can be called from any thread.
    */
   virtual void dropConnections(double pctToDrop);
+
+  /**
+   * Drops "pct" (0.0 to 1.0) of the connections active connections.
+   * Connection will be dropped only if filter (callback) returns true
+   */
+  virtual void dropEstablishedConnections(
+      double pctToDrop,
+      const std::function<bool(ManagedConnection*)>& filter);
 
   /**
    * Wrapper for connectionReady() that can be overridden by

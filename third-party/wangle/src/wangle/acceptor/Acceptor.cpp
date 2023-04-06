@@ -569,7 +569,25 @@ void Acceptor::dropConnections(double pctToDrop) {
               << " in thread " << base_;
       assert(base_->isInEventBaseThread());
       forceShutdownInProgress_ = true;
+
       downstreamConnectionManager_->dropConnections(pctToDrop);
+    }
+  });
+}
+
+void Acceptor::dropEstablishedConnections(
+    double pctToDrop,
+    const std::function<bool(ManagedConnection*)>& filter) {
+  base_->runInEventBaseThread([&, pctToDrop, filter] {
+    if (downstreamConnectionManager_) {
+      VLOG(3) << "Dropping " << pctToDrop * 100 << "% of "
+              << getNumConnections()
+              << " established connections from Acceptor=" << this
+              << " in thread " << base_;
+      assert(base_->isInEventBaseThread());
+
+      downstreamConnectionManager_->dropEstablishedConnections(
+          pctToDrop, filter);
     }
   });
 }

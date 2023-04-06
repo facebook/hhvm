@@ -32,12 +32,13 @@ class MockConnection : public ManagedConnection {
   using Mock = StrictMock<MockConnection>;
   using UniquePtr = folly::DelayedDestructionUniquePtr<Mock>;
 
-  static UniquePtr makeUnique(ConnectionManagerTest* test) {
-    UniquePtr p(new StrictMock<MockConnection>(test));
+  static UniquePtr makeUnique(ConnectionManagerTest* test, int num = -1) {
+    UniquePtr p(new StrictMock<MockConnection>(test, num));
     return p;
   }
 
-  explicit MockConnection(ConnectionManagerTest* test) : test_(test) {
+  explicit MockConnection(ConnectionManagerTest* test, int identifier)
+      : test_(test), identifier_{identifier} {
     EXPECT_CALL(*this, isBusy()).WillRepeatedly(Return(false));
     EXPECT_CALL(*this, dumpConnectionState(testing::_))
         .WillRepeatedly(Return());
@@ -77,6 +78,7 @@ class MockConnection : public ManagedConnection {
   ConnectionManagerTest* test_{nullptr};
   bool idle_{false};
   bool closeWhenIdle_{false};
+  int identifier_{-1};
 };
 
 class ConnectionManagerTest : public testing::Test {
@@ -91,7 +93,7 @@ class ConnectionManagerTest : public testing::Test {
 
   void addConns(uint64_t n) {
     for (size_t i = 0; i < n; i++) {
-      conns_.insert(conns_.begin(), MockConnection::makeUnique(this));
+      conns_.insert(conns_.begin(), MockConnection::makeUnique(this, i));
       cm_->addConnection(conns_.front().get());
     }
   }
@@ -199,6 +201,82 @@ TEST_F(ConnectionManagerTest, testDropAll) {
             [&](const std::string&) { cm_->removeConnection(conn.get()); }));
   }
   cm_->dropAllConnections();
+}
+
+TEST_F(ConnectionManagerTest, testDropEstablishedFilterDropAll) {
+  for (const auto& conn : conns_) {
+    EXPECT_CALL(*conn, dropConnection(_))
+        .WillOnce(Invoke(
+            [&](const std::string&) { cm_->removeConnection(conn.get()); }));
+  }
+
+  // We want to drop 100% of the connections and filter returns true all the
+  // time as a result we should drop all the requests
+  cm_->dropEstablishedConnections(
+      1, [](ManagedConnection* /*mangedConn*/) { return true; });
+}
+
+TEST_F(ConnectionManagerTest, testDropFilterDropNone) {
+  for (const auto& conn : conns_) {
+    EXPECT_CALL(*conn, dropConnection(_)).Times(0);
+  }
+
+  // We want to drop 100% of the connections but filter returns false all the
+  // time as a result we should see zero dropped connection
+  cm_->dropEstablishedConnections(
+      1, [](ManagedConnection* /*mangedConn*/) { return false; });
+}
+
+TEST_F(ConnectionManagerTest, testDropFilterDropHalfOnly) {
+  std::vector<int> identifiers{1, 4, 10, 30};
+  auto containsIdentifier = [&identifiers](int num) {
+    return std::find(identifiers.begin(), identifiers.end(), num) !=
+        identifiers.end();
+  };
+
+  for (const auto& conn : conns_) {
+    if (containsIdentifier(conn->identifier_)) {
+      EXPECT_CALL(*conn, dropConnection(_))
+          .WillOnce(Invoke(
+              [&](const std::string&) { cm_->removeConnection(conn.get()); }));
+    }
+  }
+
+  auto filter = [&containsIdentifier](ManagedConnection* managedConn) -> bool {
+    MockConnection* mockConn = dynamic_cast<MockConnection*>(managedConn);
+    if (containsIdentifier(mockConn->identifier_)) {
+      return true;
+    }
+    return false;
+  };
+
+  cm_->dropEstablishedConnections(1, filter);
+}
+
+// We call onDeactivated on connection with identifier 30, as a result this
+// connection will be moved at the end of the list and if the idleIterator_ is
+// conn_.end() it will decremented and now will be standing at connection (30)
+// then we start dropping everything but we make sure that we don't drop
+// connection 30 because thats where idleIterator_ is located
+TEST_F(ConnectionManagerTest, testDropFilterTraverseTillIdleIterator) {
+  for (const auto& conn : conns_) {
+    if (conn->identifier_ == 30) {
+      cm_->onDeactivated(*conn);
+    }
+  }
+
+  for (const auto& conn : conns_) {
+    if (conn->identifier_ == 30) {
+      EXPECT_CALL(*conn, dropConnection(_)).Times(0);
+    } else {
+      EXPECT_CALL(*conn, dropConnection(_))
+          .WillOnce(Invoke(
+              [&](const std::string&) { cm_->removeConnection(conn.get()); }));
+    }
+  }
+
+  auto filter = [](ManagedConnection* managedConn) -> bool { return true; };
+  cm_->dropEstablishedConnections(1, filter);
 }
 
 TEST_F(ConnectionManagerTest, testDropPercent) {

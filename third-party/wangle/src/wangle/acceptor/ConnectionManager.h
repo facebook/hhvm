@@ -155,6 +155,17 @@ class ConnectionManager : public folly::DelayedDestruction,
    */
   void dropConnections(double pct);
 
+  /**
+   * Similar to dropConnections(double pct)  difference is that here
+   * we have a callback which will be called for every connection managed
+   * and connection will be dropped only if callback returns true
+   * Also dropConnection(double pct) is supposed to be used during shutdown
+   * while dropEstablishedConnections is used during runtime
+   */
+  void dropEstablishedConnections(
+      double pct,
+      const std::function<bool(ManagedConnection*)>& filter);
+
   size_t getNumConnections() const {
     return conns_.size();
   }

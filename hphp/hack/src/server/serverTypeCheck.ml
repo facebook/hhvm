@@ -220,7 +220,7 @@ let push_and_accumulate_errors
 
 (** This pushes all [phase] errors in errors, that aren't in [files],
 to the errors-file. *)
-let push_errors_outside_files
+let push_errors_outside_files_to_errors_file
     ?(phase : Errors.phase option)
     (errors : Errors.t)
     ~(files : Relative_path.Set.t) : unit =
@@ -1366,11 +1366,11 @@ functor
          not-in-fanout errors reported here before the typecheck starts, or later after the typecheck
          has finished. We'll report them here for now. *)
       if do_errors_file then begin
-        push_errors_outside_files
+        push_errors_outside_files_to_errors_file
           errors
           ~files:files_to_check
           ~phase:Errors.Parsing;
-        push_errors_outside_files
+        push_errors_outside_files_to_errors_file
           errors
           ~files:files_to_check
           ~phase:Errors.Typing

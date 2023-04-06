@@ -203,7 +203,7 @@ val fold_errors :
   ?phase:phase ->
   t ->
   init:'a ->
-  f:(Relative_path.t -> error -> 'a -> 'a) ->
+  f:(Relative_path.t -> phase -> error -> 'a -> 'a) ->
   'a
 
 val fold_errors_in :

@@ -955,13 +955,13 @@ let fold_errors ?(drop_fixmed = true) ?phase err ~init ~f =
   let err = drop_fixmes_if err drop_fixmed in
   match phase with
   | None ->
-    files_t_fold err ~init ~f:(fun source _ errors acc ->
-        List.fold_right errors ~init:acc ~f:(f source))
+    files_t_fold err ~init ~f:(fun source phase errors acc ->
+        List.fold_right errors ~init:acc ~f:(f source phase))
   | Some phase ->
     Relative_path.Map.fold err ~init ~f:(fun source phases acc ->
         match PhaseMap.find_opt phases phase with
         | None -> acc
-        | Some errors -> List.fold_right errors ~init:acc ~f:(f source))
+        | Some errors -> List.fold_right errors ~init:acc ~f:(f source phase))
 
 let fold_errors_in ?(drop_fixmed = true) ?phase err ~file ~init ~f =
   let err = drop_fixmes_if err drop_fixmed in

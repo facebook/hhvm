@@ -152,8 +152,11 @@ let get_files_with_stale_errors
     | None ->
       fun phase init f ->
         (* Looking at global files *)
-        Errors.fold_errors errors ~phase ~init ~f:(fun source error acc ->
-            f source error acc)
+        Errors.fold_errors
+          errors
+          ~phase
+          ~init
+          ~f:(fun source _phase error acc -> f source error acc)
     | Some files ->
       fun phase init f ->
         (* Looking only at subset of files *)
@@ -228,7 +231,7 @@ let push_errors_outside_files_to_errors_file
          ~drop_fixmed:true
          ?phase
          ~init:[]
-         ~f:(fun path error acc ->
+         ~f:(fun path _phase error acc ->
            if Relative_path.Set.mem files path then
              acc
            else
@@ -253,7 +256,7 @@ let validate_no_errors_outside_files
       ~drop_fixmed:true
       ?phase
       ~init:None
-      ~f:(fun path error acc ->
+      ~f:(fun path _phase error acc ->
         if Option.is_some acc || Relative_path.Set.mem files path then
           acc
         else

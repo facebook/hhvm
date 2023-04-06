@@ -27,7 +27,6 @@
   procs_procs
   server_services
   utils_core
-  version
   base64
   uutf)
  (preprocess

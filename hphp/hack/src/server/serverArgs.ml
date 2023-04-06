@@ -91,8 +91,6 @@ module Messages = struct
   let gen_saved_ignore_type_errors =
     " generate a saved state even if there are type errors."
 
-  let glean_schema_version = " displays Glean schema version used by indexer."
-
   let ignore_hh_version = " ignore hh_version check when loading saved states"
 
   let saved_state_ignore_hhconfig =
@@ -138,9 +136,8 @@ module Messages = struct
   let write_symbol_info = " write symbol info to json files"
 end
 
-let print_json version = print_endline @@ Hh_json.json_to_string version
-
-let print_json_version () = print_json Hh_version.version_json
+let print_json_version () =
+  print_endline @@ Hh_json.json_to_string Hh_version.version_json
 
 (*****************************************************************************)
 (* The main entry point *)
@@ -161,7 +158,6 @@ let parse_options () : options =
   let from_hhclient = ref false in
   let from_vim = ref false in
   let gen_saved_ignore_type_errors = ref false in
-  let glean_schema_version = ref false in
   let ignore_hh = ref false in
   let saved_state_ignore_hhconfig = ref false in
   let json_mode = ref false in
@@ -225,9 +221,6 @@ let parse_options () : options =
       ( "--gen-saved-ignore-type-errors",
         Arg.Set gen_saved_ignore_type_errors,
         Messages.gen_saved_ignore_type_errors );
-      ( "--schema-version",
-        Arg.Set glean_schema_version,
-        Messages.glean_schema_version );
       ("--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version);
       ("--json", Arg.Set json_mode, Messages.json);
       ( "--log-inference-constraints",
@@ -274,22 +267,11 @@ let parse_options () : options =
   in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
-  if !version && !glean_schema_version then (
-    Printf.eprintf "--version is incompatible with --schema-version!\n";
-    Exit.exit Exit_status.Input_error
-  );
   if !version then (
     if !json_mode then
       print_json_version ()
     else
       print_endline Hh_version.version;
-    exit 0
-  );
-  if !glean_schema_version then (
-    if !json_mode then
-      print_json Hh_glean_version.version_json
-    else
-      print_endline Hh_glean_version.version;
     exit 0
   );
   (* --json, --save, --write-symbol-info, --concatenate-all all imply check *)

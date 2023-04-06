@@ -156,10 +156,9 @@ let src_to_string = function
   | FileLines -> "FileLines"
 
 let to_string = function
-  | Hack x -> "hack." ^ hack_to_string x ^ "." ^ Hh_glean_version.hack_version
+  | Hack x -> "hack." ^ hack_to_string x ^ ".6"
   | Src x -> "src." ^ src_to_string x ^ ".1"
-  | Gencode x ->
-    "gencode." ^ gencode_to_string x ^ "." ^ Hh_glean_version.gencode_version
+  | Gencode x -> "gencode." ^ gencode_to_string x ^ ".1"
 
 (* Containers in inheritance relationships which share the four member
    types (excludes enum) *)

@@ -73,7 +73,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     i=i,),
                 service.thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="service.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     
@@ -92,7 +92,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     i=i,),
                 service.thrift_types._fbthrift_MyService_has_arg_docs_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="service.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     
@@ -123,7 +123,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     s=s,
                     i=i,),
                 service.thrift_types._fbthrift_MyService_query_result,
-                uri_or_name="service.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     
@@ -141,7 +141,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     s=s,
                     i=i,),
                 service.thrift_types._fbthrift_MyService_has_arg_docs_result,
-                uri_or_name="service.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     

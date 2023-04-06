@@ -68,7 +68,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                     int1=int1,),
                 python_module_root.my.namespacing.test.module.module.thrift_types._fbthrift_TestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="module.TestService",
+                uri_or_name="TestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -104,7 +104,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 python_module_root.my.namespacing.test.module.module.thrift_types._fbthrift_TestService_init_args(
                     int1=int1,),
                 python_module_root.my.namespacing.test.module.module.thrift_types._fbthrift_TestService_init_result,
-                uri_or_name="module.TestService",
+                uri_or_name="TestService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns

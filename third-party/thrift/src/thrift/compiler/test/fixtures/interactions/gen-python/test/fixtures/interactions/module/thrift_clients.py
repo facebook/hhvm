@@ -66,7 +66,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
-                uri_or_name="module.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     
@@ -87,7 +87,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="MyInteraction",
                 created_interaction = _fbthrift_interaction,
-                uri_or_name="module.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
             return _fbthrift_interaction
@@ -107,7 +107,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="MyInteractionFast",
                 created_interaction = _fbthrift_interaction,
-                uri_or_name="module.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -133,7 +133,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="SerialInteraction",
                 created_interaction = _fbthrift_interaction,
-                uri_or_name="module.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -183,7 +183,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "foo",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result,
-                uri_or_name="module.MyService",
+                uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     
@@ -231,7 +231,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
-                uri_or_name="module.MyInteraction",
+                uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -257,7 +257,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 qualifier = _fbthrift_FunctionQualifier.OneWay,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
-                uri_or_name="module.MyInteraction",
+                uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
     
@@ -274,7 +274,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
-                uri_or_name="module.MyInteraction",
+                uri_or_name="MyInteraction",
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -337,7 +337,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
-                uri_or_name="module.MyInteractionFast",
+                uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
@@ -361,7 +361,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 qualifier = _fbthrift_FunctionQualifier.OneWay,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
-                uri_or_name="module.MyInteractionFast",
+                uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
     
@@ -378,7 +378,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
-                uri_or_name="module.MyInteractionFast",
+                uri_or_name="MyInteractionFast",
                 rpc_options=rpc_options,
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -441,7 +441,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="SerialInteraction",
-                uri_or_name="module.SerialInteraction",
+                uri_or_name="SerialInteraction",
                 rpc_options=rpc_options,
             )
     

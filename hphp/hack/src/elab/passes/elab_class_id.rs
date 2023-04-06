@@ -118,7 +118,7 @@ impl Pass for ElabClassIdPass {
         _: &Env,
         _: &mut nast::UserAttributes,
     ) -> ControlFlow<()> {
-        self.in_class = true;
+        self.in_class = false;
         Continue(())
     }
 }

@@ -1,2 +1,0 @@
-File "sealed_classes20.php", line 2, characters 12-17:
-`__Sealed` can only be used with named types, e.g. `Foo::class` (Parsing[1002])

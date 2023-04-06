@@ -108,23 +108,23 @@ function run_with_soft_inaccessible_state<Tout>(
   }
 }
 
-function embed_implicit_context_state_in_closure(
-  (function ()[defaults]: void) $f,
-)[zoned]: (function ()[defaults]: void) {
+function embed_implicit_context_state_in_closure<T>(
+  (function ()[defaults]: T) $f,
+)[zoned]: (function ()[defaults]: T) {
   $captured_ic_state = _Private\get_whole_implicit_context();
   return ()[defaults] ==> {
     $prev = _Private\set_implicit_context_by_value($captured_ic_state);
     try {
-      $f();
+      return $f();
     } finally {
       _Private\set_implicit_context_by_value($prev);
     }
   };
 }
 
-function embed_implicit_context_state_in_async_closure(
-  (function ()[defaults]: Awaitable<void>) $f,
-)[zoned]: (function ()[defaults]: Awaitable<void>) {
+function embed_implicit_context_state_in_async_closure<T>(
+  (function ()[defaults]: Awaitable<T>) $f,
+)[zoned]: (function ()[defaults]: Awaitable<T>) {
   $captured_ic_state = _Private\get_whole_implicit_context();
   return async ()[defaults] ==> {
     $prev = _Private\set_implicit_context_by_value($captured_ic_state);
@@ -135,7 +135,7 @@ function embed_implicit_context_state_in_async_closure(
     }
     // Needs to be awaited here so that context dependency is established
     // between parent/child functions
-    await $awaitable;
+    return await $awaitable;
   };
 }
 

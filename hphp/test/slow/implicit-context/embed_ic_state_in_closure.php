@@ -125,4 +125,13 @@ async function main(): Awaitable<void> {
   }
   await get_async_closure_from_soft_set()();
   await get_async_closure_from_value_state()();
+
+  $cls_returns = HH\ImplicitContext\embed_implicit_context_state_in_closure(
+    () ==> "returned value not lost",
+  );
+  var_dump($cls_returns());
+  $cls_returns = HH\ImplicitContext\embed_implicit_context_state_in_async_closure(
+    async () ==> "returned value not lost",
+  );
+  var_dump(await $cls_returns());
 }

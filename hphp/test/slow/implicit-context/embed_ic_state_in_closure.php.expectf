@@ -8,3 +8,5 @@ Warning: memo is a [defaults] memoized function, but it is called with a soft in
 memo is a [defaults] memoized function, but it is called with an inaccessible state implicit context
 Warning: memo is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line %d
 Calling closure with IC value: 42
+string(23) "returned value not lost"
+string(23) "returned value not lost"

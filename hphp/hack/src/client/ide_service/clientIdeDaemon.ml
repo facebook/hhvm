@@ -9,10 +9,10 @@
 
 open Hh_prelude
 
-(** This is the result type from attempting to load saved-state.
+(** This is the result type from attempting to prepare the naming table.
 In the error case, [stopped_reason] is a human-facing response,
 and [Lsp.Error.t] contains structured telemetry data. *)
-type load_saved_state_result =
+type prepare_naming_table_result =
   ( Naming_table.t * Saved_state_loader.changed_files,
     ClientIdeMessage.stopped_reason * Lsp.Error.t )
   result
@@ -22,8 +22,8 @@ type message =
   | ClientRequest : 'a ClientIdeMessage.tracked_t -> message
       (** ClientRequest came from ClientIdeService over stdin;
       it expects a response. *)
-  | LoadedState : load_saved_state_result -> message
-      (** LoadedState is posted from within ClientIdeDaemon itself once
+  | GotNamingTable : prepare_naming_table_result -> message
+      (** GotNamingTable is posted from within ClientIdeDaemon itself once
       our attempt at loading saved-state has finished; it's picked
       up by handle_messages. *)
 
@@ -225,13 +225,13 @@ let write_message
     raise @@ Outfd_write_error (fn, param)
 
 (** Load the naming table specified by [naming_table_load_info], or download one based on [root]. *)
-let load_saved_state
+let load_naming_table
     (ctx : Provider_context.t)
     ~(root : Path.t)
     ~(naming_table_load_info :
        ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
        option)
-    ~(ignore_hh_version : bool) : load_saved_state_result Lwt.t =
+    ~(ignore_hh_version : bool) : prepare_naming_table_result Lwt.t =
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
@@ -394,10 +394,10 @@ let load_saved_state
 (** Performs a full index of [root], building a naming table in hh_server's
 temporary directory, and then loading that naming table.
 
-This is an alternative to [load_saved_state] to produce a naming table. *)
+This is an alternative to [load_naming_table] to produce a naming table. *)
 let build_naming_table
     (ctx : Provider_context.t) ~(root : Path.t) ~(hhi_root : Path.t) :
-    load_saved_state_result Lwt.t =
+    prepare_naming_table_result Lwt.t =
   let output = Path.make @@ ServerFiles.client_ide_naming_table root in
   log
     "Beginning full index naming table build with destination %s"
@@ -408,15 +408,15 @@ let build_naming_table
       ~custom_hhi_path:hhi_root
       ~output
   in
-  let rec poll_build_until_complete () : int Lwt.t =
+  let rec poll_build_until_complete_exn () : int Lwt.t =
     match Naming_table_builder_ffi_externs.poll_exn progress with
     | Some exit_status -> Lwt.return exit_status
     | None ->
       let%lwt () = Lwt_unix.sleep 0.1 in
-      poll_build_until_complete ()
+      poll_build_until_complete_exn ()
   in
   try%lwt
-    let%lwt exit_status = poll_build_until_complete () in
+    let%lwt exit_status = poll_build_until_complete_exn () in
     if exit_status = 0 then begin
       log "[full-index] Successfully build naming table from full index.";
       log "[full-index] Loading naming-table... %s" (Path.to_string output);
@@ -448,6 +448,51 @@ let build_naming_table
     let reason = ClientIdeUtils.make_bug_reason "full_index_exn" ~exn in
     let e = ClientIdeUtils.make_bug_error "full_index_exn" ~exn in
     Lwt.return_error (reason, e)
+
+(** Prepare the naming table as part of the daemon's initialization. First attempt to load the naming table. If loading the naming table fails, fall back to building one if [dstate.dcommon.fall_back_to_full_index] is [true]. *)
+let prepare_naming_table
+    (param : ClientIdeMessage.Initialize_from_saved_state.t)
+    (dstate : dstate)
+    ~(out_fd : Lwt_unix.file_descr) : prepare_naming_table_result Lwt.t =
+  let ctx =
+    Provider_context.empty_for_tool
+      ~popt:dstate.dcommon.popt
+      ~tcopt:dstate.dcommon.tcopt
+      ~backend:(Provider_backend.Local_memory dstate.dcommon.local_memory)
+      ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+      ~package_info:Package.Info.empty
+  in
+  let open ClientIdeMessage.Initialize_from_saved_state in
+  (* following method never throws *)
+  let%lwt load_result =
+    load_naming_table
+      ctx
+      ~root:param.root
+      ~naming_table_load_info:param.naming_table_load_info
+      ~ignore_hh_version:param.ignore_hh_version
+  in
+  match load_result with
+  | Error (_reason, e) when dstate.dcommon.fall_back_to_full_index ->
+    let message =
+      Printf.sprintf
+        "Falling back to full index naming table build because naming table load failed: %s"
+        e.Lsp.Error.message
+    in
+    ClientIdeUtils.log_bug message ~data:e.Lsp.Error.data ~telemetry:true;
+    let%lwt () =
+      write_message
+        ~out_fd
+        ~message:
+          (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
+    in
+    let%lwt full_index_result =
+      build_naming_table ctx ~root:param.root ~hhi_root:dstate.dcommon.hhi_root
+    in
+    log "Completed index";
+    Lwt.return full_index_result
+  | Error _
+  | Ok _ ->
+    Lwt.return load_result
 
 let log_startup_time (component : string) (start_time : float) : float =
   let now = Unix.gettimeofday () in
@@ -488,7 +533,7 @@ let remove_hhi (state : state) : unit =
 message from the client. It is synchronous. It sets up global variables and
 glean. The remainder of init work will happen after we return... our caller
 handle_request will kick off async work to load saved-state, and once done
-it will stick a LoadedState message into the queue, and handle_one_message
+it will stick a GotNamingTable message into the queue, and handle_one_message
 will subsequently pick up that message and call [initialize2]. *)
 let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     dstate =
@@ -583,16 +628,16 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   }
 
 (** initialize2 is called by handle_one_message upon receipt of a
-[LoadedState] message. It sends the appropriate message on to the
+[GotNamingTable] message. It sends the appropriate message on to the
 client, and transitions into either [Initialized] or [Failed_init]
 state. *)
 let initialize2
     (out_fd : Lwt_unix.file_descr)
     (dstate : dstate)
-    (load_state_result : load_saved_state_result) : state Lwt.t =
+    (prepare_table_result : prepare_naming_table_result) : state Lwt.t =
   let (_ : float) = log_startup_time "saved_state" dstate.start_time in
   log_debug "initialize2";
-  match load_state_result with
+  match prepare_table_result with
   | Ok (naming_table, changed_files) ->
     let changed_files_to_process =
       Relative_path.Set.union
@@ -762,9 +807,11 @@ let update_state_files (state : state) (files : open_files_state) : state =
 handle one message while another is being handled. It is a bug if the client sends
 anything other than [Initialize_from_saved_state] as its first message. Upon
 receipt+processing of this we transition from [Pre_init] to [During_init]
-and kick off some async work to load saved state. During this async work, i.e.
+and kick off some async work to prepare the naming table. During this async work, i.e.
 during [During_init], we are able to handle a few requests but will reject
-others. Our caller [handle_one_message] is actually the one that transitions
+others. Important: files may change during [During_init], and it's important that we keep track of and eventually index these changed files.
+
+Our caller [handle_one_message] is actually the one that transitions
 us from [During_init] to either [Failed_init] or [Initialized]. Once in one
 of those states, we never thereafter transition state. *)
 let handle_request
@@ -791,84 +838,36 @@ let handle_request
   (***********************************************************)
   (************************* INITIALIZATION ******************)
   (***********************************************************)
-  | (Pending_init, Initialize_from_saved_state param) ->
+  | (Pending_init, Initialize_from_saved_state param) -> begin
     (* Invariant: no message will be sent to us prior to this request,
        and we must send no message until we've sent this response. *)
-    let open Initialize_from_saved_state in
-    begin
-      try
-        let dstate = initialize1 param in
-        (* We're going to kick off the asynchronous part of initializing now.
-           Once it's done, it will appear as a LoadedState message on the queue. *)
-        Lwt.async (fun () ->
-            let ctx =
-              Provider_context.empty_for_tool
-                ~popt:dstate.dcommon.popt
-                ~tcopt:dstate.dcommon.tcopt
-                ~backend:
-                  (Provider_backend.Local_memory dstate.dcommon.local_memory)
-                ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-                ~package_info:Package.Info.empty
-            in
-            (* following method never throws *)
-            let%lwt result =
-              load_saved_state
-                ctx
-                ~root:param.root
-                ~naming_table_load_info:param.naming_table_load_info
-                ~ignore_hh_version:param.ignore_hh_version
-            in
-            let%lwt fall_back_result =
-              match result with
-              | Error (_reason, e) when dstate.dcommon.fall_back_to_full_index
-                ->
-                (* fall back is only intended for repos where we *don't* expect
-                   to be able to load a saved state -- if we're in this branch, we
-                   don't worry about the error loading saved state because we
-                   didn't expect to load one. *)
-                log
-                  "Falling back to full index naming table build because failed to load saved state. Failure reason: %s"
-                  e.Lsp.Error.message;
-                let%lwt () =
-                  write_message
-                    ~out_fd
-                    ~message:
-                      (ClientIdeMessage.Notification
-                         ClientIdeMessage.Full_index_fallback)
-                in
-                let%lwt full_index_result =
-                  build_naming_table
-                    ctx
-                    ~root:param.root
-                    ~hhi_root:dstate.dcommon.hhi_root
-                in
-                log "Completed index";
-                Lwt.return full_index_result
-              | Ok _
-              | Error _ ->
-                Lwt.return result
-            in
-            (* if the following push fails, that must be because the queues
-               have been shut down, in which case there's nothing to do. *)
-            let (_succeeded : bool) =
-              Lwt_message_queue.push
-                message_queue
-                (LoadedState fall_back_result)
-            in
-            Lwt.return_unit);
-        log
-          "Finished saved state initialization. State: %s"
-          (show_dstate dstate);
-        Lwt.return (During_init dstate, Ok ())
-      with
-      | exn ->
-        let exn = Exception.wrap exn in
-        let e = ClientIdeUtils.make_bug_error "initialize1" ~exn in
-        (* Our caller has an exception handler. But we must handle this ourselves
-           to change state to Failed_init; our caller's handler doesn't change state. *)
-        (* TODO: remove_hhi *)
-        Lwt.return (Failed_init e, Error e)
-    end
+    try
+      let dstate = initialize1 param in
+      (* We're going to kick off the asynchronous part of initializing now.
+         Once it's done, it will appear as a GotNamingTable message on the queue. *)
+      Lwt.async (fun () ->
+          let%lwt naming_table_result =
+            prepare_naming_table param dstate ~out_fd
+          in
+          (* if the following push fails, that must be because the queues
+             have been shut down, in which case there's nothing to do. *)
+          let (_succeeded : bool) =
+            Lwt_message_queue.push
+              message_queue
+              (GotNamingTable naming_table_result)
+          in
+          Lwt.return_unit);
+      log "Finished saved state initialization. State: %s" (show_dstate dstate);
+      Lwt.return (During_init dstate, Ok ())
+    with
+    | exn ->
+      let exn = Exception.wrap exn in
+      let e = ClientIdeUtils.make_bug_error "initialize1" ~exn in
+      (* Our caller has an exception handler. But we must handle this ourselves
+         to change state to Failed_init; our caller's handler doesn't change state. *)
+      (* TODO: remove_hhi *)
+      Lwt.return (Failed_init e, Error e)
+  end
   | (_, Initialize_from_saved_state _) ->
     failwith ("Unexpected init in " ^ state_to_log_string state)
   (***********************************************************)
@@ -1237,11 +1236,11 @@ let handle_one_message_exn
     (match (state, message) with
     | (_, None) ->
       Lwt.return_none (* exit loop if message_queue has been closed *)
-    | (During_init dstate, Some (LoadedState load_state_result)) ->
-      let%lwt state = initialize2 out_fd dstate load_state_result in
+    | (During_init dstate, Some (GotNamingTable naming_table_result)) ->
+      let%lwt state = initialize2 out_fd dstate naming_table_result in
       Lwt.return_some state
-    | (_, Some (LoadedState _)) ->
-      failwith ("Unexpected LoadedState in " ^ state_to_log_string state)
+    | (_, Some (GotNamingTable _)) ->
+      failwith ("Unexpected GotNamingTable in " ^ state_to_log_string state)
     | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
       let unblocked_time = Unix.gettimeofday () in
       let%lwt (state, response) =

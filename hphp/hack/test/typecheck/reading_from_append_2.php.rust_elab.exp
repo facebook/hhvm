@@ -1,4 +1,0 @@
-File "reading_from_append_2.php", line 9, characters 3-4:
-Cannot use `[]` for reading (NastCheck[3047])
-File "reading_from_append_2.php", line 9, characters 3-6:
-Cannot use `[]` for reading (NastCheck[3047])

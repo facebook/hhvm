@@ -1,4 +1,0 @@
-File "array_append_bad.php", line 5, characters 3-4:
-Cannot use `[]` for reading (NastCheck[3047])
-File "array_append_bad.php", line 5, characters 3-6:
-Cannot use `[]` for reading (NastCheck[3047])

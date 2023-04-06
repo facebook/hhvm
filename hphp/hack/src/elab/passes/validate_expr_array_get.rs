@@ -19,8 +19,8 @@ pub struct ValidateExprArrayGetPass {
 impl Pass for ValidateExprArrayGetPass {
     fn on_ty_expr_bottom_up(&mut self, env: &Env, expr: &mut Expr) -> ControlFlow<()> {
         match &expr.2 {
-            Expr_::ArrayGet(box (_array_get_expr, None)) if !self.array_append_allowed => {
-                env.emit_error(NastCheckError::ReadingFromAppend(expr.1.clone()))
+            Expr_::ArrayGet(box (array_get_expr, None)) if !self.array_append_allowed => {
+                env.emit_error(NastCheckError::ReadingFromAppend(array_get_expr.1.clone()))
             }
             _ => (),
         }

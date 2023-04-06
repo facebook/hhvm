@@ -1,4 +1,0 @@
-File "disallow_read_from_append.php", line 6, characters 8-9:
-Cannot use `[]` for reading (NastCheck[3047])
-File "disallow_read_from_append.php", line 6, characters 8-11:
-Cannot use `[]` for reading (NastCheck[3047])

@@ -4993,12 +4993,13 @@ let handle_client_message
       Lwt.return_none
     (* textDocument/implementation request *)
     | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
-      ->
+      when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       state := do_goToImplementation_local !state params id;
       Lwt.return_none
     (* textDocument/rename request *)
-    | (_, Some _ide_service, RequestMessage (id, RenameRequest params)) ->
+    | (_, Some _ide_service, RequestMessage (id, RenameRequest params))
+      when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       state := do_documentRename_local !state params id;
       Lwt.return_none

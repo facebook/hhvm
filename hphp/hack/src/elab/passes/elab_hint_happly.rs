@@ -234,8 +234,8 @@ fn canonical_happly(
             None => {
                 let mut pos_canon = Pos::NONE;
                 std::mem::swap(&mut id.0, &mut pos_canon);
-                let hint_ = Hint_::HvecOrDict(None, Hint(pos_canon, Box::new(Hint_::Hany)));
-                let err = NamingError::TooFewTypeArguments(id.0.clone());
+                let hint_ = Hint_::HvecOrDict(None, Hint(pos_canon.clone(), Box::new(Hint_::Hany)));
+                let err = NamingError::TooFewTypeArguments(pos_canon);
                 Continue((Some(hint_), Some(err)))
             }
             Some(hint2) => {

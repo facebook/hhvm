@@ -275,22 +275,6 @@ let validate_no_errors_outside_files
       ~desc:("STREAMING-ERRORS unexpected extra error " ^ phase)
       (Telemetry.create () |> Telemetry.string_ ~key:"witness" ~value:error)
 
-(** Remove files which failed parsing from [defs_per_file] files and
-    discard any previous errors they had in [omitted_phases] *)
-let wont_do_failed_parsing defs_per_file ~stop_at_errors env =
-  (* TODO(ljw): push through above constants in this method *)
-  if stop_at_errors then
-    let (env, time_first_erased) =
-      push_errors
-        env
-        Errors.empty
-        ~rechecked:Relative_path.Set.empty
-        ~phase:Errors.Typing
-    in
-    (env, defs_per_file, time_first_erased)
-  else
-    (env, defs_per_file, None)
-
 let indexing genv env to_check cgroup_steps =
   let (ide_files, disk_files) =
     Relative_path.Set.partition
@@ -372,10 +356,8 @@ module type CheckKindType = sig
      *     instead of reading from disk (duh)
      * - we parse IDE files in master process (to avoid passing env to the
      *     workers)
-     * - to make the IDE more responsive, we try to shortcut the typechecking at
-     *   the parsing level if there were parsing errors
   *)
-  val get_files_to_parse : ServerEnv.env -> Relative_path.Set.t * bool
+  val get_files_to_parse : ServerEnv.env -> Relative_path.Set.t
 
   (* files to parse, should we stop if there are parsing errors *)
 
@@ -414,10 +396,7 @@ end
 
 module FullCheckKind : CheckKindType = struct
   let get_files_to_parse env =
-    let files_to_parse =
-      Relative_path.Set.(env.ide_needs_parsing |> union env.disk_needs_parsing)
-    in
-    (files_to_parse, false)
+    Relative_path.Set.(env.ide_needs_parsing |> union env.disk_needs_parsing)
 
   let get_defs_to_redecl ~reparsed ~(env : env) ~ctx =
     (* Besides the files that actually changed, we want to also redeclare
@@ -505,7 +484,7 @@ module FullCheckKind : CheckKindType = struct
 end
 
 module LazyCheckKind : CheckKindType = struct
-  let get_files_to_parse env = (env.ide_needs_parsing, true)
+  let get_files_to_parse env = env.ide_needs_parsing
 
   let some_ide_diagnosed_files env =
     Diagnostic_pusher.get_files_with_diagnostics env.diagnostic_pusher
@@ -970,7 +949,7 @@ functor
         else
           env
       in
-      let (files_to_parse, stop_at_errors) = CheckKind.get_files_to_parse env in
+      let files_to_parse = CheckKind.get_files_to_parse env in
       (* We need to do naming phase for files that failed naming in a previous cycle.
        * "Failed_naming" comes from duplicate name errors; the idea is that a change
        * deletes one of the duplicates, well, this change should cause us to re-parse
@@ -1274,12 +1253,6 @@ functor
           genv
           (Relative_path.Set.cardinal files_to_check)
           errors
-      in
-      let (env, files_to_check, time_erased_errors) =
-        wont_do_failed_parsing files_to_check ~stop_at_errors env
-      in
-      let time_first_error =
-        Option.first_some time_first_error time_erased_errors
       in
 
       ServerProgress.write

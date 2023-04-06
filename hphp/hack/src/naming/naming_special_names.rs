@@ -861,6 +861,9 @@ pub mod fb {
 }
 
 pub mod hh {
+
+    pub const MEMOIZE_OPTION: &str = "\\HH\\MemoizeOption";
+
     pub const CONTAINS: &str = "\\HH\\Lib\\C\\contains";
 
     pub const CONTAINS_KEY: &str = "\\HH\\Lib\\C\\contains_key";

@@ -6,9 +6,12 @@
 use nast::Abstraction;
 use nast::Class_;
 use nast::ClassishKind;
+use nast::Expr_;
 use nast::Hint;
 use nast::Hint_;
 use nast::Id;
+use nast::Pos;
+use nast::UserAttributes;
 
 use crate::prelude::*;
 
@@ -64,6 +67,40 @@ impl Pass for ElabEnumClassPass {
                 _ => (),
             }
         }
+        Continue(())
+    }
+
+    fn on_ty_user_attributes_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut UserAttributes,
+    ) -> ControlFlow<()> {
+        elem.iter_mut().for_each(|ua| {
+            let attr_name = ua.name.name();
+            if sn::user_attributes::MEMOIZE == attr_name
+                || sn::user_attributes::MEMOIZE_LSB == attr_name
+            {
+                ua.params.iter_mut().for_each(|expr| {
+                    if let Expr_::EnumClassLabel(box (cnm_opt, _)) = &mut expr.2 {
+                        match &cnm_opt {
+                            Some(id) => {
+                                if id.name() != sn::hh::MEMOIZE_OPTION {
+                                    env.emit_error(NamingError::InvalidMemoizeLabel {
+                                        pos: id.pos().clone(),
+                                        attr_name: attr_name.to_string(),
+                                    })
+                                }
+                            }
+                            None => {
+                                // Elaborate.
+                                *cnm_opt =
+                                    Some(Id(Pos::default(), sn::hh::MEMOIZE_OPTION.to_string()))
+                            }
+                        }
+                    }
+                })
+            }
+        });
         Continue(())
     }
 }

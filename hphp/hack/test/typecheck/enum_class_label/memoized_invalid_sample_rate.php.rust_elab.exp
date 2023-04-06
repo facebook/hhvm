@@ -1,6 +1,0 @@
-File "memoized_invalid_sample_rate.php", line 3, characters 38-42:
-Expected a valid 32-bit integer as a sample rate. (Parsing[1002])
-File "memoized_invalid_sample_rate.php", line 3, characters 13-35:
-Enum class label/member mismatch (Typing[4110])
-  File "memoized_invalid_sample_rate.php", line 3, characters 13-35:
-  Unexpected enum class label: `#SoftMakeICInaccessible`

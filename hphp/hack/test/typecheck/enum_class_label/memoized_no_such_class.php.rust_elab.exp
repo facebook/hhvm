@@ -1,2 +1,0 @@
-File "memoized_no_such_class.php", line 3, characters 13-23:
-Unbound name: `NoSuchClass` (an object type) (Naming[2049])

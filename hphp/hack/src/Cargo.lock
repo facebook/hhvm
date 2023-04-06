@@ -2090,6 +2090,14 @@ dependencies = [
 name = "hack_macros"
 version = "0.0.0"
 dependencies = [
+ "hack_macros_impl",
+ "oxidized",
+]
+
+[[package]]
+name = "hack_macros_impl"
+version = "0.0.0"
+dependencies = [
  "aast_parser",
  "macro_test_util",
  "ocamlrep",

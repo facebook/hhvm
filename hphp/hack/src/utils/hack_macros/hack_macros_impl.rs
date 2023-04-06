@@ -1,6 +1,9 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+#![feature(box_patterns)]
+
+mod ast_writer;
 
 use std::collections::HashMap;
 
@@ -17,10 +20,10 @@ use oxidized::parser_options::ParserOptions;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::SyntaxError;
+use proc_macro2::Literal;
 use proc_macro2::Span;
 use proc_macro2::TokenStream;
 use quote::quote;
-use quote::quote_spanned;
 use quote::ToTokens;
 use regex::Match;
 use regex::Regex;
@@ -39,6 +42,8 @@ use syn::LitStr;
 use syn::Path;
 use syn::Result;
 use syn::Token;
+
+use crate::ast_writer::Replacement;
 
 /// See hack_expr! for docs.
 #[proc_macro]
@@ -72,14 +77,16 @@ fn hack_stmts_impl(input: ParseStream<'_>) -> Result<TokenStream> {
     let exports: Path = input.parse()?;
     let input = Input::parse(input)?;
     let stmts = parse_stmts(&input.hack_src, 0, input.span)?;
-    emit::Emitter::build(exports, input.span, input.replacements, input.pos, stmts)
+    crate::ast_writer::write_ast(exports, input.span, input.replacements, input.pos, stmts)
+        .map_err(Into::into)
 }
 
 fn hack_stmt_impl(input: ParseStream<'_>) -> Result<TokenStream> {
     let exports: Path = input.parse()?;
     let input = Input::parse(input)?;
     let stmt = parse_stmt(&input.hack_src, 0, input.span)?;
-    emit::Emitter::build(exports, input.span, input.replacements, input.pos, stmt)
+    crate::ast_writer::write_ast(exports, input.span, input.replacements, input.pos, stmt)
+        .map_err(Into::into)
 }
 
 fn parse_stmts(src: &str, internal_offset: usize, span: Span) -> Result<Vec<ast::Stmt>> {
@@ -128,7 +135,8 @@ fn hack_expr_impl(input: ParseStream<'_>) -> Result<TokenStream> {
 
     let input = Input::parse(input)?;
     let expr = parse_expr(&input.hack_src, input.span)?;
-    emit::Emitter::build(exports, input.span, input.replacements, input.pos, expr)
+    crate::ast_writer::write_ast(exports, input.span, input.replacements, input.pos, expr)
+        .map_err(Into::into)
 }
 
 fn parse_expr(src: &str, span: Span) -> Result<ast::Expr> {
@@ -144,7 +152,7 @@ struct Input {
     pos: TokenStream,
     span: Span,
     hack_src: String,
-    replacements: HashMap<String, ReplVar>,
+    replacements: HashMap<String, Replacement>,
 }
 
 impl Input {
@@ -203,70 +211,10 @@ impl Input {
     }
 }
 
-#[derive(Debug)]
-struct ReplVar {
-    expr: TokenStream,
-    op: VarOp,
-    pos: TokenStream,
-    span: Span,
-}
-
-impl ReplVar {
-    fn to_expr(&self, _e: &emit::Emitter) -> Result<TokenStream> {
-        let expr = &self.expr;
-        let tmp = syn::Ident::new("tmp", Span::mixed_site());
-        let out = match self.op {
-            VarOp::None => {
-                quote_spanned!(self.span=> {
-                    let #tmp: Expr = #expr;
-                    #tmp
-                })
-            }
-            VarOp::Id => {
-                let pos = &self.pos;
-                quote_spanned!(self.span=> {
-                    let #tmp: String = #expr;
-                    Expr((), #pos.clone(), Expr_::Id(Box::new(Id(#pos.clone(), #tmp))))
-                })
-            }
-            VarOp::Lvar => {
-                let pos = &self.pos;
-                quote_spanned!(self.span=> {
-                    let #tmp: LocalId = #expr;
-                    Expr((), #pos.clone(), Expr_::Lvar(Box::new(Lid(#pos.clone(), #tmp))))
-                })
-            }
-            VarOp::Str => {
-                let pos = &self.pos;
-                quote_spanned!(self.span=> {
-                    let #tmp: String = #expr;
-                    Expr((), #pos.clone(), Expr_::String(#tmp.into()))
-                })
-            }
-            VarOp::Args => {
-                return Err(syn::Error::new(
-                    self.span,
-                    "Replacement used in bad spot (this is probably a bug in the hack_expr macro)",
-                ));
-            }
-        };
-        Ok(out)
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-enum VarOp {
-    None,
-    Id,
-    Lvar,
-    Str,
-    Args,
-}
-
 fn prepare_hack(
     input: LitStr,
     default_pos: &TokenStream,
-) -> Result<(String, HashMap<String, ReplVar>)> {
+) -> Result<(String, HashMap<String, Replacement>)> {
     static RE_VAR: OnceCell<Regex> = OnceCell::new();
     let re_var = RE_VAR.get_or_init(|| {
         let short = r"#(\w+)";
@@ -281,7 +229,7 @@ fn prepare_hack(
     });
 
     let span = input.span();
-    let mut replacements: HashMap<String, ReplVar> = HashMap::default();
+    let mut replacements: HashMap<String, Replacement> = HashMap::default();
 
     let input_str = input.value();
     let mut output = String::with_capacity(input_str.len());
@@ -330,13 +278,8 @@ fn prepare_hack(
             }
             2 => {
                 // short form - #name
-                let expr = Ident::new(name_str, subspan).to_token_stream();
-                ReplVar {
-                    expr,
-                    op: VarOp::None,
-                    pos: default_pos.clone(),
-                    span: subspan,
-                }
+                let pat = Ident::new(name_str, subspan).to_token_stream();
+                Replacement::Simple { pat, span: subspan }
             }
             4 => {
                 // long form - #{cmd(...)}
@@ -344,13 +287,8 @@ fn prepare_hack(
             }
             6 => {
                 // args form - #{name*}
-                let expr = Ident::new(name_str, subspan).to_token_stream();
-                ReplVar {
-                    expr,
-                    op: VarOp::Args,
-                    pos: default_pos.clone(),
-                    span: subspan,
-                }
+                let pat = Ident::new(name_str, subspan).to_token_stream();
+                Replacement::Repeat { pat, span: subspan }
             }
             _ => {
                 panic!("Unexpected match index {} in {:?}", idx, caps);
@@ -429,55 +367,73 @@ fn is_word(input: &str) -> bool {
     input.chars().all(is_word_char)
 }
 
-fn parse_repl_var(input: &str, span: Span, default_pos: &TokenStream) -> Result<ReplVar> {
+fn parse_repl_var(input: &str, span: Span, default_pos: &TokenStream) -> Result<Replacement> {
     let (cmd, args) = unwrap_call(input, span)?;
 
-    let op = match cmd {
-        "clone" => VarOp::None,
-        "id" => VarOp::Id,
-        "lvar" => VarOp::Lvar,
-        "str" => VarOp::Str,
-        _ => return Err(Error::new(span, format!("Unknown command '{}'", cmd))),
-    };
-
-    let pos = match args.len() {
-        0 => return Err(Error::new(span, format!("Too few arguments to '{}'", cmd))),
-        1 => default_pos.clone(),
-        2 if op != VarOp::None => Ident::new(args[1], span).to_token_stream(),
-        _ => {
-            return Err(Error::new(span, format!("Too many arguments to '{}'", cmd)));
-        }
-    };
-
-    let inner = if op == VarOp::None { input } else { args[0] };
-    let expr = if is_word(inner) {
-        Ident::new(inner, span).to_token_stream()
-    } else {
-        let (cmd, args) = unwrap_call(inner, span)?;
-        if cmd != "clone" {
-            return Err(Error::new(span, "Inner command can only be 'clone'"));
-        }
+    fn parse_pos(
+        has_convert: bool,
+        cmd: &str,
+        args: &[&str],
+        span: Span,
+        default_pos: &TokenStream,
+    ) -> Result<TokenStream> {
         match args.len() {
-            0 => return Err(Error::new(span, "Too few arguments to 'clone'")),
-            1 => {}
-            _ => return Err(Error::new(span, "Too many arguments to 'clone'")),
+            0 => Err(Error::new(span, format!("Too few arguments to '{}'", cmd))),
+            1 => Ok(default_pos.clone()),
+            2 if has_convert => Ok(Ident::new(args[1], span).to_token_stream()),
+            _ => Err(Error::new(span, format!("Too many arguments to '{}'", cmd))),
         }
+    }
 
-        let var = Ident::new(args[0], span);
-        match op {
-            VarOp::None | VarOp::Lvar => quote!(#var.clone()),
-            VarOp::Id => quote!(#var.to_string()),
-            VarOp::Str => quote!(#var.to_owned()),
-            VarOp::Args => unreachable!("in parse_repl_var"),
+    fn parse_expr<F: FnOnce(Ident) -> TokenStream>(
+        inner: &str,
+        span: Span,
+        f: F,
+    ) -> Result<TokenStream> {
+        if is_word(inner) {
+            Ok(Ident::new(inner, span).to_token_stream())
+        } else {
+            let (cmd, args) = unwrap_call(inner, span)?;
+            if cmd != "clone" {
+                return Err(Error::new(span, "Inner command can only be 'clone'"));
+            }
+            match args.len() {
+                0 => return Err(Error::new(span, "Too few arguments to 'clone'")),
+                1 => {}
+                _ => return Err(Error::new(span, "Too many arguments to 'clone'")),
+            }
+
+            let var = Ident::new(args[0], span);
+            Ok(f(var))
         }
-    };
+    }
 
-    Ok(ReplVar {
-        expr,
-        op,
-        pos,
-        span,
-    })
+    match cmd {
+        "as_expr" => {
+            let pat = parse_expr(args[0], span, |var| quote!(#var.clone()))?;
+            Ok(Replacement::AsExpr { pat, span })
+        }
+        "clone" => {
+            let pat = parse_expr(input, span, |var| quote!(#var.clone()))?;
+            Ok(Replacement::Simple { pat, span })
+        }
+        "id" => {
+            let pat = parse_expr(args[0], span, |var| quote!(#var.to_string()))?;
+            let pos = parse_pos(true, cmd, &args, span, default_pos)?;
+            Ok(Replacement::Id { pat, pos, span })
+        }
+        "lvar" => {
+            let pat = parse_expr(args[0], span, |var| quote!(#var.clone()))?;
+            let pos = parse_pos(true, cmd, &args, span, default_pos)?;
+            Ok(Replacement::Lvar { pat, pos, span })
+        }
+        "str" => {
+            let pat = parse_expr(args[0], span, |var| quote!(#var.to_owned()))?;
+            let pos = parse_pos(true, cmd, &args, span, default_pos)?;
+            Ok(Replacement::Str { pat, pos, span })
+        }
+        _ => Err(Error::new(span, format!("Unknown command '{}'", cmd))),
+    }
 }
 
 fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Result<Program> {
@@ -541,7 +497,7 @@ fn span_for_range(
     } else {
         range.end = 0;
     }
-    let mut tmp = proc_macro2::Literal::string(&src[internal_offset..]);
+    let mut tmp = Literal::string(&src[internal_offset..]);
     tmp.set_span(span);
     tmp.subspan(range).unwrap_or(span)
 }
@@ -584,595 +540,6 @@ fn convert_lowerer_parsing_error(
 ) -> Result<()> {
     let err_span = span_for_pos(src, internal_offset, span, &err.0);
     Err(Error::new(err_span, err.1.to_string()))
-}
-
-mod emit {
-    // This section is more focused on `ast` than `syn` - so don't import too
-    // much conflicting stuff from syn.
-    use std::collections::HashMap;
-
-    use oxidized::ast;
-    use proc_macro2::Span;
-    use proc_macro2::TokenStream;
-    use quote::quote;
-    use quote::quote_spanned;
-    use quote::ToTokens;
-    use syn::Result;
-
-    use super::ReplVar;
-    use super::VarOp;
-
-    pub(crate) trait EmitTokens {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream>;
-
-        fn emit_enum_from_debug(&self, _e: &Emitter, enum_: &str) -> Result<TokenStream>
-        where
-            Self: std::fmt::Debug,
-        {
-            let enum_ = syn::Ident::new(enum_, Span::call_site());
-            let variant = syn::Ident::new(&format!("{:?}", self), Span::call_site());
-            Ok(quote!(#enum_::#variant))
-        }
-    }
-
-    pub(crate) struct Emitter {
-        pub(crate) exports: syn::Path,
-        pub(crate) pos: TokenStream,
-        pub(crate) replacements: HashMap<String, ReplVar>,
-    }
-
-    impl Emitter {
-        fn new(exports: syn::Path, span: Span, replacements: HashMap<String, ReplVar>) -> Self {
-            let pos = proc_macro2::Ident::new("__hygienic_pos", span).to_token_stream();
-            Self {
-                exports,
-                pos,
-                replacements,
-            }
-        }
-
-        pub(crate) fn build<T: EmitTokens>(
-            exports: syn::Path,
-            span: Span,
-            replacements: HashMap<String, ReplVar>,
-            pos_src: TokenStream,
-            t: T,
-        ) -> Result<TokenStream> {
-            let emitter = Self::new(exports, span, replacements);
-            let exports = &emitter.exports;
-
-            let t = t.emit_tokens(&emitter)?;
-            // If this fires it means that we tried to swap out a replacement
-            // but the emitter didn't convert it properly.
-            debug_assert!(!t.to_string().contains("__hack_repl_"));
-            let pos_id = emitter.pos;
-            // We assign to a temp and then return so that we can silence some
-            // clippy lints (you can't use an attribute on an expression).
-            let tmp = proc_macro2::Ident::new("__hygienic_tmp", span);
-            Ok(quote!({
-                use #exports::ast::*;
-                let #pos_id: Pos = #pos_src;
-                #[allow(clippy::redundant_clone)]
-                let #tmp = #t;
-                #tmp
-            }))
-        }
-
-        fn lookup_replacement(&self, name: &str) -> Option<&ReplVar> {
-            self.replacements.get(name)
-        }
-
-        fn lookup_expr_replacement(&self, expr: &ast::Expr) -> Option<&ReplVar> {
-            match &expr.2 {
-                ast::Expr_::Id(inner) => self.lookup_replacement(&inner.1),
-                ast::Expr_::Lvar(inner) => self.lookup_replacement(&inner.1.1),
-                _ => None,
-            }
-        }
-
-        fn lookup_param_replacement(
-            &self,
-            (_, expr): &(ast::ParamKind, ast::Expr),
-        ) -> Option<&ReplVar> {
-            match &expr.2 {
-                ast::Expr_::Lvar(inner) => self.lookup_replacement(&inner.1.1).and_then(|repl| {
-                    if repl.op == VarOp::Args {
-                        Some(repl)
-                    } else {
-                        None
-                    }
-                }),
-                _ => None,
-            }
-        }
-
-        fn lookup_stmt_replacement(&self, stmt: &ast::Stmt) -> Option<&ReplVar> {
-            match &stmt.1 {
-                ast::Stmt_::Expr(inner) => match &inner.2 {
-                    ast::Expr_::Lvar(inner) => self.lookup_replacement(&inner.1.1),
-                    _ => None,
-                },
-                _ => None,
-            }
-        }
-    }
-
-    fn emit_wrapper<T: EmitTokens>(id: TokenStream, t: T, e: &Emitter) -> Result<TokenStream> {
-        let t = t.emit_tokens(e)?;
-        Ok(quote!(#id(#t)))
-    }
-
-    fn emit_wrapper2<T0: EmitTokens, T1: EmitTokens>(
-        id: TokenStream,
-        t0: T0,
-        t1: T1,
-        e: &Emitter,
-    ) -> Result<TokenStream> {
-        let t0 = t0.emit_tokens(e)?;
-        let t1 = t1.emit_tokens(e)?;
-        Ok(quote!(#id(#t0, #t1)))
-    }
-
-    fn emit_sequence_helper<T: EmitTokens>(slice: &[T], e: &Emitter) -> Result<TokenStream> {
-        let out: Vec<_> = slice
-            .iter()
-            .map(|p| p.emit_tokens(e))
-            .collect::<Result<_>>()?;
-        Ok(quote!(vec![#(#out),*]))
-    }
-
-    fn emit_repl_sequence_helper<T: EmitTokens>(
-        slice: &[T],
-        e: &Emitter,
-        chk: impl for<'a> Fn(&'a Emitter, &'a T) -> Option<&'a ReplVar>,
-    ) -> Result<TokenStream> {
-        let has_repl = slice.iter().any(|p| chk(e, p).is_some());
-        if !has_repl {
-            return emit_sequence_helper(slice, e);
-        }
-
-        // #{args*} replacement...
-
-        // Generates something that looks like:
-        //   std::iter::empty()
-        //     .chain([a, b, c].into_iter())
-        //     .chain(args.into_iter())
-        //     .chain([d, e, f].into_iter())
-        //     .collect::<Vec<_>>()
-        let mut result = quote!(std::iter::empty());
-
-        let mut cur = Vec::new();
-        for v in slice {
-            if let Some(repl) = chk(e, v) {
-                if !cur.is_empty() {
-                    result = quote!(#result.chain([#(#cur),*].into_iter()));
-                }
-                cur.clear();
-
-                let args = &repl.expr;
-                result = quote_spanned!(repl.span=> #result.chain(#args.into_iter()));
-            } else {
-                cur.push(v.emit_tokens(e)?);
-            }
-        }
-
-        if !cur.is_empty() {
-            result = quote!(#result.chain([#(#cur),*].into_iter()));
-        }
-
-        Ok(quote!(#result.collect::<Vec<_>>()))
-    }
-
-    impl EmitTokens for () {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            Ok(quote!(()))
-        }
-    }
-
-    impl EmitTokens for isize {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            Ok(quote!(#self))
-        }
-    }
-
-    impl<T: EmitTokens> EmitTokens for &T {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            <T>::emit_tokens(*self, e)
-        }
-    }
-
-    impl EmitTokens for ast::Binop {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let bop = self.bop.emit_tokens(e)?;
-            let lhs = self.lhs.emit_tokens(e)?;
-            let rhs = self.rhs.emit_tokens(e)?;
-            Ok(quote!(Binop{bop:#bop, lhs:#lhs, rhs:#rhs}))
-        }
-    }
-
-    impl EmitTokens for ast::Bop {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::Bop;
-            match self {
-                Bop::Eq(sub) => emit_wrapper(quote!(Bop::Eq), sub, e),
-                _ => self.emit_enum_from_debug(e, "Bop"),
-            }
-        }
-    }
-
-    impl<T: EmitTokens> EmitTokens for Box<T> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_wrapper(
-                quote!(Box::new),
-                <Self as std::borrow::Borrow<T>>::borrow(self),
-                e,
-            )
-        }
-    }
-
-    impl EmitTokens for ast::Catch {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let clsid = self.0.emit_tokens(e)?;
-            let var = self.1.emit_tokens(e)?;
-            let body = self.2.emit_tokens(e)?;
-            Ok(quote!(Catch(#clsid, #var, #body)))
-        }
-    }
-
-    impl EmitTokens for ast::ClassGetExpr {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::ClassGetExpr;
-            match self {
-                ClassGetExpr::CGstring(s) => emit_wrapper(quote!(ClassGetExpr::CGstring), s, e),
-                ClassGetExpr::CGexpr(ex) => emit_wrapper(quote!(ClassGetExpr::CGexpr), ex, e),
-            }
-        }
-    }
-
-    impl EmitTokens for ast::ClassId {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let pos = self.1.emit_tokens(e)?;
-            let cid_ = self.2.emit_tokens(e)?;
-            Ok(quote!(ClassId((), #pos, #cid_)))
-        }
-    }
-
-    impl EmitTokens for ast::ClassId_ {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::ClassId_;
-            match self {
-                ClassId_::CIexpr(expr) => emit_wrapper(quote!(ClassId_::CIexpr), expr, e),
-                _ => self.emit_enum_from_debug(e, "ClassId_"),
-            }
-        }
-    }
-
-    impl EmitTokens for ast::Expr {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            if let Some(repl) = e.lookup_expr_replacement(self) {
-                repl.to_expr(e)
-            } else {
-                let pos = self.1.emit_tokens(e)?;
-                let expr_ = self.2.emit_tokens(e)?;
-                Ok(quote!(Expr((), #pos, #expr_)))
-            }
-        }
-    }
-
-    impl EmitTokens for ast::Expr_ {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::Expr_;
-            match self {
-                Expr_::Binop(inner) => emit_wrapper(quote!(Expr_::Binop), inner, e),
-                Expr_::Call(inner) => emit_wrapper(quote!(Expr_::Call), inner, e),
-                Expr_::ClassConst(inner) => emit_wrapper(quote!(Expr_::ClassConst), inner, e),
-                Expr_::ClassGet(inner) => emit_wrapper(quote!(Expr_::ClassGet), inner, e),
-                Expr_::Id(inner) => emit_wrapper(quote!(Expr_::Id), inner, e),
-                Expr_::Int(inner) => emit_wrapper(quote!(Expr_::Int), inner, e),
-                Expr_::Is(inner) => emit_wrapper(quote!(Expr_::Is), inner, e),
-                Expr_::Lvar(inner) => emit_wrapper(quote!(Expr_::Lvar), inner, e),
-                Expr_::New(inner) => emit_wrapper(quote!(Expr_::New), inner, e),
-                Expr_::Null => Ok(quote!(Expr_::Null)),
-                Expr_::ObjGet(inner) => emit_wrapper(quote!(Expr_::ObjGet), inner, e),
-                expr => todo!(
-                    "Unhandled expr (please implement this missing Expr_ case): {:?}",
-                    expr
-                ),
-            }
-        }
-    }
-
-    impl EmitTokens for ast::Hint {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_wrapper2(quote!(Hint), &self.0, &self.1, e)
-        }
-    }
-
-    impl EmitTokens for ast::Hint_ {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::Hint_;
-            match self {
-                Hint_::Hoption(inner) => emit_wrapper(quote!(Hint_::Hoption), inner, e),
-                Hint_::Hlike(inner) => emit_wrapper(quote!(Hint_::Hlike), inner, e),
-                Hint_::Hfun(inner) => emit_wrapper(quote!(Hint_::Hfun), inner, e),
-                Hint_::Htuple(inner) => emit_wrapper(quote!(Hint_::Hlike), inner, e),
-                Hint_::Happly(p0, p1) => emit_wrapper2(quote!(Hint_::Happly), p0, p1, e),
-                Hint_::Hshape(inner) => emit_wrapper(quote!(Hint_::Hshape), inner, e),
-                Hint_::Haccess(p0, p1) => emit_wrapper2(quote!(Hint_::Haccess), p0, p1, e),
-                Hint_::Hrefinement(p0, p1) => emit_wrapper2(quote!(Hint_::Hrefinement), p0, p1, e),
-                Hint_::Hsoft(inner) => emit_wrapper(quote!(Hint_::Hsoft), inner, e),
-                Hint_::Hany => Ok(quote!(Hint_::Hany)),
-                Hint_::Herr => Ok(quote!(Hint_::Herr)),
-                Hint_::Hmixed => Ok(quote!(Hint_::Hmixed)),
-                Hint_::Hnonnull => Ok(quote!(Hint_::Hnonnull)),
-                Hint_::Habstr(p0, p1) => emit_wrapper2(quote!(Hint_::Habstr), p0, p1, e),
-                Hint_::HvecOrDict(p0, p1) => emit_wrapper2(quote!(Hint_::HvecOrDict), p0, p1, e),
-                Hint_::Hprim(inner) => emit_wrapper(quote!(Hint_::Hprim), inner, e),
-                Hint_::Hthis => Ok(quote!(Hint_::Hthis)),
-                Hint_::Hdynamic => Ok(quote!(Hint_::Hdynamic)),
-                Hint_::Hnothing => Ok(quote!(Hint_::Hnothing)),
-                Hint_::Hunion(inner) => emit_wrapper(quote!(Hint_::Hunion), inner, e),
-                Hint_::Hintersection(inner) => emit_wrapper(quote!(Hint_::Hintersection), inner, e),
-                Hint_::HfunContext(inner) => emit_wrapper(quote!(Hint_::HfunContext), inner, e),
-                Hint_::Hvar(inner) => emit_wrapper(quote!(Hint_::Hvar), inner, e),
-            }
-        }
-    }
-
-    impl EmitTokens for ast::HintFun {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            todo!("EmitTokens: HintFun")
-        }
-    }
-
-    impl EmitTokens for ast::Id {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_wrapper2(quote!(Id), &self.0, &self.1, e)
-        }
-    }
-
-    impl EmitTokens for ast::Lid {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let ast::Lid(pos, (scope, name)) = self;
-            if let Some(repl) = e.lookup_replacement(name) {
-                let pos = &repl.pos;
-                let tmp = syn::Ident::new("tmp", Span::mixed_site());
-                let expr = &repl.expr;
-                Ok(match repl.op {
-                    VarOp::None => quote_spanned!(repl.span=> {
-                        let #tmp: Lid = #expr;
-                        #tmp
-                    }),
-                    VarOp::Lvar => {
-                        quote_spanned!(repl.span=> {
-                            let #tmp: LocalId = #expr;
-                            Lid(#pos.clone(), #tmp)
-                        })
-                    }
-                    VarOp::Id | VarOp::Str | VarOp::Args => {
-                        return Err(syn::Error::new(
-                            repl.span,
-                            "Bad type for this position (must be either 'none' or 'lvar')",
-                        ));
-                    }
-                })
-            } else {
-                emit_wrapper2(quote!(Lid), pos, (scope, name), e)
-            }
-        }
-    }
-
-    impl EmitTokens for ast::NastShapeInfo {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            todo!("EmitTokens: NastShapeInfo")
-        }
-    }
-
-    impl EmitTokens for ast::OgNullFlavor {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            self.emit_enum_from_debug(e, "OgNullFlavor")
-        }
-    }
-
-    impl<T: EmitTokens> EmitTokens for Option<T> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            if let Some(value) = self.as_ref() {
-                let value = value.emit_tokens(e)?;
-                Ok(quote!(Some(#value)))
-            } else {
-                Ok(quote!(None))
-            }
-        }
-    }
-
-    impl EmitTokens for ast::ParamKind {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::ParamKind;
-            match self {
-                ParamKind::Pinout(pos) => emit_wrapper(quote!(ParamKind::Pinout), pos, e),
-                ParamKind::Pnormal => Ok(quote!(ParamKind::Pnormal)),
-            }
-        }
-    }
-
-    impl EmitTokens for ast::Pos {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            // Use the user-supplied `pos` instead of the original Pos (which
-            // would be from our macro's AST parse).
-            let pos = &e.pos;
-            Ok(quote!(#pos.clone()))
-        }
-    }
-
-    impl EmitTokens for ast::PropOrMethod {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            self.emit_enum_from_debug(e, "PropOrMethod")
-        }
-    }
-
-    impl EmitTokens for ast::Block {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_wrapper(quote!(Block), &self.0, e)
-        }
-    }
-
-    impl EmitTokens for ast::FinallyBlock {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_wrapper(quote!(FinallyBlock), &self.0, e)
-        }
-    }
-
-    impl EmitTokens for ast::Stmt {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_wrapper2(quote!(Stmt), &self.0, &self.1, e)
-        }
-    }
-
-    impl EmitTokens for ast::Stmt_ {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            use ast::Stmt_;
-            match self {
-                Stmt_::Expr(inner) => emit_wrapper(quote!(Stmt_::Expr), inner, e),
-                Stmt_::If(inner) => emit_wrapper(quote!(Stmt_::If), inner, e),
-                Stmt_::Noop => Ok(quote!(Stmt_::Noop)),
-                Stmt_::Return(inner) => emit_wrapper(quote!(Stmt_::Return), inner, e),
-                Stmt_::Try(inner) => emit_wrapper(quote!(Stmt_::Try), inner, e),
-                stmt => todo!(
-                    "Unhandled stmt (please implement this missing Stmt_ case): {:?}",
-                    stmt
-                ),
-            }
-        }
-    }
-
-    impl EmitTokens for String {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            Ok(quote!(#self.to_owned()))
-        }
-    }
-
-    impl EmitTokens for ast::Targ {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            todo!("EmitTokens: Targ")
-        }
-    }
-
-    impl EmitTokens for ast::Tprim {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            todo!("EmitTokens: Tprim")
-        }
-    }
-
-    // All of these 'for Vec' impls could be collapsed into one main and a
-    // couple overrides if they just finished specialization...
-
-    impl EmitTokens for Vec<ast::Catch> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_sequence_helper(self, e)
-        }
-    }
-
-    impl EmitTokens for Vec<ast::Expr> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_sequence_helper(self, e)
-        }
-    }
-
-    impl EmitTokens for Vec<ast::Hint> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_sequence_helper(self, e)
-        }
-    }
-
-    impl EmitTokens for Vec<ast::Id> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_sequence_helper(self, e)
-        }
-    }
-
-    impl EmitTokens for Vec<ast::Stmt> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_repl_sequence_helper(self, e, Emitter::lookup_stmt_replacement)
-        }
-    }
-
-    impl EmitTokens for Vec<ast::Targ> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_sequence_helper(self, e)
-        }
-    }
-
-    impl EmitTokens for Vec<(ast::ParamKind, ast::Expr)> {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            emit_repl_sequence_helper(self, e, Emitter::lookup_param_replacement)
-        }
-    }
-
-    impl EmitTokens for Vec<ast::Refinement> {
-        fn emit_tokens(&self, _e: &Emitter) -> Result<TokenStream> {
-            todo!("EmitTokens: Vec<Refinements>")
-        }
-    }
-
-    impl<T0, T1> EmitTokens for (T0, T1)
-    where
-        T0: EmitTokens,
-        T1: EmitTokens,
-    {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let t0 = self.0.emit_tokens(e)?;
-            let t1 = self.1.emit_tokens(e)?;
-            Ok(quote!((#t0, #t1)))
-        }
-    }
-
-    impl<T0, T1, T2> EmitTokens for (T0, T1, T2)
-    where
-        T0: EmitTokens,
-        T1: EmitTokens,
-        T2: EmitTokens,
-    {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let t0 = self.0.emit_tokens(e)?;
-            let t1 = self.1.emit_tokens(e)?;
-            let t2 = self.2.emit_tokens(e)?;
-            Ok(quote!((#t0, #t1, #t2)))
-        }
-    }
-
-    impl<T0, T1, T2, T3> EmitTokens for (T0, T1, T2, T3)
-    where
-        T0: EmitTokens,
-        T1: EmitTokens,
-        T2: EmitTokens,
-        T3: EmitTokens,
-    {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let t0 = self.0.emit_tokens(e)?;
-            let t1 = self.1.emit_tokens(e)?;
-            let t2 = self.2.emit_tokens(e)?;
-            let t3 = self.3.emit_tokens(e)?;
-            Ok(quote!((#t0, #t1, #t2, #t3)))
-        }
-    }
-
-    impl<T0, T1, T2, T3, T4> EmitTokens for (T0, T1, T2, T3, T4)
-    where
-        T0: EmitTokens,
-        T1: EmitTokens,
-        T2: EmitTokens,
-        T3: EmitTokens,
-        T4: EmitTokens,
-    {
-        fn emit_tokens(&self, e: &Emitter) -> Result<TokenStream> {
-            let t0 = self.0.emit_tokens(e)?;
-            let t1 = self.1.emit_tokens(e)?;
-            let t2 = self.2.emit_tokens(e)?;
-            let t3 = self.3.emit_tokens(e)?;
-            let t4 = self.4.emit_tokens(e)?;
-            Ok(quote!((#t0, #t1, #t2, #t3, #t4)))
-        }
-    }
 }
 
 #[cfg(test)]
@@ -1988,6 +1355,237 @@ mod tests {
                     __hygienic_tmp
                 })
             },
+        );
+    }
+
+    #[test]
+    fn test_ex13() {
+        assert_pat_eq(hack_expr_impl.parse2(quote!(EX r#"darray[a => 42]"#)), {
+            quote!({
+                use EX::ast::*;
+                let __hygienic_pos: Pos = Pos::NONE;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Darray(Box::new((
+                        None,
+                        vec![(
+                            Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "a".to_owned()))),
+                            ),
+                            Expr((), __hygienic_pos.clone(), Expr_::Int("42".to_owned())),
+                        )],
+                    ))),
+                );
+                __hygienic_tmp
+            })
+        });
+    }
+
+    #[test]
+    fn test_stmt() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(EX pos = p, "{ a; #b; c; }")),
+            quote!({
+                use EX::ast::*;
+                let __hygienic_pos: Pos = p;
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Stmt(
+                    __hygienic_pos.clone(),
+                    Stmt_::Block(Block(vec![
+                        Stmt(
+                            __hygienic_pos.clone(),
+                            Stmt_::Expr(Box::new(Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "a".to_owned()))),
+                            ))),
+                        ),
+                        {
+                            let tmp: Stmt = b;
+                            tmp
+                        },
+                        Stmt(
+                            __hygienic_pos.clone(),
+                            Stmt_::Expr(Box::new(Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "c".to_owned()))),
+                            ))),
+                        ),
+                    ])),
+                );
+                __hygienic_tmp
+            }),
+        );
+    }
+
+    #[test]
+    fn test_stmts() {
+        assert_pat_eq(
+            hack_stmt_impl.parse2(quote!(EX pos = p, "{ a; b; #{c*}; d; e; }")),
+            {
+                let before = quote!([
+                    Stmt(
+                        __hygienic_pos.clone(),
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "a".to_owned()))),
+                        ))),
+                    ),
+                    Stmt(
+                        __hygienic_pos.clone(),
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "b".to_owned()))),
+                        ))),
+                    ),
+                ]);
+                let after = quote!([
+                    Stmt(
+                        __hygienic_pos.clone(),
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "d".to_owned(),))),
+                        ))),
+                    ),
+                    Stmt(
+                        __hygienic_pos.clone(),
+                        Stmt_::Expr(Box::new(Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "e".to_owned(),))),
+                        ))),
+                    ),
+                ]);
+                quote!({
+                    use EX::ast::*;
+                    let __hygienic_pos: Pos = p;
+                    #[allow(clippy::redundant_clone)]
+                    let __hygienic_tmp = Stmt(
+                        __hygienic_pos.clone(),
+                        Stmt_::Block(Block(
+                            std::iter::empty()
+                                .chain(#before.into_iter())
+                                .chain(c.into_iter())
+                                .chain(#after.into_iter())
+                                .collect::<Vec<_>>(),
+                        )),
+                    );
+                    __hygienic_tmp
+                })
+            },
+        );
+    }
+
+    #[test]
+    fn test_ex14() {
+        assert_pat_eq(
+            hack_expr_impl.parse2(quote!(EX pos = pos.clone(),
+            r#"() ==> {
+                 $result = #kind;
+                 foreach (#{clone(collection)} as #{as_expr(clone(binding))}) {
+                   #inner_body;
+                 }
+                 return $result;
+               }()
+             "#)),
+            quote!({
+                use EX::ast::*;
+                let __hygienic_pos: Pos = pos.clone();
+                #[allow(clippy::redundant_clone)]
+                let __hygienic_tmp = Expr(
+                    (),
+                    __hygienic_pos.clone(),
+                    Expr_::Call(Box::new((
+                        Expr(
+                            (),
+                            __hygienic_pos.clone(),
+                            Expr_::Lfun(Box::new((
+                                Fun_ {
+                                    span: __hygienic_pos.clone(),
+                                    readonly_this: None,
+                                    annotation: (),
+                                    readonly_ret: None,
+                                    ret: TypeHint((), None),
+                                    params: vec![],
+                                    ctxs: None,
+                                    unsafe_ctxs: None,
+                                    body: FuncBody {
+                                        fb_ast: Block(vec![
+                                            Stmt(
+                                                __hygienic_pos.clone(),
+                                                Stmt_::Expr(Box::new(Expr(
+                                                    (),
+                                                    __hygienic_pos.clone(),
+                                                    Expr_::Binop(Box::new(Binop {
+                                                        bop: Bop::Eq(None),
+                                                        lhs: Expr(
+                                                            (),
+                                                            __hygienic_pos.clone(),
+                                                            Expr_::Lvar(Box::new(Lid(
+                                                                __hygienic_pos.clone(),
+                                                                (0isize, "$result".to_owned()),
+                                                            ))),
+                                                        ),
+                                                        rhs: {
+                                                            let tmp: Expr = kind;
+                                                            tmp
+                                                        },
+                                                    })),
+                                                ))),
+                                            ),
+                                            Stmt(
+                                                __hygienic_pos.clone(),
+                                                Stmt_::Foreach(Box::new((
+                                                    {
+                                                        let tmp: Expr = collection.clone();
+                                                        tmp
+                                                    },
+                                                    {
+                                                        let tmp: AsExpr = binding.clone();
+                                                        tmp
+                                                    },
+                                                    Block(vec![{
+                                                        let tmp: Stmt = inner_body;
+                                                        tmp
+                                                    }]),
+                                                ))),
+                                            ),
+                                            Stmt(
+                                                __hygienic_pos.clone(),
+                                                Stmt_::Return(Box::new(Some(Expr(
+                                                    (),
+                                                    __hygienic_pos.clone(),
+                                                    Expr_::Lvar(Box::new(Lid(
+                                                        __hygienic_pos.clone(),
+                                                        (0isize, "$result".to_owned()),
+                                                    ))),
+                                                )))),
+                                            ),
+                                        ]),
+                                    },
+                                    fun_kind: FunKind::FSync,
+                                    user_attributes: UserAttributes(vec![]),
+                                    external: false,
+                                    doc_comment: None,
+                                },
+                                vec![],
+                            ))),
+                        ),
+                        vec![],
+                        vec![],
+                        None,
+                    ))),
+                );
+                __hygienic_tmp
+            }),
         );
     }
 }

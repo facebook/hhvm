@@ -32,7 +32,7 @@
 ///
 ///   - `#{id(name)}` builds an Expr_::Ident from a string.
 ///   - `#{lvar(name)}` builds an Expr_::LVar from a LocalId.
-///   - `#{str(name)}` builds an Expr_::String from a &str.
+///   - `#{str(name)}` builds an Expr_::String from a String.
 ///
 /// All of the commands can also take an optional position override parameter:
 ///   - `#{str(name, pos)}`

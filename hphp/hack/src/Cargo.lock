@@ -2108,7 +2108,9 @@ dependencies = [
  "quote",
  "regex",
  "relative_path",
+ "serde",
  "syn 1.0.104",
+ "thiserror",
 ]
 
 [[package]]

@@ -279,8 +279,10 @@ let validate_no_errors_outside_files
 
 (** Remove files which failed parsing from [defs_per_file] files and
     discard any previous errors they had in [omitted_phases] *)
-let wont_do_failed_parsing
-    defs_per_file ~stop_at_errors ~omitted_phases env failed_parsing =
+let wont_do_failed_parsing defs_per_file ~stop_at_errors env =
+  let omitted_phases = [Errors.Typing] in
+  let failed_parsing = Relative_path.Set.empty in
+  (* TODO(ljw): push through above constants in this method *)
   if stop_at_errors then
     let (env, time_first_erased) =
       List.fold
@@ -1290,13 +1292,7 @@ functor
           errors
       in
       let (env, files_to_check, time_erased_errors) =
-        wont_do_failed_parsing
-          files_to_check
-          ~stop_at_errors
-          ~omitted_phases:[Errors.Typing]
-          env
-          Relative_path.Set.empty
-        (* TODO(ljw): push through Relative_path.Set.empty *)
+        wont_do_failed_parsing files_to_check ~stop_at_errors env
       in
       let time_first_error =
         Option.first_some time_first_error time_erased_errors

@@ -50,8 +50,7 @@ impl Pass for ElabExprCallHhInvariantPass {
                         env.emit_error(NamingPhaseError::NastCheck(
                             NastCheckError::InoutInTransformedPseudofunction {
                                 pos: Pos::merge(pk_pos, &fn_expr_pos).unwrap(),
-                                fn_name: sn::autoimported_functions::INVARIANT_VIOLATION
-                                    .to_string(),
+                                fn_name: "invariant".to_string(),
                             },
                         ))
                     }
@@ -120,7 +119,7 @@ fn check_call(env: &Env, stmt: &Stmt_) -> Check {
                 env.emit_error(NamingPhaseError::NastCheck(
                     NastCheckError::InoutInTransformedPseudofunction {
                         pos: Pos::merge(fn_expr_pos, pk_pos).unwrap(),
-                        fn_name: sn::autoimported_functions::INVARIANT.to_string(),
+                        fn_name: "invariant".to_string(),
                     },
                 ));
                 Check::Elaborate

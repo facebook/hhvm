@@ -2591,11 +2591,9 @@ and simplify_subtype_i
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
         (match deref lty with
-        | (_, Tclass ((_, name_sub), _, _)) ->
-          if String.equal name_sub name_super && Env.is_enum env name_super then
-            valid env
-          else
-            default_subtype env
+        | (_, Tclass ((_, name_sub), _, _))
+          when String.equal name_sub name_super && Env.is_enum env name_super ->
+          valid env
         | (_, Tnewtype (name_sub, tyl_sub, _))
           when String.equal name_sub name_super ->
           if List.is_empty tyl_sub then

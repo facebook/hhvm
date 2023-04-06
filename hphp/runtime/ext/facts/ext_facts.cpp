@@ -106,7 +106,9 @@ fs::path getRepoRoot(const RepoOptions& options) {
 std::string getCacheBreakerSchemaHash(
     std::string_view root,
     const RepoOptions& opts) {
-  std::string optsHash = opts.flags().cacheKeySha1().toString();
+  std::string optsHash = RO::EvalIncludeReopOptionsInFactsCacheBreaker
+      ? opts.flags().cacheKeySha1().toString()
+      : opts.flags().getFactsCacheBreaker();
   XLOG(INFO) << "Native Facts DB cache breaker:"
              << "\n Version: " << kSchemaVersion << "\n Root: " << root
              << "\n RepoOpts hash: " << optsHash;

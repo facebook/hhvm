@@ -162,6 +162,7 @@ struct RepoOptionsFlags {
     #undef E
     sd(m_packageInfo);
     sd(m_sha1);
+    sd(m_factsCacheBreaker);
   }
 
   template <typename SerDe>
@@ -170,6 +171,8 @@ struct RepoOptionsFlags {
     sd(f);
     return f;
   }
+
+  const std::string& getFactsCacheBreaker() const { return m_factsCacheBreaker;}
 
 private:
   RepoOptionsFlags() = default;
@@ -188,6 +191,7 @@ private:
   PackageInfo m_packageInfo;
 
   SHA1 m_sha1;
+  std::string m_factsCacheBreaker;
 
   friend struct RepoOptions;
 };
@@ -1476,6 +1480,7 @@ struct RuntimeOption {
   F(uint64_t, RecordSampleRate, 0)                                      \
   F(string, RecordDir, std::string(""))                                 \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
+  F(bool, IncludeReopOptionsInFactsCacheBreaker, false)                 \
   /* */
 
 private:

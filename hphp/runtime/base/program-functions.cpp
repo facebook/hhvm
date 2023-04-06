@@ -1427,6 +1427,8 @@ static int execute_program_impl(int argc, char** argv) {
     ("php", "emulate the standard php command line")
     ("compiler-id", "display the git hash for the compiler")
     ("repo-schema", "display the repository schema id")
+    ("repo-option-hash", "print the repo-options hash for the specified file "
+     "and exit")
     ("mode,m", value<std::string>(&po.mode)->default_value("run"),
      "run | debug (d) | vsdebug | server (s) | daemon | replay | "
      "translate (t) | verify | getoption | eval")
@@ -1751,6 +1753,23 @@ static int execute_program_impl(int argc, char** argv) {
         value = vs.serializeValue(value, false);
       }
       printf("%s\n", value.toString().data());
+      return 0;
+    }
+    if (vm.count("repo-option-hash")) {
+      rds::local::init();
+      SCOPE_EXIT { rds::local::fini(); };
+
+      if (scriptFilePath.empty()) {
+        std::cerr << "Must specify of file with --repo-option-hash\n";
+        return -1;
+      }
+      if (access(scriptFilePath.data(), F_OK) != 0) {
+        std::cerr << "Cannot access file " << scriptFilePath << "\n";
+        return -1;
+      }
+      auto const& opts = RepoOptions::forFile(scriptFilePath);
+      cout << opts.path() << ": "
+           << opts.flags().cacheKeySha1().toString() << "\n";
       return 0;
     }
   }

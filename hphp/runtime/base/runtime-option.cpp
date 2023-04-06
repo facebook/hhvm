@@ -554,6 +554,9 @@ AUTOLOADFLAGS();
 #undef H
 #undef E
 
+  hdfExtract(autoloadConfig, "CacheBreaker", m_flags.m_factsCacheBreaker,
+             "2b024904a67752dc492e64ad21ae88b707464bd1");
+
   filterNamespaces();
   if (!m_path.empty()) m_repo = std::filesystem::path(m_path).parent_path();
   m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);

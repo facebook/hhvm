@@ -282,9 +282,9 @@ detail::OptionalThriftValue getIOBuf(
              : detail::OptionalThriftValue{};
 }
 
-void setIOBuf(void* object, const std::unique_ptr<folly::IOBuf> value) {
+void setIOBuf(void* object, const folly::IOBuf& value) {
   FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
-  const auto buf = create_IOBuf(value->clone());
+  const auto buf = create_IOBuf(value.clone());
   Py_INCREF(buf);
   UniquePyObjectPtr iobufObj{buf};
   if (!buf) {

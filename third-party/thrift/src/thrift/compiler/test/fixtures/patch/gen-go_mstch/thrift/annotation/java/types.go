@@ -233,6 +233,87 @@ func (x *Annotation) Read(p thrift.Protocol) error {
 }
 
 
+type EnableIsSet struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = &EnableIsSet{}
+
+
+func NewEnableIsSet() *EnableIsSet {
+    return (&EnableIsSet{})
+}
+
+func (x *EnableIsSet) String() string {
+    return fmt.Sprintf("%+v", x)
+}
+
+
+// Deprecated: Use EnableIsSet.Set* methods instead or set the fields directly.
+type EnableIsSetBuilder struct {
+    obj *EnableIsSet
+}
+
+func NewEnableIsSetBuilder() *EnableIsSetBuilder {
+    return &EnableIsSetBuilder{
+        obj: NewEnableIsSet(),
+    }
+}
+
+func (x *EnableIsSetBuilder) Emit() *EnableIsSet {
+    var objCopy EnableIsSet = *x.obj
+    return &objCopy
+}
+
+func (x *EnableIsSet) Write(p thrift.Protocol) error {
+    if err := p.WriteStructBegin("EnableIsSet"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *EnableIsSet) Read(p thrift.Protocol) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        _, typ, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", x, id), err)
+        }
+
+        if typ == thrift.STOP {
+            break;
+        }
+
+        switch id {
+        default:
+            if err := p.Skip(typ); err != nil {
+                return err
+            }
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+
 type Adapter struct {
     AdapterClassName string `thrift:"adapterClassName,1" json:"adapterClassName" db:"adapterClassName"`
     TypeClassName string `thrift:"typeClassName,2" json:"typeClassName" db:"typeClassName"`

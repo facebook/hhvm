@@ -27,6 +27,7 @@ namespace py thrift.annotation.java
 // The thrift java compiler generate immutable structs and corresponding Builder by default.
 // When this annotation is applied to a struct, thrift compiler will generate getters and setters for the struct.
 @scope.Struct
+@scope.Exception
 struct Mutable {}
 
 // When this annotation is applied, thrift compiler will annotate corresponding java entity the given java annotation.
@@ -37,6 +38,11 @@ struct Mutable {}
 struct Annotation {
   1: string java_annotation;
 }
+
+// When this annotation is applied, thrift compiler will generate isSet() series of methods.
+@scope.Struct
+@scope.Exception
+struct EnableIsSet {}
 
 // An annotation that is applied to a Typedef or field that maps it a Java type Adapter.
 // For example:

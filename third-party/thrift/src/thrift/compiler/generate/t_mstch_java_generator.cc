@@ -602,7 +602,8 @@ class mstch_java_struct : public mstch_struct {
         struct_->get_field_by_name("message") == nullptr;
   }
   mstch::node enable_is_set() {
-    return struct_->has_annotation("java.swift.enable_is_set");
+    return struct_->find_structured_annotation_or_null(kJavaEnableIsSetUri) !=
+        nullptr;
   }
 };
 

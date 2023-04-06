@@ -533,17 +533,36 @@ let report_pos_from_reason = ref false
 
 let to_string error = User_error.to_string !report_pos_from_reason error
 
+let log_unexpected error path desc =
+  HackEventLogger.invariant_violation_bug
+    ~path
+    ~pos:
+      (error
+      |> User_error.to_absolute
+      |> User_error.get_pos
+      |> Pos.show_absolute)
+    ~desc
+    (Telemetry.create ());
+  Hh_logger.log
+    "UNEXPECTED: %s\n%s"
+    desc
+    (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+  ()
+
 let add_error_impl error =
+  let () =
+    match !current_context with
+    | (path, Decl) ->
+      log_unexpected error path "didn't expect to see Errors.Decl"
+    | _ -> ()
+  in
   if !accumulate_errors then
     let () =
       match !current_context with
       | (path, _)
         when Relative_path.equal path Relative_path.default
              && not !allow_errors_in_default_path ->
-        Hh_logger.log
-          "WARNING: adding an error in default path\n%s\n"
-          (Caml.Printexc.raw_backtrace_to_string
-             (Caml.Printexc.get_callstack 100))
+        log_unexpected error path "adding an error in default path"
       | _ -> ()
     in
     (* Cheap test to avoid duplicating most recent error *)

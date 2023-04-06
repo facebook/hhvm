@@ -1195,7 +1195,7 @@ class t_hack_generator : public t_concat_generator {
   /**
    * When to start emitting UNSAFE_CAST in $_TSPEC shape initializers.
    */
-  uint32_t min_depth_for_unsafe_cast_ = 3;
+  uint32_t min_depth_for_unsafe_cast_ = 4;
 };
 
 void t_hack_generator::generate_json_enum(

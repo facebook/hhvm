@@ -1714,17 +1714,17 @@ class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftStruc
             'type' => \TType::MAP,
             'ktype' => \TType::I32,
             'vtype' => \TType::SET,
-            'key' => \HH\FIXME\UNSAFE_CAST<mixed, \HH_FIXME\NON_DENOTABLE_TYPE>(shape(
+            'key' => shape(
               'type' => \TType::I32,
-            )),
-            'val' => \HH\FIXME\UNSAFE_CAST<mixed, \HH_FIXME\NON_DENOTABLE_TYPE>(shape(
+            ),
+            'val' => shape(
               'type' => \TType::SET,
               'etype' => \TType::I32,
               'elem' => \HH\FIXME\UNSAFE_CAST<mixed, \HH_FIXME\NON_DENOTABLE_TYPE>(shape(
                 'type' => \TType::I32,
               )),
               'format' => 'collection',
-            )),
+            ),
             'format' => 'collection',
           ),
           'format' => 'collection',

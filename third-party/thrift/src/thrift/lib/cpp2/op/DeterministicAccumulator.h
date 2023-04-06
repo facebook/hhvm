@@ -268,6 +268,7 @@ void DeterministicAccumulator<HasherGenerator>::combine(const T& val) {
   // and combine with the new hasher.
   ctx.hashers.push_back(generator_());
   ctx.hashers.back().combine(val);
+  ctx.hashers.back().finalize();
 }
 
 } // namespace op

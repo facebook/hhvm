@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/op/DeterministicAccumulator.h>
+#include <thrift/lib/cpp2/op/Sha256Hasher.h>
 
 #include <cstdint>
 #include <memory>
@@ -95,6 +96,23 @@ TEST(DeterministicAccumulatorTest, ComplexArgumentDeduction) {
   accumulator.endOrdered();
   accumulator.endUnordered();
   accumulator.endOrdered();
+  accumulator.result();
+}
+
+TEST(DeterministicAccumulatorTest, UnorderedElementFinalized) {
+  // Sha256Hasher throws if the hasher is not finalized.
+  DeterministicAccumulator accumulator([]() { return Sha256Hasher{}; });
+  accumulator.beginUnordered();
+  accumulator.beginOrdered();
+  accumulator.combine(1);
+  accumulator.beginOrdered();
+  accumulator.combine(1);
+  accumulator.beginUnordered();
+  accumulator.combine(1);
+  accumulator.endUnordered();
+  accumulator.endOrdered();
+  accumulator.endOrdered();
+  accumulator.endUnordered();
   accumulator.result();
 }
 

@@ -313,7 +313,8 @@ fn is_toplevel_prim(str: &str) -> bool {
 }
 
 fn is_prim(str: &str) -> bool {
-    str == sn::typehints::NULL
+    str == sn::typehints::VOID
+        || str == sn::typehints::NULL
         || str == sn::typehints::NORETURN
         || str == sn::typehints::INT
         || str == sn::typehints::BOOL

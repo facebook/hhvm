@@ -80,6 +80,7 @@ pub use crate::application_exception::ApplicationExceptionErrorCode;
 pub use crate::binary_protocol::BinaryProtocol;
 pub use crate::bufext::BufExt;
 pub use crate::bufext::BufMutExt;
+pub use crate::bufext::DeserializeSource;
 pub use crate::client::ClientFactory;
 pub use crate::client::Transport;
 pub use crate::compact_protocol::CompactProtocol;

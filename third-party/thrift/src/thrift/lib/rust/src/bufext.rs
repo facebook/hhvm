@@ -116,6 +116,12 @@ impl BufMutExt for SizeCounter {
 // Not implemented for AsRef<[u8]> as Bytes implements that
 pub struct DeserializeSource<B: BufExt>(pub(crate) B);
 
+impl<B: BufExt> DeserializeSource<B> {
+    pub fn new(b: B) -> Self {
+        DeserializeSource(b)
+    }
+}
+
 // These types will use a copying cursor
 macro_rules! impl_deser_as_ref_u8 {
     ( $($t:ty),* ) => {

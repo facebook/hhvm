@@ -41,7 +41,8 @@ CPUConcurrencyController::CPUConcurrencyController(
     folly::observer::Observer<Config> config,
     apache::thrift::server::ServerConfigs& serverConfigs,
     apache::thrift::ThriftServerConfig& thriftServerConfig)
-    : config_(std::move(config)),
+    : config_{(*config).getShared()},
+      enabled_{(*config_.rlock())->enabled()},
       serverConfigs_(serverConfigs),
       thriftServerConfig_(thriftServerConfig) {
   thriftServerConfig_.setMaxRequests(
@@ -53,10 +54,15 @@ CPUConcurrencyController::CPUConcurrencyController(
 
   scheduler_.setThreadName("CPUConcurrencyController-loop");
   scheduler_.start();
-  configSchedulerCallback_ = config_.getUnderlyingObserver().addCallback(
-      [this](folly::observer::Snapshot<Config>) {
+  configSchedulerCallback_ = config.addCallback(
+      [this](folly::observer::Snapshot<Config> configSnapshot) {
+        auto newConfig = configSnapshot.getShared();
+        this->config_.withWLock([&newConfig, this](auto& config) {
+          config = newConfig;
+          this->enabled_.store(config->enabled(), std::memory_order_relaxed);
+        });
         this->cancel();
-        this->schedule();
+        this->schedule(std::move(newConfig));
       });
 }
 
@@ -72,43 +78,62 @@ void CPUConcurrencyController::setEventHandler(
   eventHandler_ = std::move(eventHandler);
 }
 
-void CPUConcurrencyController::cycleOnce() {
-  if (!enabled()) {
+void CPUConcurrencyController::requestStarted() {
+  if (!enabled_fast()) {
     return;
   }
 
-  auto limit = this->getLimit();
-  auto load = getLoad();
+  totalRequestCount_ += 1;
+}
+
+void CPUConcurrencyController::requestShed() {
+  if (!enabled_fast()) {
+    return;
+  }
+
+  recentShedRequest_.store(true);
+}
+
+void CPUConcurrencyController::cycleOnce() {
+  // Get a snapshot of the current config
+  auto config = this->config();
+  if (!config->enabled()) {
+    return;
+  }
+
+  auto limit = this->getLimit(config);
+  auto load = getLoadInternal(config);
   if (eventHandler_) {
     eventHandler_->onCycle(limit, load);
   }
 
-  if (load >= config().cpuTarget) {
+  if (load >= config->cpuTarget) {
     lastOverloadStart_ = std::chrono::steady_clock::now();
     auto newLim =
         limit -
         std::max<uint32_t>(
-            static_cast<uint32_t>(limit * config().decreaseMultiplier), 1);
-    this->setLimit(std::max<uint32_t>(newLim, config().concurrencyLowerBound));
+            static_cast<uint32_t>(limit * config->decreaseMultiplier), 1);
+    this->setLimit(
+        config, std::max<uint32_t>(newLim, config->concurrencyLowerBound));
     if (eventHandler_) {
       eventHandler_->limitDecreased();
     }
   } else {
-    auto currentLimitUsage = this->getLimitUsage();
+    auto currentLimitUsage = this->getLimitUsage(config);
     if (currentLimitUsage == 0 || load <= 0) {
       return;
     }
 
     // Estimate stable concurrency only if we haven't been overloaded recently
     // (and thus current concurrency/CPU is not a good indicator).
-    if (!isRefractoryPeriod() &&
-        config().collectionSampleSize > stableConcurrencySamples_.size()) {
+    if (!isRefractoryPeriodInternal(config) &&
+        config->collectionSampleSize > stableConcurrencySamples_.size()) {
       auto concurrencyEstimate =
-          static_cast<double>(currentLimitUsage) / load * config().cpuTarget;
+          static_cast<double>(currentLimitUsage) / load * config->cpuTarget;
 
       stableConcurrencySamples_.push_back(
-          config().initialEstimateFactor * concurrencyEstimate);
-      if (stableConcurrencySamples_.size() >= config().collectionSampleSize) {
+          config->initialEstimateFactor * concurrencyEstimate);
+      if (stableConcurrencySamples_.size() >= config->collectionSampleSize) {
         // Take percentile to hopefully account for inaccuracies. We don't
         // need a very accurate value as we will adjust this later in the
         // algorithm.
@@ -119,17 +144,15 @@ void CPUConcurrencyController::cycleOnce() {
         auto pct = stableConcurrencySamples_.begin() +
             static_cast<size_t>(
                        stableConcurrencySamples_.size() *
-                       config().initialEstimatePercentile);
+                       config->initialEstimatePercentile);
         std::nth_element(
             stableConcurrencySamples_.begin(),
             pct,
             stableConcurrencySamples_.end());
         auto result = std::clamp<uint32_t>(
-            *pct,
-            config().concurrencyLowerBound,
-            config().concurrencyUpperBound);
+            *pct, config->concurrencyLowerBound, config->concurrencyUpperBound);
         stableEstimate_.store(result, std::memory_order_relaxed);
-        this->setLimit(result);
+        this->setLimit(config, result);
         if (eventHandler_) {
           if (result > limit) {
             eventHandler_->limitIncreased();
@@ -143,26 +166,26 @@ void CPUConcurrencyController::cycleOnce() {
 
     // We prevent unbounded increase of limits by only changing when
     // necessary (i.e., we are getting near breaching existing limit).
-    bool nearExistingLimit = !config().bumpOnError &&
-        (currentLimitUsage >= (1.0 - config().increaseDistanceRatio) * limit);
+    bool nearExistingLimit = !config->bumpOnError &&
+        (currentLimitUsage >= (1.0 - config->increaseDistanceRatio) * limit);
 
     // Bump concurrency limit if we saw some load shedding errors recently.
     bool recentLoadShed =
-        config().bumpOnError && recentShedRequest_.exchange(false);
+        config->bumpOnError && recentShedRequest_.exchange(false);
 
     // We try and push the limit back to stable estimate if we are not
     // overloaded as after an overload event the limit will be set aggressively
     // and may cause steady-state load shedding due to bursty traffic.
     bool shouldConvergeStable =
-        !isRefractoryPeriod() && limit < getStableEstimate();
+        !isRefractoryPeriodInternal(config) && limit < getStableEstimate();
 
     if (nearExistingLimit || recentLoadShed || shouldConvergeStable) {
       auto newLim =
           limit +
           std::max<uint32_t>(
-              static_cast<uint32_t>(limit * config().additiveMultiplier), 1);
+              static_cast<uint32_t>(limit * config->additiveMultiplier), 1);
       this->setLimit(
-          std::min<uint32_t>(config().concurrencyUpperBound, newLim));
+          config, std::min<uint32_t>(config->concurrencyUpperBound, newLim));
       if (eventHandler_) {
         eventHandler_->limitIncreased();
       }
@@ -170,22 +193,22 @@ void CPUConcurrencyController::cycleOnce() {
   }
 }
 
-void CPUConcurrencyController::schedule() {
+void CPUConcurrencyController::schedule(std::shared_ptr<const Config> config) {
   using time_point = std::chrono::steady_clock::time_point;
-  if (!enabled()) {
+  if (!config->enabled()) {
     return;
   }
 
-  LOG(INFO) << "Enabling CPUConcurrencyController: " << config().describe();
-  this->setLimit(this->config().concurrencyUpperBound);
+  LOG(INFO) << "Enabling CPUConcurrencyController: " << config->describe();
+  this->setLimit(config, config->concurrencyUpperBound);
   scheduler_.addFunctionGenericNextRunTimeFunctor(
       [this] { this->cycleOnce(); },
-      [this](time_point, time_point now) {
-        return now + this->config().refreshPeriodMs;
+      [config](time_point, time_point now) {
+        return now + config->refreshPeriodMs;
       },
       "cpu-shed-loop",
       "cpu-shed-interval",
-      this->config().refreshPeriodMs);
+      config->refreshPeriodMs);
 }
 
 void CPUConcurrencyController::cancel() {
@@ -197,28 +220,17 @@ void CPUConcurrencyController::cancel() {
   stableEstimate_.exchange(-1);
 }
 
-void CPUConcurrencyController::requestStarted() {
-  if (!enabled()) {
-    return;
-  }
-
-  totalRequestCount_ += 1;
+bool CPUConcurrencyController::enabled_fast() const {
+  return enabled_.load(std::memory_order_relaxed);
 }
 
-void CPUConcurrencyController::requestShed() {
-  if (!enabled()) {
-    return;
-  }
-
-  recentShedRequest_.store(true);
-}
-
-uint32_t CPUConcurrencyController::getLimit() const {
+uint32_t CPUConcurrencyController::getLimit(
+    const std::shared_ptr<const Config>& config) const {
   uint32_t limit = 0;
-  if (config().mode == Mode::DRY_RUN) {
+  if (config->mode == Mode::DRY_RUN) {
     limit = dryRunLimit_;
   } else {
-    switch (config().method) {
+    switch (config->method) {
       case Method::CONCURRENCY_LIMITS:
         // Using ServiceConfigs instead of ThriftServerConfig, because the value
         // may come from AdaptiveConcurrencyController
@@ -235,14 +247,15 @@ uint32_t CPUConcurrencyController::getLimit() const {
   // Fallback to concurrency upper bound if no limit is set yet.
   // This is most sensible value until we collect enough samples
   // to estimate a better upper bound;
-  return limit ? limit : config().concurrencyUpperBound;
+  return limit ? limit : config->concurrencyUpperBound;
 }
 
-void CPUConcurrencyController::setLimit(uint32_t newLimit) {
-  if (config().mode == Mode::DRY_RUN) {
+void CPUConcurrencyController::setLimit(
+    const std::shared_ptr<const Config>& config, uint32_t newLimit) {
+  if (config->mode == Mode::DRY_RUN) {
     dryRunLimit_ = newLimit;
-  } else if (config().mode == Mode::ENABLED) {
-    switch (config().method) {
+  } else if (config->mode == Mode::ENABLED) {
+    switch (config->method) {
       case Method::CONCURRENCY_LIMITS:
         activeRequestsLimit_.setValue(newLimit);
         break;
@@ -255,9 +268,10 @@ void CPUConcurrencyController::setLimit(uint32_t newLimit) {
   }
 }
 
-uint32_t CPUConcurrencyController::getLimitUsage() {
+uint32_t CPUConcurrencyController::getLimitUsage(
+    const std::shared_ptr<const Config>& config) {
   using namespace std::chrono;
-  switch (config().method) {
+  switch (config->method) {
     case Method::CONCURRENCY_LIMITS:
       // Note: estimating concurrency from this is fairly lossy as it's a
       // gauge metric and we can't use techniques to measure it over a duration.
@@ -283,9 +297,27 @@ uint32_t CPUConcurrencyController::getLimitUsage() {
   }
 }
 
+bool CPUConcurrencyController::isRefractoryPeriodInternal(
+    const std::shared_ptr<const Config>& config) const {
+  return (std::chrono::steady_clock::now() - lastOverloadStart_) <=
+      std::chrono::milliseconds(config->refractoryPeriodMs);
+}
+
+int64_t CPUConcurrencyController::getLoadInternal(
+    const std::shared_ptr<const Config>& config) const {
+  return std::clamp<int64_t>(
+      detail::getCPULoadCounter(config->refreshPeriodMs, config->cpuLoadSource),
+      0,
+      100);
+}
+
 /**
  * CPUConcurrencyController Config helper methods
  */
+bool CPUConcurrencyController::Config::enabled() const {
+  return mode != Mode::DISABLED;
+}
+
 std::string_view CPUConcurrencyController::Config::modeName() const {
   switch (mode) {
     case Mode::DISABLED:

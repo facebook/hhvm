@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/source-location.h"
 
+#include "hphp/util/blob.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 #include <cstdint>
@@ -47,20 +48,11 @@ struct FuncTable;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct RepoBounds {
-  size_t offset = 0;
-  size_t size = 0;
-
-  template<class SerDe> void serde(SerDe& sd) {
-    sd(offset)(size);
-  }
-};
-
 struct RepoUnitInfo {
   int64_t unitSn;
   const StringData* path = nullptr;
-  RepoBounds emitterLocation;
-  RepoBounds symbolsLocation;
+  Blob::Bounds emitterLocation;
+  Blob::Bounds symbolsLocation;
 
   void serde(BlobEncoder& sd) const;
   void serde(BlobDecoder& sd);
@@ -151,32 +143,6 @@ private:
  */
 struct RepoFile {
 
-  template <typename Compare>
-  struct HashMapIndex {
-    HashMapIndex(size_t size, RepoBounds indexBounds, RepoBounds dataBounds)
-      : size(size), indexBounds(indexBounds), dataBounds(dataBounds) {}
-    HashMapIndex()
-      : HashMapIndex<Compare>(0, RepoBounds { 0, 0 }, RepoBounds { 0, 0 }) {}
-
-    size_t size;
-    RepoBounds indexBounds;
-    RepoBounds dataBounds;
-  };
-
-  struct ListIndex {
-
-    ListIndex(): ListIndex(0, RepoBounds { 0, 0 }, RepoBounds { 0, 0 }) {}
-    ListIndex(size_t size, RepoBounds indexBounds, RepoBounds dataBounds)
-      : size(size), indexBounds(indexBounds), dataBounds(dataBounds) {}
-
-    size_t size;
-    RepoBounds indexBounds;
-    RepoBounds dataBounds;
-  };
-
-  using CaseSensitiveHashMapIndex = HashMapIndex<string_data_same>;
-  using CaseInsensitiveHashMapIndex = HashMapIndex<string_data_isame>;
-
   // To support lazy-loading, RepoFile needs to know where to load
   // certain pieces of data. It is the responsibility of the caller to
   // provide such offsets. The offset is abstracted away as a "token"
@@ -264,7 +230,7 @@ struct RepoFile {
   // Get the RepoUnitInfo for a specific key in a specific map.
   // The map must point to RepoBounds containing the bounds for RepoUnitInfo
   template <typename Compare>
-  static const RepoUnitInfo* findUnitInfo(const HashMapIndex<Compare>& map,
+  static const RepoUnitInfo* findUnitInfo(const Blob::HashMapIndex<Compare>& map,
                                           const StringData* key);
 
   // Get all the symbols for a specific path

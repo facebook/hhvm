@@ -69,6 +69,7 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/builtin-symbol-map.h"
@@ -1180,6 +1181,10 @@ static int start_server(const std::string &username, int xhprof) {
     nSlabs = RO::EvalNumReservedSlabs * (2ull << 20) / kSlabSize;
   }
   setup_local_arenas(reqHeapSpec, nSlabs);
+
+  if (RuntimeOption::RepoAuthoritative) {
+    setup_swappable_readonly_arena(RuntimeOption::EvalHHBCArenaChunkSize);
+  }
 #endif
 
   HttpServer::Server->runOrExitProcess();
@@ -2482,6 +2487,8 @@ void hphp_process_init(bool skipModules) {
 
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");
+
+  StaticContentCache::load();
 
   if (RuntimeOption::RepoAuthoritative &&
       !RuntimeOption::EvalJitSerdesFile.empty() &&

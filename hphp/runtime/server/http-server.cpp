@@ -33,7 +33,6 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -184,8 +183,6 @@ HttpServer::HttpServer() {
     }
   }
 
-  StaticContentCache::TheCache.load();
-
   m_counterCallback.init(
     [this](std::map<std::string, int64_t>& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
@@ -318,45 +315,7 @@ HttpServer::~HttpServer() {
   stop();
 }
 
-static StaticString s_file{"file"}, s_line{"line"};
-
 void HttpServer::runOrExitProcess() {
-  if (StaticContentCache::TheFileCache &&
-      StructuredLog::enabled() &&
-      StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
-    CacheManager::setLogger([](bool existsCheck, const std::string& name) {
-        auto record = StructuredLogEntry{};
-        record.setInt("existsCheck", existsCheck);
-        record.setStr("file", name);
-        bool needsCppStack = true;
-        if (!g_context.isNull()) {
-          VMRegAnchor _;
-          if (vmfp()) {
-            auto const bt =
-              createBacktrace(BacktraceArgs().withArgValues(false));
-            std::vector<std::string> frameStrings;
-            std::vector<folly::StringPiece> frames;
-            for (int i = 0; i < bt.size(); i++) {
-              auto f = tvCastToArrayLike(bt.lookup(i));
-              if (f.exists(s_file)) {
-                auto s = tvCastToString(f.lookup(s_file)).toCppString();
-                if (f.exists(s_line)) {
-                  s += folly::sformat(":{}", tvCastToInt64(f.lookup(s_line)));
-                }
-                frameStrings.emplace_back(std::move(s));
-                frames.push_back(frameStrings.back());
-              }
-            }
-            record.setVec("stack", frames);
-            needsCppStack = false;
-          }
-        }
-        if (needsCppStack) {
-          record.setStackTrace("stack", StackTrace{StackTrace::Force{}});
-        }
-        StructuredLog::log("hhvm_file_cache", record);
-      });
-  }
   auto startupFailure = [] (const std::string& msg) {
     Logger::Error(msg);
     Logger::Error("Shutting down due to failure(s) to bind in "

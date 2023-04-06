@@ -53,7 +53,6 @@
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/cpuid.h"
 #include "hphp/util/current-executable.h" // @donotremove
-#include "hphp/util/file-cache.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
@@ -2405,7 +2404,6 @@ void RuntimeOption::Load(
     if (SourceRoot.empty()) {
       SourceRoot = defSourceRoot;
     }
-    FileCache::SourceRoot = SourceRoot;
 
     Config::Bind(IncludeSearchPaths, ini, config, "Server.IncludeSearchPaths");
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {

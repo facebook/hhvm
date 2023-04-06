@@ -53,6 +53,7 @@
 #include "hphp/util/match.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/virtual-file-system.h"
 #include "hphp/zend/zend-string.h"
 
 using namespace HPHP;
@@ -70,7 +71,6 @@ Package::Package(const std::string& root,
   : m_root{root}
   , m_failed{false}
   , m_total{0}
-  , m_fileCache{std::make_shared<FileCache>()}
   , m_executor{executor}
   , m_client{client}
   , m_config{
@@ -124,7 +124,8 @@ void Package::addSourceFile(const std::string& fileName) {
   m_filesToParse.emplace(std::move(canonFileName), true);
 }
 
-std::shared_ptr<FileCache> Package::getFileCache() {
+void Package::writeVirtualFileSystem(const std::string& path) {
+  auto writer = VirtualFileSystemWriter(path);
   for (auto const& dir : m_directories) {
     std::vector<std::string> files;
     FileUtil::find(files, m_root, dir, /* php */ false,
@@ -133,9 +134,8 @@ std::shared_ptr<FileCache> Package::getFileCache() {
     Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
     for (auto& file : files) {
       auto const rpath = file.substr(m_root.size());
-      if (!m_fileCache->fileExists(rpath.c_str())) {
+      if (writer.addFile(rpath.c_str(), file.c_str())) {
         Logger::Verbose("saving %s", file.c_str());
-        m_fileCache->write(rpath.c_str(), file.c_str());
       }
     }
   }
@@ -144,34 +144,32 @@ std::shared_ptr<FileCache> Package::getFileCache() {
     FileUtil::find(files, m_root, dir, /* php */ false);
     for (auto& file : files) {
       auto const rpath = file.substr(m_root.size());
-      if (!m_fileCache->fileExists(rpath.c_str())) {
+      if (writer.addFile(rpath.c_str(), file.c_str())) {
         Logger::Verbose("saving %s", file.c_str());
-        m_fileCache->write(rpath.c_str(), file.c_str());
       }
     }
   }
   for (auto const& file : m_extraStaticFiles) {
-    if (!m_fileCache->fileExists(file.c_str())) {
-      auto const fullpath = m_root + file;
+    auto const fullpath = m_root + file;
+    if (writer.addFile(file.c_str(), fullpath.c_str())) {
       Logger::Verbose("saving %s", fullpath.c_str());
-      m_fileCache->write(file.c_str(), fullpath.c_str());
     }
   }
 
   for (auto const& pair : m_discoveredStaticFiles) {
     auto const file = pair.first.c_str();
-    if (!m_fileCache->fileExists(file)) {
-      const char *fullpath = pair.second.c_str();
-      Logger::Verbose("saving %s", fullpath[0] ? fullpath : file);
-      if (fullpath[0]) {
-        m_fileCache->write(file, fullpath);
-      } else {
-        m_fileCache->write(file);
+    const char *fullpath = pair.second.c_str();
+    if (fullpath[0]) {
+      if (writer.addFile(file, fullpath)) {
+        Logger::Verbose("saving %s", fullpath);
+      }
+    } else {
+      if (writer.addFileWithoutContent(file)) {
+        Logger::Verbose("saving %s", file);
       }
     }
   }
-
-  return m_fileCache;
+  writer.finish();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

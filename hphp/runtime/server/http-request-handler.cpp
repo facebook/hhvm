@@ -297,11 +297,6 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   string path = reqURI.path().data();
   string absPath = reqURI.absolutePath().data();
 
-  // determine whether we can use a precompressed response
-  // (the cache stores compressed values using gzip)
-  bool acceptsPrecompressed = transport->acceptEncoding("gzip");
-
-  const char *data; int len;
   const char *ext = reqURI.ext();
 
   if (reqURI.forbidden()) {
@@ -323,25 +318,21 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // If this is not a php file, check the static content cache
   if (treatAsContent) {
-    bool compressed = acceptsPrecompressed;
+    // bool compressed = acceptsPrecompressed;
     // check against static content cache
-    if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
-      ScopedMem decompressed_data;
-      // (qigao) not calling stat at this point because the timestamp of
-      // local cache file is not valuable, maybe misleading. This way
-      // the Last-Modified header will not show in response.
-      // stat(RuntimeOption::FileCache.c_str(), &st);
-      if (!acceptsPrecompressed && compressed) {
-        data = gzdecode(data, len);
-        if (data == nullptr) {
-          raise_fatal_error("cannot unzip compressed data");
-        }
-        decompressed_data = const_cast<char*>(data);
-        compressed = false;
+    if (StaticContentCache::TheFileCache) {
+      auto content = StaticContentCache::TheFileCache->content(path);
+      if (content) {
+        ScopedMem decompressed_data;
+        // (qigao) not calling stat at this point because the timestamp of
+        // local cache file is not valuable, maybe misleading. This way
+        // the Last-Modified header will not show in response.
+        // stat(RuntimeOption::FileCache.c_str(), &st);
+        sendStaticContent(transport, content->buffer, content->size, 0, false,
+                          path, ext);
+        ServerStats::LogPage(path, 200);
+        return;
       }
-      sendStaticContent(transport, data, len, 0, compressed, path, ext);
-      ServerStats::LogPage(path, 200);
-      return;
     }
 
     if (RuntimeOption::EnableStaticContentFromDisk) {

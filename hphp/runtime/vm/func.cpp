@@ -1081,30 +1081,12 @@ bool Func::getOffsetRange(Offset offset, OffsetRange& range) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode
 
-namespace {
-
-using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
-static BytecodeArena& bytecode_arena() {
-  static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
-  return arena;
-}
-
-}
-
-/*
- * Export for the admin server.
- */
-size_t hhbc_arena_capacity() {
-  if (!RuntimeOption::RepoAuthoritative) return 0;
-  return bytecode_arena().capacity();
-}
-
 unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
   g_hhbc_size->addValue(bclen);
+  auto arena = get_swappable_readonly_arena();
   auto mem = static_cast<unsigned char*>(
-    RuntimeOption::RepoAuthoritative ? bytecode_arena().allocate(bclen)
-                                     : malloc(bclen));
+    arena ? arena->allocate(bclen) : malloc(bclen));
   std::copy(bc, bc + bclen, mem);
   return mem;
 }
@@ -1129,7 +1111,9 @@ PC Func::loadBytecode() {
   if (bc.isPtr()) return bc.ptr();
   auto const length = bclen();
   g_hhbc_size->addValue(length);
-  auto mem = (unsigned char*)bytecode_arena().allocate(length);
+  auto arena = get_swappable_readonly_arena();
+  auto mem = static_cast<unsigned char*>(
+    arena ? arena->allocate(length) : malloc(length));
   RepoFile::readRawFromUnit(m_unit->sn(), bc.token(), mem, length);
   lock.update(BCPtr::FromPtr(mem));
   return mem;

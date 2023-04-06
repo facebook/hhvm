@@ -1042,7 +1042,9 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
        out << folly::format("{} \"{}\":{}\n", first ? "" : ",", name, value);
        first = false;
     };
-    appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
+
+    auto const arena = get_swappable_readonly_arena();
+    appendStat("swappable-roarena-capac", arena ? arena->capacity() : 0);
     appendStat("hhbc-size", g_hhbc_size->getValue());
     appendStat("rds", rds::usedBytes());
     appendStat("rds-local", rds::usedLocalBytes());

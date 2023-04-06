@@ -1,0 +1,5 @@
+vec(3) {
+  string(3) "bar"
+  string(7) "foo.dat"
+  string(7) "foo.txt"
+}

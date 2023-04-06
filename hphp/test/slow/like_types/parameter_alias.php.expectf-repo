@@ -1,0 +1,32 @@
+int(1)
+
+Warning: Argument 1 to f() must be of type @MyAlias, float given in %s/test/slow/like_types/parameter_alias.php on line 15
+float(1.5)
+
+Warning: Argument 1 to f() must be of type @MyAlias, string given in %s/test/slow/like_types/parameter_alias.php on line 16
+string(3) "foo"
+
+Warning: Argument 1 to f() must be of type @MyAlias, bool given in %s/test/slow/like_types/parameter_alias.php on line 17
+bool(false)
+
+Warning: Argument 1 to f() must be of type @MyAlias, MemFile given in %s/test/slow/like_types/parameter_alias.php on line 18
+resource(4) of type (stream)
+
+Warning: Argument 1 to f() must be of type @MyAlias, stdClass given in %s/test/slow/like_types/parameter_alias.php on line 19
+object(stdClass) (0) {
+}
+
+Warning: Argument 1 to f() must be of type @MyAlias, HH\vec given in %s/test/slow/like_types/parameter_alias.php on line 20
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+
+Warning: Argument 1 to f() must be of type @MyAlias, HH\dict given in %s/test/slow/like_types/parameter_alias.php on line 21
+dict(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+}

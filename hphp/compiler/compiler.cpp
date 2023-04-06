@@ -1426,7 +1426,7 @@ bool process(const CompilerOptions &po) {
       if (po.filecache.empty()) return;
       Timer _{Timer::WallTime, "saving file cache..."};
       HphpSessionAndThread session{Treadmill::SessionKind::CompilerEmit};
-      package->getFileCache()->save(po.filecache.c_str());
+      package->writeVirtualFileSystem(po.filecache.c_str());
       struct stat sb;
       stat(po.filecache.c_str(), &sb);
       Logger::Info("%" PRId64" MB %s saved",

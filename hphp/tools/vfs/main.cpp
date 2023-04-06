@@ -14,18 +14,22 @@
    +----------------------------------------------------------------------+
 */
 
-// Magic numbers associated with this cache.
+#include <stdio.h>
+#include "hphp/util/virtual-file-system.h"
 
-#pragma once
+using namespace HPHP;
+///////////////////////////////////////////////////////////////////////////////
 
-namespace HPHP {
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    printf("vfs filename\n");
+    return 0;
+  }
 
-const uint64_t kCacheFileMagic = 0x55aa0cb0cefa4b52;
-const uint64_t kDirectoryTerminatorMagic = 0x5228bb574d524554;
+  const char *name =  argv[1];
 
-// This one should only be on disk during the write process.
-// See cache-saver.h for a discussion of the "surgical updates".
-const uint64_t kDataOfsPlaceholder = 0x000044448888aaaa;
-
-}  // namespace HPHP
-
+  // Need to pass in SourceRoot but it isn't used
+  auto vfs = VirtualFileSystem(name, "/var/www/");
+  vfs.dump();
+  return 0;
+}

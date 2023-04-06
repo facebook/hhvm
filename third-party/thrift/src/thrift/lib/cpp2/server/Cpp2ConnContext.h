@@ -34,6 +34,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/Interaction.h>
+#include <thrift/lib/cpp2/util/TypeErasedStorage.h>
 #include <wangle/ssl/SSLUtil.h>
 
 using apache::thrift::concurrency::PriorityThreadManager;
@@ -70,7 +71,9 @@ class ClientMetadataRef {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     folly::erased_unique_ptr, createPerConnectionInternalFields);
-}
+using InternalFieldsT = util::TypeErasedValue<512, folly::cacheline_align_v>;
+THRIFT_PLUGGABLE_FUNC_DECLARE(InternalFieldsT, createPerRequestInternalFields);
+} // namespace detail
 
 class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   Cpp2ConnContext(
@@ -539,7 +542,8 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
       std::string methodName = std::string{})
       : TConnectionContext(header),
         ctx_(ctx),
-        methodName_(std::move(methodName)) {}
+        methodName_(std::move(methodName)),
+        internalFields_(detail::createPerRequestInternalFields()) {}
 
   void setConnectionContext(Cpp2ConnContext* ctx) { ctx_ = ctx; }
 
@@ -596,6 +600,16 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   }
   folly::erased_unique_ptr setRequestData(folly::erased_unique_ptr data) {
     return std::exchange(requestData_, std::move(data));
+  }
+
+  template <class T>
+  T& getInternalFields() noexcept {
+    return internalFields_.value_unchecked<T>();
+  }
+
+  template <class T>
+  const T& getInternalFields() const noexcept {
+    return internalFields_.value_unchecked<T>();
   }
 
   // These identities are set if the request contains a Token used for
@@ -684,6 +698,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   concurrency::ThreadManager::ExecutionScope executionScope_{
       concurrency::PRIORITY::NORMAL};
   folly::IOBuf frameworkMetadata_;
+  detail::InternalFieldsT internalFields_;
 };
 
 } // namespace thrift

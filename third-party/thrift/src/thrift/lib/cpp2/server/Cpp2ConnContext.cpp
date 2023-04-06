@@ -134,7 +134,10 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
     folly::erased_unique_ptr, createPerConnectionInternalFields) {
   return folly::empty_erased_unique_ptr();
 }
-
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    InternalFieldsT, createPerRequestInternalFields) {
+  return InternalFieldsT::make<std::monostate>();
+}
 } // namespace detail
 
 } // namespace thrift

@@ -13,6 +13,7 @@
 #include "squangle/base/ConnectionKey.h"
 #include "squangle/base/ExceptionUtil.h"
 #include "squangle/logger/DBEventLogger.h"
+#include "squangle/mysql_client/QueryRespAttrs.h"
 #include "squangle/mysql_client/Row.h"
 
 #include <folly/Exception.h>
@@ -206,7 +207,7 @@ class FetchResult : public DbResult {
 // }
 class QueryResult {
  public:
-  using RespAttrs = std::unordered_map<std::string, std::string>;
+  using RespAttrs = QueryRespAttrs;
   class Iterator;
 
   explicit QueryResult(int queryNum);
@@ -458,7 +459,7 @@ class StreamedQueryResult {
     return recv_gtid_;
   }
 
-  using RespAttrs = std::unordered_map<std::string, std::string>;
+  using RespAttrs = QueryRespAttrs;
   const RespAttrs& responseAttributes() {
     // Will throw exception if there was an error
     checkAccessToResult();

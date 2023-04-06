@@ -32,7 +32,7 @@ impl Pass for ValidateUserAttributeEntryPointPass {
             }
             match elem.tparams.as_slice() {
                 [] => (),
-                [tparam, ..] => env.emit_error(NastCheckError::EntrypointArguments(
+                [tparam, ..] => env.emit_error(NastCheckError::EntrypointGenerics(
                     tparam.name.pos().clone(),
                 )),
             }

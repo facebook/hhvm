@@ -66,7 +66,10 @@ impl Pass for ValidateControlContextPass {
 
     fn on_ty_expr__top_down(&mut self, _: &Env, elem: &mut Expr_) -> ControlFlow<()> {
         match elem {
-            Expr_::Efun(..) | Expr_::Lfun(..) => self.control_context = ControlContext::TopLevel,
+            Expr_::Efun(..) | Expr_::Lfun(..) => {
+                self.control_context = ControlContext::TopLevel;
+                self.in_finally_block = false
+            }
             _ => (),
         }
         Continue(())

@@ -36,12 +36,21 @@ struct replacement {
   size_t begin_pos;
   size_t end_pos;
   std::string new_content;
+  bool is_include = false;
 
   constexpr bool operator<(const replacement& replace) const noexcept {
     if (begin_pos != replace.begin_pos) {
       return begin_pos < replace.begin_pos;
     }
-    return end_pos < replace.end_pos;
+    if (end_pos != replace.end_pos) {
+      return end_pos < replace.end_pos;
+    }
+    if (is_include != replace.is_include) {
+      // Put includes before other insertions on the first definition (e.g. new
+      // structured annotations).
+      return is_include;
+    }
+    return new_content < replace.new_content;
   }
 };
 

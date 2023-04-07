@@ -100,7 +100,7 @@ void file_manager::add_include(std::string include) {
           : to_offset(program_->definitions().front().src_range().begin);
       curr_include += "\n";
     }
-    replacements_.insert({offset, offset, curr_include});
+    replacements_.insert({offset, offset, curr_include, true});
   }
 }
 

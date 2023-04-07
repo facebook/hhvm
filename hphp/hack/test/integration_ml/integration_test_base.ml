@@ -275,7 +275,7 @@ let assert_errors_in_phase
     (env : ServerEnv.env) (expected_count : int) (phase : Errors.phase) :
     ServerEnv.env =
   let all_phases =
-    [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing; Errors.Init]
+    [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]
   in
   let errors_in_phases =
     List.map

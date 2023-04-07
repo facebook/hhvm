@@ -14,7 +14,6 @@ type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 
 (* The analysis phase that the error is coming from. *)
 type phase =
-  | Init
   | Parsing
   | Naming
   | Decl

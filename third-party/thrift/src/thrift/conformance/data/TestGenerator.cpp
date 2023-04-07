@@ -19,7 +19,6 @@
 #include <boost/mp11.hpp>
 #include <fmt/core.h>
 
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/data/TestUtil.h>
 #include <thrift/conformance/data/ValueGenerator.h>
 #include <thrift/lib/cpp2/type/Name.h>
@@ -30,6 +29,7 @@
 #include <thrift/test/AdapterTest.h>
 
 namespace mp11 = boost::mp11;
+using apache::thrift::protocol::asValueStruct;
 using apache::thrift::test::testset::FieldModifier;
 
 namespace apache::thrift::conformance::data {

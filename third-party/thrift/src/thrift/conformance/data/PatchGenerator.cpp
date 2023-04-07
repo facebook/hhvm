@@ -24,7 +24,6 @@
 #include <boost/mp11.hpp>
 #include <fmt/core.h>
 
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/data/ValueGenerator.h>
 #include <thrift/lib/cpp/util/SaturatingMath.h>
 #include <thrift/lib/cpp2/op/Clear.h>
@@ -37,6 +36,8 @@
 #include <thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h>
 #include <thrift/test/testset/Testset.h>
 #include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
+
+using apache::thrift::protocol::asValueStruct;
 
 namespace apache::thrift::conformance::data {
 
@@ -280,37 +281,42 @@ struct target_type_impl<Tag, T, folly::void_t<type::standard_type<Tag>>> {
 template <typename Tag, typename T>
 using target_type = typename target_type_impl<Tag, T>::type;
 
-Object setObjectMemeber(Object&& object, int16_t id, Value value) {
+protocol::Object setObjectMemeber(
+    protocol::Object&& object, int16_t id, protocol::Value value) {
   object.members().ensure()[id] = value;
   return std::move(object);
 }
 
-Value wrapObjectInValue(Object object) {
-  Value result;
+protocol::Value wrapObjectInValue(protocol::Object object) {
+  protocol::Value result;
   result.objectValue_ref() = object;
   return result;
 }
 
 template <typename Tag>
-Object patchAddOperation(Object&& patch, op::PatchOp operation, auto value) {
+protocol::Object patchAddOperation(
+    protocol::Object&& patch, op::PatchOp operation, auto value) {
   return setObjectMemeber(
       std::move(patch),
       static_cast<int16_t>(operation),
       asValueStruct<Tag>(value));
 }
 
-Object patchAddOperation(Object&& patch, op::PatchOp operation, Value value) {
+protocol::Object patchAddOperation(
+    protocol::Object&& patch, op::PatchOp operation, protocol::Value value) {
   return setObjectMemeber(
       std::move(patch), static_cast<int16_t>(operation), value);
 }
 
 template <typename Tag>
-Value makePatchValue(auto operation, auto value) {
-  return wrapObjectInValue(patchAddOperation<Tag>(Object{}, operation, value));
+protocol::Value makePatchValue(auto operation, auto value) {
+  return wrapObjectInValue(
+      patchAddOperation<Tag>(protocol::Object{}, operation, value));
 }
 
-Value makePatchValue(auto operation, Value value) {
-  return wrapObjectInValue(patchAddOperation(Object{}, operation, value));
+protocol::Value makePatchValue(auto operation, protocol::Value value) {
+  return wrapObjectInValue(
+      patchAddOperation(protocol::Object{}, operation, value));
 }
 
 template <typename Tag, typename Type>
@@ -548,7 +554,7 @@ Test createListSetPatchTest(
         auto keyValuePatch = asValueStruct<type::struct_c>(
             (op::patch_type<TT>() = toValue<TT>(newValue)).toThrift());
 
-        Value patchValue;
+        protocol::Value patchValue;
         patchValue.mapValue_ref().ensure()[keyValue] = keyValuePatch;
 
         auto& patchCase = test.testCases()->emplace_back();
@@ -632,7 +638,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
       auto keyValuePatch = asValueStruct<type::struct_c>(
           (op::patch_type<TT>() = toValue<TT>(newValue)).toThrift());
       Container expected = {{key.value, newValue}};
-      Value patchValue;
+      protocol::Value patchValue;
       patchValue.mapValue_ref().ensure()[keyValue] = keyValuePatch;
 
       auto& patchPriorCase = test.testCases()->emplace_back();
@@ -700,7 +706,7 @@ Test createStructPatchTest(
   auto patch = op::patch_type<TT>();
   patch = toValue<TT>(*expected.field_1_ref());
   auto patchValue = wrapObjectInValue(setObjectMemeber(
-      Object{}, 1, asValueStruct<type::struct_c>(patch.toThrift())));
+      protocol::Object{}, 1, asValueStruct<type::struct_c>(patch.toThrift())));
 
   auto& patchPriorCase = test.testCases()->emplace_back();
   patchPriorCase.name() = makeTestName("patch_prior");

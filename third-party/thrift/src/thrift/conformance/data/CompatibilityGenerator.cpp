@@ -56,7 +56,7 @@ template <class TT>
   return genCompatibilityRoundTripTestCase(
       protocol,
       fmt::format("testset.{}/AddField", type::getName<TT>()),
-      Object{},
+      protocol::Object{},
       def);
 }
 
@@ -68,7 +68,7 @@ template <class TT>
   return genCompatibilityRoundTripTestCase(
       protocol,
       fmt::format("testset.{}/AddFieldWithCustomDefault", type::getName<TT>()),
-      Object{},
+      protocol::Object{},
       def);
 }
 
@@ -87,7 +87,7 @@ template <class TT>
   // Optional field that's not in payload should always be empty, even if there
   // is custom default
   ret.test()->roundTrip_ref()->expectedResponse().ensure().value()->data() =
-      *serializeThriftStruct(Object{}, protocol);
+      *serializeThriftStruct(protocol::Object{}, protocol);
   return ret;
 }
 
@@ -101,13 +101,13 @@ template <class TT>
       protocol,
       fmt::format(
           "testset.{}/AddTerseFieldWithCustomDefault", type::getName<TT>()),
-      Object{},
+      protocol::Object{},
       def);
   // Since terse field can not distinguish from skipping serialization for field
   // and field is missing, it always clear to intrinsic default before
   // deserialization.
   ret.test()->roundTrip_ref()->expectedResponse().ensure().value()->data() =
-      *serializeThriftStruct(Object{}, protocol);
+      *serializeThriftStruct(protocol::Object{}, protocol);
   return ret;
 }
 
@@ -141,8 +141,8 @@ template <class TT, bool IsOptional>
 }
 
 template <class T>
-[[nodiscard]] Object toObject(const T& t) {
-  Value v;
+[[nodiscard]] protocol::Object toObject(const T& t) {
+  protocol::Value v;
   ::apache::thrift::protocol::detail::ObjectWriter writer{&v};
   t.write(&writer);
   return std::move(*v.objectValue_ref());
@@ -158,8 +158,8 @@ template <class TT>
     typename struct_ByFieldType<TT, mod_set<>>::type data;
     data.field_1() = value.value;
 
-    Object obj = toObject(def);
-    Object dataObj = toObject(data);
+    protocol::Object obj = toObject(def);
+    protocol::Object dataObj = toObject(data);
     for (auto&& i : *dataObj.members()) {
       // Add new field with non-existing field id
       obj.members()[obj.members()->rbegin()->first + 1] = i.second;

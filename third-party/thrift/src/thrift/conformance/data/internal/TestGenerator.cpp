@@ -16,10 +16,12 @@
 
 #include <thrift/conformance/data/internal/TestGenerator.h>
 
+using apache::thrift::protocol::serializeObject;
+
 namespace apache::thrift::conformance::data::detail {
 
 [[nodiscard]] std::unique_ptr<folly::IOBuf> serializeThriftStruct(
-    const Object& a, const Protocol& protocol) {
+    const protocol::Object& a, const Protocol& protocol) {
   switch (auto p = protocol.standard()) {
     case StandardProtocol::Compact:
       return serializeObject<apache::thrift::CompactProtocolWriter>(a);

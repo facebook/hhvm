@@ -19,9 +19,8 @@
 #include <folly/portability/GTest.h>
 #include <thrift/conformance/cpp2/AnyRegistry.h>
 #include <thrift/conformance/cpp2/AnyStructSerializer.h>
-#include <thrift/conformance/cpp2/Object.h>
 #include <thrift/conformance/cpp2/ThriftTypeInfo.h>
-#include <thrift/conformance/if/gen-cpp2/object_types_custom_protocol.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h>
 
 namespace apache::thrift::conformance::data {
 

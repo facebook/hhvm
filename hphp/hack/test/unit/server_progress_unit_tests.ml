@@ -60,7 +60,7 @@ let an_error : Errors.t = make_errors [("c", "oops")]
 let test_completed () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
@@ -68,7 +68,7 @@ let test_completed () : bool Lwt.t =
           (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
         ServerProgress.ErrorsWrite.report (make_errors [("c", "oops")]);
         ServerProgress.ErrorsWrite.complete telemetry;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         assert (ServerProgress.ErrorsRead.openfile fd |> Result.is_ok);
         String_asserter.assert_equals
           "Errors [a=2,b=1]"
@@ -90,12 +90,12 @@ let test_completed () : bool Lwt.t =
 let test_read_empty () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         Sys_utils.touch
           (Sys_utils.Touch_existing_or_create_new
              { mkdir_if_new = false; perm_if_new = 0o666 })
-          errors_file;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+          errors_file_path;
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         String_asserter.assert_equals
           "NothingYet [no additional bytes]"
           (ServerProgress.ErrorsRead.read_next_errors fd |> show_read)
@@ -108,11 +108,11 @@ let test_read_empty () : bool Lwt.t =
 let test_read_unlinked () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
         assert (ServerProgress.ErrorsRead.openfile fd |> Result.is_ok);
         String_asserter.assert_equals
@@ -127,11 +127,11 @@ let test_read_unlinked () : bool Lwt.t =
 let test_read_unlinked_empty () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         assert (ServerProgress.ErrorsRead.openfile fd |> Result.is_ok);
         ServerProgress.ErrorsWrite.unlink_at_server_stop ();
         String_asserter.assert_equals
@@ -146,12 +146,12 @@ let test_read_unlinked_empty () : bool Lwt.t =
 let test_read_restarted () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
         ServerProgress.ErrorsWrite.report an_error;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
@@ -179,10 +179,10 @@ let test_locks () : bool Lwt.t =
 let test_read_half_message () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         let preamble = Marshal_tools.make_preamble 15 in
-        Sys_utils.write_file ~file:errors_file (Bytes.to_string preamble);
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        Sys_utils.write_file ~file:errors_file_path (Bytes.to_string preamble);
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         String_asserter.assert_equals
           "Killed [no payload]"
           (ServerProgress.ErrorsRead.read_next_errors fd |> show_read)
@@ -196,8 +196,8 @@ let test_read_dead_pid () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
         ServerProgress.ErrorsWrite.create_file_FOR_TEST ~pid:1 ~cmdline:"bogus";
-        let errors_file = ServerFiles.errors_file root in
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let errors_file_path = ServerFiles.errors_file_path root in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         begin
           match ServerProgress.ErrorsRead.openfile fd with
           | Error (ServerProgress.Killed, "Errors-file is from defunct PID") ->
@@ -309,7 +309,7 @@ let test_produce_disordered () : bool Lwt.t =
 let test_async_read_completed () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
@@ -317,7 +317,7 @@ let test_async_read_completed () : bool Lwt.t =
           (make_errors [("a", "hello"); ("a", "there"); ("b", "world")]);
         ServerProgress.ErrorsWrite.report (make_errors [("c", "oops")]);
         ServerProgress.ErrorsWrite.complete telemetry;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
         let q = ServerProgressLwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Errors [a=2,b=1]" in
@@ -331,11 +331,11 @@ let test_async_read_completed () : bool Lwt.t =
 let test_async_read_partial () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
         let q = ServerProgressLwt.watch_errors_file ~pid fd in
         (* initially there are no items available *)
@@ -356,11 +356,11 @@ let test_async_read_partial () : bool Lwt.t =
 let test_async_read_unlinked () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:(Some "clock123")
           ~ignore_hh_version:false;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let open_result = ServerProgress.ErrorsRead.openfile fd in
         let { ServerProgress.ErrorsRead.pid; clock; _ } =
           Result.ok open_result |> Option.value_exn
@@ -380,9 +380,9 @@ let test_start_read_killed () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
         (* we'll write an incomplete file *)
-        let errors_file = ServerFiles.errors_file root in
-        Sys_utils.write_file ~file:errors_file "a";
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let errors_file_path = ServerFiles.errors_file_path root in
+        Sys_utils.write_file ~file:errors_file_path "a";
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         (* files are created atomically; there should be no way to read
            an empty file, not even if the creating process got killed. *)
         let is_ok =
@@ -402,14 +402,14 @@ let test_start_read_killed () : bool Lwt.t =
 let test_async_read_killed () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
         (* we'll write an incomplete file *)
         let preamble = Marshal_tools.make_preamble 100 in
-        Sys_utils.append_file ~file:errors_file (Bytes.to_string preamble);
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        Sys_utils.append_file ~file:errors_file_path (Bytes.to_string preamble);
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
@@ -427,11 +427,11 @@ let test_async_pid_killed () : bool Lwt.t =
     try_with_tmp (fun ~root ->
         (* This will simulate a file which is in a complete state, but the producing
            PID simply died *)
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let _open = ServerProgress.ErrorsRead.openfile fd in
         (* For our test, let us pick a pid which doesn't exist.
            This is a bit racey, but it's the best we can do.
@@ -465,12 +465,12 @@ let test_async_pid_killed () : bool Lwt.t =
 let test_async_read_start () : bool Lwt.t =
   let%lwt () =
     try_with_tmp (fun ~root ->
-        let errors_file = ServerFiles.errors_file root in
+        let errors_file_path = ServerFiles.errors_file_path root in
         let pid = Unix.getpid () in
         ServerProgress.ErrorsWrite.new_empty_file
           ~clock:None
           ~ignore_hh_version:false;
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         (* oops! we didn't call ServerProgress.ErrorsRead.openfile *)
         let exn =
           try

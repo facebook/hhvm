@@ -64,7 +64,7 @@ let client_ide_naming_table root = path_of_root root "client_ide_naming_table"
 
 let monitor_log_link root = path_of_root root "monitor_log"
 
-let errors_file (root : Path.t) : string = path_of_root root "errors.bin"
+let errors_file_path (root : Path.t) : string = path_of_root root "errors.bin"
 
 let server_finale_file (pid : int) : string =
   Filename.concat (get_tmp ()) (spf "%d.fin" pid)

@@ -385,7 +385,7 @@ let rec keep_trying_to_open
     try
       Some
         (Unix.openfile
-           (ServerFiles.errors_file root)
+           (ServerFiles.errors_file_path root)
            [Unix.O_RDONLY; Unix.O_NONBLOCK]
            0)
     with

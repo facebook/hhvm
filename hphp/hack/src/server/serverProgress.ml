@@ -194,12 +194,12 @@ let is_production_enabled = ref true
 
 let enable_error_production (b : bool) : unit = is_production_enabled := b
 
-let errors_file () =
+let errors_file_path () =
   match !root with
   | None -> failwith "ServerProgress.set_root must be called first"
   | Some _ when not !is_production_enabled -> None
   | Some root when Path.equal root Path.dummy_path -> None
-  | Some root -> Some (ServerFiles.errors_file root)
+  | Some root -> Some (ServerFiles.errors_file_path root)
 
 (** This is an internal module concerned with the binary format of the errors-file. *)
 module ErrorsFile = struct
@@ -343,10 +343,10 @@ module ErrorsWrite = struct
   let unlink_sentinel_close
       (error : errors_file_error)
       ~(log_message : string)
-      ~(errors_file : string)
+      ~(errors_file_path : string)
       ~(after_unlink : unit -> 'a) =
     begin
-      try Unix.unlink errors_file with
+      try Unix.unlink errors_file_path with
       | _ -> ()
     end;
     let result = after_unlink () in
@@ -368,9 +368,9 @@ module ErrorsWrite = struct
 
   let new_empty_file
       ~(clock : Watchman.clock option) ~(ignore_hh_version : bool) : unit =
-    match errors_file () with
+    match errors_file_path () with
     | None -> ()
-    | Some errors_file -> begin
+    | Some errors_file_path -> begin
       (* (1) unlink the old errors file, (2) atomically create a new errors-file with
          Version_header+Header messages in it, (3) write a End marker into the old errors file.
 
@@ -404,11 +404,11 @@ module ErrorsWrite = struct
         unlink_sentinel_close
           Restarted
           ~log_message:"new_empty_file"
-          ~errors_file
+          ~errors_file_path
           ~after_unlink:(fun () ->
             let fd =
               Sys_utils.atomically_create_and_init_file
-                errors_file
+                errors_file_path
                 ~rd:false
                 ~wr:true
                 0o666
@@ -427,7 +427,7 @@ module ErrorsWrite = struct
     end
 
   let report (errors : Errors.t) : unit =
-    match errors_file () with
+    match errors_file_path () with
     | None -> ()
     | Some _ -> begin
       match !write_state with
@@ -461,7 +461,7 @@ module ErrorsWrite = struct
     end
 
   let complete (telemetry : Telemetry.t) : unit =
-    match errors_file () with
+    match errors_file_path () with
     | None -> ()
     | Some _ -> begin
       match !write_state with
@@ -485,13 +485,13 @@ module ErrorsWrite = struct
     end
 
   let unlink_at_server_stop () : unit =
-    match errors_file () with
+    match errors_file_path () with
     | None -> ()
-    | Some errors_file ->
+    | Some errors_file_path ->
       unlink_sentinel_close
         Stopped
         ~log_message:"unlink"
-        ~errors_file
+        ~errors_file_path
         ~after_unlink:(fun () -> ());
       write_state := Absent
 
@@ -500,7 +500,7 @@ module ErrorsWrite = struct
   let create_file_FOR_TEST ~(pid : int) ~(cmdline : string) : unit =
     let fd =
       Unix.openfile
-        (Option.value_exn (errors_file ()))
+        (Option.value_exn (errors_file_path ()))
         [Unix.O_WRONLY; Unix.O_CREAT; Unix.O_TRUNC]
         0o666
     in
@@ -608,14 +608,16 @@ let validate_errors_DELETE_THIS_SOON ~(expected : Errors.t) : string =
     (len, codes)
   in
 
-  match errors_file () with
+  match errors_file_path () with
   | None -> "disabled"
-  | Some errors_file ->
+  | Some errors_file_path ->
     (* The expected one needs to have fixmes droped, and duplicates dropped, and be sorted *)
     let expected = Errors.get_sorted_error_list expected in
     (* Our errors-file has already dropped fixmes, sorted-within-file, and dropped duplicates.
        We'll do Errors.sort on it now to do a global sort by filename, to match "expected". *)
-    let fd = Unix.openfile errors_file [Unix.O_RDONLY; Unix.O_CREAT] 0o666 in
+    let fd =
+      Unix.openfile errors_file_path [Unix.O_RDONLY; Unix.O_CREAT] 0o666
+    in
     let fd_str = ErrorsWrite.show_fd fd in
     let _ = ErrorsRead.openfile fd in
     let actual = reader fd [] |> Errors.sort in

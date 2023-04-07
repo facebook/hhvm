@@ -364,8 +364,8 @@ let test_errors_complete () : bool Lwt.t =
             |]
         in
         (* at this point we should have all errors available *)
-        let errors_file = ServerFiles.errors_file root in
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let errors_file_path = ServerFiles.errors_file_path root in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
@@ -375,7 +375,7 @@ let test_errors_complete () : bool Lwt.t =
         let%lwt () = expect_qitem q "closed" in
         Unix.close fd;
         (* a second client will also observe the files *)
-        let fd = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd |> Result.ok |> Option.value_exn
         in
@@ -386,7 +386,7 @@ let test_errors_complete () : bool Lwt.t =
         Unix.close fd;
         (* let's stop the server and verify that errors are absent *)
         let%lwt _ = hh ~root ~tmp [| "stop" |] in
-        assert (not (Sys_utils.file_exists errors_file));
+        assert (not (Sys_utils.file_exists errors_file_path));
         Lwt.return_unit)
   in
   Lwt.return_true
@@ -424,8 +424,8 @@ let test_errors_during () : bool Lwt.t =
             ~expected:"[DWorking] typechecking"
         in
         (* at this point we should have one error available *)
-        let errors_file = ServerFiles.errors_file root in
-        let fd1 = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let errors_file_path = ServerFiles.errors_file_path root in
+        let fd1 = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd1
           |> Result.ok
@@ -435,7 +435,7 @@ let test_errors_during () : bool Lwt.t =
         let%lwt () = expect_qitem q1 "Errors [b.php=1]" in
         let%lwt () = expect_qitem q1 "nothing" in
         (* and a second client should be able to observe it too *)
-        let fd2 = Unix.openfile errors_file [Unix.O_RDONLY] 0 in
+        let fd2 = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         let { ServerProgress.ErrorsRead.pid; _ } =
           ServerProgress.ErrorsRead.openfile fd2
           |> Result.ok
@@ -446,7 +446,7 @@ let test_errors_during () : bool Lwt.t =
         let%lwt () = expect_qitem q2 "nothing" in
         (* let's stop the server and verify that errors are absent *)
         let%lwt _ = hh ~root ~tmp [| "stop" |] in
-        assert (not (Sys_utils.file_exists errors_file));
+        assert (not (Sys_utils.file_exists errors_file_path));
         (* each of the two clients will see that they're done. *)
         let%lwt () = expect_qitem q1 "Stopped [unlink]" in
         let%lwt () = expect_qitem q1 "closed" in
@@ -512,8 +512,8 @@ let test_errors_kill () : bool Lwt.t =
         (* read the remainding output from hh_client. It should detect the kill. *)
         let%lwt stdout = Lwt_io.read hh_client#stdout in
         assert_substring stdout ~substring:"Hh_server has terminated. [Killed]";
-        let errors_file = ServerFiles.errors_file root in
-        assert (Sys_utils.file_exists errors_file);
+        let errors_file_path = ServerFiles.errors_file_path root in
+        assert (Sys_utils.file_exists errors_file_path);
         Lwt.return_unit)
   in
   Lwt.return_true

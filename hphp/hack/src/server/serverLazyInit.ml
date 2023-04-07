@@ -1262,12 +1262,6 @@ let post_saved_state_initialization
     "Number of files with Naming and Parsing errors: %d"
     (Relative_path.Set.cardinal naming_and_parsing_error_files);
 
-  let (decl_and_typing_error_files, naming_and_parsing_error_files) =
-    SaveStateService.partition_error_files_tf
-      old_errors
-      [Errors.Decl; Errors.Typing]
-  in
-
   (* Load and parse packages.toml if it exists at the root. *)
   let env = PackageConfig.load_and_parse env in
 

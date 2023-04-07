@@ -143,14 +143,14 @@ public final class ModuleConstants {
         .build();
 
     public static final List<String> ESCAPED_STRINGS = ImmutableList.<String>builder()
-        .add("\x01")
-        .add("\x1f")
+        .add("\001")
+        .add("\037")
         .add(" ")
         .add("'")
         .add("\"")
         .add("\n")
-        .add("\x0d")
-        .add("\x09")
+        .add("\015")
+        .add("\011")
         .add("a")
         .add("«")
         .add("j")

@@ -93,7 +93,7 @@ std::string quote_java_string(const std::string& unescaped) {
         break;
       default: {
         if (c < 0x20) {
-          quoted << fmt::format("\\x{:02x}", c);
+          quoted << fmt::format("\\{:03o}", c);
         } else if (c >= 0xf8) {
           quoted << fmt::format("\\u{:04x}", c);
         } else {

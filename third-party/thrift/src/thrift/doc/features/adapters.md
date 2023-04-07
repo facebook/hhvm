@@ -36,21 +36,23 @@ Field Wrapper is a special case of Field Adapter, where adapted type is restrict
 
 ## C++
 
-C++ adapter can be enabled via `cpp.Adapter` annotation. e.g.
+C++ adapter can be enabled via `cpp.Adapter` annotation. Users **must** provide a fully qualified C++ typename for `name`, e.g.
 
 ```cpp
 // In C++ Header
+namespace apache::thrift::test {
 struct BitsetAdapter {
   static std::bitset<32> fromThrift(std::uint32_t t) { return {t}; }
   static std::uint32_t toThrift(std::bitset<32> t) { return t.to_ullong(); }
 };
+}
 ```
 ```thrift
 // In thrift file
 include "thrift/annotation/cpp.thrift"
 cpp_include "BitsetAdapter.h"
 struct Foo {
-  @cpp.Adapter{name = "BitsetAdapter"}
+  @cpp.Adapter{name = "::apache::thrift::test::BitsetAdapter"}
   1: i32 flags;
 }
 ```
@@ -59,9 +61,13 @@ struct Foo {
 Foo foo;
 foo.flags()->set(0); // set 0th bit
 ```
-> **Note: cpp.Adapter will break Thrift py3 usage. Please migrate to new Thrift Python to use cpp.Adapter and python.Adapter.**
+:::note
+cpp.Adapter will break Thrift py3 usage. Please migrate to new Thrift Python to use cpp.Adapter and python.Adapter.
+:::
 
-> **Note: Adapted types can not be used directly with Thrift APIs. Values must be converted back to Thrift types. (e.g. `apache::thrift::CompactSerializer::serialize(Adapter::toThrift(adaptedValue))`)**
+:::note
+Adapted types can not be used directly with Thrift APIs. Values must be converted back to Thrift types. (e.g. `apache::thrift::CompactSerializer::serialize(Adapter::toThrift(adaptedValue))`)
+:::
 
 ### Type Adapter
 
@@ -107,22 +113,22 @@ Type Adapter can be applied to a typedef, struct, or field. Field Adpater can be
 
 ```thrift
 // This would result in an error if uncommented.
-// @cpp.Adapter{name="CustomTypeAdapter"}
+// @cpp.Adapter{name="::CustomTypeAdapter"}
 // typedef CustomInt DoubleCustomInt
 
-@cpp.Adapter{name = "CustomTypeAdapter"}
+@cpp.Adapter{name = "::CustomTypeAdapter"}
 typedef i32 CustomInt
 
 struct Foo {
-  @cpp.Adapter{name = "CustomFieldAdapter"}
+  @cpp.Adapter{name = "::CustomFieldAdapter"}
   1: CustomInt field;
 
-  @cpp.Adapter{name = "CustomTypeAdapter"}
+  @cpp.Adapter{name = "::CustomTypeAdapter"}
   2: CustomInt field2;
 
   // This would result in an error if uncommented.
-  // @cpp.Adapter{name = "CustomTypeAdapter"}
-  // @cpp.Adapter{name = "CustomFieldAdapter"}
+  // @cpp.Adapter{name = "::CustomTypeAdapter"}
+  // @cpp.Adapter{name = "::CustomFieldAdapter"}
   // 3: i32 field3;
 }
 ```

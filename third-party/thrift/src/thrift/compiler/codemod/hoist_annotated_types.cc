@@ -19,6 +19,7 @@
 #include <string>
 
 #include <fmt/core.h>
+#include <re2/re2.h>
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
@@ -244,39 +245,34 @@ class hoist_annotated_types {
     for (const auto& [k, v] : type->annotations()) {
       annotations.push_back(fmt::format("{}_{}", k, v.value));
     }
-    auto name = fmt::format(
-        "{}_{}_{}",
-        type->get_full_name(),
-        fmt::join(annotations, "_"),
-        std::hash<std::string>()(prog_.path()) % 1000);
-    auto prefix = prog_.scope_name("");
-    if (name.starts_with(prefix)) {
-      name.erase(0, prefix.length());
-    }
-    std::replace(name.begin(), name.end(), '<', '_');
-    std::replace(name.begin(), name.end(), ',', '_');
-    name.erase(
-        std::remove_if(
-            name.begin(),
-            name.end(),
-            [](auto c) { return !std::isalnum(c) && c != '_'; }),
-        name.end());
-    return name;
+    auto id = std::hash<std::string>()(fmt::format(
+                  "{}_{}_{}",
+                  type->get_full_name(),
+                  fmt::join(annotations, "_"),
+                  prog_.path())) %
+        10000;
+    auto name = type->get_full_name();
+    // Removes scope prefix | ids of inner types.
+    static const re2::RE2 stripNoise("(\\b\\w+?\\.|_\\d+\\b)");
+    static const re2::RE2 addUnderscores("[<,]");
+    static const re2::RE2 stripNonAlnum("\\W+");
+    re2::RE2::GlobalReplace(&name, stripNoise, "");
+    re2::RE2::GlobalReplace(&name, addUnderscores, "_");
+    re2::RE2::GlobalReplace(&name, stripNonAlnum, "");
+    return fmt::format("{}_{}", name, id);
   }
 
   std::string render_type(t_type_ref ref) {
     auto type = ref.get_type();
     auto name = type->get_full_name();
-    auto prefix = prog_.scope_name("");
-    if (name.starts_with(prefix)) {
-      name.erase(0, prefix.length());
-    }
+    re2::RE2 prefix(fmt::format("\\b{}", prog_.scope_name("")));
+    re2::RE2::GlobalReplace(&name, prefix, "");
     if (!needs_replacement(ref)) {
       return name;
     }
     std::vector<std::string> annotations;
     for (const auto& [k, v] : type->annotations()) {
-      annotations.push_back(fmt::format("{} = '{}'", k, v.value));
+      annotations.push_back(fmt::format("{} = \"{}\"", k, v.value));
     }
     assert(!annotations.empty());
     return fmt::format("{} ({})", name, fmt::join(annotations, ", "));

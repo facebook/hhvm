@@ -1574,27 +1574,33 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   // have cleared the implicit context since that logic is
   // done in a PHP try-finally. Let's clear the implicit context here.
   auto const prev_ic = *ImplicitContext::activeCtx;
-  SCOPE_FAIL { *ImplicitContext::activeCtx = prev_ic; };
-
-  enterVM(ar, [&] {
-    exception_handler([&] {
-      enterVMAtFunc(ar, numArgsInclUnpack);
+  try {
+    enterVM(ar, [&] {
+      exception_handler([&] {
+        enterVMAtFunc(ar, numArgsInclUnpack);
+      });
     });
-  });
 
-  assertx(prev_ic == *ImplicitContext::activeCtx);
+    assertx(prev_ic == *ImplicitContext::activeCtx);
 
-  if (UNLIKELY(f->takesInOutParams())) {
-    VecInit vec(f->numInOutParams() + 1);
-    for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
-      vec.append(*vmStack().topTV());
-      vmStack().popC();
+    if (UNLIKELY(f->takesInOutParams())) {
+      VecInit vec(f->numInOutParams() + 1);
+      for (uint32_t i = 0; i < f->numInOutParams() + 1; ++i) {
+        vec.append(*vmStack().topTV());
+        vmStack().popC();
+      }
+      return make_array_like_tv(vec.create());
+    } else {
+      auto const retval = *vmStack().topTV();
+      vmStack().discard();
+      return retval;
     }
-    return make_array_like_tv(vec.create());
-  } else {
-    auto const retval = *vmStack().topTV();
-    vmStack().discard();
-    return retval;
+  } catch (...) {
+    // This is an explicit try-catch-rethrow rather than a SCOPE_EXIT
+    // because std::uncaught_exceptions() is relatively expensive, and this
+    // is very hot code.
+    *ImplicitContext::activeCtx = prev_ic;
+    throw;
   }
 }
 

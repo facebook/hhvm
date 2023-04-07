@@ -155,7 +155,7 @@ let dump_naming_errors_decls
   (if Errors.is_empty errors then
     ()
   else
-    let errors_in_phases =
+    let errors_in_phases : saved_state_errors =
       List.map
         ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
         [Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing]

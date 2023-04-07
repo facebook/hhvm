@@ -16,8 +16,8 @@
 namespace fizz {
 namespace server {
 
-template <typename CodecType>
-class Aead128GCMTicketCipher : public TicketCipher {
+template <typename CodecType, typename TokenCipherType>
+class TicketCipherImpl : public TicketCipher {
  public:
   /**
    * Constructs a ticket cipher that encrypts session data with AES128-GCM.
@@ -34,7 +34,7 @@ class Aead128GCMTicketCipher : public TicketCipher {
    *  that different application contexts will result in different keys,
    *  preventing keys from one context from being used for another.
    */
-  explicit Aead128GCMTicketCipher(
+  explicit TicketCipherImpl(
       std::shared_ptr<Factory> factory,
       std::shared_ptr<CertManager> certManager,
       std::string pskContext)
@@ -44,7 +44,7 @@ class Aead128GCMTicketCipher : public TicketCipher {
         factory_(std::move(factory)),
         certManager_(std::move(certManager)) {}
 
-  Aead128GCMTicketCipher(
+  TicketCipherImpl(
       std::shared_ptr<Factory> factory,
       std::shared_ptr<CertManager> certManager)
       : tokenCipher_(std::vector<std::string>({CodecType::Label.toString()})),
@@ -111,11 +111,16 @@ class Aead128GCMTicketCipher : public TicketCipher {
   }
 
  private:
-  Aead128GCMTokenCipher tokenCipher_;
+  TokenCipherType tokenCipher_;
   TicketPolicy policy_;
 
   std::shared_ptr<Factory> factory_;
   std::shared_ptr<CertManager> certManager_;
 };
+
+template <typename CodecType>
+using Aead128GCMTicketCipher =
+    TicketCipherImpl<CodecType, Aead128GCMTokenCipher>;
+
 } // namespace server
 } // namespace fizz

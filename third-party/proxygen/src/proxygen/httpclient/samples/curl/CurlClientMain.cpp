@@ -30,6 +30,9 @@ DEFINE_string(input_filename, "", "Filename to read from for POST requests");
 DEFINE_int32(http_client_connect_timeout,
              1000,
              "connect timeout in milliseconds");
+DEFINE_int32(http_client_request_timeout,
+             5000,
+             "request timeout in milliseconds");
 DEFINE_string(ca_path,
               "/etc/ssl/certs/ca-certificates.crt",
               "Path to trusted CA file"); // default for Ubuntu 14.04
@@ -60,13 +63,13 @@ int main(int argc, char* argv[]) {
   URL url(FLAGS_url);
   URL proxy(FLAGS_proxy);
 
-  if (FLAGS_http_method != "GET" && FLAGS_http_method != "POST") {
-    LOG(ERROR) << "http_method must be either GET or POST";
+  auto httpMethod = stringToMethod(FLAGS_http_method);
+  if (!httpMethod) {
+    LOG(ERROR) << "Unsupported http_method=" << FLAGS_http_method;
     return EXIT_FAILURE;
   }
 
-  HTTPMethod httpMethod = *stringToMethod(FLAGS_http_method);
-  if (httpMethod == HTTPMethod::POST) {
+  if (*httpMethod == HTTPMethod::POST) {
     try {
       File f(FLAGS_input_filename);
       (void)f;
@@ -80,7 +83,7 @@ int main(int argc, char* argv[]) {
   HTTPHeaders headers = CurlClient::parseHeaders(FLAGS_headers);
 
   CurlClient curlClient(&evb,
-                        httpMethod,
+                        *httpMethod,
                         url,
                         FLAGS_proxy.empty() ? nullptr : &proxy,
                         headers,
@@ -88,6 +91,7 @@ int main(int argc, char* argv[]) {
                         FLAGS_h2c);
   curlClient.setFlowControlSettings(FLAGS_recv_window);
   curlClient.setLogging(FLAGS_log_response);
+  curlClient.setHeadersLogging(FLAGS_log_response);
 
   SocketAddress addr;
   if (!FLAGS_proxy.empty()) {
@@ -97,14 +101,10 @@ int main(int argc, char* argv[]) {
   }
   LOG(INFO) << "Trying to connect to " << addr;
 
-  // Note: HHWheelTimer is a large object and should be created at most
-  // once per thread
-  HHWheelTimer::UniquePtr timer{HHWheelTimer::newTimer(
-      &evb,
-      std::chrono::milliseconds(HHWheelTimer::DEFAULT_TICK_INTERVAL),
-      AsyncTimeout::InternalEnum::NORMAL,
-      std::chrono::milliseconds(5000))};
-  HTTPConnector connector(&curlClient, timer.get());
+  HTTPConnector connector(
+      &curlClient,
+      WheelTimerInstance(
+          std::chrono::milliseconds(FLAGS_http_client_request_timeout), &evb));
   if (!FLAGS_plaintext_proto.empty()) {
     connector.setPlaintextProtocol(FLAGS_plaintext_proto);
   }

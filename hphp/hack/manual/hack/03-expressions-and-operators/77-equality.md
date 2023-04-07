@@ -1,67 +1,114 @@
-**Note: The semantics of operators `==` and `!=` were inherited from PHP, and are sometimes not
-what is expected. As such, use `===` and `!==` instead.** See the discussion below.
-
-The binary equality operators are, as follows:
-* `==`, which represents *value-equality*
-* `!=`, which represents *value-inequality*
-* `===`, which represents *same-type-and-value-equality*
-* `!==`, which represents *not-same-type-and-value-equality*.
-* `<=>`, which indicates less-than, equal-to, or greater-than (see later below)
-
-However, when comparing two objects, operator `===` represents *identity* and operator `!==` represents *non-identity*. Specifically,
-in this context, these operators check to see if the two operands are the exact same object, not two different objects of the same type and value.
-
-The type of the result of `==`, `!=`, `===`, and `!==`, is `bool`.
-
-```Hack no-extract
-null == 0;   // result has value true
-null === 0;  // result has value false
-true != 100;  // result has value false
-true !== 100;  // result has value true
-
-"10" != 10;  // result has value false
-"10" !== 10; // result has value true
-
-vec[10,20] == vec[10,20.0];  // result has value true
-vec[10,20] === vec[10,20.0]; // result has value false
-dict["red"=>0,"green"=>0] === dict["red"=>0,"green"=>0]; // result has value true
-dict["red"=>0,"green"=>0] === dict["green"=>0,"red"=>0]; // result has value false
-```
-
-When using `==` and `!=` to compare strings that start with numeric digits, such strings
-are converted to `int` or `float` and then compared numerically. As such,
+There are two equality operators in Hack: `===` (recommended) and
+`==`. They also have not-equal equivalents, which are `!==` and `!=`.
 
 ```Hack
-'0e789' == '0e123';   // True
-'0e789' != '0e123';   // False
+1 === 2; // false
+1 !== 2; // true
 ```
 
-because both strings actually have the same numeric value, zero! (Zero to the power 789 is the
-same as zero to the power 123.) However,
+## `===` Equality
 
-```Hack
-'0e789' === '0e123';   // False
-'0e789' !== '0e123';   // True
+`===` compares objects by reference.
+
+```Hack file:object.hack
+class MyObject {}
 ```
 
-because there is no numeric conversion; the strings are compared character by character.
+```Hack file:object.hack
+$obj = new MyObject();
 
-## The Spaceship Operator
-Often referred to as the *spaceship operator*, the binary operator `<=>` compares the values of its operands and returns an `int`
-result. If the left-hand value is less than the right-hand value, the result is some unspecified negative value; else, if the left-hand
-value is greater than the right-hand value, the result is some unspecified positive value; otherwise, the values are equal and the result is zero. For example:
+// Different references aren't equal.
+$obj === new MyObject(); // false
+
+// The same reference is equal.
+$obj === $obj; // true
+```
+
+`===` compares primitives types by value.
 
 ```Hack
-1 <=> 1;         // 0; equal
-1 <=> 2;         // negative; 1 < 2
-2 <=> 1;         // positive; 2 > 1
+1 === 1; // true
+vec[1, 2] === vec[1, 2]; // true
+```
 
-"a" <=> "a";     // 0; same length and content
-"a" <=> "b";     // negative; a is lower than b in the collating sequence
-"b" <=> "a";     // positive; b is higher than a in the collating sequence
-"a" <=> "A";     // positive; lowercase a is higher than uppercase A
+Items of different primitive types are never equal.
 
-"a" <=> "aa";    // negative; same leading part, but a is shorter than aa
-"aa" <=> "a";    // positive; same leading part, but aa is longer than a
-"aa" <=> "aa";   // 0; same length and content
+```Hack
+0 === null; // false
+vec[1] === keyset[1]; // false
+
+// Tip: if you want to compare an integer with a float,
+// convert the integer value:
+(float)1 === 1.0; // true
+```
+
+`vec`, `keyset`, `dict` and `shape` values are equal if their items
+are `===` equal and if the items are in the same order.
+
+```Hack
+vec[1, 2] === vec[1, 2]; // true
+vec[1] === vec[2]; // false
+
+keyset[1, 2] === keyset[1, 2]; // true
+keyset[1, 2] === keyset[2, 1]; // false
+
+dict[0 => null, 1 => null] === dict[0 => null, 1 => null]; // true
+dict[1 => null, 0 => null] === dict[0 => null, 1 => null]; // false
+
+// Tip: Use Keyset\equal and Dict\equal if you
+// want to ignore order:
+Keyset\equal(keyset[1, 2], keyset[2, 1]); // true
+Dict\equal(dict[1 => null, 0 => null], dict[0 => null, 1 => null]); // true
+```
+
+`!==` returns the negation of `===`.
+
+```Hack
+1 !== 2; // true
+2 !== 2; // false
+```
+
+## `==` Equality
+
+**If in doubt, prefer `===` equality.**
+
+`==` compares objects by comparing each property, producing a
+structural equality.
+
+```Hack file:wrapper.hack
+class MyWrapper {
+  public function __construct(private mixed $m) {}
+}
+```
+
+```Hack file:wrapper.hack
+new MyWrapper(1) == new MyWrapper(1); // true
+new MyWrapper(1) == new MyWrapper(2); // false
+```
+
+Items of different type are never equal with `==`, the same as `===`.
+
+```Hack
+1 == 1.0; // false
+0 == null; // false
+"" == 0; // false
+```
+
+`==` ignores the order when comparing `keyset`, `dict` and `shape`
+values. Items within these collections are compared with `==`
+recursively.
+
+```Hack
+keyset[1, 2] == keyset[2, 1]; // true
+dict[1 => null, 2 => null] == dict[2 => null, 1 => null]; // true
+
+// Note that vec comparisons always care about order.
+vec[1, 2] == vec[2, 1]; // false
+```
+
+`!=` returns the negation of `==`.
+
+```Hack
+1 != 2; // true
+1 != 1; // false
 ```

@@ -69,10 +69,14 @@ class ClientMetadataRef {
 };
 
 namespace detail {
-using InternalFieldsT = util::TypeErasedValue<512, folly::cacheline_align_v>;
+using ConnectionInternalFieldsT =
+    util::TypeErasedValue<64, alignof(std::max_align_t)>;
 THRIFT_PLUGGABLE_FUNC_DECLARE(
-    InternalFieldsT, createPerConnectionInternalFields);
-THRIFT_PLUGGABLE_FUNC_DECLARE(InternalFieldsT, createPerRequestInternalFields);
+    ConnectionInternalFieldsT, createPerConnectionInternalFields);
+using RequestInternalFieldsT =
+    util::TypeErasedValue<128, alignof(std::max_align_t)>;
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    RequestInternalFieldsT, createPerRequestInternalFields);
 } // namespace detail
 
 class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
@@ -528,7 +532,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   std::optional<TransportType> transportType_;
   std::optional<CLIENT_TYPE> clientType_;
   std::optional<ClientMetadata> clientMetadata_;
-  detail::InternalFieldsT internalFields_;
+  detail::ConnectionInternalFieldsT internalFields_;
 };
 
 class Cpp2ClientRequestContext
@@ -693,7 +697,7 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
   concurrency::ThreadManager::ExecutionScope executionScope_{
       concurrency::PRIORITY::NORMAL};
   folly::IOBuf frameworkMetadata_;
-  detail::InternalFieldsT internalFields_;
+  detail::RequestInternalFieldsT internalFields_;
 };
 
 } // namespace thrift

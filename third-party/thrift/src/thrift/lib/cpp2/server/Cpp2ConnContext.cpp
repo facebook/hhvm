@@ -131,12 +131,12 @@ ClientMetadataRef::getFields() const {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    InternalFieldsT, createPerConnectionInternalFields) {
-  return InternalFieldsT::make<std::monostate>();
+    ConnectionInternalFieldsT, createPerConnectionInternalFields) {
+  return ConnectionInternalFieldsT::make<std::monostate>();
 }
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    InternalFieldsT, createPerRequestInternalFields) {
-  return InternalFieldsT::make<std::monostate>();
+    RequestInternalFieldsT, createPerRequestInternalFields) {
+  return RequestInternalFieldsT::make<std::monostate>();
 }
 } // namespace detail
 

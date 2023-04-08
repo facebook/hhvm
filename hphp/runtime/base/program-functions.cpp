@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/program-functions.h"
 
+#include <atomic>
+
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
@@ -88,6 +90,7 @@
 #include "hphp/runtime/vm/unit-parser.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
@@ -101,6 +104,7 @@
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/perf-event.h"
+#include "hphp/util/portability.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
@@ -2284,6 +2288,8 @@ std::string get_systemlib(const std::string &section /*= "systemlib" */,
 
 namespace {
 
+DEBUG_ONLY std::atomic<bool> s_process_exited = false;
+
 void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestTimer*)info->si_value.sival_ptr;
@@ -2355,6 +2361,9 @@ void hphp_thread_init() {
 }
 
 void hphp_thread_exit() {
+  // All threads should have already exited before process exit
+  assertx(!s_process_exited);
+
   InitFiniNode::ThreadFini();
   ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
@@ -3004,6 +3013,10 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(Debug::destroyDebugInfo())
   LOG_AND_IGNORE(clearUnitCacheForExit())
 #undef LOG_AND_IGNORE
+
+#ifndef NDEBUG
+  s_process_exited = true;
+#endif
 }
 
 bool is_hphp_session_initialized() {

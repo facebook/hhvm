@@ -28,7 +28,6 @@
 #include <folly/Conv.h>
 #include <folly/Hash.h>
 #include <folly/concurrency/ConcurrentHashMap.h>
-#include <folly/executors/GlobalExecutor.h>
 #include <folly/io/async/EventBaseThread.h>
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
@@ -700,6 +699,11 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     }
     return maps;
   }();
+
+  for (auto& map : mapsToRemove) {
+    // Join each map's update threads
+    map->close();
+  }
 
   // Final references to shared_ptr<Facts> fall out of scope on the Treadmill
   Treadmill::enqueue([_destroyed = std::move(mapsToRemove)]() {});

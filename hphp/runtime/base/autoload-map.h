@@ -219,6 +219,14 @@ struct FactsStore : public AutoloadMap {
   virtual ~FactsStore() override = default;
 
   /**
+   * Unsubscribe from any watchers, and finish any updates.
+   *
+   * Once you call this function, no new requests can use this FactsStore.
+   * Calls to `ensureUpdated()` will throw exceptions.
+   */
+  virtual void close() = 0;
+
+  /**
    * Return the correctly-capitalized name of `type`.
    *
    * Return `null` if `type` is not defined, or if it is defined in more than

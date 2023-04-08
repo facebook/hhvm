@@ -612,17 +612,6 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
     return internalFields_.value_unchecked<T>();
   }
 
-  // These identities are set if the request contains a Token used for
-  // authenication. This is analagous to `peerIdentities_` set on a
-  // Cpp2ConnContext
-  void* getRequestIdentities() const { return requestIdentities_.get(); }
-
-  // Set request level identities
-  void setRequestIdentities(folly::erased_unique_ptr data) {
-    DCHECK(requestIdentities_ == nullptr);
-    requestIdentities_ = std::move(data);
-  }
-
   virtual Cpp2ConnContext* getConnectionContext() const { return ctx_; }
 
   std::chrono::milliseconds getRequestTimeout() const {
@@ -687,7 +676,6 @@ class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {
  private:
   Cpp2ConnContext* ctx_;
   folly::erased_unique_ptr requestData_{nullptr, nullptr};
-  folly::erased_unique_ptr requestIdentities_{folly::empty_erased_unique_ptr()};
   std::chrono::milliseconds requestTimeout_{0};
   std::string methodName_;
   int32_t protoSeqId_{0};

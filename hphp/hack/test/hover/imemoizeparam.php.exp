@@ -1,0 +1,6 @@
+IMemoizeParam
+Classes that implement `IMemoizeParam` may be used as parameters on
+`<<__Memoize>>` functions.
+
+@guide /hack/attributes/introduction
+@guide /hack/attributes/special

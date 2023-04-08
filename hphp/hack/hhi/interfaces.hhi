@@ -832,13 +832,12 @@ namespace {
 namespace HH {
 
   /**
-    * Classes that implement IMemoizeParam may be used as parameters on
-    * <<__Memoize>> functions
-    *
+   * Classes that implement `IMemoizeParam` may be used as parameters on
+   * `<<__Memoize>>` functions.
+   *
    * @guide /hack/attributes/introduction
    * @guide /hack/attributes/special
-    */
-
+   */
   interface IMemoizeParam {
     abstract const ctx CMemoParam = [defaults];
     /**
@@ -865,25 +864,24 @@ namespace HH {
 namespace {
 
   /**
-    * Objects that implement IDisposable may be used in using statements
-    */
-
+   * Objects that implement `IDisposable` may be used in `using` statements.
+   */
   interface IDisposable {
     /**
      * This method is invoked exactly once at the end of the scope of the
-     * using statement, unless the program terminates with a fatal error.
+     * `using` statement, unless the program terminates with a fatal error.
      */
     public function __dispose(): void;
   }
 
   /**
-    * Objects that implement IAsyncDisposable may be used in await using statements
-    */
-
+   * Objects that implement `IAsyncDisposable` may be used in `using`
+   * statements with `await`.
+   */
   interface IAsyncDisposable {
     /**
      * This method is invoked exactly once at the end of the scope of the
-     * await using statement, unless the program terminates with a fatal error.
+     * `using` statement, unless the program terminates with a fatal error.
      */
     public function __disposeAsync(): Awaitable<void>;
   }

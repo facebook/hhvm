@@ -69,9 +69,9 @@ class ClientMetadataRef {
 };
 
 namespace detail {
-THRIFT_PLUGGABLE_FUNC_DECLARE(
-    folly::erased_unique_ptr, createPerConnectionInternalFields);
 using InternalFieldsT = util::TypeErasedValue<512, folly::cacheline_align_v>;
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    InternalFieldsT, createPerConnectionInternalFields);
 THRIFT_PLUGGABLE_FUNC_DECLARE(InternalFieldsT, createPerRequestInternalFields);
 } // namespace detail
 
@@ -345,8 +345,15 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     return ClientMetadataRef{*clientMetadata_};
   }
 
-  void* getInternalFields() { return internalFields_.get(); }
-  const void* getInternalFields() const { return internalFields_.get(); }
+  template <class T>
+  T& getInternalFields() noexcept {
+    return internalFields_.value_unchecked<T>();
+  }
+
+  template <class T>
+  const T& getInternalFields() const noexcept {
+    return internalFields_.value_unchecked<T>();
+  }
 
   InterfaceKind getInterfaceKind() const { return interfaceKind_; }
 
@@ -521,7 +528,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   std::optional<TransportType> transportType_;
   std::optional<CLIENT_TYPE> clientType_;
   std::optional<ClientMetadata> clientMetadata_;
-  folly::erased_unique_ptr internalFields_;
+  detail::InternalFieldsT internalFields_;
 };
 
 class Cpp2ClientRequestContext

@@ -131,8 +131,8 @@ ClientMetadataRef::getFields() const {
 
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    folly::erased_unique_ptr, createPerConnectionInternalFields) {
-  return folly::empty_erased_unique_ptr();
+    InternalFieldsT, createPerConnectionInternalFields) {
+  return InternalFieldsT::make<std::monostate>();
 }
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     InternalFieldsT, createPerRequestInternalFields) {

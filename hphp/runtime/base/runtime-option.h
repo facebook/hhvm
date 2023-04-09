@@ -1480,7 +1480,7 @@ struct RuntimeOption {
   F(uint64_t, RecordSampleRate, 0)                                      \
   F(string, RecordDir, std::string(""))                                 \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
-  F(bool, IncludeReopOptionsInFactsCacheBreaker, false)                 \
+  F(bool, IncludeReopOptionsInFactsCacheBreaker, true)                  \
   /* */
 
 private:

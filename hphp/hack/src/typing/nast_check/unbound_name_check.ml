@@ -317,7 +317,7 @@ let handler ctx =
       in
       env
 
-    method! at_user_attribute env { Aast.ua_name; _ } =
+    method! at_user_attribute env { Aast.ua_name; Aast.ua_params; _ } =
       let () =
         if not @@ Naming_special_names.UserAttributes.is_reserved (snd ua_name)
         then
@@ -327,6 +327,19 @@ let handler ctx =
             ~allow_generics:false
             ~kind:Name_context.ClassContext
             ua_name
+      in
+      let () =
+        if
+          String.equal
+            (snd ua_name)
+            Naming_special_names.UserAttributes.uaCrossPackage
+        then
+          List.iter
+            ~f:(function
+              | (_, pos, Aast.String pkg_name) ->
+                check_package_name env (pos, pkg_name)
+              | _ -> ())
+            ua_params
       in
       env
 

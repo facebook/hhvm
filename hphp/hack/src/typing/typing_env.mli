@@ -559,6 +559,8 @@ val mark_inconsistent : env -> env
 
 val get_package_for_module : env -> string -> Package.package option
 
+val load_packages : env -> SSet.t -> env
+
 val with_packages : env -> SSet.t -> (env -> env * 'a) -> env * 'a
 
 val is_package_loaded : env -> string -> bool

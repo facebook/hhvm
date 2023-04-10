@@ -2626,12 +2626,8 @@ and stmt_ env pos st =
                   when String.equal
                          s
                          SN.AutoimportedFunctions.invariant_violation ->
-                  {
-                    env with
-                    loaded_packages =
-                      get_loaded_packages_from_invariant e SSet.empty
-                      |> SSet.union env.loaded_packages;
-                  }
+                  get_loaded_packages_from_invariant e SSet.empty
+                  |> Env.load_packages env
                 | _ -> env)
           in
           (env, b1))

@@ -688,10 +688,12 @@ let get_package_for_module env md =
 
 let is_package_loaded env package = SSet.mem package env.loaded_packages
 
+let load_packages env packages =
+  { env with loaded_packages = SSet.union env.loaded_packages packages }
+
 let with_packages env packages f =
   let old_loaded_packages = env.loaded_packages in
-  let new_loaded_packages = SSet.union old_loaded_packages packages in
-  let env = { env with loaded_packages = new_loaded_packages } in
+  let env = load_packages env packages in
   let (env, result) = f env in
   let env = { env with loaded_packages = old_loaded_packages } in
   (env, result)

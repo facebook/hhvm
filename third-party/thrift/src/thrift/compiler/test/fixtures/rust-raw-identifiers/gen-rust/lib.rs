@@ -869,7 +869,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::foo::ReturnExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::ReturnExn::Success(_))) => {
@@ -939,7 +939,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::foo::SuperExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::SuperExn::Success(_))) => {

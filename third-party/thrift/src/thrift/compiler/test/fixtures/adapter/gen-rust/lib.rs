@@ -1377,7 +1377,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::service::FuncExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::service::FuncExn::Success(_))) => {
@@ -1753,7 +1753,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::adapter_service::CountExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::CountExn::Success(_))) => {
@@ -1823,7 +1823,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::adapter_service::AdaptedTypesExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::Success(_))) => {

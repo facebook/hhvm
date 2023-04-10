@@ -5084,7 +5084,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(_))) => {
@@ -5193,7 +5193,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(_))) => {
@@ -5308,7 +5308,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(_))) => {
@@ -5421,7 +5421,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(_))) => {
@@ -5538,7 +5538,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::BoththrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::Success(_))) => {
@@ -5657,7 +5657,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(_))) => {
@@ -5772,7 +5772,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(_))) => {
@@ -5885,7 +5885,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(_))) => {
@@ -6005,7 +6005,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(_))) => {

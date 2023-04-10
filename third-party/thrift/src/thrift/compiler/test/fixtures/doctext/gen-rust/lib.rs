@@ -1417,7 +1417,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::c::FExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::FExn::Success(_))) => {
@@ -1486,7 +1486,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::c::NumbersExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersExn::Success(_))) => {
@@ -1597,7 +1597,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::c::ThingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::ThingExn::Success(_))) => {

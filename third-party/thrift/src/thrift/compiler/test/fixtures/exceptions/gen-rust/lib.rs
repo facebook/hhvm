@@ -1521,7 +1521,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::raiser::DoBlandExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoBlandExn::Success(_))) => {
@@ -1590,7 +1590,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::raiser::DoRaiseExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoRaiseExn::Success(_))) => {
@@ -1659,7 +1659,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::raiser::Get200Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get200Exn::Success(_))) => {
@@ -1728,7 +1728,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::raiser::Get500Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get500Exn::Success(_))) => {

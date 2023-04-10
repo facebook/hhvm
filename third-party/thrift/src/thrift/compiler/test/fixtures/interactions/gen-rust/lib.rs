@@ -4728,7 +4728,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::Success(_))) => {
@@ -4797,7 +4797,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction::PingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::PingExn::Success(_))) => {
@@ -4866,7 +4866,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction::TruthifyExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::Success(_))) => {
@@ -4974,7 +4974,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction::EncodeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::EncodeExn::Success(_))) => {
@@ -5412,7 +5412,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction_fast::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::Success(_))) => {
@@ -5481,7 +5481,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction_fast::PingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::Success(_))) => {
@@ -5550,7 +5550,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction_fast::TruthifyExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::Success(_))) => {
@@ -5658,7 +5658,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_interaction_fast::EncodeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::EncodeExn::Success(_))) => {
@@ -5977,7 +5977,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::serial_interaction::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::Success(_))) => {
@@ -6461,7 +6461,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     crate::services::my_service::FooExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::FooExn::Success(_))) => {
@@ -6531,7 +6531,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     let (interaction_handler, res) = (res, ());
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6603,7 +6603,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6675,7 +6675,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::info!("success");
+                    ::tracing::trace!("success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;

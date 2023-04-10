@@ -76,9 +76,45 @@ bool HHVM_FUNCTION(autoload_is_native) {
   return autoloadMap && autoloadMap->isNative();
 }
 
-bool HHVM_FUNCTION(autoload_set_paths, const Variant&, const String&) {
-  SystemLib::throwInvalidOperationExceptionObject("NF FTW!");
-  return false;
+bool HHVM_FUNCTION(autoload_set_paths,
+                   const Variant& map,
+                   const String& root) {
+  // If we are using a native autoload map you are not allowed to override it
+  // in repo mode
+  if (RuntimeOption::RepoAuthoritative) {
+    return false;
+  }
+
+  if (!RuntimeOption::AutoloadUserlandEnabled) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Attempted to call HH\\autoload_set_paths() when "
+      "Autoload.UserlandEnabled is false. HH\\autoload_set_paths() will soon "
+      "be deleted so HHVM internals can start depending on native "
+      "autoloading.");
+  } else if (HHVM_FN(autoload_is_native)()) {
+    raise_notice(
+      "Attempted to call HH\\autoload_set_paths() while the native autoloader "
+      "is enabled. HH\\autoload_set_paths() disables the native autoloader, "
+      "putting us on a deprecated code path that will soon stop working.");
+  }
+
+  if (map.isArray()) {
+    return AutoloadHandler::s_instance->setMap(map.asCArrRef(), root);
+  }
+  if (!(map.isObject() && map.toObject()->isCollection())) {
+    return false;
+  }
+  // Assume we have Map<string, Map<string, string>> - convert to
+  // array<string, array<string, string>>
+  //
+  // Exception for 'failure' which should be a callable.
+  auto as_array = map.toArray();
+  for (auto it = as_array.begin(); !it.end(); it.next()) {
+    if (it.second().isObject() && it.second().toObject()->isCollection()) {
+      as_array.set(it.first(), it.second().toArray());
+    }
+  }
+  return AutoloadHandler::s_instance->setMap(as_array, root);
 }
 
 namespace {

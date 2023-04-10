@@ -142,6 +142,12 @@ let base_visitor ~human_friendly ~under_dynamic line char =
       else
         super#on_fun_param env fp
 
+    method! on_capture_lid env ((ty, (pos, _)) as cl) =
+      if Pos.inside pos line char && self#correct_assumptions env then
+        Some (pos, env, ty)
+      else
+        super#on_capture_lid env cl
+
     method! on_xhp_simple env attribute =
       let (pos, _) = attribute.Aast.xs_name in
       if Pos.inside pos line char && self#correct_assumptions env then

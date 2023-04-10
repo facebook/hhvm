@@ -561,6 +561,9 @@ let visitor =
       in
       self#plus acc (super#on_Lvar env (pos, id))
 
+    method! on_capture_lid _env (_, (pos, id)) =
+      process_lvar_id (pos, Local_id.get_name id)
+
     method! on_hint env h =
       let acc =
         match h with

@@ -13,6 +13,11 @@ function get_hhvm_bin {
         "/usr/local/hphpi/bin/hhvm"
     )
 
+    # If HHVM_BIN is set, only consider that
+    if [[ -n "$HHVM_BIN" ]]; then
+        candidates=("${HHVM_BIN}")
+    fi
+
     for binary in "${candidates[@]}"; do
         if [[ ! -d "$binary" && -x "$binary" ]]; then
             echo "$binary"

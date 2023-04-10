@@ -77,6 +77,21 @@ using RequestInternalFieldsT =
     util::TypeErasedValue<128, alignof(std::max_align_t)>;
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     RequestInternalFieldsT, createPerRequestInternalFields);
+
+/*
+ * Cache the exported keying material from the transport per connection
+ * and per label (key). Note we expect the number of labels to be very small
+ * Computing this per request may be too expensive which is why we cache this
+ * here. This is stored as a vector for efficiency
+ */
+struct EkmInfo {
+  std::string label;
+  uint16_t length;
+  std::unique_ptr<folly::IOBuf> buf{nullptr};
+};
+
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    std::vector<EkmInfo>, populateCachedEkms, const folly::AsyncTransport&);
 } // namespace detail
 
 class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
@@ -108,6 +123,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
         peerCert = std::move(osslCert);
       }
       transportInfo_.securityProtocol = transport->getSecurityProtocol();
+      transportInfo_.cachedEkms = detail::populateCachedEkms(*transport);
 
       if (transportInfo_.localAddress.getFamily() == AF_UNIX) {
         auto wrapper = transport->getUnderlyingTransport<folly::AsyncSocket>();
@@ -237,27 +253,18 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   }
 
   /*
-   * This is a thin wrapper over transport->getExportedKeyingMaterial(...). It
-   * will return a nullptr for a conn context that doesn't have a transport
-   * attached. Otherwise the return value should be exactly the same as calling
-   * getExportedKeyingMaterial, note that we don't allow passing in a context
-   * buf for this method
+   * The context may have prepopulated some cached ekms. This method
+   * will check against the cache and return ekm on a hit. The caller is
+   * expected to try to generate the ekm themselves on a cache miss.
    */
   std::unique_ptr<folly::IOBuf> getCachedEkm(
-      folly::StringPiece label, uint16_t length) {
-    for (const auto& ekm : cachedEkms_) {
-      if (ekm.first.label == label && ekm.first.length == length) {
-        return ekm.second->clone();
+      folly::StringPiece label, uint16_t length) const {
+    for (const auto& ekm : transportInfo_.cachedEkms) {
+      if (ekm.label == label && ekm.length == length) {
+        // We may have negatively cached (e.g. for a plaintext transport), this
+        // is a valid value so return.
+        return (ekm.buf != nullptr) ? ekm.buf->clone() : nullptr;
       }
-    }
-    if (transport_ == nullptr) {
-      return nullptr;
-    }
-    auto ekm = transport_->getExportedKeyingMaterial(label, nullptr, length);
-    if (ekm != nullptr) {
-      cachedEkms_.emplace_back(
-          std::make_pair(EkmInfo{label.toString(), length}, ekm->clone()));
-      return ekm;
     }
     return nullptr;
   }
@@ -505,19 +512,9 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
     folly::erased_unique_ptr peerIdentities{folly::empty_erased_unique_ptr()};
     std::string securityProtocol;
     std::shared_ptr<X509> peerCertificate;
+    std::vector<detail::EkmInfo> cachedEkms;
   } transportInfo_;
   const folly::AsyncTransport* transport_;
-  /*
-   * Cache the exported keying material from the transport per connection
-   * and per label (key). Note we expect the number of labels to be very small
-   * Computing this per request may be too expensive which is why we cache this
-   * here. This is stored as a vector for efficiency
-   */
-  struct EkmInfo {
-    std::string label;
-    uint16_t length;
-  };
-  std::vector<std::pair<EkmInfo, std::unique_ptr<folly::IOBuf>>> cachedEkms_;
 
   folly::EventBaseManager* manager_;
   std::shared_ptr<RequestChannel> duplexChannel_;

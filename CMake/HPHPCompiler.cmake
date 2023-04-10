@@ -65,8 +65,13 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     "fno-omit-frame-pointer"
     "fno-operator-names"
     "Wall"
-    "Woverloaded-virtual"
     "Werror=format-security"
+    "Wno-unused-variable"
+    "Wno-unused-value"
+    "Wno-comment"
+    "Wno-class-memaccess"
+    "Wno-adress"
+    "Wno-error=stringop-overflow"
   )
 
   # Options to pass for debug mode to the C++ compiler

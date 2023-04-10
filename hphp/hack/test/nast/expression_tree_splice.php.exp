@@ -61,7 +61,8 @@
                                    };
                                  f_fun_kind = FSync; f_user_attributes = []; 
                                  f_external = false; f_doc_comment = None };
-                               ef_use = [([4:3-13], $0splice0)]; ef_closure_class_name = None })),
+                               ef_use = [((), ([4:3-13], $0splice0))]; 
+                               ef_closure_class_name = None })),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [4:14-32],
@@ -205,14 +206,14 @@
                                                          f_user_attributes = []; 
                                                          f_external = false; 
                                                          f_doc_comment = None },
-                                                       [([4:25-31], $0splice0)]))))
+                                                       [((), ([4:25-31], $0splice0))]))))
                                                   ],
                                                 None))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
-                             [([4:25-31], $0splice0)]))),
+                             [((), ([4:25-31], $0splice0))]))),
                          [], [], None)));
                      et_dollardollar_pos = None }))))
             ]

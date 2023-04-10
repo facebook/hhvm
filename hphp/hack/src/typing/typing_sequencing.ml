@@ -254,7 +254,7 @@ let sequence_visitor ~require_used used_vars =
         (* Ignore the current environment and start fresh. *)
         let _acc = this#on_block empty_env nb.fb_ast in
         (* we use all the variables we are capturing *)
-        List.fold_left ~f:use_local ~init:env idl
+        List.fold_left ~f:(fun acc (_, id) -> use_local acc id) ~init:env idl
       | _ -> parent#on_expr env e
 
     method! on_field env (e1, e2) = this#check_unsequenced_exprs env e1 e2

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<582c90d76bcc37c47386422ba0a023c9>>
+// @generated SignedSource<<a0eba69ca0a41135203f35b09eeaf4f5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -997,7 +997,7 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_efun(p0: Efun<Ex, En>) -> Self {
         Expr_::Efun(Box::new(p0))
     }
-    pub fn mk_lfun(p0: Fun_<Ex, En>, p1: Vec<Lid>) -> Self {
+    pub fn mk_lfun(p0: Fun_<Ex, En>, p1: Vec<CaptureLid<Ex>>) -> Self {
         Expr_::Lfun(Box::new((p0, p1)))
     }
     pub fn mk_xml(p0: ClassName, p1: Vec<XhpAttribute<Ex, En>>, p2: Vec<Expr<Ex, En>>) -> Self {
@@ -1601,7 +1601,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_lfun(&self) -> Option<(&Fun_<Ex, En>, &Vec<Lid>)> {
+    pub fn as_lfun(&self) -> Option<(&Fun_<Ex, En>, &Vec<CaptureLid<Ex>>)> {
         match self {
             Expr_::Lfun(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1948,7 +1948,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_lfun_mut(&mut self) -> Option<(&mut Fun_<Ex, En>, &mut Vec<Lid>)> {
+    pub fn as_lfun_mut(&mut self) -> Option<(&mut Fun_<Ex, En>, &mut Vec<CaptureLid<Ex>>)> {
         match self {
             Expr_::Lfun(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2288,7 +2288,7 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_lfun_into(self) -> Option<(Fun_<Ex, En>, Vec<Lid>)> {
+    pub fn as_lfun_into(self) -> Option<(Fun_<Ex, En>, Vec<CaptureLid<Ex>>)> {
         match self {
             Expr_::Lfun(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,

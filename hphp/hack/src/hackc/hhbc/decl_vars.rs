@@ -144,7 +144,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     .map_or(false, |s| s.contains(fn_name));
                 if has_use_list {
                     for id in use_list {
-                        self.add_local(id.name())
+                        self.add_local(id.1.name())
                     }
                 }
                 Ok(())

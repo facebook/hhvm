@@ -2311,15 +2311,21 @@ fn p_upcast_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>) -> Result<Exp
     Ok(Expr_::mk_upcast(p_expr(left, env)?, p_hint(right, env)?))
 }
 
+fn p_use_var<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<ast::CaptureLid> {
+    match &n.children {
+        Token(_) => {
+            let lid = mk_name_lid(n, e)?;
+            Ok(ast::CaptureLid((), lid))
+        }
+        _ => missing_syntax("use variable", n, e),
+    }
+}
+
 fn p_anonymous_function<'a>(
     node: S<'a>,
     c: &'a AnonymousFunctionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
     env: &mut Env<'a>,
 ) -> Result<Expr_> {
-    let p_arg = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-        Token(_) => mk_name_lid(n, e),
-        _ => missing_syntax("use variable", n, e),
-    };
     let ctxs = p_contexts(
         &c.ctx_list,
         env,
@@ -2331,7 +2337,7 @@ fn p_anonymous_function<'a>(
     );
     let unsafe_ctxs = ctxs.clone();
     let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-        AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_arg),
+        AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_use_var),
         _ => Ok(vec![]),
     };
     let suspension_kind = mk_suspension_kind(&c.async_keyword);

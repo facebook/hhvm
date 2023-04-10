@@ -30,6 +30,7 @@ use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast::Abstraction;
 use oxidized::ast::Block;
+use oxidized::ast::CaptureLid;
 use oxidized::ast::ClassGetExpr;
 use oxidized::ast::ClassHint;
 use oxidized::ast::ClassId;
@@ -109,7 +110,7 @@ struct FunctionSummary<'b, 'arena> {
 struct LambdaSummary<'b, 'arena> {
     // Unfortunately hhbc::Coeffects has to be owned for now.
     coeffects: Coeffects<'arena>,
-    explicit_capture: Option<&'b [Lid]>,
+    explicit_capture: Option<&'b [CaptureLid]>,
     fun_kind: FunKind,
     span: &'b Pos,
 }
@@ -1320,7 +1321,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         &mut self,
         scope: &mut Scope<'b, 'arena>,
         mut fd: Fun_,
-        use_vars_opt: Option<Vec<Lid>>,
+        use_vars_opt: Option<Vec<CaptureLid>>,
     ) -> Result<Expr_> {
         let is_long_lambda = use_vars_opt.is_some();
         let state = self.state_mut();
@@ -1332,7 +1333,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
             .map_or_else(Default::default, |co| co.clone());
         state.enter_lambda();
         if let Some(user_vars) = &use_vars_opt {
-            for Lid(p, id) in user_vars.iter() {
+            for CaptureLid(_, Lid(p, id)) in user_vars.iter() {
                 if local_id::get_name(id) == special_idents::THIS {
                     return Err(Error::fatal_parse(
                         p,
@@ -1344,7 +1345,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
         let explicit_capture: Option<IndexSet<String>> = use_vars_opt.as_ref().map(|vars| {
             vars.iter()
-                .map(|Lid(_, (_, name))| name.to_string())
+                .map(|CaptureLid(_, Lid(_, (_, name)))| name.to_string())
                 .collect()
         });
         let variables =
@@ -1372,7 +1373,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
         let current_generics = state.capture_state.generics.clone();
 
         // TODO(hrust): produce real unique local ids
-        let fresh_lid = |name: String| Lid(Pos::NONE, (12345, name));
+        let fresh_lid = |name: String| CaptureLid((), Lid(Pos::NONE, (12345, name)));
 
         let lambda_vars: Vec<&String> = state
             .capture_state
@@ -1386,13 +1387,13 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
         // Remove duplicates, (not efficient, but unlikely to be large),
         // remove variables that are actually just parameters
-        let use_vars_opt: Option<Vec<Lid>> = use_vars_opt.map(|use_vars| {
+        let use_vars_opt: Option<Vec<CaptureLid>> = use_vars_opt.map(|use_vars| {
             let params = &fd.params;
             use_vars
                 .into_iter()
                 .rev()
-                .unique_by(|lid| lid.name().to_string())
-                .filter(|x| !params.iter().any(|y| x.name() == &y.name))
+                .unique_by(|lid| lid.1.name().to_string())
+                .filter(|x| !params.iter().any(|y| x.1.name() == &y.name))
                 .collect::<Vec<_>>()
                 .into_iter()
                 .rev()
@@ -1401,7 +1402,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
 
         // For lambdas with explicit `use` variables, we ignore the computed
         // capture set and instead use the explicit set
-        let (lambda_vars, use_vars): (Vec<String>, Vec<Lid>) = match use_vars_opt {
+        let (lambda_vars, use_vars): (Vec<String>, Vec<CaptureLid>) = match use_vars_opt {
             None => (
                 lambda_vars.iter().map(|x| x.to_string()).collect(),
                 lambda_vars
@@ -1414,7 +1415,7 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
                 (
                     use_vars
                         .iter()
-                        .map(|x| x.name())
+                        .map(|x| x.1.name())
                         .chain(current_generics.iter())
                         .map(|x| x.to_string())
                         .collect(),

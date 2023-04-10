@@ -918,17 +918,21 @@ let closure_check_param env param =
     Option.iter ty_err_opt2 ~f:Errors.add_typing_error;
     env
 
-let stash_conts_for_closure env p is_anon captured f =
+let stash_conts_for_closure env p is_anon (captured : Tast.capture_lid list) f =
+  let with_ty_for_lid ((_, name) as lid) = (Env.get_local env name, lid) in
+
   let captured =
     if is_anon && TypecheckerOptions.any_coeffects (Env.get_tcopt env) then
       Typing_coeffects.(
-        (Pos.none, local_capability_id) :: (Pos.none, capability_id) :: captured)
+        with_ty_for_lid (Pos.none, local_capability_id)
+        :: with_ty_for_lid (Pos.none, capability_id)
+        :: captured)
     else
       captured
   in
   let captured =
     if Env.is_local_defined env this && not (Env.is_in_expr_tree env) then
-      (Pos.none, this) :: captured
+      with_ty_for_lid (Pos.none, this) :: captured
     else
       captured
   in
@@ -5169,8 +5173,14 @@ and lambda ~is_anon ~closure_class_name ?expected p env f idl =
   in
 
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  (* Check that none of the explicit capture variables are from a using clause *)
-  List.iter idl ~f:(check_escaping_var env);
+  let idl =
+    List.map idl ~f:(fun ((), ((_, name) as id)) ->
+        (* Check that none of the explicit capture variables are from a using clause *)
+        check_escaping_var env id;
+
+        let ty = Env.get_local env name in
+        (ty, id))
+  in
 
   (* Ensure that variadic parameter has a name *)
   (if get_ft_variadic declared_ft then

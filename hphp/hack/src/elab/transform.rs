@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cf303ec284c95f4fbd7d28519cf8d64f>>
+// @generated SignedSource<<35ad5019c1e42ded11eff4ed7005019f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -870,6 +870,26 @@ impl Transform for Fun_ {
                     __binding_11.transform(env, pass)
                 }
                 { __binding_12.transform(env, pass) }
+            }
+        }
+    }
+}
+impl Transform for CaptureLid {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_capture_lid_top_down(env, self) {
+            return;
+        }
+        self.traverse(env, pass);
+        in_pass.on_ty_capture_lid_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            CaptureLid(ref mut __binding_0, ref mut __binding_1) => {
+                {
+                    __binding_0.transform(env, pass)
+                }
+                { __binding_1.transform(env, pass) }
             }
         }
     }

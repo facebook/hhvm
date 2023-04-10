@@ -39,7 +39,7 @@ Errors:
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
-                          [([15:15-17], $y)])))
+                          [((int), ([15:15-17], $y))])))
                       }))));
             ([16:3-14],
              (Expr
@@ -74,7 +74,7 @@ Errors:
                                 };
                               f_fun_kind = FSync; f_user_attributes = []; 
                               f_external = false; f_doc_comment = None };
-                            ef_use = [([18:26-28], $y)]; ef_closure_class_name = None }))
+                            ef_use = [((int), ([18:26-28], $y))]; ef_closure_class_name = None }))
                       }))));
             ([21:3-14],
              (Expr

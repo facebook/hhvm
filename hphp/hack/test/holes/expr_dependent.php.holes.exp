@@ -130,7 +130,7 @@
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
-                          [([17:23-28], $left)]))))))
+                          [((T), ([17:23-28], $left))]))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 

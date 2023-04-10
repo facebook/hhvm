@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4f0ef9efb10c935c032c83de7c95fbb9>>
+// @generated SignedSource<<ac73c70d805493bd4753177dc3199e48>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -164,6 +164,23 @@ impl<P: Params> Node<P> for Bop {
             Bop::QuestionQuestion => Ok(()),
             Bop::Eq(a0) => a0.accept(c, v),
         }
+    }
+}
+impl<P: Params> Node<P> for CaptureLid<P::Ex> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_capture_lid(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ex(c, &self.0)?;
+        self.1.accept(c, v)
     }
 }
 impl<P: Params> Node<P> for Case<P::Ex, P::En> {
@@ -945,7 +962,7 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
         }
         #[inline]
         fn helper19<'node, P: Params + Params<Ex = Ex> + Params<En = En>, Ex, En>(
-            a: &'node Box<(Fun_<Ex, En>, Vec<Lid>)>,
+            a: &'node Box<(Fun_<Ex, En>, Vec<CaptureLid<Ex>>)>,
             c: &mut P::Context,
             v: &mut dyn Visitor<'node, Params = P>,
         ) -> Result<(), P::Error> {

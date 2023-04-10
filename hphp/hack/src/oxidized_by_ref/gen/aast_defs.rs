@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<344fc9c22508b59660c33c8c4ae343e7>>
+// @generated SignedSource<<04a12034b0ae04de418b3b7d32af61d5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1105,7 +1105,7 @@ pub enum Expr_<'a, Ex, En> {
     ///     ($x, $y) ==> { return $x + $y; }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(inline_tuple)]
-    Lfun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a Lid<'a>])),
+    Lfun(&'a (&'a Fun_<'a, Ex, En>, &'a [&'a CaptureLid<'a, Ex>])),
     /// XHP expression. May contain interpolated expressions.
     ///
     ///     <foo x="hello" y={$foo}>hello {$bar}</foo>
@@ -1680,6 +1680,30 @@ arena_deserializer::impl_deserialize_in_arena!(Fun_<'arena, Ex, En>);
     Serialize,
     ToOcamlRep
 )]
+#[serde(bound(deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>"))]
+#[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct CaptureLid<'a, Ex>(
+    #[serde(deserialize_with = "arena_deserializer::arena")] pub Ex,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Lid<'a>,
+);
+impl<'a, Ex: TrivialDrop> TrivialDrop for CaptureLid<'a, Ex> {}
+arena_deserializer::impl_deserialize_in_arena!(CaptureLid<'arena, Ex>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
@@ -1690,7 +1714,7 @@ pub struct Efun<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun: &'a Fun_<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub use_: &'a [&'a Lid<'a>],
+    pub use_: &'a [&'a CaptureLid<'a, Ex>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub closure_class_name: Option<&'a str>,
 }

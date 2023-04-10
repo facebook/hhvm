@@ -22,6 +22,7 @@ use std::collections::BTreeMap;
 
 use naming_special_names_rust as sn;
 use nast::Binop;
+use nast::CaptureLid;
 use nast::Expr;
 use nast::Expr_;
 use nast::Lid;
@@ -46,8 +47,9 @@ impl Visitor {
     fn add_local_def(&mut self, lid: Lid) {
         self.bound.insert(lid.1, lid.0);
     }
-    fn add_local_defs(&mut self, lids: impl Iterator<Item = Lid>) {
-        for lid in lids {
+    fn add_local_defs(&mut self, lids: impl Iterator<Item = CaptureLid>) {
+        for capture_lid in lids {
+            let CaptureLid(_, lid) = capture_lid;
             self.add_local_def(lid);
         }
     }
@@ -110,7 +112,7 @@ impl<'ast> VisitorMut<'ast> for Visitor {
                 *idl = inner_free
                     .iter()
                     .rev()
-                    .map(|(lid, pos)| Lid(pos.clone(), lid.clone()))
+                    .map(|(lid, pos)| CaptureLid((), Lid(pos.clone(), lid.clone())))
                     .collect();
                 *self = outer_vars;
                 self.free.extend(inner_free);
@@ -183,7 +185,7 @@ impl<'ast> VisitorMut<'ast> for Visitor {
         // We just check that they haven't tried to explicitly capture $this.
         let idl = idl
             .into_iter()
-            .filter(|Lid(p, lid)| {
+            .filter(|CaptureLid(_, Lid(p, lid))| {
                 let is_this = local_id::get_name(lid) == sn::special_idents::THIS;
                 if is_this {
                     env.emit_error(NamingError::ThisAsLexicalVariable(p.clone()));

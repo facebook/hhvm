@@ -641,7 +641,7 @@ and ('ex, 'en) expr_ =
        *     function(int $x): int { return $x; }
        *     function($x) use ($y) { return $y; }
        *     function($x): int use ($y, $z) { return $x + $y + $z; } *)
-  | Lfun of ('ex, 'en) fun_ * lid list
+  | Lfun of ('ex, 'en) fun_ * 'ex capture_lid list
       (** Hack lambda. Captures variables automatically.
        *
        *     $x ==> $x
@@ -826,9 +826,11 @@ and ('ex, 'en) fun_ = {
   f_doc_comment: doc_comment option;
 }
 
+and 'ex capture_lid = 'ex * lid
+
 and ('ex, 'en) efun = {
   ef_fun: ('ex, 'en) fun_;
-  ef_use: lid list;
+  ef_use: 'ex capture_lid list;
   ef_closure_class_name: string option;
 }
 

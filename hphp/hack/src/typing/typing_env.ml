@@ -1273,7 +1273,7 @@ let get_local_pos env x =
 
 let get_locals ?(quiet = false) env plids =
   let next_cont = next_cont_opt env in
-  List.fold plids ~init:LID.Map.empty ~f:(fun locals (p, lid) ->
+  List.fold plids ~init:LID.Map.empty ~f:(fun locals (_, (p, lid)) ->
       let error_if_undef_at_pos =
         if quiet then
           None

@@ -54,7 +54,7 @@ Errors:
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
-                          [([10:13-19], $items)])))
+                          [((Vector<int>), ([10:13-19], $items))])))
                       }))));
             ([13:3-17],
              (Expr

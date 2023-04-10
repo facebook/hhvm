@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a31e3ddc27ae4b70c0b13fb71407c1e5>>
+// @generated SignedSource<<54777ac59f46f72d01c0a15b4a9816eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -899,7 +899,7 @@ pub enum Expr_<Ex, En> {
     ///     (int $x): int ==> $x + $other
     ///     ($x, $y) ==> { return $x + $y; }
     #[rust_to_ocaml(inline_tuple)]
-    Lfun(Box<(Fun_<Ex, En>, Vec<Lid>)>),
+    Lfun(Box<(Fun_<Ex, En>, Vec<CaptureLid<Ex>>)>),
     /// XHP expression. May contain interpolated expressions.
     ///
     ///     <foo x="hello" y={$foo}>hello {$bar}</foo>
@@ -1330,11 +1330,29 @@ pub struct Fun_<Ex, En> {
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[repr(C)]
+pub struct CaptureLid<Ex>(pub Ex, pub Lid);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "ef_")]
 #[repr(C)]
 pub struct Efun<Ex, En> {
     pub fun: Fun_<Ex, En>,
-    pub use_: Vec<Lid>,
+    pub use_: Vec<CaptureLid<Ex>>,
     pub closure_class_name: Option<String>,
 }
 

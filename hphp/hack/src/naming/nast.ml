@@ -51,6 +51,8 @@ type file_attribute = (unit, unit) Aast.file_attribute
 
 type fun_ = (unit, unit) Aast.fun_
 
+type capture_lid = unit Aast.capture_lid
+
 type efun = (unit, unit) Aast.efun
 
 type fun_def = (unit, unit) Aast.fun_def
@@ -537,7 +539,7 @@ module Visitor_DEPRECATED = struct
 
       method on_efun : 'a -> efun -> 'a
 
-      method on_lfun : 'a -> fun_ -> id list -> 'a
+      method on_lfun : 'a -> fun_ -> capture_lid list -> 'a
 
       method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
 

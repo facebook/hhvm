@@ -109,6 +109,8 @@ type class_typeconst_def = (ty, saved_env) Aast.class_typeconst_def
 
 type user_attribute = (ty, saved_env) Aast.user_attribute
 
+type capture_lid = ty Aast.capture_lid
+
 type fun_ = (ty, saved_env) Aast.fun_
 
 type efun = (ty, saved_env) Aast.efun

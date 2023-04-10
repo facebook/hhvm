@@ -784,7 +784,7 @@ fn emit_clone<'a, 'arena, 'decl>(
 fn emit_lambda<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
-    ids: &[aast_defs::Lid],
+    ids: &[ast::CaptureLid],
     closure_class_name: &Option<String>,
 ) -> Result<InstrSeq<'arena>> {
     let closure_class_name = if let Some(n) = closure_class_name {
@@ -804,7 +804,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
     Ok(InstrSeq::gather(vec![
         InstrSeq::gather(
             ids.iter()
-                .map(|ast::Lid(pos, id)| {
+                .map(|ast::CaptureLid(_, ast::Lid(pos, id))| {
                     match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
                         Some((is_fun, i)) => {
                             if is_in_lambda {

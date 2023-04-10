@@ -124,14 +124,14 @@
                                                           f_user_attributes = []; 
                                                           f_external = false; 
                                                           f_doc_comment = None },
-                                                        [([6:7-10], $0fp0)]))))
+                                                        [((), ([6:7-10], $0fp0))]))))
                                                     ],
                                                   None))))))
                                      ]
                                    };
                                  f_fun_kind = FSync; f_user_attributes = []; 
                                  f_external = false; f_doc_comment = None };
-                               ef_use = [([4:3-13], $0fp0)]; ef_closure_class_name = None })),
+                               ef_use = [((), ([4:3-13], $0fp0))]; ef_closure_class_name = None })),
                          [], [], None)));
                      et_runtime_expr =
                      ((), [4:14-8:4],
@@ -405,14 +405,14 @@
                                                          f_user_attributes = []; 
                                                          f_external = false; 
                                                          f_doc_comment = None },
-                                                       [([6:7-10], $0fp0)]))))
+                                                       [((), ([6:7-10], $0fp0))]))))
                                                   ],
                                                 None))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
-                             [([6:7-10], $0fp0)]))),
+                             [((), ([6:7-10], $0fp0))]))),
                          [], [], None)));
                      et_dollardollar_pos = None }))))
             ]

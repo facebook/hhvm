@@ -48,7 +48,7 @@
                               };
                             f_fun_kind = FSync; f_user_attributes = []; 
                             f_external = false; f_doc_comment = None },
-                          [([4:29-31], $s)])))
+                          [((string), ([4:29-31], $s))])))
                       }))));
             ([5:3-14],
              (Expr

@@ -783,9 +783,14 @@ fn print_efun(
     if !use_list.is_empty() {
         w.write_all(b"use ")?;
         write::paren(w, |w| {
-            write::concat_by(w, ", ", use_list, |w: &mut dyn Write, ast::Lid(_, id)| {
-                w.write_all(local_id::get_name(id).as_bytes())
-            })
+            write::concat_by(
+                w,
+                ", ",
+                use_list,
+                |w: &mut dyn Write, ast::CaptureLid(_, ast::Lid(_, id))| {
+                    w.write_all(local_id::get_name(id).as_bytes())
+                },
+            )
         })?;
         w.write_all(b" ")?;
     }

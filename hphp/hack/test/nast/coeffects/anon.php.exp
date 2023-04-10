@@ -46,7 +46,7 @@
                               f_body = { fb_ast = [([6:51-61], (Return (Some ((), [6:58-60], (Lvar ([6:58-60], $x))))))] }; 
                               f_fun_kind = FSync; f_user_attributes = []; 
                               f_external = false; f_doc_comment = None };
-                            ef_use = [([6:43-47], $ret)]; ef_closure_class_name = None }))
+                            ef_use = [((), ([6:43-47], $ret))]; ef_closure_class_name = None }))
                       }))));
             ([7:3-57],
              (Expr
@@ -65,7 +65,7 @@
                               f_body = { fb_ast = [([7:44-54], (Return (Some ((), [7:51-53], (Lvar ([7:51-53], $x))))))] }; 
                               f_fun_kind = FSync; f_user_attributes = []; 
                               f_external = false; f_doc_comment = None };
-                            ef_use = [([7:36-40], $ret)]; ef_closure_class_name = None }))
+                            ef_use = [((), ([7:36-40], $ret))]; ef_closure_class_name = None }))
                       }))))
             ]
           };

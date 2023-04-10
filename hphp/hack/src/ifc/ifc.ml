@@ -1506,7 +1506,9 @@ let rec expr ~pos renv (env : Env.expr_env) ((ety, epos, e) : Tast.expr) =
        lambda literal *)
     let (env, start_cont) =
       let (env, k_vars) =
-        let lids = List.map ~f:snd captured_ids |> LSet.of_list in
+        let lids =
+          List.map ~f:(fun (_, (_, id)) -> id) captured_ids |> LSet.of_list
+        in
         Env.get_locals env
         |> LMap.filter (fun lid _ -> LSet.mem lid lids)
         |> LMap.map_env

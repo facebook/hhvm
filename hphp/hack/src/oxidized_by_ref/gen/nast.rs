@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<93bfb455533fa3d60d899c7832e24dd5>>
+// @generated SignedSource<<0c4ffaa955942b79ac89fcaaea04e1e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -54,6 +54,8 @@ pub type Method_<'a> = aast::Method_<'a, (), ()>;
 pub type FileAttribute<'a> = aast::FileAttribute<'a, (), ()>;
 
 pub type Fun_<'a> = aast::Fun_<'a, (), ()>;
+
+pub type CaptureLid<'a> = aast::CaptureLid<'a, ()>;
 
 pub type Efun<'a> = aast::Efun<'a, (), ()>;
 

@@ -868,12 +868,11 @@ TEST(Value, IsIntrinsicDefaultFalse) {
   EXPECT_FALSE(isIntrinsicDefault(objectValue.as_object()));
 }
 
-template <typename ProtocolReader>
-Value parseValue(const EncodedValue& encodedValue, TType type) {
-  EXPECT_EQ(encodedValue.wireType().value(), type::toBaseType(type));
-  ProtocolReader prot;
-  prot.setInput(&encodedValue.data().value());
-  return detail::parseValue(prot, type, false);
+template <typename ProtocolReader, typename Tag>
+Value parseValueFromEncodedValue(const EncodedValue& encodedValue) {
+  auto baseType = type::detail::getBaseType(Tag{});
+  EXPECT_EQ(encodedValue.wireType().value(), baseType);
+  return parseValue<ProtocolReader, Tag>(encodedValue.data().value(), false);
 }
 
 // Tests parseObject (and serializeObject if testSerialize) with mask.
@@ -928,17 +927,24 @@ void testParseObjectWithMask(bool testSerialize) {
   EXPECT_EQ(excludedFields.size(), 2);
   auto& i16Encoded = detail::getByValueId(
       values, excludedFields.at(FieldId{1}).full_ref().value());
-  EXPECT_EQ(
-      parseValue<protocol_reader_t<Protocol>>(i16Encoded, T_I16).as_i16(), 3);
+
+  {
+    Value v =
+        parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::i16_t>(
+            i16Encoded);
+    EXPECT_EQ(v.as_i16(), 3);
+  }
   auto& nestedExcludedFields =
       excludedFields.at(FieldId{3}).fields_ref().value();
   EXPECT_EQ(nestedExcludedFields.size(), 1);
   auto& objectEncoded = detail::getByValueId(
       values, nestedExcludedFields.at(FieldId{5}).full_ref().value());
-  EXPECT_EQ(
-      parseValue<protocol_reader_t<Protocol>>(objectEncoded, T_STRUCT)
-          .as_object(),
-      foo);
+  {
+    Value v =
+        parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::struct_c>(
+            objectEncoded);
+    EXPECT_EQ(v.as_object(), foo);
+  }
 }
 
 template <::apache::thrift::conformance::StandardProtocol Protocol>
@@ -1174,9 +1180,10 @@ void testParseObjectWithMapMask(bool testSerialize) {
   {
     auto& mapEncoded = detail::getByValueId(
         values, excludedKeys.at(getKeyValueId(key20)).full_ref().value());
-    EXPECT_EQ(
-        parseValue<protocol_reader_t<Protocol>>(mapEncoded, T_MAP).as_map(),
-        obj[FieldId{1}].as_map()[key20].as_map());
+    Value v =
+        parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::map_c>(
+            mapEncoded);
+    EXPECT_EQ(v.as_map(), obj[FieldId{1}].as_map()[key20].as_map());
   }
   // check map[10]["bar"]
   {
@@ -1186,8 +1193,10 @@ void testParseObjectWithMapMask(bool testSerialize) {
     auto& i32Encoded = detail::getByValueId(
         values,
         nestedExcludedKeys.at(getKeyValueId(keyBar)).full_ref().value());
-    EXPECT_EQ(
-        parseValue<protocol_reader_t<Protocol>>(i32Encoded, T_I32).as_i32(), 2);
+    Value v =
+        parseValueFromEncodedValue<protocol_reader_t<Protocol>, type::i32_t>(
+            i32Encoded);
+    EXPECT_EQ(v.as_i32(), 2);
   }
 }
 

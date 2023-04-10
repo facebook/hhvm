@@ -137,6 +137,22 @@ std::unique_ptr<folly::IOBuf> serializeObject(
   return queue.move();
 }
 
+template <class Protocol>
+Value parseValue(
+    const folly::IOBuf& buf,
+    apache::thrift::type::BaseType baseType,
+    bool string_to_binary = true) {
+  Protocol prot;
+  prot.setInput(&buf);
+  return detail::parseValue(prot, type::toTType(baseType), string_to_binary);
+}
+
+template <class Protocol, typename Tag>
+Value parseValue(const folly::IOBuf& buf, bool string_to_binary = true) {
+  return parseValue<Protocol>(
+      buf, type::detail::getBaseType(Tag{}), string_to_binary);
+}
+
 // Returns whether the protocol::Value/ Object is its intrinsic default.
 bool isIntrinsicDefault(const Value& value);
 bool isIntrinsicDefault(const Object& obj);

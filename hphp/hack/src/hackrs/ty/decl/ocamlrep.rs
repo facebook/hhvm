@@ -66,6 +66,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
             consts,
             type_consts,
             xhp_enum_values,
+            xhp_marked_empty,
             constructor,
             deferred_init_members,
             req_ancestors,
@@ -80,7 +81,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
         } = self;
         let need_init = self.has_concrete_constructor();
         let abstract_ = self.is_abstract();
-        let mut block = alloc.block_with_size(34);
+        let mut block = alloc.block_with_size(35);
         alloc.set_field(&mut block, 0, alloc.add_copy(need_init));
         alloc.set_field(&mut block, 1, alloc.add_copy(abstract_));
         alloc.set_field(&mut block, 2, alloc.add(is_final));
@@ -112,9 +113,10 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
         alloc.set_field(&mut block, 28, alloc.add(sealed_whitelist));
         alloc.set_field(&mut block, 29, alloc.add(xhp_attr_deps));
         alloc.set_field(&mut block, 30, alloc.add(xhp_enum_values));
-        alloc.set_field(&mut block, 31, alloc.add(enum_type));
-        alloc.set_field(&mut block, 32, alloc.add(decl_errors));
-        alloc.set_field(&mut block, 33, alloc.add(docs_url));
+        alloc.set_field(&mut block, 31, alloc.add(xhp_marked_empty));
+        alloc.set_field(&mut block, 32, alloc.add(enum_type));
+        alloc.set_field(&mut block, 33, alloc.add(decl_errors));
+        alloc.set_field(&mut block, 34, alloc.add(docs_url));
         block.build()
     }
 }
@@ -123,7 +125,7 @@ impl<R: Reason> ToOcamlRep for FoldedClass<R> {
 // See comment on impl of ToOcamlRep for FoldedClass.
 impl<R: Reason> FromOcamlRep for FoldedClass<R> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        let block = ocamlrep::from::expect_tuple(value, 34)?;
+        let block = ocamlrep::from::expect_tuple(value, 35)?;
         Ok(Self {
             is_final: ocamlrep::from::field(block, 2)?,
             is_const: ocamlrep::from::field(block, 3)?,
@@ -154,9 +156,10 @@ impl<R: Reason> FromOcamlRep for FoldedClass<R> {
             sealed_whitelist: ocamlrep::from::field(block, 28)?,
             xhp_attr_deps: ocamlrep::from::field(block, 29)?,
             xhp_enum_values: ocamlrep::from::field(block, 30)?,
-            enum_type: ocamlrep::from::field(block, 31)?,
-            decl_errors: ocamlrep::from::field(block, 32)?,
-            docs_url: ocamlrep::from::field(block, 33)?,
+            xhp_marked_empty: ocamlrep::from::field(block, 31)?,
+            enum_type: ocamlrep::from::field(block, 32)?,
+            decl_errors: ocamlrep::from::field(block, 33)?,
+            docs_url: ocamlrep::from::field(block, 34)?,
         })
     }
 }

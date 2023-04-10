@@ -11,8 +11,9 @@
             [(Rhint ([4:6-7]), (Tapply (([4:6-7], "\\E"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([5:3-4], "A");

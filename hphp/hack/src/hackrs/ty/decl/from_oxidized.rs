@@ -414,6 +414,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             uses,
             xhp_attr_uses,
             xhp_enum_values,
+            xhp_marked_empty,
             req_extends,
             req_implements,
             req_class,
@@ -448,6 +449,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             xhp_enum_values: (xhp_enum_values.iter())
                 .map(|(&k, v)| (k.into(), slice(v)))
                 .collect(),
+            xhp_marked_empty: *xhp_marked_empty,
             req_extends: slice(req_extends),
             req_implements: slice(req_implements),
             req_class: slice(req_class),
@@ -677,6 +679,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             consts,
             typeconsts,
             xhp_enum_values,
+            xhp_marked_empty,
             construct,
             need_init: _, // `Self::has_concrete_constructor()` reads the `constructor` field
             deferred_init_members,
@@ -716,6 +719,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             xhp_enum_values: (xhp_enum_values.iter())
                 .map(|(&s, &evs)| (s.into(), slice(evs)))
                 .collect(),
+            xhp_marked_empty: *xhp_marked_empty,
             extends: extends.iter().copied().map(Into::into).collect(),
             xhp_attr_deps: xhp_attr_deps.iter().copied().map(Into::into).collect(),
             req_ancestors: req_ancestors.iter().copied().map(Into::into).collect(),

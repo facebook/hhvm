@@ -5,7 +5,8 @@
        sc_has_xhp_keyword = false; sc_kind = (Cclass Abstract);
        sc_module = None; sc_name = ([3:16-23], "\\Machine"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -53,7 +54,8 @@
         sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
         sc_name = ([8:11-17], "\\Fliers"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -86,6 +88,7 @@
         sc_name = ([12:7-12], "\\Plane"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false;
         sc_req_extends =
         [(Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), [])))];
         sc_req_implements =
@@ -121,7 +124,8 @@
         sc_has_xhp_keyword = false; sc_kind = Cinterface; sc_module = None;
         sc_name = ([23:11-20], "\\HasEngine"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -154,6 +158,7 @@
         sc_name = ([27:7-16], "\\Startable"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false;
         sc_req_extends =
         [(Rhint ([28:19-26]), (Tapply (([28:19-26], "\\Machine"), [])))];
         sc_req_implements =
@@ -194,7 +199,8 @@
         sc_uses =
         [(Rhint ([38:7-12]), (Tapply (([38:7-12], "\\Plane"), [])));
           (Rhint ([39:7-16]), (Tapply (([39:7-16], "\\Startable"), [])))];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = [];
         sc_implements =
         [(Rhint ([37:41-47]), (Tapply (([37:41-47], "\\Fliers"), [])));

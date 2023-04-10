@@ -225,6 +225,7 @@ type shallow_class = {
   sc_uses: decl_ty list;
   sc_xhp_attr_uses: decl_ty list;
   sc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  sc_xhp_marked_empty: bool;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_req_class: decl_ty list;

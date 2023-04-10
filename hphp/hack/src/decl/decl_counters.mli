@@ -45,6 +45,7 @@ type subdecl_kind =
   | Where_constraints
   | Enum_type
   | Xhp_enum_values
+  | Xhp_marked_empty
   | Sealed_whitelist
   | Docs_url
   | Decl_errors

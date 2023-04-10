@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<743a9d84776af28d3fd7afa5564959a9>>
+// @generated SignedSource<<119333b259de483ff86af8c980c8b42a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -200,6 +200,7 @@ pub struct DeclClassType<'a> {
     pub xhp_attr_deps: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
+    pub xhp_marked_empty: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enum_type: Option<&'a EnumType<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

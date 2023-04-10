@@ -162,6 +162,7 @@ pub struct ShallowClass<R: Reason> {
     pub uses: Box<[Ty<R>]>,
     pub xhp_attr_uses: Box<[Ty<R>]>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
+    pub xhp_marked_empty: bool,
     pub req_extends: Box<[Ty<R>]>,
     pub req_implements: Box<[Ty<R>]>,
     pub req_class: Box<[Ty<R>]>,

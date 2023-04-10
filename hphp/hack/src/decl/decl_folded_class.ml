@@ -1033,6 +1033,7 @@ and class_decl
       dc_sealed_whitelist = sealed_whitelist;
       dc_xhp_attr_deps = xhp_attr_deps;
       dc_xhp_enum_values = c.sc_xhp_enum_values;
+      dc_xhp_marked_empty = c.sc_xhp_marked_empty;
       dc_req_ancestors = req_ancestors;
       dc_req_ancestors_extends = req_ancestors_extends;
       dc_req_class_ancestors = req_class_ancestors;

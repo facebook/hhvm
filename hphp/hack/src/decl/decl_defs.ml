@@ -115,6 +115,7 @@ type decl_class_type = {
   dc_sealed_whitelist: SSet.t option;
   dc_xhp_attr_deps: SSet.t;
   dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
+  dc_xhp_marked_empty: bool;
   dc_enum_type: enum_type option;
   dc_decl_errors: decl_error list;
   dc_docs_url: string option;

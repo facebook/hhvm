@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d1c097c925fcb93719300d64328bc569>>
+// @generated SignedSource<<63b5781d77a345d0550d3f22669c709c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -198,6 +198,7 @@ pub struct ShallowClass<'a> {
     pub xhp_attr_uses: &'a [&'a Ty<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_enum_values: s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>,
+    pub xhp_marked_empty: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub req_extends: &'a [&'a Ty<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

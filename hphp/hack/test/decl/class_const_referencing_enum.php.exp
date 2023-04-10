@@ -11,8 +11,9 @@
             [(Rhint ([3:6-11]), (Tapply (([3:6-11], "\\Words"), [])))])))
          ];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([4:3-6], "FOO");
@@ -40,8 +41,9 @@
         sc_name = ([9:16-45], "\\TestClassConstReferencingEnum");
         sc_tparams = []; sc_where_constraints = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false;
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([10:28-39], "WORD_VALUES");

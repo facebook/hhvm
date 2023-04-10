@@ -18,10 +18,11 @@ File root|module_hint.php--here.php
        sc_module = (Some ([4:8-12], "here")); sc_name = ([6:16-17], "\\C");
        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = [];
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([7:19-22], "bar");
           sm_type =
@@ -63,11 +64,12 @@ File root|module_hint.php--there.php
        sc_module = (Some ([3:8-13], "there")); sc_name = ([5:16-17], "\\D");
        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None }));
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None; sc_docs_url = None }));
   ("\\G",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -80,7 +82,8 @@ File root|module_hint.php--there.php
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -99,8 +102,9 @@ File root|module_hint.php--there.php
              [(Rhint ([9:15-16]), (Tapply (([9:15-16], "\\E"), [])))])))
           ];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false;
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([10:3-4], "A");
@@ -171,7 +175,8 @@ File root|module_hint.php--everywhere.php
            tp_reified = Erased; tp_user_attributes = [] }
           ];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;

@@ -5,7 +5,8 @@
        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
        sc_module = None; sc_name = ([4:7-9], "\\C1"); sc_tparams = [];
        sc_where_constraints = []; sc_extends = []; sc_uses = [];
-       sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+       sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+       sc_xhp_marked_empty = false; sc_req_extends = [];
        sc_req_implements = []; sc_req_class = []; sc_implements = [];
        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props = []; sc_sprops = []; sc_constructor = None;
@@ -25,9 +26,10 @@
         sc_extends =
         [(Rhint ([6:18-20]), (Tapply (([6:18-20], "\\C1"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = [];
         sc_constructor =
         (Some { Shallow_decl_defs.sm_name = ([8:19-30], "__construct");
                 sm_type =
@@ -72,7 +74,8 @@
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
         sc_module = None; sc_name = ([11:7-8], "\\A"); sc_tparams = [];
         sc_where_constraints = []; sc_extends = []; sc_uses = [];
-        sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+        sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
         sc_req_implements = []; sc_req_class = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;

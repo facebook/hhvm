@@ -32,6 +32,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             uses,
             xhp_attr_uses,
             xhp_enum_values,
+            xhp_marked_empty,
             req_extends,
             req_implements,
             req_class,
@@ -95,6 +96,9 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
         }
         if !xhp_enum_values.is_empty() {
             s.field("xhp_enum_values", xhp_enum_values);
+        }
+        if *xhp_marked_empty {
+            s.field("xhp_marked_empty", xhp_marked_empty);
         }
         if !req_extends.is_empty() {
             s.field("req_extends", req_extends);
@@ -173,6 +177,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             consts,
             type_consts,
             xhp_enum_values,
+            xhp_marked_empty,
             extends,
             xhp_attr_deps,
             req_ancestors,
@@ -254,6 +259,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if !xhp_enum_values.is_empty() {
             s.field("xhp_enum_values", xhp_enum_values);
+        }
+        if *xhp_marked_empty {
+            s.field("xhp_marked_empty", xhp_marked_empty);
         }
         if !extends.is_empty() {
             s.field("extends", extends);

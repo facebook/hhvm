@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77bd0e6ce95e2b7ae3735f6b731a3367>>
+// @generated SignedSource<<df783882c10b0bcee3eb7c3b652873e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -198,21 +198,22 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 uses: ref __binding_12,
                 xhp_attr_uses: ref __binding_13,
                 xhp_enum_values: ref __binding_14,
-                req_extends: ref __binding_15,
-                req_implements: ref __binding_16,
-                req_class: ref __binding_17,
-                implements: ref __binding_18,
-                support_dynamic_type: ref __binding_19,
-                consts: ref __binding_20,
-                typeconsts: ref __binding_21,
-                props: ref __binding_22,
-                sprops: ref __binding_23,
-                constructor: ref __binding_24,
-                static_methods: ref __binding_25,
-                methods: ref __binding_26,
-                user_attributes: ref __binding_27,
-                enum_type: ref __binding_28,
-                docs_url: ref __binding_29,
+                xhp_marked_empty: ref __binding_15,
+                req_extends: ref __binding_16,
+                req_implements: ref __binding_17,
+                req_class: ref __binding_18,
+                implements: ref __binding_19,
+                support_dynamic_type: ref __binding_20,
+                consts: ref __binding_21,
+                typeconsts: ref __binding_22,
+                props: ref __binding_23,
+                sprops: ref __binding_24,
+                constructor: ref __binding_25,
+                static_methods: ref __binding_26,
+                methods: ref __binding_27,
+                user_attributes: ref __binding_28,
+                enum_type: ref __binding_29,
+                docs_url: ref __binding_30,
             } => {
                 {
                     __binding_0.accept(v)
@@ -301,7 +302,10 @@ impl<'a> Node<'a> for ShallowClass<'a> {
                 {
                     __binding_28.accept(v)
                 }
-                { __binding_29.accept(v) }
+                {
+                    __binding_29.accept(v)
+                }
+                { __binding_30.accept(v) }
             }
         }
     }

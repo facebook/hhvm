@@ -101,6 +101,11 @@ module ApiShallow = struct
     let (c, _) = t in
     c.Decl_defs.dc_xhp_enum_values
 
+  let xhp_marked_empty (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.Xhp_marked_empty @@ fun () ->
+    let (c, _) = t in
+    c.Decl_defs.dc_xhp_marked_empty
+
   let sealed_whitelist (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Sealed_whitelist @@ fun () ->
     let (c, _) = t in

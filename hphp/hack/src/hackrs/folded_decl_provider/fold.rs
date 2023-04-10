@@ -887,6 +887,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             xhp_enum_values: self.child.xhp_enum_values.clone(),
             extends,
             xhp_attr_deps,
+            xhp_marked_empty: self.child.xhp_marked_empty,
             req_ancestors,
             req_ancestors_extends,
             req_class_ancestors,

@@ -201,6 +201,7 @@ pub struct FoldedClass<R: Reason> {
     pub consts: IndexMap<ClassConstName, ClassConst<R>>,
     pub type_consts: IndexMap<TypeConstName, TypeConst<R>>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
+    pub xhp_marked_empty: bool,
     pub extends: IndexSet<TypeName>,
     pub xhp_attr_deps: IndexSet<TypeName>,
     pub req_ancestors: Box<[Requirement<R>]>,

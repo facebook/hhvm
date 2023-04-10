@@ -14,9 +14,9 @@ File root|module_properties.php--A.php
        sc_module = (Some ([5:8-9], "A")); sc_name = ([7:7-8], "\\A");
        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
-       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = [];
+       sc_xhp_marked_empty = false; sc_req_extends = [];
+       sc_req_implements = []; sc_req_class = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([8:16-18], "x"); sp_xhp_attr = None;
           sp_type = (Rhint ([8:12-15]), (Tprim Tint));

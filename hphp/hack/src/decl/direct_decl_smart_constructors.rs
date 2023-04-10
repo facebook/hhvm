@@ -912,6 +912,12 @@ mod fixed_width_token {
 use fixed_width_token::FixedWidthToken;
 
 #[derive(Copy, Clone, Debug)]
+pub enum XhpChildrenKind {
+    Empty,
+    Other,
+}
+
+#[derive(Copy, Clone, Debug)]
 pub enum Node<'a> {
     // Nodes which are not useful in constructing a decl are ignored. We keep
     // track of the SyntaxKind for two reasons.
@@ -967,6 +973,7 @@ pub enum Node<'a> {
     XhpClassAttributeDeclaration(&'a XhpClassAttributeDeclarationNode<'a>),
     XhpClassAttribute(&'a XhpClassAttributeNode<'a>),
     XhpAttributeUse(&'a Node<'a>),
+    XhpChildrenDeclaration(XhpChildrenKind),
     TypeConstant(&'a ShallowTypeconst<'a>),
     ContextConstraint(&'a (ConstraintKind, Node<'a>)),
     RequireClause(&'a RequireClause<'a>),
@@ -4148,6 +4155,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut uses_len = 0;
         let mut xhp_attr_uses_len = 0;
         let mut xhp_enum_values = SMap::empty();
+        let mut xhp_marked_empty = false;
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
         let mut req_class_len = 0;
@@ -4180,6 +4188,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     for (name, values) in xhp_attr_enum_values {
                         xhp_enum_values = xhp_enum_values.add(self.arena, name, *values);
                     }
+                }
+                Node::XhpChildrenDeclaration(XhpChildrenKind::Empty) => {
+                    xhp_marked_empty = true;
                 }
                 Node::TypeConstant(..) => typeconsts_len += 1,
                 Node::RequireClause(require) => match require.require_type.token_kind() {
@@ -4384,6 +4395,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             uses,
             xhp_attr_uses,
             xhp_enum_values,
+            xhp_marked_empty,
             req_extends,
             req_implements,
             req_class,
@@ -4477,6 +4489,20 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             decls: declarators,
             is_static: modifiers.is_static,
         }))
+    }
+
+    fn make_xhp_children_declaration(
+        &mut self,
+        _keyword: Self::Output,
+        expression: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
+        match expression {
+            Node::IgnoredToken(token) if token.kind() == TokenKind::Empty => {
+                Node::XhpChildrenDeclaration(XhpChildrenKind::Empty)
+            }
+            _ => Node::XhpChildrenDeclaration(XhpChildrenKind::Other),
+        }
     }
 
     fn make_xhp_class_attribute_declaration(
@@ -4831,6 +4857,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             uses: &[],
             xhp_attr_uses: &[],
             xhp_enum_values: SMap::empty(),
+            xhp_marked_empty: false,
             req_extends: &[],
             req_implements: &[],
             req_class: &[],
@@ -5027,6 +5054,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             uses: &[],
             xhp_attr_uses: &[],
             xhp_enum_values: SMap::empty(),
+            xhp_marked_empty: false,
             req_extends: &[],
             req_implements: &[],
             req_class: &[],

@@ -181,7 +181,7 @@ template <typename HasherGenerator>
 void DeterministicAccumulator<HasherGenerator>::beginOrdered() {
   // If the context stack is empty, push new context to the stack and use it.
   if (context_.empty()) {
-    context_.emplace(Context{});
+    context_.emplace();
   }
   auto& ctx = context();
   // If the previous context is not an ordered context, insert a new hasher

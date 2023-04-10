@@ -36,7 +36,7 @@ class Xxh64Hasher {
     XXH3_64bits_reset(state_.get());
   }
   XXH64_hash_t getResult() const {
-    if (!result_.has_value())
+    if (!finalized())
       throw std::runtime_error("getResult called on non finalized hasher");
     return *result_;
   }
@@ -54,7 +54,7 @@ class Xxh64Hasher {
     XXH3_64bits_update(state_.get(), value.data(), value.size());
   }
   void combine(const Xxh64Hasher& other) {
-    if (!other.result_.has_value())
+    if (!other.finalized())
       throw std::runtime_error("cannot combine non finalized hasher");
     combine(*other.result_);
   }
@@ -62,14 +62,16 @@ class Xxh64Hasher {
   void finalize() { result_ = XXH3_64bits_digest(state_.get()); }
 
   bool operator<(const Xxh64Hasher& other) const {
-    if (!result_.has_value())
+    if (!finalized())
       throw std::runtime_error("less then called on non finalized hasher");
-    if (!other.result_.has_value())
+    if (!other.finalized())
       throw std::runtime_error("non finalized hasher passed to less then");
     return *result_ < *other.result_;
   }
 
  private:
+  bool finalized() const { return result_.has_value(); }
+
   folly::Optional<XXH64_hash_t> result_;
   std::unique_ptr<XXH3_state_t, decltype(&XXH3_freeState)> state_;
 };

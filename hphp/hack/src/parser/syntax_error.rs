@@ -1203,3 +1203,10 @@ pub fn module_first_in_file(name: &str) -> Error {
 
 pub const module_declaration_in_module: Error =
     Cow::Borrowed("You cannot declare new modules within an existing module");
+
+pub fn invalid_cross_package_argument(message: &str) -> Error {
+    Cow::Owned(format!(
+        "This is an invalid use of '__CrossPackage' because {}",
+        message
+    ))
+}

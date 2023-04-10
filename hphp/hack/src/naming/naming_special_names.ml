@@ -352,6 +352,8 @@ module UserAttributes = struct
 
   let uaNoFlatten = "__NoFlatten"
 
+  let uaCrossPackage = "__CrossPackage"
+
   (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
      This attribute merely ensures that the global_access_check does NOT raise
      errors/warnings from writing to the annotated global variable, and it
@@ -727,6 +729,13 @@ module UserAttributes = struct
               autocomplete = false;
               doc =
                 "Instead of throwing an exception upon a module boundary violation at this symbol, logs a warning instead.";
+            } );
+          ( uaCrossPackage,
+            {
+              contexts = [fn; mthd];
+              autocomplete = true;
+              doc =
+                "Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('package')>>`";
             } );
         ])
 

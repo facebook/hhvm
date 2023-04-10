@@ -1,3 +1,7 @@
+__CrossPackage
+  INSERT __CrossPackage
+  built-in attribute
+  Enables access to elements from other package(s), requires `<<file:__EnableUnstableFeatures('package')>>`
 __Deprecated
   INSERT __Deprecated
   built-in attribute

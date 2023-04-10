@@ -1,0 +1,2 @@
+(6,20)-(6,23) This is an invalid use of '__CrossPackage' because this is not a literal string expression
+(6,25)-(6,28) This is an invalid use of '__CrossPackage' because this is not a literal string expression

@@ -1921,17 +1921,33 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             && self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE)
     }
 
-    fn is_ifc_attribute(&self, name: &str) -> bool {
-        name == sn::user_attributes::POLICIED
-            || name == sn::user_attributes::INFERFLOWS
-            || name == sn::user_attributes::EXTERNAL
+    fn check_cross_package_args_are_string_literals(&mut self, node: S<'a>) {
+        if let Some(args) = self.attr_args(node) {
+            for arg in args.peekable() {
+                if let LiteralExpression(x) = &arg.children {
+                    if let Token(t) = &x.expression.children {
+                        if t.kind() == TokenKind::SingleQuotedStringLiteral
+                            || t.kind() == TokenKind::DoubleQuotedStringLiteral
+                        {
+                            continue;
+                        }
+                    }
+                }
+                self.errors.push(make_error_from_node(
+                    arg,
+                    errors::invalid_cross_package_argument(
+                        "this is not a literal string expression",
+                    ),
+                ))
+            }
+        }
     }
 
     fn check_attr_enabled(&mut self, attrs: S<'a>) {
         for node in attr_spec_to_node_list(attrs) {
             match self.attr_name(node) {
                 Some(n) => {
-                    if self.is_ifc_attribute(n) {
+                    if sn::user_attributes::is_ifc(n) {
                         self.check_can_use_feature(node, &UnstableFeatures::Ifc)
                     }
                     if (sn::user_attributes::ignore_readonly_local_errors(n)
@@ -1947,6 +1963,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                             node,
                             errors::invalid_attribute_reserved,
                         ));
+                    }
+                    if sn::user_attributes::is_cross_package(n) {
+                        self.check_can_use_feature(node, &UnstableFeatures::Package);
+                        self.check_cross_package_args_are_string_literals(node);
                     }
                 }
                 None => {}

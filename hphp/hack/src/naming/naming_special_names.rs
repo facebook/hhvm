@@ -322,6 +322,8 @@ pub mod user_attributes {
 
     pub const IGNORE_COEFFECT_LOCAL_ERRORS: &str = "__IgnoreCoeffectLocalErrors";
 
+    pub const CROSS_PACKAGE: &str = "__CrossPackage";
+
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -361,6 +363,7 @@ pub mod user_attributes {
             NO_AUTO_DYNAMIC,
             REQUIRE_DYNAMIC,
             ENABLE_METHOD_TRAIT_DIAMOND,
+            CROSS_PACKAGE,
         ]
         .into_iter()
         .collect();
@@ -399,6 +402,14 @@ pub mod user_attributes {
 
     pub fn is_soft(name: &str) -> bool {
         name == SOFT
+    }
+
+    pub fn is_ifc(name: &str) -> bool {
+        name == POLICIED || name == INFERFLOWS || name == EXTERNAL
+    }
+
+    pub fn is_cross_package(name: &str) -> bool {
+        name == CROSS_PACKAGE
     }
 }
 

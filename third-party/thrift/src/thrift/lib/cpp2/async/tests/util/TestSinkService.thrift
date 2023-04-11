@@ -16,7 +16,10 @@
 
 namespace cpp2 testutil.testservice
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
+include "thrift/annotation/cpp.thrift"
+
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 exception MyException {
   1: string reason;
 }

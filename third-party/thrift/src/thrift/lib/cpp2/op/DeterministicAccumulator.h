@@ -144,7 +144,7 @@ class DeterministicAccumulator {
   };
 
   HasherGenerator generator_;
-  std::stack<Context> context_;
+  std::stack<Context, std::vector<Context>> context_;
   Hasher result_ = generator_();
 
   constexpr auto& context() {

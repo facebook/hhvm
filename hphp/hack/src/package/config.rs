@@ -4,9 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::VecDeque;
-use std::hash::Hash;
 
-use hash::HashMap;
 use hash::HashSet;
 use serde::Deserialize;
 use toml::Spanned;
@@ -14,7 +12,6 @@ use toml::Spanned;
 use crate::error::Error;
 use crate::types::DeploymentMap;
 use crate::types::NameSet;
-use crate::types::Package;
 use crate::types::PackageMap;
 
 #[derive(Debug, Deserialize)]
@@ -53,12 +50,6 @@ impl Config {
                     })
                 }
             };
-        let check_cyclic_package_deps = |errors: &mut Vec<Error>, pkgs: &PackageMap| {
-            let cycles = find_cycles(pkgs);
-            cycles
-                .into_iter()
-                .for_each(|cycle| errors.push(Error::cyclic_includes(cycle)));
-        };
         let check_deployed_packages_are_transitively_closed =
             |errors: &mut Vec<Error>,
              deployment: &Spanned<String>,
@@ -103,7 +94,6 @@ impl Config {
                 );
             }
         };
-        check_cyclic_package_deps(&mut errors, &self.packages);
         errors
     }
 }
@@ -195,86 +185,4 @@ fn find_missing_packages_from_deployment(
         get_missing(&included, deployed, package_map),
         get_missing(&soft_included, &soft_or_regular_deployed, package_map),
     )
-}
-
-fn find_cycles(packages: &PackageMap) -> HashSet<Vec<Spanned<String>>> {
-    #[derive(Default)]
-    struct State<Pkg> {
-        path: Vec<Pkg>,
-        package_location_in_path: HashMap<Pkg, usize>,
-        stack: Vec<(Pkg, Option<Pkg>)>,
-        visited: HashSet<Pkg>,
-    }
-    impl<Pkg: Eq + PartialEq + Hash> State<Pkg> {
-        fn reset(&mut self, start_package: Option<Pkg>) {
-            match start_package {
-                None => {
-                    self.path = vec![];
-                    self.package_location_in_path = HashMap::default();
-                }
-                Some(start_package) => {
-                    while let Some(last_package) = self.path.pop() {
-                        if last_package != start_package {
-                            self.package_location_in_path.remove(&last_package);
-                        } else {
-                            break;
-                        }
-                    }
-                    self.path.push(start_package);
-                }
-            }
-        }
-    }
-    let mut state = State::default();
-    let mut cycles = HashSet::default();
-
-    for package in packages.keys() {
-        let start_package = package.get_ref().as_str();
-        state.stack.push((start_package, None));
-        while let Some((current_package, parent_package)) = state.stack.pop() {
-            state.reset(parent_package);
-            let idx = state.path.len();
-            state.path.push(current_package);
-            state.package_location_in_path.insert(current_package, idx);
-
-            if let Some(Package {
-                includes: Some(next_packages),
-                ..
-            }) = packages.get(current_package)
-            {
-                for next_package in next_packages.iter() {
-                    let next_package = next_package.get_ref().as_str();
-                    if let Some(idx) = state.package_location_in_path.get(next_package) {
-                        let cycle = normalize_cycle(&state.path[*idx..], packages);
-                        cycles.insert(cycle);
-                    } else if !state.visited.contains(next_package) {
-                        state.stack.push((next_package, Some(current_package)));
-                    }
-                }
-            }
-        }
-        state.visited.insert(start_package);
-    }
-
-    cycles
-}
-
-fn normalize_cycle<'a>(cycle: &[&'a str], packages: &'a PackageMap) -> Vec<Spanned<String>> {
-    let min_idx: Option<usize> = cycle
-        .iter()
-        .enumerate()
-        .min_by_key(|(_, &val)| val)
-        .map(|(idx, _)| idx);
-    match min_idx {
-        None => Vec::new(),
-        Some(idx) => cycle[idx..]
-            .iter()
-            .chain(cycle[..idx].iter())
-            .into_iter()
-            .map(|&pkg_name| {
-                let (positioned_pkg_name, _) = packages.get_key_value(pkg_name).unwrap();
-                positioned_pkg_name.clone()
-            })
-            .collect(),
-    }
 }

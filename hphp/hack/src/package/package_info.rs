@@ -150,15 +150,9 @@ mod test {
             .collect::<std::collections::HashSet<_>>();
         assert_eq!(
             errors,
-            [
-                String::from("Circular dependency detected: e -> g -> e"),
-                String::from("Circular dependency detected: e -> f -> e"),
-                String::from("Circular dependency detected: a -> b -> c -> a"),
-                String::from("Circular dependency detected: h -> j -> i -> h"),
-                String::from(
-                    "my-prod must deploy all nested included packages. Missing e, g, h, i"
-                )
-            ]
+            [String::from(
+                "my-prod must deploy all nested included packages. Missing e, g, h, i"
+            )]
             .iter()
             .cloned()
             .collect::<std::collections::HashSet<_>>()

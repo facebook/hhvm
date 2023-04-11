@@ -18,9 +18,6 @@ pub enum Error {
         name: String,
         span: (usize, usize),
     },
-    CyclicIncludes {
-        cycle: Vec<Spanned<String>>,
-    },
     IncompleteDeployment {
         name: String,
         span: (usize, usize),
@@ -44,10 +41,6 @@ impl Error {
         }
     }
 
-    pub fn cyclic_includes(cycle: Vec<Spanned<String>>) -> Self {
-        Self::CyclicIncludes { cycle }
-    }
-
     pub fn incomplete_deployment(
         deployment: &Spanned<String>,
         missing_pkgs: Vec<Spanned<String>>,
@@ -66,10 +59,6 @@ impl Error {
             Self::DuplicateUse { span, .. }
             | Self::UndefinedInclude { span, .. }
             | Self::IncompleteDeployment { span, .. } => *span,
-            Self::CyclicIncludes { cycle } => {
-                let base = cycle.first().unwrap();
-                base.span()
-            }
         }
     }
 
@@ -78,26 +67,13 @@ impl Error {
     }
 
     pub fn reasons(&self) -> Vec<(usize, usize, String)> {
-        if let Self::CyclicIncludes { cycle } = self {
-            cycle
-                .iter()
-                .map(|x| (x.start(), x.end(), x.get_ref().into()))
-                .collect::<Vec<_>>()
-        } else {
-            vec![]
-        }
+        // Might need reasons later for more complicated error messages
+        vec![]
     }
 }
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Self::CyclicIncludes { cycle } => {
-                write!(f, "Circular dependency detected: ")?;
-                for elem in cycle.iter() {
-                    write!(f, "{} -> ", elem.get_ref())?;
-                }
-                write!(f, "{}", cycle[0].get_ref())?;
-            }
             Self::UndefinedInclude { name, .. } => {
                 write!(f, "Undefined package: {}", name)?;
             }

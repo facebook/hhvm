@@ -64,7 +64,7 @@ let raise_global_access_error
       "possibly written via function call."
     | GlobalAccessCheck.DefiniteGlobalRead -> "definitely read."
   in
-  let global_vars_str = String.concat ~sep:"," (SSet.elements global_set) in
+  let global_vars_str = String.concat ~sep:";" (SSet.elements global_set) in
   let print_pattern p =
     match p with
     | NoPattern -> None

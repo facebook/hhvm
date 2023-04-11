@@ -35,7 +35,7 @@ File "test_pattern.php", line 39, characters 5-64:
 File "test_pattern.php", line 42, characters 5-56:
 [Test::test_method_call]{Foo::$bar}(int)<WriteGlobalToGlobal,WriteNonSensitive> A global variable is possibly written via reference. (Other[11002])
 File "test_pattern.php", line 43, characters 5-77:
-[Test::test_method_call]{Foo::$bar,Foo::$static_prop}(int) A global variable is possibly written via reference. (Other[11002])
+[Test::test_method_call]{Foo::$bar;Foo::$static_prop}(int) A global variable is possibly written via reference. (Other[11002])
 File "test_pattern.php", line 24, characters 10-27:
 [Test::test_method_call]{Foo::$nullable_bar}(?Bar) A global variable is definitely read. (Other[11004])
 File "test_pattern.php", line 33, characters 10-18:

@@ -96,8 +96,8 @@ let get_patches ctx file =
             get_first_suggested_type_as_string file type_map node
             >>= fun type_str ->
             position_exclusive file node >>| fun pos ->
-            ServerRefactorTypes.Replace
-              ServerRefactorTypes.
+            ServerRenameTypes.Replace
+              ServerRenameTypes.
                 {
                   pos = Pos.to_absolute pos;
                   text = Printf.sprintf "(%s %s)" type_str (text node);
@@ -108,8 +108,8 @@ let get_patches ctx file =
               get_first_suggested_type_as_string file type_map list_item
               >>= fun type_str ->
               position file list_item >>| fun pos ->
-              ServerRefactorTypes.Insert
-                ServerRefactorTypes.
+              ServerRenameTypes.Insert
+                ServerRenameTypes.
                   { pos = Pos.to_absolute pos; text = type_str ^ " " }
             | _ -> None
           end

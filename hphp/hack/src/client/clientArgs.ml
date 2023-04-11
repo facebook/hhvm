@@ -144,7 +144,7 @@ let parse_check_args cmd =
   let prefer_stdout = ref false in
   let prechecked = ref None in
   let mini_state : string option ref = ref None in
-  let refactor_before = ref "" in
+  let rename_before = ref "" in
   let remote = ref false in
   let sort_results = ref false in
   let stdin_name = ref None in
@@ -487,7 +487,7 @@ let parse_check_args cmd =
         ^ "[\"merge\", \"solve\", \"export-json\", \"rewrite\"] files..." );
       ("--ide-outline", Arg.Unit (fun () -> set_mode MODE_OUTLINE2), "");
       ( "--ide-refactor",
-        Arg.String (fun x -> set_mode (MODE_IDE_REFACTOR x)),
+        Arg.String (fun x -> set_mode (MODE_IDE_RENAME x)),
         " (mode) rename a symbol, Usage: --ide-refactor "
         ^ " <filename>:<line number>:<col number>:<new name>" );
       ( "--identify-function",
@@ -617,28 +617,28 @@ let parse_check_args cmd =
         Arg.Unit (fun () -> config := ("profile_log", "true") :: !config),
         " enable profile logging" );
       ( "--refactor-sound-dynamic",
-        (let refactor_mode = ref Unspecified in
+        (let rename_mode = ref Unspecified in
          Arg.Tuple
            [
              Arg.Symbol
                ( ["Class"; "Function"],
-                 (fun x -> refactor_mode := string_to_refactor_mode x) );
+                 (fun x -> rename_mode := string_to_rename_mode x) );
              Arg.String
                (fun x ->
-                 set_mode @@ MODE_REFACTOR_SOUND_DYNAMIC (!refactor_mode, x));
+                 set_mode @@ MODE_RENAME_SOUND_DYNAMIC (!rename_mode, x));
            ]),
         "" );
       ( "--refactor",
-        (let refactor_mode = ref Unspecified in
+        (let rename_mode = ref Unspecified in
          Arg.Tuple
            [
              Arg.Symbol
                ( ["Class"; "Function"; "Method"],
-                 (fun x -> refactor_mode := string_to_refactor_mode x) );
-             Arg.String (fun x -> refactor_before := x);
+                 (fun x -> rename_mode := string_to_rename_mode x) );
+             Arg.String (fun x -> rename_before := x);
              Arg.String
                (fun x ->
-                 set_mode (MODE_REFACTOR (!refactor_mode, !refactor_before, x)));
+                 set_mode (MODE_RENAME (!rename_mode, !rename_before, x)));
            ]),
         " (mode) rename a symbol, Usage: --refactor "
         ^ "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>" );

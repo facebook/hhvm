@@ -307,20 +307,20 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           (env, ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column))
     in
     r
-  | REFACTOR refactor_action ->
+  | RENAME rename_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-        ServerRefactor.go ctx refactor_action genv env)
-  | REFACTOR_CHECK_SD refactor_action ->
+        ServerRename.go ctx rename_action genv env)
+  | RENAME_CHECK_SD rename_action ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    ServerRefactor.go_sound_dynamic ctx refactor_action genv env
-  | IDE_REFACTOR
-      { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->
+    ServerRename.go_sound_dynamic ctx rename_action genv env
+  | IDE_RENAME
+      { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name } ->
     let ctx = Provider_utils.ctx_from_server_env env in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         let open Done_or_retry in
         match
-          ServerRefactor.go_ide ctx (filename, line, char) new_name genv env
+          ServerRename.go_ide ctx (filename, line, char) new_name genv env
         with
         | Error e -> (env, Done (Error e))
         | Ok r -> map_env r ~f:(fun x -> Ok x))
@@ -331,22 +331,22 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     if genv.ServerEnv.options |> ServerArgs.no_load then (
       HackEventLogger.check_response
         (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
-      (env, `Ok (ServerRefactor.get_fixme_patches codes env))
+      (env, `Ok (ServerRename.get_fixme_patches codes env))
     ) else
       (env, `Error (remove_dead_warning "fixme"))
   | REMOVE_DEAD_UNSAFE_CASTS ->
     if genv.ServerEnv.options |> ServerArgs.no_load then (
       HackEventLogger.check_response
         (Errors.get_error_list env.errorl |> List.map ~f:User_error.get_code);
-      (env, `Ok (ServerRefactor.get_dead_unsafe_cast_patches env))
+      (env, `Ok (ServerRename.get_dead_unsafe_cast_patches env))
     ) else
       (env, `Error (remove_dead_warning "unsafe cast"))
   | REWRITE_LAMBDA_PARAMETERS files ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerRefactor.get_lambda_parameter_rewrite_patches ctx files)
+    (env, ServerRename.get_lambda_parameter_rewrite_patches ctx files)
   | REWRITE_TYPE_PARAMS_TYPE files ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    (env, ServerRefactor.get_type_params_type_rewrite_patches ctx files)
+    (env, ServerRename.get_type_params_type_rewrite_patches ctx files)
   | DUMP_SYMBOL_INFO file_list ->
     (env, SymbolInfoService.go genv.workers file_list env)
   | IN_MEMORY_DEP_TABLE_SIZE ->

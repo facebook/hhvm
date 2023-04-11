@@ -200,7 +200,7 @@ let do_tast
       let reverse_patches_to_preserve_positions =
         let compare patch1 patch2 =
           (patch1, patch2)
-          |> Tuple2.map ~f:ServerRefactorTypes.get_pos
+          |> Tuple2.map ~f:ServerRenameTypes.get_pos
           |> Tuple2.uncurry (Pos.compare_pos String.compare)
           |> ( * ) (-1)
         in
@@ -210,11 +210,10 @@ let do_tast
         let contents =
           match contents_opt with
           | Some contents -> contents
-          | None ->
-            ServerRefactorTypes.get_pos patch |> Pos.filename |> Disk.cat
+          | None -> ServerRenameTypes.get_pos patch |> Pos.filename |> Disk.cat
         in
         let buf = Buffer.create (String.length contents) in
-        ServerRefactorTypes.write_patches_to_buffer buf contents [patch];
+        ServerRenameTypes.write_patches_to_buffer buf contents [patch];
         Some (Buffer.contents buf)
       in
       nadable_groups

@@ -7,7 +7,7 @@
  *
  *)
 
-type refactor_mode =
+type rename_mode =
   | Function
   | Class
   | Method
@@ -44,7 +44,7 @@ type client_mode =
   | MODE_IDE_FIND_REFS of string
   | MODE_IDE_GO_TO_IMPL of string
   | MODE_IDE_HIGHLIGHT_REFS of string
-  | MODE_IDE_REFACTOR of string
+  | MODE_IDE_RENAME of string
   | MODE_IDENTIFY_SYMBOL1 of string
   | MODE_IDENTIFY_SYMBOL2 of string
   | MODE_IDENTIFY_SYMBOL3 of string
@@ -60,8 +60,8 @@ type client_mode =
   | MODE_OUTLINE
   | MODE_OUTLINE2
   | MODE_PAUSE of bool
-  | MODE_REFACTOR of refactor_mode * string * string
-  | MODE_REFACTOR_SOUND_DYNAMIC of refactor_mode * string
+  | MODE_RENAME of rename_mode * string * string
+  | MODE_RENAME_SOUND_DYNAMIC of rename_mode * string
   | MODE_REMOVE_DEAD_FIXMES of int list
   | MODE_REMOVE_DEAD_UNSAFE_CASTS
   | MODE_REWRITE_LAMBDA_PARAMETERS of string list
@@ -123,12 +123,12 @@ type client_check_env = {
   desc: string;
 }
 
-let string_to_refactor_mode = function
+let string_to_rename_mode = function
   | "Function" -> Function
   | "Class" -> Class
   | "Method" -> Method
   | _ ->
     Printf.fprintf
       stderr
-      "Error: please provide one of the following refactor modes: Function, Class, or Method. \n%!";
+      "Error: please provide one of the following rename modes: Function, Class, or Method. \n%!";
     exit 1

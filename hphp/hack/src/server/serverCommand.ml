@@ -39,9 +39,9 @@ let rpc_command_needs_full_check : type a. a t -> bool =
    * during interruptions *)
   | COVERAGE_COUNTS _ -> true
   (* Codebase-wide rename, uses find references *)
-  | REFACTOR _ -> true
-  | REFACTOR_CHECK_SD _ -> true
-  | IDE_REFACTOR _ -> true
+  | RENAME _ -> true
+  | RENAME_CHECK_SD _ -> true
+  | IDE_RENAME _ -> true
   (* Same case as Ai commands *)
   | CREATE_CHECKPOINT _ -> true
   | RETRIEVE_CHECKPOINT _ -> true

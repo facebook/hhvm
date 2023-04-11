@@ -3,7 +3,7 @@ import os
 import common_tests
 
 
-class TestRefactorSoundDynamic(common_tests.CommonTests):
+class TestRenameSoundDynamic(common_tests.CommonTests):
     @classmethod
     def get_test_driver(cls) -> common_tests.CommonTestDriver:
         return common_tests.CommonTestDriver()

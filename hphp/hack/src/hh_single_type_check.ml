@@ -1891,7 +1891,7 @@ let apply_patches files_contents patches =
   if List.length patches <= 0 then
     print_endline "No patches"
   else
-    ServerRefactorTypes.apply_patches_to_file_contents files_contents patches
+    ServerRenameTypes.apply_patches_to_file_contents files_contents patches
     |> Multifile.print_files_as_multifile
 
 (** Used for testing code that generates patches. *)
@@ -1901,8 +1901,8 @@ let codemod
     ~files_contents
     ctx
     (get_patches :
-      files_info:FileInfo.t Relative_path.Map.t ->
-      ServerRefactorTypes.patch list) =
+      files_info:FileInfo.t Relative_path.Map.t -> ServerRenameTypes.patch list)
+    =
   let decl_parse_typecheck_and_then =
     decl_parse_typecheck_and_then ~verbosity ctx
   in
@@ -1935,7 +1935,7 @@ let codemod
     decl_parse_typecheck_and_then files_contents @@ fun files_info ->
     let patches = get_patches ~files_info in
     let files_contents =
-      ServerRefactorTypes.apply_patches_to_file_contents files_contents patches
+      ServerRenameTypes.apply_patches_to_file_contents files_contents patches
     in
     if List.is_empty patches then
       Multifile.print_files_as_multifile files_contents

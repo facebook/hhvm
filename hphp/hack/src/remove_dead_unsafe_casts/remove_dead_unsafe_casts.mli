@@ -6,7 +6,7 @@
  *
  *)
 
-type patches = ServerRefactorTypes.patch list
+type patches = ServerRenameTypes.patch list
 
 val patch_location_collection_handler : Tast_visitor.handler_base
 

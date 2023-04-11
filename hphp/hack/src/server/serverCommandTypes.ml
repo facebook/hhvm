@@ -183,10 +183,10 @@ module Find_refs = struct
     | Typeconst s -> "Typeconst " ^ s
 end
 
-module Refactor = struct
-  type ide_result = (ServerRefactorTypes.patch list, string) result
+module Rename = struct
+  type ide_result = (ServerRenameTypes.patch list, string) result
 
-  type result = ServerRefactorTypes.patch list
+  type result = ServerRenameTypes.patch list
 
   type ide_result_or_retry = ide_result Done_or_retry.t
 
@@ -273,7 +273,7 @@ module Infer_return_type = struct
   type result = (string, string) Stdlib.result
 end
 
-module Ide_refactor_type = struct
+module Ide_rename_type = struct
   type t = {
     filename: string;
     line: int;
@@ -385,23 +385,23 @@ type _ t =
   | IDE_HIGHLIGHT_REFS :
       string * file_input * int * int
       -> ServerHighlightRefsTypes.result t
-  | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
-  | REFACTOR_CHECK_SD : ServerRefactorTypes.action -> string Done_or_retry.t t
-  | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
+  | RENAME : ServerRenameTypes.action -> Rename.result_or_retry t
+  | RENAME_CHECK_SD : ServerRenameTypes.action -> string Done_or_retry.t t
+  | IDE_RENAME : Ide_rename_type.t -> Rename.ide_result_or_retry t
   | CODEMOD_SDT :
       string
-      -> (ServerRefactorTypes.patch list
+      -> (ServerRenameTypes.patch list
          * string list
          * [ `ClassLike | `Function ])
          t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES :
       int list
-      -> [ `Ok of ServerRefactorTypes.patch list | `Error of string ] t
+      -> [ `Ok of ServerRenameTypes.patch list | `Error of string ] t
   | REMOVE_DEAD_UNSAFE_CASTS
-      : [ `Ok of ServerRefactorTypes.patch list | `Error of string ] t
-  | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRefactorTypes.patch list t
-  | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRefactorTypes.patch list t
+      : [ `Ok of ServerRenameTypes.patch list | `Error of string ] t
+  | REWRITE_LAMBDA_PARAMETERS : string list -> ServerRenameTypes.patch list t
+  | REWRITE_TYPE_PARAMS_TYPE : string list -> ServerRenameTypes.patch list t
   | IN_MEMORY_DEP_TABLE_SIZE : (int, string) Stdlib.result t
   | SAVE_NAMING :
       string

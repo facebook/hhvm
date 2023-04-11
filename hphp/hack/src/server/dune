@@ -265,7 +265,7 @@
   serverHighlightRefsTypes
   serverLintTypes
   serverRageTypes
-  serverRefactorTypes
+  serverRenameTypes
   tastHolesService)
  (libraries
   connection_tracker
@@ -531,7 +531,7 @@
   serverMethodJumpsBatch
   serverRage
   serverRecheckCapture
-  serverRefactor
+  serverRename
   serverRewriteLambdaParameters
   serverRewriteTypeParamsType
   serverSignatureHelp

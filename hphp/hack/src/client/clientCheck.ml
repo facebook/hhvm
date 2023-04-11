@@ -10,7 +10,7 @@
 open Hh_prelude
 open ClientEnv
 open Utils
-open ClientRefactor
+open ClientRename
 open Ocaml_overrides
 module Rpc = ServerCommandTypes
 module SyntaxTree =
@@ -386,20 +386,18 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
       let%lwt conn = connect args in
       let%lwt () = ClientSymbolInfo.go conn ~desc:args.desc files expand_path in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
-    | MODE_REFACTOR_SOUND_DYNAMIC (ref_mode, name) ->
+    | MODE_RENAME_SOUND_DYNAMIC (ref_mode, name) ->
       let conn () = connect args in
-      let%lwt result =
-        ClientRefactor.go_sound_dynamic conn args ref_mode name
-      in
+      let%lwt result = ClientRename.go_sound_dynamic conn args ref_mode name in
       let () = Printf.printf "%s" result in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
-    | MODE_REFACTOR (ref_mode, before, after) ->
+    | MODE_RENAME ((ref_mode : rename_mode), before, after) ->
       let conn () = connect args in
       let%lwt () =
-        ClientRefactor.go conn ~desc:args.desc args ref_mode before after
+        ClientRename.go conn ~desc:args.desc args ref_mode before after
       in
       Lwt.return (Exit_status.No_error, Telemetry.create ())
-    | MODE_IDE_REFACTOR arg ->
+    | MODE_IDE_RENAME arg ->
       let conn () = connect args in
       let tpos = Str.split (Str.regexp ":") arg in
       let (filename, line, char, new_name) =
@@ -415,7 +413,7 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
           raise Exit_status.(Exit_with Input_error)
       in
       let%lwt () =
-        ClientRefactor.go_ide
+        ClientRename.go_ide
           conn
           ~desc:args.desc
           args

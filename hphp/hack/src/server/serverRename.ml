@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open ServerEnv
-open ServerRefactorTypes
+open ServerRenameTypes
 open ServerCommandTypes.Done_or_retry
 
 let maybe_add_dollar s =
@@ -524,7 +524,7 @@ let go_sound_dynamic ctx action genv env =
   else
     let is_sound_dynamic_str = "Server is using sound dynamic. \n" in
     match action with
-    | ServerRefactorTypes.FunctionRename { old_name; _ } ->
+    | ServerRenameTypes.FunctionRename { old_name; _ } ->
       let function_name = ServerFindRefs.add_ns old_name in
       ServerFindRefs.handle_prechecked_files
         genv
@@ -539,7 +539,7 @@ let go_sound_dynamic ctx action genv env =
         |> Relative_path.Set.elements
       in
       is_sound_dynamic_str ^ get_upcast_locations ctx files old_name
-    | ServerRefactorTypes.ClassRename (class_name, _) ->
+    | ServerRenameTypes.ClassRename (class_name, _) ->
       let class_name = ServerFindRefs.add_ns class_name in
       ServerFindRefs.handle_prechecked_files
         genv
@@ -630,7 +630,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
     (match (kind, pieces) with
     | (Function, [function_name]) ->
       let command =
-        ServerRefactorTypes.FunctionRename
+        ServerRenameTypes.FunctionRename
           {
             filename = Some filename;
             definition = Some definition;
@@ -640,22 +640,22 @@ let go_ide ctx (filename, line, column) new_name genv env =
       in
       Ok (go ctx command genv env)
     | (Enum, [enum_name]) ->
-      let command = ServerRefactorTypes.ClassRename (enum_name, new_name) in
+      let command = ServerRenameTypes.ClassRename (enum_name, new_name) in
       Ok (go ctx command genv env)
     | (Class, [class_name]) ->
-      let command = ServerRefactorTypes.ClassRename (class_name, new_name) in
+      let command = ServerRenameTypes.ClassRename (class_name, new_name) in
       Ok (go ctx command genv env)
     | (Typedef, [class_name]) ->
-      let command = ServerRefactorTypes.ClassRename (class_name, new_name) in
+      let command = ServerRenameTypes.ClassRename (class_name, new_name) in
       Ok (go ctx command genv env)
     | (ClassConst, [class_name; const_name]) ->
       let command =
-        ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name)
+        ServerRenameTypes.ClassConstRename (class_name, const_name, new_name)
       in
       Ok (go ctx command genv env)
     | (Method, [class_name; method_name]) ->
       let command =
-        ServerRefactorTypes.MethodRename
+        ServerRenameTypes.MethodRename
           {
             filename = Some filename;
             definition = Some definition;
@@ -667,7 +667,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
       Ok (go ctx command genv env)
     | (LocalVar, _) ->
       let command =
-        ServerRefactorTypes.LocalVarRename
+        ServerRenameTypes.LocalVarRename
           {
             filename = Relative_path.create_detect_prefix filename;
             file_content;

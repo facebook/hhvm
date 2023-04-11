@@ -18,7 +18,7 @@ module Reverts = struct
   let of_patches patches : t =
     let open List.Monad_infix in
     patches
-    >>| ServerRefactorTypes.get_pos
+    >>| ServerRenameTypes.get_pos
     >>| Pos.filename
     |> List.dedup_and_sort ~compare:compare_string
     >>| fun file -> { file; contents = Disk.cat file }

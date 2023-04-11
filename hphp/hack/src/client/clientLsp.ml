@@ -3483,9 +3483,9 @@ let do_signatureHelp_local
   in
   Lwt.return signatures
 
-let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
+let patch_to_workspace_edit_change (patch : ServerRenameTypes.patch) :
     string * TextEdit.t =
-  let open ServerRefactorTypes in
+  let open ServerRenameTypes in
   let open Pos in
   let text_edit =
     match patch with
@@ -3512,7 +3512,7 @@ let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
   in
   (uri, text_edit)
 
-let patches_to_workspace_edit (patches : ServerRefactorTypes.patch list) :
+let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
     WorkspaceEdit.t =
   let changes = List.map patches ~f:patch_to_workspace_edit_change in
   let changes =
@@ -3533,8 +3533,8 @@ let do_documentRename
   let open Rename in
   let new_name = params.newName in
   let command =
-    ServerCommandTypes.IDE_REFACTOR
-      { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
+    ServerCommandTypes.IDE_RENAME
+      { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name }
   in
   let%lwt patches =
     rpc_with_retry conn ref_unblocked_time ~desc:"rename" command

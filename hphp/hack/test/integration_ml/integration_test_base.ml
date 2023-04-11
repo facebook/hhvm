@@ -972,17 +972,17 @@ let assert_ide_find_refs loop_output expected_name expected =
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
 
-let assert_refactor loop_output expected =
+let assert_rename loop_output expected =
   let results = assert_response loop_output in
-  (* We don't have any (better than JSON) human-readable format for refactor results,
+  (* We don't have any (better than JSON) human-readable format for rename results,
    * and I'm too lazy to write it. Tests will have to compare JSON outputs for now. *)
-  let results_as_string = ClientRefactor.patches_to_json_string results in
+  let results_as_string = ClientRename.patches_to_json_string results in
   assertEqual expected results_as_string
 
-let assert_ide_refactor loop_output expected =
+let assert_ide_rename loop_output expected =
   let results = assert_response loop_output in
   let results = Result.ok_or_failwith results in
-  let results_as_string = ClientRefactor.patches_to_json_string results in
+  let results_as_string = ClientRename.patches_to_json_string results in
   assertEqual expected results_as_string
 
 let assert_needs_recheck env x =

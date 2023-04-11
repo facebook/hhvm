@@ -395,7 +395,7 @@ let get_definitions ctx action =
   | IGConst _
   | IMember (Subclasses_of _, _)
   | IMember (_, (Property _ | Typeconst _)) ->
-    (* this code path is used only in ServerRefactor, we can update it at some
+    (* this code path is used only in ServerRename, we can update it at some
        later time *)
     []
 

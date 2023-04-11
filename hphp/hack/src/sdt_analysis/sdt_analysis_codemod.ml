@@ -68,7 +68,7 @@ let patches_of_nadable_id ~source ~path id =
   fold_syntax ~f:collect_patches ~init:[] root
 
 let patches_of_nadable Summary.{ id; path_opt; _ } :
-    ServerRefactorTypes.patch list =
+    ServerRenameTypes.patch list =
   let open Option.Let_syntax in
   Option.value ~default:[]
   @@ let* path = path_opt in

@@ -7,28 +7,27 @@
  *)
 
 val get_fixme_patches :
-  int list -> ServerEnv.env -> ServerRefactorTypes.patch list
+  int list -> ServerEnv.env -> ServerRenameTypes.patch list
 
-val get_dead_unsafe_cast_patches :
-  ServerEnv.env -> ServerRefactorTypes.patch list
+val get_dead_unsafe_cast_patches : ServerEnv.env -> ServerRenameTypes.patch list
 
 val get_lambda_parameter_rewrite_patches :
-  Provider_context.t -> string list -> ServerRefactorTypes.patch list
+  Provider_context.t -> string list -> ServerRenameTypes.patch list
 
 val get_type_params_type_rewrite_patches :
-  Provider_context.t -> string list -> ServerRefactorTypes.patch list
+  Provider_context.t -> string list -> ServerRenameTypes.patch list
 
 val go :
   Provider_context.t ->
-  ServerRefactorTypes.action ->
+  ServerRenameTypes.action ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ServerEnv.env
-  * ServerRefactorTypes.patch list ServerCommandTypes.Done_or_retry.t
+  * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t
 
 val go_sound_dynamic :
   Provider_context.t ->
-  ServerRefactorTypes.action ->
+  ServerRenameTypes.action ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ServerEnv.env * string ServerCommandTypes.Done_or_retry.t
@@ -40,6 +39,6 @@ val go_ide :
   ServerEnv.genv ->
   ServerEnv.env ->
   ( ServerEnv.env
-    * ServerRefactorTypes.patch list ServerCommandTypes.Done_or_retry.t,
+    * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t,
     string )
   result

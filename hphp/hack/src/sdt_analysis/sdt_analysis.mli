@@ -21,7 +21,7 @@ val create_handler :
 
 val patches_of_codemod_line :
   string ->
-  ServerRefactorTypes.patch list * string list * [ `ClassLike | `Function ]
+  ServerRenameTypes.patch list * string list * [ `ClassLike | `Function ]
 
 module StandaloneApi : sig
   (* solve constraints from `db_dir` and log the solution to stdout *)

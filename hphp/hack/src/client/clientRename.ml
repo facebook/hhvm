@@ -10,23 +10,23 @@
 open Hh_prelude
 open ClientEnv
 
-let get_pos = ServerRefactorTypes.get_pos
+let get_pos = ServerRenameTypes.get_pos
 
-let compare_result = ServerRefactorTypes.compare_result
+let compare_result = ServerRenameTypes.compare_result
 
 let apply_patches_to_string old_content patch_list =
   let buf = Buffer.create (String.length old_content) in
   let patch_list = List.sort ~compare:compare_result patch_list in
-  ServerRefactorTypes.write_patches_to_buffer buf old_content patch_list;
+  ServerRenameTypes.write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 
 let apply_patches_to_file fn patch_list =
   let old_content = Sys_utils.cat fn in
   let new_file_contents = apply_patches_to_string old_content patch_list in
-  ServerRefactorTypes.write_string_to_file fn new_file_contents
+  ServerRenameTypes.write_string_to_file fn new_file_contents
 
 let list_to_file_map =
-  List.fold_left ~f:ServerRefactorTypes.map_patches_to_filename ~init:SMap.empty
+  List.fold_left ~f:ServerRenameTypes.map_patches_to_filename ~init:SMap.empty
 
 let plural count one many =
   let obj =
@@ -46,11 +46,10 @@ let apply_patches patches =
 let patch_to_json res =
   let (type_, replacement) =
     match res with
-    | ServerRefactorTypes.Insert patch ->
-      ("insert", patch.ServerRefactorTypes.text)
-    | ServerRefactorTypes.Replace patch ->
-      ("replace", patch.ServerRefactorTypes.text)
-    | ServerRefactorTypes.Remove _ -> ("remove", "")
+    | ServerRenameTypes.Insert patch -> ("insert", patch.ServerRenameTypes.text)
+    | ServerRenameTypes.Replace patch ->
+      ("replace", patch.ServerRenameTypes.text)
+    | ServerRenameTypes.Remove _ -> ("remove", "")
   in
   let pos = get_pos res in
   let (char_start, char_end) = Pos.info_raw pos in
@@ -90,20 +89,20 @@ let print_patches_json patches = print_endline (patches_to_json_string patches)
 let go_sound_dynamic
     (conn : unit -> ClientConnect.conn Lwt.t)
     (args : client_check_env)
-    (mode : refactor_mode)
+    (mode : rename_mode)
     (name : string) =
   let command =
     match mode with
-    | Class -> ServerRefactorTypes.ClassRename (name, "")
+    | Class -> ServerRenameTypes.ClassRename (name, "")
     | Function ->
       let filename = None in
       let definition = None in
-      ServerRefactorTypes.FunctionRename
+      ServerRenameTypes.FunctionRename
         { filename; definition; old_name = name; new_name = "" }
     | _ -> failwith "Unexpected Mode"
   in
   ClientConnect.rpc_with_retry conn ~desc:args.desc
-  @@ ServerCommandTypes.REFACTOR_CHECK_SD command
+  @@ ServerCommandTypes.RENAME_CHECK_SD command
 
 let go_ide
     (conn : unit -> ClientConnect.conn Lwt.t)
@@ -115,8 +114,8 @@ let go_ide
     (new_name : string) : unit Lwt.t =
   let%lwt patches =
     ClientConnect.rpc_with_retry conn ~desc
-    @@ ServerCommandTypes.IDE_REFACTOR
-         { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
+    @@ ServerCommandTypes.IDE_RENAME
+         { ServerCommandTypes.Ide_rename_type.filename; line; char; new_name }
   in
   let patches =
     match patches with
@@ -133,12 +132,12 @@ let go
     (conn : unit -> ClientConnect.conn Lwt.t)
     ~(desc : string)
     (args : client_check_env)
-    (mode : refactor_mode)
+    (mode : rename_mode)
     (before : string)
     (after : string) : unit Lwt.t =
   let command =
     match mode with
-    | Class -> ServerRefactorTypes.ClassRename (before, after)
+    | Class -> ServerRenameTypes.ClassRename (before, after)
     | Function ->
       (*
         We set these to `None` here because we don't want to add a deprecated
@@ -146,7 +145,7 @@ let go
       *)
       let filename = None in
       let definition = None in
-      ServerRefactorTypes.FunctionRename
+      ServerRenameTypes.FunctionRename
         { filename; definition; old_name = before; new_name = after }
     | Method ->
       let befores = Str.split (Str.regexp "::") before in
@@ -165,7 +164,7 @@ let go
       ) else
         let filename = None in
         let definition = None in
-        ServerRefactorTypes.MethodRename
+        ServerRenameTypes.MethodRename
           {
             filename;
             definition;
@@ -176,8 +175,7 @@ let go
     | _ -> failwith "Unexpected Mode"
   in
   let%lwt patches =
-    ClientConnect.rpc_with_retry conn ~desc
-    @@ ServerCommandTypes.REFACTOR command
+    ClientConnect.rpc_with_retry conn ~desc @@ ServerCommandTypes.RENAME command
   in
   if args.output_json then
     print_patches_json patches

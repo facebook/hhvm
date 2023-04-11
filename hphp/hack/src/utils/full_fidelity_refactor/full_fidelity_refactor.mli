@@ -6,7 +6,7 @@
  *
  *)
 (*
- * Utilities for generating `ServerRefactorTypes.patch`s
+ * Utilities for generating `ServerRenameTypes.patch`s
  * from `full_fidelity` parse trees.
  *)
 
@@ -15,10 +15,10 @@ val insert_attribute :
   attribute:string ->
   enclosing_node:Full_fidelity_editable_positioned_syntax.t option ->
   attributes_node:Full_fidelity_editable_positioned_syntax.t ->
-  ServerRefactorTypes.patch option
+  ServerRenameTypes.patch option
 
 val insert_before_leading_fixme :
   Relative_path.t ->
   keyword:Full_fidelity_editable_positioned_syntax.t ->
   text:string ->
-  ServerRefactorTypes.patch option
+  ServerRenameTypes.patch option

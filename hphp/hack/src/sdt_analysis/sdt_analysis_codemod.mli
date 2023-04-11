@@ -7,4 +7,4 @@
  *)
 open Sdt_analysis_types
 
-val patches_of_nadable : Summary.nadable -> ServerRefactorTypes.patch list
+val patches_of_nadable : Summary.nadable -> ServerRenameTypes.patch list

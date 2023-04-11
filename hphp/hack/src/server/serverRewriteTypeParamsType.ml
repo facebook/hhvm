@@ -153,8 +153,8 @@ let get_patches ctx file =
                 get_first_suggested_type_as_string file type_map parameter_name
                 >>= fun type_str ->
                 position file parameter_type >>| fun pos ->
-                ServerRefactorTypes.Replace
-                  ServerRefactorTypes.
+                ServerRenameTypes.Replace
+                  ServerRenameTypes.
                     {
                       pos = Pos.to_absolute (Pos.advance_one pos);
                       text = "<<__Soft>> " ^ type_str ^ " ";

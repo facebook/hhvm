@@ -1182,6 +1182,8 @@ enum SourceControlType {
   REGULAR_FILE = 1,
   EXECUTABLE_FILE = 2,
   SYMLINK = 3,
+  UNKNOWN = 4, // File types that can not be versioned in source control.
+// Currently includes things like FIFOs and sockets.
 }
 
 /**

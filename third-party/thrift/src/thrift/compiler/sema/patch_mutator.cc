@@ -22,6 +22,7 @@
 
 #include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
+#include <thrift/compiler/gen/cpp/namespace_resolver.h>
 #include <thrift/compiler/lib/uri.h>
 #include <thrift/compiler/sema/standard_mutator_stage.h>
 
@@ -150,11 +151,13 @@ struct StructGen {
         dynamic_cast<const t_type*>(program_.scope()->find_def(kCppAdapterUri));
     assert(annotation); // transitive include from patch.thrift
     auto value = std::make_unique<t_const_value>();
+    auto ns = gen::cpp::namespace_resolver::gen_namespace(program_);
     value->set_map();
     value->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(
-            "::apache::thrift::op::detail::" + std::move(name)));
+            "::apache::thrift::op::detail::" + std::move(name) + "<" +
+            std::move(ns) + "::" + generated.name() + "Struct" + ">"));
     value->add_map(
         std::make_unique<t_const_value>("underlyingName"),
         std::make_unique<t_const_value>(generated.name() + "Struct"));

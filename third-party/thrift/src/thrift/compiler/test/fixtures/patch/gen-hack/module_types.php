@@ -3001,7 +3001,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>",
             "underlyingName" => "MyDataPatchStruct",
             "extraNamespace" => "",
           )
@@ -3013,7 +3013,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>",
                 "underlyingName" => "MyDataFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -3034,7 +3034,7 @@ class MyDataPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>",
                 "underlyingName" => "MyDataFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -3202,7 +3202,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>",
             "underlyingName" => "MyDataFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -3219,7 +3219,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StringPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
                 "underlyingName" => "StringPatchStruct",
               )
             ),
@@ -3235,7 +3235,7 @@ class MyDataFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
                 "underlyingName" => "I32PatchStruct",
               )
             ),
@@ -3626,7 +3626,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>",
             "underlyingName" => "MyDataWithCustomDefaultPatchStruct",
             "extraNamespace" => "",
           )
@@ -3638,7 +3638,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>",
                 "underlyingName" => "MyDataWithCustomDefaultFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -3659,7 +3659,7 @@ class MyDataWithCustomDefaultPatch implements \IThriftSyncStruct, \IThriftStruct
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>",
                 "underlyingName" => "MyDataWithCustomDefaultFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -3827,7 +3827,7 @@ class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftS
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>",
             "underlyingName" => "MyDataWithCustomDefaultFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -3844,7 +3844,7 @@ class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftS
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StringPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
                 "underlyingName" => "StringPatchStruct",
               )
             ),
@@ -3860,7 +3860,7 @@ class MyDataWithCustomDefaultFieldPatch implements \IThriftSyncStruct, \IThriftS
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
                 "underlyingName" => "I32PatchStruct",
               )
             ),
@@ -4251,7 +4251,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::UnionPatchAdapter",
+            "name" => "::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>",
             "underlyingName" => "InnerUnionPatchStruct",
             "extraNamespace" => "",
           )
@@ -4263,7 +4263,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>",
                 "underlyingName" => "InnerUnionFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -4284,7 +4284,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>",
                 "underlyingName" => "InnerUnionFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -4421,7 +4421,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>",
             "underlyingName" => "InnerUnionFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -4438,7 +4438,7 @@ class InnerUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>",
                 "underlyingName" => "BinaryPatchStruct",
               )
             ),
@@ -4686,7 +4686,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::UnionPatchAdapter",
+            "name" => "::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>",
             "underlyingName" => "MyUnionPatchStruct",
             "extraNamespace" => "",
           )
@@ -4698,7 +4698,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>",
                 "underlyingName" => "MyUnionFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -4719,7 +4719,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>",
                 "underlyingName" => "MyUnionFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -4918,7 +4918,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>",
             "underlyingName" => "MyUnionFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -4935,7 +4935,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StringPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
                 "underlyingName" => "StringPatchStruct",
               )
             ),
@@ -4951,7 +4951,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
                 "underlyingName" => "I32PatchStruct",
               )
             ),
@@ -4967,7 +4967,7 @@ class MyUnionFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::UnionPatchAdapter",
+                "name" => "::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>",
                 "underlyingName" => "InnerUnionPatchStruct",
                 "extraNamespace" => "",
               )
@@ -5228,7 +5228,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyStructPatchStruct>",
             "underlyingName" => "MyStructPatchStruct",
             "extraNamespace" => "",
           )
@@ -5249,7 +5249,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>",
                 "underlyingName" => "MyStructFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -5270,7 +5270,7 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>",
                 "underlyingName" => "MyStructFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -5441,7 +5441,7 @@ class MyStructField10Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>",
             "underlyingName" => "MyStructField10PatchStruct",
             "extraNamespace" => "",
           )
@@ -5591,7 +5591,7 @@ class MyStructField23Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>",
             "underlyingName" => "MyStructField23PatchStruct",
             "extraNamespace" => "",
           )
@@ -5927,7 +5927,7 @@ class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::ListPatchAdapter",
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>",
             "underlyingName" => "MyStructField26PatchStruct",
             "extraNamespace" => "",
           )
@@ -6237,7 +6237,7 @@ class MyStructField27Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::SetPatchAdapter",
+            "name" => "::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>",
             "underlyingName" => "MyStructField27PatchStruct",
             "extraNamespace" => "",
           )
@@ -6682,7 +6682,7 @@ class MyStructField28Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::MapPatchAdapter",
+            "name" => "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>",
             "underlyingName" => "MyStructField28PatchStruct",
             "extraNamespace" => "",
           )
@@ -7169,7 +7169,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::ListPatchAdapter",
+            "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>",
             "underlyingName" => "MyStructField29PatchStruct",
             "extraNamespace" => "",
           )
@@ -7685,7 +7685,7 @@ class MyStructField29Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::MapPatchAdapter",
+            "name" => "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField29Patch1Struct>",
             "underlyingName" => "MyStructField29Patch1Struct",
             "extraNamespace" => "",
           )
@@ -8247,7 +8247,7 @@ class MyStructField30Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::MapPatchAdapter",
+            "name" => "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>",
             "underlyingName" => "MyStructField30PatchStruct",
             "extraNamespace" => "",
           )
@@ -8764,7 +8764,7 @@ class MyStructField30Patch1 implements \IThriftSyncStruct, \IThriftStructMetadat
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::MapPatchAdapter",
+            "name" => "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30Patch1Struct>",
             "underlyingName" => "MyStructField30Patch1Struct",
             "extraNamespace" => "",
           )
@@ -9968,7 +9968,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>",
             "underlyingName" => "MyStructFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -9985,7 +9985,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>",
                 "underlyingName" => "MyDataWithCustomDefaultPatchStruct",
                 "extraNamespace" => "",
               )
@@ -10002,7 +10002,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
                 "underlyingName" => "I32PatchStruct",
               )
             ),
@@ -10018,7 +10018,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::MapPatchAdapter",
+                "name" => "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>",
                 "underlyingName" => "MyStructField30PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10035,7 +10035,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::ListPatchAdapter",
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>",
                 "underlyingName" => "MyStructField29PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10052,7 +10052,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::MapPatchAdapter",
+                "name" => "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>",
                 "underlyingName" => "MyStructField28PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10069,7 +10069,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::SetPatchAdapter",
+                "name" => "::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>",
                 "underlyingName" => "MyStructField27PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10086,7 +10086,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::ListPatchAdapter",
+                "name" => "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>",
                 "underlyingName" => "MyStructField26PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10103,7 +10103,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>",
                 "underlyingName" => "LateDefStructPatchStruct",
                 "extraNamespace" => "",
               )
@@ -10120,7 +10120,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>",
                 "underlyingName" => "MyDataPatchStruct",
                 "extraNamespace" => "",
               )
@@ -10137,7 +10137,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>",
                 "underlyingName" => "MyStructField23PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10154,7 +10154,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>",
                 "underlyingName" => "BinaryPatchStruct",
               )
             ),
@@ -10170,7 +10170,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StringPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
                 "underlyingName" => "StringPatchStruct",
               )
             ),
@@ -10186,7 +10186,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>",
                 "underlyingName" => "DoublePatchStruct",
               )
             ),
@@ -10202,7 +10202,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>",
                 "underlyingName" => "FloatPatchStruct",
               )
             ),
@@ -10218,7 +10218,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>",
                 "underlyingName" => "I64PatchStruct",
               )
             ),
@@ -10234,7 +10234,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
                 "underlyingName" => "I32PatchStruct",
               )
             ),
@@ -10250,7 +10250,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>",
                 "underlyingName" => "I16PatchStruct",
               )
             ),
@@ -10266,7 +10266,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>",
                 "underlyingName" => "BytePatchStruct",
               )
             ),
@@ -10282,7 +10282,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::BoolPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>",
                 "underlyingName" => "BoolPatchStruct",
               )
             ),
@@ -10298,7 +10298,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>",
                 "underlyingName" => "LateDefStructPatchStruct",
                 "extraNamespace" => "",
               )
@@ -10315,7 +10315,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::UnionPatchAdapter",
+                "name" => "::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>",
                 "underlyingName" => "MyUnionPatchStruct",
                 "extraNamespace" => "",
               )
@@ -10332,7 +10332,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>",
                 "underlyingName" => "MyDataPatchStruct",
                 "extraNamespace" => "",
               )
@@ -10349,7 +10349,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>",
                 "underlyingName" => "MyStructField10PatchStruct",
                 "extraNamespace" => "",
               )
@@ -10366,7 +10366,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>",
                 "underlyingName" => "BinaryPatchStruct",
               )
             ),
@@ -10382,7 +10382,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StringPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
                 "underlyingName" => "StringPatchStruct",
               )
             ),
@@ -10398,7 +10398,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>",
                 "underlyingName" => "DoublePatchStruct",
               )
             ),
@@ -10414,7 +10414,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>",
                 "underlyingName" => "FloatPatchStruct",
               )
             ),
@@ -10430,7 +10430,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>",
                 "underlyingName" => "I64PatchStruct",
               )
             ),
@@ -10446,7 +10446,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
                 "underlyingName" => "I32PatchStruct",
               )
             ),
@@ -10462,7 +10462,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>",
                 "underlyingName" => "I16PatchStruct",
               )
             ),
@@ -10478,7 +10478,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+                "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>",
                 "underlyingName" => "BytePatchStruct",
               )
             ),
@@ -10494,7 +10494,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::BoolPatchAdapter",
+                "name" => "::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>",
                 "underlyingName" => "BoolPatchStruct",
               )
             ),
@@ -10510,7 +10510,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>",
                 "underlyingName" => "MyDataPatchStruct",
                 "extraNamespace" => "",
               )
@@ -12263,7 +12263,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>",
             "underlyingName" => "LateDefStructPatchStruct",
             "extraNamespace" => "",
           )
@@ -12275,7 +12275,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>",
                 "underlyingName" => "LateDefStructFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -12296,7 +12296,7 @@ class LateDefStructPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>",
                 "underlyingName" => "LateDefStructFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -12400,7 +12400,7 @@ class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftStructMetad
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>",
             "underlyingName" => "LateDefStructFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -12717,7 +12717,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RecursivePatchStruct>",
             "underlyingName" => "RecursivePatchStruct",
             "extraNamespace" => "",
           )
@@ -12729,7 +12729,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>",
                 "underlyingName" => "RecursiveFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -12750,7 +12750,7 @@ class RecursivePatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>",
                 "underlyingName" => "RecursiveFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -12952,7 +12952,7 @@ class RecursiveField1Patch implements \IThriftSyncStruct, \IThriftStructMetadata
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>",
             "underlyingName" => "RecursiveField1PatchStruct",
             "extraNamespace" => "",
           )
@@ -13078,7 +13078,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>",
             "underlyingName" => "RecursiveFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -13095,7 +13095,7 @@ class RecursiveFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata 
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>",
                 "underlyingName" => "RecursiveField1PatchStruct",
                 "extraNamespace" => "",
               )
@@ -13494,7 +13494,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::BarPatchStruct>",
             "underlyingName" => "BarPatchStruct",
             "extraNamespace" => "",
           )
@@ -13506,7 +13506,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>",
                 "underlyingName" => "BarFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -13527,7 +13527,7 @@ class BarPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>",
                 "underlyingName" => "BarFieldPatchStruct",
                 "extraNamespace" => "",
               )
@@ -13673,7 +13673,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>",
             "underlyingName" => "BarFieldPatchStruct",
             "extraNamespace" => "",
           )
@@ -13690,7 +13690,7 @@ class BarFieldPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>",
                 "underlyingName" => "LoopPatchStruct",
                 "extraNamespace" => "",
               )
@@ -13970,7 +13970,7 @@ class LoopPatch implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>",
             "underlyingName" => "LoopPatchStruct",
             "extraNamespace" => "",
           )

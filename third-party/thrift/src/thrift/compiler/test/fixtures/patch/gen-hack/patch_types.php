@@ -455,7 +455,7 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::BoolPatchAdapter",
+            "name" => "::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>",
             "underlyingName" => "BoolPatchStruct",
           )
         ),
@@ -652,7 +652,7 @@ class BytePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftS
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+            "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>",
             "underlyingName" => "BytePatchStruct",
           )
         ),
@@ -859,7 +859,7 @@ class I16Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+            "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>",
             "underlyingName" => "I16PatchStruct",
           )
         ),
@@ -1066,7 +1066,7 @@ class I32Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+            "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
             "underlyingName" => "I32PatchStruct",
           )
         ),
@@ -1273,7 +1273,7 @@ class I64Patch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftSh
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+            "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>",
             "underlyingName" => "I64PatchStruct",
           )
         ),
@@ -1470,7 +1470,7 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+            "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>",
             "underlyingName" => "FloatPatchStruct",
           )
         ),
@@ -1667,7 +1667,7 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
+            "name" => "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>",
             "underlyingName" => "DoublePatchStruct",
           )
         ),
@@ -1893,7 +1893,7 @@ class StringPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::StringPatchAdapter",
+            "name" => "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
             "underlyingName" => "StringPatchStruct",
           )
         ),
@@ -2154,7 +2154,7 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrif
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
+            "name" => "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>",
             "underlyingName" => "BinaryPatchStruct",
           )
         ),

@@ -50,7 +50,7 @@ struct AssignOnlyPatch {}
 /** A patch for a boolean value. */
 @cpp.Adapter{
   underlyingName = "BoolPatchStruct",
-  name = "::apache::thrift::op::detail::BoolPatchAdapter",
+  name = "::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>",
 }
 struct BoolPatch {
   /**
@@ -72,7 +72,7 @@ struct BoolPatch {
 /** A patch for an 8-bit integer value. */
 @cpp.Adapter{
   underlyingName = "BytePatchStruct",
-  name = "::apache::thrift::op::detail::NumberPatchAdapter",
+  name = "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>",
 }
 struct BytePatch {
   /**
@@ -94,7 +94,7 @@ struct BytePatch {
 /** A patch for a 16-bit integer value. */
 @cpp.Adapter{
   underlyingName = "I16PatchStruct",
-  name = "::apache::thrift::op::detail::NumberPatchAdapter",
+  name = "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>",
 }
 struct I16Patch {
   /**
@@ -116,7 +116,7 @@ struct I16Patch {
 /** A patch for a 32-bit integer value. */
 @cpp.Adapter{
   underlyingName = "I32PatchStruct",
-  name = "::apache::thrift::op::detail::NumberPatchAdapter",
+  name = "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>",
 }
 struct I32Patch {
   /**
@@ -138,7 +138,7 @@ struct I32Patch {
 /** A patch for a 64-bit integer value. */
 @cpp.Adapter{
   underlyingName = "I64PatchStruct",
-  name = "::apache::thrift::op::detail::NumberPatchAdapter",
+  name = "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>",
 }
 struct I64Patch {
   /**
@@ -160,7 +160,7 @@ struct I64Patch {
 /** A patch for a 32-bit floating point value. */
 @cpp.Adapter{
   underlyingName = "FloatPatchStruct",
-  name = "::apache::thrift::op::detail::NumberPatchAdapter",
+  name = "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>",
 }
 struct FloatPatch {
   /**
@@ -182,7 +182,7 @@ struct FloatPatch {
 /** A patch for an 64-bit floating point value. */
 @cpp.Adapter{
   underlyingName = "DoublePatchStruct",
-  name = "::apache::thrift::op::detail::NumberPatchAdapter",
+  name = "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>",
 }
 struct DoublePatch {
   /**
@@ -204,7 +204,7 @@ struct DoublePatch {
 /** A patch for a string value. */
 @cpp.Adapter{
   underlyingName = "StringPatchStruct",
-  name = "::apache::thrift::op::detail::StringPatchAdapter",
+  name = "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>",
 }
 struct StringPatch {
   /**
@@ -229,7 +229,7 @@ struct StringPatch {
 /** A patch for a binary value. */
 @cpp.Adapter{
   underlyingName = "BinaryPatchStruct",
-  name = "::apache::thrift::op::detail::BinaryPatchAdapter",
+  name = "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>",
 }
 struct BinaryPatch {
   /**

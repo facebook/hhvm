@@ -33,21 +33,32 @@ namespace op {
 namespace detail {
 
 // Adapter for all base types.
-using AssignPatchAdapter = TemplateInlineAdapter<AssignPatch>;
-using BoolPatchAdapter = TemplateInlineAdapter<BoolPatch>;
-using NumberPatchAdapter = TemplateInlineAdapter<NumberPatch>;
-using StringPatchAdapter = TemplateInlineAdapter<StringPatch>;
-using BinaryPatchAdapter = TemplateInlineAdapter<BinaryPatch>;
+template <typename T>
+using AssignPatchAdapter = InlineAdapter<AssignPatch<T>>;
+template <typename T>
+using BoolPatchAdapter = InlineAdapter<BoolPatch<T>>;
+template <typename T>
+using NumberPatchAdapter = InlineAdapter<NumberPatch<T>>;
+template <typename T>
+using StringPatchAdapter = InlineAdapter<StringPatch<T>>;
+template <typename T>
+using BinaryPatchAdapter = InlineAdapter<BinaryPatch<T>>;
 
 // Adapters for structred types.
-using FieldPatchAdapter = TemplateInlineAdapter<FieldPatch>;
-using StructPatchAdapter = TemplateInlineAdapter<StructPatch>;
-using UnionPatchAdapter = TemplateInlineAdapter<UnionPatch>;
+template <typename T>
+using FieldPatchAdapter = InlineAdapter<FieldPatch<T>>;
+template <typename T>
+using StructPatchAdapter = InlineAdapter<StructPatch<T>>;
+template <typename T>
+using UnionPatchAdapter = InlineAdapter<UnionPatch<T>>;
 
 // Adapters for containers.
-using ListPatchAdapter = TemplateInlineAdapter<ListPatch>;
-using SetPatchAdapter = TemplateInlineAdapter<SetPatch>;
-using MapPatchAdapter = TemplateInlineAdapter<MapPatch>;
+template <typename T>
+using ListPatchAdapter = InlineAdapter<ListPatch<T>>;
+template <typename T>
+using SetPatchAdapter = InlineAdapter<SetPatch<T>>;
+template <typename T>
+using MapPatchAdapter = InlineAdapter<MapPatch<T>>;
 
 } // namespace detail
 } // namespace op

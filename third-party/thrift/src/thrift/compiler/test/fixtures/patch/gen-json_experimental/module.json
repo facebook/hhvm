@@ -503,7 +503,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyDataPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataPatchStruct>", "underlyingName": "MyDataPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -569,7 +569,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataFieldPatchStruct>", "underlyingName": "MyDataFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -661,7 +661,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyDataWithCustomDefaultPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultPatchStruct>", "underlyingName": "MyDataWithCustomDefaultPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -727,7 +727,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataWithCustomDefaultFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyDataWithCustomDefaultFieldPatchStruct>", "underlyingName": "MyDataWithCustomDefaultFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -819,7 +819,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::UnionPatchAdapter", "underlyingName": "InnerUnionPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::InnerUnionPatchStruct>", "underlyingName": "InnerUnionPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -896,7 +896,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "InnerUnionFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::InnerUnionFieldPatchStruct>", "underlyingName": "InnerUnionFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -935,7 +935,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::UnionPatchAdapter", "underlyingName": "MyUnionPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::UnionPatchAdapter<::test::fixtures::patch::MyUnionPatchStruct>", "underlyingName": "MyUnionPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1012,7 +1012,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyUnionFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyUnionFieldPatchStruct>", "underlyingName": "MyUnionFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1092,7 +1092,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyStructPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::MyStructPatchStruct>", "underlyingName": "MyStructPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1158,7 +1158,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "MyStructField10PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField10PatchStruct>", "underlyingName": "MyStructField10PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1194,7 +1194,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "MyStructField23PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::MyStructField23PatchStruct>", "underlyingName": "MyStructField23PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1230,7 +1230,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructField26PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField26PatchStruct>", "underlyingName": "MyStructField26PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1311,7 +1311,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::SetPatchAdapter", "underlyingName": "MyStructField27PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::SetPatchAdapter<::test::fixtures::patch::MyStructField27PatchStruct>", "underlyingName": "MyStructField27PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1367,7 +1367,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField28PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField28PatchStruct>", "underlyingName": "MyStructField28PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1466,7 +1466,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructField29PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter<::test::fixtures::patch::MyStructField29PatchStruct>", "underlyingName": "MyStructField29PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1562,7 +1562,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField29Patch1Struct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField29Patch1Struct>", "underlyingName": "MyStructField29Patch1Struct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1661,7 +1661,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField30PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30PatchStruct>", "underlyingName": "MyStructField30PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1770,7 +1770,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructField30Patch1Struct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField30Patch1Struct>", "underlyingName": "MyStructField30Patch1Struct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -1869,7 +1869,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyStructFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::MyStructFieldPatchStruct>", "underlyingName": "MyStructFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -2867,7 +2867,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "LateDefStructPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::LateDefStructPatchStruct>", "underlyingName": "LateDefStructPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -2933,7 +2933,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "LateDefStructFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::LateDefStructFieldPatchStruct>", "underlyingName": "LateDefStructFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "is_exception" : false,
@@ -2965,7 +2965,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "RecursivePatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::RecursivePatchStruct>", "underlyingName": "RecursivePatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -3031,7 +3031,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "RecursiveField1PatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::RecursiveField1PatchStruct>", "underlyingName": "RecursiveField1PatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -3071,7 +3071,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "RecursiveFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::RecursiveFieldPatchStruct>", "underlyingName": "RecursiveFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -3141,7 +3141,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "BarPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter<::test::fixtures::patch::BarPatchStruct>", "underlyingName": "BarPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -3207,7 +3207,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "BarFieldPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter<::test::fixtures::patch::BarFieldPatchStruct>", "underlyingName": "BarFieldPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {
@@ -3273,7 +3273,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "LoopPatchStruct", "extraNamespace": ""}
+        "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter<::test::fixtures::patch::LoopPatchStruct>", "underlyingName": "LoopPatchStruct", "extraNamespace": ""}
       }
         },
         "fields" : {

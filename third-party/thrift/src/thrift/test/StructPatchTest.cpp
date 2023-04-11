@@ -45,7 +45,8 @@ static_assert(
     test::same_type<MyUnionPatch, ::apache::thrift::op::patch_type<MyUnion>>);
 
 static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
-              ::apache::thrift::op::detail::FieldPatchAdapter,
+              ::apache::thrift::op::detail::FieldPatchAdapter<
+                  MyStructFieldPatchStruct>,
               MyStructFieldPatch>::value);
 
 using ListPatch =

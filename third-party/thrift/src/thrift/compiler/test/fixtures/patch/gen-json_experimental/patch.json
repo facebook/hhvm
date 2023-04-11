@@ -146,7 +146,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "BoolPatchStruct", "name": "::apache::thrift::op::detail::BoolPatchAdapter"}
+        "value" : {"underlyingName": "BoolPatchStruct", "name": "::apache::thrift::op::detail::BoolPatchAdapter<::apache::thrift::op::BoolPatchStruct>"}
       }
         },
         "docstring" : "A patch for a boolean value.\n",
@@ -187,7 +187,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "BytePatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "BytePatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::BytePatchStruct>"}
       }
         },
         "docstring" : "A patch for an 8-bit integer value.\n",
@@ -228,7 +228,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "I16PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "I16PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>"}
       }
         },
         "docstring" : "A patch for a 16-bit integer value.\n",
@@ -269,7 +269,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "I32PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "I32PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I32PatchStruct>"}
       }
         },
         "docstring" : "A patch for a 32-bit integer value.\n",
@@ -310,7 +310,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "I64PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "I64PatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I64PatchStruct>"}
       }
         },
         "docstring" : "A patch for a 64-bit integer value.\n",
@@ -351,7 +351,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "FloatPatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "FloatPatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::FloatPatchStruct>"}
       }
         },
         "docstring" : "A patch for a 32-bit floating point value.\n",
@@ -392,7 +392,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "DoublePatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+        "value" : {"underlyingName": "DoublePatchStruct", "name": "::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::DoublePatchStruct>"}
       }
         },
         "docstring" : "A patch for an 64-bit floating point value.\n",
@@ -433,7 +433,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "StringPatchStruct", "name": "::apache::thrift::op::detail::StringPatchAdapter"}
+        "value" : {"underlyingName": "StringPatchStruct", "name": "::apache::thrift::op::detail::StringPatchAdapter<::apache::thrift::op::StringPatchStruct>"}
       }
         },
         "docstring" : "A patch for a string value.\n",
@@ -481,7 +481,7 @@
   "name" : "Adapter",
   "path" : "thrift/annotation/cpp.thrift"
 },
-        "value" : {"underlyingName": "BinaryPatchStruct", "name": "::apache::thrift::op::detail::BinaryPatchAdapter"}
+        "value" : {"underlyingName": "BinaryPatchStruct", "name": "::apache::thrift::op::detail::BinaryPatchAdapter<::apache::thrift::op::BinaryPatchStruct>"}
       }
         },
         "docstring" : "A patch for a binary value.\n",

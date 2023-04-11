@@ -75,10 +75,6 @@ end
 
 module Error : sig
   type t
-
-  val show : t -> string
-
-  val pp : Format.formatter -> t -> unit
 end
 
 module Primary : sig
@@ -1664,12 +1660,12 @@ module Secondary : sig
     | Violated_refinement_constraint of {
         cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
+  [@@deriving show]
 end
 
 module Callback : sig
   (** A mechanism to apply transformations to primary errors *)
-  type t
-
+  type t [@@deriving show]
   (* -- Constructors -------------------------------------------------------- *)
 
   (** Ignore any arguments and always return the given base error *)
@@ -1741,7 +1737,7 @@ end
 
 module Reasons_callback : sig
   (** A mechanism to apply transformations to secondary errors *)
-  type t
+  type t [@@deriving show]
 
   (** Evaluate the `Reasons_callback.t` to a `(Pos.t,Pos_or_decl.t) User_error.t`
       for use in error reporting.
@@ -1925,11 +1921,7 @@ module Reasons_callback : sig
     Pos_or_decl.ctx -> t
 end
 
-type t = Error.t
-
-val show : t -> string
-
-val pp : Format.formatter -> t -> unit
+type t = Error.t [@@deriving show]
 
 (** Iterate over an error calling `on_prim` and `on_snd` when each `Primary.t`
      and `Secondary.t` error is encountered, respectively. *)

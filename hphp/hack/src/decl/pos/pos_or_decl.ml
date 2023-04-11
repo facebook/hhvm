@@ -15,6 +15,7 @@ type ctx = {
   decl: Decl_reference.t option;
   file: Relative_path.t;
 }
+[@@deriving show]
 
 let none : t = Pos.none
 

@@ -6145,7 +6145,7 @@ module Primary = struct
 end
 
 module rec Error : sig
-  type t
+  type t [@@deriving show]
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -6196,10 +6196,6 @@ module rec Error : sig
   val both : t -> t -> t
 
   val with_code : t -> code:Error_code.t -> t
-
-  val show : t -> string
-
-  val pp : Format.formatter -> t -> unit
 end = struct
   type t =
     | Primary of Primary.t
@@ -6210,6 +6206,7 @@ end = struct
     | Union of t list
     | Intersection of t list
     | With_code of t * Error_code.t
+  [@@deriving show]
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -6339,42 +6336,6 @@ end = struct
   let both t1 t2 = Multiple [t1; t2]
 
   let with_code t ~code = With_code (t, code)
-
-  (* TODO: this is not actually showing the [Error.t]! It will actually show the
-     error evaluated at [Pos.none] without any quickfixes.
-     This may be quite expensive. In short, you should only be using this for
-     debugging and when you don't need to understand the structure of the
-     various callbacks etc. *)
-  let show t =
-    let show_message show_pos (pos, str) =
-      Format.sprintf "(%s, %s)" (show_pos pos) str
-    in
-    let show_error (code, message, reasons, _) =
-      let pos_to_string p = Pos.string @@ Pos.to_absolute p in
-      let msg_string = show_message pos_to_string @@ Lazy.force message in
-      let reasons = Lazy.force reasons in
-      let reasons_string =
-        List.fold_left
-          ~f:(fun acc msg ->
-            Format.sprintf "%s, %s" acc
-            @@ show_message
-                 Pos_or_decl.show_as_absolute_file_line_characters
-                 msg)
-          ~init:""
-          reasons
-      in
-      Format.(
-        open_hovbox 2;
-        sprintf
-          {|{@ code: %i;@ message: %s;@ reasons: %s }@]|}
-          (Error_code.to_enum code)
-          msg_string
-          reasons_string)
-    in
-    let res = eval t ~current_span:Pos.none in
-    Eval_result.to_string res show_error
-
-  let pp _ _ = ()
 end
 
 and Secondary : sig
@@ -6653,6 +6614,7 @@ and Secondary : sig
     | Violated_refinement_constraint of {
         cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
+  [@@deriving show]
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -6938,6 +6900,7 @@ end = struct
     | Violated_refinement_constraint of {
         cstr: [ `As | `Super ] * Pos_or_decl.t;
       }
+  [@@deriving show]
 
   let iter t ~on_prim ~on_snd =
     match t with
@@ -7875,7 +7838,7 @@ end = struct
 end
 
 and Callback : sig
-  type t
+  type t [@@deriving show]
 
   val iter : t -> on_prim:(Primary.t -> unit) -> unit
 
@@ -7949,6 +7912,7 @@ end = struct
     | With_code of Error_code.t * Pos.t Quickfix.t list
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
+  [@@deriving show]
 
   let iter t ~on_prim =
     let rec aux = function
@@ -8092,7 +8056,7 @@ end = struct
 end
 
 and Reasons_callback : sig
-  type t
+  type t [@@deriving show]
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
@@ -8208,11 +8172,13 @@ end = struct
   type op =
     | Append
     | Prepend
+  [@@deriving show]
 
   type component =
     | Code
     | Reasons
     | Quickfixes
+  [@@deriving show]
 
   type t =
     | Always of Error.t
@@ -8223,10 +8189,11 @@ end = struct
     | With_code of t * Error_code.t
     | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
     | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
-    | From_on_error of on_error
+    | From_on_error of (on_error[@show.opaque])
     | Prepend_on_apply of t * Secondary.t
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
     | Drop_reasons_on_apply of t
+  [@@deriving show]
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function

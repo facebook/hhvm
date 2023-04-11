@@ -27,36 +27,34 @@
 
 namespace apache::thrift {
 
-class ParallelConcurrencyController : public ConcurrencyControllerBase {
+class ParallelConcurrencyControllerBase : public ConcurrencyControllerBase {
  public:
-  ParallelConcurrencyController(RequestPileInterface& pile, folly::Executor& ex)
-      : pile_(pile), executor_(ex) {}
+  explicit ParallelConcurrencyControllerBase(RequestPileInterface& pile)
+      : pile_(pile) {}
 
-  void setExecutionLimitRequests(uint64_t limit) override;
+  void setExecutionLimitRequests(uint64_t limit) override final;
 
   using ConcurrencyControllerBase::setObserver;
 
-  uint64_t getExecutionLimitRequests() const override {
+  uint64_t getExecutionLimitRequests() const override final {
     return executionLimit_.load();
   }
 
-  uint64_t requestCount() const override {
+  uint64_t requestCount() const override final {
     return counters_.load().requestInExecution;
   }
 
-  void onEnqueued() override;
+  void onEnqueued() override final;
 
   void onRequestFinished(ServerRequestData&) override;
 
-  void stop() override;
+  void stop() override final;
 
-  uint64_t numPendingDequeRequest() const override {
+  uint64_t numPendingDequeRequest() const override final {
     return counters_.load().pendingDequeCalls;
   }
 
-  std::string describe() const override;
-
- private:
+ protected:
   struct Counters {
     constexpr Counters() noexcept = default;
     // Number of requests that are being executed
@@ -74,15 +72,27 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
 
   bool executorSupportPriority{true};
   RequestPileInterface& pile_;
-  folly::Executor& executor_;
 
   bool trySchedule(bool onEnqueued = false);
+  void executeRequest(std::optional<ServerRequest> req);
 
-  void executeRequest();
+  virtual void scheduleOnExecutor() = 0;
 
   bool isRequestActive(const ServerRequest& req);
 
   void onExecuteFinish(bool dequeueSuccess);
+};
+
+class ParallelConcurrencyController : public ParallelConcurrencyControllerBase {
+ public:
+  ParallelConcurrencyController(RequestPileInterface& pile, folly::Executor& ex)
+      : ParallelConcurrencyControllerBase(pile), executor_(ex) {}
+  std::string describe() const override;
+
+ private:
+  folly::Executor& executor_;
+
+  void scheduleOnExecutor() override;
 };
 
 } // namespace apache::thrift

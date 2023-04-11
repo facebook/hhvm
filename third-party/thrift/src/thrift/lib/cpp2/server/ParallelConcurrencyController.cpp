@@ -19,7 +19,8 @@
 
 namespace apache::thrift {
 
-void ParallelConcurrencyController::setExecutionLimitRequests(uint64_t limit) {
+void ParallelConcurrencyControllerBase::setExecutionLimitRequests(
+    uint64_t limit) {
   executionLimit_.store(limit);
   // When the limit is changed, we call trySchedule() to fill the gap
   // of new limit and the old (if new > old)
@@ -27,7 +28,7 @@ void ParallelConcurrencyController::setExecutionLimitRequests(uint64_t limit) {
   }
 }
 
-void ParallelConcurrencyController::onEnqueued() {
+void ParallelConcurrencyControllerBase::onEnqueued() {
   trySchedule(true);
 }
 
@@ -38,7 +39,7 @@ void ParallelConcurrencyController::onEnqueued() {
 // without being pulled if we don't schedule another task
 // And if the dequeue failed for some reason, we still decremented the
 // pendingCounter, so we are adding it back in here as well
-void ParallelConcurrencyController::onExecuteFinish(bool dequeueSuccess) {
+void ParallelConcurrencyControllerBase::onExecuteFinish(bool dequeueSuccess) {
   for (;;) {
     auto countersOld = counters_.load();
     auto counters = countersOld;
@@ -52,7 +53,7 @@ void ParallelConcurrencyController::onExecuteFinish(bool dequeueSuccess) {
   trySchedule();
 }
 
-void ParallelConcurrencyController::onRequestFinished(ServerRequestData&) {
+void ParallelConcurrencyControllerBase::onRequestFinished(ServerRequestData&) {
   onExecuteFinish(true);
 }
 
@@ -66,7 +67,7 @@ void ParallelConcurrencyController::onRequestFinished(ServerRequestData&) {
 // } else {
 //   return false;
 // }
-bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
+bool ParallelConcurrencyControllerBase::trySchedule(bool onEnqueued) {
   for (;;) {
     auto countersOld = counters_.load();
     auto counters = countersOld;
@@ -95,14 +96,7 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
         continue;
       }
 
-      if (executor_.getNumPriorities() > 1) {
-        // By default we have 2 prios, external requests should go to
-        // lower priority queue to yield to the internal ones
-        executor_.addWithPriority(
-            [this]() { executeRequest(); }, folly::Executor::LO_PRI);
-      } else {
-        executor_.add([this]() { executeRequest(); });
-      }
+      scheduleOnExecutor();
       return true;
     }
 
@@ -118,8 +112,19 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
   }
 }
 
-void ParallelConcurrencyController::executeRequest() {
-  auto req = pile_.dequeue();
+void ParallelConcurrencyController::scheduleOnExecutor() {
+  if (executor_.getNumPriorities() > 1) {
+    // By default we have 2 prios, external requests should go to
+    // lower priority queue to yield to the internal ones
+    executor_.addWithPriority(
+        [this]() { executeRequest(pile_.dequeue()); }, folly::Executor::LO_PRI);
+  } else {
+    executor_.add([this]() { executeRequest(pile_.dequeue()); });
+  }
+}
+
+void ParallelConcurrencyControllerBase::executeRequest(
+    std::optional<ServerRequest> req) {
   if (req) {
     ServerRequest& serverRequest = req.value();
     // Only continue when the request has not
@@ -152,7 +157,7 @@ void ParallelConcurrencyController::executeRequest() {
   }
 }
 
-void ParallelConcurrencyController::stop() {}
+void ParallelConcurrencyControllerBase::stop() {}
 
 std::string ParallelConcurrencyController::describe() const {
   return fmt::format(

@@ -22,29 +22,6 @@
 
 namespace apache {
 namespace thrift {
-
-namespace detail {
-namespace bound {
-
-template <typename T>
-struct Always {
-  template <typename...>
-  using apply = T;
-};
-template <template <typename...> class T, typename... Bound>
-struct Bind {
-  template <typename... Args>
-  using apply = T<Bound..., Args...>;
-};
-template <template <typename...> class T, typename... Bound>
-struct BindBack {
-  template <typename... Args>
-  using apply = T<Args..., Bound...>;
-};
-
-} // namespace bound
-} // namespace detail
-
 namespace adapt_detail {
 
 // Used to detect if an adapted type has a reset method.
@@ -102,7 +79,8 @@ struct StaticCastAdapter {
   }
 };
 
-struct BaseInlineAdapter {
+template <class T>
+struct InlineAdapter {
   template <typename U>
   static decltype(auto) toThrift(U&& value) {
     return std::forward<U>(value).toThrift();
@@ -121,27 +99,12 @@ struct BaseInlineAdapter {
         "not a mutable reference");
     apache::thrift::op::clear<>(value.toThrift());
   }
-};
 
-// A adapters for types that know how to adapt themselves.
-template <typename F>
-struct BoundInlineAdapter : BaseInlineAdapter {
-  template <
-      typename U,
-      typename T = typename F::template apply<folly::remove_cvref_t<U>>>
+  template <typename U>
   static T fromThrift(U&& value) {
     return T{std::forward<U>(value)};
   }
 };
-
-template <typename T>
-using InlineAdapter = BoundInlineAdapter<detail::bound::Always<T>>;
-template <template <typename...> class T, typename... Args>
-using TemplateInlineAdapter =
-    BoundInlineAdapter<detail::bound::Bind<T, Args...>>;
-template <template <typename...> class T, typename... Args>
-using BackTemplateInlineAdapter =
-    BoundInlineAdapter<detail::bound::BindBack<T, Args...>>;
 
 } // namespace thrift
 } // namespace apache

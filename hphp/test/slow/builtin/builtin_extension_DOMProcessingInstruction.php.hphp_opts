@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/builtin/builtin_extensions.inc
+--inputs=__DIR__/builtin_extensions.inc

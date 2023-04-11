@@ -1,1 +1,1 @@
---cfile=hphp/test/slow/ext_file/test_ext_file.txt
+--cfile=__DIR__/test_ext_file.txt

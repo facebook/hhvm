@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_vsdebug/./common.inc
+--inputs=__DIR__/./common.inc

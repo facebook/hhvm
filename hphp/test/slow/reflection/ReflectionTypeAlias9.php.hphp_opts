@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/reflection/ReflectionTypeAlias.inc
+--inputs=__DIR__/ReflectionTypeAlias.inc

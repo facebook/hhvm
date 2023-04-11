@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/sealed/sealed_classes11.inc
+--inputs=__DIR__/sealed_classes11.inc

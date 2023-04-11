@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_hsl/dump_locale.inc
+--inputs=__DIR__/dump_locale.inc

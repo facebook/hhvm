@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/spec/tests/classes/MyCollection.inc
---inputs=hphp/test/slow/spec/tests/classes/mylist.inc
+--inputs=__DIR__/MyCollection.inc
+--inputs=__DIR__/mylist.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/volatile/1227.inc
+--inputs=__DIR__/1227.inc

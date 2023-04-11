@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/hhbbc/private_props_006-1.inc
---inputs=hphp/test/slow/hhbbc/private_props_006-2.inc
+--inputs=__DIR__/private_props_006-1.inc
+--inputs=__DIR__/private_props_006-2.inc

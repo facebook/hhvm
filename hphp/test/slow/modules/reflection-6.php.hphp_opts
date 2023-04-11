@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/modules/reflection-6.inc
+--inputs=__DIR__/reflection-6.inc

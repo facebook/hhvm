@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/memoize/namespacebar.php.inc
---inputs=hphp/test/slow/memoize/namespacefoo.php.inc
---inputs=hphp/test/slow/memoize/traits.inc
+--inputs=__DIR__/namespacebar.php.inc
+--inputs=__DIR__/namespacefoo.php.inc
+--inputs=__DIR__/traits.inc

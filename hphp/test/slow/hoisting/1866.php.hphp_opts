@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/hoisting/1866.inc
+--inputs=__DIR__/1866.inc

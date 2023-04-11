@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/hhbbc/constant_folding/constant_folding.inc
+--inputs=__DIR__/constant_folding.inc

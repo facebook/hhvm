@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/compilation/refcount-bug.inc
+--inputs=__DIR__/refcount-bug.inc

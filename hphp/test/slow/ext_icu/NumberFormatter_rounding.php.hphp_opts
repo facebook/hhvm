@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_icu/NumberFormatter_rounding.inc
+--inputs=__DIR__/NumberFormatter_rounding.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/continuation_inherit.inc
+--inputs=__DIR__/continuation_inherit.inc

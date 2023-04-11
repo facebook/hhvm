@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/tests/classes/abstract_by_interface_002.inc
+--inputs=__DIR__/abstract_by_interface_002.inc

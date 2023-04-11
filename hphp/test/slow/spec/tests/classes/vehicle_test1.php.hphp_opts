@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/spec/tests/classes/Aircraft.inc
---inputs=hphp/test/slow/spec/tests/classes/PassengerJet.inc
---inputs=hphp/test/slow/spec/tests/classes/Vehicle.inc
+--inputs=__DIR__/Aircraft.inc
+--inputs=__DIR__/PassengerJet.inc
+--inputs=__DIR__/Vehicle.inc

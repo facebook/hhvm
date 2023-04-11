@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/spec/tests/exception_handling/MyRangeException.inc
+--inputs=__DIR__/MyRangeException.inc

@@ -1,4 +1,4 @@
 -d hhvm.php7.all=0 -d hhvm.php7.all=0
---inputs=hphp/test/slow/yield/2182-1.inc
---inputs=hphp/test/slow/yield/2182-2.inc
---inputs=hphp/test/slow/yield/2182-after.inc
+--inputs=__DIR__/2182-1.inc
+--inputs=__DIR__/2182-2.inc
+--inputs=__DIR__/2182-after.inc

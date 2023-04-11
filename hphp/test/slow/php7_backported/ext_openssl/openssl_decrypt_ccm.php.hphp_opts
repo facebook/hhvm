@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/php7_backported/ext_openssl/cipher_tests.inc
+--inputs=__DIR__/cipher_tests.inc

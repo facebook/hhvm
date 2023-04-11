@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/ext/standard/tests/file/fopen_include_path.inc
+--inputs=__DIR__/fopen_include_path.inc

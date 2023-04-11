@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/entrypoint-symlink2.inc
---inputs=hphp/test/slow/entrypoint-symlink3.inc
+--inputs=__DIR__/entrypoint-symlink2.inc
+--inputs=__DIR__/entrypoint-symlink3.inc

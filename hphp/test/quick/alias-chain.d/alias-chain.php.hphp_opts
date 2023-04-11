@@ -1,2 +1,2 @@
---inputs=hphp/test/quick/alias-chain.d/alias-chain-1.inc
---inputs=hphp/test/quick/alias-chain.d/alias-chain-2.inc
+--inputs=__DIR__/alias-chain-1.inc
+--inputs=__DIR__/alias-chain-2.inc

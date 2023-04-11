@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/file-coverage/multi-file-b.inc
---inputs=hphp/test/slow/file-coverage/multi-file-c.inc
+--inputs=__DIR__/multi-file-b.inc
+--inputs=__DIR__/multi-file-c.inc

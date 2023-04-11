@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/compilation/1240-1.inc
---inputs=hphp/test/slow/compilation/1240-2.inc
+--inputs=__DIR__/1240-1.inc
+--inputs=__DIR__/1240-2.inc

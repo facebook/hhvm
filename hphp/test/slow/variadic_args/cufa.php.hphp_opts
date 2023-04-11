@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/variadic_args/variadic_funcs.inc
+--inputs=__DIR__/variadic_funcs.inc

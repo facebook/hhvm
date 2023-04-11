@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/traits/fatal_missing_trait-class.inc
---inputs=hphp/test/slow/traits/fatal_missing_trait.inc
+--inputs=__DIR__/fatal_missing_trait-class.inc
+--inputs=__DIR__/fatal_missing_trait.inc

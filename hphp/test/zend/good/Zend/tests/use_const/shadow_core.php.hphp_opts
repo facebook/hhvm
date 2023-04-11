@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/Zend/tests/use_const/includes/foo_php_version.inc
+--inputs=__DIR__/includes/foo_php_version.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/Zend/tests/ns_069.inc
+--inputs=__DIR__/ns_069.inc

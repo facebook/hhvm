@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/ext_vsdebug/context.php
---inputs=hphp/test/slow/ext_vsdebug/common.inc
+--inputs=__DIR__/context.php
+--inputs=__DIR__/common.inc

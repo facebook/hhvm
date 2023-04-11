@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/namespace/autoload/autoload.inc
+--inputs=__DIR__/autoload.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/Zend/tests/unset.inc
+--inputs=__DIR__/unset.inc

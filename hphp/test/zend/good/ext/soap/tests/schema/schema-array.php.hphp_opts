@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/ext/soap/tests/schema/test_schema.inc
+--inputs=__DIR__/test_schema.inc

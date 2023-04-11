@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/constructor/1723.b.inc
---inputs=hphp/test/slow/constructor/1723.inc
+--inputs=__DIR__/1723.b.inc
+--inputs=__DIR__/1723.inc

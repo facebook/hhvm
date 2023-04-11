@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/hhbbc/parent_by_name_non_unique_child.1.inc
---inputs=hphp/test/slow/hhbbc/parent_by_name_non_unique_child.2.inc
---inputs=hphp/test/slow/hhbbc/parent_by_name_non_unique_child.inc
+--inputs=__DIR__/parent_by_name_non_unique_child.1.inc
+--inputs=__DIR__/parent_by_name_non_unique_child.2.inc
+--inputs=__DIR__/parent_by_name_non_unique_child.inc

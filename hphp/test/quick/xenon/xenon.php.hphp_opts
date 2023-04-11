@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/xenon/xenonUtil.inc
+--inputs=__DIR__/xenonUtil.inc

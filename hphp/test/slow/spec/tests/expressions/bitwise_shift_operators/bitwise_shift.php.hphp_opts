@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/spec/tests/expressions/bitwise_shift_operators/bitwise_shift_helper.inc
+--inputs=__DIR__/bitwise_shift_helper.inc

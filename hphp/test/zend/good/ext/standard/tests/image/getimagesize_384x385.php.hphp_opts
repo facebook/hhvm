@@ -1,1 +1,1 @@
---cdir="hphp/test/zend/good/ext/standard/tests/image"
+--cdir="__DIR__"

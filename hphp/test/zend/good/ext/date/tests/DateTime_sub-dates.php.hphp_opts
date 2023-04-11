@@ -1,2 +1,2 @@
---inputs=hphp/test/zend/good/ext/date/tests/DateTime_data-dates.inc
---inputs=hphp/test/zend/good/ext/date/tests/examine_diff.inc
+--inputs=__DIR__/DateTime_data-dates.inc
+--inputs=__DIR__/examine_diff.inc

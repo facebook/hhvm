@@ -1,4 +1,4 @@
---inputs=hphp/test/slow/ext_watchman/callback.inc
---inputs=hphp/test/slow/ext_watchman/constants.inc
---inputs=hphp/test/slow/ext_watchman/wminst.inc
+--inputs=__DIR__/callback.inc
+--inputs=__DIR__/constants.inc
+--inputs=__DIR__/wminst.inc
 -vRuntime.Eval.EnableArgsInBacktraces=1

@@ -1,2 +1,2 @@
 --inputs=test/slow/eval_order/1531.inc
---inputs=hphp/test/slow/eval_order/1531.inc
+--inputs=__DIR__/1531.inc

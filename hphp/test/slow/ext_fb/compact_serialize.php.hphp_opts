@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_fb/compact_serialize.inc
+--inputs=__DIR__/compact_serialize.inc

@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/hhbbc/maybe-mixed-tc1.inc
---inputs=hphp/test/slow/hhbbc/maybe-mixed-tc2.inc
+--inputs=__DIR__/maybe-mixed-tc1.inc
+--inputs=__DIR__/maybe-mixed-tc2.inc

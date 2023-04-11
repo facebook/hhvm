@@ -1,2 +1,2 @@
---inputs=hphp/test/zend/good/Zend/tests/nowdoc.inc
---inputs=hphp/test/zend/good/Zend/tests/nowdoc_vars.inc
+--inputs=__DIR__/nowdoc.inc
+--inputs=__DIR__/nowdoc_vars.inc

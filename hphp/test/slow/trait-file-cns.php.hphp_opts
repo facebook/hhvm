@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/trait-file-cns.php.inc
+--inputs=__DIR__/trait-file-cns.php.inc

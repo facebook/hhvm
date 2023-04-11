@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/parser/colon_colon_class_include_parent.inc
+--inputs=__DIR__/colon_colon_class_include_parent.inc

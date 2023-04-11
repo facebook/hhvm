@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/hhbbc/func_family_009-1.inc
---inputs=hphp/test/slow/hhbbc/func_family_009-2.inc
+--inputs=__DIR__/func_family_009-1.inc
+--inputs=__DIR__/func_family_009-2.inc

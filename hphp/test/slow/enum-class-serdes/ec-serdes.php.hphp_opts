@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/enum-class-serdes/ec-serdes.php.inc
+--inputs=__DIR__/ec-serdes.php.inc

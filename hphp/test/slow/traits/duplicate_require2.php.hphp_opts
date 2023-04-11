@@ -1,5 +1,5 @@
---inputs=hphp/test/slow/traits/duplicate_require2-1.inc
---inputs=hphp/test/slow/traits/duplicate_require2-2.inc
---inputs=hphp/test/slow/traits/duplicate_require2-3.inc
---inputs=hphp/test/slow/traits/duplicate_require2-4.inc
---inputs=hphp/test/slow/traits/duplicate_require2-5.inc
+--inputs=__DIR__/duplicate_require2-1.inc
+--inputs=__DIR__/duplicate_require2-2.inc
+--inputs=__DIR__/duplicate_require2-3.inc
+--inputs=__DIR__/duplicate_require2-4.inc
+--inputs=__DIR__/duplicate_require2-5.inc

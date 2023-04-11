@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/modules/duplicate-module-1.inc
+--inputs=__DIR__/duplicate-module-1.inc

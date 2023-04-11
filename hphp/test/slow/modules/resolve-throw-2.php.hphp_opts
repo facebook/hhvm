@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/modules/resolve-1.inc1
---inputs=hphp/test/slow/modules/resolve-2.inc
+--inputs=__DIR__/resolve-1.inc1
+--inputs=__DIR__/resolve-2.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/using/logger.inc
+--inputs=__DIR__/logger.inc

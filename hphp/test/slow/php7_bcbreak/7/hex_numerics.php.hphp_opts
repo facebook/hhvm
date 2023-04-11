@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/php7_bcbreak/7/../5/hex_numerics.php
+--inputs=__DIR__/../5/hex_numerics.php

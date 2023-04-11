@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/traits/abstract-final-override.inc
+--inputs=__DIR__/abstract-final-override.inc

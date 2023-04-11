@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/global_func/class_meth/dv_arr_hack_arr/call_user_func.inc
+--inputs=__DIR__/call_user_func.inc

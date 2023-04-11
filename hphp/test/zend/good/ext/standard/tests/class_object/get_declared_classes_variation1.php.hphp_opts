@@ -1,2 +1,2 @@
 --inputs=test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
---inputs=hphp/test/zend/good/ext/standard/tests/class_object/AutoLoaded.inc
+--inputs=__DIR__/AutoLoaded.inc

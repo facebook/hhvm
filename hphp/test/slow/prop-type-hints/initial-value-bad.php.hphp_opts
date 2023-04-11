@@ -1,4 +1,4 @@
 -vCheckPropTypeHints=1
---inputs=hphp/test/slow/prop-type-hints/initial-value-bad.inc
---inputs=hphp/test/slow/prop-type-hints/redefine1.inc
---inputs=hphp/test/slow/prop-type-hints/redefine2.inc
+--inputs=__DIR__/initial-value-bad.inc
+--inputs=__DIR__/redefine1.inc
+--inputs=__DIR__/redefine2.inc

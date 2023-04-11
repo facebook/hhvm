@@ -1,4 +1,4 @@
 -vParserThreadCount=64
---inputs=hphp/test/slow/compilation/pseudo-cycles-1.inc
---inputs=hphp/test/slow/compilation/pseudo-cycles-2.inc
---inputs=hphp/test/slow/compilation/pseudo-cycles-3.inc
+--inputs=__DIR__/pseudo-cycles-1.inc
+--inputs=__DIR__/pseudo-cycles-2.inc
+--inputs=__DIR__/pseudo-cycles-3.inc

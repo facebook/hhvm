@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/syntax-error.php
+--inputs=__DIR__/syntax-error.php

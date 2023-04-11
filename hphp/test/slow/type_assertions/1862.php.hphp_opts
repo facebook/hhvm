@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/type_assertions/1862-1.inc
---inputs=hphp/test/slow/type_assertions/1862-2.inc
---inputs=hphp/test/slow/type_assertions/1862-after.inc
+--inputs=__DIR__/1862-1.inc
+--inputs=__DIR__/1862-2.inc
+--inputs=__DIR__/1862-after.inc

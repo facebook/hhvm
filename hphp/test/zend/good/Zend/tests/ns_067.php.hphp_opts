@@ -1,3 +1,3 @@
---inputs=hphp/test/zend/good/Zend/tests/ns_022.inc
---inputs=hphp/test/zend/good/Zend/tests/ns_027.inc
---inputs=hphp/test/zend/good/Zend/tests/ns_067.inc
+--inputs=__DIR__/ns_022.inc
+--inputs=__DIR__/ns_027.inc
+--inputs=__DIR__/ns_067.inc

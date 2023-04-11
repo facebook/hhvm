@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/debugger/modules.php.inc
---inputs=hphp/test/slow/debugger/modules.php.inc2
+--inputs=__DIR__/modules.php.inc
+--inputs=__DIR__/modules.php.inc2

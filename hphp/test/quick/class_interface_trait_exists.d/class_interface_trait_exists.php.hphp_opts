@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/class_interface_trait_exists.d/class_interface_trait_exists1.inc
+--inputs=__DIR__/class_interface_trait_exists1.inc

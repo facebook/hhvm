@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/autoload_case.d/autoload_case1.inc
+--inputs=__DIR__/autoload_case1.inc

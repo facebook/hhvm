@@ -1,1 +1,1 @@
---cdir="hphp/test/slow/vfs/files"
+--cdir="__DIR__/files"

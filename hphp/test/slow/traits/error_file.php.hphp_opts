@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/traits/error_file-class.inc
---inputs=hphp/test/slow/traits/error_file.inc
---inputs=hphp/test/slow/traits/error_file.inc2
+--inputs=__DIR__/error_file-class.inc
+--inputs=__DIR__/error_file.inc
+--inputs=__DIR__/error_file.inc2

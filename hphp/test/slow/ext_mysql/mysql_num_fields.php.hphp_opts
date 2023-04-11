@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_mysql/connect.inc
+--inputs=__DIR__/connect.inc

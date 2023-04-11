@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/ext/gd/tests/func.inc
+--inputs=__DIR__/func.inc

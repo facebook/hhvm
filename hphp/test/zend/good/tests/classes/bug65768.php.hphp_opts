@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/tests/classes/bug65768.inc
+--inputs=__DIR__/bug65768.inc

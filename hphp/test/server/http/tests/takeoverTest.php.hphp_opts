@@ -1,1 +1,1 @@
---inputs=hphp/test/server/http/tests/../../util/server_tests.inc
+--inputs=__DIR__/../../util/server_tests.inc

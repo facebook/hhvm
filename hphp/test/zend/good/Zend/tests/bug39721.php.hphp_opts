@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/Zend/tests/bug39721.inc
+--inputs=__DIR__/bug39721.inc

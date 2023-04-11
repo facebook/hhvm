@@ -3,4 +3,4 @@
 -vRuntime.Eval.ClassAsStringVarExport=false
 -vRuntime.Eval.ClassPassesClassname=true
 -vRuntime.Eval.CoeffectEnforcementLevels.zoned=0
---inputs=hphp/test/slow/class-ptr/lazyclass-suppress.inc
+--inputs=__DIR__/lazyclass-suppress.inc

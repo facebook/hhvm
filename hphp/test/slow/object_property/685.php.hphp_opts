@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/object_property/685-1.inc
---inputs=hphp/test/slow/object_property/685-2.inc
---inputs=hphp/test/slow/object_property/685-classes.inc
+--inputs=__DIR__/685-1.inc
+--inputs=__DIR__/685-2.inc
+--inputs=__DIR__/685-classes.inc

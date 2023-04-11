@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/spec/tests/serialization/Point.inc
+--inputs=__DIR__/Point.inc

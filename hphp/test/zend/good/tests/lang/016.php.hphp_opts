@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/tests/lang/016.inc
+--inputs=__DIR__/016.inc

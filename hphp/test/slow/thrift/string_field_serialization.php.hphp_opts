@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/thrift/common.inc
+--inputs=__DIR__/common.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/dynamic-calls/watchman_shared.inc
+--inputs=__DIR__/watchman_shared.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/ext/standard/tests/class_object/AutoInterface.inc
+--inputs=__DIR__/AutoInterface.inc

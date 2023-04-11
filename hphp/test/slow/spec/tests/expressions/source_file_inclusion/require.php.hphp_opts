@@ -1,5 +1,5 @@
---inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/mycolors.php
---inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/return_none.php
---inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/return_with_value.php
---inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/return_without_value.php
---inputs=hphp/test/slow/spec/tests/expressions/source_file_inclusion/test.php
+--inputs=__DIR__/mycolors.php
+--inputs=__DIR__/return_none.php
+--inputs=__DIR__/return_with_value.php
+--inputs=__DIR__/return_without_value.php
+--inputs=__DIR__/test.php

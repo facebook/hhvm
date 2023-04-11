@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/apc_fetch_object_fast_init.inc
+--inputs=__DIR__/apc_fetch_object_fast_init.inc

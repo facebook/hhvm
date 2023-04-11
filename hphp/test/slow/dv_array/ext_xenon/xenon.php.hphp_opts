@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/dv_array/ext_xenon/xenonUtil.inc
+--inputs=__DIR__/xenonUtil.inc

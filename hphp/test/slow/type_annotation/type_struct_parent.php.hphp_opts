@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/type_annotation/type_struct_child.inc
---inputs=hphp/test/slow/type_annotation/type_struct_parent.inc
+--inputs=__DIR__/type_struct_child.inc
+--inputs=__DIR__/type_struct_parent.inc

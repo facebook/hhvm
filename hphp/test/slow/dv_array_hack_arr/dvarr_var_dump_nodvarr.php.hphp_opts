@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/dv_array_hack_arr/dvarr_var_dump.inc
+--inputs=__DIR__/dvarr_var_dump.inc

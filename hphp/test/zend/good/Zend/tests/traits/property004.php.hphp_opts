@@ -1,2 +1,2 @@
---inputs=hphp/test/zend/good/Zend/tests/traits/property004.class.inc
---inputs=hphp/test/zend/good/Zend/tests/traits/property004.traits.inc
+--inputs=__DIR__/property004.class.inc
+--inputs=__DIR__/property004.traits.inc

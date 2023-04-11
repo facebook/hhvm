@@ -1,2 +1,2 @@
 -vRuntime.Hack.Lang.AllowUnstableFeatures=1
---inputs=hphp/test/slow/expression_trees/expression_tree.inc
+--inputs=__DIR__/expression_tree.inc

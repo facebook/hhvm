@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/modules/internal-function-1.inc0
---inputs=hphp/test/slow/modules/internal-function-1.inc1
+--inputs=__DIR__/internal-function-1.inc0
+--inputs=__DIR__/internal-function-1.inc1

@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/class_constant/1618-1.inc
---inputs=hphp/test/slow/class_constant/1618-2.inc
+--inputs=__DIR__/1618-1.inc
+--inputs=__DIR__/1618-2.inc

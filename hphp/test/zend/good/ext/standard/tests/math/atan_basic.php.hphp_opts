@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/ext/standard/tests/math/allowed_rounding_error.inc
+--inputs=__DIR__/allowed_rounding_error.inc

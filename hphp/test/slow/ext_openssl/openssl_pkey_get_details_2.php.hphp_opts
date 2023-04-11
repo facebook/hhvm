@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_openssl/recursive.inc
+--inputs=__DIR__/recursive.inc

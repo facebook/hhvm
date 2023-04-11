@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/redeclared_classes/1467-1.inc
---inputs=hphp/test/slow/redeclared_classes/1467-2.inc
---inputs=hphp/test/slow/redeclared_classes/1467-3.inc
+--inputs=__DIR__/1467-1.inc
+--inputs=__DIR__/1467-2.inc
+--inputs=__DIR__/1467-3.inc

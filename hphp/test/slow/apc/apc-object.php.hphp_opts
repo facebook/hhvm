@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/apc/apc-object-1.inc
---inputs=hphp/test/slow/apc/apc-object-2.inc
+--inputs=__DIR__/apc-object-1.inc
+--inputs=__DIR__/apc-object-2.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/hhbbc/persistent.inc
+--inputs=__DIR__/persistent.inc

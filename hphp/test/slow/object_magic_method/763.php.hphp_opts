@@ -1,3 +1,3 @@
---inputs=hphp/test/slow/object_magic_method/763-1.inc
---inputs=hphp/test/slow/object_magic_method/763-2.inc
---inputs=hphp/test/slow/object_magic_method/763-classes.inc
+--inputs=__DIR__/763-1.inc
+--inputs=__DIR__/763-2.inc
+--inputs=__DIR__/763-classes.inc

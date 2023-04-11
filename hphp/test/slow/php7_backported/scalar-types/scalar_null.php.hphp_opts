@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/php7_backported/scalar-types/fix_exceptions.inc
+--inputs=__DIR__/fix_exceptions.inc

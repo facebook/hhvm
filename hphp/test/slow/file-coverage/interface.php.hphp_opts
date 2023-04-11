@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/file-coverage/interface-definition.inc
+--inputs=__DIR__/interface-definition.inc

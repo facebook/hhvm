@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/traits/2127.inc
+--inputs=__DIR__/2127.inc

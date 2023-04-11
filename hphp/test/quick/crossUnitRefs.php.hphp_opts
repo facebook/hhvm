@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/crossUnitRefsInc.php
+--inputs=__DIR__/crossUnitRefsInc.php

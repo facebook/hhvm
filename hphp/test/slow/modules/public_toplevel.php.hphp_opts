@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/modules/public_toplevel.inc
+--inputs=__DIR__/public_toplevel.inc

@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/spec/tests/constants/includefile.inc
+--inputs=__DIR__/includefile.inc

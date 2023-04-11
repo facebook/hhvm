@@ -1,1 +1,1 @@
---inputs=hphp/test/zend/good/ext/intl/tests/ut_common.inc
+--inputs=__DIR__/ut_common.inc

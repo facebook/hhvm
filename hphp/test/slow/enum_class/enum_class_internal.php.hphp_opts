@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/enum_class/enum_class_internal.inc
+--inputs=__DIR__/enum_class_internal.inc

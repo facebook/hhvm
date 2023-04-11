@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/ext_pdo/ext_pdo.inc
+--inputs=__DIR__/ext_pdo.inc

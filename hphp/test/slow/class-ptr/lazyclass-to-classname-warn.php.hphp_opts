@@ -4,4 +4,4 @@
 -vRuntime.Eval.ClassStringHintNotices=true
 -vRuntime.Eval.RaiseClassConversionWarning=true
 -vRuntime.Eval.CheckPropTypeHints=3
---inputs=hphp/test/slow/class-ptr/classname-type-hint.inc
+--inputs=__DIR__/classname-type-hint.inc

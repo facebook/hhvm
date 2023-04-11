@@ -1,2 +1,2 @@
---inputs=hphp/test/slow/type_assertions/enum-param-2.inc
---inputs=hphp/test/slow/type_assertions/enum-param.php
+--inputs=__DIR__/enum-param-2.inc
+--inputs=__DIR__/enum-param.php

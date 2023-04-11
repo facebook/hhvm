@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/exceptions/60.inc
+--inputs=__DIR__/60.inc

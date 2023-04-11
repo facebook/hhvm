@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/like_types/parameter_alias.inc
+--inputs=__DIR__/parameter_alias.inc

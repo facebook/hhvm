@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/implicit-context/async-implicit.inc
+--inputs=__DIR__/async-implicit.inc

@@ -1,2 +1,2 @@
 -vRuntime.Eval.CoeffectEnforcementLevels.zoned=0
---inputs=hphp/test/slow/implicit-context/implicit.inc
+--inputs=__DIR__/implicit.inc

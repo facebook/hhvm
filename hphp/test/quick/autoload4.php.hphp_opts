@@ -1,1 +1,1 @@
---inputs=hphp/test/quick/autoload4.inc
+--inputs=__DIR__/autoload4.inc

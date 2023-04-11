@@ -1,1 +1,1 @@
---inputs=hphp/test/slow/redeclared_classes/1468-1.inc
+--inputs=__DIR__/1468-1.inc

@@ -754,7 +754,6 @@ void ThriftServer::setupThreadManager() {
                 << THRIFT_FLAG(experimental_use_resource_pools)
                 << " enable gflag:"
                 << FLAGS_thrift_experimental_use_resource_pools;
-      DCHECK(!threadManager_);
 
       ensureResourcePools();
 
@@ -1037,6 +1036,22 @@ void ThriftServer::ensureResourcePools() {
           std::move(concurrencyController));
     }
 
+    return;
+  }
+
+  if (threadManager_) {
+    apache::thrift::RoundRobinRequestPile::Options options;
+    auto requestPile = std::make_unique<apache::thrift::RoundRobinRequestPile>(
+        std::move(options));
+    auto concurrencyController =
+        std::make_unique<apache::thrift::TMConcurrencyController>(
+            *requestPile, *threadManager_);
+    resourcePoolSet().setResourcePool(
+        ResourcePoolHandle::defaultAsync(),
+        std::move(requestPile),
+        threadManager_,
+        std::move(concurrencyController),
+        concurrency::PRIORITY::NORMAL);
     return;
   }
 

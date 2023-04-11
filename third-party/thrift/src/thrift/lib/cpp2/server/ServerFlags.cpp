@@ -32,8 +32,9 @@ FOLLY_GFLAGS_DEFINE_bool(
     true,
     "Allow resource pools for wildcard processors");
 
-THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
+THRIFT_FLAG_DEFINE_bool(allow_set_thread_manager_resource_pools, false);
 
+THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
 THRIFT_FLAG_DEFINE_bool(
     allow_resource_pools_set_thread_manager_from_executor, true);
 

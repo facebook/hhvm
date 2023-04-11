@@ -1274,6 +1274,7 @@ bool blockWhile(F&& f, Duration duration = 1s) {
 } // namespace
 
 TEST_P(HeaderOrRocket, ThreadManagerAdapterOverSimpleTMUpstreamPriorities) {
+  THRIFT_FLAG_SET_MOCK(allow_set_thread_manager_resource_pools, true);
   class TestInterface : public apache::thrift::ServiceHandler<TestService> {
    public:
     TestInterface() {}
@@ -1509,6 +1510,7 @@ TEST_P(HeaderOrRocket, ThreadManagerAdapterSinglePool) {
 }
 
 TEST_P(HeaderOrRocket, StickyToThreadPool) {
+  THRIFT_FLAG_SET_MOCK(allow_set_thread_manager_resource_pools, true);
   int callCount{0};
   class TestInterface : public apache::thrift::ServiceHandler<TestService> {
     int& callCount_;

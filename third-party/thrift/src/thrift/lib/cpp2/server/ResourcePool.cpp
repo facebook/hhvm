@@ -298,6 +298,10 @@ std::size_t ResourcePoolSet::workerCount() const {
               &resourcePools_[i]->executor()->get())) {
         // Return the configured number of threads not the dynamic number.
         workers += tpe->numThreads();
+      } else if (
+          auto* tm = dynamic_cast<concurrency::ThreadManager*>(
+              &resourcePools_[i]->executor()->get())) {
+        workers += tm->workerCount();
       }
     }
   }
@@ -318,6 +322,10 @@ std::size_t ResourcePoolSet::idleWorkerCount() const {
         // PoolStats idleThreadCount correctly reflects threads which are
         // configured in the executor but not running as idle.
         idle += poolStats.idleThreadCount;
+      } else if (
+          auto* tm = dynamic_cast<concurrency::ThreadManager*>(
+              &resourcePools_[i]->executor()->get())) {
+        idle += tm->idleWorkerCount();
       }
     }
   }

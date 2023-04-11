@@ -604,7 +604,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
       std::shared_ptr<apache::thrift::concurrency::ThreadManager>
           threadManager) {
     setThreadManagerInternal(threadManager);
-    runtimeDisableResourcePoolsDeprecated();
+    if (!THRIFT_FLAG(allow_set_thread_manager_resource_pools)) {
+      runtimeDisableResourcePoolsDeprecated();
+    }
     runtimeServerActions_.userSuppliedThreadManager = true;
   }
 

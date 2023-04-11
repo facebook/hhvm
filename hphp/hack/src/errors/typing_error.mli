@@ -142,6 +142,7 @@ module Primary : sig
           reason:
             [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
+    [@@deriving show]
   end
 
   module Enum : sig
@@ -212,6 +213,7 @@ module Primary : sig
           src_classish_name: string;
         }
       | Enum_classes_reserved_syntax of Pos.t
+    [@@deriving show]
   end
 
   module Expr_tree : sig
@@ -228,6 +230,7 @@ module Primary : sig
           member_name: string;
           class_name: string;
         }
+    [@@deriving show]
   end
 
   module Readonly : sig
@@ -258,6 +261,7 @@ module Primary : sig
           decl_pos: Pos_or_decl.t;
           suggestion: string;
         }
+    [@@deriving show]
   end
 
   module Ifc : sig
@@ -286,6 +290,7 @@ module Primary : sig
           pos: Pos.t;
           msg: string;
         }
+    [@@deriving show]
   end
 
   module Coeffect : sig
@@ -306,6 +311,7 @@ module Primary : sig
           required: string Lazy.t;
           suggestion: Pos_or_decl.t Message.t list Lazy.t option;
         }
+    [@@deriving show]
   end
 
   module Wellformedness : sig
@@ -335,6 +341,7 @@ module Primary : sig
         }
       | Tuple_syntax of Pos.t
       | Invalid_class_refinement of { pos: Pos.t }
+    [@@deriving show]
   end
 
   module Modules : sig
@@ -387,6 +394,7 @@ module Primary : sig
           target_module_opt: string option;
           target_package_opt: string option;
         }
+    [@@deriving show]
   end
 
   module Xhp : sig
@@ -405,6 +413,7 @@ module Primary : sig
           attr: string;
           ty_reason_msg: Pos_or_decl.t Message.t list Lazy.t;
         }
+    [@@deriving show]
   end
 
   (** Specific error information readily transformable into a user error *)
@@ -1369,6 +1378,7 @@ module Primary : sig
         member_name: string;
         kind: [ `meth | `prop ];
       }
+  [@@deriving show]
 
   val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option
 end

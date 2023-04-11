@@ -375,6 +375,7 @@ module Primary = struct
           reason:
             [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
+    [@@deriving show]
 
     let invalid_shape_field_type pos ty_pos ty_name trail : error =
       let reasons =
@@ -616,6 +617,7 @@ module Primary = struct
           src_classish_name: string;
         }
       | Enum_classes_reserved_syntax of Pos.t
+    [@@deriving show]
 
     let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
       let claim = lazy (pos, "Enum class label/member mismatch")
@@ -874,6 +876,7 @@ module Primary = struct
           member_name: string;
           class_name: string;
         }
+    [@@deriving show]
 
     let expression_tree_non_public_member pos decl_pos =
       let claim =
@@ -967,6 +970,7 @@ module Primary = struct
           decl_pos: Pos_or_decl.t;
           suggestion: string;
         }
+    [@@deriving show]
 
     let readonly_modified pos reason_opt : error =
       let claim =
@@ -1105,6 +1109,7 @@ module Primary = struct
           pos: Pos.t;
           msg: string;
         }
+    [@@deriving show]
 
     let illegal_information_flow
         pos secondaries source_poss source sink_poss sink =
@@ -1225,6 +1230,7 @@ module Primary = struct
           required: string Lazy.t;
           suggestion: Pos_or_decl.t Message.t list Lazy.t option;
         }
+    [@@deriving show]
 
     let call_coeffect
         pos available_pos available_incl_unsafe required_pos required : error =
@@ -1328,6 +1334,7 @@ module Primary = struct
         }
       | Tuple_syntax of Pos.t
       | Invalid_class_refinement of { pos: Pos.t }
+    [@@deriving show]
 
     let missing_return pos hint_pos is_async =
       let return_type =
@@ -1493,6 +1500,7 @@ module Primary = struct
           target_module_opt: string option;
           target_package_opt: string option;
         }
+    [@@deriving show]
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1722,6 +1730,7 @@ module Primary = struct
           attr: string;
           ty_reason_msg: Pos_or_decl.t Message.t list Lazy.t;
         }
+    [@@deriving show]
 
     let xhp_required pos why_xhp ty_reason_msg =
       let claim = lazy (pos, "An XHP instance was expected") in
@@ -2710,6 +2719,7 @@ module Primary = struct
         member_name: string;
         kind: [ `meth | `prop ];
       }
+  [@@deriving show]
 
   (* User error helpers *)
 

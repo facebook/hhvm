@@ -63,7 +63,8 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
     packages.emplace(std::string(p.name),
                      Package {
                        convert(p.package.uses),
-                       convert(p.package.includes)
+                       convert(p.package.includes),
+                       convert(p.package.soft_includes)
                      });
   }
 
@@ -75,6 +76,7 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
     deployments.emplace(std::string(d.name),
                         Deployment {
                           convert(d.deployment.packages),
+                          convert(d.deployment.soft_packages),
                           std::move(domains),
                         });
   }
@@ -111,12 +113,14 @@ std::string PackageInfo::mangleForCacheKey() const {
     folly::dynamic entry = folly::dynamic::object();
     entry["uses"] = mangleVecForCacheKey(package.m_uses);
     entry["includes"] = mangleVecForCacheKey(package.m_includes);
+    entry["soft_includes"] = mangleVecForCacheKey(package.m_soft_includes);
     result[name] = entry;
   }
 
   for (auto& [name, deployment] : deployments()) {
     folly::dynamic entry = folly::dynamic::object();
     entry["packages"] = mangleVecForCacheKey(deployment.m_packages);
+    entry["soft_packages"] = mangleVecForCacheKey(deployment.m_soft_packages);
     entry["domains"] = mangleVecForCacheKey(deployment.m_domains);
     result[name] = entry;
   }

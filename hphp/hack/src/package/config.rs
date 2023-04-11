@@ -177,7 +177,7 @@ fn find_missing_packages_from_deployment(
         package_map: &PackageMap,
     ) -> Vec<Spanned<String>> {
         let mut missing_pkgs = included
-            .into_iter()
+            .iter()
             .filter_map(|pkg| {
                 let pkg_name = pkg.get_ref().as_str();
                 if !deployed.contains(pkg_name) {
@@ -192,7 +192,7 @@ fn find_missing_packages_from_deployment(
         missing_pkgs
     }
     (
-        get_missing(&included, &deployed, package_map),
+        get_missing(&included, deployed, package_map),
         get_missing(&soft_included, &soft_or_regular_deployed, package_map),
     )
 }

@@ -1470,7 +1470,9 @@ namespace {
 const StaticString
   s_uses("uses"),
   s_includes("includes"),
+  s_soft_includes("soft_includes"),
   s_packages("packages"),
+  s_soft_packages("soft_packages"),
   s_domains("domains");
 
 const PackageInfo getPackageInfo() {
@@ -1486,7 +1488,7 @@ Array HHVM_FUNCTION(get_all_packages) {
   auto const packageInfo = getPackageInfo();
   DictInit result(packageInfo.packages().size());
   for (auto const& [name, p] : packageInfo.packages()) {
-    DictInit package(2);
+    DictInit package(3);
 
     VecInit uses(p.m_uses.size());
     for (auto& s : p.m_uses) uses.append(String{makeStaticString(s)});
@@ -1496,6 +1498,9 @@ Array HHVM_FUNCTION(get_all_packages) {
     for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
     package.set(s_includes.get(), includes.toVariant());
 
+    VecInit soft_includes(p.m_soft_includes.size());
+    for (auto& s : p.m_soft_includes) soft_includes.append(String{makeStaticString(s)});
+    package.set(s_soft_includes.get(), soft_includes.toVariant());
     result.set(makeStaticString(name), package.toVariant());
   }
 
@@ -1506,11 +1511,15 @@ Array HHVM_FUNCTION(get_all_deployments) {
   auto const packageInfo = getPackageInfo();
   DictInit result(packageInfo.deployments().size());
   for (auto const& [name, d] : packageInfo.deployments()) {
-    DictInit deployment(2);
+    DictInit deployment(3);
 
     VecInit packages(d.m_packages.size());
     for (auto& s : d.m_packages) packages.append(String{makeStaticString(s)});
     deployment.set(s_packages.get(), packages.toVariant());
+
+    VecInit soft_packages(d.m_soft_packages.size());
+    for (auto& s : d.m_soft_packages) soft_packages.append(String{makeStaticString(s)});
+    deployment.set(s_soft_packages.get(), soft_packages.toVariant());
 
     VecInit domains(d.m_domains.size());
     for (auto& r : d.m_domains) {

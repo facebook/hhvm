@@ -32,21 +32,25 @@ struct PackageInfo {
   struct Package {
     hphp_vector_string_set m_uses;
     hphp_vector_string_set m_includes;
+    hphp_vector_string_set m_soft_includes;
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_uses, stdltstr{})
         (m_includes, stdltstr{})
+        (m_soft_includes, stdltstr{})
         ;
     }
   };
 
   struct Deployment {
     hphp_vector_string_set m_packages;
+    hphp_vector_string_set m_soft_packages;
     std::vector<std::shared_ptr<re2::RE2>> m_domains;
 
     template <typename SerDe> void serde(SerDe& sd) {
       // m_domains omitted on purpose, as it is not needed to be serialized
       sd(m_packages, stdltstr{});
+      sd(m_soft_packages, stdltstr{});
     }
   };
 

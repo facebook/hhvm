@@ -22,6 +22,7 @@ mod ffi {
     struct Package {
         uses: Vec<String>,
         includes: Vec<String>,
+        soft_includes: Vec<String>,
     }
     struct DeploymentMapEntry {
         name: String,
@@ -29,6 +30,7 @@ mod ffi {
     }
     struct Deployment {
         packages: Vec<String>,
+        soft_packages: Vec<String>,
         domains: Vec<String>,
     }
     extern "Rust" {
@@ -49,6 +51,7 @@ pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
             let package_ffi = ffi::Package {
                 uses: convert(package.uses.as_ref()),
                 includes: convert(package.includes.as_ref()),
+                soft_includes: convert(package.soft_includes.as_ref()),
             };
             ffi::PackageMapEntry {
                 name: name.get_ref().to_string(),
@@ -64,6 +67,7 @@ pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
                 .map(|(name, deployment)| {
                     let deployment_ffi = ffi::Deployment {
                         packages: convert(deployment.packages.as_ref()),
+                        soft_packages: convert(deployment.soft_packages.as_ref()),
                         domains: convert(deployment.domains.as_ref()),
                     };
                     ffi::DeploymentMapEntry {

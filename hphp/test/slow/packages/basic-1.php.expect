@@ -1,6 +1,19 @@
-dict(3) {
+dict(4) {
+  ["bat"]=>
+  dict(3) {
+    ["uses"]=>
+    vec(1) {
+      string(3) "z.*"
+    }
+    ["includes"]=>
+    vec(0) {
+    }
+    ["soft_includes"]=>
+    vec(0) {
+    }
+  }
   ["baz"]=>
-  dict(2) {
+  dict(3) {
     ["uses"]=>
     vec(2) {
       string(3) "x.*"
@@ -11,9 +24,12 @@ dict(3) {
       string(3) "foo"
       string(3) "bar"
     }
+    ["soft_includes"]=>
+    vec(0) {
+    }
   }
   ["bar"]=>
-  dict(2) {
+  dict(3) {
     ["uses"]=>
     vec(1) {
       string(3) "b.*"
@@ -22,9 +38,13 @@ dict(3) {
     vec(1) {
       string(3) "foo"
     }
+    ["soft_includes"]=>
+    vec(1) {
+      string(3) "bat"
+    }
   }
   ["foo"]=>
-  dict(2) {
+  dict(3) {
     ["uses"]=>
     vec(1) {
       string(3) "a.*"
@@ -32,15 +52,22 @@ dict(3) {
     ["includes"]=>
     vec(0) {
     }
+    ["soft_includes"]=>
+    vec(0) {
+    }
   }
 }
 dict(1) {
   ["my-prod"]=>
-  dict(2) {
+  dict(3) {
     ["packages"]=>
     vec(2) {
       string(3) "foo"
       string(3) "bar"
+    }
+    ["soft_packages"]=>
+    vec(1) {
+      string(3) "bat"
     }
     ["domains"]=>
     vec(2) {

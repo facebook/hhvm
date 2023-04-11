@@ -6,13 +6,18 @@ uses = ["a.*"]
 [packages.bar]
 uses = ["b.*"]
 includes = ["foo"]
+soft_includes = ["bat"]
 
 [packages.baz]
 uses = ["x.*", "y.*"]
 includes = ["foo", "bar"]
 
+[packages.bat]
+uses=["z.*"]
+
 [deployments]
 
 [deployments.my-prod]
 packages = ["foo", "bar"]
+soft_packages=["bat"]
 domains = ['www\.my-prod\.com', '.*\.website\.com$']

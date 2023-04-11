@@ -41,6 +41,7 @@ type 'a t = {
   kind: kind;
   name: string;
   full_name: string;
+  class_name: string option;
   id: string option;
   pos: 'a Pos.pos;
   (* covers the span of just the identifier *)

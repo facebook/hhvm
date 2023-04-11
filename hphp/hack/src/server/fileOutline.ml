@@ -64,6 +64,7 @@ let summarize_property class_name var =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos;
     span = var.cv_span;
@@ -95,6 +96,7 @@ let summarize_class_const class_name cc =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos;
     span;
@@ -128,6 +130,7 @@ let summarize_typeconst class_name t =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos;
     span = t.c_tconst_span;
@@ -164,6 +167,7 @@ let summarize_param param =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos;
     span = Pos.btw param_start param_end;
@@ -192,6 +196,7 @@ let summarize_method class_name m =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos = fst m.m_name;
     span = m.m_span;
@@ -305,6 +310,7 @@ let summarize_class class_ ~no_children =
     kind;
     name;
     full_name;
+    class_name = Some class_name;
     id;
     pos = class_name_pos;
     span = c_span;
@@ -326,6 +332,7 @@ let summarize_typedef tdef =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos;
     span;
@@ -347,6 +354,7 @@ let summarize_fun fd =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos = fst fd.fd_name;
     span = f.f_span;
@@ -368,6 +376,7 @@ let summarize_gconst cst =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos;
     span = Pos.btw gconst_start gconst_end;
@@ -385,6 +394,7 @@ let summarize_local name span =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos = span;
     span;
@@ -410,6 +420,7 @@ let summarize_module_def md =
     kind;
     name;
     full_name;
+    class_name = None;
     id;
     pos = span;
     span;
@@ -523,6 +534,7 @@ let rec print_def ~short_pos indent def =
     params;
     docblock;
     full_name = _;
+    class_name = _;
   } =
     def
   in

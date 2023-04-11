@@ -970,7 +970,7 @@ function hhvm_cmd_impl(
       // use the temp path for embedded data
       '-vEval.EmbeddedDataExtractPath='.
       Status::getRunTmpDir().
-      '/hhvm_%{type}_%{buildid}',
+      escapeshellarg('/hhvm_%{type}_%{buildid}'),
 
       // Stick to a single thread for retranslate-all
       '-vEval.JitWorkerThreads=1',

@@ -20,15 +20,17 @@
 use std::ffi::CStr;
 use std::fmt;
 use std::future::Future;
-use std::marker::PhantomData;
 use std::pin::Pin;
 
 use anyhow::bail;
+use anyhow::Context;
 use anyhow::Result;
+use bytes::Buf;
 use futures::future::FutureExt;
 
 use crate::serialize;
 use crate::ApplicationException;
+use crate::BufExt;
 use crate::ContextStack;
 use crate::Deserialize;
 use crate::MessageType;
@@ -70,6 +72,14 @@ pub fn type_name_of_val<T>(_: &T) -> &'static str {
     std::any::type_name::<T>()
 }
 
+pub fn buf_len<B: Buf>(b: &B) -> anyhow::Result<u32> {
+    let length: usize = b.remaining();
+    let length: u32 = length.try_into().with_context(|| {
+        format!("Unable to report a buffer length of {length} bytes as a `u32`")
+    })?;
+    Ok(length)
+}
+
 /// Serialize a result as encoded into a generated *Exn type, wrapped in an envelope.
 pub fn serialize_result_envelope<P, CTXT, RES>(
     name: &str,
@@ -83,6 +93,8 @@ where
     P: Protocol,
     RES: ResultInfo + Serialize<P::Sizer> + Serialize<P::Serializer>,
     CTXT: RequestContext<Name = CStr>,
+    <CTXT as RequestContext>::ContextStack: ContextStack<Frame = P::Frame>,
+    ProtocolEncodedFinal<P>: Clone + Buf + BufExt,
 {
     let res_type = res.result_type();
 
@@ -99,12 +111,13 @@ where
         p.write_message_end();
     });
 
-    ctx_stack.on_write_data(&SerializedMessage {
+    ctx_stack.on_write_data(SerializedMessage {
         protocol: P::PROTOCOL_ID,
         method_name: name_cstr,
-        buffer: PhantomData,
+        buffer: envelope.clone(),
     })?;
-    ctx_stack.post_write(0)?;
+    let bytes_written = buf_len(&envelope)?;
+    ctx_stack.post_write(bytes_written)?;
 
     Ok(envelope)
 }

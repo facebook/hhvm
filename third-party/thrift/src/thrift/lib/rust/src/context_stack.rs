@@ -26,7 +26,7 @@ use crate::thrift_protocol::ProtocolID;
 
 pub struct SerializedMessage<'a, Name: ?Sized, Buffer> {
     pub protocol: ProtocolID,
-    pub buffer: PhantomData<Buffer>, // Buffer,
+    pub buffer: Buffer,
     pub method_name: &'a Name,
 }
 
@@ -43,7 +43,7 @@ pub trait ContextStack {
     /// reply (client), with the actual (unparsed, serialized) data.
     fn on_read_data(
         &mut self,
-        msg: &SerializedMessage<Self::Name, FramingDecoded<Self::Frame>>,
+        msg: SerializedMessage<Self::Name, FramingDecoded<Self::Frame>>,
     ) -> Result<(), Error>;
 
     /// Called after the request is read.
@@ -56,7 +56,7 @@ pub trait ContextStack {
     /// serializing request (client), with the actual (serialized) data.
     fn on_write_data(
         &mut self,
-        msg: &SerializedMessage<Self::Name, FramingEncodedFinal<Self::Frame>>,
+        msg: SerializedMessage<Self::Name, FramingEncodedFinal<Self::Frame>>,
     ) -> Result<(), Error>;
 
     /// Called after a response a written.
@@ -88,7 +88,7 @@ where
 
     fn on_read_data(
         &mut self,
-        _msg: &SerializedMessage<Self::Name, FramingDecoded<Self::Frame>>,
+        _msg: SerializedMessage<Self::Name, FramingDecoded<Self::Frame>>,
     ) -> Result<(), Error> {
         Ok(())
     }
@@ -103,7 +103,7 @@ where
 
     fn on_write_data(
         &mut self,
-        _msg: &SerializedMessage<Self::Name, FramingEncodedFinal<Self::Frame>>,
+        _msg: SerializedMessage<Self::Name, FramingEncodedFinal<Self::Frame>>,
     ) -> Result<(), Error> {
         Ok(())
     }

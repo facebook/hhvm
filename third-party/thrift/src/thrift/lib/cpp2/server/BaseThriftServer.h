@@ -667,7 +667,8 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
    */
   std::shared_ptr<folly::Executor> getHandlerExecutor_deprecated()
       const override {
-    if (!resourcePoolSet().empty()) {
+    if (!runtimeServerActions_.userSuppliedThreadManager &&
+        !resourcePoolSet().empty()) {
       return resourcePoolSet()
           .resourcePool(ResourcePoolHandle::defaultAsync())
           .sharedPtrExecutor()
@@ -678,7 +679,8 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   folly::Executor::KeepAlive<> getHandlerExecutorKeepAlive() const override {
-    if (!resourcePoolSet().empty()) {
+    if (!runtimeServerActions_.userSuppliedThreadManager &&
+        !resourcePoolSet().empty()) {
       return resourcePoolSet()
           .resourcePool(ResourcePoolHandle::defaultAsync())
           .sharedPtrExecutor()

@@ -21,6 +21,7 @@
 #include <folly/synchronization/Baton.h>
 #include <folly/synchronization/Latch.h>
 
+#include <thrift/lib/cpp/concurrency/SFQThreadManager.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
@@ -99,7 +100,7 @@ class FIFORequestPile : public RequestPileInterface {
 class ResourcePoolMock {
  public:
   ResourcePoolMock(
-      FIFORequestPile* pile, ParallelConcurrencyController* controller)
+      RequestPileInterface* pile, ParallelConcurrencyControllerBase* controller)
       : pile_(pile), controller_(controller) {}
 
   void enqueue(ServerRequest&& request) {
@@ -108,8 +109,8 @@ class ResourcePoolMock {
   }
 
  private:
-  FIFORequestPile* pile_;
-  ParallelConcurrencyController* controller_;
+  RequestPileInterface* pile_;
+  ParallelConcurrencyControllerBase* controller_;
 };
 
 class MockResponseChannelRequest : public ResponseChannelRequest {
@@ -145,7 +146,7 @@ ServerRequest getRequest(AsyncProcessor* ap, folly::EventBase*) {
   return req;
 }
 
-Func blockingTaskGen(folly::Baton<>& baton, ParallelConcurrencyController&) {
+Func blockingTaskGen(folly::Baton<>& baton) {
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
     baton.wait();
@@ -154,7 +155,7 @@ Func blockingTaskGen(folly::Baton<>& baton, ParallelConcurrencyController&) {
   return waitingTask;
 }
 
-Func endingTaskGen(folly::Baton<>& baton, ParallelConcurrencyController&) {
+Func endingTaskGen(folly::Baton<>& baton) {
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
     baton.post();
@@ -172,74 +173,174 @@ std::unique_ptr<AsyncProcessor> makeAP(Func func) {
 
 } // namespace
 
+enum class CCType {
+  // ParallelConcurrencyController
+  PARALLEL_CC = 0,
+  // TMConcurrencyController with SimpleThreadManager
+  TM_CC_STM = 1,
+  // TMConcurrencyController with PriorityThreadManager
+  TM_CC_PTM = 2,
+  // TMConcurrencyController with SFQThreadManager
+  TM_CC_SFQTM = 3
+};
+
+// Holds a request pile, concurrency controller and an executor required to
+// construct a ResourcePool
+struct ResourcePoolHolder {
+  std::unique_ptr<RequestPileInterface> pile;
+  std::unique_ptr<ParallelConcurrencyControllerBase> controller;
+  std::shared_ptr<folly::Executor> ex;
+
+  size_t getTaskQueueSize() {
+    if (ex) {
+      if (auto threadPoolExecutor =
+              dynamic_cast<folly::CPUThreadPoolExecutor*>(ex.get())) {
+        return threadPoolExecutor->getTaskQueueSize();
+      } else if (auto threadManager = dynamic_cast<ThreadManager*>(ex.get())) {
+        return threadManager->pendingTaskCount();
+      }
+    }
+    return 0;
+  }
+
+  void join() {
+    if (ex) {
+      if (auto threadPoolExecutor =
+              dynamic_cast<folly::ThreadPoolExecutor*>(ex.get())) {
+        threadPoolExecutor->join();
+      } else if (auto threadManager = dynamic_cast<ThreadManager*>(ex.get())) {
+        threadManager->join();
+      }
+    }
+  }
+};
+
+class ParallelConcurrencyControllerTest
+    : public ::testing::Test,
+      public ::testing::WithParamInterface<CCType> {
+ public:
+  ResourcePoolHolder getResourcePoolHolder(bool useFifoRequestPile = false) {
+    ResourcePoolHolder holder;
+    if (useFifoRequestPile) {
+      holder.pile = std::make_unique<FIFORequestPile>();
+    } else {
+      RoundRobinRequestPile::Options options;
+      holder.pile = std::make_unique<apache::thrift::RoundRobinRequestPile>(
+          std::move(options));
+    }
+    switch (GetParam()) {
+      case CCType::PARALLEL_CC: {
+        holder.ex = std::make_shared<folly::CPUThreadPoolExecutor>(1, 2);
+        holder.controller = std::make_unique<ParallelConcurrencyController>(
+            *holder.pile, *holder.ex);
+        break;
+      }
+      case CCType::TM_CC_STM: {
+        auto threadManager = ThreadManager::newSimpleThreadManager("tm", 1);
+        auto threadFactory =
+            std::make_shared<PosixThreadFactory>(PosixThreadFactory::ATTACHED);
+        threadManager->threadFactory(threadFactory);
+        threadManager->start();
+        holder.ex = threadManager;
+        holder.controller = std::make_unique<TMConcurrencyController>(
+            *holder.pile, *threadManager);
+        break;
+      }
+      case CCType::TM_CC_PTM: {
+        auto threadManager = PriorityThreadManager::newPriorityThreadManager(1);
+        threadManager->setNamePrefix("ptm");
+        threadManager->start();
+        holder.ex = threadManager;
+        holder.controller = std::make_unique<TMConcurrencyController>(
+            *holder.pile, *threadManager);
+        break;
+      }
+      case CCType::TM_CC_SFQTM: {
+        auto threadManager =
+            std::make_shared<SFQThreadManager>(SFQThreadManagerConfig());
+        threadManager->setNamePrefix("sfqtm");
+        threadManager->start();
+        holder.ex = threadManager;
+        holder.controller = std::make_unique<TMConcurrencyController>(
+            *holder.pile, *threadManager);
+        break;
+      }
+    };
+    return holder;
+  }
+};
+
 // This test just tests the normal case where we have 2 tasks that sit in
 // the Executor, the count should return 2.
 // When the tasks all finish, the count should return 0
-TEST(ParallelConcurrencyControllerTest, NormalCases) {
+TEST_P(ParallelConcurrencyControllerTest, NormalCases) {
   folly::EventBase eb;
-
-  folly::CPUThreadPoolExecutor ex(1);
-  FIFORequestPile pile;
-  ParallelConcurrencyController controller(pile, ex);
+  auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
 
   folly::Baton baton1;
   folly::Baton baton2;
 
-  auto blockingAP = makeAP(blockingTaskGen(baton1, controller));
+  auto blockingAP = makeAP(blockingTaskGen(baton1));
 
-  auto endingAP = makeAP(endingTaskGen(baton2, controller));
+  auto endingAP = makeAP(endingTaskGen(baton2));
 
-  ResourcePoolMock pool(&pile, &controller);
+  ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
   pool.enqueue(getRequest(blockingAP.get(), &eb));
   pool.enqueue(getRequest(endingAP.get(), &eb));
 
-  EXPECT_EQ(controller.requestCount(), 2);
+  EXPECT_EQ(holder.controller->requestCount(), 2);
   baton1.post();
 
   baton2.wait();
-  EXPECT_EQ(controller.requestCount(), 0);
+  EXPECT_EQ(holder.controller->requestCount(), 0);
 
-  ex.join();
+  holder.join();
 }
 
 // This tests when the concurrency limit is set to 2
 // In this case only 2 tasks can run concurrently
-TEST(ParallelConcurrencyControllerTest, LimitedTasks) {
+TEST_P(ParallelConcurrencyControllerTest, LimitedTasks) {
   folly::EventBase eb;
+  auto holder = getResourcePoolHolder(true /*useFifoRequestPile*/);
 
-  folly::CPUThreadPoolExecutor ex(1);
-  FIFORequestPile pile;
-  ParallelConcurrencyController controller(pile, ex);
-
-  controller.setExecutionLimitRequests(2);
+  holder.controller->setExecutionLimitRequests(2);
 
   folly::Baton baton1;
   folly::Baton baton2;
   folly::Baton baton3;
 
-  auto staringBlockingAP = makeAP(blockingTaskGen(baton1, controller));
+  auto staringBlockingAP = makeAP(blockingTaskGen(baton1));
 
-  auto blockingAP = makeAP(blockingTaskGen(baton2, controller));
+  auto blockingAP = makeAP(blockingTaskGen(baton2));
 
-  auto endingAP = makeAP(endingTaskGen(baton3, controller));
+  auto endingAP = makeAP(endingTaskGen(baton3));
 
-  ResourcePoolMock pool(&pile, &controller);
+  ResourcePoolMock pool(holder.pile.get(), holder.controller.get());
 
   pool.enqueue(getRequest(blockingAP.get(), &eb));
   pool.enqueue(getRequest(blockingAP.get(), &eb));
   pool.enqueue(getRequest(endingAP.get(), &eb));
 
-  EXPECT_EQ(controller.requestCount(), 2);
+  EXPECT_EQ(holder.controller->requestCount(), 2);
 
   baton1.post();
   baton2.post();
 
   baton3.wait();
-  EXPECT_EQ(controller.requestCount(), 0);
+  EXPECT_EQ(holder.controller->requestCount(), 0);
 
-  ex.join();
+  holder.join();
 }
+
+INSTANTIATE_TEST_CASE_P(
+    ParallelConcurrencyControllerTest,
+    ParallelConcurrencyControllerTest,
+    testing::Values(
+        CCType::PARALLEL_CC,
+        CCType::TM_CC_STM,
+        CCType::TM_CC_PTM,
+        CCType::TM_CC_SFQTM));
 
 Func edgeTaskGen(
     folly::Latch& latch,
@@ -360,7 +461,7 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   ex.join();
 }
 
-TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
+TEST_P(ParallelConcurrencyControllerTest, InternalPrioritization) {
   THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
   if (!apache::thrift::useResourcePoolsFlagsSet()) {
     GTEST_SKIP() << "Invalid resource pools mode";
@@ -387,53 +488,46 @@ TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
 
   auto handler = std::make_shared<BlockingCallTestService>(counter);
 
-  RoundRobinRequestPile::Options options;
-  auto requestPile = std::make_unique<apache::thrift::RoundRobinRequestPile>(
-      std::move(options));
-
-  // 1 thread, 2 priorities, so that we can serialize the calls
-  auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(1, 2);
-
-  auto concurrencyController =
-      std::make_unique<apache::thrift::ParallelConcurrencyController>(
-          *requestPile.get(), *executor.get());
+  auto holder = getResourcePoolHolder();
 
   auto config = [&](apache::thrift::ThriftServer& server) mutable {
     server.resourcePoolSet().setResourcePool(
         apache::thrift::ResourcePoolHandle::defaultAsync(),
-        std::move(requestPile),
-        executor,
-        std::move(concurrencyController));
+        std::move(holder.pile),
+        holder.ex,
+        std::move(holder.controller));
   };
 
-  ScopedServerInterfaceThread runner(handler, config);
+  {
+    ScopedServerInterfaceThread runner(handler, config);
 
-  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+    auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
 
-  auto ka = thriftServer.getHandlerExecutorKeepAlive();
+    auto ka = thriftServer.getHandlerExecutorKeepAlive();
 
-  ka->add([&]() { blockingBaton.wait(); });
+    ka->add([&]() { blockingBaton.wait(); });
 
-  auto client = runner.newClient<TestServiceAsyncClient>();
+    auto client = runner.newClient<TestServiceAsyncClient>();
 
-  auto res = client->semifuture_echoInt(0);
+    auto res = client->semifuture_echoInt(0);
 
-  // wait for the request to reach the executor queue
-  while (executor->getTaskQueueSize() != 1) {
-    std::this_thread::yield();
+    // wait for the request to reach the executor queue
+    while (holder.getTaskQueueSize() != 1) {
+      std::this_thread::yield();
+    }
+
+    // this is an internal task, which should
+    // be prioritized over external requests
+    // so counter should be 0 here
+    ka->add([&]() {
+      EXPECT_EQ(counter.load(), 0);
+      ++counter;
+    });
+
+    blockingBaton.post();
+
+    EXPECT_EQ(std::move(res).get(), 1);
   }
-
-  // this is an internal task, which should
-  // be prioritized over external requests
-  // so counter should be 0 here
-  ka->add([&]() {
-    EXPECT_EQ(counter.load(), 0);
-    ++counter;
-  });
-
-  blockingBaton.post();
-
-  EXPECT_EQ(std::move(res).get(), 1);
 }
 
 TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {

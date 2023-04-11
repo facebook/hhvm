@@ -22,6 +22,7 @@
 #include <folly/lang/Align.h>
 #include <folly/synchronization/RelaxedAtomic.h>
 
+#include <thrift/lib/cpp/concurrency/ThreadManager.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerBase.h>
 #include <thrift/lib/cpp2/server/RequestPileInterface.h>
 
@@ -91,6 +92,19 @@ class ParallelConcurrencyController : public ParallelConcurrencyControllerBase {
 
  private:
   folly::Executor& executor_;
+
+  void scheduleOnExecutor() override;
+};
+
+class TMConcurrencyController : public ParallelConcurrencyControllerBase {
+ public:
+  TMConcurrencyController(
+      RequestPileInterface& pile, concurrency::ThreadManager& tm)
+      : ParallelConcurrencyControllerBase(pile), tm_(tm) {}
+  std::string describe() const override;
+
+ private:
+  concurrency::ThreadManager& tm_;
 
   void scheduleOnExecutor() override;
 };

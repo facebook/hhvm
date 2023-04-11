@@ -72,6 +72,10 @@ void ResourcePool::stop() {
         auto virtualExecutor =
             dynamic_cast<folly::VirtualExecutor*>(executor_.get())) {
       executor_.reset();
+    } else if (
+        auto threadManager =
+            dynamic_cast<concurrency::ThreadManager*>(executor_.get())) {
+      threadManager->join();
     } else {
       auto& exe = *executor_.get();
       LOG(WARNING) << "Could not join executor threads:"

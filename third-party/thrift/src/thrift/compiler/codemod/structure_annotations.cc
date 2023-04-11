@@ -39,7 +39,10 @@ class structure_annotations {
       const t_named& node, t_type_ref type, bool is_field) {
     std::set<std::string> to_add;
     // Annotations on type
-    {
+    if (type->is_base_type() || type->is_container() ||
+        (type->is_typedef() &&
+         static_cast<const t_typedef&>(*type).typedef_kind() !=
+             t_typedef::kind::defined)) {
       std::vector<t_annotation> to_remove;
       for (const auto& [name, data] : type->annotations()) {
         bool has_cpp_type = false;

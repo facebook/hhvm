@@ -46,6 +46,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 struct S {
                     1: i32 (cpp.template = "baz") baz;
                     2: i32 qux (cpp.template = "oops!");
+                    3: foo noAdd;
                 }
 
                 """
@@ -70,6 +71,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     @cpp.Type{template = "baz"}
                     1: i32  baz;
                     2: i32 qux ;
+                    3: foo noAdd;
                 }
                 """
             ),

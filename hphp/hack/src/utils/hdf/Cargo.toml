@@ -10,10 +10,10 @@ path = "lib.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-cxx = "1.0.91"
+cxx = "1.0.94"
 thiserror = "1.0.36"
 
 [build-dependencies]
 cc = {}
-cxx-build = "1.0.91"
+cxx-build = "1.0.94"
 glob = {}

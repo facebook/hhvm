@@ -1765,13 +1765,13 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
     | ClientIdeService.Status.Initializing ->
       ( MessageType.WarningMessage,
         "Hack: initializing",
-        "Hack IDE: initializing.",
+        "hh_client: initializing.",
         None )
     | ClientIdeService.Status.Processing_files p ->
       let open ClientIdeMessage.Processing_files in
       ( MessageType.WarningMessage,
         "Hack",
-        Printf.sprintf "Hack IDE: processing %d files." p.total,
+        Printf.sprintf "hh_client: processing %d files." p.total,
         None )
     | ClientIdeService.Status.Rpc requests ->
       let telemetry =
@@ -1779,10 +1779,10 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
       in
       ( MessageType.WarningMessage,
         "Hack",
-        "Hack IDE: working...",
+        "hh_client: working...",
         Some telemetry )
     | ClientIdeService.Status.Ready ->
-      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", None)
+      (MessageType.InfoMessage, "Hack: ready", "hh_client: ready.", None)
     | ClientIdeService.Status.Stopped s ->
       let open ClientIdeMessage in
       ( MessageType.ErrorMessage,
@@ -1990,7 +1990,7 @@ let publish_hh_server_status_diagnostic
 (** Here are the rules for merging status. They embody the principle that the spinner
 shows if initializing/typechecking is in progress, the error icon shows if error,
 and the status bar word is "Hack" if IDE services are available or "Hack: xyz" if not.
-Note that if Hack IDE is up but hh_server is down, then the hh_server failure message
+Note that if hh_client is up but hh_server is down, then the hh_server failure message
 is conveyed via a publishDiagnostic; it's not conveyed via status.
   [ok] Hack -- if ide_service is up and hh_server is ready
   [spin] Hack -- if ide_service is processing-files or hh_server is initializing/typechecking

@@ -70,9 +70,9 @@ let make_bug_reason
   let { message; data } = make_error_internal ~message ~exn ~data in
   {
     ClientIdeMessage.short_user_message = "failed";
-    medium_user_message = "Hack IDE has failed.";
+    medium_user_message = "hh_client has failed.";
     long_user_message =
-      "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.";
+      "hh_client has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.";
     debug_details = message ^ "\nDETAILS:\n" ^ Hh_json.json_to_string data;
     is_actionable = false;
   }

@@ -8,14 +8,14 @@
 
 type finale_data = {
   exit_status: Exit_status.t;
-      (** exit_status is shown to the user in CLI and HackIDE,
+      (** exit_status is shown to the user in CLI and LSP,
       just so they have an error code they can quote back at
       developers. It's also used by hh_client to decide, on the
       basis of that hh_server exit_status, whether to auto-restart
       hh_server or not. And it appears in logs and telemetry. *)
   msg: string option;
       (** msg is a human-readable message for the end-user to explain why
-      hh_server stopped. It appears in the CLI, and in HackIDE in a
+      hh_server stopped. It appears in the CLI, and in LSP in a
       hover tooltip. It also is copied into the logs. *)
   stack: Utils.callstack;
       (** telemetry is unstructured data, for logging, not shown to users *)

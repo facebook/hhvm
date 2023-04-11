@@ -282,11 +282,11 @@ let handle
 
   let msg = ClientProvider.read_client_msg client in
 
-  (* This is a helper to update progress.json to things like "[HackIDE:idle done]" or "[HackAst:--type-at-pos check]"
+  (* This is a helper to update progress.json to things like "[hh_client:idle done]" or "[HackAst:--type-at-pos check]"
      or "[HackAst:--type-at-pos]". We try to balance something useful to the user, with something that helps the hack
      team know what's going on and who is to blame.
      The form is [FROM:CMD PHASE].
-     FROM is the --from argument passed at the command-line, or "HackIDE" in case of LSP requests.
+     FROM is the --from argument passed at the command-line, or "hh_client" in case of LSP requests.
      CMD is the "--type-at-pos" or similar command-line argument that gave rise to serverRpc, or something sensible for LSP.
      PHASE is empty at the start, "done" once we've finished handling, "write" if Needs_writes, "check" if Needs_full_recheck. *)
   let send_progress phase =

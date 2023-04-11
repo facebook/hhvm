@@ -6298,7 +6298,7 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "hh_client: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6307,7 +6307,7 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6316,14 +6316,14 @@ function unsaved_bar(): string { return "hello"; }
                 method="window/showStatus",
                 params={
                     "type": 3,
-                    "message": "Hack IDE: ready.",
+                    "message": "hh_client: ready.",
                     "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "message": "hh_client: ready.\nhh_server: stopped.",
                     "shortMessage": "Hack: ready",
                     "type": 3,
                 },
@@ -6923,7 +6923,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "hh_client: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6932,7 +6932,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6941,14 +6941,14 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 3,
-                    "message": "Hack IDE: ready.",
+                    "message": "hh_client: ready.",
                     "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "message": "hh_client: ready.\nhh_server: stopped.",
                     "shortMessage": "Hack: ready",
                     "type": 3,
                 },
@@ -6977,7 +6977,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
+                    "message": "hh_client: initializing.\nhh_server initializing: processing [<test> seconds]",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6986,7 +6986,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.\nhh_server: ready.",
+                    "message": "hh_client: initializing.\nhh_server: ready.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6995,7 +6995,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -7004,7 +7004,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/showStatus",
                 params={
                     "type": 1,
-                    "message": "Hack IDE has failed. See Output›Hack for details.",
+                    "message": "hh_client has failed. See Output›Hack for details.",
                     "shortMessage": "Hack: failed",
                 },
             )
@@ -7012,13 +7012,13 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.\nMore details: http://dummy/HH_TEST_MODE",
+                    "message": "hh_client has failed.\nThis is unexpected.\nPlease file a bug within your IDE, and try restarting it.\nMore details: http://dummy/HH_TEST_MODE",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE has failed. See Output›Hack for details.\nhh_server: ready.",
+                    "message": "hh_client has failed. See Output›Hack for details.\nhh_server: ready.",
                     "shortMessage": "Hack: failed",
                     "type": 1,
                 },
@@ -7544,7 +7544,7 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "message": "hh_client: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -7553,16 +7553,16 @@ function aaa(): string {
                 method="window/showStatus",
                 params={
                     "type": 2,
-                    "message": "Hack IDE: initializing.",
+                    "message": "hh_client: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
             .ignore_requests(
-                comment="another racy initialization, if HackIDE is done before hh_server has yet sent status",
+                comment="another racy initialization, if hh_client is done before hh_server has yet sent status",
                 method="window/showStatus",
                 params={
                     "type": 3,
-                    "message": "Hack IDE: ready.",
+                    "message": "hh_client: ready.",
                     "shortMessage": "Hack: ready",
                 },
             )
@@ -7622,7 +7622,7 @@ function aaa(): string {
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
-                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "message": "hh_client: ready.\nhh_server: stopped.",
                     "shortMessage": "Hack: ready",
                     "type": 3,
                 },

@@ -718,7 +718,7 @@ let serve_one_iteration genv env client_provider =
     match selected_client with
     | ClientProvider.(Select_nothing | Select_exception _) when not env.ide_idle
       ->
-      ServerProgress.write ~include_in_logs:false "HackIDE:active"
+      ServerProgress.write ~include_in_logs:false "hh_client:active"
     | ClientProvider.(Select_nothing | Select_exception _) ->
       ServerProgress.write
         ~include_in_logs:false

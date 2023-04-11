@@ -408,6 +408,16 @@ void lower_type_annotations(
     for (auto& pair : unstructured) {
       const_cast<t_type*>(node_type)->set_annotation(pair.first, pair.second);
     }
+  } else if (node_type->is_base_type()) {
+    // Copy type as we don't handle unnamed typedefs to base types :(
+    auto& program = mCtx.program();
+    auto unnamed = std::make_unique<t_base_type>(
+        *static_cast<const t_base_type*>(node_type));
+    for (auto& pair : unstructured) {
+      unnamed->set_annotation(pair.first, pair.second);
+    }
+    node.set_type(t_type_ref::from_ptr(unnamed.get()));
+    program.add_unnamed_type(std::move(unnamed));
   } else {
     // Wrap in an unnamed typedef :(
     auto& program = mCtx.program();

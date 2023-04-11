@@ -18,6 +18,10 @@ use std::marker::PhantomData;
 
 use anyhow::Error;
 
+use crate::bufext::BufExt;
+use crate::framing::Framing;
+use crate::framing::FramingDecoded;
+use crate::framing::FramingEncodedFinal;
 use crate::thrift_protocol::ProtocolID;
 
 pub struct SerializedMessage<'a, Name: ?Sized, Buffer> {
@@ -29,8 +33,8 @@ pub struct SerializedMessage<'a, Name: ?Sized, Buffer> {
 pub trait ContextStack {
     /// Type for method names
     type Name: ?Sized;
-    /// Type for buffers
-    type Buffer;
+    /// Type for serialized read and write buffers
+    type Frame: Framing;
 
     /// Called before the request is read.
     fn pre_read(&mut self) -> Result<(), Error>;
@@ -39,7 +43,7 @@ pub trait ContextStack {
     /// reply (client), with the actual (unparsed, serialized) data.
     fn on_read_data(
         &mut self,
-        msg: &SerializedMessage<Self::Name, Self::Buffer>,
+        msg: &SerializedMessage<Self::Name, FramingDecoded<Self::Frame>>,
     ) -> Result<(), Error>;
 
     /// Called after the request is read.
@@ -52,18 +56,18 @@ pub trait ContextStack {
     /// serializing request (client), with the actual (serialized) data.
     fn on_write_data(
         &mut self,
-        msg: &SerializedMessage<Self::Name, Self::Buffer>,
+        msg: &SerializedMessage<Self::Name, FramingEncodedFinal<Self::Frame>>,
     ) -> Result<(), Error>;
 
     /// Called after a response a written.
     fn post_write(&mut self, bytes: u32) -> Result<(), Error>;
 }
 
-pub struct DummyContextStack<Name: ?Sized, Buffer> {
-    _phantom: PhantomData<(Buffer, Name)>,
+pub struct DummyContextStack<Name: ?Sized, Frame> {
+    _phantom: PhantomData<(Frame, Name)>,
 }
 
-impl<Name: ?Sized, Buffer> DummyContextStack<Name, Buffer> {
+impl<Name: ?Sized, Frame> DummyContextStack<Name, Frame> {
     pub fn new() -> Self {
         Self {
             _phantom: PhantomData,
@@ -71,9 +75,12 @@ impl<Name: ?Sized, Buffer> DummyContextStack<Name, Buffer> {
     }
 }
 
-impl<Name: ?Sized, Buffer> ContextStack for DummyContextStack<Name, Buffer> {
+impl<Name: ?Sized, Frame: Framing> ContextStack for DummyContextStack<Name, Frame>
+where
+    FramingEncodedFinal<Frame>: BufExt,
+{
     type Name = Name;
-    type Buffer = Buffer;
+    type Frame = Frame;
 
     fn pre_read(&mut self) -> Result<(), Error> {
         Ok(())
@@ -81,7 +88,7 @@ impl<Name: ?Sized, Buffer> ContextStack for DummyContextStack<Name, Buffer> {
 
     fn on_read_data(
         &mut self,
-        _msg: &SerializedMessage<Self::Name, Self::Buffer>,
+        _msg: &SerializedMessage<Self::Name, FramingDecoded<Self::Frame>>,
     ) -> Result<(), Error> {
         Ok(())
     }
@@ -96,7 +103,7 @@ impl<Name: ?Sized, Buffer> ContextStack for DummyContextStack<Name, Buffer> {
 
     fn on_write_data(
         &mut self,
-        _msg: &SerializedMessage<Self::Name, Self::Buffer>,
+        _msg: &SerializedMessage<Self::Name, FramingEncodedFinal<Self::Frame>>,
     ) -> Result<(), Error> {
         Ok(())
     }
@@ -106,9 +113,16 @@ impl<Name: ?Sized, Buffer> ContextStack for DummyContextStack<Name, Buffer> {
     }
 }
 
-fn _assert_context_stack(_: &impl ContextStack) {}
+#[cfg(test)]
+mod test {
+    use bytes::Bytes;
 
-#[test]
-fn check_unsized() {
-    _assert_context_stack(&DummyContextStack::<std::ffi::CStr, Vec<u8>>::new());
+    use super::*;
+
+    fn assert_context_stack(_: &impl ContextStack) {}
+
+    #[test]
+    fn check_unsized() {
+        assert_context_stack(&DummyContextStack::<std::ffi::CStr, Bytes>::new());
+    }
 }

@@ -18,8 +18,11 @@ use std::marker::PhantomData;
 
 use anyhow::Error;
 
+use crate::bufext::BufExt;
 use crate::context_stack::ContextStack;
 use crate::context_stack::DummyContextStack;
+use crate::framing::Framing;
+use crate::framing::FramingEncodedFinal;
 
 pub trait RequestContext {
     type ContextStack: ContextStack;
@@ -36,11 +39,11 @@ pub trait RequestContext {
     fn set_user_exception_header(&self, ex_type: &str, ex_reason: &str) -> Result<(), Error>;
 }
 
-pub struct DummyRequestContext<Name: ?Sized, Buffer> {
-    _phantom: PhantomData<(Buffer, Name)>,
+pub struct DummyRequestContext<Name: ?Sized, Frame> {
+    _phantom: PhantomData<(Frame, Name)>,
 }
 
-impl<Name: ?Sized, Buffer> DummyRequestContext<Name, Buffer> {
+impl<Name: ?Sized, Frame> DummyRequestContext<Name, Frame> {
     pub fn new() -> Self {
         Self {
             _phantom: PhantomData,
@@ -48,8 +51,11 @@ impl<Name: ?Sized, Buffer> DummyRequestContext<Name, Buffer> {
     }
 }
 
-impl<Name: ?Sized, Buffer> RequestContext for DummyRequestContext<Name, Buffer> {
-    type ContextStack = crate::context_stack::DummyContextStack<Name, Buffer>;
+impl<Name: ?Sized, Frame: Framing> RequestContext for DummyRequestContext<Name, Frame>
+where
+    FramingEncodedFinal<Frame>: BufExt,
+{
+    type ContextStack = crate::context_stack::DummyContextStack<Name, Frame>;
     type Name = Name;
 
     fn get_context_stack(
@@ -65,9 +71,16 @@ impl<Name: ?Sized, Buffer> RequestContext for DummyRequestContext<Name, Buffer> 
     }
 }
 
-fn _assert_context_stack(_: &impl RequestContext) {}
+#[cfg(test)]
+mod test {
+    use bytes::Bytes;
 
-#[test]
-fn check_unsized() {
-    _assert_context_stack(&DummyRequestContext::<std::ffi::CStr, Vec<u8>>::new());
+    use super::*;
+
+    fn assert_context_stack(_: &impl RequestContext) {}
+
+    #[test]
+    fn check_unsized() {
+        assert_context_stack(&DummyRequestContext::<std::ffi::CStr, Bytes>::new());
+    }
 }

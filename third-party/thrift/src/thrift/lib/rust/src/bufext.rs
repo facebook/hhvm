@@ -34,6 +34,8 @@ pub trait BufExt: Buf {
     }
 }
 
+impl BufExt for Bytes {}
+
 impl BufExt for Cursor<Bytes> {
     // We can get a reference to the underlying Bytes here, and reuse that.
     fn copy_or_reuse_bytes(&mut self, len: usize) -> Bytes {

@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if echo "$1" | grep -q -e 'install_dir='; then
-  # Skip --install_dir
-  shift 1
-fi
-
 DIR="$(pwd -P)"
 SOURCE_ROOT="${SOURCE_ROOT:-$DIR}"
 

@@ -403,6 +403,8 @@ final class Options {
     public bool $split_hphpc = false;
     public bool $repo_single = false;
     public bool $repo_separate = false;
+    public bool $only_remote_executable = false;
+    public bool $only_non_remote_executable = false;
     public ?string $repo_threads;
     public ?string $repo_out;
     public bool $hhbbc2 = false;
@@ -472,6 +474,8 @@ function get_options(
     'help' => 'h',
     'verbose' => 'v',
     'testpilot' => '',
+    'only-remote-executable' => '',
+    'only-non-remote-executable' => '',
     'threads:' => '',
     '*args:' => 'a:',
     '*compiler-args:' => '',
@@ -811,6 +815,16 @@ function find_tests(
     $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
     $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return (false === in_array(canonical_path($test), $exclude));
+    }));
+  }
+  if ($options->only_remote_executable) {
+    $tests = vec(array_filter($tests, function($test) {
+      return (false === is_file("$test.no_remote"));
+    }));
+  }
+  if ($options->only_non_remote_executable) {
+    $tests = vec(array_filter($tests, function($test) {
+      return (false !== is_file("$test.no_remote"));
     }));
   }
   if ($options->include is nonnull) {
@@ -2836,6 +2850,13 @@ function can_run_server_test(string $test, Options $options): bool {
     return false;
   }
 
+  if (
+    ($options->only_remote_executable && is_file("$test.no_remote"))
+    || ($options->only_non_remote_executable && !is_file("$test.no_remote"))
+  ) {
+    return false;
+  }
+
   foreach (SERVER_EXCLUDE_PATHS as $path) {
     if (strpos($test, $path) !== false) return false;
   }
@@ -3205,6 +3226,12 @@ function run_test(Options $options, string $test): mixed {
   }
   if (file_exists($test.'.onlyjumpstart')) {
     return 'skip-onlyjumpstart';
+  }
+  if ($options->only_remote_executable && is_file("$test.no_remote")) {
+    return 'skip-only_running_remote_executable_tests';
+  }
+  if ($options->only_non_remote_executable && !is_file("$test.no_remote")) {
+    return 'skip-only_running_NON_remote_executable_tests';
   }
 
   if ($options->hhas_round_trip) {
@@ -3761,7 +3788,7 @@ EOT;
     }
 
     $starting = $still_starting;
-    $max_time = 10;
+    $max_time = 30;
     if (mtime() - $start_time > $max_time) {
       error("Servers took more than $max_time seconds to come up");
     }
@@ -3860,7 +3887,7 @@ function main(vec<string> $argv): int {
       $configs[] = $config;
     }
 
-    $max_configs = 30;
+    $max_configs = 10;
     if (count($configs) > $max_configs) {
       error("More than $max_configs unique config files will be needed to run ".
             "the tests you specified. They may not be a good fit for server ".

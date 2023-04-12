@@ -19,6 +19,7 @@
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/upload.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/stream-transport.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/string-util.h"
@@ -443,6 +444,9 @@ bool Transport::acceptEncoding(const char *encoding) {
 }
 
 void Transport::setResponse(int code, const char *info) {
+  if (isStreamTransport()) {
+    return;
+  }
   m_responseCode = code;
   m_responseCodeInfo = info ? info : HttpProtocol::GetReasonString(code);
 }
@@ -739,6 +743,10 @@ void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
   if (m_sendEnded) {
     return;
   }
+  // This API cannot be used for streaming transports.
+  if (isStreamTransport()) {
+    return;
+  }
 
   if (!precompressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;
@@ -816,6 +824,10 @@ void Transport::sendRawInternal(const char *data, int size,
 }
 
 void Transport::onSendEnd() {
+  if (auto stream = getStreamTransport()) {
+    stream->close();
+    return;
+  }
   bool eomSent = false;
   if (m_chunkedEncoding) {
     assertx(m_headerSent);
@@ -838,6 +850,10 @@ void Transport::onSendEnd() {
 
 void Transport::redirect(const char *location, int code /* = 302 */,
                          const char *info /* = nullptr */) {
+  if (auto stream = getStreamTransport()) {
+    stream->close();
+    return;
+  }
   addHeaderImpl("Location", location);
   setResponse(code, info);
   sendString("Moved", code);

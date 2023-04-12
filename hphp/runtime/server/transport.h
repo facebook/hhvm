@@ -38,6 +38,9 @@ namespace HPHP {
 struct Array;
 struct Variant;
 struct ResponseCompressorManager;
+namespace stream_transport {
+struct StreamTransport;
+}
 struct StructuredLogEntry;
 
 using HeaderMap = hphp_fast_string_imap<TinyVector<std::string>>;
@@ -176,12 +179,34 @@ public:
   };
 
   /**
+   * Get stream transport if it has one, otherwise returns nullptr
+   */
+  virtual std::shared_ptr<stream_transport::StreamTransport>
+  getStreamTransport() const {
+    return nullptr;
+  }
+  /**
+   * Is this a streaming transport?
+   */
+  virtual bool isStreamTransport() const {
+    return false;
+  }
+
+  /**
    * POST request's data.
    */
   virtual const void *getPostData(size_t &size) = 0;
   virtual bool hasMorePostData() { return false; }
   virtual const void *getMorePostData(size_t &size) { size = 0;return nullptr; }
   virtual bool getFiles(std::string& /*files*/) { return false; }
+
+  /**
+   * This callback should be called when the StreamTransport is ready
+   * to receive data.
+   * This is relevant only for transports that have a StreamTransport.
+   */
+  virtual void onStreamReady() {}
+
   /**
    * Is this a GET, POST or anything?
    */
@@ -394,6 +419,7 @@ public:
 
   /**
    * Sending back a response.
+   * These APIs should not be used for streaming treansports.
    */
   void setResponse(int code, const char *info = nullptr);
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
@@ -401,6 +427,12 @@ public:
   void sendRaw(const char *data, int size, int code = 200,
                bool precompressed = false, bool chunked = false,
                const char *codeInfo = nullptr);
+
+  /**
+   * Sending response for streaming transports.
+   */
+  virtual void sendStreamResponse(const void* /*data*/, int /*size*/) {}
+  virtual void sendStreamEOM() {}
 private:
   void sendRawInternal(const char *data, int size, int code = 200,
                        bool precompressed = false,
@@ -422,11 +454,12 @@ public:
   // TODO: support rfc1867
   virtual bool isUploadedFile(const String& filename);
 
+  // For streaming transports, only getResponseSentSize is valid.
   int getResponseSize() const { return m_responseSize; }
-  int getResponseCode() const { return m_responseCode; }
-
   int getResponseTotalSize() const { return m_responseTotalSize; }
   int getResponseSentSize() const { return m_responseSentSize; }
+
+  int getResponseCode() const { return m_responseCode; }
   int64_t getFlushTime() const { return m_flushTimeUs; }
   int getLastChunkSentSize();
   void getChunkSentSizes(Array &ret);

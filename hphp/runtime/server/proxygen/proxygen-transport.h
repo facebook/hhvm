@@ -83,6 +83,10 @@ struct ResponseMessage {
 
 struct PushTxnHandler;
 
+namespace stream_transport {
+struct HttpStreamServerTransport;
+}
+
 const StaticString s_proxygen("proxygen");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,10 +126,17 @@ struct ProxygenTransport final
 
   /**
    * POST request's data.
+   * These APIs return empty data for streaming transports.
    */
   const void *getPostData(size_t &size) override;
   bool hasMorePostData() override;
   const void *getMorePostData(size_t &size) override;
+
+  /**
+   * This callback should be called when the StreamTransport
+   * is ready to receive data.
+   */
+  void onStreamReady() override;
 
   // TODO: is get getFiles required?
 
@@ -147,6 +158,8 @@ struct ProxygenTransport final
 
   /**
    * Get http request size.
+   * For non-buffering requests, this method returns
+   * the size of request data recieved so far.
    */
   size_t getRequestSize() const override;
 
@@ -164,6 +177,10 @@ struct ProxygenTransport final
   String describe() const override {
     return s_proxygen;
   }
+
+  std::shared_ptr<stream_transport::StreamTransport>
+    getStreamTransport() const override;
+  bool isStreamTransport() const override;
 
   /**
    * Add/remove a response header.
@@ -184,6 +201,8 @@ struct ProxygenTransport final
    */
   void sendImpl(const void *data, int size, int code,
                 bool chunked, bool eom) override;
+  void sendStreamResponse(const void* data, int size) override;
+  void sendStreamEOM() override;
 
   /**
    * Override to implement more send end logic.
@@ -333,11 +352,7 @@ struct ProxygenTransport final
 
   void sendErrorResponse(uint32_t code) noexcept;
 
-  void requestDoneLocking() {
-    Lock lock(this);
-    m_clientComplete = true;
-    notify();
-  }
+  void requestDoneLocking();
 
   bool handlePOST(const proxygen::HTTPHeaders& headers);
 
@@ -352,7 +367,7 @@ struct ProxygenTransport final
   folly::SocketAddress m_clientAddress;
   std::string m_addressStr;
   std::unique_ptr<proxygen::HTTPMessage> m_request;
-  size_t m_requestBodyLength{0};
+  std::atomic<size_t> m_requestBodyLength{0};
   int64_t m_bodyLengthPastLimit{128 * 1024};
 
   // There are two modes of operation for reading POST bodies.  When
@@ -387,6 +402,8 @@ struct ProxygenTransport final
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   int64_t m_maxPost{-1};
   const proxygen::HTTPHeaders* m_proxygenHeaders = nullptr;
+  std::shared_ptr<stream_transport::HttpStreamServerTransport>
+    m_streamTransport;
 
  public:
   // List of ProxygenTransport not yet handed to the server will sit

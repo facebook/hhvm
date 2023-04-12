@@ -41,6 +41,13 @@ inline Transport* ExecutionContext::getTransport() {
   return m_transport;
 }
 
+// This method may return different implementations of StreamTransport
+// based on runtime options.
+inline std::shared_ptr<stream_transport::StreamTransport>
+ExecutionContext::getServerStreamTransport() const {
+  return m_transport->getStreamTransport();
+}
+
 inline rqtrace::Trace* ExecutionContext::getRequestTrace() {
   return m_requestTrace;
 }
@@ -309,4 +316,3 @@ template<class Fn> void ExecutionContext::sweepDynPropTable(Fn fn) {
 ///////////////////////////////////////////////////////////////////////////////
 
 }
-

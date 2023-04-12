@@ -483,6 +483,10 @@ struct RuntimeOption {
   // -1 for no limit.
   static int64_t RequestBodyReadLimit;
 
+  // Allow POST requests containing NonBlockingPost header to start execution
+  // without waiting for the entire POST body.
+  static bool AllowNonBlockingPosts;
+
   static bool EnableSSL;
   static int SSLPort;
   static int SSLPortFd;

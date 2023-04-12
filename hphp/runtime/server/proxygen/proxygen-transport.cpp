@@ -16,6 +16,7 @@
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/server/http-stream-transport.h"
 #include "hphp/runtime/server/proxygen/proxygen-server.h"
 #include "hphp/runtime/server/server.h"
 #include "hphp/util/logger.h"
@@ -177,8 +178,7 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
 ProxygenTransport::ProxygenTransport(ProxygenServer *server,
                                      HPHPWorkerThread *worker)
   : m_server(server)
-  , m_worker(worker)
-{
+  , m_worker(worker) {
   m_worker->addPendingTransport(*this);
 }
 
@@ -195,8 +195,10 @@ ProxygenTransport::~ProxygenTransport() {
 }
 
 bool ProxygenTransport::bufferRequest() const {
-  return (m_method != Transport::Method::POST ||
-          RuntimeOption::RequestBodyReadLimit <= 0);
+  return
+    (m_method != Transport::Method::POST ||
+     RuntimeOption::RequestBodyReadLimit <= 0) &&
+    !isStreamTransport();
 }
 
 bool ProxygenTransport::handlePOST(const proxygen::HTTPHeaders& headers) {
@@ -299,6 +301,13 @@ void ProxygenTransport::onHeadersComplete(
       m_requestHeaders[header.c_str()].push_back(val.c_str());
     });
 
+  if (RuntimeOption::AllowNonBlockingPosts &&
+      m_method == Transport::Method::POST &&
+      m_requestHeaders.find("NonBlockingPost") != m_requestHeaders.end()) {
+    m_streamTransport =
+      std::make_shared<stream_transport::HttpStreamServerTransport>(this);
+  }
+
   if (m_method == Transport::Method::POST && m_request->isHTTP1_1()) {
     if (!handlePOST(headers)) {
       // We already fully responded.
@@ -334,9 +343,10 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
           << chain->computeChainDataLength();
   m_requestBodyLength += chain->computeChainDataLength();
 
-  if (m_maxPost >= 0 && m_requestBodyLength > m_maxPost) {
+  if (m_maxPost >= 0 && m_requestBodyLength > m_maxPost &&
+      !isStreamTransport()) {
     Logger::Warning("Request body length of %" PRId64 " now exceeds max POST of"
-                    "size %" PRId64 ".", m_requestBodyLength, m_maxPost);
+                    "size %" PRId64 ".", m_requestBodyLength.load(), m_maxPost);
     sendErrorResponse(413);
     return;
   }
@@ -356,13 +366,27 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
     }
   } else {
     Lock lock(this);
-    m_bodyData.append(std::move(chain));
+    if (isStreamTransport() && m_streamTransport->isReady()) {
+      // TODO: pause ingress if request cannot process the data fast enough?
+      m_streamTransport->doOnData(std::move(chain));
+    } else {
+      m_bodyData.append(std::move(chain));
+    }
     notify();
     if (m_bodyData.chainLength() >= RuntimeOption::RequestBodyReadLimit) {
       VLOG(4) << *m_clientTxn << "Buffer max reached, pausing ingress";
       m_clientTxn->pauseIngress();
     }
   }
+}
+
+void ProxygenTransport::requestDoneLocking() {
+  Lock lock(this);
+  if (isStreamTransport()) {
+    m_streamTransport->doOnClose();
+  }
+  m_clientComplete = true;
+  notify();
 }
 
 void ProxygenTransport::onEOM() noexcept {
@@ -402,6 +426,15 @@ void ProxygenTransport::onEOM() noexcept {
   }
 }
 
+std::shared_ptr<stream_transport::StreamTransport>
+ProxygenTransport::getStreamTransport() const {
+  return m_streamTransport;
+}
+
+bool ProxygenTransport::isStreamTransport() const {
+  return m_streamTransport != nullptr;
+}
+
 const char *ProxygenTransport::getUrl() {
   return m_request->getURL().c_str();
 }
@@ -418,7 +451,7 @@ uint16_t ProxygenTransport::getRemotePort() {
 }
 
 const void *ProxygenTransport::getPostData(size_t &size) {
-  if (m_sendEnded) {
+  if (m_sendEnded || isStreamTransport()) {
     size = 0;
     return 0;
   }
@@ -438,6 +471,11 @@ bool ProxygenTransport::hasMorePostData() {
     CHECK(m_clientComplete);
     return false;
   }
+  // This API should not be used for stream transports.
+  if (isStreamTransport()) {
+    return false;
+  }
+
   Lock lock(this);
   // We have more post data if a) there's some in the queue or b) the client
   // EOM hasn't come yet
@@ -447,9 +485,24 @@ bool ProxygenTransport::hasMorePostData() {
   return result;
 }
 
+void ProxygenTransport::onStreamReady() {
+  assertx(m_streamTransport && m_streamTransport->isReady());
+  Lock lock(this);
+  while (!m_bodyData.empty()) {
+    auto buf = m_bodyData.pop_front();
+    CHECK(buf && buf->length() > 0);
+    m_streamTransport->doOnData(std::move(buf));
+  }
+  notify();
+}
+
 const void *ProxygenTransport::getMorePostData(size_t &size) {
   if (bufferRequest()) {
     CHECK(m_clientComplete);
+    size = 0;
+    return nullptr;
+  }
+  if (isStreamTransport()) {
     size = 0;
     return nullptr;
   }
@@ -573,6 +626,11 @@ bool ProxygenTransport::isServerStopping() {
 }
 
 void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
+  // TODO: Implement proper error handling for srteam transports.
+  if (auto stream = getStreamTransport()) {
+    stream->close();
+    return;
+  }
   HTTPMessage response;
   response.setHTTPVersion(1, 1);
   response.setStatusCode(code);
@@ -709,6 +767,25 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
   }
 }
 
+void ProxygenTransport::sendStreamResponse(const void* data, int size) {
+  // TODO: track and log response size.
+  assertx(isStreamTransport());
+  if (m_responseCode < 0) {
+    m_responseCode = 200;
+  }
+  assertx(m_responseCode == 200);
+  sendImpl(data, size, m_responseCode, true, false);
+}
+
+void ProxygenTransport::sendStreamEOM() {
+  assertx(isStreamTransport());
+  if (m_responseCode < 0) {
+    m_responseCode = 200;
+  }
+  assertx(m_responseCode == 200);
+  sendImpl("", 0, m_responseCode, true, true);
+}
+
 void ProxygenTransport::sendImpl(const void *data, int size, int code,
                                  bool chunked, bool eom) {
   assertx(data);
@@ -790,7 +867,8 @@ bool ProxygenTransport::supportsServerPush() {
           m_clientTxn->supportsPushTransactions() &&
           isHTTP2CodecProtocol(
             m_clientTxn->getTransport().getCodec().getProtocol()) &&
-          !m_sendEnded);
+          !m_sendEnded &&
+          !isStreamTransport());
 }
 
 int64_t ProxygenTransport::pushResource(const char *host, const char *path,

@@ -49,6 +49,9 @@ namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
 struct Resumable;
+namespace stream_transport {
+struct StreamTransport;
+}
 }
 
 namespace HPHP {
@@ -189,6 +192,7 @@ public:
    */
   Transport* getTransport();
   void setTransport(Transport*);
+  std::shared_ptr<stream_transport::StreamTransport> getServerStreamTransport() const;
   void setRequestTrace(rqtrace::Trace*);
   std::string getRequestUrl(size_t szLimit = std::string::npos);
   String getMimeType() const;

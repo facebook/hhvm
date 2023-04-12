@@ -772,6 +772,8 @@ bool RuntimeOption::PathDebug = false;
 
 int64_t RuntimeOption::RequestBodyReadLimit = -1;
 
+bool RuntimeOption::AllowNonBlockingPosts = true;
+
 bool RuntimeOption::EnableSSL = false;
 int RuntimeOption::SSLPort = 443;
 int RuntimeOption::SSLPortFd = -1;
@@ -2333,6 +2335,8 @@ void RuntimeOption::Load(
                  "");
     Config::Bind(RequestBodyReadLimit, ini, config,
                  "Server.RequestBodyReadLimit", -1);
+    Config::Bind(AllowNonBlockingPosts, ini, config,
+                 "Server.AllowNonBlockingPosts", true);
     Config::Bind(EnableSSL, ini, config, "Server.EnableSSL");
     Config::Bind(SSLPort, ini, config, "Server.SSLPort", 443);
     Config::Bind(SSLCertificateFile, ini, config, "Server.SSLCertificateFile");

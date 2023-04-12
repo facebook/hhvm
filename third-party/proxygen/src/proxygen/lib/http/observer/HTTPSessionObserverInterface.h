@@ -52,23 +52,26 @@ class HTTPSessionObserverInterface {
 
   struct RequestStartedEvent {
     const HTTPHeaders& requestHeaders;
-  };
 
-  class RequestStartedEventBuilder {
-   public:
-    RequestStartedEventBuilder& setHeaders(
-        const proxygen::HTTPHeaders& headers) {
-      headers_ = &headers;
-      return *this;
-    }
+    // Do not support copy or move given that requestHeaders is a ref.
+    RequestStartedEvent(RequestStartedEvent&&) = delete;
+    RequestStartedEvent& operator=(const RequestStartedEvent&) = delete;
+    RequestStartedEvent& operator=(RequestStartedEvent&& rhs) = delete;
 
-    [[nodiscard]] proxygen::HTTPSessionObserverInterface::RequestStartedEvent
-    build() const {
-      return {*CHECK_NOTNULL(headers_)};
-    }
+    struct BuilderFields {
+      folly::Optional<std::reference_wrapper<const HTTPHeaders>>
+          maybeHTTPHeadersRef;
+      explicit BuilderFields() = default;
+    };
 
-   private:
-    const proxygen::HTTPHeaders* headers_{nullptr};
+    struct Builder : public BuilderFields {
+      Builder&& setHeaders(const proxygen::HTTPHeaders& headers);
+      RequestStartedEvent build() &&;
+      explicit Builder() = default;
+    };
+
+    // Use builder to construct.
+    explicit RequestStartedEvent(const BuilderFields& builderFields);
   };
 
   /**

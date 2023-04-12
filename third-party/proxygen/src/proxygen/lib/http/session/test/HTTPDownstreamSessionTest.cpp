@@ -451,7 +451,7 @@ class HTTPDownstreamTest : public testing::Test {
     return byteEventTracker;
   }
 
-  std::unique_ptr<MockSessionObserver> setMockSessionObserver(
+  std::unique_ptr<MockSessionObserver> addMockSessionObserver(
       MockSessionObserver::EventSet eventSet) {
     auto observer = std::make_unique<NiceMock<MockSessionObserver>>(eventSet);
     EXPECT_CALL(*observer, attached(_));
@@ -4349,14 +4349,14 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
 
   // Test attached/detached callbacks when adding/removing observers
   {
-    auto observer = setMockSessionObserver(eventSet);
+    auto observer = addMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, detached(_));
     httpSession_->removeObserver(observer.get());
   }
 
   // Test destroyed callback when session is destroyed
   {
-    auto observer = setMockSessionObserver(eventSet);
+    auto observer = addMockSessionObserver(eventSet);
     auto handler = addSimpleStrictHandler();
     handler->expectHeaders();
     handler->expectEOM([&handler]() {
@@ -4380,22 +4380,23 @@ TEST_F(HTTP2DownstreamSessionTest, Observer_Attach_Detach_Destroy) {
 
 TEST_F(HTTP2DownstreamSessionTest, Observer_RequestStarted) {
 
-  // Add an observer subscribed to the RequestStarted event
-  MockSessionObserver::EventSet eventSet1;
-  auto observer_unsubscribed = setMockSessionObserver(eventSet1);
-  httpSession_->addObserver(observer_unsubscribed.get());
+  // Add an observer NOT subscribed to the RequestStarted event
+  auto observerUnsubscribed =
+      addMockSessionObserver(MockSessionObserver::EventSetBuilder().build());
+  httpSession_->addObserver(observerUnsubscribed.get());
 
-  // Add an observer not subscribed to this event
-  MockSessionObserver::EventSet eventSet2;
-  eventSet2.enable(HTTPSessionObserverInterface::Events::requestStarted);
-  auto observer_subscribed = setMockSessionObserver(eventSet2);
-  httpSession_->addObserver(observer_subscribed.get());
+  // Add an observer subscribed to this event
+  auto observerSubscribed = addMockSessionObserver(
+      MockSessionObserver::EventSetBuilder()
+          .enable(HTTPSessionObserverInterface::Events::requestStarted)
+          .build());
+  httpSession_->addObserver(observerSubscribed.get());
 
-  EXPECT_CALL(*observer_unsubscribed, requestStarted(_, _)).Times(0);
+  EXPECT_CALL(*observerUnsubscribed, requestStarted(_, _)).Times(0);
 
   // Subscribed observer expects to receive RequestStarted callback, with a
   // request header x-meta-test-header and value "abc123"
-  EXPECT_CALL(*observer_subscribed, requestStarted(_, _))
+  EXPECT_CALL(*observerSubscribed, requestStarted(_, _))
       .WillOnce(Invoke(
           [](HTTPSessionObserverAccessor*,
              const proxygen::HTTPSessionObserverInterface::RequestStartedEvent&

@@ -83,7 +83,7 @@ class HQUpstreamSessionTest : public HQSessionTest {
 
   testing::StrictMock<proxygen::MockController>& getMockController();
 
-  std::unique_ptr<proxygen::MockSessionObserver> setMockSessionObserver(
+  std::unique_ptr<proxygen::MockSessionObserver> addMockSessionObserver(
       proxygen::MockSessionObserver::EventSet eventSet);
 
   // Representation of stream data

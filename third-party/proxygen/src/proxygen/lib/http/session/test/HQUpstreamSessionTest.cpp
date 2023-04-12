@@ -204,7 +204,7 @@ bool HQUpstreamSessionTest::flush(bool eof,
 }
 
 std::unique_ptr<MockSessionObserver>
-HQUpstreamSessionTest::setMockSessionObserver(
+HQUpstreamSessionTest::addMockSessionObserver(
     MockSessionObserver::EventSet eventSet) {
   auto observer = std::make_unique<NiceMock<MockSessionObserver>>(eventSet);
   EXPECT_CALL(*observer, attached(_));
@@ -1190,33 +1190,34 @@ TEST_P(HQUpstreamSessionTest, Observer_Attach_Detach_Destroyed) {
 
   // Test attached/detached callbacks when adding/removing observers
   {
-    auto observer = setMockSessionObserver(eventSet);
+    auto observer = addMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, detached(_));
     hqSession_->removeObserver(observer.get());
   }
 
   {
-    auto observer = setMockSessionObserver(eventSet);
+    auto observer = addMockSessionObserver(eventSet);
     EXPECT_CALL(*observer, destroyed(_, _));
     hqSession_->dropConnection();
   }
 }
 
 TEST_P(HQUpstreamSessionTest, Observer_RequestStarted) {
-  // Add an observer subscribed to the RequestStarted event
-  MockSessionObserver::EventSet eventSet1;
-  auto observer_unsubscribed = setMockSessionObserver(eventSet1);
-  hqSession_->addObserver(observer_unsubscribed.get());
+  // Add an observer NOT subscribed to the RequestStarted event
+  auto observerUnsubscribed =
+      addMockSessionObserver(MockSessionObserver::EventSetBuilder().build());
+  hqSession_->addObserver(observerUnsubscribed.get());
 
-  // Add an observer not subscribed to this event
-  MockSessionObserver::EventSet eventSet2;
-  eventSet2.enable(HTTPSessionObserverInterface::Events::requestStarted);
-  auto observer_subscribed = setMockSessionObserver(eventSet2);
-  hqSession_->addObserver(observer_subscribed.get());
+  // Add an observer subscribed to this event
+  auto observerSubscribed = addMockSessionObserver(
+      MockSessionObserver::EventSetBuilder()
+          .enable(HTTPSessionObserverInterface::Events::requestStarted)
+          .build());
+  hqSession_->addObserver(observerSubscribed.get());
 
   // expect to see a request started with header 'x-meta-test-header' having
   // value 'abc123'
-  EXPECT_CALL(*observer_subscribed, requestStarted(_, _))
+  EXPECT_CALL(*observerSubscribed, requestStarted(_, _))
       .WillOnce(Invoke(
           [](HTTPSessionObserverAccessor*,
              const proxygen::MockSessionObserver::RequestStartedEvent& event) {

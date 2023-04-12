@@ -1122,11 +1122,9 @@ class HTTPSession
    public:
     explicit ObserverAccessor(HTTPSessionBase* sessionBasePtr)
         : sessionBasePtr_(sessionBasePtr) {
+      (void)sessionBasePtr_; // silence unused variable warnings
     }
     ~ObserverAccessor() override = default;
-    const HTTPSessionBase* getSessionBase() {
-      return sessionBasePtr_;
-    }
 
    private:
     HTTPSessionBase* sessionBasePtr_{nullptr};

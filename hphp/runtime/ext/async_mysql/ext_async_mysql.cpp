@@ -1609,7 +1609,7 @@ void AsyncMysqlQueryResult::sweep() {
   m_query_result.reset();
 }
 
-Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::Operation> op,
+Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::FetchOperation> op,
                                           db::ClientPerfStats stats,
                                           am::QueryResult query_result,
                                           bool noIndexUsed) {
@@ -1619,7 +1619,7 @@ Object AsyncMysqlQueryResult::newInstance(std::shared_ptr<am::Operation> op,
   return ret;
 }
 
-void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
+void AsyncMysqlQueryResult::create(std::shared_ptr<am::FetchOperation> op,
                                    db::ClientPerfStats stats,
                                    am::QueryResult query_result,
                                    bool noIndexUsed) {
@@ -1648,6 +1648,15 @@ static int64_t HHVM_METHOD(AsyncMysqlQueryResult, numRows) {
 static Object HHVM_METHOD(AsyncMysqlQueryResult, vectorRows) {
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   return data->buildRows(false /* as_maps */, false /* typed */);
+}
+
+static int64_t HHVM_METHOD(AsyncMysqlQueryResult, resultSizeBytes) {
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  auto* fetchOp =  dynamic_cast<const am::FetchOperation*>(data->op());
+  if(fetchOp) {
+    return fetchOp->resultSize();
+  }
+  return -1;
 }
 
 static Object HHVM_METHOD(AsyncMysqlQueryResult, mapRows) {
@@ -2246,7 +2255,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "6.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "7.0") {}
   void loadDecls() override {
     loadDeclsFrom("async_mysql");
     loadDeclsFrom("async_mysql_exceptions");
@@ -2392,6 +2401,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, noIndexUsed);
     HHVM_ME(AsyncMysqlQueryResult, recvGtid);
     HHVM_ME(AsyncMysqlQueryResult, responseAttributes);
+    HHVM_ME(AsyncMysqlQueryResult, resultSizeBytes);
     Native::registerNativeDataInfo<AsyncMysqlQueryResult>(
       AsyncMysqlQueryResult::s_className.get(), Native::NDIFlags::NO_COPY);
 

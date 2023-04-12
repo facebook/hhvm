@@ -268,6 +268,7 @@ namespace {
     public function noIndexUsed(): bool {}
     public function recvGtid(): string {}
     public function responseAttributes(): Map<string, string> {}
+    public function resultSizeBytes(): int {}
   }
   class AsyncMysqlRowBlock
     implements Countable, KeyedTraversable<int, AsyncMysqlRow> {

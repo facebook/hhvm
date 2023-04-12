@@ -1443,6 +1443,19 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
   <<__Native>>
   /* HH_FIXME[2049] TODO(T121423772) [systemlib] Hack Collections */
   public function responseAttributes(): Map<string, string>;
+
+  /**
+   * The number of bytes in the current result set.
+   *
+   * This is particularly useful for `SELECT` statements.
+   *
+   * See the MySQL's mysql_fetch_lengths() api documentation for
+   * more information.
+   *
+   * @return - The size of result set in bytes as an `int`.
+   */
+  <<__Native>>
+  public function resultSizeBytes(): int;
 }
 
 /**

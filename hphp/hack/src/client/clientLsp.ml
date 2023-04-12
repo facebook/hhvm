@@ -2367,7 +2367,8 @@ let ide_rpc
   | Error error_data -> raise (Server_nonfatal_exception error_data)
 
 let kickoff_shell_out_and_maybe_cancel
-    (state : state) (shellable_type : Lost_env.shellable_type) : state =
+    (state : state) (shellable_type : Lost_env.shellable_type) : state Lwt.t =
+  let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
   let compose_shellout_cmd
       ~(from : string) (server_cmd : string) (cmd_arg : string) : string array =
     let from = Printf.sprintf "clientLsp:%s" from in
@@ -2426,13 +2427,14 @@ let kickoff_shell_out_and_maybe_cancel
     let process =
       Lwt_utils.exec_checked Exec_command.Current_executable cmd ~cancel
     in
-    Lost_server
-      {
-        lenv with
-        Lost_env.current_hh_shell =
-          Some { Lost_env.process; cancellation_token; shellable_type };
-      }
-  | _ -> state
+    Lwt.return
+      (Lost_server
+         {
+           lenv with
+           Lost_env.current_hh_shell =
+             Some { Lost_env.process; cancellation_token; shellable_type };
+         })
+  | _ -> Lwt.return state
 
 (************************************************************************)
 (* Protocol                                                             *)
@@ -3366,7 +3368,8 @@ let do_findReferences
       (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
 let do_findReferences_local
-    (state : state) (params : FindReferences.params) (lsp_id : lsp_id) : state =
+    (state : state) (params : FindReferences.params) (lsp_id : lsp_id) :
+    state Lwt.t =
   let { Ide_api_types.line; column } =
     lsp_position_to_ide
       params.FindReferences.loc.TextDocumentPositionParams.position
@@ -3380,7 +3383,8 @@ let do_findReferences_local
   state
 
 let do_goToImplementation_local
-    (state : state) (params : Implementation.params) (lsp_id : lsp_id) : state =
+    (state : state) (params : Implementation.params) (lsp_id : lsp_id) :
+    state Lwt.t =
   let { Ide_api_types.line; column } =
     lsp_position_to_ide params.TextDocumentPositionParams.position
   in
@@ -3772,7 +3776,7 @@ let do_documentRename
   Lwt.return (patches_to_workspace_edit patches)
 
 let do_documentRename_local
-    (state : state) (params : Rename.params) (lsp_id : lsp_id) : state =
+    (state : state) (params : Rename.params) (lsp_id : lsp_id) : state Lwt.t =
   let (filename, line, col) =
     lsp_file_position_to_hack (rename_params_to_document_position params)
   in
@@ -5292,19 +5296,22 @@ let handle_client_message
     | (_, Some _ide_service, RequestMessage (id, FindReferencesRequest params))
       when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      state := do_findReferences_local !state params id;
+      let%lwt new_state = do_findReferences_local !state params id in
+      state := new_state;
       Lwt.return_none
     (* textDocument/implementation request *)
     | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
       when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      state := do_goToImplementation_local !state params id;
+      let%lwt new_state = do_goToImplementation_local !state params id in
+      state := new_state;
       Lwt.return_none
     (* textDocument/rename request *)
     | (_, Some _ide_service, RequestMessage (id, RenameRequest params))
       when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      state := do_documentRename_local !state params id;
+      let%lwt new_state = do_documentRename_local !state params id in
+      state := new_state;
       Lwt.return_none
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
     | (_, Some ide_service, RequestMessage (id, SignatureHelpRequest params)) ->

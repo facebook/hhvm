@@ -20,8 +20,6 @@ import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 import facebook.thrift.annotation.cpp.thrift_types
 
-import facebook.thrift.annotation.deprecated.meta.thrift_types
-
 
 class AnEnum(_fbthrift_python_types.Enum, int):
     NOTSET: AnEnum = ...
@@ -142,23 +140,6 @@ class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct):
     def _to_python(self) -> HiddenTypeFieldsStruct: ...
     def _to_py3(self) -> "module.types.HiddenTypeFieldsStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.HiddenTypeFieldsStruct": ...  # type: ignore
-
-
-class GeneratedStruct(_fbthrift_python_types.Struct):
-    the: _typing.Final[int] = ...
-    def __init__(
-        self, *,
-        the: _typing.Optional[int]=...
-    ) -> None: ...
-
-    def __call__(
-        self, *,
-        the: _typing.Optional[int]=...
-    ) -> GeneratedStruct: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
-    def _to_python(self) -> GeneratedStruct: ...
-    def _to_py3(self) -> "module.types.GeneratedStruct": ...  # type: ignore
-    def _to_py_deprecated(self) -> "module.ttypes.GeneratedStruct": ...  # type: ignore
 
 
 class AdaptedUnion(_fbthrift_python_types.Union):

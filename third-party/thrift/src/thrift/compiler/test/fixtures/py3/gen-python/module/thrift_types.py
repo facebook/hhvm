@@ -16,8 +16,6 @@ import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 import facebook.thrift.annotation.cpp.thrift_types
 
-import facebook.thrift.annotation.deprecated.meta.thrift_types
-
 
 class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -249,46 +247,6 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
         py_deprecated_types = importlib.import_module("module.ttypes")
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.HiddenTypeFieldsStruct, self)
-
-
-class GeneratedStruct(metaclass=_fbthrift_python_types.StructMeta):
-    _fbthrift_SPEC = (
-        (
-            1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "the",  # name
-            _fbthrift_python_types.typeinfo_i16,  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-    )
-
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.GeneratedStruct"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return _fbthrift_metadata__struct_GeneratedStruct()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        import thrift.py3.converter
-        return thrift.py3.converter.to_py3_struct(py3_types.GeneratedStruct, self)
-
-    def _to_py_deprecated(self):
-        import importlib
-        py_deprecated_types = importlib.import_module("module.ttypes")
-        import thrift.util.converter
-        return thrift.util.converter.to_py_struct(py_deprecated_types.GeneratedStruct, self)
 
 
 class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -653,8 +611,6 @@ def _fbthrift_metadata__struct_SimpleStruct():
     return module.thrift_metadata.gen_metadata_struct_SimpleStruct()
 def _fbthrift_metadata__struct_HiddenTypeFieldsStruct():
     return module.thrift_metadata.gen_metadata_struct_HiddenTypeFieldsStruct()
-def _fbthrift_metadata__struct_GeneratedStruct():
-    return module.thrift_metadata.gen_metadata_struct_GeneratedStruct()
 def _fbthrift_metadata__struct_AdaptedUnion():
     return module.thrift_metadata.gen_metadata_struct_AdaptedUnion()
 def _fbthrift_metadata__exception_HiddenException():
@@ -671,7 +627,6 @@ _fbthrift_all_structs = [
     OptionalRefStruct,
     SimpleStruct,
     HiddenTypeFieldsStruct,
-    GeneratedStruct,
     AdaptedUnion,
     HiddenException,
     ComplexStruct,

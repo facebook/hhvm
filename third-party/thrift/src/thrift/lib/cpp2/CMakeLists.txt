@@ -24,11 +24,9 @@ set(LIB_CPP2_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 # Using global properties gets around this; probably better to restructure
 # the directories/files to avoid this type of hack
 #
-get_property(api-cpp2-SOURCES GLOBAL PROPERTY api-cpp2-SOURCES)
 get_property(cpp-cpp2-SOURCES GLOBAL PROPERTY cpp-cpp2-SOURCES)
 get_property(hack-cpp2-SOURCES GLOBAL PROPERTY hack-cpp2-SOURCES)
 get_property(java-cpp2-SOURCES GLOBAL PROPERTY java-cpp2-SOURCES)
-get_property(meta-cpp2-SOURCES GLOBAL PROPERTY meta-cpp2-SOURCES)
 get_property(python-cpp2-SOURCES GLOBAL PROPERTY python-cpp2-SOURCES)
 get_property(scope-cpp2-SOURCES GLOBAL PROPERTY scope-cpp2-SOURCES)
 get_property(thrift-cpp2-SOURCES GLOBAL PROPERTY thrift-cpp2-SOURCES)
@@ -44,32 +42,26 @@ get_property(standard-cpp2-SOURCES GLOBAL PROPERTY standard-cpp2-SOURCES)
 get_property(type_rep-cpp2-SOURCES GLOBAL PROPERTY type_rep-cpp2-SOURCES)
 get_property(type-cpp2-SOURCES GLOBAL PROPERTY type-cpp2-SOURCES)
 
-bypass_source_check("${api-cpp2-SOURCES}")
 bypass_source_check("${cpp-cpp2-SOURCES}")
 bypass_source_check("${hack-cpp2-SOURCES}")
 bypass_source_check("${java-cpp2-SOURCES}")
-bypass_source_check("${meta-cpp2-SOURCES}")
 bypass_source_check("${python-cpp2-SOURCES}")
 bypass_source_check("${scope-cpp2-SOURCES}")
 bypass_source_check("${thrift-cpp2-SOURCES}")
 add_library(
   thriftannotation
 
-  ${api-cpp2-SOURCES}
   ${cpp-cpp2-SOURCES}
   ${hack-cpp2-SOURCES}
   ${java-cpp2-SOURCES}
-  ${meta-cpp2-SOURCES}
   ${python-cpp2-SOURCES}
   ${scope-cpp2-SOURCES}
   ${thrift-cpp2-SOURCES}
 )
 add_dependencies(thriftannotation
-  api-cpp2-target
   cpp-cpp2-target
   hack-cpp2-target
   java-cpp2-target
-  meta-cpp2-target
   python-cpp2-target
   scope-cpp2-target
   thrift-cpp2-target

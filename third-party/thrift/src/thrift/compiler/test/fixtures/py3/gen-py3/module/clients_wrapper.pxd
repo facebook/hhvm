@@ -27,7 +27,6 @@ from thrift.py3.client cimport cClientWrapper
 cimport module.types as _module_types
 
 cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-cimport facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
 
 cdef extern from "thrift/compiler/test/fixtures/py3/src/gen-py3cpp/module_clients.h" namespace "::py3::simple":
   cdef cppclass cSimpleServiceAsyncClient "::py3::simple::SimpleServiceAsyncClient":

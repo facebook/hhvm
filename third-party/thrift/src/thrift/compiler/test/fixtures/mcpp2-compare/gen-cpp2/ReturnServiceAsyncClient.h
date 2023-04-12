@@ -80,12 +80,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = noReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       noReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      noReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      noReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -173,12 +173,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = boolReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       boolReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      boolReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      boolReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -268,12 +268,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = i16ReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       i16ReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      i16ReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      i16ReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -363,12 +363,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = i32ReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       i32ReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      i32ReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      i32ReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -458,12 +458,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = i64ReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       i64ReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      i64ReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      i64ReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -553,12 +553,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = floatReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       floatReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      floatReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      floatReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -648,12 +648,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = doubleReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       doubleReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      doubleReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      doubleReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -743,12 +743,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = stringReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       stringReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      stringReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      stringReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -838,12 +838,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = binaryReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       binaryReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      binaryReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      binaryReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -933,12 +933,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = mapReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       mapReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      mapReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      mapReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1028,12 +1028,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = simpleTypedefReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       simpleTypedefReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      simpleTypedefReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      simpleTypedefReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1123,12 +1123,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = complexTypedefReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       complexTypedefReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      complexTypedefReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      complexTypedefReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1218,12 +1218,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = list_mostComplexTypedefReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       list_mostComplexTypedefReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      list_mostComplexTypedefReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      list_mostComplexTypedefReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1313,12 +1313,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = enumReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       enumReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      enumReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      enumReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1408,12 +1408,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = list_EnumReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       list_EnumReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      list_EnumReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      list_EnumReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1503,12 +1503,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = structReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       structReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      structReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      structReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1598,12 +1598,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = set_StructReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       set_StructReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      set_StructReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      set_StructReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1693,12 +1693,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = unionReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       unionReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      unionReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      unionReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1788,12 +1788,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = list_UnionReturnCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       list_UnionReturnImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      list_UnionReturnImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      list_UnionReturnImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1883,12 +1883,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = readDataEbCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       readDataEbImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_size);
     } else {
-      readDataEbImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_size);
+      readDataEbImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_size);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -1978,12 +1978,12 @@ class Client<::some::valid::ns::ReturnService> : public apache::thrift::Generate
     auto [ctx, header] = readDataCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       readDataImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_size);
     } else {
-      readDataImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_size);
+      readDataImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_size);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

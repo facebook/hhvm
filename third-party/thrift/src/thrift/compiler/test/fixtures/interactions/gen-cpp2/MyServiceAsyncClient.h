@@ -86,12 +86,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = frobnicateCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       frobnicateImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      frobnicateImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      frobnicateImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -170,12 +170,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = pingCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<true>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       pingImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      pingImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      pingImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -237,14 +237,14 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = truthifyCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
-      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions.getBufferOptions());
+      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if constexpr (hasRpcOptions) {
       truthifyImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      truthifyImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      truthifyImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -350,12 +350,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = frobnicateCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       frobnicateImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      frobnicateImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      frobnicateImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -434,12 +434,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = pingCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<true>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       pingImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      pingImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      pingImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -501,14 +501,14 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = truthifyCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
-      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions.getBufferOptions());
+      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     if constexpr (hasRpcOptions) {
       truthifyImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      truthifyImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      truthifyImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -614,12 +614,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = frobnicateCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       frobnicateImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      frobnicateImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      frobnicateImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -706,12 +706,12 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = fooCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       fooImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      fooImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      fooImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -798,13 +798,13 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = interactCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     MyInteraction handle(channel_, "MyInteraction");
     if constexpr (hasRpcOptions) {
       interactImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle, p_arg);
     } else {
-      interactImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle, p_arg);
+      interactImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle, p_arg);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -887,13 +887,13 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = interactFastCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     MyInteractionFast handle(channel_, "MyInteractionFast");
     if constexpr (hasRpcOptions) {
       interactFastImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
     } else {
-      interactFastImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
+      interactFastImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -977,15 +977,15 @@ class MyInteraction final : public apache::thrift::InteractionHandle {
     auto [ctx, header] = serializeCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
-      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions.getBufferOptions());
+      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
     SerialInteraction handle(channel_, "SerialInteraction");
     if constexpr (hasRpcOptions) {
       serializeImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
     } else {
-      serializeImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
+      serializeImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), handle);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

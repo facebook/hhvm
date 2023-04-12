@@ -87,12 +87,12 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
     auto [ctx, header] = funcCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       funcImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
     } else {
-      funcImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
+      funcImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg1, p_arg2, p_arg3);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

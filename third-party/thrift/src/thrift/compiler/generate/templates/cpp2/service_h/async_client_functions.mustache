@@ -104,13 +104,13 @@
     auto [ctx, header] = <%function:cpp_name%>Ctx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<<%#function:oneway?%>true<%/function:oneway?%><%^function:oneway?%>false<%/function:oneway?%>>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
   <%^function:returns_stream?%>
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
   <%/function:returns_stream?%><%#function:returns_stream?%>
     auto wrappedCallback = apache::thrift::createStreamClientCallback(
         apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback),
-      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions.getBufferOptions());
+      hasRpcOptions ? rpcOptions->getBufferOptions() : defaultRpcOptions->getBufferOptions());
   <%/function:returns_stream?%>
   <%#function:creates_interaction?%>
     <%function:created_interaction%> handle(channel_, "<%function:created_interaction%>");
@@ -118,7 +118,7 @@
     if constexpr (hasRpcOptions) {
       <%function:cpp_name%>Impl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
     } else {
-      <%function:cpp_name%>Impl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
+      <%function:cpp_name%>Impl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback)<%#function:creates_interaction?%>, handle<%/function:creates_interaction?%><%function:comma%><% > service_common/param_list%>);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

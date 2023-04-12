@@ -87,12 +87,12 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
     auto [ctx, header] = countCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       countImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     } else {
-      countImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
+      countImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback));
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
@@ -182,12 +182,12 @@ class Client<::facebook::thrift::test::AdapterService> : public apache::thrift::
     auto [ctx, header] = adaptedTypesCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       adaptedTypesImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg);
     } else {
-      adaptedTypesImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg);
+      adaptedTypesImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_arg);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

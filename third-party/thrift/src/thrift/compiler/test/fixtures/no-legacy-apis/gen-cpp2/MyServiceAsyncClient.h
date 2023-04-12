@@ -77,12 +77,12 @@ class Client<::test::fixtures::basic::MyService> : public apache::thrift::Genera
     auto [ctx, header] = queryCtx(rpcOptions);
     using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
     auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-    static apache::thrift::RpcOptions defaultRpcOptions;
+    static apache::thrift::RpcOptions* defaultRpcOptions = new apache::thrift::RpcOptions();
     auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
     if constexpr (hasRpcOptions) {
       queryImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_u);
     } else {
-      queryImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_u);
+      queryImpl(*defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_u);
     }
     if (cancellable) {
       folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });

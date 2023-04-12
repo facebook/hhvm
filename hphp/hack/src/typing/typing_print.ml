@@ -127,6 +127,16 @@ module Full = struct
     | Loclenv env -> Typing_env_types.get_log_level env "show" > 1
     | Declenv -> false
 
+  (* Until we support NoAutoDynamic, all types under everything-sdt
+   * support dynamic so displaying supportdyn is redundant
+   *)
+  let show_supportdyn penv =
+    match penv with
+    | Loclenv env ->
+      (not (TypecheckerOptions.everything_sdt env.genv.tcopt))
+      || Typing_env_types.get_log_level env "show" >= 1
+    | Declenv -> false
+
   let blank_tyvars = ref false
 
   let comma_sep = Concat [text ","; Space]
@@ -609,6 +619,10 @@ module Full = struct
     | Tprim x -> (fuel, tprim x)
     | Tvar x -> (fuel, text (Printf.sprintf "#%d" x))
     | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_decl_implicit_params
+    | Tnewtype (n, _, ty)
+      when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn penv)
+      ->
+      k ~fuel ty
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
@@ -774,6 +788,10 @@ module Full = struct
     | Tnewtype (s, [], _)
     | Tgeneric (s, []) ->
       (fuel, to_doc s)
+    | Tnewtype (n, _, ty)
+      when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn penv)
+      ->
+      k ~fuel ty
     | Tnewtype (s, tyl, _)
     | Tgeneric (s, tyl) ->
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in

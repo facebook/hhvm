@@ -8,11 +8,11 @@
       { f_span = [3:1-6:11]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid))));
         f_params =
-        [{ param_annotation = (supportdyn<nonnull>); param_type_hint = ((supportdyn<nonnull>), (Some ([4:3-10], (Happly (([4:3-10], "\\HH\\supportdyn"), [([4:3-10], Hnonnull)])))));
+        [{ param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([4:3-10], (Happly (([4:3-10], "\\HH\\supportdyn"), [([4:3-10], Hnonnull)]))))); 
            param_is_variadic = false; param_pos = [4:11-13]; param_name = "$n"; 
            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
            param_user_attributes = []; param_visibility = None };
-          { param_annotation = (supportdyn<mixed>); param_type_hint = ((supportdyn<mixed>), (Some ([5:3-8], (Happly (([5:3-8], "\\HH\\supportdyn"), [([5:3-8], Hmixed)])))));
+          { param_annotation = (mixed); param_type_hint = ((mixed), (Some ([5:3-8], (Happly (([5:3-8], "\\HH\\supportdyn"), [([5:3-8], Hmixed)]))))); 
             param_is_variadic = false; param_pos = [5:9-11]; param_name = "$m"; 
             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }

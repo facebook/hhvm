@@ -160,8 +160,9 @@ well supported and may change):
 Be very careful and deliberate when using these, as they are loosely typed but
 will throw exceptions for bad arguments.
 
-<span data-nosnippet class="fbOnly fbIcon">In Facebook's WWW repository, prefer using higher
-level wrappers such as the `HackCallable` class.</span>
+<span data-nosnippet class="fbOnly fbIcon">In Meta's WWW repository, prefer using higher
+level wrappers such as the `HackCallable` class, or `ReflectionFunctionProdUtils` outside
+of intern code.</span>
 
 ## Old syntax
 

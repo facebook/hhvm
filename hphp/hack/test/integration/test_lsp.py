@@ -22,8 +22,14 @@ from utils import interpolate_variables, Json, JsonObject
 
 class LspTestDriver(common_tests.CommonTestDriver):
     def write_load_config(
-        self, use_serverless_ide: bool = False, use_saved_state: bool = False
+        self,
+        use_serverless_ide: bool = False,
+        use_saved_state: bool = False,
+        use_standalone_ide: bool = False,
     ) -> None:
+        assert (
+            use_serverless_ide or not use_standalone_ide
+        ), "use_standalone_ide requires use_serverless_ide"
         # Will use the .hhconfig already in the repo directory
         # As for hh.conf, we'll write it explicitly each test.
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
@@ -43,9 +49,12 @@ lazy_init2 = {use_saved_state}
 symbolindex_search_provider = SqliteIndex
 allow_unstable_features = true
 ide_serverless = {use_serverless_ide}
+ide_standalone = {use_standalone_ide}
+produce_streaming_errors = {use_standalone_ide}
 """.format(
                     use_saved_state=str(use_saved_state).lower(),
                     use_serverless_ide=str(use_serverless_ide).lower(),
+                    use_standalone_ide=str(use_standalone_ide).lower(),
                 )
             )
 
@@ -254,10 +263,14 @@ class TestLsp(TestCase[LspTestDriver]):
             raise unittest.SkipTest("Hack server could not be launched")
         self.assertEqual(output.strip(), "No errors!")
 
-    def prepare_serverless_ide_environment(self) -> Mapping[str, str]:
+    def prepare_serverless_ide_environment(
+        self, use_standalone_ide: bool = False
+    ) -> Mapping[str, str]:
         self.maxDiff = None
         self.test_driver.write_load_config(
-            use_serverless_ide=True, use_saved_state=False
+            use_serverless_ide=True,
+            use_saved_state=False,
+            use_standalone_ide=use_standalone_ide,
         )
         naming_table_saved_state_path = (
             self.test_driver.write_naming_table_saved_state()
@@ -6955,6 +6968,164 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_standalone_status(self) -> None:
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_standalone_status"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .wait_for_server_request(
+                comment="standalone status upon startup when it starts with hh_server stopped",
+                method="window/showStatus",
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .start_hh_server("Restart HH Server")
+            .wait_for_server_request(
+                comment="standalone status when hh_server transitions to starting up",
+                method="window/showStatus",
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is ready",
+                    "shortMessage": "Hack",
+                    "type": 3,
+                },
+                result=NoResponse(),
+            )
+            .stop_hh_server("Shutdown HH Server")
+            .wait_for_server_request(
+                comment="standalone status when hh_server transitions to stopped",
+                method="window/showStatus",
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_standalone_errors(self) -> None:
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        errors_a_uri = self.repo_file_uri("errors_a.php")
+        errors_b_uri = self.repo_file_uri("errors_b.php")
+        variables.update({"errors_a_uri": errors_a_uri, "errors_b_uri": errors_b_uri})
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_standalone_status"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .write_to_disk(
+                comment="create file errors_a.php",
+                uri="${errors_a_uri}",
+                contents="<?hh\nfunction aaa(): int { return 1 }\n",
+                notify=False,
+            )
+            .write_to_disk(
+                comment="create file errors_b.php",
+                uri="${errors_b_uri}",
+                contents="<?hh\nfunction bbb(): int { return 2 }\n",
+                notify=False,
+            )
+            .notification(
+                comment="actually open something that's different from what was on disk (with extra newline)",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${errors_a_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh\n\n\n\nfunction aaa(): int { return 1 }\n",
+                    }
+                },
+            )
+            .wait_for_notification(
+                comment="standalone should report a squiggle in errors_a.php from serverless",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_a_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 4, "character": 31},
+                                "end": {"line": 4, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("start HH Server")
+            .wait_for_notification(
+                comment="standalone should report a squiggle in errors_b.php from errors.bin",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${errors_b_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 1, "character": 31},
+                                "end": {"line": 1, "character": 31},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon ; is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("start HH Server")
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .wait_for_notification(
+                comment="standalone should clean up squiggles - a",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${errors_a_uri}", "diagnostics": []},
+            )
+            .wait_for_notification(
+                comment="standalone should clean up squiggles - b",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${errors_b_uri}", "diagnostics": []},
+            )
             .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

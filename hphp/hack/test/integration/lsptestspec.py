@@ -93,20 +93,32 @@ class LspTestSpec:
         self._messages: Sequence["_MessageSpec"] = []
         self._ignored_notification_methods: AbstractSet[str] = set()
         # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        self._ignored_requests: Sequence[Tuple[str, Json]] = []
+        self._ignored_requests: Sequence[Tuple[str, Optional[Json]]] = []
         self._ignore_status_diagnostics: bool = False
 
     def ignore_notifications(self, *, method: str) -> "LspTestSpec":
+        """For example .ignore_notifications(method="textDocument/publishDiagnostics") --
+        normally an unexpected notification from the LSP server would result in test failure,
+        but this directive means that unexpected notifications with this exact method name do not."""
         ignored_notification_methods = set(self._ignored_notification_methods)
         ignored_notification_methods.add(method)
         return self._update(ignored_notification_methods=ignored_notification_methods)
 
     def ignore_status_diagnostics(self, value: bool) -> "LspTestSpec":
+        """For example .ignore_status_diagnostics(True) --
+        normally an unexpected publishDiagnostic from the LSP server would result in test failure,
+        but this directive means that unexpected publishDiagnostics with isStatusFB=true will not.
+        (This is what's used by clientLsp to represent the current progress of hh_server during In_init state.)"""
         return self._update(ignore_status_diagnostics=value)
 
     def ignore_requests(
-        self, *, method: str, params: Json, comment: Optional[str] = None
+        self, *, method: str, params: Optional[Json], comment: Optional[str] = None
     ) -> "LspTestSpec":
+        """For example .ignore_requests(comment="for_tester", method="window/showStatus", params={"type":2}) --
+        normally an unexpected request from the LSP server would result in test failure,
+        but this directive means that unexpected requests with this exact method name and params do not.
+        If you pass params=None then unexpected requests with this exact method name and *any* params do not.
+        Typically used for window/showStatus messages!"""
         ignored_requests = list(self._ignored_requests)
         ignored_requests.append((method, params))
         return self._update(ignored_requests=ignored_requests)
@@ -457,8 +469,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 transcript_id = LspCommandProcessor._client_request_id(lsp_id)
                 handled_entries.add(transcript_id)
                 assert transcript_id in transcript, (
-                    f"Expected message with ID {lsp_id!r} "
-                    + f"to have an entry in the transcript "
+                    f"Expected message with ID {lsp_id!r} to have an entry in the transcript "
                     + f"under key {transcript_id!r}, "
                     + f"but it was not found. Transcript: {transcript!r}"
                 )
@@ -472,8 +483,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 transcript_id = LspCommandProcessor._client_request_id(lsp_id)
                 handled_entries.add(transcript_id)
                 assert transcript_id in transcript, (
-                    f"Expected message with ID {lsp_id!r} "
-                    + f"to have an entry in the transcript "
+                    f"Expected message with ID {lsp_id!r} to have an entry in the transcript "
                     + f"under key {transcript_id!r}, "
                     + f"but it was not found. Transcript: {transcript!r}"
                 )
@@ -651,7 +661,7 @@ This was the associated request:
         )
         powered_by = actual_response.get("powered_by")
 
-        request_snippet = f"""\
+        request_snippet = """\
     .request(
         line=line(),"""
         if request.comment is not None:
@@ -667,7 +677,7 @@ This was the associated request:
         if powered_by is not None:
             request_snippet += f"""
         powered_by={powered_by!r},"""
-        request_snippet += f"""
+        request_snippet += """
     )"""
 
         remediation = f"""\
@@ -704,8 +714,11 @@ make it match:
                 and "id" in entry.received
                 and "method" in entry.received
                 and "params" in entry.received
-                and (entry.received["method"], entry.received["params"])
-                in self._ignored_requests
+                and (
+                    (entry.received["method"], entry.received["params"])
+                    in self._ignored_requests
+                    or (entry.received["method"], None) in self._ignored_requests
+                )
             ):
                 yield transcript_id
 

@@ -4553,6 +4553,18 @@ let log_response_if_necessary
         (get_older_hh_server_state timestamp |> hh_server_state_to_string)
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:(show_serverless_ide env.serverless_ide)
+  | Shell_out_hh_feature_complete (result, _) ->
+    let command_line =
+      match result with
+      | Ok Lwt_utils.Process_success.{ command_line; _ }
+      | Error Lwt_utils.Process_failure.{ command_line; _ } ->
+        command_line
+    in
+    HackEventLogger.client_lsp_shellout
+      ~root:(get_root_opt ())
+      ~command_line
+      ~result_count
+      ~result_extra_telemetry
   | _ -> ()
 
 type error_source =

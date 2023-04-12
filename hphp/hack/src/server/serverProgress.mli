@@ -172,6 +172,8 @@ type errors_file_error =
       (** The hh_server that produced these errors is incompatible with the current binary. *)
 [@@deriving show]
 
+val is_complete : errors_file_error -> bool
+
 val enable_error_production : bool -> unit
 
 val validate_errors_DELETE_THIS_SOON : expected:Errors.t -> string

@@ -826,6 +826,9 @@ let atomically_create_and_init_file
     Exception.reraise e
 
 let protected_read_exn (filename : string) : string =
+  (* TODO(ljw): this function is vulnerable to EINTR. Although we only hit it about once a month. *)
+  (* TODO(ljw): we should use atomic-create for this! *)
+
   (* We can't use the standard Disk.cat because we need to read from an existing (locked)
      fd for the file; not open the file a second time and read from that. *)
   let cat_from_fd (fd : Unix.file_descr) : string =

@@ -74,6 +74,8 @@ type hh_server_state =
 
 let see_output_hack = " See Output\xE2\x80\xBAHack for details." (* chevron *)
 
+let fix_by_running_hh = "Try running `hh` at the command-line."
+
 type incoming_metadata = {
   timestamp: float;  (** time this message arrived at stdin *)
   tracking_id: string;
@@ -387,6 +389,16 @@ let latest_hh_server_errors : errors_conn ref =
   ref
     (SeekingErrors
        { prev_st_ino = None; seek_reason = (ServerProgress.NothingYet, "init") })
+
+(** This is the latest state of the progress.json file, updated once a second
+in a background Lwt process [background_status_refresher]. This file is where the
+monitor reports its status like "starting up", and hh_server reports its status
+like "typechecking". If there is no hh_server or monitor, the state is reported
+as "Stopped".
+
+Why do we have this form of status in addition to [latest_hh_server_status]?
+Answer: this form is nicer, and we're going to rip the other one out soon... *)
+let latest_hh_server_progress : ServerProgress.t option ref = ref None
 
 (** Have we already sent a status message over LSP? If so, and our new
 status will be just the same as the previous one, we won't need to send it
@@ -2088,16 +2100,179 @@ let merge_statuses
     else
       Some { client_ide_status with request }
 
-let refresh_status ~(ide_service : ClientIdeService.t ref option) : unit =
-  let client_ide_status =
-    match ide_service with
-    | None -> None
-    | Some ide_service -> get_client_ide_status !ide_service
+(** This function looks at three sources of information (1) hh_server progress.json file,
+(2) whether we're currently tailing an errors.bin file or whether we failed to open one,
+(3) status of clientIdeDaemon. It synthesizes a status message suitable for display
+in the VSCode status bar.
+
+TODO(ljw): This function is duplicative of [merge_statuses] and [get_client_ide_status].
+Once we've switched over to ide_standalone, we should delete the old code, and maybe
+split this function up with two smaller ones. *)
+let merge_statuses_standalone
+    (server : ServerProgress.t)
+    (errors : errors_conn)
+    (ide : ClientIdeService.t) : Lsp.ShowStatusFB.params option =
+  let ( (client_ide_disposition, client_ide_is_initializing),
+        client_ide_message,
+        client_ide_tooltip ) =
+    match ClientIdeService.get_status ide with
+    | ClientIdeService.Status.Initializing ->
+      ( (ServerProgress.DWorking, true),
+        "Hack: initializing",
+        "Hack IDE support is initializing (loading saved state)" )
+    | ClientIdeService.Status.Processing_files p ->
+      ( (ServerProgress.DWorking, false),
+        "Hack: indexing",
+        Printf.sprintf
+          "Hack IDE support is indexing %d files"
+          p.ClientIdeMessage.Processing_files.total )
+    | ClientIdeService.Status.Rpc _ ->
+      ( (ServerProgress.DWorking, false),
+        "Hack",
+        "Hack is working on IDE requests" )
+    | ClientIdeService.Status.Ready ->
+      ((ServerProgress.DReady, false), "Hack", "Hack IDE support is ready")
+    | ClientIdeService.Status.Stopped s ->
+      ( (ServerProgress.DStopped, false),
+        s.ClientIdeMessage.short_user_message,
+        s.ClientIdeMessage.medium_user_message
+        ^ see_output_hack
+        ^ fix_by_running_hh )
   in
+  let (hh_server_disposition, hh_server_message, hh_server_tooltip) =
+    let open ServerProgress in
+    match (server, errors) with
+    | ({ disposition = DStopped; message; _ }, _) ->
+      ( DStopped,
+        "Hack: hh_server " ^ message,
+        Printf.sprintf "hh_server is %s. %s" message fix_by_running_hh )
+    | ( _,
+        SeekingErrors
+          { seek_reason = (ServerProgress.Build_id_mismatch, log_message); _ }
+      ) ->
+      ( DStopped,
+        "Hack: hh_server wrong version",
+        Printf.sprintf
+          "hh_server is the wrong version [%s]. %s"
+          log_message
+          fix_by_running_hh )
+    | ({ disposition = DWorking; message; _ }, _) ->
+      ( DWorking,
+        (* following is little hack because "Hack: typechecking 1234/5678" is too big to fit
+           in the VSCode status bar. So we shorten this special case. *)
+        (if String.is_substring message ~substring:"typechecking" then
+          message
+        else
+          "Hack: " ^ message),
+        Printf.sprintf "hh_server is busy [%s]" message )
+    | ( { disposition = DReady; _ },
+        SeekingErrors
+          {
+            seek_reason = (ServerProgress.(NothingYet | Killed), log_message);
+            _;
+          } ) ->
+      ( DStopped,
+        "Hack: hh_server stopped",
+        Printf.sprintf
+          "hh_server is stopped. [%s]. %s"
+          log_message
+          fix_by_running_hh )
+    | ( { disposition = DReady; _ },
+        SeekingErrors { seek_reason = (e, log_message); _ } )
+      when not (ServerProgress.is_complete e) ->
+      let e = ServerProgress.show_errors_file_error e in
+      ( DStopped,
+        "Hack: hh_server " ^ e,
+        Printf.sprintf
+          "hh_server error %s [%s]. %s"
+          e
+          log_message
+          fix_by_running_hh )
+    | ({ disposition = DReady; _ }, TailingErrors _) ->
+      (DWorking, "Hack: typechecking", "hh_server is busy [typechecking].")
+    | ({ disposition = DReady; _ }, _) -> (DReady, "Hack", "hh_server is ready")
+  in
+  let (disposition, message) =
+    match
+      (client_ide_disposition, client_ide_is_initializing, hh_server_disposition)
+    with
+    | (ServerProgress.DWorking, true, _) ->
+      (ServerProgress.DWorking, client_ide_message)
+    | (_, _, ServerProgress.DWorking) ->
+      (ServerProgress.DWorking, hh_server_message)
+    | (ServerProgress.DWorking, false, ServerProgress.DStopped) ->
+      (ServerProgress.DWorking, hh_server_message)
+    | (ServerProgress.DWorking, false, _) ->
+      (ServerProgress.DWorking, client_ide_message)
+    | (ServerProgress.DStopped, _, _) ->
+      (ServerProgress.DStopped, client_ide_message)
+    | (_, _, ServerProgress.DStopped) ->
+      (ServerProgress.DStopped, hh_server_message)
+    | (ServerProgress.DReady, _, ServerProgress.DReady) ->
+      (ServerProgress.DReady, "Hack")
+  in
+  let tooltip =
+    Printf.sprintf "%s\n\n%s" client_ide_tooltip hh_server_tooltip
+  in
+  let type_ =
+    match disposition with
+    | ServerProgress.DStopped -> MessageType.ErrorMessage
+    | ServerProgress.DWorking -> MessageType.WarningMessage
+    | ServerProgress.DReady -> MessageType.InfoMessage
+  in
+  Some
+    {
+      ShowStatusFB.shortMessage = Some message;
+      request = { ShowStatusFB.type_; message = tooltip };
+      progress = None;
+      total = None;
+      telemetry = None;
+    }
+
+let refresh_status (env : env) ~(ide_service : ClientIdeService.t ref option) :
+    unit =
   let status =
-    merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
+    match (env.serverless_ide, !latest_hh_server_progress) with
+    | (Serverless_with_shell, Some latest_hh_server_progress) ->
+      merge_statuses_standalone
+        latest_hh_server_progress
+        !latest_hh_server_errors
+        !(Option.value_exn ide_service)
+    | (Serverless_with_shell, None) ->
+      (* [latest_hh_server_progress] gets set in [background_status_refresher]. The only way it might
+         be None is if we're not using Serverless_with_shell (impossible to reach here) or if root hasn't yet
+         been set, in which case declining to refresh status is the right thing to do. *)
+      None
+    | _ ->
+      let client_ide_status =
+        match ide_service with
+        | None -> None
+        | Some ide_service -> get_client_ide_status !ide_service
+      in
+      merge_statuses
+        ~hh_server_status:!latest_hh_server_status
+        ~client_ide_status
   in
   Option.iter status ~f:request_showStatusFB;
+  ()
+
+(** This kicks off a permanent process which, once a second, reads progress.json
+and calls [refresh_status]. Because it's an Lwt process, it's able to update
+status even when we're stuck waiting for RPC. *)
+let background_status_refresher
+    (env : env) (ide_service : ClientIdeService.t ref option) : unit =
+  let rec loop () =
+    (* Currently clientLsp does not know root until after the Initialize request.
+       That's a bit of a pain and should be changed to assume current-working-directory.
+       The "initialize" handler both sets root and calls ServerProgress.set_root,
+       and we use the former as a proxy for the latter... *)
+    if Option.is_some (get_root_opt ()) then
+      latest_hh_server_progress := Some (ServerProgress.read ());
+    refresh_status env ~ide_service;
+    let%lwt () = Lwt_unix.sleep 1.0 in
+    loop ()
+  in
+  let _future = loop () in
   ()
 
 let rpc_lock = Lwt_mutex.create ()
@@ -2178,7 +2353,7 @@ let ide_rpc
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
   let (_ : env) = env in
-  let progress () = refresh_status ~ide_service:(Some ide_service) in
+  let progress () = refresh_status env ~ide_service:(Some ide_service) in
   let%lwt result =
     ClientIdeService.rpc
       !ide_service
@@ -5759,6 +5934,13 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
                 verbose_to_file = env.args.verbose;
               }))
   in
+  (* We have two different techniques for refreshing status: ide_standalone
+     refreshes status once a second, so we kick off the once-a-second background
+     refreshing process here; other modes refresh every event and are handled
+     later, in the event loop.
+     TODO(ljw): delete the "other modes" status refresh once we switch over. *)
+  if versionless_local_config.ServerLocalConfig.ide_standalone then
+    background_status_refresher env ide_service;
 
   let client = Jsonrpc.make_t () in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
@@ -5800,10 +5982,13 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       update_hh_server_state_if_necessary event;
 
       (* update status immediately if warranted *)
-      if not (is_pre_init !state || is_post_shutdown !state) then begin
+      if
+        (not (is_pre_init !state || is_post_shutdown !state))
+        && not versionless_local_config.ServerLocalConfig.ide_standalone
+      then begin
         state :=
           publish_hh_server_status_diagnostic !state !latest_hh_server_status;
-        refresh_status ~ide_service
+        refresh_status env ~ide_service
       end;
 
       (* this is the main handler for each message*)

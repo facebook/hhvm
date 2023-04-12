@@ -83,11 +83,11 @@ advisory; we trust [write_file] above to also acquire a writer
 lock).  If there are failures, we log, and return a human-readable
 string that indicates why. *)
 let read () : t =
-  let unknown =
+  let synthesize_stopped message =
     {
       pid = 0;
       disposition = DStopped;
-      message = "unknown hh_server state";
+      message;
       timestamp = Unix.gettimeofday ();
     }
   in
@@ -111,8 +111,9 @@ let read () : t =
        if Proc.is_alive ~pid ~expected:"" then
          { pid; message; disposition; timestamp }
        else
-         unknown
+         synthesize_stopped "stopped"
      with
+    | Unix.Unix_error (Unix.ENOENT, _, _) -> synthesize_stopped "stopped"
     | exn ->
       let e = Exception.wrap exn in
       Hh_logger.log
@@ -121,7 +122,7 @@ let read () : t =
         (Exception.get_backtrace_string e |> Exception.clean_stack)
         !content;
       HackEventLogger.server_progress_read_exn ~server_progress_file e;
-      unknown)
+      synthesize_stopped "unknown state")
 
 let write ?(include_in_logs = true) ?(disposition = DWorking) fmt =
   let f message =
@@ -189,6 +190,11 @@ type errors_file_error =
   | Killed
   | Build_id_mismatch
 [@@deriving show { with_path = false }]
+
+let is_complete (e : errors_file_error) : bool =
+  match e with
+  | Complete _ -> true
+  | _ -> false
 
 let is_production_enabled = ref true
 

@@ -247,9 +247,7 @@ let test_start_stop () : bool Lwt.t =
         if Sys_utils.file_exists (ServerFiles.server_progress_file root) then
           failwith "expected progress file to be deleted";
         let%lwt () =
-          wait_for_progress
-            ~deadline:0.
-            ~expected:"[DStopped] unknown hh_server state"
+          wait_for_progress ~deadline:0. ~expected:"[DStopped] stopped"
         in
         Lwt.return_unit)
   in
@@ -337,7 +335,7 @@ let test_kill_monitor () : bool Lwt.t =
         let%lwt () =
           wait_for_progress
             ~deadline:(Unix.gettimeofday () +. 60.0)
-            ~expected:"[DStopped] unknown hh_server state"
+            ~expected:"[DStopped] stopped"
         in
         if not (Sys_utils.file_exists (ServerFiles.server_progress_file root))
         then

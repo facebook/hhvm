@@ -245,18 +245,14 @@ let rpc
         Active_rpc_requests.add telemetry t.active_rpc_requests
       in
       t.active_rpc_requests <- active;
-      let (pingPromise : unit Lwt.t) =
-        let%lwt () = Lwt_unix.sleep 0.2 in
-        progress ();
-        Lwt.return_unit
-      in
+      let pingPromise = Lwt_unix.sleep 0.2 |> Lwt.map progress in
       let%lwt (response : response_wrapper option) =
         Lwt_message_queue.pop t.response_emitter
       in
       t.active_rpc_requests <-
         Active_rpc_requests.remove id t.active_rpc_requests;
       Lwt.cancel pingPromise;
-      if Active_rpc_requests.is_empty t.active_rpc_requests then progress ();
+      progress ();
 
       (* when might t.active_rpc_count <> 0? well, if the caller did
          Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will

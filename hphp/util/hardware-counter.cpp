@@ -362,6 +362,24 @@ struct HardwareCounterImpl {
     }
   }
 
+  void pause() {
+    if (m_fd > 0) {
+      if (ioctl(m_fd, PERF_EVENT_IOC_DISABLE, PERF_IOC_FLAG_GROUP) < 0) {
+        Logger::FWarning("perf_event failed to disable: {}",
+                         folly::errnoStr(errno));
+      }
+    }
+  }
+
+  void resume() {
+    if (m_fd > 0) {
+      if (ioctl(m_fd, PERF_EVENT_IOC_ENABLE, PERF_IOC_FLAG_GROUP) < 0) {
+        Logger::FWarning("perf_event failed to resume: {}",
+                         folly::errnoStr(errno));
+      }
+    }
+  }
+
 public:
   std::string m_desc;
   int m_err{0};
@@ -438,6 +456,14 @@ void HardwareCounter::Reset() {
   s_counter->reset();
 }
 
+void HardwareCounter::Pause() {
+  s_counter->pause();
+}
+
+void HardwareCounter::Resume() {
+  s_counter->resume();
+}
+
 void HardwareCounter::reset() {
   m_instructionCounter->reset();
   if (!m_countersSet) {
@@ -446,6 +472,28 @@ void HardwareCounter::reset() {
   }
   for (unsigned i = 0; i < m_counters.size(); i++) {
     m_counters[i]->reset();
+  }
+}
+
+void HardwareCounter::pause() {
+  m_instructionCounter->pause();
+  if (!m_countersSet) {
+    m_storeCounter->pause();
+    m_loadCounter->pause();
+  }
+  for (unsigned i = 0; i < m_counters.size(); i++) {
+    m_counters[i]->pause();
+  }
+}
+
+void HardwareCounter::resume() {
+  m_instructionCounter->resume();
+  if (!m_countersSet) {
+    m_storeCounter->resume();
+    m_loadCounter->resume();
+  }
+  for (unsigned i = 0; i < m_counters.size(); i++) {
+    m_counters[i]->resume();
   }
 }
 

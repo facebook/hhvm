@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -634,6 +635,9 @@ void RegionTranslator::resetCached() {
 }
 
 void RegionTranslator::gen() {
+  // Per-request hardware counters (such as instructions, load/store) should not
+  // include the JIT.
+  UNUSED HardwareCounter::ExcludeScope stopCount;
   auto const srcRec = srcDB().find(sk);
   auto const emitInterpStub = [&] {
     FTRACE(1, "emitting dispatchBB interp request for failed "

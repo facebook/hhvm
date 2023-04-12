@@ -156,13 +156,13 @@ class SerializerTests(unittest.TestCase):
     def test_serialize_easy_struct(self) -> None:
         control = easy(val=5, val_list=[1, 2, 3, 4])
         fixtures: Mapping[Protocol, bytes] = {
-            Protocol.COMPACT: b"\x15\n\x19E\x02\x04\x06\x08,\x00\x00",
+            Protocol.COMPACT: b"\x15\n\x19E\x02\x04\x06\x08,\x00\x16\x00\x00",
             Protocol.BINARY: b"\x08\x00\x01\x00\x00\x00\x05\x0f\x00\x02\x08\x00\x00\x00"
             b"\x04\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00"
-            b"\x00\x00\x04\x0c\x00\x04\x00\x00",
-            Protocol.JSON: b'{"val":5,"val_list":[1,2,3,4],"an_int":{}}',
+            b"\x00\x00\x04\x0c\x00\x04\x00\n\x00\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            Protocol.JSON: b'{"val":5,"val_list":[1,2,3,4],"an_int":{},"py3_hidden":0}',
             Protocol.COMPACT_JSON: b'{"1":{"i32":5},"2":{"lst":["i32",4,1,2,3,4]},"4"'
-            b':{"rec":{}}}',
+            b':{"rec":{}},"5":{"i64":0}}',
         }
         self.thrift_serialization_round_robin(control, fixtures)
 

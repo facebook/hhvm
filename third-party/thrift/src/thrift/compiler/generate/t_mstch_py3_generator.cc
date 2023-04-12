@@ -786,14 +786,17 @@ class py3_mstch_struct : public mstch_struct {
              &py3_mstch_struct::fields_and_mixin_fields},
             {"struct:py3_fields", &py3_mstch_struct::py3_fields},
             {"struct:py3_fields?", &py3_mstch_struct::has_py3_fields},
+            {"struct:has_hidden_fields?", &py3_mstch_struct::has_hidden_fields},
         });
     py3_fields_ = struct_->fields().copy();
     py3_fields_.erase(
         std::remove_if(
             py3_fields_.begin(),
             py3_fields_.end(),
-            [](const t_field* field) {
-              return field->has_annotation("py3.hidden");
+            [this](const t_field* field) {
+              bool hidden = field->has_annotation("py3.hidden");
+              this->hidden_fields |= hidden;
+              return hidden;
             }),
         py3_fields_.end());
   }
@@ -823,6 +826,8 @@ class py3_mstch_struct : public mstch_struct {
 
   mstch::node has_py3_fields() { return !py3_fields_.empty(); }
 
+  mstch::node has_hidden_fields() { return hidden_fields; }
+
   mstch::node fields_and_mixin_fields() {
     std::vector<const t_field*> fields = py3_fields_;
     for (const auto& m : cpp2::get_mixins_and_members(*struct_)) {
@@ -834,6 +839,7 @@ class py3_mstch_struct : public mstch_struct {
 
  private:
   std::vector<const t_field*> py3_fields_;
+  bool hidden_fields = false;
 };
 
 class py3_mstch_field : public mstch_field {

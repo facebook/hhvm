@@ -624,9 +624,19 @@ cdef class SimpleStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.SimpleStruct"
 
+    __fbthrift_field_name_list = [
+        'is_on',
+        'tiny_int',
+        'small_int',
+        'nice_sized_int',
+        'big_int',
+        'real',
+        'smaller_real',
+    ]
+
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cSimpleStruct](idx))
+        return cls.__fbthrift_field_name_list[idx]
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
@@ -725,9 +735,12 @@ cdef class HiddenTypeFieldsStruct(thrift.py3.types.Struct):
     def __get_thrift_name__():
         return "module.HiddenTypeFieldsStruct"
 
+    __fbthrift_field_name_list = [
+    ]
+
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
-        return __sv_to_str(__get_field_name_by_index[cHiddenTypeFieldsStruct](idx))
+        return cls.__fbthrift_field_name_list[idx]
 
     @classmethod
     def _fbthrift_get_struct_size(cls):

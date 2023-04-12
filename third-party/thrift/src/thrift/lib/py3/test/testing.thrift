@@ -152,6 +152,7 @@ struct easy {
   1: i32 val;
   2: I32List val_list;
   4: Integers an_int;
+  5: i64 py3_hidden (py3.hidden);
 } (anno1 = "foo", bar)
 
 struct PrivateCppRefField {

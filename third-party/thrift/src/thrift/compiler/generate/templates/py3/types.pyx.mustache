@@ -405,9 +405,22 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     def __get_thrift_name__():
         return "{{program:name}}.{{struct:name}}"
 
+    {{#struct:has_hidden_fields?}}
+    __fbthrift_field_name_list = [
+        {{#struct:py3_fields}}
+        '{{field:py_name}}',
+        {{/struct:py3_fields}}
+    ]
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return cls.__fbthrift_field_name_list[idx]
+    {{/struct:has_hidden_fields?}}
+    {{^struct:has_hidden_fields?}}
     @classmethod
     def _fbthrift_get_field_name_by_index(cls, idx):
         return __sv_to_str(__get_field_name_by_index[c{{struct:name}}](idx))
+    {{/struct:has_hidden_fields?}}
 
     @classmethod
     def _fbthrift_get_struct_size(cls):

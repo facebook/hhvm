@@ -208,7 +208,7 @@ class StructTests(unittest.TestCase):
         )
 
     def test_dir(self) -> None:
-        expected = ["__iter__", "an_int", "name", "val", "val_list"]
+        expected = ["__iter__", "an_int", "name", "py3_hidden", "val", "val_list"]
         self.assertEqual(expected, dir(easy()))
         self.assertEqual(expected, dir(easy))
 
@@ -220,7 +220,7 @@ class StructTests(unittest.TestCase):
 
     def test_repr(self) -> None:
         self.assertEqual(
-            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None))",
+            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None), py3_hidden=0)",
             repr(easy(val=42)),
         )
 

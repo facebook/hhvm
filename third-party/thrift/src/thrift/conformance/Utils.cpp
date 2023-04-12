@@ -113,7 +113,7 @@ std::map<std::string_view, std::string_view> parseCmds(
 
 std::set<std::string> parseNonconforming(std::string_view data) {
   std::vector<folly::StringPiece> lines;
-  folly::split("\n", data, lines);
+  folly::split('\n', data, lines);
   std::set<std::string> result;
   for (auto& line : lines) {
     // Strip any comments.
@@ -134,7 +134,7 @@ std::vector<TestSuite> getSuites() {
 
   std::vector<std::string> suiteGens;
   folly::split(
-      ",", getEnvOr("THRIFT_CONFORMANCE_TEST_SUITE_GENS", ""), suiteGens);
+      ',', getEnvOr("THRIFT_CONFORMANCE_TEST_SUITE_GENS", ""), suiteGens);
   for (auto cmd : suiteGens) {
     if (!cmd.empty()) {
       result.emplace_back(BinarySerializer::deserialize<TestSuite>(

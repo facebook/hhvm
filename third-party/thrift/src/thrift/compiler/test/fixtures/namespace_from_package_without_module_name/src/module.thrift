@@ -25,7 +25,6 @@ namespace java dev.test.namespace_from_package_without_module_name_deprecated
 namespace py.asyncio test.namespace_from_package_without_module_name.module
 namespace go namespace_from_package_without_module_name.module
 namespace py namespace_from_package_without_module_name.module
-namespace rust test.namespace_from_package_without_module_name
 namespace hs NamespaceFromPackageWithoutModuleName
 
 struct Foo {

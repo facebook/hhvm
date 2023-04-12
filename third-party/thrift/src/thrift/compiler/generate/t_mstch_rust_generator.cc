@@ -23,8 +23,10 @@
 #include <string>
 #include <unordered_set>
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_struct.h>
@@ -1901,11 +1903,42 @@ void t_mstch_rust_generator::generate_program() {
     options_.gen_metadata = gen_metadata.value() == "true";
   }
 
+  boost::optional<std::string> crate_name_option = get_option("crate_name");
+  std::string namespace_rust = program_->get_namespace("rust");
+  if (!namespace_rust.empty()) {
+    std::vector<std::string> pieces;
+    boost::split(pieces, namespace_rust, boost::is_any_of("."));
+    if (options_.multifile_mode) {
+      if (pieces.size() != 2) {
+        throw std::runtime_error(fmt::format(
+            "`namespace rust {}`: namespace for multi-file Thrift library must have 2 pieces separated by '.'",
+            namespace_rust));
+      }
+    } else {
+      if (pieces.size() != 1) {
+        throw std::runtime_error(fmt::format(
+            "`namespace rust {}`: namespace for single-file Thrift library must not contain '.'",
+            namespace_rust));
+      }
+    }
+    if (crate_name_option && pieces[0] != *crate_name_option) {
+      throw std::runtime_error(fmt::format(
+          "`namespace rust` disagrees with rust_crate_name option: \"{}\" vs \"{}\"",
+          pieces[0],
+          *crate_name_option));
+    }
+  } else if (crate_name_option) {
+    namespace_rust = *crate_name_option;
+  } else {
+    namespace_rust = program_->name();
+  }
+
   set_mstch_factories();
 
-  const auto& prog = cached_program(get_program());
+  const auto& prog = cached_program(program_);
   render_to_file(prog, "lib.rs", "lib.rs");
   render_to_file(prog, "types.rs", "types.rs");
+  write_output("namespace", namespace_rust);
 }
 
 void t_mstch_rust_generator::set_mstch_factories() {

@@ -6,8 +6,7 @@
     "hs": "NamespaceFromPackageWithoutModuleName",
     "java": "dev.test.namespace_from_package_without_module_name_deprecated",
     "py": "namespace_from_package_without_module_name.module",
-    "py.asyncio": "test.namespace_from_package_without_module_name.module",
-    "rust": "test.namespace_from_package_without_module_name"
+    "py.asyncio": "test.namespace_from_package_without_module_name.module"
   },  "structs" :
   {
       "Foo" : {
@@ -16,21 +15,21 @@
           "MyInt" : {
             "name" : "MyInt",
             "key" : 1,
-            "lineno" : 32,
+            "lineno" : 31,
             "required" : "opt-in-req-out",
             "type" : "i64"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 31
+        "lineno" : 30
       }
       },
   "services" :
   {
       "TestService" : { 
         "name" : "TestService",
-        "lineno" : 35,
+        "lineno" : 34,
         "functions" : {
           "init" : {
             "name" : "init",
@@ -39,12 +38,12 @@
                 "name" : "int1",
                 "type" : "i64",
                 "key" : 1,
-                "lineno" : 36,
+                "lineno" : 35,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : "i64",
-            "lineno" : 36
+            "lineno" : 35
           }
         }
           }

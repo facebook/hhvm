@@ -25,7 +25,6 @@ namespace java dev.test.namespace_from_package.module_deprecated
 namespace py.asyncio test.namespace_from_package.module
 namespace go namespace_from_package.module
 namespace py namespace_from_package.module
-namespace rust test.namespace_from_package.module
 namespace hs DefaultNamespace.module
 
 struct Foo {

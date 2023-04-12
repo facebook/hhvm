@@ -23,6 +23,7 @@
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Testing.h>
+#include <thrift/lib/cpp2/type/detail/Wrap.h>
 
 namespace apache::thrift::type {
 namespace {
@@ -102,6 +103,14 @@ TEST(InferTagTest, Containers) {
   test::same_tag<set<i32_t>, infer_tag<std::set<std::int32_t>>>;
   test::same_tag<native_type<map<i32_t, bool_t>>, std::map<std::int32_t, bool>>;
   test::same_tag<map<i32_t, bool_t>, infer_tag<std::map<std::int32_t, bool>>>;
+}
+
+TEST(InferTagTest, Wrap) {
+  struct FooStruct {};
+  struct Foo : detail::Wrap<FooStruct, struct_t<FooStruct>> {};
+  test::same_tag<
+      infer_tag<Foo>,
+      adapted<InlineAdapter<Foo>, struct_t<FooStruct>>>;
 }
 
 } // namespace

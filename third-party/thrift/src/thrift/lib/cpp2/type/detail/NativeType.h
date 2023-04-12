@@ -34,8 +34,15 @@
 
 namespace apache {
 namespace thrift {
+
+template <class T>
+struct InlineAdapter;
+
 namespace type {
 namespace detail {
+
+template <typename T, typename Tag>
+class Wrap;
 
 // All the NativeTypes for the given tag.
 template <typename Tag, typename = void>
@@ -251,6 +258,16 @@ struct InferTag<T, std::enable_if_t<is_thrift_struct_v<T>>> {
 template <typename Tag>
 struct InferTag<Tag, if_thrift_type_tag<Tag>> {
   using type = Tag;
+};
+
+// For Wrap based adapted type, the adapter is InlineAdapter.
+template <typename T>
+struct InferTag<
+    T,
+    std::enable_if_t<std::is_base_of<
+        Wrap<typename T::underlying_type, typename T::underlying_tag>,
+        T>::value>> {
+  using type = adapted<InlineAdapter<T>, typename T::underlying_tag>;
 };
 
 } // namespace detail

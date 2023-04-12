@@ -49,6 +49,12 @@ static_assert(::apache::thrift::adapt_detail::has_inplace_toThrift<
                   MyStructFieldPatchStruct>,
               MyStructFieldPatch>::value);
 
+static_assert(test::same_type<
+              type::infer_tag<MyStructPatch>,
+              type::adapted<
+                  InlineAdapter<MyStructPatch>,
+                  type::struct_t<MyStructPatchStruct>>>);
+
 using ListPatch =
     std::decay_t<decltype(*std::declval<MyStructFieldPatch>()->optListVal())>;
 using ListDequePatch =

@@ -339,12 +339,12 @@ let check_inout_return ret_pos env =
             mk (Reason.Rinout_param (get_pos out_ty), get_node out_ty)
           in
           let (env, ty_err_opt) =
-            Typing_ops.sub_type
+            Typing_coercion.coerce_type
               pos
               Reason.URassign_inout
               env
               ety
-              param_ty
+              (MakeType.unenforced param_ty)
               Typing_error.Callback.inout_return_type_mismatch
           in
           let ty_errs =

@@ -9,6 +9,8 @@ from typing import Generic, Optional, TypeVar
 class TestDriver(abc.ABC, unittest.TestCase):
     @classmethod
     @abc.abstractmethod
+    # pyre-fixme[14]: `setUpClass` overrides method defined in `TestCase`
+    #  inconsistently.
     def setUpClass(cls, template_repo: str) -> None:
         raise NotImplementedError()
 

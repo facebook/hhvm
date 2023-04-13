@@ -117,7 +117,7 @@ bool FizzBase<Derived, ActionMoveVisitor, StateMachine>::actionProcessing()
 
 template <typename Derived, typename ActionMoveVisitor, typename StateMachine>
 void FizzBase<Derived, ActionMoveVisitor, StateMachine>::processActions(
-    typename StateMachine::CompletedActions actions) {
+    typename StateMachine::CompletedActions& actions) {
   // This extra DestructorGuard is needed due to the gap between clearing
   // actionGuard_ and potentially processing another action.
   folly::DelayedDestruction::DestructorGuard dg(owner_);

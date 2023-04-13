@@ -80,17 +80,17 @@ void FizzServer<ActionMoveVisitor, SM>::startActions(AsyncActions actions) {
         if (futureActions.isReady()) {
           auto result = std::move(futureActions).getTry();
           if (result.hasValue()) {
-            this->processActions(std::move(result).value());
+            this->processActions(result.value());
           }
         } else {
           std::move(futureActions)
               .via(this->state_.executor())
               .thenValueInline(
-                  [this](Actions&& a) { this->processActions(std::move(a)); });
+                  [this](Actions&& a) { this->processActions(a); });
         }
       },
       [this](Actions& immediateActions) {
-        this->processActions(std::move(immediateActions));
+        this->processActions(immediateActions);
       });
 }
 

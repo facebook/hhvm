@@ -144,7 +144,7 @@ class FizzBase {
       uint16_t length) const;
 
  protected:
-  void processActions(typename StateMachine::CompletedActions actions);
+  void processActions(typename StateMachine::CompletedActions& actions);
 
   void addProcessingActions(typename StateMachine::ProcessingActions actions);
 

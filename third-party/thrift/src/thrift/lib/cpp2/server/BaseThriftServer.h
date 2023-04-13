@@ -47,6 +47,7 @@
 #include <thrift/lib/cpp2/server/ControlServerInterface.h>
 #include <thrift/lib/cpp2/server/MonitoringServerInterface.h>
 #include <thrift/lib/cpp2/server/ResourcePool.h>
+#include <thrift/lib/cpp2/server/ResourcePoolSet.h>
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>

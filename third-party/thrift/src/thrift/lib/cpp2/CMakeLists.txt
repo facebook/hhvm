@@ -289,6 +289,7 @@ add_library(
   server/ReactiveToggle.cpp
   server/RequestsRegistry.cpp
   server/ResourcePool.cpp
+  server/ResourcePoolSet.cpp
   server/ResourcePoolHandle.cpp
   server/RoundRobinRequestPile.cpp
   server/WeightedRequestPileQueue.cpp

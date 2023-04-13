@@ -8428,9 +8428,10 @@ end = struct
       match dsl_opt with
       | Some dsl_name ->
         Printf.sprintf
-          "This value cannot be spliced into a `%s` expression tree"
+          "This value cannot be inserted (spliced) into a `%s` expression tree"
         @@ Utils.strip_ns dsl_name
-      | None -> "This value cannot be spliced into an expression tree"
+      | None ->
+        "This value cannot be inserted (spliced) into an expression tree"
     in
     let reason =
       lazy
@@ -8442,9 +8443,8 @@ end = struct
               ~default:"https://docs.hhvm.com/hack/expression-trees/splicing"
           in
           let msg =
-            Printf.sprintf
-              "Hack values need to be lifted to compatible types before splicing. See %s for more information."
-              docs_url
+            "Hack values need to be converted (lifted) to compatible types before splicing. "
+            ^ Printf.sprintf "For more information see: %s" docs_url
           in
 
           (expr_pos, msg)

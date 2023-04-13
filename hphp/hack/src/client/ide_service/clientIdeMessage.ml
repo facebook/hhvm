@@ -117,6 +117,19 @@ module Find_references = struct
   type result = (Find_refs.ide_result, Find_refs.action) Hh_prelude.result
 end
 
+(* Handles "textDocument/rename" LSP messages - for local variables only *)
+module Rename = struct
+  type request = {
+    document_location: document_location;
+    new_name: string;
+  }
+
+  type result =
+    ( ServerRenameTypes.patch list option,
+      ServerCommandTypes.Find_refs.action )
+    Hh_prelude.result
+end
+
 (* Handles "textDocument/signatureHelp" LSP messages *)
 module Signature_help = struct
   type request = document_location
@@ -194,6 +207,7 @@ type _ t =
   | Signature_help : Signature_help.request -> Signature_help.result t
   | Code_action : Code_action.request -> Code_action.result t
   | Find_references : Find_references.request -> Find_references.result t
+  | Rename : Rename.request -> Rename.result t
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
@@ -241,6 +255,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
   | Find_references { file_path; _ } ->
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
+  | Rename { Rename.document_location = { file_path; _ }; _ } ->
+    Printf.sprintf "Rename(%s)" (Path.to_string file_path)
 
 type 'a tracked_t = {
   tracking_id: string;

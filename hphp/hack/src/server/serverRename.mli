@@ -42,3 +42,11 @@ val go_ide :
     * ServerRenameTypes.patch list ServerCommandTypes.Done_or_retry.t,
     string )
   result
+
+val go_for_localvar :
+  Provider_context.t ->
+  ServerCommandTypes.Find_refs.action ->
+  string ->
+  ( ServerRenameTypes.patch list option,
+    ServerCommandTypes.Find_refs.action )
+  result

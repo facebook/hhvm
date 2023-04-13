@@ -3834,15 +3834,56 @@ let do_documentRename
   Lwt.return (patches_to_workspace_edit patches)
 
 let do_documentRename_local
-    (state : state) (params : Rename.params) (lsp_id : lsp_id) : state Lwt.t =
-  let (filename, line, col) =
-    lsp_file_position_to_hack (rename_params_to_document_position params)
+    (state : state)
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : Rename.params)
+    (lsp_id : lsp_id) : state Lwt.t =
+  let document_position = rename_params_to_document_position params in
+  let document_location =
+    get_document_location editor_open_files document_position
   in
   let new_name = params.Rename.newName in
-  let shellable_type =
-    Lost_env.Rename (lsp_id, filename, line, col, new_name)
+  let%lwt response =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Rename
+         { ClientIdeMessage.Rename.document_location; new_name })
   in
-  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  let state =
+    match response with
+    | Ok None ->
+      let patches = patches_to_workspace_edit [] in
+      respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
+      Lwt.return state
+    | Ok (Some patch_list) ->
+      let patches = patches_to_workspace_edit patch_list in
+      respond_jsonrpc ~powered_by:Hh_server lsp_id (RenameResult patches);
+      Lwt.return state
+    | Error action when ServerFindRefs.is_local action ->
+      (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
+      let str =
+        Printf.sprintf
+          "ClientIDEDaemon failed to rename for localvar %s"
+          (ServerCommandTypes.Find_refs.show_action action)
+      in
+      log "%s" str;
+      failwith "ClientIDEDaemon failed to rename for a localvar"
+    | Error _action ->
+      (* clientIdeDaemon returns errors if we try to rename a non-localvar *)
+      let (filename, line, col) = lsp_file_position_to_hack document_position in
+      let shellable_type =
+        Lost_env.Rename (lsp_id, filename, line, col, new_name)
+      in
+      let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+      Lwt.return state
+  in
   state
 
 (** This updates Main_env.hh_server_status according to the status message
@@ -5375,10 +5416,20 @@ let handle_client_message
       state := new_state;
       Lwt.return_none
     (* textDocument/rename request *)
-    | (_, Some _ide_service, RequestMessage (id, RenameRequest params))
+    | (_, Some ide_service, RequestMessage (id, RenameRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt new_state = do_documentRename_local !state params id in
+      let%lwt new_state =
+        do_documentRename_local
+          !state
+          ide_service
+          env
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+          id
+      in
       state := new_state;
       Lwt.return_none
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)

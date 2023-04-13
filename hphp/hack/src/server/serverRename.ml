@@ -612,6 +612,26 @@ let go ctx action genv env =
            ~default:changes
            ~f:(fun patch -> patch :: changes))
 
+let go_for_localvar ctx action new_name =
+  let open Result.Monad_infix in
+  let module Types = ServerCommandTypes.Find_refs in
+  match action with
+  | Types.LocalVar _ ->
+    let changes =
+      ServerFindRefs.go_for_localvar ctx action
+      >>| List.fold_left
+            ~f:(fun acc x ->
+              let replacement =
+                { pos = Pos.to_absolute (snd x); text = new_name }
+              in
+              let patch = Replace replacement in
+              patch :: acc)
+            ~init:[]
+      >>| fun patches -> Some patches
+    in
+    changes
+  | _ -> Error action
+
 let go_ide ctx (filename, line, column) new_name genv env =
   let open SymbolDefinition in
   let (ctx, entry) =

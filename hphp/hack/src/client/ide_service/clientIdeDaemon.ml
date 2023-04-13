@@ -978,6 +978,26 @@ let handle_request
             ~column:document_location.ClientIdeMessage.column)
     in
     Lwt.return (state, Ok result)
+    (* textDocument/rename - localvar only *)
+  | (Initialized istate, Rename { Rename.document_location; new_name }) ->
+    (* Update the state of the world with the document as it exists in the IDE *)
+    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          match
+            ServerFindRefs.go_from_file_ctx
+              ~ctx
+              ~entry
+              ~line:document_location.line
+              ~column:document_location.column
+          with
+          | None -> Ok None (* Clicking a line+col that isn't a symbol *)
+          | Some (_name, action) when ServerFindRefs.is_local action ->
+            ServerRename.go_for_localvar ctx action new_name
+          | Some (_name, action) ->
+            Error action (* not a localvar, must defer to hh_server *))
+    in
+    Lwt.return (state, Ok result)
     (* textDocument/references - localvar only *)
   | (Initialized istate, Find_references document_location) ->
     let open Result.Monad_infix in

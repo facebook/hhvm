@@ -539,7 +539,8 @@ struct Printer {
   virtual void operator()(
     std::ostream& os,
     std::size_t begin = 0,
-    std::size_t end = std::numeric_limits<std::size_t>::max()
+    std::size_t end = std::numeric_limits<std::size_t>::max(),
+    bool dwp = false
   ) const = 0;
 };
 

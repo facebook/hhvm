@@ -157,6 +157,7 @@ void AbbrevMap::build(folly::StringPiece debug_abbrev) {
 }
 
 DwarfState::DwarfState(std::string filename) {
+  // Open binary/elf file
   auto res = elf.openNoThrow(filename.c_str());
   if (res.code != folly::symbolizer::ElfFile::kSuccess) {
     throw DwarfStateException{
@@ -167,9 +168,19 @@ DwarfState::DwarfState(std::string filename) {
       )
     };
   }
-  auto getSection = [&] (const char* name, folly::StringPiece& section) {
+
+  // Check for a DWARF package file (dwp)
+  const std::string dwpFilename = filename + ".dwp";
+  auto res_dwp = elf_dwp.openNoThrow(dwpFilename.c_str());
+  if (res_dwp.code == folly::symbolizer::ElfFile::kSuccess) {
+    useDWP = true;
+  }
+
+  auto getSection = [&](const folly::symbolizer::ElfFile &elf, const char *name,
+                        folly::StringPiece &section) {
     auto elfSection = elf.getSectionByName(name);
-    if (!elfSection) return false;
+    if (!elfSection)
+      return false;
     #ifdef SHF_COMPRESSED
     if (elfSection->sh_flags & SHF_COMPRESSED) {
       return false;
@@ -179,53 +190,196 @@ DwarfState::DwarfState(std::string filename) {
     return true;
   };
 
-  if (!getSection(".debug_info", debug_info) ||
-      !getSection(".debug_abbrev", debug_abbrev) ||
-      !getSection(".debug_str", debug_str)) {
+  // DWARF-5 offset tables.
+  if (!getSection(elf, ".debug_info", debug_info) ||
+      !getSection(elf, ".debug_abbrev", debug_abbrev) ||
+      !getSection(elf, ".debug_str", debug_str)) {
     throw DwarfStateException{
-      folly::sformat("Missing required sections in '{}'", filename)
-    };
+        folly::sformat("Missing required sections in '{}'", filename)};
+  }
+  getSection(elf, ".debug_addr", debug_addr);
+  getSection(elf, ".debug_str_offsets", debug_str_offsets);
+  getSection(elf, ".debug_types", debug_types);
+  getSection(elf, ".debug_ranges", debug_ranges);
+  getSection(elf, ".debug_rnglists", debug_rnglists);
+
+  // Split dwarf offset tables
+  if (useDWP) {
+    if (!getSection(elf_dwp, ".debug_info.dwo", debug_info_dwo) ||
+        !getSection(elf_dwp, ".debug_abbrev.dwo", debug_abbrev_dwo)) {
+      throw DwarfStateException{folly::sformat(
+          "Missing required sections in '{}'", dwpFilename)};
+    }
+
+    getSection(elf_dwp, ".debug_cu_index", debug_cu_index);
+    getSection(elf_dwp, ".debug_tu_index", debug_tu_index);
+    getSection(elf_dwp, ".debug_str.dwo", debug_str_dwo);
+    getSection(elf_dwp, ".debug_str_offsets.dwo", debug_str_offsets_dwo);
+    getSection(elf_dwp, ".debug_rnglists.dwo", debug_rnglists_dwo);
+    getSection(elf_dwp, ".debug_line.dwo", debug_line_dwo);
+    getSection(elf_dwp, ".debug_loclists.dwo", debug_loclists_dwo);
   }
 
-  // DWARF-5 offset tables.
-  getSection(".debug_addr", debug_addr);
-  getSection(".debug_str_offsets", debug_str_offsets);
-  getSection(".debug_types", debug_types);
-  getSection(".debug_ranges", debug_ranges);
-  getSection(".debug_rnglists", debug_rnglists);
   init();
 }
 
 void DwarfState::init() {
   abbrevMap.build(debug_abbrev);
-  auto populate = [&] (bool isInfo) {
-    auto& offsets = isInfo ? cuContextOffsets : tuContextOffsets;
-    auto sp = isInfo ? debug_info : debug_types;
+  abbrevMapDwo.build(debug_abbrev_dwo);
+
+  auto populate = [&](bool isInfo, bool isDWP) {
+    auto &offsets = isDWP ? dwpContextOffsets
+                          : (isInfo ? cuContextOffsets : tuContextOffsets);
+    auto sp = isDWP ? debug_info_dwo : (isInfo ? debug_info : debug_types);
     uint64_t offset{};
     while (offset < sp.size()) {
-      auto context = getContextAtOffset(GlobalOff{ offset, isInfo });
+      auto const context = getContextAtOffset(GlobalOff{ offset, isInfo, isDWP });
       offsets.push_back(offset);
       offset += context.size;
       if (context.typeOffset) {
-        sig8_map.emplace(context.typeSignature,
-                         GlobalOff { context.typeOffset, isInfo });
+        sig8_map.emplace(std::make_pair(isDWP, context.typeSignature),
+                         GlobalOff { context.typeOffset, isInfo, isDWP });
+      }
+
+      // DWP range lists reference the addr_base from the skeleton compile unit,
+      // so store them while initializing the dwarf state for later lookup.
+      if (useDWP && context.unitType == DW_UT_skeleton) {
+        auto die = getDieAtOffset(&context, {context.firstDie, isInfo, isDWP});
+        forEachAttribute(&die, [&] (Dwarf_Attribute attr) {
+          if (attr->name != DW_AT_addr_base) return true;
+          auto const addrBase = getAttributeValueUData(attr);
+          addrBaseMap.emplace(context.dwoId, addrBase);
+          return false;
+        });
       }
     }
   };
 
-  populate(false);
-  populate(true);
+  // Populate debug_info and debug_types sections from non-dwp sections
+  populate(false, false);
+  populate(true, false);
+
+  // Populate dwp sections (.debug_info.dwo)
+  populate(true, true);
 }
 
 DwarfState::~DwarfState() {
+}
+
+// CU/TU index contains various metadata about a CU or TU. A CU.dwoId or
+// TU.typeSignature is used to look up the info in the index hash table.
+// See 7.3.5 of the dwarf5 spec for full details.
+void DwarfState::populateContextFromIndex(Context &context) const {
+  always_assert(context.unitType == DW_UT_split_compile ||
+                context.unitType == DW_UT_split_type);
+
+  auto const signature = context.unitType == DW_UT_split_compile
+                             ? context.dwoId
+                             : context.typeSignature;
+  auto indexSection =
+      context.unitType == DW_UT_split_compile ? debug_cu_index : debug_tu_index;
+
+  // version (uhalf) is 5 and padding is zero
+  auto const version = read<uint16_t>(indexSection);
+  always_assert(version == 5); // Note: not the dwarf version
+  auto const padding = read<uint16_t>(indexSection);
+  always_assert(padding == 0);
+
+  auto const sectionCount = read<uint32_t>(indexSection);
+  auto const unitCount = read<uint32_t>(indexSection);
+  auto const slotCount = read<uint32_t>(indexSection);
+
+  // The size of the hash table, S, must be 2^k such that: 2^k > 3 * U / 2
+  always_assert(slotCount > 3 * unitCount / 2);
+
+  // Hash table starts after the header
+  auto hashTable = indexSection;
+
+  // Index table starts after the hash table
+  auto indexTable = indexSection;
+  indexTable.advance(slotCount * sizeof(uint64_t));
+
+  // Section offsets start after the index table
+  auto sectionOffsets = indexTable;
+  sectionOffsets.advance(slotCount * sizeof(uint32_t));
+
+  // See 7.3.5.3 of the dwarf5 spec for more info on how to calculate the hash
+  // index
+  int64_t const hashIndex = [&]() -> int64_t {
+    auto const mask = slotCount - 1;
+    auto H = signature & mask;
+    auto HP = ((signature >> 32) & mask) | 1;
+
+    while (true) {
+      auto hashPointer = hashTable;
+      hashPointer.advance(H * sizeof(uint64_t));
+      auto const entry = read<uint64_t>(hashPointer);
+      if (entry == signature) {
+        indexTable.advance(H * sizeof(uint32_t));
+        return read<uint32_t>(indexTable);
+      }
+      if (entry == 0) {
+        return -1;
+      }
+      H = (H + HP) & mask;
+    }
+  }();
+
+  if (hashIndex <= 0) {
+    return;
+  }
+
+  // Read the header of the sectionOffsets table
+  size_t infoSectionIndex = -1;
+  size_t abbrevSectionIndex = -1;
+  size_t strOffsetsSectionIndex = -1;
+  size_t rnglistsSectionIndex = -1;
+  for (unsigned i = 0; i != sectionCount; ++i) {
+    auto index = read<uint32_t>(sectionOffsets);
+    if (index == DW_SECT_INFO) {
+      infoSectionIndex = i;
+    } else if (index == DW_SECT_ABBREV) {
+      abbrevSectionIndex = i;
+    } else if (index == DW_SECT_STR_OFFSETS) {
+      strOffsetsSectionIndex = i;
+    } else if (index == DW_SECT_RNGLISTS) {
+      rnglistsSectionIndex = i;
+    }
+  }
+
+  // Read the info out of the sectionOffsets table, subtract 1 from the index
+  // since it it 1-based.
+  sectionOffsets.advance((hashIndex - 1) * sectionCount * sizeof(uint32_t));
+  for (unsigned i = 0; i != sectionCount; ++i) {
+    auto offset = read<uint32_t>(sectionOffsets);
+    if (i == infoSectionIndex) {
+      // Confirm we have the correct entry
+      assertx(context.offset == offset);
+    }
+    if (i == abbrevSectionIndex) {
+      context.abbrevOffset = offset;
+    }
+    if (i == strOffsetsSectionIndex) {
+      // Skip header which is 8 or 16 bytes depending on 64 bit
+      // See section 7.26 of the dwarf5 spec
+      context.strOffsetsBase = offset + (context.is64Bit ? 16 : 8);
+    }
+    if (i == rnglistsSectionIndex) {
+      // Skip header which is 12 or 20 bytes depending on 64 bit
+      // See section 7.28 of the dwarf5 spec
+      context.rnglistsBase = offset + (context.is64Bit ? 20 : 12);
+    }
+  }
 }
 
 DwarfState::Context DwarfState::getContextAtOffset(GlobalOff off) const {
   Context context;
 
   context.isInfo = off.isInfo();
+  context.isDWP = off.isDWP();
 
-  auto sp = context.isInfo ? debug_info : debug_types;
+  auto sp = context.isDWP ? debug_info_dwo
+                          : (context.isInfo ? debug_info : debug_types);
   context.section = sp.data();
   context.offset = off.offset();
   sp.advance(context.offset);
@@ -249,12 +403,8 @@ DwarfState::Context DwarfState::getContextAtOffset(GlobalOff off) const {
     context.addrSize = read<uint8_t>(sp);
   }
 
-  always_assert(context.unitType == DW_UT_type ||
-                (context.isInfo && context.unitType == DW_UT_compile));
-  always_assert(context.addrSize == 4 || context.addrSize == 8);
-  always_assert(context.abbrevOffset <= debug_abbrev.size());
-
-  if (context.unitType == DW_UT_type) {
+  // Type unit headers contain a type_signature and type_offset field
+  if (context.unitType == DW_UT_type || context.unitType == DW_UT_split_type) {
     context.typeSignature = read<uint64_t>(sp);
     context.typeOffset = readOffset(sp, context.is64Bit);
     context.typeOffset += context.offset;
@@ -263,13 +413,32 @@ DwarfState::Context DwarfState::getContextAtOffset(GlobalOff off) const {
     context.typeOffset = 0;
   }
 
+  // Skeleton and split compilation unit headers contain a dwo_id field
+  if (context.unitType == DW_UT_skeleton ||
+      context.unitType == DW_UT_split_compile) {
+    context.dwoId = read<uint64_t>(sp);
+  } else {
+    context.dwoId = 0;
+  }
+
   context.firstDie = sp.data() - context.section;
+
+  if (context.isDWP) {
+    populateContextFromIndex(context);
+  }
+
+  always_assert(context.addrSize == 4 || context.addrSize == 8);
+  always_assert(context.abbrevOffset <= (context.isDWP ? debug_abbrev_dwo.size()
+                                                       : debug_abbrev.size()));
+
   return context;
 }
 
 DwarfState::Die DwarfState::getDieAtOffset(const Context* context,
                                            GlobalOff off) const {
   assert(context->isInfo == off.isInfo());
+  assert(context->isDWP == off.isDWP());
+
   auto sp = folly::StringPiece {
     context->section + off.offset(),
     context->section + context->offset + context->size
@@ -286,12 +455,14 @@ DwarfState::Die DwarfState::getDieAtOffset(const Context* context,
     die.code = 0;
     return die;
   }
-  auto abbrev = debug_abbrev;
-
   die.attrOffset = sp.data() - context->section - off.offset();
-  auto const it = abbrevMap.abbrev_map.find(context->abbrevOffset);
-  if (it != abbrevMap.abbrev_map.end()) {
-    auto const abbr_off = abbrevMap.abbrev_vec[it->second + code - 1];
+
+  auto abbrev = off.isDWP() ? debug_abbrev_dwo : debug_abbrev;
+  auto const& abMap = off.isDWP() ? abbrevMapDwo : abbrevMap;
+
+  auto const it = abMap.abbrev_map.find(context->abbrevOffset);
+  if (it != abMap.abbrev_map.end()) {
+    auto const abbr_off = abMap.abbrev_vec[it->second + code - 1];
     abbrev.advance(abbr_off);
     die.code = AbbrevMap::readOne(abbrev, die.tag,
                                   die.hasChildren, die.attributes);
@@ -309,8 +480,8 @@ DwarfState::Die DwarfState::getDieAtOffset(const Context* context,
 
 DwarfState::Die DwarfState::getCuForDie(Dwarf_Die die) const {
   return getDieAtOffset(
-    die->context, { die->context->firstDie, die->context->isInfo }
-  );
+      die->context,
+      {die->context->firstDie, die->context->isInfo, die->context->isDWP});
 }
 
 DwarfState::Die DwarfState::getNextSibling(Dwarf_Die die) const {
@@ -338,10 +509,9 @@ DwarfState::Die DwarfState::getNextSibling(Dwarf_Die die) const {
     }
   }
 
-  return getDieAtOffset(
-    die->context,
-    { sp.data() - die->context->section, die->context->isInfo }
-  );
+  return getDieAtOffset(die->context,
+                        {sp.data() - die->context->section,
+                         die->context->isInfo, die->context->isDWP});
 }
 
 DwarfState::AttributeSpec
@@ -466,16 +636,20 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
 }
 
 folly::StringPiece DwarfState::getStringFromStringSection(
-    uint64_t offset) const {
-  assert(offset < debug_str.size());
-  folly::StringPiece sp(debug_str);
+    uint64_t offset, bool isDWP) const {
+  auto section = isDWP ? debug_str_dwo : debug_str;
+  assert(offset < section.size());
+  folly::StringPiece sp(section);
   sp.advance(offset);
   return readNullTerminated(sp);
 }
 
-folly::StringPiece DwarfState::getStringFromStringSectionIndirect(
-    uint64_t strOffsetsBase, uint64_t str_offsets_idx, bool is64Bit) const {
-  folly::StringPiece sp = debug_str_offsets;
+folly::StringPiece
+DwarfState::getStringFromStringSectionIndirect(uint64_t strOffsetsBase,
+                                               uint64_t str_offsets_idx,
+                                               bool is64Bit, bool isDWP) const {
+  folly::StringPiece sp = isDWP ? debug_str_offsets_dwo : debug_str_offsets;
+
   uint64_t string_offset;
   if (is64Bit) {
     sp.advance(strOffsetsBase + str_offsets_idx * sizeof(uint64_t));
@@ -484,7 +658,7 @@ folly::StringPiece DwarfState::getStringFromStringSectionIndirect(
     sp.advance(strOffsetsBase + str_offsets_idx * sizeof(uint32_t));
     string_offset = read<uint32_t>(sp);
   }
-  return getStringFromStringSection(string_offset);
+  return getStringFromStringSection(string_offset, isDWP);
 }
 
 uintptr_t DwarfState::readAddrIndirect(uint64_t addrIdx, uint64_t addrSize,
@@ -512,7 +686,7 @@ std::string DwarfState::getDIEName(Dwarf_Die die) const {
 }
 
 GlobalOff DwarfState::getDIEOffset(Dwarf_Die die) const {
-  return { die->offset, die->context->isInfo };
+  return { die->offset, die->context->isInfo, die->context->isDWP };
 }
 
 auto DwarfState::getAttributeType(Dwarf_Attribute attr) const -> Dwarf_Half {
@@ -529,15 +703,23 @@ std::string DwarfState::getAttributeValueString(Dwarf_Attribute attr) const {
 
 folly::StringPiece
 DwarfState::getAttributeValueStringPiece(Dwarf_Attribute attr) const {
-  uint64_t strOffsetsBase;
+  auto isDWP = attr->die->context->isDWP;
 
-  // strOffsetsBase is stored in the CU, fetch it from there
-  auto cu = getCuForDie(attr->die);
-  forEachAttribute(&cu, [&] (Dwarf_Attribute attr) {
-    if (attr->name != DW_AT_str_offsets_base) return true;
-    strOffsetsBase = getAttributeValueUData(attr);
-    return false;
-  });
+  uint64_t strOffsetsBase = [&](){
+    if (isDWP) {
+      return attr->die->context->strOffsetsBase;
+    }
+
+    // strOffsetsBase is stored in the CU, fetch it from there
+    auto cu = getCuForDie(attr->die);
+    uint64_t base;
+    forEachAttribute(&cu, [&] (Dwarf_Attribute attr) {
+      if (attr->name != DW_AT_str_offsets_base) return true;
+      base = getAttributeValueUData(attr);
+      return false;
+    });
+    return base;
+  }();
 
   auto sp = attr->attrValue;
 
@@ -545,37 +727,43 @@ DwarfState::getAttributeValueStringPiece(Dwarf_Attribute attr) const {
     case DW_FORM_string:
       return sp;
     case DW_FORM_strp:
-      return getStringFromStringSection(readOffset(sp, attr->die->is64Bit));
+      return getStringFromStringSection(readOffset(sp, attr->die->is64Bit),
+                                        isDWP);
     case DW_FORM_strx1:
       return getStringFromStringSectionIndirect(
         strOffsetsBase,
         read<uint8_t>(sp),
-        attr->die->is64Bit
+        attr->die->is64Bit,
+        isDWP
       );
     case DW_FORM_strx2:
       return getStringFromStringSectionIndirect(
         strOffsetsBase,
         read<uint16_t>(sp),
-        attr->die->is64Bit
+        attr->die->is64Bit,
+        isDWP
       );
     case DW_FORM_strx3:
       // Force read() to only read 3 bytes into uint32_t
       return getStringFromStringSectionIndirect(
           strOffsetsBase,
           read<uint32_t>(sp, 3),
-          attr->die->is64Bit
+          attr->die->is64Bit,
+          isDWP
         );
     case DW_FORM_strx4:
       return getStringFromStringSectionIndirect(
         strOffsetsBase,
         read<uint32_t>(sp),
-        attr->die->is64Bit
+        attr->die->is64Bit,
+        isDWP
       );
     case DW_FORM_strx:
       return getStringFromStringSectionIndirect(
         strOffsetsBase,
         readULEB(sp),
-        attr->die->is64Bit
+        attr->die->is64Bit,
+        isDWP
       );
   }
 
@@ -687,10 +875,11 @@ uintptr_t DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) const {
 GlobalOff DwarfState::getAttributeValueRef(Dwarf_Attribute attr) const {
   auto const die = attr->die;
   auto const isInfo = die->context->isInfo;
+  auto const isDWP = die->context->isDWP;
   auto sp = attr->attrValue;
 
   auto go = [&] (uint64_t off) {
-    return GlobalOff { off + die->context->offset, isInfo };
+    return GlobalOff { off + die->context->offset, isInfo, isDWP };
   };
 
   switch (attr->form) {
@@ -702,12 +891,12 @@ GlobalOff DwarfState::getAttributeValueRef(Dwarf_Attribute attr) const {
     case DW_FORM_ref_addr: {
       auto const addrSize = die->context->version <= 2 ? die->context->addrSize :
         die->is64Bit ? 8 : 4;
-      return { readAddr(sp, addrSize, false), isInfo };
+      return { readAddr(sp, addrSize, false), isInfo, isDWP };
     }
 
     case DW_FORM_ref_sig8: {
       auto sig8 = read<uint64_t>(sp);
-      auto const it = sig8_map.find(sig8);
+      auto const it = sig8_map.find(std::make_pair(isDWP, sig8));
       if (it != sig8_map.end()) return it->second;
       break;
     }
@@ -736,7 +925,8 @@ uint64_t DwarfState::getAttributeValueSig8(Dwarf_Attribute attr) const {
   };
 }
 
-std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRanges(Dwarf_Attribute attr) const {
+std::vector<DwarfState::Dwarf_Ranges>
+DwarfState::getRanges(Dwarf_Attribute attr) const {
   auto const offset = getAttributeValueUData(attr);
   auto range = debug_ranges;
   range.advance(offset);
@@ -751,100 +941,117 @@ std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRanges(Dwarf_Attribute attr
   return v;
 }
 
-std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRngLists(Dwarf_Attribute attr) const {
-  uint64_t rnglistBase;
-  uint64_t addrBase;
 
-  // rnglistBase and addrBase are stored in the CU, fetch them from there
-  auto cu = getCuForDie(attr->die);
-  forEachAttribute(&cu, [&] (Dwarf_Attribute attr) {
-    switch (attr->name) {
-      case DW_AT_rnglists_base:
-        rnglistBase = getAttributeValueUData(attr);
-        return true;
-      case DW_AT_addr_base:
-        addrBase = getAttributeValueUData(attr);
-        return true;
-      default:
-        return true;
-    }
-  });
-  assert(rnglistBase);
-  assert(addrBase);
+std::vector<DwarfState::Dwarf_Ranges>
+DwarfState::getRngLists(Dwarf_Attribute attr) const {
+  auto const isDWP = attr->die->context->isDWP;
+  uint64_t rnglistsBase = 0;
+  uint64_t addrBase = 0;
 
-  // Calculate the section offset
+  // If the context is DWP then rangelists and addr bases can be found in
+  // auxilary data structures. Otherwise, look them up from the CU
+  if (isDWP) {
+    rnglistsBase = attr->die->context->rnglistsBase;
+    auto const it = addrBaseMap.find(attr->die->context->dwoId);
+    always_assert(it != addrBaseMap.end());
+    addrBase = it->second;
+  } else {
+    auto cu = getCuForDie(attr->die);
+    forEachAttribute(&cu, [&] (Dwarf_Attribute attr) {
+      switch (attr->name) {
+        case DW_AT_rnglists_base:
+          rnglistsBase = getAttributeValueUData(attr);
+          return true;
+        case DW_AT_addr_base:
+          addrBase = getAttributeValueUData(attr);
+          return true;
+        default:
+          return true;
+      }
+    });
+  }
+
+  uint8_t addrSize = attr->die->context->addrSize;
+  auto rng_section = isDWP ? debug_rnglists_dwo : debug_rnglists;
+
+  // Calculate the section offset (see section 7.5.5 of the dwarf5 spec)
   auto const indexOffset = getAttributeValueUData(attr);
-  auto rnglists = debug_rnglists;
-  rnglists.advance(
-    rnglistBase +
-    indexOffset * (attr->die->is64Bit ? sizeof(uint64_t) : sizeof(uint32_t))
-  );
-  auto const sectionOffset = read<uint32_t>(rnglists);
+  auto rnglists = rng_section;
 
-  // Advance to the section offset which is relative to debug_rnglists
-  rnglists = debug_rnglists;
-  rnglists.advance(rnglistBase + sectionOffset);
+  auto const offsetSize = attr->die->is64Bit ? sizeof(uint64_t) : sizeof(uint32_t);
+  rnglists.advance(rnglistsBase + indexOffset * offsetSize);
+  auto const sectionOffset = readOffset(rnglists, attr->die->is64Bit);
+
+  // Advance to the section offset which is relative to rng_section
+  rnglists = rng_section;
+  rnglists.advance(rnglistsBase + sectionOffset);
 
   // Collect all ranges
   std::vector<Dwarf_Ranges> ranges;
   uintptr_t baseAddr = 0;
   while (true) {
     auto debug_addr_sp = debug_addr;
-    debug_addr_sp.advance(addrBase);
     auto const val = read<uint8_t>(rnglists);
     switch (val) {
-      case DW_RLE_end_of_list:
+      case DW_RLE_end_of_list: {
         return ranges;
+      }
       case DW_RLE_base_addressx: {
-        debug_addr_sp.advance(readULEB(rnglists) * cu.context->addrSize);
-        baseAddr = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        auto const addrIndex = readULEB(rnglists);
+        debug_addr_sp.advance(addrBase + addrIndex * addrSize);
+
+        // TODO: Check the baseAddr from the following. One matches spec, one
+        // matches llvm-dwarfdump output.
+        // baseAddr = addrIndex;
+        baseAddr = readAddr(debug_addr_sp, addrSize, false);
         break;
       }
       case DW_RLE_startx_endx: {
         auto const startUleb = readULEB(rnglists);
-        debug_addr_sp.advance(startUleb * cu.context->addrSize);
-        auto const start = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        debug_addr_sp.advance(addrBase + startUleb * addrSize);
+        auto const start = readAddr(debug_addr_sp, addrSize, false);
 
         auto const endUleb = readULEB(rnglists);
-        debug_addr_sp.advance((endUleb - startUleb) * cu.context->addrSize);
-        auto const end = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        debug_addr_sp.advance(addrBase + (endUleb - startUleb) * addrSize);
+        auto const end = readAddr(debug_addr_sp, addrSize, false);
 
         ranges.push_back({start, end});
         break;
       }
       case DW_RLE_startx_length: {
-        debug_addr_sp.advance(readULEB(rnglists) * cu.context->addrSize);
-        auto const start = readAddr(debug_addr_sp, cu.context->addrSize, false);
+        debug_addr_sp.advance(addrBase + readULEB(rnglists) * addrSize);
+        auto const start = readAddr(debug_addr_sp, addrSize, false);
         auto const length = readULEB(rnglists);
         ranges.push_back({start, start + length});
         break;
       }
       case DW_RLE_offset_pair: {
-        assert(baseAddr);
         auto const v1 = baseAddr + readULEB(rnglists);
         auto const v2 = baseAddr + readULEB(rnglists);
         ranges.push_back({v1, v2});
         break;
       }
       // Non-split Units
-      case DW_RLE_base_address:
-        debug_addr_sp.advance(readULEB(rnglists) * cu.context->addrSize);
-        baseAddr = readAddr(debug_addr_sp, cu.context->addrSize, false);
+      case DW_RLE_base_address: {
+        debug_addr_sp.advance(addrBase + readULEB(rnglists) * addrSize);
+        baseAddr = readAddr(debug_addr_sp, addrSize, false);
         break;
+      }
       case DW_RLE_start_end: {
-        auto const start = readAddr(rnglists, cu.context->addrSize, false);
-        auto const end = readAddr(rnglists, cu.context->addrSize, false);
+        auto const start = readAddr(rnglists, addrSize, false);
+        auto const end = readAddr(rnglists, addrSize, false);
         ranges.push_back({start, end});
         break;
       }
       case DW_RLE_start_length: {
-        auto const start = readAddr(rnglists, cu.context->addrSize, false);
+        auto const start = readAddr(rnglists, addrSize, false);
         auto const length = readULEB(rnglists);
         ranges.push_back({start, start + length});
         break;
       }
-      default:
+      default: {
         always_assert(false); // unknown RLE
+      }
     }
   }
 
@@ -864,6 +1071,7 @@ std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRngLists(Dwarf_Attribute at
   X(DW_TAG_pointer_type)                        \
   X(DW_TAG_reference_type)                      \
   X(DW_TAG_compile_unit)                        \
+  X(DW_TAG_skeleton_unit)                       \
   X(DW_TAG_string_type)                         \
   X(DW_TAG_structure_type)                      \
   X(DW_TAG_subroutine_type)                     \
@@ -1428,6 +1636,16 @@ std::vector<DwarfState::Dwarf_Ranges> DwarfState::getRngLists(Dwarf_Attribute at
   X(DW_OP_convert)                              \
   X(DW_OP_reinterpret)
 
+#define DW_UTS(X)                                \
+  X(DW_UT_compile)                              \
+  X(DW_UT_type)                                 \
+  X(DW_UT_partial)                              \
+  X(DW_UT_skeleton)                             \
+  X(DW_UT_split_compile)                        \
+  X(DW_UT_split_type)                           \
+  X(DW_UT_lo_user)                              \
+  X(DW_UT_hi_user)
+
 namespace {
 template<typename R, typename T, typename F>
 HPHP::Optional<R> thingToResult(T thing, F values) {
@@ -1481,6 +1699,13 @@ std::string DwarfState::opToString(Dwarf_Half op) const {
     return std::vector<std::pair<uint16_t, const char*>> { DW_OPS(X) };
   };
   return thingToString(op, init, "<UNKNOWN OP({})>");
+}
+
+std::string DwarfState::utToString(uint8_t unitType) const {
+  auto init = [] {
+    return std::vector<std::pair<uint16_t, const char*>> { DW_UTS(X) };
+  };
+  return thingToString(unitType, init, "<UNKNOWN UT({})>");
 }
 #undef X
 

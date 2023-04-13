@@ -48,26 +48,28 @@ struct DwarfStateException: std::runtime_error {
 };
 
 struct GlobalOff {
-  GlobalOff(uint64_t off, bool isInfo) : m_value{off * 2 + (isInfo ? 1 : 0)} {
+  GlobalOff(uint64_t off, bool isInfo, bool isDWP) {
+    m_value = (off << 2) + (isInfo << 1) + (isDWP ? 1 : 0);
     assert(offset() == off);
   }
-  GlobalOff(int64_t off, bool isInfo) :
-      GlobalOff{ static_cast<uint64_t>(off), isInfo } {}
+  GlobalOff(int64_t off, bool isInfo, bool isDWP) :
+      GlobalOff{ static_cast<uint64_t>(off), isInfo, isDWP } {}
 
   static GlobalOff fromRaw(uint64_t raw) {
     return GlobalOff{raw};
   }
-  uint64_t offset() const { return m_value >> 1; }
-  bool isInfo() const { return m_value & 1; }
+  uint64_t offset() const { return m_value >> 2; }
+  bool isInfo() const { return m_value & 2; }
+  bool isDWP() const { return m_value & 1; }
   uint64_t raw() const { return m_value; }
 
   friend GlobalOff operator+(GlobalOff a, size_t b) {
-    return {a.offset() + b, a.isInfo()};
+    return {a.offset() + b, a.isInfo(), a.isDWP()};
   }
   friend bool operator<(GlobalOff a, GlobalOff b) {
     // we want all the debug_types to sort before all the debug_infos
-    if ((a.m_value ^ b.m_value) & 1) {
-      return (a.m_value & 1);
+    if ((a.m_value ^ b.m_value) & 2) {
+      return (a.m_value & 2);
     }
     return a.m_value < b.m_value;
   }
@@ -105,7 +107,8 @@ struct AbbrevMap {
 };
 
 struct DwarfState {
-  using Sig8Map = folly::F14FastMap<uint64_t, GlobalOff>;
+  // Maps (dwp, signature) -> global offset
+  using Sig8Map = folly::F14FastMap<std::pair<bool, uint64_t>, GlobalOff>;
 
   explicit DwarfState(std::string filename);
   DwarfState(const DwarfState&) = delete;
@@ -128,6 +131,7 @@ struct DwarfState {
     uint64_t size;
     bool is64Bit;
     bool isInfo;
+    bool isDWP;
     uint8_t version;
     uint8_t unitType;
     uint8_t addrSize;
@@ -135,6 +139,9 @@ struct DwarfState {
     uint64_t typeSignature;
     uint64_t typeOffset;
     uint64_t firstDie;
+    uint64_t dwoId;
+    uint64_t strOffsetsBase = 0;
+    uint64_t rnglistsBase = 0;
   };
 
   struct Die {
@@ -203,6 +210,7 @@ struct DwarfState {
   Dwarf_Half getAttributeForm(Attribute* attr) const;
   std::string attributeFormToString(Dwarf_Half form) const;
   std::string opToString(Dwarf_Half form) const;
+  std::string utToString(uint8_t unitType) const;
   std::string getAttributeValueString(Attribute* attr) const;
   folly::StringPiece getAttributeValueStringPiece(Attribute* attr) const;
   bool getAttributeValueFlag(Attribute* attr) const;
@@ -215,23 +223,32 @@ struct DwarfState {
   std::vector<Dwarf_Ranges> getRanges(Attribute* attr) const;
   std::vector<Dwarf_Ranges> getRngLists(Attribute* attr) const;
 
+  // Populate context with information from the cu/tu indexes. These indexes
+  // only exist in a dwp file and contain info such as str and range base
+  // offsets, etc.
+  void populateContextFromIndex(Context& context) const;
+
   // Get a string from the .debug_str section
-  folly::StringPiece getStringFromStringSection(uint64_t offset) const;
+  folly::StringPiece getStringFromStringSection(uint64_t offset, bool isDWP) const;
   folly::StringPiece getStringFromStringSectionIndirect(
-      uint64_t strOffsetsBase, uint64_t stringOffsetsIdx, bool is64Bit) const;
+      uint64_t strOffsetsBase, uint64_t stringOffsetsIdx, bool is64Bit, bool isDWP) const;
 
   uintptr_t readAddrIndirect(uint64_t addrIdx, uint64_t addrSize,
                              bool sng) const;
 
-  template <typename F> void forEachContext(F&& f, bool isInfo) const;
-  template <typename F> void forEachContextParallel(F&& f, bool isInfo,
-                                                    int num_threads) const;
-  template <typename F> void forEachChild(Die* die, F&& f) const;
-  template <typename F> void forEachAttribute(Die* die, F&& f) const;
-  template <typename F> void forEachCompilationUnit(F&& f) const;
-  template <typename F> void forEachTopLevelUnit(F&& f, bool isInfo) const;
-  template <typename F> void forEachTopLevelUnitParallel(F&& f, bool isInfo,
-                                                         int num_threads) const;
+  template <typename F>
+  void forEachContext(F &&f, bool isInfo, bool isDWP) const;
+  template <typename F>
+  void forEachContextParallel(F &&f, bool isInfo, int num_threads,
+                              bool isDWP) const;
+  template <typename F> void forEachChild(Die *die, F &&f) const;
+  template <typename F> void forEachAttribute(Die *die, F &&f) const;
+  template <typename F> void forEachCompilationUnit(F &&f, bool isDWP) const;
+  template <typename F>
+  void forEachTopLevelUnit(F &&f, bool isInfo, bool isDWP) const;
+  template <typename F>
+  void forEachTopLevelUnitParallel(F &&f, bool isInfo, int num_threads,
+                                   bool isDWP) const;
   template <typename F> auto onDIEAtOffset(GlobalOff offset, F&& f) const ->
     decltype(f(std::declval<Die*>()));
   template <typename F> auto onDIEAtContextOffset(
@@ -254,9 +271,16 @@ struct DwarfState {
     sp.advance(numBytes);
     return x;
   }
+
+  // Whether or not the dwarfstate is using dwp (a .dwp file is present).
+  bool useDWP = false;
 private:
   AbbrevMap abbrevMap;
   Sig8Map sig8_map;
+  // dwp rnglists need addr base from the original CU, store them here for
+  // lookup during dwp processing
+  folly::F14FastMap<uint64_t, uint64_t> addrBaseMap;
+
   std::vector<uint64_t> cuContextOffsets;
   std::vector<uint64_t> tuContextOffsets;
 
@@ -269,6 +293,21 @@ private:
   folly::StringPiece debug_str;
   folly::StringPiece debug_str_offsets;
   folly::StringPiece debug_types;
+
+  // DWARF package info (dwp)
+  std::vector<uint64_t> dwpContextOffsets;
+  AbbrevMap abbrevMapDwo;
+  folly::symbolizer::ElfFile elf_dwp;
+  folly::StringPiece debug_cu_index;
+  folly::StringPiece debug_tu_index;
+  folly::StringPiece debug_info_dwo;
+  folly::StringPiece debug_abbrev_dwo;
+  folly::StringPiece debug_str_dwo;
+  folly::StringPiece debug_str_offsets_dwo;
+  folly::StringPiece debug_rnglists_dwo;
+  folly::StringPiece debug_line_dwo;
+  folly::StringPiece debug_loclists_dwo;
+
 
   // Read a value of "section offset" type, which may be 4 or 8 bytes
   static uint64_t readOffset(folly::StringPiece& sp, bool is64Bit) {
@@ -307,9 +346,9 @@ void DwarfState::forEachChild(Dwarf_Die die, F&& f) const {
     assert(die->nextDieDelta);
   }
 
-  auto sibling = getDieAtOffset(
-      die->context, { die->offset + die->nextDieDelta, die->context->isInfo }
-  );
+  auto sibling =
+      getDieAtOffset(die->context, {die->offset + die->nextDieDelta,
+                                    die->context->isInfo, die->context->isDWP});
   while (sibling.code) {
     if (!f(&sibling)) return;
     sibling = getNextSibling(&sibling);
@@ -358,12 +397,13 @@ void DwarfState::forEachAttribute(Dwarf_Die die, F&& f) const {
  * callable for each.
  */
 template <typename F>
-void DwarfState::forEachContext(F&& f, bool isInfo) const {
-  auto const section = isInfo ? debug_info : debug_types;
+void DwarfState::forEachContext(F&& f, bool isInfo, bool isDWP) const {
+  auto const section =
+      isDWP ? debug_info_dwo : (isInfo ? debug_info : debug_types);
   auto sp = section;
   while (!sp.empty()) {
     auto context = getContextAtOffset(
-        { sp.data() - section.data(), isInfo }
+        { sp.data() - section.data(), isInfo, isDWP }
     );
     sp.advance(context.size);
     f(&context);
@@ -376,14 +416,14 @@ void DwarfState::forEachContext(F&& f, bool isInfo) const {
  */
 template <typename F>
 void DwarfState::forEachContextParallel(F&& f, bool isInfo,
-                                        int num_threads) const {
-  if (num_threads <= 1) return forEachContext(f, isInfo);
+                                        int num_threads, bool isDWP) const {
+  if (num_threads <= 1) return forEachContext(f, isInfo, isDWP);
 
   std::vector<GlobalOff> offsets;
 
   forEachContext([&] (Dwarf_Context context) {
-    offsets.push_back({ context->offset, isInfo });
-  }, isInfo);
+    offsets.push_back({ context->offset, isInfo, isDWP });
+  }, isInfo, isDWP);
 
   std::atomic<size_t> index{0};
 
@@ -411,25 +451,25 @@ void DwarfState::forEachContextParallel(F&& f, bool isInfo,
  * callable for each.
  */
 template <typename F>
-void DwarfState::forEachTopLevelUnitParallel(F&& f, bool isInfo,
-                                             int num_threads) const {
+void DwarfState::forEachTopLevelUnitParallel(F &&f, bool isInfo,
+                                             int num_threads,
+                                             bool isDWP) const {
   forEachContextParallel(
-    [&] (Dwarf_Context context) {
-      auto die = getDieAtOffset(context, { context->firstDie, isInfo });
-      f(&die);
-    },
-    isInfo,
-    num_threads
-  );
+      [&](Dwarf_Context context) {
+        auto die = getDieAtOffset(context, {context->firstDie, isInfo, isDWP});
+        f(&die);
+      },
+      isInfo, num_threads, isDWP);
 }
 
 template <typename F>
-void DwarfState::forEachTopLevelUnit(F&& f, bool isInfo) const {
-  forEachTopLevelUnitParallel(f, isInfo, 1);
+void DwarfState::forEachTopLevelUnit(F&& f, bool isInfo, bool isDWP) const {
+  forEachTopLevelUnitParallel(f, isInfo, 1, isDWP);
 }
 
-template <typename F> void DwarfState::forEachCompilationUnit(F&& f) const {
-  forEachTopLevelUnit(std::forward<F>(f), true);
+template <typename F>
+void DwarfState::forEachCompilationUnit(F &&f, bool isDWP) const {
+  forEachTopLevelUnit(std::forward<F>(f), true, isDWP);
 }
 
 /*
@@ -440,13 +480,16 @@ template <typename F> auto DwarfState::onDIEAtOffset(GlobalOff offset,
                                                      F&& f) const ->
   decltype(f(std::declval<Dwarf_Die>())) {
 
-  auto const& contextOffsets = offset.isInfo() ?
-    cuContextOffsets : tuContextOffsets;
+  auto const& contextOffsets =
+    offset.isDWP() ?
+      dwpContextOffsets :
+      (offset.isInfo() ? cuContextOffsets : tuContextOffsets);
   auto it = std::upper_bound(
       contextOffsets.begin(), contextOffsets.end(), offset.offset());
   assertx(it != contextOffsets.begin());
   auto const contextOffset = *--it;
-  auto const context = getContextAtOffset({ contextOffset, offset.isInfo() });
+  auto const context =
+      getContextAtOffset({contextOffset, offset.isInfo(), offset.isDWP()});
 
   auto die = getDieAtOffset(&context, offset);
   return f(&die);
@@ -457,7 +500,8 @@ auto DwarfState::onDIEAtContextOffset(GlobalOff offset, F&& f) const ->
   decltype(f(std::declval<Dwarf_Die>())) {
 
   auto context = getContextAtOffset(offset);
-  auto die = getDieAtOffset(&context, { context.firstDie, context.isInfo });
+  auto die = getDieAtOffset(&context,
+                            {context.firstDie, context.isInfo, context.isDWP});
   return f(&die);
 }
 

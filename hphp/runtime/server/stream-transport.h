@@ -32,10 +32,32 @@ struct StreamTransport {
   using OnDataType = std::function<void(std::unique_ptr<folly::IOBuf>)>;
   using OnCloseType = std::function<void()>;
 
+  /// Delete the StreamTransport.
+  ///
+  /// If the connection is open then performs `closeNow()`. If `close()` was
+  /// called before deleting the object then deleting the object will wait until
+  /// all data is written before proceeding.
   virtual ~StreamTransport() { }
 
+  /// Flush all pending writes and close the transport stream. This may not
+  /// actually close the physical connection (in connection pooling, for
+  /// example) but it signals to the remote end that the connection has been
+  /// severed.
+  ///
+  /// It is safe to delete this object even with pending writes - it is up to
+  /// StreamTransport::~StreamTransport() to wait until it is safe to continue
+  /// before actually deleting the underlying data.
+  ///
+  /// Does not call the onClose callback when finished.
   virtual void close() = 0;
+
+  /// Abandon pending writes and close the transport stream immediately.
   virtual void closeNow() = 0;
+
+  /// Returns true if the connection is closed.
+  ///
+  /// After `closeNow()` will return true immediately.
+  /// After `close()` will return true only once all bytes are flushed.
   virtual bool isClosed() const = 0;
 
   virtual void write(folly::StringPiece data) = 0;
@@ -48,22 +70,43 @@ struct StreamTransport {
   void writeUint8(uint8_t c) { writeRawObject(c); }
   void writeUint32(uint32_t i) { writeRawObject(i); }
 
-  virtual bool isReady() const = 0;
+  /// Sets the `onData` callback. See `onData` for details.
+  ///
+  /// When this is called if there is pending data the callback may be
+  /// immediately called before returning.
+  virtual void setOnData(OnDataType callback) {
+    onData = std::move(callback);
+  }
 
-  // These callbacks maybe called on a non-request thread.
-  virtual void doOnData(std::unique_ptr<folly::IOBuf> data) = 0;
-  virtual void doOnClose() = 0;
-
-  // Set the callback that will be called when new data is available.
-  // The data may not persist after the callback returns;
-  // it's the responsibility of the callback to copy the data if required.
-  virtual void setOnData(OnDataType callback) = 0;
-  // Set the callback that will be called when the connection is closed.
-  virtual void setOnClose(OnCloseType callback) = 0;
+  /// Sets the `onClose` callback. See `onClose` for details.
+  virtual void setOnClose(OnCloseType callback) {
+    onClose = std::move(callback);
+  }
 
 protected:
+  /// Called when new data is available from the remote. The data
+  /// may not persist after the callback returns; it's the responsibility of the
+  /// callback to copy the data if required.
+  ///
+  /// This callback will almost certainly be called on a non-request thread.
   OnDataType onData{nullptr};
+
+  /// Called when the remote closes the connection.
+  ///
+  /// This callback will almost certainly be called on a non-request thread.
   OnCloseType onClose{nullptr};
+
+  void doOnData(std::unique_ptr<folly::IOBuf> data) {
+    if (onData) {
+      onData(std::move(data));
+    }
+  }
+
+  void doOnClose() {
+    if (onClose) {
+      onClose();
+    }
+  }
 };
 
 } // namespace stream_transport

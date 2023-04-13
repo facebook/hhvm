@@ -40,19 +40,8 @@ struct HttpStreamServerTransport final : StreamTransport {
   void closeNow() override { }
   bool isClosed() const override { return m_eom_sent; }
 
-  bool isReady() const override {
+  bool isReady() const {
     return onData != nullptr;
-  }
-
-  void doOnData(std::unique_ptr<folly::IOBuf> data) noexcept override {
-    assertx(isReady());
-    onData(std::move(data));
-  }
-
-  void doOnClose() noexcept override {
-    if (onClose) {
-      onClose();
-    }
   }
 
   void setOnData(OnDataType callback) override;
@@ -61,6 +50,8 @@ struct HttpStreamServerTransport final : StreamTransport {
     onClose = callback;
   }
 
+  using StreamTransport::doOnData;
+  using StreamTransport::doOnClose;
 
 private:
   Transport* m_transport;

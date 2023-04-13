@@ -22,6 +22,7 @@
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
 #include <folly/Utility.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/GetStandardProtocol.h>
 #include <thrift/lib/cpp2/type/Any.h>
@@ -324,11 +325,9 @@ template <typename TT>
 struct ValueHelper<TT, type::if_structured<TT>> {
   template <typename T>
   static void set(Value& result, T&& value) {
-    // TODO(afuller): Using the Visitor reflection API + ValueHelper instead.
-    // This method loses type information (the enum or struct type for
-    // example).
     ObjectWriter writer(&result);
-    value.write(&writer);
+    op::detail::RecursiveEncode<type::infer_tag<folly::remove_cvref_t<T>>>{}(
+        writer, value);
   }
 };
 

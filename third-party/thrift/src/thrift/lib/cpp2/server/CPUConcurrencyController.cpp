@@ -107,11 +107,11 @@ void CPUConcurrencyController::cycleOnce() {
   }
 
   auto limit = this->getLimit(config);
+  auto currentLimitUsage = this->getLimitUsage(config);
   auto load = getLoadInternal(config);
   if (eventHandler) {
-    eventHandler->onCycle(limit, load);
+    eventHandler->onCycle(limit, currentLimitUsage, load);
   }
-
   if (load >= config->cpuTarget) {
     lastOverloadStart_ = std::chrono::steady_clock::now();
     auto newLim =
@@ -124,7 +124,6 @@ void CPUConcurrencyController::cycleOnce() {
       eventHandler->limitDecreased();
     }
   } else {
-    auto currentLimitUsage = this->getLimitUsage(config);
     if (currentLimitUsage == 0 || load <= 0) {
       return;
     }

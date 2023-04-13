@@ -33,7 +33,7 @@ using apache::thrift::CPUConcurrencyController;
 
 class MockEventHandler : public CPUConcurrencyController::EventHandler {
  public:
-  MOCK_METHOD(void, onCycle, (int64_t, int64_t), (override));
+  MOCK_METHOD(void, onCycle, (int64_t, int64_t, int64_t), (override));
   MOCK_METHOD(void, limitIncreased, (), (override));
   MOCK_METHOD(void, limitDecreased, (), (override));
 };
@@ -85,20 +85,22 @@ THRIFT_PLUGGABLE_FUNC_SET(
 
 TEST_F(CPUConcurrencyControllerTest, testEventHandler) {
   using ::testing::Eq;
+  using ::testing::Gt;
   folly::Baton<> baton1;
   folly::Baton<> baton2;
   folly::Baton<> baton3;
   auto eventHandler = std::make_shared<MockEventHandler>();
 
   ::testing::Sequence seq;
-  EXPECT_CALL(*eventHandler, onCycle(Eq(100), Eq(50)))
+  EXPECT_CALL(*eventHandler, onCycle(Eq(100), Eq(0), Eq(50)))
       .InSequence(seq)
-      .WillOnce(::testing::Invoke([&baton1](auto, auto) { baton1.post(); }));
-  EXPECT_CALL(*eventHandler, onCycle(Eq(100), Eq(100))).InSequence(seq);
+      .WillOnce(
+          ::testing::Invoke([&baton1](auto, auto, auto) { baton1.post(); }));
+  EXPECT_CALL(*eventHandler, onCycle(Eq(100), Eq(0), Eq(100))).InSequence(seq);
   EXPECT_CALL(*eventHandler, limitDecreased())
       .InSequence(seq)
       .WillOnce(::testing::Invoke([&baton2]() { baton2.post(); }));
-  EXPECT_CALL(*eventHandler, onCycle(Eq(95), Eq(50))).InSequence(seq);
+  EXPECT_CALL(*eventHandler, onCycle(Eq(95), Gt(0), Eq(50))).InSequence(seq);
   EXPECT_CALL(*eventHandler, limitIncreased())
       .InSequence(seq)
       .WillOnce(::testing::Invoke([&baton3]() { baton3.post(); }));

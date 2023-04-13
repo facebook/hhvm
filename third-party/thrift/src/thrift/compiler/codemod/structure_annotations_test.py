@@ -76,3 +76,31 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 """
             ),
         )
+
+    def test_existing_include(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/cpp.thrift"
+
+                typedef i32 foo (cpp.type = "foo")
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/cpp.thrift"
+
+                @cpp.Type{name = "foo"}
+                typedef i32 foo
+                """
+            ),
+        )

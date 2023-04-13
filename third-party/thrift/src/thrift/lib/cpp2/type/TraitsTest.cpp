@@ -21,19 +21,17 @@
 #include <thrift/lib/cpp2/type/Traits.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/conformance/if/gen-cpp2/object_types.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 #include <thrift/lib/cpp2/type/Type.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
 
 namespace apache::thrift::type {
 namespace {
-using conformance::Object;
-using conformance::Value;
 using test::FieldAdapter;
 using test::FieldValue;
 using test::TestAdapter;
@@ -215,11 +213,11 @@ TEST(TraitsTest, Struct) {
   EXPECT_EQ(base_type_v<tag>, BaseType::Struct);
   EXPECT_EQ(getName<tag>(), "struct");
 
-  using tag_t = struct_t<Object>;
+  using tag_t = struct_t<protocol::Object>;
   EXPECT_EQ(base_type_v<tag_t>, BaseType::Struct);
   // TODO(afuller): Remove dep of fatal.
   // EXPECT_EQ(getName<tag_t>(), "object.Object");
-  test_concrete_type<tag_t, Object>();
+  test_concrete_type<tag_t, protocol::Object>();
 }
 
 TEST(TraitsTest, Union) {
@@ -233,11 +231,11 @@ TEST(TraitsTest, Union) {
   EXPECT_EQ(base_type_v<tag>, BaseType::Union);
   EXPECT_EQ(getName<tag>(), "union");
 
-  using tag_t = union_t<Value>;
+  using tag_t = union_t<protocol::Value>;
   EXPECT_EQ(base_type_v<tag_t>, BaseType::Union);
   // TODO(afuller): Remove dep of fatal.
   // EXPECT_EQ(getName<tag_t>(), "object.Value");
-  test_concrete_type<tag_t, Value>();
+  test_concrete_type<tag_t, protocol::Value>();
 }
 
 TEST(TraitsTest, Exception) {

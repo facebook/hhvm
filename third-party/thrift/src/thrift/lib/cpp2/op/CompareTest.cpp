@@ -19,13 +19,12 @@
 #include <thrift/lib/cpp2/op/Compare.h>
 
 #include <folly/portability/GTest.h>
-#include <thrift/conformance/if/gen-cpp2/object_types.h>
 #include <thrift/lib/cpp2/op/detail/Compare.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/Module_types_custom_protocol.h>
+#include <thrift/lib/thrift/gen-cpp2/protocol_types_custom_protocol.h>
 
 namespace apache::thrift::op {
 namespace {
-using conformance::Value;
 
 TEST(CompareTest, IOBuf) {
   using STag = type::cpp_type<folly::IOBuf, type::string_t>;
@@ -115,15 +114,15 @@ TEST(CompareTest, Float) {
 }
 
 TEST(CompareTest, StructWithFloat) {
-  Value lhs;
-  Value rhs;
-  EqualTo<type::struct_t<Value>> equal;
-  IdenticalTo<type::struct_t<Value>> identical;
+  protocol::Value lhs;
+  protocol::Value rhs;
+  EqualTo<type::struct_t<protocol::Value>> equal;
+  IdenticalTo<type::struct_t<protocol::Value>> identical;
 
   lhs.floatValue_ref().ensure() = std::numeric_limits<float>::quiet_NaN();
   rhs.floatValue_ref().ensure() = std::numeric_limits<float>::quiet_NaN();
-  EXPECT_FALSE(op::equal<Value>(lhs, rhs));
-  EXPECT_FALSE(op::identical<Value>(lhs, rhs)); // Should be true!
+  EXPECT_FALSE(op::equal<protocol::Value>(lhs, rhs));
+  EXPECT_FALSE(op::identical<protocol::Value>(lhs, rhs)); // Should be true!
 
   lhs.floatValue_ref().ensure() = -0.0f;
   rhs.floatValue_ref().ensure() = +0.0f;

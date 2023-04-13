@@ -886,7 +886,6 @@ let rec event_loop
     (interrupt : 'a MultiThreadedCall.interrupt_config)
     (fd_distc : Unix.file_descr)
     (handle : Hh_distc_ffi.handle)
-    (buf : bytes)
     (check_info : check_info) :
     [> `Success of Errors.t * _ | `Error of string | `Cancel of _ ] =
   let handlers =
@@ -914,7 +913,7 @@ let rec event_loop
         ~total_count
         ~unit:"files"
         ~extra:None;
-      event_loop done_count total_count interrupt fd_distc handle buf check_info
+      event_loop done_count total_count interrupt fd_distc handle check_info
   ) else
     let (env, decision, _handlers) =
       List.fold
@@ -945,7 +944,7 @@ let rec event_loop
       let () = Hh_distc_ffi.cancel handle in
       `Cancel interrupt.MultiThreadedCall.env
     | MultiThreadedCall.Continue ->
-      event_loop done_count total_count interrupt fd_distc handle buf check_info
+      event_loop done_count total_count interrupt fd_distc handle check_info
 
 (**
   This is the main process function that triggers a full init via hh_distc.
@@ -979,9 +978,8 @@ let process_with_hh_distc
     |> Result.ok_or_failwith
   in
   let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
-  let buf = Bytes.create 1 in
   ServerProgress.write "hh_distc running";
-  match event_loop 0 0 interrupt fd_distc hh_distc_handle buf check_info with
+  match event_loop 0 0 interrupt fd_distc hh_distc_handle check_info with
   | `Success (errors, env) ->
     (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
     Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));

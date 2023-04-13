@@ -26,7 +26,8 @@ namespace apache::thrift {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     folly::observer::Observer<CPUConcurrencyController::Config>,
-    makeCPUConcurrencyControllerConfig) {
+    makeCPUConcurrencyControllerConfig,
+    BaseThriftServer*) {
   return folly::observer::makeStaticObserver(
       CPUConcurrencyController::Config{});
 }
@@ -75,7 +76,10 @@ CPUConcurrencyController::~CPUConcurrencyController() {
 
 void CPUConcurrencyController::setEventHandler(
     std::shared_ptr<EventHandler> eventHandler) {
-  eventHandler_ = std::move(eventHandler);
+  eventHandler_.withWLock(
+      [newEventHandler = std::move(eventHandler)](auto& eventHandler) {
+        eventHandler = std::move(newEventHandler);
+      });
 }
 
 void CPUConcurrencyController::requestStarted() {
@@ -97,14 +101,15 @@ void CPUConcurrencyController::requestShed() {
 void CPUConcurrencyController::cycleOnce() {
   // Get a snapshot of the current config
   auto config = this->config();
+  auto eventHandler = eventHandler_.copy();
   if (!config->enabled()) {
     return;
   }
 
   auto limit = this->getLimit(config);
   auto load = getLoadInternal(config);
-  if (eventHandler_) {
-    eventHandler_->onCycle(limit, load);
+  if (eventHandler) {
+    eventHandler->onCycle(limit, load);
   }
 
   if (load >= config->cpuTarget) {
@@ -115,8 +120,8 @@ void CPUConcurrencyController::cycleOnce() {
             static_cast<uint32_t>(limit * config->decreaseMultiplier), 1);
     this->setLimit(
         config, std::max<uint32_t>(newLim, config->concurrencyLowerBound));
-    if (eventHandler_) {
-      eventHandler_->limitDecreased();
+    if (eventHandler) {
+      eventHandler->limitDecreased();
     }
   } else {
     auto currentLimitUsage = this->getLimitUsage(config);
@@ -153,11 +158,11 @@ void CPUConcurrencyController::cycleOnce() {
             *pct, config->concurrencyLowerBound, config->concurrencyUpperBound);
         stableEstimate_.store(result, std::memory_order_relaxed);
         this->setLimit(config, result);
-        if (eventHandler_) {
+        if (eventHandler) {
           if (result > limit) {
-            eventHandler_->limitIncreased();
+            eventHandler->limitIncreased();
           } else if (result < limit) {
-            eventHandler_->limitDecreased();
+            eventHandler->limitDecreased();
           }
         }
         return;
@@ -186,8 +191,8 @@ void CPUConcurrencyController::cycleOnce() {
               static_cast<uint32_t>(limit * config->additiveMultiplier), 1);
       this->setLimit(
           config, std::min<uint32_t>(config->concurrencyUpperBound, newLim));
-      if (eventHandler_) {
-        eventHandler_->limitIncreased();
+      if (eventHandler) {
+        eventHandler->limitIncreased();
       }
     }
   }

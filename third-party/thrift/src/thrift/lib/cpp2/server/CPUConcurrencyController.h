@@ -174,7 +174,7 @@ class CPUConcurrencyController {
   apache::thrift::ThriftServerConfig& thriftServerConfig_;
 
   folly::FunctionScheduler scheduler_;
-  std::shared_ptr<EventHandler> eventHandler_{nullptr};
+  folly::Synchronized<std::shared_ptr<EventHandler>> eventHandler_{nullptr};
 
   std::chrono::steady_clock::time_point lastOverloadStart_{
       std::chrono::steady_clock::now()};
@@ -192,9 +192,12 @@ class CPUConcurrencyController {
       std::chrono::steady_clock::now()};
 };
 
+class BaseThriftServer;
+
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     folly::observer::Observer<CPUConcurrencyController::Config>,
-    makeCPUConcurrencyControllerConfig);
+    makeCPUConcurrencyControllerConfig,
+    BaseThriftServer*);
 } // namespace detail
 } // namespace apache::thrift

@@ -1036,6 +1036,7 @@ void ThriftServer::ensureResourcePools() {
           std::move(concurrencyController));
     }
 
+    runtimeServerActions_.userSuppliedResourcePools = true;
     return;
   }
 

@@ -53,7 +53,7 @@ BaseThriftServer::BaseThriftServer()
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver()},
       cpuConcurrencyController_{
-          detail::makeCPUConcurrencyControllerConfig(),
+          detail::makeCPUConcurrencyControllerConfig(this),
           *this,
           detail::getThriftServerConfig(*this)},
       addresses_(1) {}
@@ -65,7 +65,7 @@ BaseThriftServer::BaseThriftServer(
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver()},
       cpuConcurrencyController_{
-          detail::makeCPUConcurrencyControllerConfig(),
+          detail::makeCPUConcurrencyControllerConfig(this),
           *this,
           detail::getThriftServerConfig(*this)},
       addresses_(1) {}
@@ -171,6 +171,7 @@ std::string BaseThriftServer::getLoadInfo(int64_t load) const {
 std::string BaseThriftServer::RuntimeServerActions::explain() const {
   std::string result;
   result = std::string(userSuppliedThreadManager ? "setThreadManager, " : "") +
+      (userSuppliedResourcePools ? "userSuppliedResourcePools, " : "") +
       (interactionInService ? "interactionInService, " : "") +
       (wildcardMethods ? "wildcardMethods, " : "") +
       (noServiceRequestInfo ? "noServiceRequestInfo, " : "") +

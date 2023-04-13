@@ -30,8 +30,9 @@ class StateMachine {
 
     std::tie(newState, ok) = T::find(state, event);
     if (!ok) {
-      LOG(ERROR) << T::getName() << ": invalid transition tried: " << state
-                 << " " << event;
+      LOG_EVERY_N(ERROR, 100)
+          << T::getName() << ": invalid transition tried: " << state << " "
+          << event;
       return false;
     } else {
       VLOG(6) << T::getName() << ": transitioning from " << state << " to "

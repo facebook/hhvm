@@ -166,6 +166,10 @@ let search_localvar ~ctx ~entry ~line ~char =
     List.map results ~f:(fun x -> (var_text, x))
   | [] -> []
 
+let is_local = function
+  | LocalVar _ -> true
+  | _ -> false
+
 let go ctx action include_defs genv env =
   match action with
   | Member (class_name, member) ->
@@ -187,6 +191,18 @@ let go ctx action include_defs genv env =
         ~contents:file_content
     in
     (env, Done (search_localvar ~ctx ~entry ~line ~char))
+
+let go_for_localvar ctx action =
+  match action with
+  | LocalVar { filename; file_content; line; char } ->
+    let (ctx, entry) =
+      Provider_context.add_or_overwrite_entry_contents
+        ~ctx
+        ~path:filename
+        ~contents:file_content
+    in
+    Ok (search_localvar ~ctx ~entry ~line ~char)
+  | _ -> Error action
 
 let to_absolute res = List.map res ~f:(fun (r, pos) -> (r, Pos.to_absolute pos))
 

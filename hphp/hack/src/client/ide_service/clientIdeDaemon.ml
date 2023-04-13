@@ -978,6 +978,30 @@ let handle_request
             ~column:document_location.ClientIdeMessage.column)
     in
     Lwt.return (state, Ok result)
+    (* textDocument/references - localvar only *)
+  | (Initialized istate, Find_references document_location) ->
+    let open Result.Monad_infix in
+    (* Update the state of the world with the document as it exists in the IDE *)
+    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          match
+            ServerFindRefs.go_from_file_ctx
+              ~ctx
+              ~entry
+              ~line:document_location.line
+              ~column:document_location.column
+          with
+          | Some (name, action) when ServerFindRefs.is_local action ->
+            ServerFindRefs.go_for_localvar ctx action
+            >>| ServerFindRefs.to_ide name
+            (* clientLsp should raise if we return a LocalVar action *)
+          | None -> Ok None (* Clicking a line+col that isn't a symbol *)
+          | Some (_name, action) ->
+            (* Not a localvar, must defer to hh_server *)
+            Error action)
+    in
+    Lwt.return (state, Ok result)
   (* Autocomplete *)
   | ( Initialized istate,
       Completion

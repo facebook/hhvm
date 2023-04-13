@@ -3372,18 +3372,72 @@ let do_findReferences
       (List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename))
 
 let do_findReferences_local
-    (state : state) (params : FindReferences.params) (lsp_id : lsp_id) :
-    state Lwt.t =
-  let { Ide_api_types.line; column } =
-    lsp_position_to_ide
-      params.FindReferences.loc.TextDocumentPositionParams.position
+    (state : state)
+    (ide_service : ClientIdeService.t ref)
+    (env : env)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
+    (params : FindReferences.params)
+    (lsp_id : lsp_id) =
+  let document_location =
+    get_document_location editor_open_files params.FindReferences.loc
   in
-  let filename =
-    Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-      params.FindReferences.loc.TextDocumentPositionParams.textDocument
+  let%lwt response =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Find_references document_location)
   in
-  let shellable_type = Lost_env.FindRefs (lsp_id, filename, line, column) in
-  let state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+  let state =
+    match response with
+    | Ok None ->
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        lsp_id
+        (FindReferencesResult []);
+      Lwt.return state
+    | Ok (Some (_name, positions)) ->
+      let filename =
+        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+          params.FindReferences.loc.TextDocumentPositionParams.textDocument
+      in
+      let positions =
+        List.map positions ~f:(hack_pos_to_lsp_location ~default_path:filename)
+      in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        lsp_id
+        (FindReferencesResult positions);
+      Lwt.return state
+    | Error action when ServerFindRefs.is_local action ->
+      (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
+      let str =
+        Printf.sprintf
+          "ClientIDEDaemon failed to find-refs for localvar %s"
+          (ServerCommandTypes.Find_refs.show_action action)
+      in
+      log "%s" str;
+      failwith "ClientIDEDaemon failed to find-refs for a localvar"
+    | Error _action ->
+      (* ClientIdeMessage.Find_references only supports localvar.
+         Receiving an error with a non-localvar action indicates that we attempted to
+         try and find references for a non-localvar
+      *)
+      let { Ide_api_types.line; column } =
+        lsp_position_to_ide
+          params.FindReferences.loc.TextDocumentPositionParams.position
+      in
+      let filename =
+        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
+          params.FindReferences.loc.TextDocumentPositionParams.textDocument
+      in
+      let shellable_type = Lost_env.FindRefs (lsp_id, filename, line, column) in
+      let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
+      Lwt.return state
+  in
   state
 
 let do_goToImplementation_local
@@ -3913,7 +3967,7 @@ let publish_errors_if_standalone
   | (Ide_standalone, Pre_init) ->
     failwith "how we got errors before initialize?"
   | (Ide_standalone, (In_init _ | Main_loop _)) ->
-    failwith "how serverless_with_shell is in an hh_server state?"
+    failwith "how Ide_standalone is in an hh_server state?"
   | (Ide_standalone, Post_shutdown) -> state (* no-op *)
   | (Ide_standalone, Lost_server lenv) ->
     let file_path = Path.to_string file_path in
@@ -5297,10 +5351,20 @@ let handle_client_message
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/references request *)
-    | (_, Some _ide_service, RequestMessage (id, FindReferencesRequest params))
+    | (_, Some ide_service, RequestMessage (id, FindReferencesRequest params))
       when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
-      let%lwt new_state = do_findReferences_local !state params id in
+      let%lwt new_state =
+        do_findReferences_local
+          !state
+          ide_service
+          env
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
+          id
+      in
       state := new_state;
       Lwt.return_none
     (* textDocument/implementation request *)

@@ -254,7 +254,19 @@ static inline bool check_ssize_t_32(Py_ssize_t len) {
 
 static inline bool parse_pyint(
     PyObject* o, int32_t* ret, int32_t min, int32_t max) {
-  long val = AS_LONG(o);
+  long val;
+  if (PyLong_Check(o)) {
+    val = AS_LONG(o);
+  } else {
+    PyObject* tmp = PyNumber_Long(o);
+    if (tmp == NULL) {
+      PyErr_Format(PyExc_TypeError, "Unable to convert %R to int()", o);
+      return false;
+    } else {
+      val = AS_LONG(tmp);
+      Py_DECREF(tmp);
+    }
+  }
   if (INT_CONV_ERROR_OCCURRED(val)) {
     return false;
   }
@@ -320,7 +332,19 @@ static bool encode_impl(
       break;
     }
     case TType::T_I64: {
-      int64_t val = PyLong_AsLongLong(value);
+      int64_t val;
+      if (PyLong_Check(value)) {
+        val = PyLong_AsLongLong(value);
+      } else {
+        PyObject* tmp = PyNumber_Long(value);
+        if (tmp == NULL) {
+          PyErr_Format(PyExc_TypeError, "Unable to convert %R to int()", value);
+          return false;
+        } else {
+          val = PyLong_AsLongLong(tmp);
+          Py_DECREF(tmp);
+        }
+      }
       if (INT_CONV_ERROR_OCCURRED(val)) {
         return false;
       }

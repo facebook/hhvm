@@ -1097,8 +1097,10 @@ let rec assign_array_get
       array_pos
       ty1
   in
+  let preserve_supportdyn = TUtils.is_supportdyn env ty2 in
   Option.iter ~f:Errors.add_typing_error ty_err1;
   GenericRules.apply_rules_with_array_index_value_ty_mismatches
+    ~preserve_supportdyn
     env
     ety1
     (fun env ety1 ->

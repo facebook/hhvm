@@ -103,6 +103,10 @@ type penv =
 let strip_ns id =
   id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
+let show_supportdyn env =
+  (not (TypecheckerOptions.everything_sdt env.genv.tcopt))
+  || Typing_env_types.get_log_level env "show" >= 1
+
 (*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)
 (* This is used in server/symbolTypeService and elsewhere                    *)
@@ -130,11 +134,9 @@ module Full = struct
   (* Until we support NoAutoDynamic, all types under everything-sdt
    * support dynamic so displaying supportdyn is redundant
    *)
-  let show_supportdyn penv =
+  let show_supportdyn_penv penv =
     match penv with
-    | Loclenv env ->
-      (not (TypecheckerOptions.everything_sdt env.genv.tcopt))
-      || Typing_env_types.get_log_level env "show" >= 1
+    | Loclenv env -> show_supportdyn env
     | Declenv -> false
 
   let blank_tyvars = ref false
@@ -355,7 +357,7 @@ module Full = struct
     (fuel, tparam_doc)
 
   and tparam_constraint ~fuel ~ty to_doc st penv (ck, cty) =
-    let (fuel, contraint_ty_doc) = ty ~fuel to_doc st penv cty in
+    let (fuel, constraint_ty_doc) = ty ~fuel to_doc st penv cty in
     let constraint_doc =
       Concat
         [
@@ -366,7 +368,7 @@ module Full = struct
             | Ast_defs.Constraint_super -> "super"
             | Ast_defs.Constraint_eq -> "=");
           Space;
-          contraint_ty_doc;
+          constraint_ty_doc;
         ]
     in
     (fuel, constraint_doc)
@@ -620,8 +622,8 @@ module Full = struct
     | Tvar x -> (fuel, text (Printf.sprintf "#%d" x))
     | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft fun_decl_implicit_params
     | Tnewtype (n, _, ty)
-      when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn penv)
-      ->
+      when String.equal n SN.Classes.cSupportDyn
+           && not (show_supportdyn_penv penv) ->
       k ~fuel ty
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
@@ -663,6 +665,15 @@ module Full = struct
       let lower = Typing_env_types.get_lower_bounds penv tparam params in
       let upper = Typing_env_types.get_upper_bounds penv tparam params in
       let equ = Typing_env_types.get_equal_bounds penv tparam params in
+      let upper =
+        if show_supportdyn penv then
+          upper
+        else
+          (* Don't show "as mixed" if we're not printing supportdyn *)
+          TySet.remove
+            Typing_make_type.(supportdyn Reason.Rnone (mixed Reason.Rnone))
+            upper
+      in
       (* If we have an equality we can ignore the other bounds *)
       if not (TySet.is_empty equ) then
         List.map (TySet.elements equ) ~f:(fun ty ->
@@ -789,8 +800,8 @@ module Full = struct
     | Tgeneric (s, []) ->
       (fuel, to_doc s)
     | Tnewtype (n, _, ty)
-      when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn penv)
-      ->
+      when String.equal n SN.Classes.cSupportDyn
+           && not (show_supportdyn_penv penv) ->
       k ~fuel ty
     | Tnewtype (s, tyl, _)
     | Tgeneric (s, tyl) ->
@@ -1284,6 +1295,9 @@ module ErrorString = struct
     | Tgeneric _ ->
       let (fuel, ty_str) = ety_to_string ety in
       (fuel, "a value of generic type " ^ ty_str)
+    | Tnewtype (n, _, ty)
+      when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env) ->
+      type_ ~fuel env ty
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
       (fuel, "a classname string")
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->

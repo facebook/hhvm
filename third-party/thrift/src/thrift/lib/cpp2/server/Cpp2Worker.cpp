@@ -57,6 +57,8 @@ void Cpp2Worker::initRequestsRegistry() {
     if (auto self = self_weak.lock()) {
       self->requestsRegistry_ = &registry.get().try_emplace(
           *evb, memPerReq, memPerWorker, maxFinished);
+      self->workerProvider_ =
+          detail::createIOWorkerProvider(evb, requestsRegistry_);
     }
   });
 }

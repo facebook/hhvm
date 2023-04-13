@@ -72,11 +72,17 @@ folly::Synchronized<RegistryIdManager>& registryIdManager() {
 } // namespace
 
 namespace detail {
-
 THRIFT_PLUGGABLE_FUNC_REGISTER(uint64_t, getCurrentServerTick) {
   return 0;
 }
 
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    std::unique_ptr<folly::WorkerProvider>,
+    createIOWorkerProvider,
+    folly::Executor*,
+    RequestsRegistry*) {
+  return nullptr;
+}
 } // namespace detail
 
 void RecentRequestCounter::increment() {

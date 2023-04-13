@@ -422,6 +422,7 @@ class Cpp2Worker : public IOWorkerContext,
   folly::Baton<> stopBaton_;
   std::unique_ptr<MemoryTracker> ingressMemoryTracker_;
   std::unique_ptr<MemoryTracker> egressMemoryTracker_;
+  std::unique_ptr<folly::WorkerProvider> workerProvider_;
 
   void initRequestsRegistry();
 

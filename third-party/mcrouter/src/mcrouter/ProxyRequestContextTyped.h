@@ -148,7 +148,10 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
           flags,
           /* numFailovers */ 0,
           /* beforeReqLatencyInjectedUs */ 0,
-          /* afterReqLatencyInjectedUs */ 0);
+          /* afterReqLatencyInjectedUs */ 0,
+          /* poolIndex */ std::nullopt,
+          getProductId(request));
+
       assert(additionalLogger_.hasValue());
       additionalLogger_->logBeforeRequestSent(request, loggerContext);
     }
@@ -198,7 +201,8 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
         fiber_local<RouterInfo>::getFailoverCount(),
         fiber_local<RouterInfo>::getAccumulatedInjectedBeforeReqLatencyUs(),
         fiber_local<RouterInfo>::getAccumulatedInjectedAfterReqLatencyUs(),
-        poolIndex);
+        poolIndex,
+        getProductId(request));
     assert(logger_.hasValue());
     logger_->template log<Request>(loggerContext);
     assert(additionalLogger_.hasValue());

@@ -142,11 +142,6 @@ int main(int argc, char* argv[]) {
         folly::AsyncReader::ReadCallback::ReadMode::ReadVec;
   }
 
-  auto config = server->getFizzConfig();
-  config.transportOptions = transportOptions;
-
-  server->setFizzConfig(config);
-
   if (FLAGS_threshold > 0) {
     LOG(INFO) << "Adding zerocopy enable func with threshold = "
               << FLAGS_threshold;
@@ -163,8 +158,11 @@ int main(int argc, char* argv[]) {
 
   facebook::services::ServiceFramework instance("ZeroCopyServer");
 
+  facebook::services::ServiceFramework::ServerOptions options;
+  options.transportOptions = transportOptions;
+
   // TODO(T123377436) CodeFrameworks Migration - Binary Contract
-  instance.addPrimaryThriftService(server, handler.get());
+  instance.addPrimaryThriftService(server, handler.get(), options);
   instance.go();
 
   return 0;

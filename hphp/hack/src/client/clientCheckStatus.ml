@@ -550,7 +550,7 @@ let go_streaming
     (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ root; show_spinner; deadline; _ } = args in
   let progress_callback : string option -> unit =
-    ClientSpinner.report ~to_stderr:show_spinner ~angery_reaccs_only:true
+    ClientSpinner.report ~to_stderr:show_spinner ~angery_reaccs_only:false
   in
   let connect_then_close () =
     (* must clear spinner in case [connect_then_close] writes to stderr *)

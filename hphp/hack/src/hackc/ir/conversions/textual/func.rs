@@ -883,7 +883,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     fn load_static_class(&mut self, cid: ClassId) -> Result<textual::Sid> {
-        class::load_static_class(self.fb, cid, &self.strings)
+        class::load_static_class(self.fb, cid)
     }
 
     pub(crate) fn load_mixed(&mut self, src: impl Into<textual::Expr>) -> Result<Sid> {

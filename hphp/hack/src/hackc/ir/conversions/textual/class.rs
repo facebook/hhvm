@@ -439,14 +439,8 @@ fn compute_base(class: &ir::Class<'_>) -> Option<ir::ClassId> {
 pub(crate) fn load_static_class(
     fb: &mut textual::FuncBuilder<'_, '_>,
     class: ir::ClassId,
-    strings: &StringInterner,
 ) -> Result<textual::Sid> {
-    // Blindly load the static singleton, assuming it's already been initialized.
-    let singleton_name = static_singleton_name(class, strings);
-    fb.txf
-        .define_global(singleton_name.clone(), static_ty(class));
-    let singleton_expr = textual::Expr::deref(textual::Var::global(singleton_name));
-    let value = fb.load(&static_ty(class), singleton_expr)?;
-    hack::call_builtin(fb, hack::Builtin::SilLazyInitialize, [value])?;
-    Ok(value)
+    let cname = TypeName::Class(class);
+    let ty = textual::Ty::Type(cname);
+    fb.lazy_class_initialize(&ty)
 }

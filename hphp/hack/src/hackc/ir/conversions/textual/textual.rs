@@ -1028,6 +1028,18 @@ impl FuncBuilder<'_, '_> {
         Ok(dst)
     }
 
+    pub(crate) fn lazy_class_initialize(&mut self, ty: &Ty) -> Result<Sid> {
+        let dst = self.alloc_sid();
+        let strings = &self.txf.strings;
+        writeln!(
+            self.txf.w,
+            "{INDENT}{dst} = __sil_lazy_class_initialize(<{ty}>)",
+            dst = FmtSid(dst),
+            ty = ty.display(strings),
+        )?;
+        Ok(dst)
+    }
+
     pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
         let dst = self.alloc_sid();

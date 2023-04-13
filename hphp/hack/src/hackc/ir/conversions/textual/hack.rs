@@ -269,9 +269,6 @@ pub(crate) enum Builtin {
     /// Build a dict based on key/value pairs.
     #[decl(fn hack_new_dict(...) -> *HackMixed)]
     NewDict,
-    /// Lazily initializes a static singleton.
-    #[decl(fn lazy_initialize(*HackMixed) -> void)]
-    SilLazyInitialize,
     /// Note that this argument is a 'splat' (unwrapped array args for a function).
     #[decl(fn __sil_splat(*HackArray) -> *HackArray)]
     SilSplat,

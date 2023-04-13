@@ -91,9 +91,8 @@ function check2(): D::TMyShape {
 // CHECK: define $root.main($this: *void) : *void {
 // CHECK: #b0:
 // CHECK:   n0 = $root.check1(null, $builtins.hack_int(5))
-// CHECK:   n1: *D$static = load &const::D$static::static_singleton
-// CHECK:   n2 = $builtins.lazy_initialize(n1)
-// CHECK:   n3 = D$static.check2(n1, $builtins.hack_int(5))
+// CHECK:   n1 = __sil_lazy_class_initialize(<D>)
+// CHECK:   n2 = D$static.check2(n1, $builtins.hack_int(5))
 // CHECK:   ret null
 // CHECK: }
 <<__EntryPoint>>

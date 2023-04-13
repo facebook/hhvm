@@ -62,14 +62,13 @@ class C {
   // CHECK:   prune ! $builtins.hack_is_true(n7)
   // CHECK:   n9: *HackMixed = load &$a
   // CHECK:   n10: *HackMixed = load &$b
-  // CHECK:   n11: *C$static = load &const::C$static::static_singleton
-  // CHECK:   n12 = $builtins.lazy_initialize(n11)
-  // CHECK:   n13 = C$static.memometh_static$memoize_impl(n11, n9, n10)
-  // CHECK:   n14: *HackMixed = load &$this
-  // CHECK:   n15: *HackMixed = load &$0
-  // CHECK:   n16: *HackMixed = load &$1
-  // CHECK:   n17 = $builtins.hhbc_memo_set(&memocache::_C$static_2ememometh__static, n14, n15, n16, n13)
-  // CHECK:   ret n17
+  // CHECK:   n11 = __sil_lazy_class_initialize(<C>)
+  // CHECK:   n12 = C$static.memometh_static$memoize_impl(n11, n9, n10)
+  // CHECK:   n13: *HackMixed = load &$this
+  // CHECK:   n14: *HackMixed = load &$0
+  // CHECK:   n15: *HackMixed = load &$1
+  // CHECK:   n16 = $builtins.hhbc_memo_set(&memocache::_C$static_2ememometh__static, n13, n14, n15, n12)
+  // CHECK:   ret n16
   // CHECK: }
   <<__Memoize>>
   public static function memometh_static(int $a, int $b)[]: int {

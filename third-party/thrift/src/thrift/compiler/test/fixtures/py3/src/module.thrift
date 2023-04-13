@@ -15,7 +15,6 @@
  */
 
 include "thrift/annotation/cpp.thrift"
-include "thrift/annotation/meta.thrift"
 
 namespace cpp2 py3.simple
 
@@ -73,11 +72,6 @@ struct HiddenTypeFieldsStruct {
   3: map<i32, AdaptedTypeDef> (cpp.template = "::std::unordered_map") field3 (
     py3.hidden,
   );
-}
-
-@meta.SetGenerated
-struct GeneratedStruct {
-  1: i16 the;
 }
 
 @cpp.Adapter{name = "Adapter"}

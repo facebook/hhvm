@@ -11,7 +11,6 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/SimpleServiceAsyncClient.h"
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 #include "thrift/annotation/gen-py3cpp/cpp_types.h"
-#include "thrift/annotation/gen-py3cpp/meta_types.h"
 
 namespace folly {
   class IOBuf;

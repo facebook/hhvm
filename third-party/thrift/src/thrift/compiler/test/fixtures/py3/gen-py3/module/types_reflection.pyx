@@ -15,7 +15,6 @@ from thrift.py3.reflection cimport (
 )
 
 cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
-cimport facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
 
 cimport module.types as _module_types
 

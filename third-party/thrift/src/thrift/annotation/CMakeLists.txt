@@ -13,17 +13,6 @@
 # limitations under the License.
 
 thrift_generate(
-  "api" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
   "cpp" #file_name
   "" #services
   "cpp2" #language
@@ -47,17 +36,6 @@ thrift_generate(
 
 thrift_generate(
   "java" #file_name
-  "" #services
-  "cpp2" #language
-  "templates,no_metadata" #options
-  "${CMAKE_CURRENT_SOURCE_DIR}" #file_path
-  "${CMAKE_CURRENT_BINARY_DIR}" #output_path
-  "thrift/annotation" #include_prefix
-  THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
-)
-
-thrift_generate(
-  "meta" #file_name
   "" #services
   "cpp2" #language
   "templates,no_metadata" #options
@@ -100,11 +78,9 @@ thrift_generate(
   THRIFT_INCLUDE_DIRECTORIES ${THRIFT_SOURCE_DIR}
 )
 
-set_property(GLOBAL PROPERTY api-cpp2-SOURCES ${api-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY cpp-cpp2-SOURCES ${cpp-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY hack-cpp2-SOURCES ${hack-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY java-cpp2-SOURCES ${java-cpp2-SOURCES})
-set_property(GLOBAL PROPERTY meta-cpp2-SOURCES ${meta-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY python-cpp2-SOURCES ${python-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY scope-cpp2-SOURCES ${scope-cpp2-SOURCES})
 set_property(GLOBAL PROPERTY thrift-cpp2-SOURCES ${thrift-cpp2-SOURCES})

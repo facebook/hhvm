@@ -44,6 +44,10 @@ void MemcacheRequestCommon::deserialize(carbon::CarbonProtocolReader& reader) {
         reader.readField(bucketId_ref(), fieldType);
         break;
       }
+      case 4: {
+        reader.readField(productId_ref(), fieldType);
+        break;
+      }
       default: {
         reader.skip(fieldType);
         break;

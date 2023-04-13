@@ -25,6 +25,7 @@ struct MemcacheRequestCommon {
   1: optional i64 (cpp.type = "uint64_t") beforeLatencyUs
   2: optional i64 (cpp.type = "uint64_t") afterLatencyUs
   3: optional string bucketId
+  4: optional i64 productId
 }(cpp.methods = "
   template <class V>
   void visitFields(V&& v);

@@ -18,6 +18,8 @@ struct MemcacheRequestCommon {
   # when the request is routed using bucketized routing
   # this bucketId serves as the routing key
   3: optional std::string bucketId;
+  # Product identifier
+  4: optional int64_t productId;
 };
 
 struct MemcacheReplyCommon {

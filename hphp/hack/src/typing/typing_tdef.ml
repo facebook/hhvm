@@ -87,7 +87,13 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
             in
             let cstr = MakeType.mixed r_cstr in
             ((env, None), cstr)
-          | Some cstr -> Phase.localize ~ety_env env cstr
+          | Some cstr ->
+            (* Special case for supportdyn<T> defined with "as T" in order to
+             * avoid supportdynamic.hhi appearing in reason *)
+            if String.equal x Naming_special_names.Classes.cSupportDyn then
+              ((env, None), List.hd_exn argl)
+            else
+              Phase.localize ~ety_env env cstr
         in
         (* TODO: update Tnewtype and pass in super constraint as well *)
         (env, mk (r, Tnewtype (x, argl, td_as_constraint)))

@@ -30,7 +30,7 @@ File "supportdyn.bad.php", line 26, characters 27-30:
 Invalid type hint (Typing[4062])
   File "supportdyn.bad.php", line 26, characters 30-30:
   You are trying to access the type constant `C` but this is a nonnull value
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdyn.bad.php", line 24, characters 21-27:
   Definition is here
 File "supportdyn.bad.php", line 15, characters 3-5:
 Typing error (Typing[4110])
@@ -44,24 +44,18 @@ Invalid `foreach` (Typing[4110])
   Expected an array that can be traversed with foreach because this is used in a `foreach` statement
   File "supportdyn.bad.php", line 18, characters 32-38:
   But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
 File "supportdyn.bad.php", line 20, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdyn.bad.php", line 20, characters 12-14:
   Expected an array that can be traversed with foreach because this is used in a `foreach` statement
   File "supportdyn.bad.php", line 18, characters 32-38:
   But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
 File "supportdyn.bad.php", line 21, characters 3-11:
 `await` can only operate on an `Awaitable` (Typing[4110])
   File "supportdyn.bad.php", line 21, characters 3-11:
   Expected `Awaitable<_>`
   File "supportdyn.bad.php", line 18, characters 32-38:
   But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
 File "supportdyn.bad.php", line 38, characters 10-18:
 Invalid return type (Typing[4110])
   File "supportdyn.bad.php", line 37, characters 42-48:

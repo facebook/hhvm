@@ -38,6 +38,7 @@ val go :
   Typing_service_delegate.state ->
   Telemetry.t ->
   Relative_path.t list ->
+  root:Path.t option ->
   memory_cap:int option ->
   longlived_workers:bool ->
   use_hh_distc_instead_of_hulk:bool ->
@@ -53,6 +54,7 @@ val go_with_interrupt :
   Typing_service_delegate.state ->
   Telemetry.t ->
   Relative_path.t list ->
+  root:Path.t option ->
   interrupt:'env MultiWorker.interrupt_config ->
   memory_cap:int option ->
   longlived_workers:bool ->

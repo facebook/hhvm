@@ -224,6 +224,7 @@ let type_check
       let use_hh_distc_instead_of_hulk =
         genv.local_config.ServerLocalConfig.use_hh_distc_instead_of_hulk
       in
+      let root = Some (ServerArgs.root genv.ServerEnv.options) in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
@@ -232,6 +233,7 @@ let type_check
         env.typing_service.delegate_state
         (Telemetry.create ())
         files_to_check
+        ~root
         ~memory_cap
         ~longlived_workers
         ~use_hh_distc_instead_of_hulk

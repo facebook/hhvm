@@ -857,69 +857,149 @@ let on_cancelled
   in
   add_next []
 
-let process_with_hh_distc
-    ~(interrupt : 'a MultiWorker.interrupt_config) ~(check_info : check_info) :
-    typing_result =
-  (* TODO: Plumb extra --config name=value args through to spawn() *)
-  (* TODO: Poll interrupts *)
-  let _ = interrupt in
-  (* TODO: the following is a bug! I'm not exactly sure how to get root here... *)
-  let root = Wwwroot.interpret_command_line_root_parameter [] in
-  (* We don't want to use with_tempdir because we need to keep the folder around
-     for subseqent typechecks that will read the dep graph in the folder *)
-  let ss_dir = Tempfile.mkdtemp ~skip_mocking:false in
-  let dg_path = Path.(to_string @@ concat ss_dir "hh_mini_saved_state.hhdg") in
-  let handle =
-    Hh_distc_ffi.spawn (Path.to_string root) (Path.to_string ss_dir) dg_path
-    |> Result.ok_or_failwith
+let rec drain_events (done_count, total_count, handle, check_info) =
+  match Hh_distc_ffi.recv handle |> Result.ok_or_failwith with
+  | Some (Hh_distc_types.Errors errors) ->
+    if check_info.log_errors then ServerProgress.ErrorsWrite.report errors;
+    drain_events (done_count, total_count, handle, check_info)
+  | Some (Hh_distc_types.TypingStart total_count) ->
+    drain_events (done_count, total_count, handle, check_info)
+  | Some (Hh_distc_types.TypingProgress n) ->
+    let done_count = done_count + n in
+    drain_events (done_count, total_count, handle, check_info)
+  | None -> (done_count, total_count)
+
+(**
+  This is the event loop that powers hh_distc. It keeps looping and calling
+  select on a series of fds including ones from watchman, hh_distc, hh_client, etc.
+
+  When one of the fds activate, the loops continues one iteration and decides what to
+  do.
+
+  Most of the time the main fd that will be selected is the hh_distc one as it reports
+  progress events on a very frequent interval. We can then use these progress events
+  to stream errors and report progress back to the user.
+*)
+let rec event_loop
+    (done_count : int)
+    (total_count : int)
+    (interrupt : 'a MultiThreadedCall.interrupt_config)
+    (fd_distc : Unix.file_descr)
+    (handle : Hh_distc_ffi.handle)
+    (buf : bytes)
+    (check_info : check_info) :
+    [> `Success of Errors.t * _ | `Error of string | `Cancel of _ ] =
+  let handlers =
+    interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
   in
-  let fd = Hh_distc_ffi.get_fd handle in
-  let rec drain_events (done_count, total_count) =
-    match Hh_distc_ffi.recv handle |> Result.ok_or_failwith with
-    | Some (Hh_distc_types.Errors errors) ->
-      if check_info.log_errors then ServerProgress.ErrorsWrite.report errors;
-      drain_events (done_count, total_count)
-    | Some (Hh_distc_types.TypingStart total_count) ->
-      drain_events (done_count, total_count)
-    | Some (Hh_distc_types.TypingProgress n) ->
-      let done_count = done_count + n in
-      drain_events (done_count, total_count)
-    | None -> (done_count, total_count)
+  let handler_fds = List.map handlers ~f:fst in
+  (* hh_distc sends a byte each time new events are ready. *)
+  let (ready_fds, _, _) =
+    Sys_utils.select_non_intr (handler_fds @ [fd_distc]) [] [] (-1.)
   in
-  let buf = Bytes.create 1 in
-  let select_timeout = -1.0 in
-  let rec event_loop (done_count, total_count) =
-    (* hh_distc sends a byte each time new events are ready. *)
-    (* TODO add fd to interrupts or something? *)
-    let (_ready, _, _) = Unix.select [fd] [] [] select_timeout in
-    (* TODO only read from fd if it was ready *)
-    let n = Unix.recv fd buf 0 1 [] in
-    match n with
-    | 0 ->
+  if List.mem ~equal:Poly.( = ) ready_fds fd_distc then (
+    match Sys_utils.read_non_intr fd_distc 1 with
+    | None ->
       ServerProgress.write "hh_distc done";
-      Hh_distc_ffi.join handle
-    | _ ->
-      let (done_count, total_count) = drain_events (done_count, total_count) in
+      (match Hh_distc_ffi.join handle with
+      | Ok errors -> `Success (errors, interrupt.MultiThreadedCall.env)
+      | Error error -> `Error error)
+    | Some _ ->
+      let (done_count, total_count) =
+        drain_events (done_count, total_count, handle, check_info)
+      in
       ServerProgress.write_percentage
         ~operation:"hh_distc checking"
         ~done_count
         ~total_count
         ~unit:"files"
         ~extra:None;
-      event_loop (done_count, total_count)
+      event_loop done_count total_count interrupt fd_distc handle buf check_info
+  ) else
+    let (env, decision, _handlers) =
+      List.fold
+        handlers
+        ~init:
+          (interrupt.MultiThreadedCall.env, MultiThreadedCall.Continue, handlers)
+        ~f:(fun (env, decision, handlers) (fd, handler) ->
+          match (decision, not @@ List.mem ~equal:Poly.( = ) ready_fds fd) with
+          | (_, false) ->
+            (* skip handlers whose fd isn't ready *)
+            (env, decision, handlers)
+          | (MultiThreadedCall.Cancel, _) ->
+            (* if a previous handler has decided to cancel, skip further handlers *)
+            (env, decision, handlers)
+          | (MultiThreadedCall.Continue, true) ->
+            let (env, decision) = handler env in
+            (* running a handler could have changed the handlers,
+               * so need to regenerate them based on new environment *)
+            let handlers =
+              interrupt.MultiThreadedCall.handlers
+                interrupt.MultiThreadedCall.env
+            in
+            (env, decision, handlers))
+    in
+    let interrupt = { interrupt with MultiThreadedCall.env } in
+    match decision with
+    | MultiThreadedCall.Cancel ->
+      let () = Hh_distc_ffi.cancel handle in
+      `Cancel interrupt.MultiThreadedCall.env
+    | MultiThreadedCall.Continue ->
+      event_loop done_count total_count interrupt fd_distc handle buf check_info
+
+(**
+  This is the main process function that triggers a full init via hh_distc.
+
+  We FFI into rustland to activate hh_distc to get back an opaque handle. We
+  can then use this handle to poll for progress and eventually join the handle
+  to get all the errors we need to return to the user.
+
+  This also works with the existing hh_server incrementality paradigm because
+  after each typecheck, we generate a full dep graph, which we then use to replace
+  the existing hh_server dep graph.
+
+  We return a result where Ok represents a completed typecheck and Error represents
+  a cancelled typecheck. Any errors from hh_distc are considered fatal and results in
+  a call to failwith, which will terminate hh_server.
+*)
+let process_with_hh_distc
+    ~(root : Path.t option)
+    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
+    ~(check_info : check_info) : (typing_result * _, _) result =
+  (* TODO: Plumb extra --config name=value args through to spawn() *)
+  (* We don't want to use with_tempdir because we need to keep the folder around
+     for subseqent typechecks that will read the dep graph in the folder *)
+  let root = Option.value_exn root in
+  let ss_dir = Tempfile.mkdtemp ~skip_mocking:false in
+  let hhdg_path =
+    Path.(to_string @@ concat ss_dir "hh_mini_saved_state.hhdg")
   in
+  let hh_distc_handle =
+    Hh_distc_ffi.spawn (Path.to_string root) (Path.to_string ss_dir) hhdg_path
+    |> Result.ok_or_failwith
+  in
+  let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
+  let buf = Bytes.create 1 in
   ServerProgress.write "hh_distc running";
-  match event_loop (0, 0) with
-  | Ok errors ->
+  match event_loop 0 0 interrupt fd_distc hh_distc_handle buf check_info with
+  | `Success (errors, env) ->
     (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
-    Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some dg_path));
-    {
-      errors;
-      dep_edges = Typing_deps.dep_edges_make ();
-      telemetry = Telemetry.create ();
-    }
-  | Error msg ->
+    Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
+    Ok
+      ( {
+          errors;
+          dep_edges = Typing_deps.dep_edges_make ();
+          telemetry = Telemetry.create ();
+        },
+        env )
+  | `Cancel env -> Error env
+  | `Error msg ->
     Hh_logger.log "Error with hh_distc: %s" msg;
+    HackEventLogger.invariant_violation_bug
+      ~path:Relative_path.default
+      ~pos:""
+      ~desc:("Unexpected hh_distc error: " ^ msg)
+      (Telemetry.create () |> Telemetry.string_ ~key:"error" ~value:msg);
     failwith msg
 
 (**
@@ -934,7 +1014,7 @@ let process_in_parallel
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (workitems : workitem BigList.t)
-    ~(interrupt : 'a MultiWorker.interrupt_config)
+    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(check_info : check_info)
@@ -1184,7 +1264,8 @@ let go_with_interrupt
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
-    ~(interrupt : 'a MultiWorker.interrupt_config)
+    ~(root : Path.t option)
+    ~(interrupt : 'a MultiThreadedCall.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(use_hh_distc_instead_of_hulk : bool)
@@ -1205,6 +1286,7 @@ let go_with_interrupt
   in
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = TypecheckerOptions.typecheck_sample_rate opts in
+  let original_fnl = fnl in
   let fnl = BigList.create fnl in
   ServerProgress.write "typechecking %d files" (BigList.length fnl);
   let fnl =
@@ -1237,14 +1319,24 @@ let go_with_interrupt
         env,
         cancelled_fnl,
         diagnostic_pusher ) =
-    if BigList.length fnl > 100_000 && use_hh_distc_instead_of_hulk then
-      let typing_result = process_with_hh_distc ~interrupt ~check_info in
-      ( typing_result,
-        delegate_state,
-        telemetry,
-        interrupt.MultiThreadedCall.env,
-        [],
-        (None, None) )
+    (* Good cutoff where hh_server is definitely slower than hh_distc
+       https://fburl.com/scuba/hh_server_events/f1wdh9nr *)
+    if BigList.length fnl > 150_000 && use_hh_distc_instead_of_hulk then
+      match process_with_hh_distc ~root ~interrupt ~check_info with
+      | Ok (typing_result, env) ->
+        (typing_result, delegate_state, telemetry, env, [], (None, None))
+      | Error env ->
+        (* Typecheck is cancelled due to interrupt *)
+        ( {
+            errors = Errors.empty;
+            dep_edges = Typing_deps.dep_edges_make ();
+            telemetry = Telemetry.create ();
+          },
+          delegate_state,
+          telemetry,
+          env,
+          original_fnl,
+          (None, None) )
     else if should_process_sequentially opts fnl then begin
       Hh_logger.log "Type checking service will process files sequentially";
       let (typing_result, diagnostic_pusher) =
@@ -1303,6 +1395,7 @@ let go
     (delegate_state : Delegate.state)
     (telemetry : Telemetry.t)
     (fnl : Relative_path.t list)
+    ~(root : Path.t option)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(use_hh_distc_instead_of_hulk : bool)
@@ -1316,6 +1409,7 @@ let go
       delegate_state
       telemetry
       fnl
+      ~root
       ~interrupt
       ~memory_cap
       ~longlived_workers

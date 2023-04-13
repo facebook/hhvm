@@ -94,6 +94,7 @@ let test () =
       Typing_service_delegate.default
       (Telemetry.create ())
       fnl
+      ~root:None
       ~interrupt
       ~memory_cap:None
       ~longlived_workers:false

@@ -765,6 +765,7 @@ functor
                     (diagnostic_pusher, time_first_typing_error);
                 } ),
               cancelled ) =
+          let root = Some (ServerArgs.root genv.ServerEnv.options) in
           Typing_check_service.go_with_interrupt
             ~diagnostic_pusher:env.ServerEnv.diagnostic_pusher
             ctx
@@ -772,6 +773,7 @@ functor
             env.typing_service.delegate_state
             telemetry
             (files_to_check |> Relative_path.Set.elements)
+            ~root
             ~interrupt
             ~memory_cap
             ~longlived_workers

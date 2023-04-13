@@ -447,6 +447,8 @@
   decl_counters
   hh_distc_ffi
   decl_service
+  server_env
+  server_env_build
   deferred_decl
   diagnostic_pusher
   errors

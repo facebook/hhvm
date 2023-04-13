@@ -715,6 +715,7 @@ let make_remote_server_api
           Typing_service_delegate.default
           telemetry
           files_to_check
+          ~root:None
           ~memory_cap:(Some 200000)
           ~longlived_workers:false
           ~use_hh_distc_instead_of_hulk:false

@@ -103,10 +103,13 @@ let satisfies_package_deps env current target =
   let current_pkg = Env.get_package_for_module env current in
   let target_pkg = Env.get_package_for_module env target in
   match (current_pkg, target_pkg) with
-  | (None, None) -> None
-  | (None, Some _) -> Some (Pos.none, Package.Unrelated)
-  | (Some current_pkg_info, None) ->
-    Some (Package.get_package_pos current_pkg_info, Package.Unrelated)
+  | (_, None) -> None
+  | (None, Some target_pkg_info) ->
+    if Env.is_package_loaded env (Package.get_package_name target_pkg_info) then
+      None
+    else
+      Some (Pos.none, Package.Unrelated)
+  (* Anyone can call code outside of a package *)
   | (Some current_pkg_info, Some target_pkg_info) ->
     Package.(
       (match relationship current_pkg_info target_pkg_info with

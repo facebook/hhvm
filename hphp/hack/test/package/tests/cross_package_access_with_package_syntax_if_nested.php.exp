@@ -1,7 +1,7 @@
-Typing[4472] Cannot access a public element from package 'pkg4' in package 'pkg3' [1]
+Typing[4472] Cannot access a public element in package pkg4 from package pkg3 [1]
 -> This is from module d, which is in package pkg4 [2]
--> Module 'c' belongs to package 'pkg3' [3]
--> And package 'pkg3' does not include package 'pkg4 [4]
+-> But this is from module c, which belongs to package pkg3 [3]
+-> And package pkg3 does not include package pkg4 [4]
 
 cross_package_access_with_package_syntax_if_nested.php--c.php:13:5
     11 |     // only pkg1 is accessible here

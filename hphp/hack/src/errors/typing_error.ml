@@ -1600,12 +1600,21 @@ module Primary = struct
         (target_module_opt : string option)
         (target_package_opt : string option)
         (soft : bool) =
-      let current_module = Option.value current_module_opt ~default:"global" in
-      let target_module = Option.value target_module_opt ~default:"global" in
-      let current_package =
-        Option.value current_package_opt ~default:"default"
+      let get_module_str m_opt =
+        match m_opt with
+        | Some s -> Printf.sprintf "module `%s`" s
+        | None -> "outside of a module"
       in
-      let target_package = Option.value target_package_opt ~default:"default" in
+      let get_package_str p_opt =
+        match p_opt with
+        | Some s -> Printf.sprintf "package `%s`" s
+        | None -> "the default package"
+      in
+      let current_module = get_module_str current_module_opt in
+      let target_module = get_module_str target_module_opt in
+      let current_package = get_package_str current_package_opt in
+      let target_package = get_package_str target_package_opt in
+      let is_default = Pos.equal Pos.none package_pos in
       let relationship =
         if soft then
           "only soft includes"
@@ -1616,7 +1625,7 @@ module Primary = struct
         lazy
           ( pos,
             Printf.sprintf
-              "Cannot access a public element from package '%s' in package '%s'"
+              "Cannot access a public element in %s from %s"
               target_package
               current_package )
       and reason =
@@ -1624,17 +1633,20 @@ module Primary = struct
           [
             ( decl_pos,
               Printf.sprintf
-                "This is from module `%s`, which is in package `%s`"
+                "This is from %s, which is in %s"
                 target_module
                 target_package );
             ( module_pos,
               Printf.sprintf
-                "Module '%s' belongs to package '%s'"
+                "But this is from %s, which belongs to %s"
                 current_module
                 current_package );
-            ( Pos_or_decl.of_raw_pos package_pos,
+            ( (if is_default then
+                module_pos
+              else
+                Pos_or_decl.of_raw_pos package_pos),
               Printf.sprintf
-                "And package '%s' %s package '%s"
+                "And %s %s %s"
                 current_package
                 relationship
                 target_package );

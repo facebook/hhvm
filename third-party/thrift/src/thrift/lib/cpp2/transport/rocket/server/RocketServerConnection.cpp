@@ -86,6 +86,9 @@ RocketServerConnection::RocketServerConnection(
       observerContainer_(this) {
   CHECK(socket_);
   CHECK(frameHandler_);
+
+  peerAddress_ = socket_->getPeerAddress();
+
   socket_->setReadCB(&parser_);
   if (rawSocket_) {
     rawSocket_->setBufferCallback(this);

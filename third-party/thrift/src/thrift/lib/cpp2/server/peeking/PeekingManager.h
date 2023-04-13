@@ -77,6 +77,10 @@ class PeekingManagerBase : public wangle::ManagedConnection {
 
   void dumpConnectionState(uint8_t /* loglevel */) override {}
 
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return clientAddr_;
+  }
+
  protected:
   const std::shared_ptr<apache::thrift::Cpp2Worker> acceptor_;
   const folly::SocketAddress clientAddr_;

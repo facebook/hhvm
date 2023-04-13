@@ -52,6 +52,11 @@ void AcceptorHandshakeManager::connectionReady(
     std::string nextProtocol,
     SecureTransportType secureTransportType,
     folly::Optional<SSLErrorEnum> sslErr) noexcept {
+  try {
+    transport->getPeerAddress(&peerAddress_);
+  } catch (...) {
+    // ignore
+  }
   if (sslErr) {
     acceptor_->updateSSLStats(
         transport.get(),

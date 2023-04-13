@@ -239,10 +239,17 @@ class AcceptorHandshakeManager : public ManagedConnection,
 
   void dumpConnectionState(uint8_t /* loglevel */) override {}
 
+  [[nodiscard]] const folly::SocketAddress& getPeerAddress()
+      const noexcept override {
+    return peerAddress_;
+  }
+
  private:
   // Invoking this method guarantees a synchronous invocation to one of
   // `connectionReady` or `connectionError`, which will destroy this object.
   void handshakeAborted(SSLErrorEnum reason);
+
+  folly::SocketAddress peerAddress_;
 
  protected:
   void connectionReady(

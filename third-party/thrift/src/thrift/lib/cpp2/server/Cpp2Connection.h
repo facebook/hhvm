@@ -109,6 +109,10 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
     }
   }
 
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return *(context_.getPeerAddress());
+  }
+
   typedef apache::thrift::ThriftPresult<true>
       RocketUpgrade_upgradeToRocket_presult;
   template <class ProtocolWriter>

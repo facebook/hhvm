@@ -17,6 +17,7 @@
 #pragma once
 
 #include <folly/IntrusiveList.h>
+#include <folly/SocketAddress.h>
 #include <folly/io/async/DelayedDestruction.h>
 #include <folly/io/async/HHWheelTimer.h>
 
@@ -70,6 +71,12 @@ class ManagedConnection : public folly::HHWheelTimer::Callback,
    * Check whether the connection has any requests outstanding.
    */
   virtual bool isBusy() const = 0;
+
+  /**
+   * Returns socket address of the peer
+   */
+  [[nodiscard]] virtual const folly::SocketAddress& getPeerAddress()
+      const noexcept = 0;
 
   /**
    * Get the idle time of the connection. If it returning 0, that means this

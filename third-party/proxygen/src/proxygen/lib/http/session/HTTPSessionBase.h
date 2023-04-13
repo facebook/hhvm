@@ -370,7 +370,7 @@ class HTTPSessionBase : public wangle::ManagedConnection {
   virtual const folly::SocketAddress& getLocalAddress() const noexcept {
     return localAddr_;
   }
-  virtual const folly::SocketAddress& getPeerAddress() const noexcept {
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
     return peerAddr_;
   }
   const wangle::TransportInfo& getSetupTransportInfo() const noexcept

@@ -68,6 +68,12 @@ class MockConnection : public ManagedConnection {
   MOCK_METHOD1(dumpConnectionState, void(uint8_t));
   MOCK_METHOD2(drainConnections, void(double, std::chrono::milliseconds));
 
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return dummyAddress;
+  }
+
+  folly::SocketAddress dummyAddress;
+
   void setIdle(bool idle) {
     idle_ = idle;
     closeWhenIdleImpl();

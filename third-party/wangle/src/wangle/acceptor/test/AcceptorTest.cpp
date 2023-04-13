@@ -39,6 +39,12 @@ class TestConnection : public wangle::ManagedConnection {
     delete this;
   }
   void dumpConnectionState(uint8_t /*loglevel*/) override {}
+
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return dummyAddress;
+  }
+
+  folly::SocketAddress dummyAddress;
 };
 
 class TestAcceptor : public Acceptor {

@@ -235,8 +235,8 @@ class RocketServerConnection final
     return result;
   }
 
-  folly::SocketAddress getPeerAddress() const final {
-    return socket_->getPeerAddress();
+  const folly::SocketAddress& getPeerAddress() const noexcept override {
+    return peerAddress_;
   }
 
   using RocketServerConnectionObserverContainer = folly::ObserverContainer<
@@ -324,6 +324,7 @@ class RocketServerConnection final
   folly::EventBase& evb_;
   folly::AsyncTransport::UniquePtr socket_;
   folly::AsyncSocket* const rawSocket_;
+  folly::SocketAddress peerAddress_;
 
   Parser<RocketServerConnection> parser_{*this};
   std::unique_ptr<RocketServerHandler> frameHandler_;

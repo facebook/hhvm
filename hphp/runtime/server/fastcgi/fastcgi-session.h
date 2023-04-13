@@ -201,6 +201,7 @@ struct FastCGISession
   void closeWhenIdle() override;
   void dropConnection(const std::string& errorMsg = "") override;
   void dumpConnectionState(uint8_t loglevel) override;
+  const folly::SocketAddress& getPeerAddress() const noexcept override;
 
 private:
   // Async read callbacks
@@ -409,5 +410,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-
-

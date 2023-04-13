@@ -229,6 +229,10 @@ void FastCGISession::dropConnection(const std::string& /* errorMsg */) {
 void FastCGISession::dumpConnectionState(uint8_t /*loglevel*/) { /* nop */
 }
 
+const folly::SocketAddress& FastCGISession::getPeerAddress() const noexcept {
+  return m_peerAddr;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Borrowed from proxygen

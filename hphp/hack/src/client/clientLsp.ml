@@ -23,11 +23,15 @@ type args = {
 }
 
 type serverless_ide =
-  | Serverless_not  (** all IDE requests are handled by RPC to hh_server *)
-  | Serverless_with_rpc
-      (** most IDE requests handled by clientIdeDaemon, some by RPC to hh_server *)
-  | Serverless_with_shell
-      (** most IDE requests handled by clientIdeDaemon, some by shelling-out to hh_server *)
+  | Ide_hh_server
+      (** [--config ide_serverless=false --config ide_standalone=false]
+          All IDE requests are handled by RPC to hh_server *)
+  | Ide_serverless
+      (** [--config ide_serverless=true --config ide_standalone=false]
+          Most IDE requests are handled by clientIdeDaemon, some by RPC to hh_server *)
+  | Ide_standalone
+      (** [--config ide_serverless=true --config ide_standalone=true]
+          Most IDE requests handled by clientIdeDaemon, some by shelling-out to hh_server *)
 [@@deriving eq, show { with_path = false }]
 
 type env = {
@@ -193,7 +197,7 @@ module Lost_env = struct
   and params = {
     explanation: string;
     new_hh_server_state: hh_server_state option;
-        (** This is the state as we discern through 'connect' and rpc. We use None to indicate Serverless_with_shell *)
+        (** This is the state as we discern through 'connect' and rpc. We use None to indicate Ide_standalone *)
     start_on_click: bool;
         (** if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool;
@@ -1462,7 +1466,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
       save_human_readable_64bit_dep_map = None;
       (* priority_pipe delivers good experience for hh_server, but has a bug,
          and doesn't provide benefits in serverless-ide. *)
-      use_priority_pipe = equal_serverless_ide env.serverless_ide Serverless_not;
+      use_priority_pipe = equal_serverless_ide env.serverless_ide Ide_hh_server;
       prechecked = None;
       config = env.args.config;
       custom_hhi_path = None;
@@ -1490,9 +1494,9 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     leave in a Lost_server state. You might call this from Pre_init or
     Lost_server states, obviously. But you can also call it from In_init state
     if you want to give up on the prior attempt at connection and try again.
-    NOTE: you naturally shouldn't attempt to call this function if Serverless_with_shell! *)
+    NOTE: you naturally shouldn't attempt to call this function if Ide_standalone! *)
 let rec connect ~(env : env) (state : state) : state Lwt.t =
-  assert (not (equal_serverless_ide env.serverless_ide Serverless_with_shell));
+  assert (not (equal_serverless_ide env.serverless_ide Ide_standalone));
   begin
     match state with
     | In_init { In_init_env.conn; _ } -> begin
@@ -1600,7 +1604,7 @@ and reconnect_from_lost_if_necessary
   let open Lost_env in
   let should_reconnect =
     match (env.serverless_ide, state, reason) with
-    | (Serverless_with_shell, _, _) -> false
+    | (Ide_standalone, _, _) -> false
     | (_, Lost_server _, `Force_regain) -> true
     | ( _,
         Lost_server { p = { trigger_on_lsp = true; _ }; _ },
@@ -1614,7 +1618,7 @@ and reconnect_from_lost_if_necessary
   in
   if should_reconnect then
     let%lwt () = terminate_if_version_changed_since_start_of_lsp () in
-    (* Note: the should_reconnect flag ensures we're not in Serverless_with_shell, hence we're safe to connect here *)
+    (* Note: the should_reconnect flag ensures we're not in Ide_standalone, hence we're safe to connect here *)
     let%lwt state = connect ~env state in
     Lwt.return state
   else
@@ -1911,7 +1915,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     Some hh_server_status
   | Lost_server { Lost_env.p; _ }
     when Option.is_none p.Lost_env.new_hh_server_state ->
-    (* This is the case of Serverless_with_shell, when we don't even track server state *)
+    (* This is the case of Ide_standalone, when we don't even track server state *)
     None
   | Lost_server { Lost_env.p; _ } ->
     Some
@@ -2233,14 +2237,14 @@ let refresh_status (env : env) ~(ide_service : ClientIdeService.t ref option) :
     unit =
   let status =
     match (env.serverless_ide, !latest_hh_server_progress) with
-    | (Serverless_with_shell, Some latest_hh_server_progress) ->
+    | (Ide_standalone, Some latest_hh_server_progress) ->
       merge_statuses_standalone
         latest_hh_server_progress
         !latest_hh_server_errors
         !(Option.value_exn ide_service)
-    | (Serverless_with_shell, None) ->
+    | (Ide_standalone, None) ->
       (* [latest_hh_server_progress] gets set in [background_status_refresher]. The only way it might
-         be None is if we're not using Serverless_with_shell (impossible to reach here) or if root hasn't yet
+         be None is if we're not using Ide_standalone (impossible to reach here) or if root hasn't yet
          been set, in which case declining to refresh status is the right thing to do. *)
       None
     | _ ->
@@ -3905,13 +3909,13 @@ let publish_errors_if_standalone
     (errors : Errors.t)
     ~(powered_by : powered_by) : state =
   match (env.serverless_ide, state) with
-  | ((Serverless_not | Serverless_with_rpc), _) -> state
-  | (Serverless_with_shell, Pre_init) ->
+  | ((Ide_hh_server | Ide_serverless), _) -> state
+  | (Ide_standalone, Pre_init) ->
     failwith "how we got errors before initialize?"
-  | (Serverless_with_shell, (In_init _ | Main_loop _)) ->
+  | (Ide_standalone, (In_init _ | Main_loop _)) ->
     failwith "how serverless_with_shell is in an hh_server state?"
-  | (Serverless_with_shell, Post_shutdown) -> state (* no-op *)
-  | (Serverless_with_shell, Lost_server lenv) ->
+  | (Ide_standalone, Post_shutdown) -> state (* no-op *)
+  | (Ide_standalone, Lost_server lenv) ->
     let file_path = Path.to_string file_path in
     let uri = path_to_lsp_uri file_path ~default_path:file_path in
     let errors_by_file =
@@ -5013,7 +5017,7 @@ let handle_client_message
       hhconfig_version_and_switch := version_and_switch;
       let%lwt new_state =
         match env.serverless_ide with
-        | Serverless_with_shell ->
+        | Ide_standalone ->
           let p =
             {
               Lost_env.explanation = "No persistent connection to hh_server";
@@ -5036,8 +5040,8 @@ let handle_client_message
               }
           in
           Lwt.return new_state
-        | Serverless_with_rpc
-        | Serverless_not ->
+        | Ide_serverless
+        | Ide_hh_server ->
           connect ~env !state
       in
       state := new_state;
@@ -5294,21 +5298,21 @@ let handle_client_message
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/references request *)
     | (_, Some _ide_service, RequestMessage (id, FindReferencesRequest params))
-      when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
+      when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt new_state = do_findReferences_local !state params id in
       state := new_state;
       Lwt.return_none
     (* textDocument/implementation request *)
     | (_, Some _ide_service, RequestMessage (id, ImplementationRequest params))
-      when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
+      when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt new_state = do_goToImplementation_local !state params id in
       state := new_state;
       Lwt.return_none
     (* textDocument/rename request *)
     | (_, Some _ide_service, RequestMessage (id, RenameRequest params))
-      when equal_serverless_ide env.serverless_ide Serverless_with_shell ->
+      when equal_serverless_ide env.serverless_ide Ide_standalone ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt new_state = do_documentRename_local !state params id in
       state := new_state;
@@ -5855,7 +5859,7 @@ let handle_tick
           Lwt.return_unit
         else
           (* terminate + retry the connection *)
-          (* Note: In_init isn't reachable under Serverless_with_shell, hence we're safe to call connect here *)
+          (* Note: In_init isn't reachable under Ide_standalone, hence we're safe to call connect here *)
           let%lwt new_state = connect ~env !state in
           state := new_state;
           Lwt.return_unit
@@ -5885,7 +5889,7 @@ let handle_tick
     | _ ->
       let%lwt () =
         match env.serverless_ide with
-        | Serverless_with_shell -> try_open_errors_file ~state
+        | Ide_standalone -> try_open_errors_file ~state
         | _ -> Lwt.return_unit
       in
       Lwt.return_unit
@@ -5919,9 +5923,9 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
       ( versionless_local_config.ServerLocalConfig.ide_standalone,
         versionless_local_config.ServerLocalConfig.ide_serverless )
     with
-    | (true, _) -> Serverless_with_shell
-    | (false, true) -> Serverless_with_rpc
-    | (false, false) -> Serverless_not
+    | (true, _) -> Ide_standalone
+    | (false, true) -> Ide_serverless
+    | (false, false) -> Ide_hh_server
   in
   let env = { args; init_id; serverless_ide } in
 
@@ -5941,9 +5945,9 @@ let main (args : args) ~(init_id : string) : Exit_status.t Lwt.t =
      we don't yet know which path to log to. *)
   let ide_service =
     match env.serverless_ide with
-    | Serverless_not -> None
-    | Serverless_with_rpc
-    | Serverless_with_shell ->
+    | Ide_hh_server -> None
+    | Ide_serverless
+    | Ide_standalone ->
       Some
         (ref
            (ClientIdeService.make

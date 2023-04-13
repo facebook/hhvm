@@ -121,6 +121,8 @@ module Delegate = Typing_service_delegate
 
 type seconds_since_epoch = float
 
+type log_message = string
+
 let neutral : unit -> typing_result = Typing_service_types.make_typing_result
 
 let should_enable_deferring (file : check_file_workitem) =
@@ -887,7 +889,7 @@ let rec event_loop
     (fd_distc : Unix.file_descr)
     (handle : Hh_distc_ffi.handle)
     (check_info : check_info) :
-    [> `Success of Errors.t * _ | `Error of string | `Cancel of _ ] =
+    [> `Success of Errors.t * _ | `Error of log_message | `Cancel of _ ] =
   let handlers =
     interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
   in

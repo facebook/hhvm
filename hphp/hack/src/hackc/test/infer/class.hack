@@ -15,10 +15,9 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define C$static.$init_static
-// CHECK: define C$static.$init_static() : void {
+// CHECK: define C$static.$init_static($this: *C$static) : void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.alloc_words(0)
-// CHECK:   store &const::C$static::static_singleton <- n0: *C$static
+// CHECK:   n0: *C$static = load &$this
 // CHECK:   store &const::C$static::MY_CONSTANT <- $builtins.hack_int(7): *HackMixed
 // CHECK:   ret 0
 // CHECK: }

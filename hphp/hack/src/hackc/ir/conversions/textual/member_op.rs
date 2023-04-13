@@ -12,6 +12,7 @@ use ir::LocalId;
 use ir::QueryMOp;
 use ir::StringInterner;
 use ir::ValueId;
+use naming_special_names_rust::special_idents;
 
 use crate::func::FuncState;
 use crate::hack;
@@ -84,7 +85,7 @@ fn write_base(
         BaseOp::BaseH { loc: _ } => {
             // Get base from $this.
             // Just pretend to be a BaseL w/ $this.
-            let lid = LocalId::Named(state.strings.intern_str("$this"));
+            let lid = LocalId::Named(state.strings.intern_str(special_idents::THIS));
             let base = base_from_lid(lid);
             state.fb.copy(base)
         }

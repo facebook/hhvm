@@ -34,6 +34,7 @@ use ir::StringInterner;
 use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
+use naming_special_names_rust::special_idents;
 
 use crate::class;
 use crate::class::IsStatic;
@@ -81,8 +82,8 @@ pub(crate) fn compute_func_params<'a>(
     this_ty: textual::Ty,
 ) -> Result<(Vec<AsciiString>, Vec<textual::Ty>, HashSet<LocalId>)> {
     // Prepend the 'this' parameter.
-    let this_name = AsciiString::from_str("$this").unwrap();
-    let this_lid = LocalId::Named(unit_state.strings.intern_str("$this"));
+    let this_name = AsciiString::from_str(special_idents::THIS).unwrap();
+    let this_lid = LocalId::Named(unit_state.strings.intern_str(special_idents::THIS));
     let mut param_names = vec![this_name];
     let mut param_tys = vec![this_ty];
     let mut param_lids: HashSet<LocalId> = [this_lid].into_iter().collect();
@@ -198,7 +199,7 @@ fn write_instance_stub(
     let locals = Vec::default();
     txf.define_function(&name_str, span, &tx_params, ret_ty, &locals, |fb| {
         fb.comment("forward to the static method")?;
-        let this_str = strings.intern_str("$this");
+        let this_str = strings.intern_str(special_idents::THIS);
         let this_lid = LocalId::Named(this_str);
         let this = fb.load(&inst_ty, textual::Expr::deref(this_lid))?;
         let static_this = hack::call_builtin(fb, hack::Builtin::GetStaticClass, [this])?;
@@ -891,7 +892,7 @@ impl<'a, 'b, 'c> FuncState<'a, 'b, 'c> {
     }
 
     fn load_this(&mut self) -> Result<textual::Sid> {
-        let var = LocalId::Named(self.strings.intern_str("$this"));
+        let var = LocalId::Named(self.strings.intern_str(special_idents::THIS));
         let mi = self.expect_method_info();
         let ty = mi.class_ty();
         let this = self.fb.load(&ty, textual::Expr::deref(var))?;

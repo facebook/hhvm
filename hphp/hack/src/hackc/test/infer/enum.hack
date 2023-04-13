@@ -5,10 +5,9 @@
 // CHECK: }
 
 // TEST-CHECK-BAL: define A$static.$init_static
-// CHECK: define A$static.$init_static() : void {
+// CHECK: define A$static.$init_static($this: *A$static) : void {
 // CHECK: #b0:
-// CHECK:   n0 = $builtins.alloc_words(0)
-// CHECK:   store &const::A$static::static_singleton <- n0: *A$static
+// CHECK:   n0: *A$static = load &$this
 // CHECK:   store &const::A$static::V <- $builtins.hack_int(1): *HackMixed
 // CHECK:   ret 0
 // CHECK: }

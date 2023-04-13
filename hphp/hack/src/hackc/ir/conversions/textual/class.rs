@@ -15,6 +15,7 @@ use std::sync::Arc;
 
 use anyhow::Error;
 use hash::IndexMap;
+use ir::LocalId;
 use ir::StringInterner;
 use itertools::Itertools;
 use log::trace;
@@ -22,7 +23,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::typehints;
 
 use super::func;
-use super::hack;
 use super::textual;
 use crate::func::FuncInfo;
 use crate::func::MethodInfo;
@@ -275,20 +275,22 @@ impl ClassState<'_, '_, '_> {
         self.txf
             .define_global(singleton_name.clone(), static_ty(self.class.name));
 
+        let this_ty = static_ty(self.class.name);
         self.txf.define_function(
             &init_static_name(self.class.name),
             &self.class.src_loc,
-            &[],
+            &[(special_idents::THIS, &this_ty)],
             &textual::Ty::Void,
             &[],
             |fb| {
-                let sz = 0; // TODO: properties
-                let p = hack::call_builtin(fb, hack::Builtin::AllocWords, [sz])?;
+                let var = LocalId::Named(self.unit_state.strings.intern_str(special_idents::THIS));
+                let _this = fb.load(&this_ty, textual::Expr::deref(var))?;
 
-                let singleton_expr = textual::Expr::deref(textual::Var::global(singleton_name));
-                fb.store(singleton_expr, p, &static_ty(self.class.name))?;
+                // TODO: Initialize static properties here
 
-                // constants
+                // constants are stored as independent globals instead of being
+                // on the class object itself.  However we initialize them as
+                // part of the Class initialization.
                 for constant in &self.class.constants {
                     if let Some(value) = constant.value.as_ref() {
                         let name = GlobalName::StaticConst(self.class.name, constant.name);

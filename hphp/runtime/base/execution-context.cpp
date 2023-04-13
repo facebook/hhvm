@@ -1180,7 +1180,6 @@ const RepoOptions& ExecutionContext::getRepoOptionsForFrame(int frame) const {
 void ExecutionContext::onLoadWithOptions(
   const char* f, const RepoOptions& opts
 ) {
-  if (!RuntimeOption::EvalFatalOnParserOptionMismatch) return;
   if (!m_requestOptions) {
     m_requestOptions.emplace(opts);
     return;

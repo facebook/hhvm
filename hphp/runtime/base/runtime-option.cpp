@@ -383,8 +383,7 @@ const RepoOptions& RepoOptions::forFile(const std::string& path) {
   };
 
   // Fast path: we have an active request and it has cached a RepoOptions
-  // which has not been modified. This only works when the runtime option
-  // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
+  // which has not been modified. It can cause us to miss out on
   // configs that were added between the current directory and the source file.
   // (Loading these configs would result in a fatal anyway with this option)
   if (!g_context.isNull()) {

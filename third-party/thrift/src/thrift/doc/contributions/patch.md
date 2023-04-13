@@ -1,11 +1,10 @@
 # Thrift Patch
 
-Thrift Patch implementation **should** contain 2 parts.
+Thrift Patch implementation **must** contain 2 parts.
 
-1. Functionalities of apply/merge without schema as minimal support.
-2. More user-friendly APIs to create/modify the patch. Patch created/modified by these APIs must always be valid.
+1. Functionalities of apply/merge without schema.
+2. User-friendly APIs to create/modify/read the patch. Patch created/modified by these APIs must always be valid. User should not interactive with the raw patch struct directly.
 
-A conforming implementation **must** at least implement apply/merge without schema.
 
 ## Apply
 

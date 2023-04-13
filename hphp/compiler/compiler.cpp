@@ -71,6 +71,7 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 
+#include <cerrno>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -1531,7 +1532,12 @@ int compiler_main(int argc, char **argv) {
     if (ret != 0) return ret; // command line error
 
     Timer totalTimer(Timer::WallTime, "running hphp");
-    mkdir(po.outputDir.c_str(), 0777);
+    always_assert_flog(
+      mkdir(po.outputDir.c_str(), 0777) == 0 || errno == EEXIST,
+      "Unable to mkdir({}): {}",
+      po.outputDir.c_str(),
+      folly::errnoStr(errno)
+    );
     if (!process(po)) {
       Logger::Error("hphp failed");
       return -1;

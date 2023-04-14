@@ -761,30 +761,23 @@ let update_file
     |> Path.to_string
     |> Relative_path.create_detect_prefix
   in
+  let contents = document_location.ClientIdeMessage.file_contents in
   let entry =
-    match
-      ( document_location.ClientIdeMessage.file_contents,
-        Relative_path.Map.find_opt files.open_files path )
-    with
-    | (Some contents, None) ->
-      log_missing_open_file_BUG "update-without-entry" path;
-      (* TODO(ljw): failwith "Attempted LSP operation on a non-open file" *)
+    match Relative_path.Map.find_opt files.open_files path with
+    | None ->
+      (* This is a common scenario although I'm not quite sure why *)
       Provider_context.make_entry
         ~path
         ~contents:(Provider_context.Provided_contents contents)
-    | (None, None) ->
-      log_missing_open_file_BUG "update-without-content-or-entry" path;
-      failwith "Attempted LSP operation on a non-open file"
-    | (Some contents, Some entry)
+    | Some entry
       when Option.equal
              String.equal
              (Some contents)
              (Provider_context.get_file_contents_if_present entry) ->
+      (* we can just re-use the existing entry; contents haven't changed *)
       entry
-    | (None, Some entry) ->
-      log_missing_open_file_BUG "update-without-content" path;
-      entry
-    | (Some contents, _) ->
+    | Some _ ->
+      (* we'll create a new entry; existing entry caches, if present, will be dropped. *)
       Provider_context.make_entry
         ~path
         ~contents:(Provider_context.Provided_contents contents)
@@ -924,7 +917,7 @@ let handle_request
     Lwt.return (state, Ok Errors.empty)
   | (Initialized istate, Ide_file_opened { file_path; file_contents }) ->
     let document_location =
-      { file_path; file_contents = Some file_contents; line = 0; column = 0 }
+      { file_path; file_contents; line = 0; column = 0 }
     in
     let (state, ctx, entry) = update_file_ctx istate document_location in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
@@ -940,7 +933,7 @@ let handle_request
     Lwt.return (state, Ok Errors.empty)
   | (Initialized istate, Ide_file_changed { file_path; file_contents }) ->
     let document_location =
-      { file_path; file_contents = Some file_contents; line = 0; column = 0 }
+      { file_path; file_contents; line = 0; column = 0 }
     in
     let (state, ctx, entry) = update_file_ctx istate document_location in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
@@ -1100,9 +1093,7 @@ let handle_request
     in
     Lwt.return (state, Ok results)
   (* Code actions (refactorings, quickfixes) *)
-  | (Initialized istate, Code_action (document_location, range)) ->
-    let file_path = document_location.file_path in
-    let file_contents = Some document_location.file_contents in
+  | (Initialized istate, Code_action ({ file_path; file_contents }, range)) ->
     let document_location : ClientIdeMessage.document_location =
       { file_path; file_contents; line = 0; column = 0 }
     in
@@ -1140,14 +1131,9 @@ let handle_request
     in
     Lwt.return (state, Ok result)
   (* Type Coverage *)
-  | (Initialized istate, Type_coverage document_identifier) ->
+  | (Initialized istate, Type_coverage { file_path; file_contents }) ->
     let document_location =
-      {
-        file_path = document_identifier.file_path;
-        file_contents = Some document_identifier.file_contents;
-        line = 0;
-        column = 0;
-      }
+      { file_path; file_contents; line = 0; column = 0 }
     in
     let (state, ctx, entry) = update_file_ctx istate document_location in
     let result =

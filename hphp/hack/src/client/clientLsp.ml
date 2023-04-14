@@ -1377,13 +1377,24 @@ let hack_errors_to_lsp_diagnostic
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
+(** Retrieves the content of this file, or raises an LSP [InvalidRequest] exception
+if the file isn't currently open *)
 let get_document_contents
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
-    string option =
+    string =
   match UriMap.find_opt uri editor_open_files with
-  | Some document -> Some document.TextDocumentItem.text
-  | None -> None
+  | Some document -> document.TextDocumentItem.text
+  | None ->
+    raise
+      (Error.LspException
+         {
+           Error.code = Error.InvalidRequest;
+           message = "action on a file not open in LSP server";
+           data = None;
+         })
 
+(** Turns this Lsp uri+line+col into a format suitable for clientIdeDaemon.
+Raises an LSP [InvalidRequest] exception if the file isn't currently open. *)
 let get_document_location
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Lsp.TextDocumentPositionParams.t) :
@@ -3112,7 +3123,6 @@ let do_resolve_local
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
     =
   if Option.is_some params.Completion.documentation then
@@ -3128,11 +3138,11 @@ let do_resolve_local
         | None -> raise NoLocationFound
         | Some _ as data ->
           let filename = Jget.string_exn data "filename" in
-          let uri = File_url.create filename |> Lsp.uri_of_string in
           let file_path = Path.make filename in
           let line = Jget.int_exn data "line" in
           let column = Jget.int_exn data "char" in
-          let file_contents = get_document_contents editor_open_files uri in
+          let file_contents = "" in
+          (* TODO(ljw): change ide message so it doesn't even take file_contents *)
           let ranking_detail = Jget.string_opt data "ranking_detail" in
           let ranking_source = Jget.int_opt data "ranking_source" in
           if line = 0 && column = 0 then failwith "NoFileLineColumnData";
@@ -3558,31 +3568,28 @@ let do_typeCoverage_localFB
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
   let open TypeCoverageFB in
-  let document_contents =
+  let file_contents =
     get_document_contents
       editor_open_files
       params.textDocument.TextDocumentIdentifier.uri
   in
-  match document_contents with
-  | None -> failwith "Local type coverage failed, file could not be found."
-  | Some file_contents ->
-    let file_path =
-      params.textDocument.TextDocumentIdentifier.uri
-      |> lsp_uri_to_path
-      |> Path.make
-    in
-    let request =
-      ClientIdeMessage.Type_coverage
-        { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
-    in
-    let%lwt result =
-      ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
-    in
-    let (results, counts) = result in
-    let formatted =
-      format_typeCoverage_result ~equal:String.equal results counts
-    in
-    Lwt.return formatted
+  let file_path =
+    params.textDocument.TextDocumentIdentifier.uri
+    |> lsp_uri_to_path
+    |> Path.make
+  in
+  let request =
+    ClientIdeMessage.Type_coverage
+      { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
+  in
+  let%lwt result =
+    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
+  in
+  let (results, counts) = result in
+  let formatted =
+    format_typeCoverage_result ~equal:String.equal results counts
+  in
+  Lwt.return formatted
 
 let do_formatting_common
     (uri : Lsp.documentUri)
@@ -3714,20 +3721,16 @@ let do_codeAction_local
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
-  match file_contents with
-  | None -> Lwt.return []
-  | Some file_contents ->
-    let%lwt actions =
-      ide_rpc
-        ide_service
-        ~env
-        ~tracking_id
-        ~ref_unblocked_time
-        (ClientIdeMessage.Code_action
-           ( { ClientIdeMessage.file_path; ClientIdeMessage.file_contents },
-             range ))
-    in
-    Lwt.return actions
+  let%lwt actions =
+    ide_rpc
+      ide_service
+      ~env
+      ~tracking_id
+      ~ref_unblocked_time
+      (ClientIdeMessage.Code_action
+         ({ ClientIdeMessage.file_path; ClientIdeMessage.file_contents }, range))
+  in
+  Lwt.return actions
 
 let do_codeAction
     (conn : server_conn)
@@ -4870,21 +4873,19 @@ let handle_editor_buffer_message
         | None -> UriMap.empty
       in
       begin
-        match get_document_contents editor_open_files uri with
-        | None -> Lwt.return !state
-        | Some file_contents ->
-          let%lwt errors =
-            ide_rpc
-              ide_service
-              ~env
-              ~tracking_id:metadata.tracking_id
-              ~ref_unblocked_time:ref_ide_unblocked_time
-              ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
-          in
-          let new_state =
-            publish_errors_if_standalone env !state file_path errors
-          in
-          Lwt.return new_state
+        let file_contents = get_document_contents editor_open_files uri in
+        let%lwt errors =
+          ide_rpc
+            ide_service
+            ~env
+            ~tracking_id:metadata.tracking_id
+            ~ref_unblocked_time:ref_ide_unblocked_time
+            ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
+        in
+        let new_state =
+          publish_errors_if_standalone env !state file_path errors
+        in
+        Lwt.return new_state
       end
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
       let file_path =
@@ -5235,13 +5236,7 @@ let handle_client_message
         RequestMessage (id, CompletionItemResolveRequest params) ) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_resolve_local
-          ide_service
-          env
-          tracking_id
-          ref_unblocked_time
-          editor_open_files
-          params
+        do_resolve_local ide_service env tracking_id ref_unblocked_time params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide

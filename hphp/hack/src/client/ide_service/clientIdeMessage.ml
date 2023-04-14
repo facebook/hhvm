@@ -26,8 +26,7 @@ end
 
 type document_location = {
   file_path: Path.t;
-  file_contents: string option;
-  (* if absent, should read from file on disk *)
+  file_contents: string;
   line: int;
   column: int;
 }

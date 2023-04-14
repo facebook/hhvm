@@ -1,1 +1,4 @@
+(5,1)-(5,28) Cannot use unstable feature: `case_types`
+(7,1)-(7,33) Cannot use unstable feature: `case_types`
 (9,8)-(9,8) A name is expected here.
+(9,8)-(9,29) Cannot use unstable feature: `case_types`

@@ -1,6 +1,13 @@
+(3,1)-(3,18) Cannot use unstable feature: `case_types`
 (3,17)-(3,18) A type specifier is expected here.
+(5,1)-(5,18) Cannot use unstable feature: `case_types`
 (5,17)-(5,17) A type specifier is expected here.
+(7,1)-(7,26) Cannot use unstable feature: `case_types`
 (7,25)-(7,26) A type specifier is expected here.
+(10,1)-(10,29) Cannot use unstable feature: `case_types`
 (10,29)-(11,1) Either the token `|` or `;` is expected here. Use `|` to specify additional variant types for this case type or use `;` to terminate the declaration.
+(12,1)-(12,21) Cannot use unstable feature: `case_types`
+(14,1)-(14,23) Cannot use unstable feature: `case_types`
 (14,25)-(15,1) A semicolon `;` is expected here.
 (16,1)-(16,5) A type specifier is expected here.
+(16,1)-(16,21) Cannot use unstable feature: `case_types`

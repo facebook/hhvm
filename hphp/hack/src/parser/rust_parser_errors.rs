@@ -103,6 +103,7 @@ enum UnstableFeatures {
     NewtypeSuperBounds,
     ExpressionTreeBlocks,
     Package,
+    CaseTypes,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -129,6 +130,7 @@ impl UnstableFeatures {
             UnstableFeatures::NewtypeSuperBounds => Unstable,
             UnstableFeatures::ExpressionTreeBlocks => OngoingRelease,
             UnstableFeatures::Package => Unstable,
+            UnstableFeatures::CaseTypes => Unstable,
         }
     }
 }
@@ -347,6 +349,7 @@ fn get_modifiers_of_declaration<'a>(node: S<'a>) -> Option<S<'a>> {
         EnumClassEnumerator(x) => Some(&x.modifiers),
         EnumDeclaration(x) => Some(&x.modifiers),
         AliasDeclaration(x) => Some(&x.modifiers),
+        CaseTypeDeclaration(x) => Some(&x.modifiers),
         _ => None,
     }
 }
@@ -357,6 +360,7 @@ fn declaration_is_toplevel<'a>(node: S<'a>) -> bool {
         | ClassishDeclaration(_)
         | EnumClassDeclaration(_)
         | EnumDeclaration(_)
+        | CaseTypeDeclaration(_)
         | AliasDeclaration(_) => true,
         _ => false,
     }
@@ -4138,6 +4142,35 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
                 self.check_type_name(&cad.name, name, location)
             }
+        } else if let CaseTypeDeclaration(ctd) = &node.children {
+            self.check_can_use_feature(node, &UnstableFeatures::CaseTypes);
+
+            let attrs = &ctd.attribute_spec;
+            self.check_attr_enabled(attrs);
+
+            self.invalid_modifier_errors("Case types", node, |kind| {
+                kind == TokenKind::Internal || kind == TokenKind::Public
+            });
+
+            if !ctd.name.is_missing() {
+                let name = self.text(&ctd.name);
+                let location = make_location_of_node(&ctd.name);
+
+                self.check_type_name(&ctd.name, name, location)
+            }
+        }
+    }
+
+    fn case_type_variant_errors(&mut self, node: S<'a>) {
+        if let CaseTypeVariant(ctv) = &node.children {
+            if let TypeConstant(_) = &ctv.type_.children {
+                if self.env.is_typechecker() {
+                    self.errors.push(make_error_from_node(
+                        &ctv.type_,
+                        errors::type_alias_to_type_constant,
+                    ))
+                }
+            }
         }
     }
 
@@ -5316,7 +5349,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.type_const_bounds_errors(node);
             }
 
-            AliasDeclaration(_) | ContextAliasDeclaration(_) => self.alias_errors(node),
+            AliasDeclaration(_) | ContextAliasDeclaration(_) | CaseTypeDeclaration(_) => {
+                self.alias_errors(node)
+            }
+            CaseTypeVariant(_) => self.case_type_variant_errors(node),
             ConstantDeclarator(_) => self.const_decl_errors(node),
             NamespaceBody(_) | NamespaceEmptyBody(_) | NamespaceDeclaration(_) => {
                 self.mixed_namespace_errors(node)

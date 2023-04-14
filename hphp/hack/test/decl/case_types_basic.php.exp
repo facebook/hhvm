@@ -1,0 +1,77 @@
+[("\\CT1",
+  (Shallow_decl_defs.Typedef
+     { Typing_defs.td_module = None; td_pos = [4:11-14]; td_vis = Opaque;
+       td_tparams =
+       [{ Typing_defs_core.tp_variance = Covariant;
+          tp_name = ([4:16-18], "T1"); tp_tparams = [];
+          tp_constraints =
+          [(Constraint_as, (Rhint ([4:22-30]), (Tprim Tarraykey)))];
+          tp_reified = Erased; tp_user_attributes = [] };
+         { Typing_defs_core.tp_variance = Contravariant;
+           tp_name = ([4:33-35], "T2"); tp_tparams = []; tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] };
+         { Typing_defs_core.tp_variance = Invariant;
+           tp_name = ([4:37-38], "T"); tp_tparams = []; tp_constraints = [];
+           tp_reified = Erased; tp_user_attributes = [] }
+         ];
+       td_as_constraint = (Some (Rhint ([4:43-50]), Tnonnull));
+       td_super_constraint = None;
+       td_type =
+       (Rhint ([4:53-83]),
+        (Tunion
+           [(Rhint ([4:53-63]),
+             (Tapply (([4:53-59], "\\HH\\keyset"),
+                [(Rhint ([4:60-62]), (Tgeneric ("T1", [])))])));
+             (Rhint ([4:66-83]),
+              (Tfun
+                 { ft_tparams = []; ft_where_constraints = [];
+                   ft_params =
+                   [{ fp_pos = [4:76-78]; fp_name = None;
+                      fp_type =
+                      { et_enforced = Typing_defs_core.Unenforced;
+                        et_type = (Rhint ([4:76-78]), (Tgeneric ("T2", [])))
+                        };
+                      fp_flags =
+                      (make_fp_flags ~accept_disposable:false
+                        ~has_default:false ~mode:Typing_defs_core.FPnormal
+                        ~ifc_external:false ~ifc_can_call:false
+                        ~readonly:false);
+                       }
+                     ];
+                   ft_implicit_params =
+                   { capability = (CapDefaults [4:66-83]) };
+                   ft_ret =
+                   { et_enforced = Typing_defs_core.Unenforced;
+                     et_type = (Rhint ([4:81-82]), (Tgeneric ("T", []))) };
+                   ft_flags =
+                   (make_ft_flags FSync ~return_disposable:false
+                     ~returns_readonly:false ~support_dynamic_type:false
+                     ~readonly_this:false ~is_memoized:false ~variadic:false);
+                   ft_ifc_decl = FDPolicied {PUBLIC} }))
+             ]));
+       td_is_ctx = false; td_attributes = []; td_internal = false;
+       td_docs_url = None }));
+  ("\\CT2",
+   (Shallow_decl_defs.Typedef
+      { Typing_defs.td_module = None; td_pos = [6:11-14]; td_vis = Opaque;
+        td_tparams = [];
+        td_as_constraint =
+        (Some (Rhint ([6:18-31]),
+               (Tintersection
+                  [(Rhint ([6:18-26]), (Tprim Tarraykey));
+                    (Rhint ([6:28-31]), (Tprim Tnum))])));
+        td_super_constraint = None;
+        td_type = (Rhint ([6:34-37]), (Tprim Tint)); td_is_ctx = false;
+        td_attributes = []; td_internal = false; td_docs_url = None }));
+  ("\\CT3",
+   (Shallow_decl_defs.Typedef
+      { Typing_defs.td_module = None; td_pos = [8:11-14]; td_vis = Opaque;
+        td_tparams = []; td_as_constraint = None; td_super_constraint = None;
+        td_type =
+        (Rhint ([8:17-30]),
+         (Tunion
+            [(Rhint ([8:17-23]), (Tprim Tstring));
+              (Rhint ([8:26-30]), (Tprim Tbool))]));
+        td_is_ctx = false; td_attributes = []; td_internal = false;
+        td_docs_url = None }))
+  ]

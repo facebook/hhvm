@@ -3482,6 +3482,119 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         Node::Ignored(SK::ContextAliasDeclaration)
     }
 
+    fn make_case_type_declaration(
+        &mut self,
+        attribute_spec: Self::Output,
+        modifiers: Self::Output,
+        _case_keyword: Self::Output,
+        _type_keyword: Self::Output,
+        name: Self::Output,
+        generic_parameter: Self::Output,
+        _as: Self::Output,
+        bounds: Self::Output,
+        _equal: Self::Output,
+        variants: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
+        if name.is_ignored() {
+            return Node::Ignored(SK::CaseTypeDeclaration);
+        }
+        let Id(pos, name) = match self.elaborate_defined_id(name) {
+            Some(id) => id,
+            None => return Node::Ignored(SK::CaseTypeDeclaration),
+        };
+
+        let as_constraint = match bounds.len() {
+            0 => None,
+            1 => self.node_to_ty(*bounds.iter().next().unwrap()),
+            _ => {
+                let pos = self.get_pos(bounds);
+                let tys = self.slice(bounds.iter().filter_map(|x| match x {
+                    Node::ListItem(&(ty, _commas)) => self.node_to_ty(ty),
+                    &x => self.node_to_ty(x),
+                }));
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tintersection(tys))))
+            }
+        };
+
+        let ty = match variants.len() {
+            0 => None,
+            1 => self.node_to_ty(*variants.iter().next().unwrap()),
+            _ => {
+                let pos = self.get_pos(variants);
+                let tys = self.slice(variants.iter().filter_map(|x| self.node_to_ty(*x)));
+                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tunion(tys))))
+            }
+        };
+
+        let type_ = match ty {
+            Some(x) => x,
+            None => return Node::Ignored(SK::CaseTypeDeclaration),
+        };
+
+        // Pop the type params stack only after creating all inner types.
+        let tparams = self.pop_type_params(generic_parameter);
+
+        // Parse the user attributes
+        // in facts-mode all attributes are saved, otherwise only __NoAutoDynamic is
+        let user_attributes = self.slice(attribute_spec.iter().rev().filter_map(|attribute| {
+            if let Node::Attribute(attr) = attribute {
+                if self.retain_or_omit_user_attributes_for_facts || attr.name.1 == "__NoAutoDynamic"
+                {
+                    Some(self.user_attribute_to_decl(attr))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }));
+
+        let mut docs_url = None;
+        for attribute in attribute_spec.iter() {
+            match attribute {
+                Node::Attribute(attr) => {
+                    if attr.name.1 == "__Docs" {
+                        if let Some((_, bstr)) = attr.string_literal_params.first() {
+                            docs_url = Some(self.str_from_utf8_for_bytes_in_arena(bstr));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let internal = modifiers
+            .iter()
+            .any(|m| m.as_visibility() == Some(aast::Visibility::Internal));
+        let typedef = self.alloc(TypedefType {
+            module: self.module,
+            pos,
+            vis: aast::TypedefVisibility::Opaque,
+            tparams,
+            as_constraint,
+            super_constraint: None,
+            type_,
+            is_ctx: false,
+            attributes: user_attributes,
+            internal,
+            docs_url,
+        });
+
+        let this = Rc::make_mut(&mut self.state);
+        this.add_typedef(name, typedef);
+
+        Node::Ignored(SK::CaseTypeDeclaration)
+    }
+
+    fn make_case_type_variant(&mut self, _bar: Self::Output, type_: Self::Output) -> Self::Output {
+        if type_.is_ignored() {
+            Node::Ignored(SK::CaseTypeVariant)
+        } else {
+            type_
+        }
+    }
+
     fn make_type_constraint(&mut self, kind: Self::Output, value: Self::Output) -> Self::Output {
         let kind = match kind.token_kind() {
             Some(TokenKind::As) => ConstraintKind::ConstraintAs,

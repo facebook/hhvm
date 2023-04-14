@@ -102,7 +102,6 @@ module.exports = {
           },
           items: [
             "spec/definition/interface",
-            "spec/definition/patch",
           ]
         },
         {

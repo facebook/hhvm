@@ -140,6 +140,16 @@ where
         Self::Output::make_context_alias_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     }
 
+    fn make_case_type_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output, arg6 : Self::Output, arg7 : Self::Output, arg8 : Self::Output, arg9 : Self::Output, arg10 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10]);
+        Self::Output::make_case_type_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
+    }
+
+    fn make_case_type_variant(&mut self, arg0 : Self::Output, arg1 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1]);
+        Self::Output::make_case_type_variant(self.state_mut(), arg0, arg1)
+    }
+
     fn make_property_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
         Self::Output::make_property_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4)

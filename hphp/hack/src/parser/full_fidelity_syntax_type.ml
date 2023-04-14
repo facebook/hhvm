@@ -261,6 +261,23 @@ struct
         ctx_alias_context: t;
         ctx_alias_semicolon: t;
       }
+    | CaseTypeDeclaration of {
+        case_type_attribute_spec: t;
+        case_type_modifiers: t;
+        case_type_case_keyword: t;
+        case_type_type_keyword: t;
+        case_type_name: t;
+        case_type_generic_parameter: t;
+        case_type_as: t;
+        case_type_bounds: t;
+        case_type_equal: t;
+        case_type_variants: t;
+        case_type_semicolon: t;
+      }
+    | CaseTypeVariant of {
+        case_type_variant_bar: t;
+        case_type_variant_type: t;
+      }
     | PropertyDeclaration of {
         property_attribute_spec: t;
         property_modifiers: t;

@@ -39,6 +39,8 @@ type t =
   | EnumClassEnumerator
   | AliasDeclaration
   | ContextAliasDeclaration
+  | CaseTypeDeclaration
+  | CaseTypeVariant
   | PropertyDeclaration
   | PropertyDeclarator
   | NamespaceDeclaration
@@ -220,6 +222,8 @@ let to_string kind =
   | EnumClassEnumerator -> "enum_class_enumerator"
   | AliasDeclaration -> "alias_declaration"
   | ContextAliasDeclaration -> "context_alias_declaration"
+  | CaseTypeDeclaration -> "case_type_declaration"
+  | CaseTypeVariant -> "case_type_variant"
   | PropertyDeclaration -> "property_declaration"
   | PropertyDeclarator -> "property_declarator"
   | NamespaceDeclaration -> "namespace_declaration"

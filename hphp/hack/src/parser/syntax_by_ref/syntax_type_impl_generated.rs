@@ -229,6 +229,33 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_case_type_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, case_keyword: Self, type_keyword: Self, name: Self, generic_parameter: Self, as_: Self, bounds: Self, equal: Self, variants: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::CaseTypeDeclaration(ctx.get_arena().alloc(CaseTypeDeclarationChildren {
+            attribute_spec,
+            modifiers,
+            case_keyword,
+            type_keyword,
+            name,
+            generic_parameter,
+            as_,
+            bounds,
+            equal,
+            variants,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
+    fn make_case_type_variant(ctx: &C, bar: Self, type_: Self) -> Self {
+        let syntax = SyntaxVariant::CaseTypeVariant(ctx.get_arena().alloc(CaseTypeVariantChildren {
+            bar,
+            type_,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_property_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, type_: Self, declarators: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PropertyDeclaration(ctx.get_arena().alloc(PropertyDeclarationChildren {
             attribute_spec,

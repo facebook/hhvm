@@ -142,6 +142,9 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       else
         Concat [t env hashbang; Newline; t env suffix]
     | Syntax.MarkupSuffix _ -> transform_simple_statement env node
+    (* TODO(T150253169) - #CaseTypes: Implement proper formatting before preview launch *)
+    | Syntax.CaseTypeDeclaration _
+    | Syntax.CaseTypeVariant _
     | Syntax.SimpleTypeSpecifier _
     | Syntax.VariableExpression _
     | Syntax.PipeVariableExpression _

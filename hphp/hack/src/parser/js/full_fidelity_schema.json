@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2023-03-22-0000",
+  "version" : "2023-04-14-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -611,6 +611,31 @@
         { "field_name" : "equal" },
         { "field_name" : "context" },
         { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "CaseTypeDeclaration",
+      "type_name" : "case_type_declaration",
+      "description" : "case_type_declaration",
+      "prefix" : "case_type",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "modifiers" },
+        { "field_name" : "case_keyword" },
+        { "field_name" : "type_keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "generic_parameter" },
+        { "field_name" : "as" },
+        { "field_name" : "bounds" },
+        { "field_name" : "equal" },
+        { "field_name" : "variants" },
+        { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "CaseTypeVariant",
+      "type_name" : "case_type_variant",
+      "description" : "case_type_variant",
+      "prefix" : "case_type_variant",
+      "fields" : [
+        { "field_name" : "bar" },
+        { "field_name" : "type" }
       ] },
     { "kind_name" : "PropertyDeclaration",
       "type_name" : "property_declaration",

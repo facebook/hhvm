@@ -44,6 +44,8 @@ pub enum SyntaxVariant<'a, T, V> {
     EnumClassEnumerator(&'a EnumClassEnumeratorChildren<'a, T, V>),
     AliasDeclaration(&'a AliasDeclarationChildren<'a, T, V>),
     ContextAliasDeclaration(&'a ContextAliasDeclarationChildren<'a, T, V>),
+    CaseTypeDeclaration(&'a CaseTypeDeclarationChildren<'a, T, V>),
+    CaseTypeVariant(&'a CaseTypeVariantChildren<'a, T, V>),
     PropertyDeclaration(&'a PropertyDeclarationChildren<'a, T, V>),
     PropertyDeclarator(&'a PropertyDeclaratorChildren<'a, T, V>),
     NamespaceDeclaration(&'a NamespaceDeclarationChildren<'a, T, V>),
@@ -344,6 +346,27 @@ pub struct ContextAliasDeclarationChildren<'a, T, V> {
     pub equal: Syntax<'a, T, V>,
     pub context: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CaseTypeDeclarationChildren<'a, T, V> {
+    pub attribute_spec: Syntax<'a, T, V>,
+    pub modifiers: Syntax<'a, T, V>,
+    pub case_keyword: Syntax<'a, T, V>,
+    pub type_keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub generic_parameter: Syntax<'a, T, V>,
+    pub as_: Syntax<'a, T, V>,
+    pub bounds: Syntax<'a, T, V>,
+    pub equal: Syntax<'a, T, V>,
+    pub variants: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CaseTypeVariantChildren<'a, T, V> {
+    pub bar: Syntax<'a, T, V>,
+    pub type_: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

@@ -43,6 +43,8 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::EnumClassEnumerator {..} => SyntaxKind::EnumClassEnumerator,
             SyntaxVariant::AliasDeclaration {..} => SyntaxKind::AliasDeclaration,
             SyntaxVariant::ContextAliasDeclaration {..} => SyntaxKind::ContextAliasDeclaration,
+            SyntaxVariant::CaseTypeDeclaration {..} => SyntaxKind::CaseTypeDeclaration,
+            SyntaxVariant::CaseTypeVariant {..} => SyntaxKind::CaseTypeVariant,
             SyntaxVariant::PropertyDeclaration {..} => SyntaxKind::PropertyDeclaration,
             SyntaxVariant::PropertyDeclarator {..} => SyntaxKind::PropertyDeclarator,
             SyntaxVariant::NamespaceDeclaration {..} => SyntaxKind::NamespaceDeclaration,

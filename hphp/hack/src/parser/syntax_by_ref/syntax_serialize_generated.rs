@@ -205,6 +205,29 @@ ss.serialize_field("ctx_alias_context", &self.with(context))?;
 ss.serialize_field("ctx_alias_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
+SyntaxVariant::CaseTypeDeclaration (CaseTypeDeclarationChildren{attribute_spec,modifiers,case_keyword,type_keyword,name,generic_parameter,as_,bounds,equal,variants,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 12)?;
+      ss.serialize_field("kind", "case_type_declaration")?;
+      ss.serialize_field("case_type_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("case_type_modifiers", &self.with(modifiers))?;
+ss.serialize_field("case_type_case_keyword", &self.with(case_keyword))?;
+ss.serialize_field("case_type_type_keyword", &self.with(type_keyword))?;
+ss.serialize_field("case_type_name", &self.with(name))?;
+ss.serialize_field("case_type_generic_parameter", &self.with(generic_parameter))?;
+ss.serialize_field("case_type_as", &self.with(as_))?;
+ss.serialize_field("case_type_bounds", &self.with(bounds))?;
+ss.serialize_field("case_type_equal", &self.with(equal))?;
+ss.serialize_field("case_type_variants", &self.with(variants))?;
+ss.serialize_field("case_type_semicolon", &self.with(semicolon))?;
+      ss.end()
+} 
+SyntaxVariant::CaseTypeVariant (CaseTypeVariantChildren{bar,type_} ) => {
+      let mut ss = s.serialize_struct("", 3)?;
+      ss.serialize_field("kind", "case_type_variant")?;
+      ss.serialize_field("case_type_variant_bar", &self.with(bar))?;
+ss.serialize_field("case_type_variant_type", &self.with(type_))?;
+      ss.end()
+} 
 SyntaxVariant::PropertyDeclaration (PropertyDeclarationChildren{attribute_spec,modifiers,type_,declarators,semicolon} ) => {
       let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "property_declaration")?;

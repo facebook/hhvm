@@ -222,6 +222,31 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            CaseTypeDeclaration(x) => {
+                get_index(11).and_then(|index| { match index {
+                        0 => Some(&x.attribute_spec),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.case_keyword),
+                    3 => Some(&x.type_keyword),
+                    4 => Some(&x.name),
+                    5 => Some(&x.generic_parameter),
+                    6 => Some(&x.as_),
+                    7 => Some(&x.bounds),
+                    8 => Some(&x.equal),
+                    9 => Some(&x.variants),
+                    10 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
+            CaseTypeVariant(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.bar),
+                    1 => Some(&x.type_),
+                        _ => None,
+                    }
+                })
+            },
             PropertyDeclaration(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),

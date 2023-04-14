@@ -1513,7 +1513,7 @@ let check_argument_type_against_parameter_type
     if Option.is_some dynamic_func then
       match e1opt with
       | None -> (env1, None, false)
-      | Some _e1 ->
+      | Some e1 ->
         let (env2, e2opt) =
           check_argument_type_against_parameter_type_helper
             ~dynamic_func
@@ -1525,7 +1525,8 @@ let check_argument_type_against_parameter_type
         (match e2opt with
         (* We used dynamic calling to get a successful check *)
         | None -> (env2, None, true)
-        | Some e2 -> (env2, Some e2, false))
+        (* We failed on both, report the error that we got with the static check *)
+        | Some _e2 -> (env1, Some e1, false))
     else
       (env1, e1opt, false)
   in

@@ -1,24 +1,32 @@
 File "union_fun.bad.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
-  File "collections/Set.hhi", line 197, characters 7-27:
-  Expected `dynamic`
-  File "union_fun.bad.php", line 5, characters 8-57:
-  But got `(function(mixed $_): Awaitable<int>)`
+  File "union_fun.bad.php", line 6, characters 11-13:
+  Expected `int`
+  File "collections/Set.hhi", line 197, characters 25-26:
+    via this generic `Tu`
+  File "union_fun.bad.php", line 5, characters 39-41:
+  But got `Awaitable<int>` (result of an `async` function)
 File "union_fun.bad.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
-  File "collections/Vector.hhi", line 176, characters 29-49:
-  Expected `dynamic`
-  File "union_fun.bad.php", line 5, characters 8-57:
-  But got `(function(mixed $_): Awaitable<int>)`
+  File "union_fun.bad.php", line 6, characters 11-13:
+  Expected `int`
+  File "collections/Vector.hhi", line 176, characters 47-48:
+    via this generic `Tu`
+  File "union_fun.bad.php", line 5, characters 39-41:
+  But got `Awaitable<int>` (result of an `async` function)
 File "union_fun.bad.php", line 7, characters 16-66:
 Invalid argument (Typing[4110])
-  File "collections/Set.hhi", line 197, characters 7-27:
-  Expected `dynamic`
-  File "union_fun.bad.php", line 7, characters 16-66:
-  But got `(function(mixed $_): Awaitable<int>)`
+  File "union_fun.bad.php", line 7, characters 11-13:
+  Expected `int`
+  File "collections/Set.hhi", line 197, characters 25-26:
+    via this generic `Tu`
+  File "union_fun.bad.php", line 7, characters 48-50:
+  But got `Awaitable<int>` (result of an `async` function)
 File "union_fun.bad.php", line 7, characters 16-66:
 Invalid argument (Typing[4110])
-  File "collections/Vector.hhi", line 176, characters 29-49:
-  Expected `dynamic`
-  File "union_fun.bad.php", line 7, characters 16-66:
-  But got `(function(mixed $_): Awaitable<int>)`
+  File "union_fun.bad.php", line 7, characters 11-13:
+  Expected `int`
+  File "collections/Vector.hhi", line 176, characters 47-48:
+    via this generic `Tu`
+  File "union_fun.bad.php", line 7, characters 48-50:
+  But got `Awaitable<int>` (result of an `async` function)

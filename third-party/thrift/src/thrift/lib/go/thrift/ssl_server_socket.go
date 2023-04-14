@@ -87,6 +87,9 @@ func (p *SSLServerSocket) Open() error {
 }
 
 func (p *SSLServerSocket) Addr() net.Addr {
+	if p.listener != nil {
+		return p.listener.Addr()
+	}
 	return p.addr
 }
 

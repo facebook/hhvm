@@ -46,7 +46,7 @@ struct HttpStreamServerTransport final : StreamTransport {
 
   void setOnData(OnDataType callback) override;
   void setOnClose(OnCloseType callback) override {
-    assertx(!onClose);
+    assertx(!callback || !onClose);
     onClose = callback;
   }
 

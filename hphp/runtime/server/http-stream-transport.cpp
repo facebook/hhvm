@@ -29,10 +29,12 @@ void HttpStreamServerTransport::write(folly::StringPiece data) {
 }
 
 void HttpStreamServerTransport::setOnData(OnDataType callback) {
-  assertx(!onData);
+  assertx(!callback || !onData);
   onData = callback;
   assertx(m_transport);
-  m_transport->onStreamReady();
+  if (callback) {
+    m_transport->onStreamReady();
+  }
 }
 
 void HttpStreamServerTransport::close() {

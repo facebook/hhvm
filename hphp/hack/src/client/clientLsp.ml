@@ -4000,12 +4000,10 @@ let do_server_diagnostics
     uris_with_server_diagnostics
     errors_per_file
 
+(** Used to publish clientIdeDaemon errors in [ide_standalone] mode. *)
 let publish_errors_if_standalone
-    (env : env)
-    (state : state)
-    (file_path : Path.t)
-    (errors : Errors.t)
-    ~(powered_by : powered_by) : state =
+    (env : env) (state : state) (file_path : Path.t) (errors : Errors.t) : state
+    =
   match (env.serverless_ide, state) with
   | ((Ide_hh_server | Ide_serverless), _) -> state
   | (Ide_standalone, Pre_init) ->
@@ -4035,7 +4033,7 @@ let publish_errors_if_standalone
     in
     let params = hack_errors_to_lsp_diagnostic file_path errors_in_file in
     let notification = PublishDiagnosticsNotification params in
-    notify_jsonrpc ~powered_by notification;
+    notify_jsonrpc ~powered_by:Serverless_ide notification;
     let new_state =
       Lost_server { lenv with Lost_env.uris_with_standalone_diagnostics }
     in
@@ -4860,12 +4858,7 @@ let handle_editor_buffer_message
           ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
       in
       let new_state =
-        publish_errors_if_standalone
-          env
-          !state
-          file_path
-          errors
-          ~powered_by:Serverless_ide
+        publish_errors_if_standalone env !state file_path errors
       in
       Lwt.return new_state
     | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
@@ -4891,12 +4884,7 @@ let handle_editor_buffer_message
               ClientIdeMessage.(Ide_file_changed { file_path; file_contents })
           in
           let new_state =
-            publish_errors_if_standalone
-              env
-              !state
-              file_path
-              errors
-              ~powered_by:Serverless_ide
+            publish_errors_if_standalone env !state file_path errors
           in
           Lwt.return new_state
       end

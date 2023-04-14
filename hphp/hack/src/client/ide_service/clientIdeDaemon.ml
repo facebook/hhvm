@@ -990,7 +990,7 @@ let handle_request
     in
     Lwt.return (state, Ok result)
     (* textDocument/rename - localvar only *)
-  | (Initialized istate, Rename { Rename.document_location; new_name }) ->
+  | (Initialized istate, Rename (document_location, new_name)) ->
     (* Update the state of the world with the document as it exists in the IDE *)
     let (state, ctx, entry) = update_file_ctx istate document_location in
     let result =
@@ -1038,8 +1038,7 @@ let handle_request
     Lwt.return (state, Ok result)
   (* Autocomplete *)
   | ( Initialized istate,
-      Completion
-        { ClientIdeMessage.Completion.document_location; is_manually_invoked }
+      Completion (document_location, { ClientIdeMessage.is_manually_invoked })
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
     let (state, ctx, entry) = update_file_ctx istate document_location in
@@ -1055,38 +1054,25 @@ let handle_request
     in
     Lwt.return (state, Ok result)
   (* Autocomplete docblock resolve *)
-  | (Initialized istate, Completion_resolve param) ->
+  | (Initialized istate, Completion_resolve (symbol, kind)) ->
     let ctx = make_empty_ctx istate in
-    ClientIdeMessage.Completion_resolve.(
-      let result =
-        ServerDocblockAt.go_docblock_for_symbol
-          ~ctx
-          ~symbol:param.symbol
-          ~kind:param.kind
-      in
-      Lwt.return (state, Ok result))
+    let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
+    Lwt.return (state, Ok result)
   (* Autocomplete docblock resolve *)
-  | (Initialized istate, Completion_resolve_location param) ->
+  | ( Initialized istate,
+      Completion_resolve_location ({ file_path; line; column; _ }, kind) ) ->
     (* We're given a location but it often won't be an opened file.
        We will only serve autocomplete docblocks as of truth on disk.
        Hence, we construct temporary entry to reflect the file which
        contained the target of the resolve. *)
-    let open ClientIdeMessage.Completion_resolve_location in
     let path =
-      param.document_location.ClientIdeMessage.file_path
-      |> Path.to_string
-      |> Relative_path.create_detect_prefix
+      file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let ctx = make_empty_ctx istate in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerDocblockAt.go_docblock_ctx
-            ~ctx
-            ~entry
-            ~line:param.document_location.line
-            ~column:param.document_location.column
-            ~kind:param.kind)
+          ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind)
     in
     Lwt.return (state, Ok result)
   (* Document highlighting *)

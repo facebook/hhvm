@@ -2975,7 +2975,7 @@ let do_completion_local
   (* this is what I want to fix *)
   let request =
     ClientIdeMessage.Completion
-      { ClientIdeMessage.Completion.document_location; is_manually_invoked }
+      (document_location, { ClientIdeMessage.is_manually_invoked })
   in
   let%lwt infos =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
@@ -3138,16 +3138,13 @@ let do_resolve_local
           if line = 0 && column = 0 then failwith "NoFileLineColumnData";
           let request =
             ClientIdeMessage.Completion_resolve_location
-              {
-                ClientIdeMessage.Completion_resolve_location.document_location =
-                  {
-                    ClientIdeMessage.file_path;
-                    ClientIdeMessage.file_contents;
-                    ClientIdeMessage.line;
-                    ClientIdeMessage.column;
-                  };
-                kind = resolve_ranking_source kind ranking_source;
-              }
+              ( {
+                  ClientIdeMessage.file_path;
+                  ClientIdeMessage.file_contents;
+                  ClientIdeMessage.line;
+                  ClientIdeMessage.column;
+                },
+                resolve_ranking_source kind ranking_source )
           in
           let%lwt raw_docblock =
             ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
@@ -3174,11 +3171,9 @@ let do_resolve_local
         in
         let request =
           ClientIdeMessage.Completion_resolve
-            {
-              ClientIdeMessage.Completion_resolve.symbol = symbolname;
-              kind = resolve_ranking_source kind ranking_source;
-            }
+            (symbolname, resolve_ranking_source kind ranking_source)
         in
+
         let%lwt raw_docblock =
           ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
         in
@@ -3860,8 +3855,7 @@ let do_documentRename_local
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Rename
-         { ClientIdeMessage.Rename.document_location; new_name })
+      (ClientIdeMessage.Rename (document_location, new_name))
   in
   let state =
     match response with

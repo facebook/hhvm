@@ -11,7 +11,6 @@ open Hh_prelude
 open Option.Monad_infix
 module Bucket = Hack_bucket
 open Typing_service_types
-open Typing_check_job
 
 (*
 ####
@@ -160,10 +159,14 @@ let process_file
     let (funs, classes, typedefs, gconsts, modules) = Nast.get_defs ast in
     let ctx = Provider_context.map_tcopt ctx ~f:(fun _tcopt -> opts) in
     let ignore_check_typedef opts fn name =
-      ignore (check_typedef opts fn name)
+      ignore (Typing_check_job.check_typedef opts fn name)
     in
-    let ignore_check_const opts fn name = ignore (check_const opts fn name) in
-    let ignore_check_module opts fn name = ignore (check_module opts fn name) in
+    let ignore_check_const opts fn name =
+      ignore (Typing_check_job.check_const opts fn name)
+    in
+    let ignore_check_module opts fn name =
+      ignore (Typing_check_job.check_module opts fn name)
+    in
     try
       let result =
         Deferred_decl.with_deferred_decls
@@ -175,13 +178,13 @@ let process_file
         Errors.do_with_context ~drop_fixmed:false fn Errors.Typing @@ fun () ->
         let (fun_tasts, fun_global_tvenvs) =
           List.map funs ~f:FileInfo.id_name
-          |> List.filter_map ~f:(type_fun ctx fn)
+          |> List.filter_map ~f:(Typing_check_job.type_fun ctx fn)
           |> List.unzip
         in
         let fun_tasts = List.concat fun_tasts in
         let (class_tasts, class_global_tvenvs) =
           List.map classes ~f:FileInfo.id_name
-          |> List.filter_map ~f:(type_class ctx fn)
+          |> List.filter_map ~f:(Typing_check_job.type_class ctx fn)
           |> List.unzip
         in
         let class_global_tvenvs = List.concat class_global_tvenvs in

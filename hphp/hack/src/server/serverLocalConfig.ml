@@ -720,6 +720,7 @@ let load_
     ~silent
     ~current_version
     ~current_rolled_out_flag_idx
+    ~deactivate_saved_state_rollout
     ~project_metadata_w_flags_www_ready
     overrides : t =
   let config = Config_file.parse_local_config system_config_path in
@@ -778,6 +779,7 @@ let load_
     Saved_state_rollouts.make
       ~get_default:(fun name -> bool_ name ~default:false config)
       ~current_rolled_out_flag_idx
+      ~deactivate_saved_state_rollout
       ~force_flag_value:(string_opt "ss_force" config)
   in
   (if not silent then
@@ -1526,6 +1528,7 @@ let load :
     silent:bool ->
     current_version:Config_file_version.version ->
     current_rolled_out_flag_idx:int ->
+    deactivate_saved_state_rollout:bool ->
     project_metadata_w_flags_www_ready:bool ->
     Config_file_common.t ->
     t =

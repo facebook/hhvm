@@ -123,6 +123,7 @@ let rollout_order =
 
 let make
     ~current_rolled_out_flag_idx
+    ~(deactivate_saved_state_rollout : bool)
     ~(get_default : flag_name -> bool)
     ~(force_flag_value : string option) =
   let force_prod_or_candidate = ForcedFlags.parse ~force_flag_value in
@@ -131,9 +132,11 @@ let make
     let flag_name = flag_name flag in
     if Int.equal current_rolled_out_flag_idx i then
       ForcedFlags.rollout_flag_value force_prod_or_candidate
-      |> Option.value ~default:(get_default flag_name)
+      |> Option.value
+           ~default:
+             ((not deactivate_saved_state_rollout) && get_default flag_name)
     else if Int.(current_rolled_out_flag_idx < i) then
-      (* This flag will be rolled out next *)
+      (* This flag will be rolled out next, so return false unless forced. *)
       ForcedFlags.is_forced flag_name force_prod_or_candidate
     else
       (* This flag has already been rolled out *)
@@ -148,6 +151,7 @@ let make
 let default : t =
   make
     ~current_rolled_out_flag_idx:Int.min_value
+    ~deactivate_saved_state_rollout:false
     ~get_default:(fun _ -> false)
     ~force_flag_value:None
 

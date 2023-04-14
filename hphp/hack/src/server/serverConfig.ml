@@ -279,6 +279,9 @@ let load ~silent options : t * ServerLocalConfig.t =
         ~default:Int.min_value
         config
     in
+    let deactivate_saved_state_rollout =
+      bool_ "deactivate_saved_state_rollout" ~default:false config
+    in
     let project_metadata_w_flags_www_ready =
       bool_ "project_metadata_w_flags_www_ready" ~default:false config
     in
@@ -286,6 +289,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       ~silent
       ~current_version:version
       ~current_rolled_out_flag_idx
+      ~deactivate_saved_state_rollout
       ~project_metadata_w_flags_www_ready
       command_line_overrides
   in

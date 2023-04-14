@@ -11,7 +11,7 @@ use crate::gen::saved_state_rollouts::SavedStateRollouts;
 
 impl Default for SavedStateRollouts {
     fn default() -> Self {
-        Self::make(isize::MIN, None, |_| Ok(false)).expect("default had errors")
+        Self::make(isize::MIN, false, None, |_| Ok(false)).expect("default had errors")
     }
 }
 
@@ -56,6 +56,7 @@ impl Flag {
 impl SavedStateRollouts {
     pub fn make(
         current_rolled_out_flag_idx: isize,
+        deactivate_saved_state_rollout: bool,
         force_flag_value: Option<&str>,
         mut get_default: impl FnMut(&str) -> Result<bool, std::str::ParseBoolError>,
     ) -> Result<Self, RolloutsError> {
@@ -67,7 +68,13 @@ impl SavedStateRollouts {
             match current_rolled_out_flag_idx.cmp(&i) {
                 Ordering::Equal => match force_prod_or_candidate.rollout_flag_value() {
                     Some(b) => Ok(b),
-                    None => get_default(flag_name),
+                    None => {
+                        if deactivate_saved_state_rollout {
+                            Ok(false)
+                        } else {
+                            get_default(flag_name)
+                        }
+                    }
                 },
                 Ordering::Less => {
                     // This flag will be rolled out next, set to false unless forced to true.

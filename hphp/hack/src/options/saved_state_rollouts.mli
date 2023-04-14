@@ -14,6 +14,7 @@ val default : t
 
 val make :
   current_rolled_out_flag_idx:int ->
+  deactivate_saved_state_rollout:bool ->
   get_default:(flag_name -> bool) ->
   force_flag_value:string option ->
   t

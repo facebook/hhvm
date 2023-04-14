@@ -27,11 +27,13 @@ impl LocalConfig {
     pub fn from_config(
         current_version: Option<&str>,
         current_rolled_out_flag_idx: isize,
+        deactivate_saved_state_rollout: bool,
         config: ConfigFile,
     ) -> Result<Self> {
         let mut lc = Self::default();
         lc.saved_state.rollouts = SavedStateRollouts::make(
             current_rolled_out_flag_idx,
+            deactivate_saved_state_rollout,
             config.get_str("ss_force"),
             |flag_name| config.get_bool(flag_name).unwrap_or(Ok(false)),
         )?;

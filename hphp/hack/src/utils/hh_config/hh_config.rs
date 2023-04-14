@@ -86,10 +86,18 @@ impl HhConfig {
         let current_rolled_out_flag_idx = hhconfig
             .get_int("current_saved_state_rollout_flag_index")
             .unwrap_or(Ok(isize::MIN))?;
+        let deactivate_saved_state_rollout = hhconfig
+            .get_bool("deactivate_saved_state_rollout")
+            .unwrap_or(Ok(false))?;
 
         let version = hhconfig.get_str("version");
         let mut c = Self {
-            local_config: LocalConfig::from_config(version, current_rolled_out_flag_idx, hh_conf)?,
+            local_config: LocalConfig::from_config(
+                version,
+                current_rolled_out_flag_idx,
+                deactivate_saved_state_rollout,
+                hh_conf,
+            )?,
             ..Self::default()
         };
 
@@ -392,6 +400,24 @@ mod test {
             SavedStateRollouts {
                 one: true,
                 two: false,
+                three: false,
+            }
+        );
+    }
+
+    #[test]
+    fn dummy_deactivated() {
+        let hhconfig = ConfigFile::from_args([
+            "current_saved_state_rollout_flag_index=1".as_bytes(),
+            "deactivate_saved_state_rollout=true".as_bytes(),
+        ]);
+        let hhconf = ConfigFile::from_args(["ss_force=candidate".as_bytes()]);
+        let c = HhConfig::from_configs(hhconfig, hhconf).unwrap();
+        assert_eq!(
+            c.opts.tco_saved_state.rollouts,
+            SavedStateRollouts {
+                one: true,
+                two: true,
                 three: false,
             }
         );

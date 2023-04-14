@@ -357,8 +357,6 @@ let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
 
 let invariant_violation_bug ~path:_ ~pos:_ ~desc:_ _ = ()
 
-let errors_file_mismatch _ _ = ()
-
 let type_check_end
     _
     ~heap_size:_

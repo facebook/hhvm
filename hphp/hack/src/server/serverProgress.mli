@@ -176,8 +176,6 @@ val is_complete : errors_file_error -> bool
 
 val enable_error_production : bool -> unit
 
-val validate_errors_DELETE_THIS_SOON : expected:Errors.t -> string
-
 module ErrorsWrite : sig
   (** To be called at start of typechecking.
   This creates a new errors file. If there had been a previous errors file, then the previous

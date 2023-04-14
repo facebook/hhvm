@@ -241,43 +241,6 @@ let push_errors_outside_files_to_errors_file
   ServerProgress.ErrorsWrite.report typing_errors_not_in_files_to_check;
   ()
 
-(** [validate_no_errors_outside_files ?phase errors files] validates that
-[errors] contains no [phase] errors other than those in [files].
-If [phase] is None, then it validates that [errors] contains no errors of any phase
-other than those in [files].
-If validation fails, all we do is log. *)
-let validate_no_errors_outside_files
-    ?(phase : Errors.phase option)
-    (errors : Errors.t)
-    ~(files : Relative_path.Set.t) : unit =
-  let witness_opt =
-    Errors.fold_errors
-      errors
-      ~drop_fixmed:true
-      ?phase
-      ~init:None
-      ~f:(fun path _phase error acc ->
-        if Option.is_some acc || Relative_path.Set.mem files path then
-          acc
-        else
-          Some (path, error))
-  in
-  match witness_opt with
-  | None -> ()
-  | Some (path, error) ->
-    let error = error |> User_error.to_absolute |> Errors.to_string in
-    let phase = Option.value_map phase ~f:Errors.phase_to_string ~default:"" in
-    Hh_logger.log
-      "STREAMING-ERRORS unexpected %s error in %s:\n%s"
-      phase
-      (Relative_path.to_absolute path)
-      error;
-    HackEventLogger.invariant_violation_bug
-      ~path
-      ~pos:""
-      ~desc:("STREAMING-ERRORS unexpected extra error " ^ phase)
-      (Telemetry.create () |> Telemetry.string_ ~key:"witness" ~value:error)
-
 let indexing genv env to_check cgroup_steps =
   let (ide_files, disk_files) =
     Relative_path.Set.partition
@@ -1035,20 +998,6 @@ functor
         |> Relative_path.Map.keys
         |> Relative_path.Set.of_list
       in
-      if do_errors_file then begin
-        validate_no_errors_outside_files duplicate_name_errors ~files:rechecked;
-        (* If this validation is false, then I've misunderstood how duplicate
-           name errors are calculated! *)
-        validate_no_errors_outside_files
-          errors
-          ~files:rechecked
-          ~phase:Errors.Naming
-        (* If this validation is false, then we'll end up failing to push to the errors-file
-           those errors that are outside rechecked. Why do I think the validation is true?
-           For an error to have been existing, it must have been in env.errorl,
-           but all naming errors we know are also in env.failed_naming. Well, all of env.failed_naming
-           gets incorporated into files_to_parse, which is then present in rechecked. *)
-      end;
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
           (env, errors)
@@ -1675,33 +1624,26 @@ let type_check :
     type_check_unsafe genv env kind start_time cgroup_steps
   in
 
-  (* Update the errors-file as necessary... *)
+  (* If the typecheck completed, them mark the errors-file as complete.
+     A "completed" typecheck means (1) all the [env.needs_recheck] files
+     were indeed typechecked, i.e. not interrupted and cancelled by an
+     interrupt handler like watchman; (2) watchman interrupt didn't
+     insert any [env.disk_needs_parsing] files.
+     Because we mark the errors-file as complete, anyone tailing it will
+     know that they can finish their tailing.
+
+     For incomplete typechecks, we don't do anything here. Necessarily ServerMain
+     will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
+     and then next round will call [ServerProgress.ErrorsWrite.new_empty_file]
+     which will put a "restarted" sentinel at the end of the current file as
+     well as starting a new file. Indeed it's *better* to place the "restarted"
+     sentinel at that future time rather than now, because it'll have a more
+     up-to-date watchclock at that time. *)
   let is_complete =
     Relative_path.Set.is_empty env.needs_recheck
     && Relative_path.Set.is_empty env.disk_needs_parsing
   in
-  let validation_result =
-    match (kind, is_complete) with
-    | (CheckKind.Full, true) ->
-      (* We mark the errors-file as complete. Thus, anyone tailing it will
-         know that the typecheck has finished. *)
-      ServerProgress.ErrorsWrite.complete telemetry;
-      ServerProgress.validate_errors_DELETE_THIS_SOON ~expected:env.errorl
-    | (CheckKind.Full, false) ->
-      (* We don't do anything! If it's not complete, then necessarily ServerMain
-         will do another round of [ServerTypeCheck.type_check] (i.e. us) shortly,
-         and then next round will call [ServerProgress.ErrorsWrite.new_empty_file]
-         which will put a "restarted" sentinel at the end of the current file as
-         well as starting a new file. Indeed it's *better* to place the "restarted"
-         sentinel at that future time rather than now, because it'll have a more
-         up-to-date watchclock at that time. *)
-      "<incomplete checks don't get validated>"
-    | (CheckKind.Lazy, _) -> "<lazy checks don't do streaming errors>"
-  in
-  let telemetry =
-    telemetry
-    |> Telemetry.string_
-         ~key:"streaming_errors_validation"
-         ~value:validation_result
-  in
+  if CheckKind.is_full_check kind && is_complete then
+    ServerProgress.ErrorsWrite.complete telemetry;
+
   (env, stats, telemetry)

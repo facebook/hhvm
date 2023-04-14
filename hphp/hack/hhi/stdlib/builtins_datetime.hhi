@@ -321,7 +321,7 @@ class DateTime implements DateTimeInterface {
     DateTimeInterface $datetime2,
     bool $absolute = false,
   )[]: HH\FIXME\MISSING_RETURN_TYPE;
-  public function format(string $format): HH\FIXME\MISSING_RETURN_TYPE;
+  public function format(string $format)[]: HH\FIXME\MISSING_RETURN_TYPE;
   public static function createFromFormat(
     string $format,
     string $time,

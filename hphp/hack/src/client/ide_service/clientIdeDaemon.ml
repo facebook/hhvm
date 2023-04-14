@@ -1015,11 +1015,14 @@ let handle_request
           | Some (name, action) when ServerFindRefs.is_local action ->
             ServerFindRefs.go_for_localvar ctx action
             >>| ServerFindRefs.to_ide name
+            |> Result.map_error ~f:(fun action -> (name, action))
             (* clientLsp should raise if we return a LocalVar action *)
-          | None -> Ok None (* Clicking a line+col that isn't a symbol *)
-          | Some (_name, action) ->
+          | None ->
+            (* Clicking a line+col that isn't a symbol *)
+            Ok None
+          | Some (name, action) ->
             (* Not a localvar, must defer to hh_server *)
-            Error action)
+            Error (name, action))
     in
     Lwt.return (state, Ok result)
   (* Autocomplete *)

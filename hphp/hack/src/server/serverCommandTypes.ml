@@ -181,6 +181,71 @@ module Find_refs = struct
     | Property s -> "Property " ^ s
     | Class_const s -> "Class_consts " ^ s
     | Typeconst s -> "Typeconst " ^ s
+
+  (**
+   * Output strings in the form of
+   * SYMBOL_NAME|COMMA_SEPARATED_ACTION_STRING
+   * For example,
+   * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
+   * Must be manually kept in sync with string_to_symbol_and_action_exn.
+  *)
+  let symbol_and_action_to_string_exn symbol_name action =
+    let action_serialized =
+      match action with
+      | Class str -> Printf.sprintf "Class,%s" str
+      | ExplicitClass str -> Printf.sprintf "ExplicitClass,%s" str
+      | Function str -> Printf.sprintf "Function,%s" str
+      | GConst str -> Printf.sprintf "GConst,%s" str
+      | Member (str, Method s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Method" s
+      | Member (str, Property s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Property" s
+      | Member (str, Class_const s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Class_const" s
+      | Member (str, Typeconst s) ->
+        Printf.sprintf "Member,%s,%s,%s" str "Typeconst" s
+      | LocalVar _ -> failwith "Invalid action"
+    in
+    Printf.sprintf "%s|%s" symbol_name action_serialized
+
+  (**
+   * Expects input strings in the form of
+   * SYMBOL_NAME|COMMA_SEPARATED_ACTION_STRING
+   * For example,
+   * HackTypecheckerQueryBase::getWWWDir|Member,\HackTypecheckerQueryBase,Method,getWWWDir
+   * The implementation explicitly is tied to whatever is generated from symbol_and_action_to_string_exn
+   * and should be kept in sync manually by anybody editing.
+  *)
+  let string_to_symbol_and_action_exn arg =
+    let pair = Str.split (Str.regexp "|") arg in
+    let (symbol_name, action_arg) =
+      try
+        match pair with
+        | [symbol_name; action_arg] -> (symbol_name, action_arg)
+        | _ -> raise Exit
+      with
+      | _ ->
+        Printf.eprintf "Invalid input\n";
+        raise Exit_status.(Exit_with Input_error)
+    in
+    let action =
+      (* Explicitly ignoring localvar support *)
+      match Str.split (Str.regexp ",") action_arg with
+      | ["Class"; str] -> Class str
+      | ["ExplicitClass"; str] -> ExplicitClass str
+      | ["Function"; str] -> Function str
+      | ["GConst"; str] -> GConst str
+      | ["Member"; str; "Method"; member_name] ->
+        Member (str, Method member_name)
+      | ["Member"; str; "Property"; member_name] ->
+        Member (str, Property member_name)
+      | ["Member"; str; "Class_const"; member_name] ->
+        Member (str, Class_const member_name)
+      | ["Member"; str; "Typeconst"; member_name] ->
+        Member (str, Typeconst member_name)
+      | _ -> raise Exit_status.(Exit_with Input_error)
+    in
+    (symbol_name, action)
 end
 
 module Rename = struct
@@ -378,6 +443,9 @@ type _ t =
   | GO_TO_IMPL : Find_refs.action -> Find_refs.result_or_retry t
   | IDE_FIND_REFS :
       labelled_file * int * int * bool
+      -> Find_refs.ide_result_or_retry t
+  | IDE_FIND_REFS_BY_SYMBOL :
+      Find_refs.action * string
       -> Find_refs.ide_result_or_retry t
   | IDE_GO_TO_IMPL :
       labelled_file * int * int

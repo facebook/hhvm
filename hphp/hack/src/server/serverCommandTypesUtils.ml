@@ -23,6 +23,7 @@ let debug_describe_t : type a. a t -> string = function
   | FIND_REFS _ -> "FIND_REFS"
   | GO_TO_IMPL _ -> "GO_TO_IMPL"
   | IDE_FIND_REFS _ -> "IDE_FIND_REFS"
+  | IDE_FIND_REFS_BY_SYMBOL _ -> "IDE_FIND_REFS_BY_SYMBOL"
   | IDE_GO_TO_IMPL _ -> "IDE_GO_TO_IMPL"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"
   | RENAME _ -> "RENAME"

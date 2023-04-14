@@ -213,7 +213,8 @@ module Lost_env = struct
   }
 
   and shellable_type =
-    | FindRefs of lsp_id * string * int * int (* lsp_id, filename, line, col *)
+    | FindRefs of lsp_id * string * ServerCommandTypes.Find_refs.action
+      (* lsp_id, symbol_name, FindRefs action *)
     | GoToImpl of lsp_id * string * int * int (* lsp_id, filename, line, col *)
     | Rename of
         lsp_id
@@ -224,7 +225,7 @@ module Lost_env = struct
 end
 
 let get_lsp_id_of_shell_out = function
-  | Lost_env.FindRefs (lsp_id, _, _, _) -> lsp_id
+  | Lost_env.FindRefs (lsp_id, _, _) -> lsp_id
   | Lost_env.GoToImpl (lsp_id, _, _, _) -> lsp_id
   | Lost_env.Rename (lsp_id, _, _, _, _) -> lsp_id
 
@@ -2389,21 +2390,23 @@ let kickoff_shell_out_and_maybe_cancel
   in
   match state with
   | Lost_server ({ Lost_env.current_hh_shell; _ } as lenv) ->
+    let open ServerCommandTypes in
     (* If there's an existing shell process, cancel it *)
     Option.iter current_hh_shell ~f:(fun sh ->
         Lwt.wakeup_later sh.Lost_env.cancellation_token ());
-
     let (cancel, cancellation_token) = Lwt.wait () in
     let cmd =
       begin
         match shellable_type with
-        | Lost_env.FindRefs (_, filename, line, col) ->
-          let file_line_col = Printf.sprintf "%s:%d,%d" filename line col in
+        | Lost_env.FindRefs (_lsp_id, symbol_name, action) ->
+          let symbol_action_arg =
+            Find_refs.symbol_and_action_to_string_exn symbol_name action
+          in
           let cmd =
             compose_shellout_cmd
-              ~from:"find-refs"
-              "--ide-find-refs"
-              file_line_col
+              ~from:"find-refs-by-symbol"
+              "--ide-find-refs-by-symbol"
+              symbol_action_arg
           in
           cmd
         | Lost_env.GoToImpl (_, filename, line, col) ->
@@ -3412,7 +3415,7 @@ let do_findReferences_local
         lsp_id
         (FindReferencesResult positions);
       Lwt.return state
-    | Error action when ServerFindRefs.is_local action ->
+    | Error (_symbol_name, action) when ServerFindRefs.is_local action ->
       (* clientIdeDaemon returned an error for a localvar, indicating a real failure *)
       let str =
         Printf.sprintf
@@ -3420,21 +3423,21 @@ let do_findReferences_local
           (ServerCommandTypes.Find_refs.show_action action)
       in
       log "%s" str;
+      HackEventLogger.invariant_violation_bug
+        ~path:Relative_path.default
+        ~pos:""
+        ~desc:str
+        (Telemetry.create ());
       failwith "ClientIDEDaemon failed to find-refs for a localvar"
-    | Error _action ->
+    | Error (symbol_name, action) ->
       (* ClientIdeMessage.Find_references only supports localvar.
          Receiving an error with a non-localvar action indicates that we attempted to
          try and find references for a non-localvar
       *)
-      let { Ide_api_types.line; column } =
-        lsp_position_to_ide
-          params.FindReferences.loc.TextDocumentPositionParams.position
-      in
-      let filename =
-        Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-          params.FindReferences.loc.TextDocumentPositionParams.textDocument
-      in
-      let shellable_type = Lost_env.FindRefs (lsp_id, filename, line, column) in
+      let shellable_type = Lost_env.FindRefs (lsp_id, symbol_name, action) in
+      (* If we reach kickoff a shell-out to hh_server, processing that response
+         also invokes respond_jsonrpc
+      *)
       let%lwt state = kickoff_shell_out_and_maybe_cancel state shellable_type in
       Lwt.return state
   in

@@ -31,6 +31,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FIND_REFS _ -> true
   | GO_TO_IMPL _ -> true
   | IDE_FIND_REFS _ -> true
+  | IDE_FIND_REFS_BY_SYMBOL _ -> true
   | IDE_GO_TO_IMPL _ -> true
   | METHOD_JUMP (_, _, find_children) -> find_children (* uses find refs *)
   | SAVE_NAMING _ -> false

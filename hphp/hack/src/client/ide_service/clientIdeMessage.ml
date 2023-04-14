@@ -114,7 +114,19 @@ module Find_references = struct
 
   type request = document_location
 
-  type result = (Find_refs.ide_result, Find_refs.action) Hh_prelude.result
+  (**
+   * The result of Find_references is either:
+   * In the success case, a Find_refs ide_result, which is
+   * an optional tuple of symbol name from SymbolDefinition.full_name
+   * and positions for that symbol.
+   * In the failure case, we return both:
+   * A symbol's name, from SymbolDefinition.full_name and
+   * the Find_refs action, a data structure describing what
+   * a symbol refers to. For example, a Class of class_name,
+   * a Member of member_name with a Method of method_name, etc.
+   *)
+  type result =
+    (Find_refs.ide_result, string * Find_refs.action) Hh_prelude.result
 end
 
 (* Handles "textDocument/rename" LSP messages - for local variables only *)

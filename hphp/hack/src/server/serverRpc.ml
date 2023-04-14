@@ -286,6 +286,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             map_env
               ~f:(ServerFindRefs.to_ide name)
               (ServerFindRefs.go ctx action include_defs genv env)))
+  | IDE_FIND_REFS_BY_SYMBOL (find_refs_action, name) ->
+    let ctx = Provider_utils.ctx_from_server_env env in
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        let open Done_or_retry in
+        let include_defs = false in
+        map_env
+          ~f:(ServerFindRefs.to_ide name)
+          (ServerFindRefs.go ctx find_refs_action include_defs genv env))
   | IDE_GO_TO_IMPL (labelled_file, line, column) ->
     Done_or_retry.(
       let (path, file_input) =

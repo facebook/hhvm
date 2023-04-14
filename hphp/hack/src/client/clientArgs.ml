@@ -439,6 +439,10 @@ let parse_check_args cmd =
       ( "--ide-find-refs",
         Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x)),
         "" );
+      ( "--ide-find-refs-by-symbol",
+        Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS_BY_SYMBOL x)),
+        "(mode) similar to IDE_FIND_REFS, but takes a symbol name rather than position"
+      );
       ( "--ide-go-to-impl",
         Arg.String (fun x -> set_mode (MODE_IDE_GO_TO_IMPL x)),
         "" );

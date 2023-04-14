@@ -3729,7 +3729,8 @@ let do_codeAction_local
         ~tracking_id
         ~ref_unblocked_time
         (ClientIdeMessage.Code_action
-           { ClientIdeMessage.Code_action.file_path; file_contents; range })
+           ( { ClientIdeMessage.file_path; ClientIdeMessage.file_contents },
+             range ))
     in
     Lwt.return actions
 

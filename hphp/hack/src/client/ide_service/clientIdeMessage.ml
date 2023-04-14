@@ -158,11 +158,7 @@ end
 
 (* Handles "textDocument/codeActions" LSP messages *)
 module Code_action = struct
-  type request = {
-    file_path: Path.t;
-    file_contents: string;
-    range: Ide_api_types.range;
-  }
+  type request = document_and_path * Ide_api_types.range
 
   type result = Lsp.CodeAction.command_or_action list
 end
@@ -263,7 +259,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Type_coverage(%s)" (Path.to_string file_path)
   | Signature_help { file_path; _ } ->
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
-  | Code_action { Code_action.file_path; _ } ->
+  | Code_action ({ file_path; _ }, _) ->
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
   | Find_references { file_path; _ } ->
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)

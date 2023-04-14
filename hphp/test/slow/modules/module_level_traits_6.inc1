@@ -1,0 +1,9 @@
+<?hh
+
+module MLT_B;
+
+internal function foo(): void { echo "foo"; }
+
+class C {
+  use T;
+}

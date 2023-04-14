@@ -1,0 +1,9 @@
+<?hh
+
+// as module_level_traits_3, but wrt the toplevel module
+
+trait T {
+  public function getFoo(): void {
+    foo();
+  }
+}

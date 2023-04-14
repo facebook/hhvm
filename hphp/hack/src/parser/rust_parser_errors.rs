@@ -5385,9 +5385,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
                 }
             }
-            PrefixedCodeExpression(x) if x.body.is_compound_statement() => {
-                self.check_can_use_feature(&x.body, &UnstableFeatures::ExpressionTreeBlocks);
-            }
             _ => {}
         }
 

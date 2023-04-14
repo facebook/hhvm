@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures('expression_trees', 'expression_tree_blocks')>>
+<<file:__EnableUnstableFeatures('expression_trees')>>
 
 function test(): void {
   ExampleDsl`{}`;

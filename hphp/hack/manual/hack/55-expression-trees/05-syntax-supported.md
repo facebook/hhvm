@@ -150,7 +150,7 @@ function example1(): void {
 This can be rewritten using expression tree blocks, eliminating the need to create a lambda and invoke it.
 
 ```hack
-<<file:__EnableUnstableFeatures('expression_trees', 'expression_tree_blocks')>>
+<<file:__EnableUnstableFeatures('expression_trees')>>
 
 function example2(): void {
   $num = ExampleDsl`1 + 1`;

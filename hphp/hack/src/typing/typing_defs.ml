@@ -852,6 +852,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_ifc_decl = ifc_decl1;
       ft_tparams = tparams1;
       ft_where_constraints = where_constraints1;
+      ft_cross_package = cross_package1;
     } =
       fty1
     in
@@ -863,6 +864,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_ifc_decl = ifc_decl2;
       ft_tparams = tparams2;
       ft_where_constraints = where_constraints2;
+      ft_cross_package = cross_package2;
     } =
       fty2
     in
@@ -882,7 +884,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
               let { capability = capability2 } = implicit_params2 in
               begin
                 match capability_compare capability1 capability2 with
-                | 0 -> compare_ifc_fun_decl ifc_decl1 ifc_decl2
+                | 0 -> begin
+                  match compare_ifc_fun_decl ifc_decl1 ifc_decl2 with
+                  | 0 ->
+                    compare_cross_package_decl cross_package1 cross_package2
+                  | n -> n
+                end
                 | n -> n
               end
             | n -> n

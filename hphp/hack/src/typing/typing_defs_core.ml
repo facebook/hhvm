@@ -26,6 +26,8 @@ type ifc_fun_decl =
   | FDInferFlows
 [@@deriving eq, ord]
 
+type cross_package_decl = string option [@@deriving eq, ord]
+
 (* The default policy is the public one. PUBLIC is a keyword, so no need to prevent class collisions *)
 let default_ifc_fun_decl = FDPolicied (Some "PUBLIC")
 
@@ -393,6 +395,7 @@ and 'ty fun_type = {
       (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.fun_type_flags;
   ft_ifc_decl: ifc_fun_decl;
+  ft_cross_package: cross_package_decl;
 }
 
 and 'ty possibly_enforced_ty = {
@@ -798,6 +801,15 @@ module Pp = struct
       Format.pp_print_string fmt s;
       Format.pp_print_string fmt "}"
 
+  and pp_cross_package_decl : Format.formatter -> cross_package_decl -> unit =
+   fun fmt r ->
+    match r with
+    | Some s ->
+      Format.pp_print_string fmt "CrossPackage(";
+      Format.pp_print_string fmt s;
+      Format.pp_print_string fmt ")"
+    | None -> Format.pp_print_string fmt "None"
+
   and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
    fun fmt x ->
     Format.fprintf fmt "@[<2>{ ";
@@ -874,6 +886,10 @@ module Pp = struct
 
     Format.fprintf fmt "@[%s =@ " "ft_ifc_decl";
     pp_ifc_fun_decl fmt x.ft_ifc_decl;
+    Format.fprintf fmt "@]";
+
+    Format.fprintf fmt "@[%s =@ " "ft_cross_package";
+    pp_cross_package_decl fmt x.ft_cross_package;
     Format.fprintf fmt "@]";
 
     Format.fprintf fmt "@ }@]"

@@ -1162,6 +1162,7 @@ struct Attributes<'a> {
     soft: bool,
     support_dynamic_type: bool,
     safe_global_variable: bool,
+    cross_package: Option<&'a str>,
 }
 
 impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> Impl<'a, 'o, 't, S> {
@@ -1636,6 +1637,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             soft: false,
             support_dynamic_type: false,
             safe_global_variable: false,
+            cross_package: None,
         };
 
         let nodes = match node {
@@ -1704,6 +1706,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                             ));
                         ifc_already_policied = true;
                     }
+
                     "__InferFlows" => {
                         if !ifc_already_policied {
                             attributes.ifc_attribute = IfcFunDecl::FDInferFlows;
@@ -1723,6 +1726,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__SafeForGlobalAccessCheck" => {
                         attributes.safe_global_variable = true;
+                    }
+                    "__CrossPackage" => {
+                        attributes.cross_package = attribute
+                            .string_literal_params
+                            .first()
+                            .map(|&(_, x)| self.str_from_utf8_for_bytes_in_arena(x));
                     }
                     _ => {}
                 }
@@ -1930,6 +1939,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             }),
             flags,
             ifc_decl,
+            cross_package: None,
         });
 
         let ty = self.alloc(Ty(
@@ -5624,6 +5634,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             }),
             flags,
             ifc_decl: default_ifc_fun_decl(),
+            cross_package: None,
         }));
 
         if self.implicit_sdt() {

@@ -78,6 +78,8 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
                   (List.exists f.f_params ~f:(fun p -> p.param_is_variadic));
             (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
+            (* TODO *)
+            ft_cross_package = None;
           } )
   in
   {

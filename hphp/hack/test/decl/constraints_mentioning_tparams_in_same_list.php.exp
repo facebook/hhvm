@@ -111,7 +111,8 @@
                       ~returns_readonly:false ~support_dynamic_type:false
                       ~readonly_this:false ~is_memoized:false
                       ~variadic:false);
-                    ft_ifc_decl = FDPolicied {PUBLIC} })))
+                    ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None
+                    })))
               ];
             tp_reified = Erased; tp_user_attributes = [] };
           { Typing_defs_core.tp_variance = Invariant;

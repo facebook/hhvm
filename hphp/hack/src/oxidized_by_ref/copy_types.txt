@@ -151,6 +151,7 @@ typing_defs_core::CollectionStyle
 typing_defs_core::ConsistentKind
 typing_defs_core::ConstraintType
 typing_defs_core::ConstraintType_
+typing_defs_core::CrossPackageDecl
 typing_defs_core::CtxRefinement
 typing_defs_core::DependentType
 typing_defs_core::DestructureKind

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eb8ef0a86f5581a07e8f0046c94fab66>>
+// @generated SignedSource<<97bc4476d42a6b0d6aba65854deab257>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,6 +68,9 @@ pub enum IfcFunDecl {
     FDPolicied(Option<String>),
     FDInferFlows,
 }
+
+#[rust_to_ocaml(attr = "deriving (eq, ord)")]
+pub type CrossPackageDecl = Option<String>;
 
 #[derive(
     Clone,
@@ -849,6 +852,7 @@ pub struct FunType {
     pub ret: PossiblyEnforcedTy,
     pub flags: typing_defs_flags::FunTypeFlags,
     pub ifc_decl: IfcFunDecl,
+    pub cross_package: CrossPackageDecl,
 }
 
 #[derive(

@@ -68,10 +68,12 @@ let expand_ty ?var_hook ?pos env ty =
         ft_params;
         ft_implicit_params;
         ft_ifc_decl;
+        ft_cross_package;
       } =
     {
       ft_flags;
       ft_ifc_decl;
+      ft_cross_package;
       ft_tparams = List.map ~f:exp_tparam ft_tparams;
       ft_where_constraints =
         List.map ~f:exp_where_constraint ft_where_constraints;

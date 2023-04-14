@@ -253,6 +253,7 @@ impl<R: Reason> From<&obr::typing_defs::FunType<'_>> for ty::FunType<R, Ty<R>> {
             ret: ft.ret.into(),
             flags: ft.flags,
             ifc_decl: ft.ifc_decl.into(),
+            cross_package: ft.cross_package.as_ref().map(|s| (*s).into()),
         }
     }
 }

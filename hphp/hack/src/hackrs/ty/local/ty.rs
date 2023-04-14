@@ -489,6 +489,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
             }),
             flags: flags.clone(),
             ifc_decl: oxidized_by_ref::typing_defs_core::IfcFunDecl::FDInferFlows,
+            cross_package: None,
         }
     }
 }

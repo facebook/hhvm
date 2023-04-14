@@ -19,6 +19,8 @@ type ce_visibility =
   | Vinternal of string
 [@@deriving eq, ord, show]
 
+type cross_package_decl = string option [@@deriving eq, ord]
+
 (* Represents <<Policied()>> or <<InferFlows>> attribute *)
 type ifc_fun_decl =
   | FDPolicied of string option
@@ -366,6 +368,7 @@ and 'ty fun_type = {
   (* Carries through the sync/async information from the aast *)
   ft_flags: int;
   ft_ifc_decl: ifc_fun_decl;
+  ft_cross_package: cross_package_decl;
 }
 
 and 'ty possibly_enforced_ty = {
@@ -486,6 +489,8 @@ module Pp : sig
   val show_locl_ty : locl_ty -> string
 
   val pp_ifc_fun_decl : Format.formatter -> ifc_fun_decl -> unit
+
+  val pp_cross_package_decl : Format.formatter -> cross_package_decl -> unit
 end
 
 include module type of Pp

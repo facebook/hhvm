@@ -503,6 +503,7 @@ pub struct FunType<R: Reason, TY> {
     pub ret: PossiblyEnforcedTy<TY>,
     pub flags: typing_defs_flags::FunTypeFlags,
     pub ifc_decl: IfcFunDecl,
+    pub cross_package: Option<Symbol>,
 }
 
 walkable!(impl<R: Reason, TY> for FunType<R, TY> => [

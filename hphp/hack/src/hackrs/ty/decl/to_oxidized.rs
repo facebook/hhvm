@@ -262,6 +262,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R, Ty<R>> {
             ret: self.ret.to_oxidized(arena),
             flags: self.flags,
             ifc_decl: self.ifc_decl.to_oxidized(arena),
+            cross_package: self.cross_package.to_oxidized(arena),
         })
     }
 }

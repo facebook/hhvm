@@ -4049,6 +4049,7 @@ and expr_
             ft_ret = fty.ft_ret;
             ft_flags = fty.ft_flags;
             ft_ifc_decl = fty.ft_ifc_decl;
+            ft_cross_package = fty.ft_cross_package;
           }
         in
         let ty =
@@ -8545,6 +8546,7 @@ and call_construct
             ~variadic:false;
         ft_ret = MakeType.unenforced (MakeType.void r);
         ft_ifc_decl = default_ifc_fun_decl;
+        ft_cross_package = None;
       }
     in
     let ty = mk (r, Tfun ft) in
@@ -9460,6 +9462,7 @@ and call
           (* TODO: ensure `ft_params`/`ft_where_constraints` don't affect subtyping *)
           let ft_tparams = [] in
           let ft_where_constraints = [] in
+          let ft_cross_package = None in
           let ft_params = List.map ~f:mk_fun_param type_of_el in
           let ft_implicit_params =
             {
@@ -9496,6 +9499,7 @@ and call
               ft_ret;
               ft_flags;
               ft_ifc_decl;
+              ft_cross_package;
             }
           in
           let fun_type = mk (r, Tfun fun_locl_type) in

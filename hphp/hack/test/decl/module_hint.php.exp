@@ -48,7 +48,7 @@ File root|module_hint.php--here.php
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                ft_ifc_decl = FDPolicied {PUBLIC} }));
+                ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] }
          ];
@@ -160,7 +160,7 @@ File root|module_hint.php--everywhere.php
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
                ~readonly_this:false ~is_memoized:false ~variadic:false);
-             ft_ifc_decl = FDPolicied {PUBLIC} }));
+             ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
        fe_pos = [3:10-16]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false }));
   ("\\MyList",

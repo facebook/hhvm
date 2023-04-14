@@ -25,7 +25,7 @@
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
                   ~readonly_this:false ~is_memoized:false ~variadic:false);
-                ft_ifc_decl = FDPolicied {PUBLIC} }));
+                ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
           sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
          { Shallow_decl_defs.sm_name = ([5:19-29], "closeDoors");
@@ -42,7 +42,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
          ];
@@ -75,7 +75,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
           ];
@@ -112,7 +112,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];
@@ -145,7 +145,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = abstract;
            sm_attributes = [] }
           ];
@@ -182,7 +182,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
           ];
@@ -223,7 +223,7 @@
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
                    ~readonly_this:false ~is_memoized:false ~variadic:false);
-                 ft_ifc_decl = FDPolicied {PUBLIC} }));
+                 ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
           { Shallow_decl_defs.sm_name = ([45:19-30], "startEngine");
@@ -240,7 +240,7 @@
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
                     ~readonly_this:false ~is_memoized:false ~variadic:false);
-                  ft_ifc_decl = FDPolicied {PUBLIC} }));
+                  ft_ifc_decl = FDPolicied {PUBLIC}ft_cross_package = None }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }
           ];

@@ -1863,6 +1863,7 @@ module Json = struct
                  ft_where_constraints = [];
                  ft_flags = 0;
                  ft_ifc_decl = default_ifc_fun_decl;
+                 ft_cross_package = None;
                })
         | _ ->
           deserialization_error

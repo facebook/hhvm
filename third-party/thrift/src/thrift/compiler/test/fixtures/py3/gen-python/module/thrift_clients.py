@@ -26,6 +26,7 @@ import fbcode.thrift.python.types as _fbthrift_python_types
 import module.thrift_types
 import module.thrift_metadata
 import facebook.thrift.annotation.cpp.thrift_types
+import facebook.thrift.annotation.deprecated.meta.thrift_types
 
 class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleService.Sync"]):
     @staticmethod

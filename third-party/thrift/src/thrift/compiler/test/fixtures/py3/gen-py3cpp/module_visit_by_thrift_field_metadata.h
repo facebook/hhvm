@@ -84,6 +84,19 @@ struct VisitByFieldId<::py3::simple::HiddenTypeFieldsStruct> {
 };
 
 template <>
+struct VisitByFieldId<::py3::simple::GeneratedStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).the_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::py3::simple::GeneratedStruct");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::py3::simple::detail::AdaptedUnion> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

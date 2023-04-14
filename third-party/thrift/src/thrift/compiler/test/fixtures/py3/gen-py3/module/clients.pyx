@@ -51,6 +51,8 @@ cimport module.types as _module_types
 import module.types as _module_types
 cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
 import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
+import facebook.thrift.annotation.deprecated.meta.types as _facebook_thrift_annotation_deprecated_meta_types
 
 cimport module.services_reflection as _services_reflection
 

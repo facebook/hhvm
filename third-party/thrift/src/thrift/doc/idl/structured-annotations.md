@@ -4,7 +4,7 @@
 
 ## Definition
 
-[Read here](https://www.internalfb.com/intern/staticdocs/thrift/docs/spec/definition/annotation)
+[Read here](https://www.internalfb.com/intern/staticdocs/thrift/docs/idl/annotations)
 
 ## Exposure in languages
 

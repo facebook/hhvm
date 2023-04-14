@@ -1,0 +1,6 @@
+(3,17)-(3,18) A type specifier is expected here.
+(5,17)-(5,17) A type specifier is expected here.
+(7,25)-(7,26) A type specifier is expected here.
+(10,29)-(11,1) Either the token `|` or `;` is expected here. Use `|` to specify additional variant types for this case type or use `;` to terminate the declaration.
+(14,25)-(15,1) A semicolon `;` is expected here.
+(16,1)-(16,5) A type specifier is expected here.

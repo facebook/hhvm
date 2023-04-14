@@ -56,9 +56,8 @@
 (65,8)-(65,8) An expression is expected here.
 (66,6)-(66,6) A semicolon `;` is expected here.
 (66,8)-(66,8) An expression is expected here.
-(67,7)-(67,7) An expression is expected here.
-(67,7)-(67,8) A colon `:` is expected here.
-(67,8)-(68,1) A `case` statement may only appear directly inside a `switch`.
+(67,5)-(67,5) The `type` keyword is expected here.
+(67,6)-(67,6) A type specifier is expected here.
 (68,6)-(68,6) An expression is expected here.
 (70,8)-(70,8) An expression is expected here.
 (71,6)-(71,6) A name is expected here.

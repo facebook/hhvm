@@ -1394,9 +1394,9 @@ where
     }
 
     // Parse with parse_item while a condition is met.
-    fn parse_list_while<F, P>(&mut self, parse_item: F, predicate: P) -> S::Output
+    fn parse_list_while<F, P>(&mut self, mut parse_item: F, predicate: P) -> S::Output
     where
-        F: Fn(&mut Self) -> S::Output,
+        F: FnMut(&mut Self) -> S::Output,
         P: Fn(&Self) -> bool,
     {
         let mut items = vec![];
@@ -1431,7 +1431,7 @@ where
 
     fn parse_terminated_list<F>(&mut self, parse_item: F, terminator: TokenKind) -> S::Output
     where
-        F: Fn(&mut Self) -> S::Output,
+        F: FnMut(&mut Self) -> S::Output,
     {
         let predicate = |x: &Self| x.peek_token_kind() != terminator;
         self.parse_list_while(parse_item, predicate)

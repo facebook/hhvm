@@ -2189,6 +2189,7 @@ where
                 self.parse_type_alias_declaration(attribute_specification, false)
             }
             TokenKind::Newctx => self.parse_ctx_alias_declaration(attribute_specification),
+            TokenKind::Case => self.parse_case_type_declaration(attribute_specification),
             TokenKind::Async | TokenKind::Function => {
                 if attribute_specification.is_missing() && !has_visibility {
                     // if attribute section is missing - it might be either
@@ -2396,6 +2397,110 @@ where
         )
     }
 
+    fn parse_case_type_declaration(&mut self, attr: S::Output) -> S::Output {
+        // SPEC
+        // case-type-declaration:
+        //   attribute-spec-opt modifiers case type  name
+        //     generic-type-parameter-list-opt case-type-bounds =  case-type-variants  ;
+        let modifiers = self.parse_modifiers();
+        let case_keyword = self.assert_token(TokenKind::Case);
+        let type_keyword = self.require_token(TokenKind::Type, Errors::type_keyword);
+        let name = self.require_name();
+        let generic_parameter = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
+        let (as_kw, bounds) = self.parse_case_type_bounds();
+        let equal = self.require_equal();
+        let variants = self.parse_case_type_variants();
+        let semi = self.require_semicolon();
+        self.sc_mut().make_case_type_declaration(
+            attr,
+            modifiers,
+            case_keyword,
+            type_keyword,
+            name,
+            generic_parameter,
+            as_kw,
+            bounds,
+            equal,
+            variants,
+            semi,
+        )
+    }
+
+    fn parse_case_type_bounds(&mut self) -> (S::Output, S::Output) {
+        // SPEC
+        // case-type-bounds:
+        //    as type-specifier, type-specifier
+        if self.peek_token_kind() == TokenKind::As {
+            let as_kw = self.fetch_token();
+            let bounds = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
+                p.parse_comma_list(TokenKind::Equal, Errors::error1007, |p| {
+                    p.parse_type_specifier(false /* allow_var */, false /* allow_attr */)
+                })
+            });
+            (as_kw, bounds)
+        } else {
+            let pos = self.pos();
+            let as_kw = self.sc_mut().make_missing(pos);
+            let bounds = self.sc_mut().make_missing(pos);
+            (as_kw, bounds)
+        }
+    }
+
+    fn parse_case_type_variants(&mut self) -> S::Output {
+        // SPEC
+        // case-type-variant:
+        //   |  type-specifier
+        //   type-specifier
+
+        // Error Reporting: If the next token is a `;` that means no type-specifier was given.
+        // `parse_terminated_list` won't report an error in this case, so let's handle it here
+        if self.peek_token_kind() == TokenKind::Semicolon {
+            self.with_error(Errors::error1007);
+            let pos = self.pos();
+            self.sc_mut().make_missing(pos)
+        } else {
+            let mut is_first = true;
+            self.parse_terminated_list(
+                |this: &mut Self| {
+                    // For the first variant in the list the leading `|` is optional
+                    let bar = if is_first {
+                        is_first = false;
+                        this.optional_token(TokenKind::Bar)
+                    } else {
+                        let token =
+                            this.require_token(TokenKind::Bar, Errors::expected_bar_or_semicolon);
+
+                        // Error Recovery: If we are missing a `|` don't bother parsing anything else.
+                        // It is likely a `;` is missing, so bail out
+                        if token.is_missing() {
+                            let pos = this.pos();
+                            return this.sc_mut().make_missing(pos);
+                        }
+                        token
+                    };
+
+                    let typ = this.with_type_parser(|p: &mut TypeParser<'a, S>| {
+                        p.parse_type_specifier_opt(false, false)
+                    });
+
+                    // Error Recovery: We use `parse_type_specifier_opt` so we can handle error recovery directly.
+                    // If we didn't get a type specifier, report an error then consider the whole case-type-variant
+                    // to be missing. This will prevent the parser from consuming too many tokens in the error case
+                    if typ.is_missing() {
+                        this.with_error_on_whole_token(Errors::error1007);
+                        let pos = this.pos();
+                        this.sc_mut().make_missing(pos)
+                    } else {
+                        this.sc_mut().make_case_type_variant(bar, typ)
+                    }
+                },
+                TokenKind::Semicolon,
+            )
+        }
+    }
+
     fn parse_ctx_alias_declaration(&mut self, attr: S::Output) -> S::Output {
         // SPEC
         // ctx-alias-declaration:
@@ -2586,6 +2691,11 @@ where
                 let pos = self.pos();
                 let missing = self.sc_mut().make_missing(pos);
                 self.parse_ctx_alias_declaration(missing)
+            }
+            TokenKind::Case => {
+                let pos = self.pos();
+                let missing = self.sc_mut().make_missing(pos);
+                self.parse_case_type_declaration(missing)
             }
             TokenKind::Enum => {
                 let pos = self.pos();

@@ -5742,8 +5742,8 @@
         }
       },
       {
-        "kind":"case_label",
-        "case_keyword":{
+        "kind":"case_type_declaration",
+        "case_type_case_keyword":{
           "kind":"token",
           "token":{
             "kind":"case",
@@ -5757,38 +5757,47 @@
             "line_number":67
           }
         },
-        "case_expression":{
-          "kind":"parenthesized_expression",
-          "parenthesized_expression_left_paren":{
-            "kind":"token",
-            "token":{
-              "kind":"(",
-              "text":"(",
-              "offset":1405,
-              "leading_width":0,
-              "width":1,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":67
+        "case_type_variants":{
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"case_type_variant",
+              "case_type_variant_type":{
+                "kind":"tuple_type_specifier",
+                "tuple_left_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"(",
+                    "text":"(",
+                    "offset":1405,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":67
+                  }
+                },
+                "tuple_types":{"kind":"list","elements":[]},
+                "tuple_right_paren":{
+                  "kind":"token",
+                  "token":{
+                    "kind":")",
+                    "text":")",
+                    "offset":1406,
+                    "leading_width":0,
+                    "width":1,
+                    "trailing_width":0,
+                    "leading":[],
+                    "trailing":[],
+                    "line_number":67
+                  }
+                }
+              }
             }
-          },
-          "parenthesized_expression_expression":{
-            "kind":"token",
-            "token":{
-              "kind":")",
-              "text":")",
-              "offset":1406,
-              "leading_width":0,
-              "width":1,
-              "trailing_width":0,
-              "leading":[],
-              "trailing":[],
-              "line_number":67
-            }
-          }
+          ]
         },
-        "case_colon":{
+        "case_type_semicolon":{
           "kind":"token",
           "token":{
             "kind":";",

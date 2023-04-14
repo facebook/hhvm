@@ -142,9 +142,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       else
         Concat [t env hashbang; Newline; t env suffix]
     | Syntax.MarkupSuffix _ -> transform_simple_statement env node
-    (* TODO(T150253169) - #CaseTypes: Implement proper formatting before preview launch *)
-    | Syntax.CaseTypeDeclaration _
-    | Syntax.CaseTypeVariant _
     | Syntax.SimpleTypeSpecifier _
     | Syntax.VariableExpression _
     | Syntax.PipeVariableExpression _
@@ -322,6 +319,51 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semi;
           Newline;
         ]
+    (* TODO(T150253169) - #CaseTypes: Implement proper formatting before preview launch *)
+    | Syntax.CaseTypeDeclaration
+        {
+          case_type_attribute_spec = attr;
+          case_type_modifiers = modifiers;
+          case_type_case_keyword = case_kw;
+          case_type_type_keyword = type_kw;
+          case_type_name = name;
+          case_type_generic_parameter = generic;
+          case_type_as = as_kw;
+          case_type_bounds = bounds;
+          case_type_equal = eq_kw;
+          case_type_variants = variants;
+          case_type_semicolon = semi;
+        } ->
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          t env case_kw;
+          Space;
+          t env type_kw;
+          Space;
+          t env name;
+          t env generic;
+          when_present as_kw space;
+          t env as_kw;
+          when_present as_kw space;
+          handle_possible_list env bounds;
+          when_present eq_kw (function () ->
+              Concat
+                [
+                  Space;
+                  t env eq_kw;
+                  Space;
+                  SplitWith Cost.Base;
+                  Nest [handle_possible_list env variants];
+                ]);
+          t env semi;
+          Newline;
+        ]
+    | Syntax.CaseTypeVariant
+        { case_type_variant_bar = bar; case_type_variant_type = ty } ->
+      Concat [t env bar; when_present bar space; t env ty]
     | Syntax.PropertyDeclaration
         {
           property_attribute_spec = attr;

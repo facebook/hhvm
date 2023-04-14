@@ -80,6 +80,7 @@ and expand_typedef_ ?(force_expand = false) visited ctx (name : string) :
     && (force_expand
        ||
        match td_vis with
+       | Aast.CaseType
        | Aast.OpaqueModule
        | Aast.Opaque ->
          false

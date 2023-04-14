@@ -1339,6 +1339,7 @@ end = struct
 
     let pp_typedef_visiblity ppf = function
       | Aast_defs.Transparent -> Fmt.string ppf "type"
+      | Aast_defs.CaseType -> Fmt.string ppf "case type"
       | Aast_defs.Opaque
       | Aast_defs.OpaqueModule ->
         Fmt.string ppf "newtype"

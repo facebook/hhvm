@@ -3570,7 +3570,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let typedef = self.alloc(TypedefType {
             module: self.module,
             pos,
-            vis: aast::TypedefVisibility::Opaque,
+            vis: aast::TypedefVisibility::CaseType,
             tparams,
             as_constraint,
             super_constraint: None,

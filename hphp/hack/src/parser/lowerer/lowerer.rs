@@ -5902,7 +5902,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 file_attributes: vec![],
                 namespace: mk_empty_ns_env(env),
                 mode: env.file_mode(),
-                vis: ast::TypedefVisibility::Opaque,
+                vis: ast::TypedefVisibility::CaseType,
                 kind,
                 span: p_pos(node, env),
                 emit_id: None,

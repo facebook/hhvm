@@ -2761,6 +2761,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                                 aast_defs::TypedefVisibility::Transparent => "type",
                                 aast_defs::TypedefVisibility::Opaque => "newtype",
                                 aast_defs::TypedefVisibility::OpaqueModule => "module newtype",
+                                aast_defs::TypedefVisibility::CaseType => "case type",
                             })
                         })
                         .to_string(),

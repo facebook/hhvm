@@ -54,6 +54,7 @@ type typedef_visibility = Ast_defs.typedef_visibility =
   | Transparent
   | Opaque
   | OpaqueModule
+  | CaseType
 [@@deriving eq, ord, show { with_path = false }] [@@transform.opaque]
 
 type reify_kind = Ast_defs.reify_kind =

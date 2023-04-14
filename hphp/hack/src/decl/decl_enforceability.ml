@@ -258,7 +258,11 @@ module Enforce (ContextAccess : ContextAccess) :
             in
             Aast.(
               (match td_vis with
-              | Transparent -> exp_ty
+              (* While case types are Tnewtype in the type system, at runtime
+               * they are enforced transparently. *)
+              | CaseType
+              | Transparent ->
+                exp_ty
               | Opaque -> make_unenforced exp_ty
               | OpaqueModule -> Unenforced None))
           | Some (ClassResult cls) ->

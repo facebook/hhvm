@@ -733,6 +733,7 @@ let is_typedef_visible env ?(expand_visible_newtype = true) ~name td =
          (get_current_module env)
          (Option.map td_module ~f:snd)
   | Aast.Transparent -> true
+  | Aast.CaseType -> false
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t option =
   let res =

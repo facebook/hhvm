@@ -11,7 +11,7 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = Opaque;
+       t_mode = Mstrict; t_vis = CaseType;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -30,7 +30,7 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = Opaque;
+       t_mode = Mstrict; t_vis = CaseType;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
@@ -49,7 +49,7 @@
             ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
           }
          ];
-       t_mode = Mstrict; t_vis = Opaque;
+       t_mode = Mstrict; t_vis = CaseType;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

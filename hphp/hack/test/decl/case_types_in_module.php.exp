@@ -1,21 +1,21 @@
 [("\\CT1",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_module = (Some ([4:8-16], "some.mod"));
-       td_pos = [6:20-23]; td_vis = Opaque; td_tparams = [];
+       td_pos = [6:20-23]; td_vis = CaseType; td_tparams = [];
        td_as_constraint = None; td_super_constraint = None;
        td_type = (Rhint ([6:26-29]), (Tprim Tint)); td_is_ctx = false;
        td_attributes = []; td_internal = true; td_docs_url = None }));
   ("\\CT2",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([4:8-16], "some.mod"));
-        td_pos = [8:18-21]; td_vis = Opaque; td_tparams = [];
+        td_pos = [8:18-21]; td_vis = CaseType; td_tparams = [];
         td_as_constraint = None; td_super_constraint = None;
         td_type = (Rhint ([8:24-27]), (Tprim Tint)); td_is_ctx = false;
         td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\CT3",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([4:8-16], "some.mod"));
-        td_pos = [11:11-14]; td_vis = Opaque; td_tparams = [];
+        td_pos = [11:11-14]; td_vis = CaseType; td_tparams = [];
         td_as_constraint = None; td_super_constraint = None;
         td_type = (Rhint ([11:17-20]), (Tprim Tint)); td_is_ctx = false;
         td_attributes = []; td_internal = false; td_docs_url = None }))

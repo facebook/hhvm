@@ -531,6 +531,7 @@ let typedef_defn ctx source_text elem decl_id progress =
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
+    | CaseType
     | Opaque
     | OpaqueModule ->
       false

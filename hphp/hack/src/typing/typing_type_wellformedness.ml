@@ -520,6 +520,7 @@ let typedef tenv t =
            * references.
            *)
           t.t_tparams
+        | CaseType
         | Opaque
         | OpaqueModule ->
           []);

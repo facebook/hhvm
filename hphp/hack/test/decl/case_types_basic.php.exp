@@ -1,6 +1,6 @@
 [("\\CT1",
   (Shallow_decl_defs.Typedef
-     { Typing_defs.td_module = None; td_pos = [4:11-14]; td_vis = Opaque;
+     { Typing_defs.td_module = None; td_pos = [4:11-14]; td_vis = CaseType;
        td_tparams =
        [{ Typing_defs_core.tp_variance = Covariant;
           tp_name = ([4:16-18], "T1"); tp_tparams = [];
@@ -53,7 +53,7 @@
        td_docs_url = None }));
   ("\\CT2",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [6:11-14]; td_vis = Opaque;
+      { Typing_defs.td_module = None; td_pos = [6:11-14]; td_vis = CaseType;
         td_tparams = [];
         td_as_constraint =
         (Some (Rhint ([6:18-31]),
@@ -65,7 +65,7 @@
         td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\CT3",
    (Shallow_decl_defs.Typedef
-      { Typing_defs.td_module = None; td_pos = [8:11-14]; td_vis = Opaque;
+      { Typing_defs.td_module = None; td_pos = [8:11-14]; td_vis = CaseType;
         td_tparams = []; td_as_constraint = None; td_super_constraint = None;
         td_type =
         (Rhint ([8:17-30]),

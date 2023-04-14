@@ -178,6 +178,7 @@ class MyServicePrioParentClient extends \ThriftClientBase implements MyServicePr
 abstract class MyServicePrioParentAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as MyServicePrioParentAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'MyServicePrioParent';
 
   protected async function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');
@@ -310,6 +311,7 @@ class MyServicePrioParentAsyncProcessor extends MyServicePrioParentAsyncProcesso
 abstract class MyServicePrioParentSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as MyServicePrioParentIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServicePrioParentStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'MyServicePrioParent';
 
   protected function process_ping(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('ping');

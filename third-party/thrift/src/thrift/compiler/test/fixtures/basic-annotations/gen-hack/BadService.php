@@ -195,6 +195,7 @@ class BadService_BadInteraction extends \ThriftClientBase {
 abstract class BadServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as BadServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'BadService';
 
   protected async function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');
@@ -283,6 +284,7 @@ class BadServiceAsyncProcessor extends BadServiceAsyncProcessorBase {
 abstract class BadServiceSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as BadServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BadServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'BadService';
 
   protected function process_bar(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('bar');

@@ -5711,7 +5711,9 @@ void t_hack_generator::generate_service_processor(
              << indent()
              << "  const classname<\\IThriftServiceStaticMetadata> "
                 "SERVICE_METADATA_CLASS = "
-             << long_name << "StaticMetadata::class;\n\n";
+             << long_name << "StaticMetadata::class;\n"
+             << indent() << "  const string THRIFT_SVC_NAME = '"
+             << tservice->get_name() << "';\n\n";
 
   indent_up();
 

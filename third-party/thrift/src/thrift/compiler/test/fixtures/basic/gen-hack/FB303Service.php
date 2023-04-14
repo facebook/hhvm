@@ -129,6 +129,7 @@ class FB303ServiceClient extends \ThriftClientBase implements FB303ServiceClient
 abstract class FB303ServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as FB303ServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'FB303Service';
 
   protected async function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');
@@ -217,6 +218,7 @@ class FB303ServiceAsyncProcessor extends FB303ServiceAsyncProcessorBase {
 abstract class FB303ServiceSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as FB303ServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = FB303ServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'FB303Service';
 
   protected function process_renamed_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('renamed_rpc');

@@ -218,6 +218,7 @@ class BarClient extends \ThriftClientBase implements BarClientIf {
 abstract class BarAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as BarAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'Bar';
 
   protected async function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');
@@ -306,6 +307,7 @@ class BarAsyncProcessor extends BarAsyncProcessorBase {
 abstract class BarSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as BarIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = BarStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'Bar';
 
   protected function process_baz(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('baz');

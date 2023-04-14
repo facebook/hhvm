@@ -128,6 +128,7 @@ class MyServiceClient extends \ThriftClientBase implements MyServiceClientIf {
 abstract class MyServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as MyServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'MyService';
 
   protected async function process_query(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('query');
@@ -216,6 +217,7 @@ class MyServiceAsyncProcessor extends MyServiceAsyncProcessorBase {
 abstract class MyServiceSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as MyServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = MyServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'MyService';
 
   protected function process_query(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('query');

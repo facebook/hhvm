@@ -197,6 +197,7 @@ class DbMixedStackArgumentsClient extends \ThriftClientBase implements DbMixedSt
 abstract class DbMixedStackArgumentsAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as DbMixedStackArgumentsAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'DbMixedStackArguments';
 
   protected async function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');
@@ -329,6 +330,7 @@ class DbMixedStackArgumentsAsyncProcessor extends DbMixedStackArgumentsAsyncProc
 abstract class DbMixedStackArgumentsSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as DbMixedStackArgumentsIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = DbMixedStackArgumentsStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'DbMixedStackArguments';
 
   protected function process_getDataByKey0(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('getDataByKey0');

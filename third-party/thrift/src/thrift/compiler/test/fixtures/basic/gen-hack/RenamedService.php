@@ -123,6 +123,7 @@ class RenamedServiceClient extends \ThriftClientBase implements RenamedServiceCl
 abstract class RenamedServiceAsyncProcessorBase extends \ThriftAsyncProcessor {
   abstract const type TThriftIf as RenamedServiceAsyncIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'FooService';
 
   protected async function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): Awaitable<void> {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');
@@ -211,6 +212,7 @@ class RenamedServiceAsyncProcessor extends RenamedServiceAsyncProcessorBase {
 abstract class RenamedServiceSyncProcessorBase extends \ThriftSyncProcessor {
   abstract const type TThriftIf as RenamedServiceIf;
   const classname<\IThriftServiceStaticMetadata> SERVICE_METADATA_CLASS = RenamedServiceStaticMetadata::class;
+  const string THRIFT_SVC_NAME = 'FooService';
 
   protected function process_simple_rpc(int $seqid, \TProtocol $input, \TProtocol $output): void {
     $handler_ctx = $this->eventHandler_->getHandlerContext('simple_rpc');

@@ -3263,7 +3263,6 @@ dependencies = [
 name = "naming_table_builder_ffi"
 version = "0.0.0"
 dependencies = [
- "anyhow",
  "naming_table_builder",
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",

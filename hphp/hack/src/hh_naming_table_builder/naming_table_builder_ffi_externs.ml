@@ -6,7 +6,14 @@
  *
  *)
 
+open Hh_prelude
+
 type build_progress
+
+type build_result = {
+  exit_status: int;
+  time_taken_secs: float;
+}
 
 external build :
   www:string -> custom_hhi_path:string -> output:string -> build_progress
@@ -17,7 +24,7 @@ external build :
    stack), or by returning a non-zero exit status. The exit statuses are
    described by `naming_table_builder::ExitStatus`. All other failures are
    represented by exceptions. *)
-external poll_exn : build_progress -> int option
+external poll_exn : build_progress -> (int * float) option
   = "naming_table_builder_ffi_poll"
 
 let build ~(www : Path.t) ~(custom_hhi_path : Path.t) ~(output : Path.t) :
@@ -26,3 +33,8 @@ let build ~(www : Path.t) ~(custom_hhi_path : Path.t) ~(output : Path.t) :
     ~www:(Path.to_string www)
     ~custom_hhi_path:(Path.to_string custom_hhi_path)
     ~output:(Path.to_string output)
+
+let poll_exn (progress : build_progress) : build_result option =
+  poll_exn progress
+  |> Option.map ~f:(fun (exit_status, time_taken_secs) ->
+         { exit_status; time_taken_secs })

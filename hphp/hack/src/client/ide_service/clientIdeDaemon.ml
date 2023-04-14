@@ -396,11 +396,12 @@ temporary directory, and then loading that naming table.
 
 This is an alternative to [load_naming_table] to produce a naming table. *)
 let build_naming_table
-    (ctx : Provider_context.t) ~(root : Path.t) ~(hhi_root : Path.t) :
-    prepare_naming_table_result Lwt.t =
-  let output = Path.make @@ ServerFiles.client_ide_naming_table root in
+    (ctx : Provider_context.t)
+    ~(root : Path.t)
+    ~(hhi_root : Path.t)
+    ~(output : Path.t) : prepare_naming_table_result Lwt.t =
   log
-    "Beginning full index naming table build with destination %s"
+    "[full-index] Beginning full index naming table build with destination %s"
     (Path.to_string output);
   let progress =
     Naming_table_builder_ffi_externs.build
@@ -408,17 +409,22 @@ let build_naming_table
       ~custom_hhi_path:hhi_root
       ~output
   in
-  let rec poll_build_until_complete_exn () : int Lwt.t =
+  let rec poll_build_until_complete_exn () :
+      Naming_table_builder_ffi_externs.build_result Lwt.t =
     match Naming_table_builder_ffi_externs.poll_exn progress with
-    | Some exit_status -> Lwt.return exit_status
+    | Some build_result -> Lwt.return build_result
     | None ->
       let%lwt () = Lwt_unix.sleep 0.1 in
       poll_build_until_complete_exn ()
   in
   try%lwt
-    let%lwt exit_status = poll_build_until_complete_exn () in
+    let%lwt Naming_table_builder_ffi_externs.{ exit_status; time_taken_secs } =
+      poll_build_until_complete_exn ()
+    in
     if exit_status = 0 then begin
-      log "[full-index] Successfully built naming table from full index.";
+      log
+        "[full-index] Successfully built naming table from full index in %f seconds."
+        time_taken_secs;
       log "[full-index] Loading naming-table... %s" (Path.to_string output);
       let naming_table =
         Naming_table.load_from_sqlite ctx (Path.to_string output)
@@ -427,8 +433,9 @@ let build_naming_table
       Lwt.return_ok (naming_table, [])
     end else begin
       log
-        "[full-index] Naming table build failed with nonzero exit status: %d"
-        exit_status;
+        "[full-index] Naming table build failed with nonzero exit status: %d in %f seconds"
+        exit_status
+        time_taken_secs;
       let data =
         Some
           (Hh_json.JSON_Object
@@ -486,7 +493,11 @@ let prepare_naming_table
           (ClientIdeMessage.Notification ClientIdeMessage.Full_index_fallback)
     in
     let%lwt full_index_result =
-      build_naming_table ctx ~root:param.root ~hhi_root:dstate.dcommon.hhi_root
+      build_naming_table
+        ctx
+        ~root:param.root
+        ~hhi_root:dstate.dcommon.hhi_root
+        ~output:(Path.make @@ ServerFiles.client_ide_naming_table param.root)
     in
     log "Completed index";
     Lwt.return full_index_result

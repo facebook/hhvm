@@ -334,7 +334,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Foo.return"));
+                .instrument(::tracing::trace_span!("call", method = "Foo.return"));
 
             async move {
                 let reply_env = call.await?;
@@ -350,7 +350,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Foo.return"))
+            .instrument(::tracing::info_span!("stream", method = "Foo.return"))
             .boxed()
         }
 
@@ -382,7 +382,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Foo.super"));
+                .instrument(::tracing::trace_span!("call", method = "Foo.super"));
 
             async move {
                 let reply_env = call.await?;
@@ -398,7 +398,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Foo.super"))
+            .instrument(::tracing::info_span!("stream", method = "Foo.super"))
             .boxed()
         }
     }
@@ -873,7 +873,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Foo.return", "success");
                     crate::services::foo::ReturnExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::ReturnExn::Success(_))) => {
@@ -883,11 +883,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Foo.return", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Foo.return", exn);
+                    ::tracing::error!(method = "Foo.return", panic = ?aexn);
                     crate::services::foo::ReturnExn::ApplicationException(aexn)
                 }
             };
@@ -945,7 +946,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Foo.super", "success");
                     crate::services::foo::SuperExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::foo::SuperExn::Success(_))) => {
@@ -955,11 +956,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Foo.super", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Foo.super", exn);
+                    ::tracing::error!(method = "Foo.super", panic = ?aexn);
                     crate::services::foo::SuperExn::ApplicationException(aexn)
                 }
             };

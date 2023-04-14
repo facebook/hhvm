@@ -867,7 +867,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.ping"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.ping"));
 
             async move {
                 let reply_env = call.await?;
@@ -883,7 +883,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.ping"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.ping"))
             .boxed()
         }
 
@@ -913,7 +913,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.getRandomData"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.getRandomData"));
 
             async move {
                 let reply_env = call.await?;
@@ -929,7 +929,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.getRandomData"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.getRandomData"))
             .boxed()
         }
 
@@ -961,7 +961,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.hasDataById"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.hasDataById"));
 
             async move {
                 let reply_env = call.await?;
@@ -977,7 +977,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.hasDataById"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.hasDataById"))
             .boxed()
         }
 
@@ -1009,7 +1009,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.getDataById"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.getDataById"));
 
             async move {
                 let reply_env = call.await?;
@@ -1025,7 +1025,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.getDataById"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.getDataById"))
             .boxed()
         }
 
@@ -1059,7 +1059,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.putDataById"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.putDataById"));
 
             async move {
                 let reply_env = call.await?;
@@ -1075,7 +1075,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.putDataById"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.putDataById"))
             .boxed()
         }
 
@@ -1109,7 +1109,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.lobDataById"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.lobDataById"));
 
             async move {
                 let reply_env = call.await?;
@@ -1125,7 +1125,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.lobDataById"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.lobDataById"))
             .boxed()
         }
     }

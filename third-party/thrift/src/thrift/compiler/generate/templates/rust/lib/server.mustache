@@ -247,7 +247,7 @@
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "{{service:name}}.{{function:name}}", "success");
                     {{#function:creates_interaction?}}
                     {{#function:return_type}}{{#type:void?}}
                     let (interaction_handler, res) = (res, ());
@@ -268,12 +268,13 @@
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
                     {{!TODO: Remove this once debug for stream is implemented.}}
                     {{^function:returns_stream?}}
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "{{service:name}}.{{function:name}}", exception = ?exn);
                     {{/function:returns_stream?}}
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("{{service:name}}.{{function:name}}", exn);
+                    ::tracing::error!(method = "{{service:name}}.{{function:name}}", panic = ?aexn);
                     {{program:crate}}::services::{{service:snake}}::{{function:upcamel}}Exn::ApplicationException(aexn)
                 }
             };

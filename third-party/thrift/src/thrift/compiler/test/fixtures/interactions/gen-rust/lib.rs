@@ -2351,7 +2351,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyInteraction.frobnicate"));
+                .instrument(::tracing::trace_span!("call", method = "MyInteraction.frobnicate"));
 
             async move {
                 let reply_env = call.await?;
@@ -2367,7 +2367,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyInteraction.frobnicate"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteraction.frobnicate"))
             .boxed()
         }
 
@@ -2397,7 +2397,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyInteraction.ping"));
+                .instrument(::tracing::trace_span!("call", method = "MyInteraction.ping"));
 
             async move {
                 let reply_env = call.await?;
@@ -2413,7 +2413,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyInteraction.ping"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteraction.ping"))
             .boxed()
         }
 
@@ -2479,7 +2479,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("MyInteraction.truthify"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteraction.truthify"))
             .boxed()
         }
 
@@ -2509,7 +2509,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyInteraction.encode"));
+                .instrument(::tracing::trace_span!("call", method = "MyInteraction.encode"));
 
             async move {
                 let reply_env = call.await?;
@@ -2525,7 +2525,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyInteraction.encode"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteraction.encode"))
             .boxed()
         }
     }
@@ -2947,7 +2947,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyInteractionFast.frobnicate"));
+                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.frobnicate"));
 
             async move {
                 let reply_env = call.await?;
@@ -2963,7 +2963,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyInteractionFast.frobnicate"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.frobnicate"))
             .boxed()
         }
 
@@ -2993,7 +2993,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyInteractionFast.ping"));
+                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.ping"));
 
             async move {
                 let reply_env = call.await?;
@@ -3009,7 +3009,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyInteractionFast.ping"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.ping"))
             .boxed()
         }
 
@@ -3075,7 +3075,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("MyInteractionFast.truthify"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.truthify"))
             .boxed()
         }
 
@@ -3105,7 +3105,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyInteractionFast.encode"));
+                .instrument(::tracing::trace_span!("call", method = "MyInteractionFast.encode"));
 
             async move {
                 let reply_env = call.await?;
@@ -3121,7 +3121,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyInteractionFast.encode"))
+            .instrument(::tracing::info_span!("stream", method = "MyInteractionFast.encode"))
             .boxed()
         }
     }
@@ -3544,7 +3544,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "SerialInteraction.frobnicate"));
+                .instrument(::tracing::trace_span!("call", method = "SerialInteraction.frobnicate"));
 
             async move {
                 let reply_env = call.await?;
@@ -3560,7 +3560,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("SerialInteraction.frobnicate"))
+            .instrument(::tracing::info_span!("stream", method = "SerialInteraction.frobnicate"))
             .boxed()
         }
     }
@@ -3827,7 +3827,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.foo"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.foo"));
 
             async move {
                 let reply_env = call.await?;
@@ -3843,7 +3843,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyService.foo"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.foo"))
             .boxed()
         }
 
@@ -3881,7 +3881,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.interact"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.interact"));
 
             async move {
                 let reply_env = call.await?;
@@ -3899,7 +3899,7 @@ pub mod client {
                 res?;
                 ::std::result::Result::Ok(interaction_client)
             }
-            .instrument(::tracing::info_span!("MyService.interact"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.interact"))
             .boxed()
         }
 
@@ -3935,7 +3935,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyService.interactFast"));
+                .instrument(::tracing::trace_span!("call", method = "MyService.interactFast"));
 
             async move {
                 let reply_env = call.await?;
@@ -3952,7 +3952,7 @@ pub mod client {
                 let interaction_client: crate::client::MyInteractionFastClient = ::std::sync::Arc::new(interaction_impl);
                 ::std::result::Result::Ok((interaction_client, res?))
             }
-            .instrument(::tracing::info_span!("MyService.interactFast"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.interactFast"))
             .boxed()
         }
 
@@ -4025,7 +4025,7 @@ pub mod client {
                 let interaction_client: crate::client::SerialInteractionClient = ::std::sync::Arc::new(interaction_impl);
                 ::std::result::Result::Ok((interaction_client, res?))
             }
-            .instrument(::tracing::info_span!("MyService.serialize"))
+            .instrument(::tracing::info_span!("stream", method = "MyService.serialize"))
             .boxed()
         }
     }
@@ -4732,7 +4732,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteraction.frobnicate", "success");
                     crate::services::my_interaction::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::FrobnicateExn::Success(_))) => {
@@ -4742,11 +4742,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyInteraction.frobnicate", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteraction.frobnicate", panic = ?aexn);
                     crate::services::my_interaction::FrobnicateExn::ApplicationException(aexn)
                 }
             };
@@ -4803,7 +4804,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteraction.ping", "success");
                     crate::services::my_interaction::PingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::PingExn::Success(_))) => {
@@ -4813,11 +4814,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyInteraction.ping", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.ping", exn);
+                    ::tracing::error!(method = "MyInteraction.ping", panic = ?aexn);
                     crate::services::my_interaction::PingExn::ApplicationException(aexn)
                 }
             };
@@ -4874,7 +4876,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteraction.truthify", "success");
                     crate::services::my_interaction::TruthifyExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::TruthifyExn::Success(_))) => {
@@ -4888,6 +4890,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.truthify", exn);
+                    ::tracing::error!(method = "MyInteraction.truthify", panic = ?aexn);
                     crate::services::my_interaction::TruthifyExn::ApplicationException(aexn)
                 }
             };
@@ -4984,7 +4987,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteraction.encode", "success");
                     crate::services::my_interaction::EncodeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction::EncodeExn::Success(_))) => {
@@ -4994,11 +4997,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyInteraction.encode", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteraction.encode", exn);
+                    ::tracing::error!(method = "MyInteraction.encode", panic = ?aexn);
                     crate::services::my_interaction::EncodeExn::ApplicationException(aexn)
                 }
             };
@@ -5430,7 +5434,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteractionFast.frobnicate", "success");
                     crate::services::my_interaction_fast::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::FrobnicateExn::Success(_))) => {
@@ -5440,11 +5444,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyInteractionFast.frobnicate", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.frobnicate", exn);
+                    ::tracing::error!(method = "MyInteractionFast.frobnicate", panic = ?aexn);
                     crate::services::my_interaction_fast::FrobnicateExn::ApplicationException(aexn)
                 }
             };
@@ -5501,7 +5506,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteractionFast.ping", "success");
                     crate::services::my_interaction_fast::PingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::PingExn::Success(_))) => {
@@ -5511,11 +5516,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyInteractionFast.ping", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.ping", exn);
+                    ::tracing::error!(method = "MyInteractionFast.ping", panic = ?aexn);
                     crate::services::my_interaction_fast::PingExn::ApplicationException(aexn)
                 }
             };
@@ -5572,7 +5578,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteractionFast.truthify", "success");
                     crate::services::my_interaction_fast::TruthifyExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::TruthifyExn::Success(_))) => {
@@ -5586,6 +5592,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.truthify", exn);
+                    ::tracing::error!(method = "MyInteractionFast.truthify", panic = ?aexn);
                     crate::services::my_interaction_fast::TruthifyExn::ApplicationException(aexn)
                 }
             };
@@ -5682,7 +5689,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyInteractionFast.encode", "success");
                     crate::services::my_interaction_fast::EncodeExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_interaction_fast::EncodeExn::Success(_))) => {
@@ -5692,11 +5699,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyInteractionFast.encode", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyInteractionFast.encode", exn);
+                    ::tracing::error!(method = "MyInteractionFast.encode", panic = ?aexn);
                     crate::services::my_interaction_fast::EncodeExn::ApplicationException(aexn)
                 }
             };
@@ -6009,7 +6017,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "SerialInteraction.frobnicate", "success");
                     crate::services::serial_interaction::FrobnicateExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::serial_interaction::FrobnicateExn::Success(_))) => {
@@ -6019,11 +6027,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "SerialInteraction.frobnicate", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SerialInteraction.frobnicate", exn);
+                    ::tracing::error!(method = "SerialInteraction.frobnicate", panic = ?aexn);
                     crate::services::serial_interaction::FrobnicateExn::ApplicationException(aexn)
                 }
             };
@@ -6501,7 +6510,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyService.foo", "success");
                     crate::services::my_service::FooExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_service::FooExn::Success(_))) => {
@@ -6511,11 +6520,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyService.foo", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.foo", exn);
+                    ::tracing::error!(method = "MyService.foo", panic = ?aexn);
                     crate::services::my_service::FooExn::ApplicationException(aexn)
                 }
             };
@@ -6573,7 +6583,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyService.interact", "success");
                     let (interaction_handler, res) = (res, ());
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionProcessor::<P, ::std::boxed::Box<dyn MyInteraction>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6586,11 +6596,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyService.interact", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.interact", exn);
+                    ::tracing::error!(method = "MyService.interact", panic = ?aexn);
                     crate::services::my_service::InteractExn::ApplicationException(aexn)
                 }
             };
@@ -6647,7 +6658,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyService.interactFast", "success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(MyInteractionFastProcessor::<P, ::std::boxed::Box<dyn MyInteractionFast>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6660,11 +6671,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyService.interactFast", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.interactFast", exn);
+                    ::tracing::error!(method = "MyService.interactFast", panic = ?aexn);
                     crate::services::my_service::InteractFastExn::ApplicationException(aexn)
                 }
             };
@@ -6721,7 +6733,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyService.serialize", "success");
                     let (interaction_handler, res) = res;
                     let interaction_processor = ::std::sync::Arc::new(SerialInteractionProcessor::<P, ::std::boxed::Box<dyn SerialInteraction>, R, RS>::new(interaction_handler));
                     reply_state.lock().unwrap().set_interaction_processor(interaction_processor)?;
@@ -6738,6 +6750,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyService.serialize", exn);
+                    ::tracing::error!(method = "MyService.serialize", panic = ?aexn);
                     crate::services::my_service::SerializeExn::ApplicationException(aexn)
                 }
             };

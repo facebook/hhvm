@@ -349,7 +349,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "SomeService.bounce_map"));
+                .instrument(::tracing::trace_span!("call", method = "SomeService.bounce_map"));
 
             async move {
                 let reply_env = call.await?;
@@ -365,7 +365,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("SomeService.bounce_map"))
+            .instrument(::tracing::info_span!("stream", method = "SomeService.bounce_map"))
             .boxed()
         }
 
@@ -397,7 +397,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "SomeService.binary_keyed_map"));
+                .instrument(::tracing::trace_span!("call", method = "SomeService.binary_keyed_map"));
 
             async move {
                 let reply_env = call.await?;
@@ -413,7 +413,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("SomeService.binary_keyed_map"))
+            .instrument(::tracing::info_span!("stream", method = "SomeService.binary_keyed_map"))
             .boxed()
         }
     }
@@ -888,7 +888,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "SomeService.bounce_map", "success");
                     crate::services::some_service::BounceMapExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::some_service::BounceMapExn::Success(_))) => {
@@ -898,11 +898,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "SomeService.bounce_map", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SomeService.bounce_map", exn);
+                    ::tracing::error!(method = "SomeService.bounce_map", panic = ?aexn);
                     crate::services::some_service::BounceMapExn::ApplicationException(aexn)
                 }
             };
@@ -960,7 +961,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "SomeService.binary_keyed_map", "success");
                     crate::services::some_service::BinaryKeyedMapExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::some_service::BinaryKeyedMapExn::Success(_))) => {
@@ -970,11 +971,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "SomeService.binary_keyed_map", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("SomeService.binary_keyed_map", exn);
+                    ::tracing::error!(method = "SomeService.binary_keyed_map", panic = ?aexn);
                     crate::services::some_service::BinaryKeyedMapExn::ApplicationException(aexn)
                 }
             };

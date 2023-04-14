@@ -561,7 +561,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Service.func"));
+                .instrument(::tracing::trace_span!("call", method = "Service.func"));
 
             async move {
                 let reply_env = call.await?;
@@ -577,7 +577,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Service.func"))
+            .instrument(::tracing::info_span!("stream", method = "Service.func"))
             .boxed()
         }
     }
@@ -885,7 +885,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "AdapterService.count"));
+                .instrument(::tracing::trace_span!("call", method = "AdapterService.count"));
 
             async move {
                 let reply_env = call.await?;
@@ -901,7 +901,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("AdapterService.count"))
+            .instrument(::tracing::info_span!("stream", method = "AdapterService.count"))
             .boxed()
         }
 
@@ -933,7 +933,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "AdapterService.adaptedTypes"));
+                .instrument(::tracing::trace_span!("call", method = "AdapterService.adaptedTypes"));
 
             async move {
                 let reply_env = call.await?;
@@ -949,7 +949,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("AdapterService.adaptedTypes"))
+            .instrument(::tracing::info_span!("stream", method = "AdapterService.adaptedTypes"))
             .boxed()
         }
     }
@@ -1381,7 +1381,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Service.func", "success");
                     crate::services::service::FuncExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::service::FuncExn::Success(_))) => {
@@ -1391,11 +1391,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Service.func", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Service.func", exn);
+                    ::tracing::error!(method = "Service.func", panic = ?aexn);
                     crate::services::service::FuncExn::ApplicationException(aexn)
                 }
             };
@@ -1767,7 +1768,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "AdapterService.count", "success");
                     crate::services::adapter_service::CountExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::CountExn::Success(_))) => {
@@ -1777,11 +1778,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "AdapterService.count", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.count", exn);
+                    ::tracing::error!(method = "AdapterService.count", panic = ?aexn);
                     crate::services::adapter_service::CountExn::ApplicationException(aexn)
                 }
             };
@@ -1839,7 +1841,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "AdapterService.adaptedTypes", "success");
                     crate::services::adapter_service::AdaptedTypesExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::adapter_service::AdaptedTypesExn::Success(_))) => {
@@ -1849,11 +1851,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "AdapterService.adaptedTypes", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("AdapterService.adaptedTypes", exn);
+                    ::tracing::error!(method = "AdapterService.adaptedTypes", panic = ?aexn);
                     crate::services::adapter_service::AdaptedTypesExn::ApplicationException(aexn)
                 }
             };

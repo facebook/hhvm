@@ -687,7 +687,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "C.f"));
+                .instrument(::tracing::trace_span!("call", method = "C.f"));
 
             async move {
                 let reply_env = call.await?;
@@ -703,7 +703,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("C.f"))
+            .instrument(::tracing::info_span!("stream", method = "C.f"))
             .boxed()
         }
 
@@ -769,7 +769,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("C.numbers"))
+            .instrument(::tracing::info_span!("stream", method = "C.numbers"))
             .boxed()
         }
 
@@ -805,7 +805,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "C.thing"));
+                .instrument(::tracing::trace_span!("call", method = "C.thing"));
 
             async move {
                 let reply_env = call.await?;
@@ -821,7 +821,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("C.thing"))
+            .instrument(::tracing::info_span!("stream", method = "C.thing"))
             .boxed()
         }
     }
@@ -1421,7 +1421,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "C.f", "success");
                     crate::services::c::FExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::FExn::Success(_))) => {
@@ -1431,11 +1431,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "C.f", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("C.f", exn);
+                    ::tracing::error!(method = "C.f", panic = ?aexn);
                     crate::services::c::FExn::ApplicationException(aexn)
                 }
             };
@@ -1492,7 +1493,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "C.numbers", "success");
                     crate::services::c::NumbersExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::NumbersExn::Success(_))) => {
@@ -1506,6 +1507,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("C.numbers", exn);
+                    ::tracing::error!(method = "C.numbers", panic = ?aexn);
                     crate::services::c::NumbersExn::ApplicationException(aexn)
                 }
             };
@@ -1605,7 +1607,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "C.thing", "success");
                     crate::services::c::ThingExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::c::ThingExn::Success(_))) => {
@@ -1615,11 +1617,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "C.thing", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("C.thing", exn);
+                    ::tracing::error!(method = "C.thing", panic = ?aexn);
                     crate::services::c::ThingExn::ApplicationException(aexn)
                 }
             };

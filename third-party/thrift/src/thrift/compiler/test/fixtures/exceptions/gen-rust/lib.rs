@@ -759,7 +759,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Raiser.doBland"));
+                .instrument(::tracing::trace_span!("call", method = "Raiser.doBland"));
 
             async move {
                 let reply_env = call.await?;
@@ -775,7 +775,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Raiser.doBland"))
+            .instrument(::tracing::info_span!("stream", method = "Raiser.doBland"))
             .boxed()
         }
 
@@ -805,7 +805,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Raiser.doRaise"));
+                .instrument(::tracing::trace_span!("call", method = "Raiser.doRaise"));
 
             async move {
                 let reply_env = call.await?;
@@ -821,7 +821,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Raiser.doRaise"))
+            .instrument(::tracing::info_span!("stream", method = "Raiser.doRaise"))
             .boxed()
         }
 
@@ -851,7 +851,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Raiser.get200"));
+                .instrument(::tracing::trace_span!("call", method = "Raiser.get200"));
 
             async move {
                 let reply_env = call.await?;
@@ -867,7 +867,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Raiser.get200"))
+            .instrument(::tracing::info_span!("stream", method = "Raiser.get200"))
             .boxed()
         }
 
@@ -897,7 +897,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "Raiser.get500"));
+                .instrument(::tracing::trace_span!("call", method = "Raiser.get500"));
 
             async move {
                 let reply_env = call.await?;
@@ -913,7 +913,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("Raiser.get500"))
+            .instrument(::tracing::info_span!("stream", method = "Raiser.get500"))
             .boxed()
         }
     }
@@ -1525,7 +1525,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Raiser.doBland", "success");
                     crate::services::raiser::DoBlandExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoBlandExn::Success(_))) => {
@@ -1535,11 +1535,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Raiser.doBland", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.doBland", exn);
+                    ::tracing::error!(method = "Raiser.doBland", panic = ?aexn);
                     crate::services::raiser::DoBlandExn::ApplicationException(aexn)
                 }
             };
@@ -1596,7 +1597,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Raiser.doRaise", "success");
                     crate::services::raiser::DoRaiseExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::DoRaiseExn::Success(_))) => {
@@ -1606,11 +1607,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Raiser.doRaise", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.doRaise", exn);
+                    ::tracing::error!(method = "Raiser.doRaise", panic = ?aexn);
                     crate::services::raiser::DoRaiseExn::ApplicationException(aexn)
                 }
             };
@@ -1667,7 +1669,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Raiser.get200", "success");
                     crate::services::raiser::Get200Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get200Exn::Success(_))) => {
@@ -1677,11 +1679,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Raiser.get200", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.get200", exn);
+                    ::tracing::error!(method = "Raiser.get200", panic = ?aexn);
                     crate::services::raiser::Get200Exn::ApplicationException(aexn)
                 }
             };
@@ -1738,7 +1741,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "Raiser.get500", "success");
                     crate::services::raiser::Get500Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::raiser::Get500Exn::Success(_))) => {
@@ -1748,11 +1751,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "Raiser.get500", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("Raiser.get500", exn);
+                    ::tracing::error!(method = "Raiser.get500", panic = ?aexn);
                     crate::services::raiser::Get500Exn::ApplicationException(aexn)
                 }
             };

@@ -211,7 +211,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "TestService.init"));
+                .instrument(::tracing::trace_span!("call", method = "TestService.init"));
 
             async move {
                 let reply_env = call.await?;
@@ -227,7 +227,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("TestService.init"))
+            .instrument(::tracing::info_span!("stream", method = "TestService.init"))
             .boxed()
         }
     }
@@ -589,7 +589,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "TestService.init", "success");
                     crate::services::test_service::InitExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::test_service::InitExn::Success(_))) => {
@@ -599,11 +599,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "TestService.init", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("TestService.init", exn);
+                    ::tracing::error!(method = "TestService.init", panic = ?aexn);
                     crate::services::test_service::InitExn::ApplicationException(aexn)
                 }
             };

@@ -3195,7 +3195,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.returnstream"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.returnstream"))
             .boxed()
         }
 
@@ -3263,7 +3263,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.streamthrows"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.streamthrows"))
             .boxed()
         }
 
@@ -3331,7 +3331,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.servicethrows"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.servicethrows"))
             .boxed()
         }
 
@@ -3399,7 +3399,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.servicethrows2"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.servicethrows2"))
             .boxed()
         }
 
@@ -3467,7 +3467,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.boththrows"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.boththrows"))
             .boxed()
         }
 
@@ -3535,7 +3535,7 @@ pub mod client {
                 let res = initial.map(move |initial| (initial, new_stream));
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.responseandstreamstreamthrows"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.responseandstreamstreamthrows"))
             .boxed()
         }
 
@@ -3603,7 +3603,7 @@ pub mod client {
                 let res = initial.map(move |initial| (initial, new_stream));
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.responseandstreamservicethrows"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.responseandstreamservicethrows"))
             .boxed()
         }
 
@@ -3671,7 +3671,7 @@ pub mod client {
                 let res = initial.map(move |initial| (initial, new_stream));
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.responseandstreamboththrows"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.responseandstreamboththrows"))
             .boxed()
         }
 
@@ -3741,7 +3741,7 @@ pub mod client {
                 let res = initial.map(move |_| new_stream);
                 res
             }
-            .instrument(::tracing::info_span!("PubSubStreamingService.returnstreamFast"))
+            .instrument(::tracing::info_span!("stream", method = "PubSubStreamingService.returnstreamFast"))
             .boxed()
         }
     }
@@ -5088,7 +5088,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.returnstream", "success");
                     crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamExn::Success(_))) => {
@@ -5102,6 +5102,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.returnstream", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.returnstream", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::ReturnstreamExn::ApplicationException(aexn)
                 }
             };
@@ -5199,7 +5200,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.streamthrows", "success");
                     crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::StreamthrowsExn::Success(_))) => {
@@ -5213,6 +5214,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.streamthrows", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.streamthrows", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::StreamthrowsExn::ApplicationException(aexn)
                 }
             };
@@ -5316,7 +5318,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.servicethrows", "success");
                     crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ServicethrowsExn::Success(_))) => {
@@ -5330,6 +5332,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.servicethrows", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.servicethrows", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::ServicethrowsExn::ApplicationException(aexn)
                 }
             };
@@ -5431,7 +5434,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.servicethrows2", "success");
                     crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::Servicethrows2Exn::Success(_))) => {
@@ -5445,6 +5448,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.servicethrows2", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.servicethrows2", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::Servicethrows2Exn::ApplicationException(aexn)
                 }
             };
@@ -5550,7 +5554,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.boththrows", "success");
                     crate::services::pub_sub_streaming_service::BoththrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::BoththrowsExn::Success(_))) => {
@@ -5564,6 +5568,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.boththrows", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.boththrows", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::BoththrowsExn::ApplicationException(aexn)
                 }
             };
@@ -5671,7 +5676,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.responseandstreamstreamthrows", "success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::Success(_))) => {
@@ -5685,6 +5690,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.responseandstreamstreamthrows", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.responseandstreamstreamthrows", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::ResponseandstreamstreamthrowsExn::ApplicationException(aexn)
                 }
             };
@@ -5788,7 +5794,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.responseandstreamservicethrows", "success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::Success(_))) => {
@@ -5802,6 +5808,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.responseandstreamservicethrows", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.responseandstreamservicethrows", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::ResponseandstreamservicethrowsExn::ApplicationException(aexn)
                 }
             };
@@ -5903,7 +5910,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.responseandstreamboththrows", "success");
                     crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::Success(_))) => {
@@ -5917,6 +5924,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.responseandstreamboththrows", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.responseandstreamboththrows", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::ResponseandstreamboththrowsExn::ApplicationException(aexn)
                 }
             };
@@ -6025,7 +6033,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "PubSubStreamingService.returnstreamFast", "success");
                     crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::pub_sub_streaming_service::ReturnstreamFastExn::Success(_))) => {
@@ -6039,6 +6047,7 @@ pub mod server {
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("PubSubStreamingService.returnstreamFast", exn);
+                    ::tracing::error!(method = "PubSubStreamingService.returnstreamFast", panic = ?aexn);
                     crate::services::pub_sub_streaming_service::ReturnstreamFastExn::ApplicationException(aexn)
                 }
             };

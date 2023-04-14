@@ -118,7 +118,7 @@
             {{/function:returns_streams?}}{{^function:returns_streams?}}
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "{{service:name}}.{{function:name}}"));
+                .instrument(::tracing::trace_span!("call", method = "{{service:name}}.{{function:name}}"));
             {{/function:returns_streams?}}
 
             async move {
@@ -205,7 +205,7 @@
                 res
                 {{/function:creates_interaction?}}{{/function:return_type}}
             }
-            .instrument(::tracing::info_span!("{{service:name}}.{{function:name}}"))
+            .instrument(::tracing::info_span!("stream", method = "{{service:name}}.{{function:name}}"))
             .boxed()
         }
         {{/function:starts_interaction?}}

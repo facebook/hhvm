@@ -718,7 +718,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "NestedContainers.mapList"));
+                .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapList"));
 
             async move {
                 let reply_env = call.await?;
@@ -734,7 +734,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("NestedContainers.mapList"))
+            .instrument(::tracing::info_span!("stream", method = "NestedContainers.mapList"))
             .boxed()
         }
 
@@ -766,7 +766,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "NestedContainers.mapSet"));
+                .instrument(::tracing::trace_span!("call", method = "NestedContainers.mapSet"));
 
             async move {
                 let reply_env = call.await?;
@@ -782,7 +782,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("NestedContainers.mapSet"))
+            .instrument(::tracing::info_span!("stream", method = "NestedContainers.mapSet"))
             .boxed()
         }
 
@@ -814,7 +814,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "NestedContainers.listMap"));
+                .instrument(::tracing::trace_span!("call", method = "NestedContainers.listMap"));
 
             async move {
                 let reply_env = call.await?;
@@ -830,7 +830,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("NestedContainers.listMap"))
+            .instrument(::tracing::info_span!("stream", method = "NestedContainers.listMap"))
             .boxed()
         }
 
@@ -862,7 +862,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "NestedContainers.listSet"));
+                .instrument(::tracing::trace_span!("call", method = "NestedContainers.listSet"));
 
             async move {
                 let reply_env = call.await?;
@@ -878,7 +878,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("NestedContainers.listSet"))
+            .instrument(::tracing::info_span!("stream", method = "NestedContainers.listSet"))
             .boxed()
         }
 
@@ -910,7 +910,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "NestedContainers.turtles"));
+                .instrument(::tracing::trace_span!("call", method = "NestedContainers.turtles"));
 
             async move {
                 let reply_env = call.await?;
@@ -926,7 +926,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("NestedContainers.turtles"))
+            .instrument(::tracing::info_span!("stream", method = "NestedContainers.turtles"))
             .boxed()
         }
     }
@@ -1740,7 +1740,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "NestedContainers.mapList", "success");
                     crate::services::nested_containers::MapListExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::MapListExn::Success(_))) => {
@@ -1750,11 +1750,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "NestedContainers.mapList", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.mapList", exn);
+                    ::tracing::error!(method = "NestedContainers.mapList", panic = ?aexn);
                     crate::services::nested_containers::MapListExn::ApplicationException(aexn)
                 }
             };
@@ -1812,7 +1813,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "NestedContainers.mapSet", "success");
                     crate::services::nested_containers::MapSetExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::MapSetExn::Success(_))) => {
@@ -1822,11 +1823,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "NestedContainers.mapSet", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.mapSet", exn);
+                    ::tracing::error!(method = "NestedContainers.mapSet", panic = ?aexn);
                     crate::services::nested_containers::MapSetExn::ApplicationException(aexn)
                 }
             };
@@ -1884,7 +1886,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "NestedContainers.listMap", "success");
                     crate::services::nested_containers::ListMapExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::ListMapExn::Success(_))) => {
@@ -1894,11 +1896,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "NestedContainers.listMap", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.listMap", exn);
+                    ::tracing::error!(method = "NestedContainers.listMap", panic = ?aexn);
                     crate::services::nested_containers::ListMapExn::ApplicationException(aexn)
                 }
             };
@@ -1956,7 +1959,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "NestedContainers.listSet", "success");
                     crate::services::nested_containers::ListSetExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::ListSetExn::Success(_))) => {
@@ -1966,11 +1969,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "NestedContainers.listSet", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.listSet", exn);
+                    ::tracing::error!(method = "NestedContainers.listSet", panic = ?aexn);
                     crate::services::nested_containers::ListSetExn::ApplicationException(aexn)
                 }
             };
@@ -2028,7 +2032,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "NestedContainers.turtles", "success");
                     crate::services::nested_containers::TurtlesExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::nested_containers::TurtlesExn::Success(_))) => {
@@ -2038,11 +2042,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "NestedContainers.turtles", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("NestedContainers.turtles", exn);
+                    ::tracing::error!(method = "NestedContainers.turtles", panic = ?aexn);
                     crate::services::nested_containers::TurtlesExn::ApplicationException(aexn)
                 }
             };

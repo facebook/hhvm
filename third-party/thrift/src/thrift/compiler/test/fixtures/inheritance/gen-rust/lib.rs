@@ -462,7 +462,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyRoot.do_root"));
+                .instrument(::tracing::trace_span!("call", method = "MyRoot.do_root"));
 
             async move {
                 let reply_env = call.await?;
@@ -478,7 +478,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyRoot.do_root"))
+            .instrument(::tracing::info_span!("stream", method = "MyRoot.do_root"))
             .boxed()
         }
     }
@@ -741,7 +741,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyNode.do_mid"));
+                .instrument(::tracing::trace_span!("call", method = "MyNode.do_mid"));
 
             async move {
                 let reply_env = call.await?;
@@ -757,7 +757,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyNode.do_mid"))
+            .instrument(::tracing::info_span!("stream", method = "MyNode.do_mid"))
             .boxed()
         }
     }
@@ -1053,7 +1053,7 @@ pub mod client {
 
             let call = transport
                 .call(SERVICE_NAME.as_cstr(), METHOD_NAME.as_cstr(), request_env, rpc_options)
-                .instrument(::tracing::trace_span!("call", function = "MyLeaf.do_leaf"));
+                .instrument(::tracing::trace_span!("call", method = "MyLeaf.do_leaf"));
 
             async move {
                 let reply_env = call.await?;
@@ -1069,7 +1069,7 @@ pub mod client {
                 };
                 res
             }
-            .instrument(::tracing::info_span!("MyLeaf.do_leaf"))
+            .instrument(::tracing::info_span!("stream", method = "MyLeaf.do_leaf"))
             .boxed()
         }
     }
@@ -1474,7 +1474,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyRoot.do_root", "success");
                     crate::services::my_root::DoRootExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_root::DoRootExn::Success(_))) => {
@@ -1484,11 +1484,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyRoot.do_root", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyRoot.do_root", exn);
+                    ::tracing::error!(method = "MyRoot.do_root", panic = ?aexn);
                     crate::services::my_root::DoRootExn::ApplicationException(aexn)
                 }
             };
@@ -1815,7 +1816,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyNode.do_mid", "success");
                     crate::services::my_node::DoMidExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_node::DoMidExn::Success(_))) => {
@@ -1825,11 +1826,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyNode.do_mid", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyNode.do_mid", exn);
+                    ::tracing::error!(method = "MyNode.do_mid", panic = ?aexn);
                     crate::services::my_node::DoMidExn::ApplicationException(aexn)
                 }
             };
@@ -2167,7 +2169,7 @@ pub mod server {
             // nested results - panic catch on the outside, method on the inside
             let res = match res {
                 ::std::result::Result::Ok(::std::result::Result::Ok(res)) => {
-                    ::tracing::trace!("success");
+                    ::tracing::trace!(method = "MyLeaf.do_leaf", "success");
                     crate::services::my_leaf::DoLeafExn::Success(res)
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(crate::services::my_leaf::DoLeafExn::Success(_))) => {
@@ -2177,11 +2179,12 @@ pub mod server {
                     )
                 }
                 ::std::result::Result::Ok(::std::result::Result::Err(exn)) => {
-                    ::tracing::error!(exception = ?exn);
+                    ::tracing::info!(method = "MyLeaf.do_leaf", exception = ?exn);
                     exn
                 }
                 ::std::result::Result::Err(exn) => {
                     let aexn = ::fbthrift::ApplicationException::handler_panic("MyLeaf.do_leaf", exn);
+                    ::tracing::error!(method = "MyLeaf.do_leaf", panic = ?aexn);
                     crate::services::my_leaf::DoLeafExn::ApplicationException(aexn)
                 }
             };

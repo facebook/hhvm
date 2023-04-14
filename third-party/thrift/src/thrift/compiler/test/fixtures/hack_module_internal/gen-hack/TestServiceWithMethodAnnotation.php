@@ -19,7 +19,7 @@ interface TestServiceWithMethodAnnotationAsyncIf extends \IThriftAsyncIf {
    * i32
    *   testMethodWithAnnotation();
    */
-  public function testMethodWithAnnotation(): Awaitable<int>;
+  internal function testMethodWithAnnotation(): Awaitable<int>;
 
   /**
    * Original thrift definition:-
@@ -39,7 +39,7 @@ interface TestServiceWithMethodAnnotationIf extends \IThriftSyncIf {
    * i32
    *   testMethodWithAnnotation();
    */
-  public function testMethodWithAnnotation(): int;
+  internal function testMethodWithAnnotation(): int;
 
   /**
    * Original thrift definition:-
@@ -66,7 +66,7 @@ interface TestServiceWithMethodAnnotationClientIf extends \IThriftSyncIf {
    * i32
    *   testMethodWithAnnotation();
    */
-  public function testMethodWithAnnotation(): Awaitable<int>;
+  internal function testMethodWithAnnotation(): Awaitable<int>;
 
   /**
    * Original thrift definition:-
@@ -93,7 +93,7 @@ class TestServiceWithMethodAnnotationAsyncClient extends \ThriftClientBase imple
    * i32
    *   testMethodWithAnnotation();
    */
-  public async function testMethodWithAnnotation(): Awaitable<int> {
+  internal async function testMethodWithAnnotation(): Awaitable<int> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -132,7 +132,7 @@ class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements
    * i32
    *   testMethodWithAnnotation();
    */
-  public async function testMethodWithAnnotation(): Awaitable<int> {
+  internal async function testMethodWithAnnotation(): Awaitable<int> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -162,11 +162,11 @@ class TestServiceWithMethodAnnotationClient extends \ThriftClientBase implements
   }
 
   /* send and recv functions */
-  public function send_testMethodWithAnnotation(): int {
+  internal function send_testMethodWithAnnotation(): int {
     $args = \hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_args::withDefaultValues();
     return $this->sendImplHelper($args, "testMethodWithAnnotation", false);
   }
-  public function recv_testMethodWithAnnotation(?int $expectedsequenceid = null): int {
+  internal function recv_testMethodWithAnnotation(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(\hack\fixtures\TestServiceWithMethodAnnotation_testMethodWithAnnotation_result::class, "testMethodWithAnnotation", false, $expectedsequenceid);
   }
   public function send_testMethodWithoutAnnotation(): int {

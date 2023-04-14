@@ -24,6 +24,7 @@
 #include <queue>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -849,6 +850,11 @@ class t_hack_generator : public t_concat_generator {
     return annotation != nullptr;
   }
 
+  bool has_hack_module_internal(const t_named* tnamed) const {
+    return tnamed->find_structured_annotation_or_null(kHackModuleInternalUri) !=
+        nullptr;
+  }
+
   std::string find_exception_message(const t_struct* tstruct) {
     const auto& value = tstruct->get_annotation("message");
     if (value != "") {
@@ -1611,6 +1617,7 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
   if (!typedef_) {
     return;
   }
+  bool is_mod_int = has_hack_module_internal(ttypedef);
   auto typedef_name = hack_name(ttypedef, true);
   auto [wrapper, name, ns] = find_hack_wrapper(ttypedef, false);
   if (wrapper) {
@@ -1624,8 +1631,9 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
       {{TypeToTypehintVariations::IGNORE_TYPEDEF, true},
        {TypeToTypehintVariations::IGNORE_WRAPPER, true}});
   if (wrapper) {
-    f_types_ << "type " << typedef_name << " = " << *wrapper << "<"
-             << hack_wrapped_type_name(name, ns) << ">;\n";
+    f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
+             << " = " << *wrapper << "<" << hack_wrapped_type_name(name, ns)
+             << ">;\n";
 
     if (!f_adapted_types_.is_open()) {
       init_codegen_file(
@@ -1635,7 +1643,8 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
     if (ns) {
       f_adapted_types_ << "namespace " << *ns << " {\n";
     }
-    f_adapted_types_ << "type " << *name << " = " << typehint << ";\n";
+    f_adapted_types_ << (is_mod_int ? "internal " : "") << "type " << *name
+                     << " = " << typehint << ";\n";
 
     if (ns) {
       f_adapted_types_ << "}\n";
@@ -1644,7 +1653,8 @@ void t_hack_generator::generate_typedef(const t_typedef* ttypedef) {
     if (typedef_name == typehint) {
       return;
     }
-    f_types_ << "type " << typedef_name << " = " << typehint << ";\n";
+    f_types_ << (is_mod_int ? "internal " : "") << "type " << typedef_name
+             << " = " << typehint << ";\n";
   }
   // Reset the flag
   has_nested_ns = false;
@@ -6912,6 +6922,11 @@ void t_hack_generator::generate_service_interface(
   auto delim = "";
   auto functions = client ? get_supported_client_functions(tservice)
                           : get_supported_server_functions(tservice);
+
+  auto svc_mod_int =
+      (tservice->find_structured_annotation_or_null(kHackModuleInternalUri) !=
+       nullptr);
+
   for (const auto* function : functions) {
     if (skip_codegen(function) ||
         (async && client && !is_client_only_function(function))) {
@@ -6941,15 +6956,17 @@ void t_hack_generator::generate_service_interface(
     if (async || client) {
       return_typehint = "Awaitable<" + return_typehint + ">";
     }
-
+    auto fqlfr = (svc_mod_int || has_hack_module_internal(function))
+        ? "internal"
+        : "public";
     if (nullable_everything_) {
       const std::string& funname = find_hack_name(function);
-      indent(f_service_) << "public function " << funname << "("
+      indent(f_service_) << fqlfr << " function " << funname << "("
                          << argument_list(
                                 function->get_paramlist(), "", true, true)
                          << "): " << return_typehint << ";\n";
     } else {
-      indent(f_service_) << "public function "
+      indent(f_service_) << fqlfr << " function "
                          << function_signature(function, "", return_typehint)
                          << ";\n";
     }
@@ -7255,8 +7272,12 @@ void t_hack_generator::_generate_service_client_children(
       const std::string& funname = find_hack_name(function);
       std::string return_typehint =
           type_to_typehint(function->get_returntype());
-
-      out << indent() << "public function send_"
+      auto fqlfr =
+          (has_hack_module_internal(tservice) ||
+                   has_hack_module_internal(function)
+               ? "internal"
+               : "public");
+      out << indent() << fqlfr << " function send_"
           << function_signature(function, "", "int") << " {\n";
       indent_up();
       _generate_args(out, tservice, function);
@@ -7274,7 +7295,7 @@ void t_hack_generator::_generate_service_client_children(
         bool is_void = function->get_returntype()->is_void();
         std::string resultname = generate_function_helper_name(
             tservice, function, PhpFunctionNameSuffix::RESULT);
-        out << indent() << "public function "
+        out << indent() << fqlfr << " function "
             << function_signature(
                    &recv_function,
                    "?int $expectedsequenceid = null",
@@ -7317,7 +7338,11 @@ void t_hack_generator::_generate_service_client_child_fn(
   std::string return_typehint = type_to_typehint(tfunction->get_returntype());
 
   generate_php_docstring(out, tfunction);
-  indent(out) << "public async function " << funname << "("
+  indent(out) << (has_hack_module_internal(tservice) ||
+                          has_hack_module_internal(tfunction)
+                      ? "internal"
+                      : "public")
+              << " async function " << funname << "("
               << argument_list(
                      tfunction->get_paramlist(), "", true, nullable_everything_)
               << "): Awaitable<" + return_typehint + "> {\n";

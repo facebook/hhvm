@@ -19,14 +19,14 @@ interface TestServiceWithServiceAnnotationAsyncIf extends \IThriftAsyncIf {
    * i32
    *   testMethodWithServiceAnnotation();
    */
-  public function testMethodWithServiceAnnotation(): Awaitable<int>;
+  internal function testMethodWithServiceAnnotation(): Awaitable<int>;
 
   /**
    * Original thrift definition:-
    * void
    *   testMethodWithServiceAnnotation2();
    */
-  public function testMethodWithServiceAnnotation2(): Awaitable<void>;
+  internal function testMethodWithServiceAnnotation2(): Awaitable<void>;
 }
 
 /**
@@ -39,14 +39,14 @@ interface TestServiceWithServiceAnnotationIf extends \IThriftSyncIf {
    * i32
    *   testMethodWithServiceAnnotation();
    */
-  public function testMethodWithServiceAnnotation(): int;
+  internal function testMethodWithServiceAnnotation(): int;
 
   /**
    * Original thrift definition:-
    * void
    *   testMethodWithServiceAnnotation2();
    */
-  public function testMethodWithServiceAnnotation2(): void;
+  internal function testMethodWithServiceAnnotation2(): void;
 }
 
 /**
@@ -66,14 +66,14 @@ interface TestServiceWithServiceAnnotationClientIf extends \IThriftSyncIf {
    * i32
    *   testMethodWithServiceAnnotation();
    */
-  public function testMethodWithServiceAnnotation(): Awaitable<int>;
+  internal function testMethodWithServiceAnnotation(): Awaitable<int>;
 
   /**
    * Original thrift definition:-
    * void
    *   testMethodWithServiceAnnotation2();
    */
-  public function testMethodWithServiceAnnotation2(): Awaitable<void>;
+  internal function testMethodWithServiceAnnotation2(): Awaitable<void>;
 }
 
 /**
@@ -93,7 +93,7 @@ class TestServiceWithServiceAnnotationAsyncClient extends \ThriftClientBase impl
    * i32
    *   testMethodWithServiceAnnotation();
    */
-  public async function testMethodWithServiceAnnotation(): Awaitable<int> {
+  internal async function testMethodWithServiceAnnotation(): Awaitable<int> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -110,7 +110,7 @@ class TestServiceWithServiceAnnotationAsyncClient extends \ThriftClientBase impl
    * void
    *   testMethodWithServiceAnnotation2();
    */
-  public async function testMethodWithServiceAnnotation2(): Awaitable<void> {
+  internal async function testMethodWithServiceAnnotation2(): Awaitable<void> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -132,7 +132,7 @@ class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implement
    * i32
    *   testMethodWithServiceAnnotation();
    */
-  public async function testMethodWithServiceAnnotation(): Awaitable<int> {
+  internal async function testMethodWithServiceAnnotation(): Awaitable<int> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -149,7 +149,7 @@ class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implement
    * void
    *   testMethodWithServiceAnnotation2();
    */
-  public async function testMethodWithServiceAnnotation2(): Awaitable<void> {
+  internal async function testMethodWithServiceAnnotation2(): Awaitable<void> {
     $hh_frame_metadata = $this->getHHFrameMetadata();
     if ($hh_frame_metadata !== null) {
       \HH\set_frame_metadata($hh_frame_metadata);
@@ -162,18 +162,18 @@ class TestServiceWithServiceAnnotationClient extends \ThriftClientBase implement
   }
 
   /* send and recv functions */
-  public function send_testMethodWithServiceAnnotation(): int {
+  internal function send_testMethodWithServiceAnnotation(): int {
     $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_args::withDefaultValues();
     return $this->sendImplHelper($args, "testMethodWithServiceAnnotation", false);
   }
-  public function recv_testMethodWithServiceAnnotation(?int $expectedsequenceid = null): int {
+  internal function recv_testMethodWithServiceAnnotation(?int $expectedsequenceid = null): int {
     return $this->recvImplHelper(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation_result::class, "testMethodWithServiceAnnotation", false, $expectedsequenceid);
   }
-  public function send_testMethodWithServiceAnnotation2(): int {
+  internal function send_testMethodWithServiceAnnotation2(): int {
     $args = \hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_args::withDefaultValues();
     return $this->sendImplHelper($args, "testMethodWithServiceAnnotation2", false);
   }
-  public function recv_testMethodWithServiceAnnotation2(?int $expectedsequenceid = null): void {
+  internal function recv_testMethodWithServiceAnnotation2(?int $expectedsequenceid = null): void {
     $this->recvImplHelper(\hack\fixtures\TestServiceWithServiceAnnotation_testMethodWithServiceAnnotation2_result::class, "testMethodWithServiceAnnotation2", true, $expectedsequenceid);
   }
 }

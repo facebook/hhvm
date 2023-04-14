@@ -81,7 +81,7 @@ type _ t =
       (** "completionItem/resolve" LSP messages - if we have symbol name, and [Completion_resolve_location] failed *)
   | Document_highlight : document * location -> Ide_api_types.range list t
       (** Handles "textDocument/documentHighlight" LSP messages *)
-  | Document_symbol : document * location -> FileOutline.outline t
+  | Document_symbol : document -> FileOutline.outline t
       (** Handles "textDocument/documentSymbol" LSP messages *)
   | Workspace_symbol : string -> SearchUtils.result t
   | Find_references :
@@ -146,7 +146,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
   | Document_highlight ({ file_path; _ }, _) ->
     Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)
-  | Document_symbol ({ file_path; _ }, _) ->
+  | Document_symbol { file_path; _ } ->
     Printf.sprintf "Document_symbol(%s)" (Path.to_string file_path)
   | Workspace_symbol query -> Printf.sprintf "Workspace_symbol(%s)" query
   | Type_definition ({ file_path; _ }, _) ->

@@ -935,7 +935,7 @@ let handle_request
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),
-      Document_symbol (document, _location) ) ->
+      Document_symbol document ) ->
     let (files, entry) = update_file files document in
     let result =
       FileOutline.outline_entry_no_comments ~popt:common.popt ~entry

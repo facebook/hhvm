@@ -3328,15 +3328,14 @@ let do_documentSymbol_local
   let open DocumentSymbol in
   let open TextDocumentIdentifier in
   let filename = lsp_uri_to_path params.textDocument.uri in
-  let (document, location) =
-    ( {
-        ClientIdeMessage.file_path = Path.make filename;
-        file_contents =
-          get_document_contents editor_open_files params.textDocument.uri;
-      },
-      { ClientIdeMessage.line = 0; column = 0 } )
+  let document =
+    {
+      ClientIdeMessage.file_path = Path.make filename;
+      file_contents =
+        get_document_contents editor_open_files params.textDocument.uri;
+    }
   in
-  let request = ClientIdeMessage.Document_symbol (document, location) in
+  let request = ClientIdeMessage.Document_symbol document in
   let%lwt outline =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in

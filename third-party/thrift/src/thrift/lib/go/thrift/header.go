@@ -619,7 +619,7 @@ func (hdr *tHeader) writeVarHeader(buf io.Writer) (int, error) {
 		return size, err
 	}
 
-	padding := (4 - size%4) % 4
+	padding := 4 - size%4
 	for i := 0; i < padding; i++ {
 		buf.Write([]byte{byte(0)})
 		size++

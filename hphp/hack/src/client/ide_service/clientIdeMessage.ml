@@ -24,16 +24,14 @@ module Initialize_from_saved_state = struct
   }
 end
 
-type document_location = {
+type document = {
   file_path: Path.t;
   file_contents: string;
-  line: int;
-  column: int;
 }
 
-type document_and_path = {
-  file_path: Path.t;
-  file_contents: string;
+type location = {
+  line: int;
+  column: int;
 }
 
 type completion_request = { is_manually_invoked: bool }
@@ -61,33 +59,33 @@ type _ t =
       it has responded. *)
   | Shutdown : unit -> unit t
   | Disk_files_changed : changed_file list -> unit t
-  | Ide_file_opened : document_and_path -> Errors.t t
-  | Ide_file_changed : document_and_path -> Errors.t t
+  | Ide_file_opened : document -> Errors.t t
+  | Ide_file_changed : document -> Errors.t t
   | Ide_file_closed : Path.t -> unit t
   | Verbose_to_file : bool -> unit t
-  | Hover : document_location -> HoverService.result t
+  | Hover : document * location -> HoverService.result t
   | Definition :
-      document_location
+      document * location
       -> ServerCommandTypes.Go_to_definition.result t
   | Completion :
-      document_location * completion_request
+      document * location * completion_request
       -> AutocompleteTypes.ide_result t
       (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
-      document_location * SearchUtils.si_kind
+      document * location * SearchUtils.si_kind
       -> DocblockService.result t
       (** "completionItem/resolve" LSP messages - if we have file/line/column *)
   | Completion_resolve :
       string * SearchUtils.si_kind
       -> DocblockService.result t
       (** "completionItem/resolve" LSP messages - if we have symbol name, and [Completion_resolve_location] failed *)
-  | Document_highlight : document_location -> Ide_api_types.range list t
+  | Document_highlight : document * location -> Ide_api_types.range list t
       (** Handles "textDocument/documentHighlight" LSP messages *)
-  | Document_symbol : document_location -> FileOutline.outline t
+  | Document_symbol : document * location -> FileOutline.outline t
       (** Handles "textDocument/documentSymbol" LSP messages *)
   | Workspace_symbol : string -> SearchUtils.result t
   | Find_references :
-      document_location
+      document * location
       -> ( ServerCommandTypes.Find_refs.ide_result,
            string * ServerCommandTypes.Find_refs.action )
          result
@@ -99,20 +97,20 @@ type _ t =
          and the [Find_refs.action] which describes what the symbol refers to,
          e.g. Class of class_name, Member of member_name with a Method of method_name. *)
   | Rename :
-      document_location * string
+      document * location * string
       -> ( ServerRenameTypes.patch list option,
            ServerCommandTypes.Find_refs.action )
          result
          t
   | Type_definition :
-      document_location
+      document * location
       -> ServerCommandTypes.Go_to_type_definition.result t
       (** Handles "textDocument/typeDefinition" LSP messages *)
-  | Type_coverage : document_and_path -> Coverage_level_defs.result t
-  | Signature_help : document_location -> Lsp.SignatureHelp.result t
+  | Type_coverage : document -> Coverage_level_defs.result t
+  | Signature_help : document * location -> Lsp.SignatureHelp.result t
       (** Handles "textDocument/signatureHelp" LSP messages *)
   | Code_action :
-      document_and_path * Ide_api_types.range
+      document * Ide_api_types.range
       -> Lsp.CodeAction.command_or_action list t
       (** Handles "textDocument/codeActions" LSP messages *)
 
@@ -136,32 +134,32 @@ let t_to_string : type a. a t -> string = function
   | Ide_file_closed file_path ->
     Printf.sprintf "Ide_file_closed(%s)" (Path.to_string file_path)
   | Verbose_to_file verbose -> Printf.sprintf "Verbose_to_file(%b)" verbose
-  | Hover { file_path; _ } ->
+  | Hover ({ file_path; _ }, _) ->
     Printf.sprintf "Hover(%s)" (Path.to_string file_path)
-  | Definition { file_path; _ } ->
+  | Definition ({ file_path; _ }, _) ->
     Printf.sprintf "Definition(%s)" (Path.to_string file_path)
-  | Completion ({ file_path; _ }, _) ->
+  | Completion ({ file_path; _ }, _, _) ->
     Printf.sprintf "Completion(%s)" (Path.to_string file_path)
   | Completion_resolve (symbol, _) ->
     Printf.sprintf "Completion_resolve(%s)" symbol
-  | Completion_resolve_location ({ file_path; _ }, _) ->
+  | Completion_resolve_location ({ file_path; _ }, _, _) ->
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
-  | Document_highlight { file_path; _ } ->
+  | Document_highlight ({ file_path; _ }, _) ->
     Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)
-  | Document_symbol { file_path; _ } ->
+  | Document_symbol ({ file_path; _ }, _) ->
     Printf.sprintf "Document_symbol(%s)" (Path.to_string file_path)
   | Workspace_symbol query -> Printf.sprintf "Workspace_symbol(%s)" query
-  | Type_definition { file_path; _ } ->
+  | Type_definition ({ file_path; _ }, _) ->
     Printf.sprintf "Type_definition(%s)" (Path.to_string file_path)
   | Type_coverage { file_path; _ } ->
     Printf.sprintf "Type_coverage(%s)" (Path.to_string file_path)
-  | Signature_help { file_path; _ } ->
+  | Signature_help ({ file_path; _ }, _) ->
     Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
   | Code_action ({ file_path; _ }, _) ->
     Printf.sprintf "Code_action(%s)" (Path.to_string file_path)
-  | Find_references { file_path; _ } ->
+  | Find_references ({ file_path; _ }, _) ->
     Printf.sprintf "Find_references(%s)" (Path.to_string file_path)
-  | Rename ({ file_path; _ }, _) ->
+  | Rename ({ file_path; _ }, _, _) ->
     Printf.sprintf "Rename(%s)" (Path.to_string file_path)
 
 type 'a tracked_t = {

@@ -753,15 +753,14 @@ contents haven't changed then the existing open file's AST and TAST
 will be left intact; if the file wasn't already open then we
 throw an exception. *)
 let update_file
-    (files : open_files_state)
-    (document_location : ClientIdeMessage.document_location) :
+    (files : open_files_state) (document : ClientIdeMessage.document) :
     open_files_state * Provider_context.entry =
   let path =
-    document_location.ClientIdeMessage.file_path
+    document.ClientIdeMessage.file_path
     |> Path.to_string
     |> Relative_path.create_detect_prefix
   in
-  let contents = document_location.ClientIdeMessage.file_contents in
+  let contents = document.ClientIdeMessage.file_contents in
   let entry =
     match Relative_path.Map.find_opt files.open_files path with
     | None ->
@@ -790,11 +789,10 @@ let update_file
 (** like [update_file], but for convenience also produces a ctx for
 use in typechecking. Also ensures that hhi files haven't been deleted
 by tmp_cleaner, so that type-checking will succeed. *)
-let update_file_ctx
-    (istate : istate) (document_location : ClientIdeMessage.document_location) :
+let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
     state * Provider_context.t * Provider_context.entry =
   let istate = restore_hhi_root_if_necessary istate in
-  let (ifiles, entry) = update_file istate.ifiles document_location in
+  let (ifiles, entry) = update_file istate.ifiles document in
   let ctx = make_singleton_ctx istate entry in
   (Initialized { istate with ifiles }, ctx, entry)
 
@@ -915,11 +913,8 @@ let handle_request
     in
     let state = open_or_change_file_during_init dstate path file_contents in
     Lwt.return (state, Ok Errors.empty)
-  | (Initialized istate, Ide_file_opened { file_path; file_contents }) ->
-    let document_location =
-      { file_path; file_contents; line = 0; column = 0 }
-    in
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Ide_file_opened document) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
@@ -931,11 +926,8 @@ let handle_request
     in
     let state = open_or_change_file_during_init dstate path file_contents in
     Lwt.return (state, Ok Errors.empty)
-  | (Initialized istate, Ide_file_changed { file_path; file_contents }) ->
-    let document_location =
-      { file_path; file_contents; line = 0; column = 0 }
-    in
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Ide_file_changed document) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
@@ -943,8 +935,8 @@ let handle_request
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),
-      Document_symbol document_location ) ->
-    let (files, entry) = update_file files document_location in
+      Document_symbol (document, _location) ) ->
+    let (files, entry) = update_file files document in
     let result =
       FileOutline.outline_entry_no_comments ~popt:common.popt ~entry
     in
@@ -971,30 +963,20 @@ let handle_request
   (***********************************************************)
   (************************* NORMAL HANDLING AFTER INIT ******)
   (***********************************************************)
-  | (Initialized istate, Hover document_location) ->
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Hover (document, { line; column })) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerHover.go_quarantined
-            ~ctx
-            ~entry
-            ~line:document_location.ClientIdeMessage.line
-            ~column:document_location.ClientIdeMessage.column)
+          ServerHover.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (state, Ok result)
     (* textDocument/rename - localvar only *)
-  | (Initialized istate, Rename (document_location, new_name)) ->
+  | (Initialized istate, Rename (document, { line; column }, new_name)) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          match
-            ServerFindRefs.go_from_file_ctx
-              ~ctx
-              ~entry
-              ~line:document_location.line
-              ~column:document_location.column
-          with
+          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
           | None -> Ok None (* Clicking a line+col that isn't a symbol *)
           | Some (_name, action) when ServerFindRefs.is_local action ->
             ServerRename.go_for_localvar ctx action new_name
@@ -1003,19 +985,13 @@ let handle_request
     in
     Lwt.return (state, Ok result)
     (* textDocument/references - localvar only *)
-  | (Initialized istate, Find_references document_location) ->
+  | (Initialized istate, Find_references (document, { line; column })) ->
     let open Result.Monad_infix in
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          match
-            ServerFindRefs.go_from_file_ctx
-              ~ctx
-              ~entry
-              ~line:document_location.line
-              ~column:document_location.column
-          with
+          match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
           | Some (name, action) when ServerFindRefs.is_local action ->
             ServerFindRefs.go_for_localvar ctx action
             >>| ServerFindRefs.to_ide name
@@ -1031,18 +1007,19 @@ let handle_request
     Lwt.return (state, Ok result)
   (* Autocomplete *)
   | ( Initialized istate,
-      Completion (document_location, { ClientIdeMessage.is_manually_invoked })
+      Completion
+        (document, { line; column }, { ClientIdeMessage.is_manually_invoked })
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
         ~entry
         ~sienv:istate.icommon.sienv
         ~is_manually_invoked
-        ~line:document_location.line
-        ~column:document_location.column
+        ~line
+        ~column
         ~naming_table:istate.naming_table
     in
     Lwt.return (state, Ok result)
@@ -1053,7 +1030,8 @@ let handle_request
     Lwt.return (state, Ok result)
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
-      Completion_resolve_location ({ file_path; line; column; _ }, kind) ) ->
+      Completion_resolve_location ({ file_path; _ }, { line; column }, kind) )
+    ->
     (* We're given a location but it often won't be an opened file.
        We will only serve autocomplete docblocks as of truth on disk.
        Hence, we construct temporary entry to reflect the file which
@@ -1069,37 +1047,26 @@ let handle_request
     in
     Lwt.return (state, Ok result)
   (* Document highlighting *)
-  | (Initialized istate, Document_highlight document_location) ->
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Document_highlight (document, { line; column })) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerHighlightRefs.go_quarantined
-            ~ctx
-            ~entry
-            ~line:document_location.line
-            ~column:document_location.column)
+          ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (state, Ok results)
   (* Signature help *)
-  | (Initialized istate, Signature_help document_location) ->
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Signature_help (document, { line; column })) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerSignatureHelp.go_quarantined
-            ~ctx
-            ~entry
-            ~line:document_location.line
-            ~column:document_location.column)
+          ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (state, Ok results)
   (* Code actions (refactorings, quickfixes) *)
-  | (Initialized istate, Code_action ({ file_path; file_contents }, range)) ->
-    let document_location : ClientIdeMessage.document_location =
-      { file_path; file_contents; line = 0; column = 0 }
-    in
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Code_action (document, range)) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
 
-    let path = Path.to_string file_path in
+    let path = Path.to_string document.file_path in
     (* TODO: should be using RelativePath.t, not string *)
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -1107,35 +1074,24 @@ let handle_request
     in
     Lwt.return (state, Ok results)
   (* Go to definition *)
-  | (Initialized istate, Definition document_location) ->
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Definition (document, { line; column })) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerGoToDefinition.go_quarantined
-            ~ctx
-            ~entry
-            ~line:document_location.ClientIdeMessage.line
-            ~column:document_location.ClientIdeMessage.column)
+          ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (state, Ok result)
   (* Type Definition *)
-  | (Initialized istate, Type_definition document_location) ->
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Type_definition (document, { line; column })) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-          ServerTypeDefinition.go_quarantined
-            ~ctx
-            ~entry
-            ~line:document_location.ClientIdeMessage.line
-            ~column:document_location.ClientIdeMessage.column)
+          ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
     Lwt.return (state, Ok result)
   (* Type Coverage *)
-  | (Initialized istate, Type_coverage { file_path; file_contents }) ->
-    let document_location =
-      { file_path; file_contents; line = 0; column = 0 }
-    in
-    let (state, ctx, entry) = update_file_ctx istate document_location in
+  | (Initialized istate, Type_coverage document) ->
+    let (state, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerColorFile.go_quarantined ~ctx ~entry)

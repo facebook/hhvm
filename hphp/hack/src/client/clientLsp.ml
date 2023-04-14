@@ -1398,14 +1398,15 @@ Raises an LSP [InvalidRequest] exception if the file isn't currently open. *)
 let get_document_location
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Lsp.TextDocumentPositionParams.t) :
-    ClientIdeMessage.document_location =
+    ClientIdeMessage.document * ClientIdeMessage.location =
   let (file_path, line, column) = lsp_file_position_to_hack params in
   let uri =
     params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
   in
   let file_path = Path.make file_path in
   let file_contents = get_document_contents editor_open_files uri in
-  { ClientIdeMessage.file_path; file_contents; line; column }
+  ( { ClientIdeMessage.file_path; file_contents },
+    { ClientIdeMessage.line; column } )
 
 (************************************************************************)
 (* Connection and rpc                                                   *)
@@ -2688,14 +2689,14 @@ let do_hover_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Hover.params) : Hover.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt infos =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Hover document_location)
+      (ClientIdeMessage.Hover (document, location))
   in
   Lwt.return (do_hover_common infos)
 
@@ -2721,16 +2722,16 @@ let do_typeDefinition_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : TypeDefinition.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt results =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Type_definition document_location)
+      (ClientIdeMessage.Type_definition (document, location))
   in
-  let file = Path.to_string document_location.ClientIdeMessage.file_path in
+  let file = Path.to_string document.ClientIdeMessage.file_path in
   let results =
     List.map results ~f:(fun nast_sid ->
         hack_pos_definition_to_lsp_identifier_location
@@ -2779,21 +2780,20 @@ let do_definition_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : (Definition.result * bool) Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt results =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Definition document_location)
+      (ClientIdeMessage.Definition (document, location))
   in
   let locations =
     List.map results ~f:(fun (_, definition) ->
         hack_symbol_definition_to_lsp_identifier_location
           definition
-          ~default_path:
-            (document_location.ClientIdeMessage.file_path |> Path.to_string))
+          ~default_path:(document.ClientIdeMessage.file_path |> Path.to_string))
   in
   let has_xhp_attribute =
     List.exists results ~f:(fun (occurence, _) ->
@@ -2976,7 +2976,9 @@ let do_completion_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Completion.params) : Completion.result Lwt.t =
   let open Completion in
-  let document_location = get_document_location editor_open_files params.loc in
+  let (document, location) =
+    get_document_location editor_open_files params.loc
+  in
   (* Other parameters *)
   let is_manually_invoked =
     match params.context with
@@ -2986,14 +2988,12 @@ let do_completion_local
   (* this is what I want to fix *)
   let request =
     ClientIdeMessage.Completion
-      (document_location, { ClientIdeMessage.is_manually_invoked })
+      (document, location, { ClientIdeMessage.is_manually_invoked })
   in
   let%lwt infos =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
-  let filename =
-    document_location.ClientIdeMessage.file_path |> Path.to_string
-  in
+  let filename = document.ClientIdeMessage.file_path |> Path.to_string in
   let%lwt response = make_ide_completion_response infos filename in
   Lwt.return response
 
@@ -3148,12 +3148,8 @@ let do_resolve_local
           if line = 0 && column = 0 then failwith "NoFileLineColumnData";
           let request =
             ClientIdeMessage.Completion_resolve_location
-              ( {
-                  ClientIdeMessage.file_path;
-                  ClientIdeMessage.file_contents;
-                  ClientIdeMessage.line;
-                  ClientIdeMessage.column;
-                },
+              ( { ClientIdeMessage.file_path; file_contents },
+                { ClientIdeMessage.line; column },
                 resolve_ranking_source kind ranking_source )
           in
           let%lwt raw_docblock =
@@ -3332,16 +3328,15 @@ let do_documentSymbol_local
   let open DocumentSymbol in
   let open TextDocumentIdentifier in
   let filename = lsp_uri_to_path params.textDocument.uri in
-  let document_location =
-    {
-      ClientIdeMessage.file_path = Path.make filename;
-      file_contents =
-        get_document_contents editor_open_files params.textDocument.uri;
-      line = 0;
-      column = 0;
-    }
+  let (document, location) =
+    ( {
+        ClientIdeMessage.file_path = Path.make filename;
+        file_contents =
+          get_document_contents editor_open_files params.textDocument.uri;
+      },
+      { ClientIdeMessage.line = 0; column = 0 } )
   in
-  let request = ClientIdeMessage.Document_symbol document_location in
+  let request = ClientIdeMessage.Document_symbol (document, location) in
   let%lwt outline =
     ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
@@ -3388,7 +3383,7 @@ let do_findReferences_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : FindReferences.params)
     (lsp_id : lsp_id) =
-  let document_location =
+  let (document, location) =
     get_document_location editor_open_files params.FindReferences.loc
   in
   let%lwt response =
@@ -3397,7 +3392,7 @@ let do_findReferences_local
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Find_references document_location)
+      (ClientIdeMessage.Find_references (document, location))
   in
   let state =
     match response with
@@ -3511,14 +3506,14 @@ let do_highlight_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentHighlight.params) : DocumentHighlight.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt ranges =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Document_highlight document_location)
+      (ClientIdeMessage.Document_highlight (document, location))
   in
   Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
 
@@ -3761,14 +3756,14 @@ let do_signatureHelp_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : SignatureHelp.params) : SignatureHelp.result Lwt.t =
-  let document_location = get_document_location editor_open_files params in
+  let (document, location) = get_document_location editor_open_files params in
   let%lwt signatures =
     ide_rpc
       ide_service
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Signature_help document_location)
+      (ClientIdeMessage.Signature_help (document, location))
   in
   Lwt.return signatures
 
@@ -3848,7 +3843,7 @@ let do_documentRename_local
     (params : Rename.params)
     (lsp_id : lsp_id) : state Lwt.t =
   let document_position = rename_params_to_document_position params in
-  let document_location =
+  let (document, location) =
     get_document_location editor_open_files document_position
   in
   let new_name = params.Rename.newName in
@@ -3858,7 +3853,7 @@ let do_documentRename_local
       ~env
       ~tracking_id
       ~ref_unblocked_time
-      (ClientIdeMessage.Rename (document_location, new_name))
+      (ClientIdeMessage.Rename (document, location, new_name))
   in
   let state =
     match response with

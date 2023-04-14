@@ -264,7 +264,8 @@ class TestLsp(TestCase[LspTestDriver]):
         self.assertEqual(output.strip(), "No errors!")
 
     def prepare_serverless_ide_environment(
-        self, use_standalone_ide: bool = False
+        self,
+        use_standalone_ide: bool = False,
     ) -> Mapping[str, str]:
         self.maxDiff = None
         self.test_driver.write_load_config(
@@ -317,6 +318,7 @@ class TestLsp(TestCase[LspTestDriver]):
         variables: Mapping[str, str],
         wait_for_server: bool,
         use_serverless_ide: bool,
+        fall_back_to_full_index: bool = True,
     ) -> None:
         if wait_for_server:
             # wait until hh_server is ready before starting lsp
@@ -324,8 +326,13 @@ class TestLsp(TestCase[LspTestDriver]):
         elif use_serverless_ide:
             self.test_driver.stop_hh_server()
 
+        lsp_args = (
+            []
+            if fall_back_to_full_index
+            else ["--config", "ide_fall_back_to_full_index=false"]
+        )
         with LspCommandProcessor.create(
-            self.test_driver.test_env, []
+            self.test_driver.test_env, lsp_args
         ) as lsp_command_processor:
             (observed_transcript, error_details) = spec.run(
                 lsp_command_processor=lsp_command_processor, variables=variables
@@ -7130,7 +7137,60 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
-    def test_serverless_ide_failed_to_load_saved_state(self) -> None:
+    def test_serverless_ide_falls_back_to_full_index(self) -> None:
+        # Test recovery behavior when we fail to load a naming table, but we're
+        # permitted to fall back to the full index naming table build.
+        variables = dict(
+            self.prepare_serverless_ide_environment(use_standalone_ide=True)
+        )
+        variables.update(self.setup_php_file("hover.php"))
+        assert "naming_table_saved_state_path" in variables
+        variables["naming_table_saved_state_path"] = "/tmp/nonexistent"
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_falls_back_to_full_index"),
+                use_serverless_ide=True,
+                supports_status=True,
+                supports_init=True,
+            )
+            .ignore_requests(
+                comment="Ignore all status requests not explicitly waited for in the test",
+                method="window/showStatus",
+                params=None,
+            )
+            .wait_for_notification(
+                comment="This log should appear whenever we fall back to a full index.",
+                method="telemetry/event",
+                params={
+                    "type": 4,
+                    "message": "[client-ide] Falling back to full index naming table build",
+                },
+            )
+            .wait_for_server_request(
+                comment="standalone status upon startup when it starts with hh_server stopped",
+                method="window/showStatus",
+                params={
+                    "message": "Hack IDE support is ready\n\nhh_server is stopped. Try running `hh` at the command-line.",
+                    "shortMessage": "Hack: hh_server stopped",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(
+            spec,
+            variables,
+            # We don't need hh_server here
+            wait_for_server=False,
+            use_serverless_ide=True,
+        )
+
+    def test_serverless_ide_failed_to_load_saved_state_no_full_index(self) -> None:
+        # This test examines the failure behavior when the naming table is
+        # non-existent and we are *not* falling back to full index.
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("hover.php"))
         assert "naming_table_saved_state_path" in variables
@@ -7198,7 +7258,14 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
-        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+        # By setting `fall_back_to_full_index` to `False`, the IDE will give up once it fails to load a saved state instead of attempting the naming table build.
+        self.run_spec(
+            spec,
+            variables,
+            wait_for_server=True,
+            use_serverless_ide=True,
+            fall_back_to_full_index=False,
+        )
 
     def test_workspace_symbol(self) -> None:
         self.prepare_server_environment()

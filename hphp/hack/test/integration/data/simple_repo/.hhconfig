@@ -7,5 +7,3 @@ disallow_fun_and_cls_meth_pseudo_funcs = true
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 disable_xhp_element_mangling = false
-
-ide_fall_back_to_full_index = true

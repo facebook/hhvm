@@ -418,7 +418,7 @@ let build_naming_table
   try%lwt
     let%lwt exit_status = poll_build_until_complete_exn () in
     if exit_status = 0 then begin
-      log "[full-index] Successfully build naming table from full index.";
+      log "[full-index] Successfully built naming table from full index.";
       log "[full-index] Loading naming-table... %s" (Path.to_string output);
       let naming_table =
         Naming_table.load_from_sqlite ctx (Path.to_string output)

@@ -316,7 +316,7 @@ let load ~silent options : t * ServerLocalConfig.t =
     bool_ "warn_on_non_opt_build" ~default:false config
   in
   let ide_fall_back_to_full_index =
-    bool_ "ide_fall_back_to_full_index" ~default:false config
+    bool_ "ide_fall_back_to_full_index" ~default:true config
   in
   let formatter_override =
     Option.map
@@ -550,7 +550,7 @@ let default_config =
     ignored_paths = [];
     extra_paths = [];
     warn_on_non_opt_build = false;
-    ide_fall_back_to_full_index = false;
+    ide_fall_back_to_full_index = true;
   }
 
 let set_parser_options config popt = { config with parser_options = popt }

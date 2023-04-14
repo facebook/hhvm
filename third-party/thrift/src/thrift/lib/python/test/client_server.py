@@ -228,6 +228,7 @@ class ClientServerTests(unittest.TestCase):
                 await client.__aenter__()
                 self.assertTrue(await client.invert(False))
                 self.assertFalse(await client.invert(True))
+                # pyre-fixme[1001]: Async expression is not awaited.
                 _ = client.__aexit__(None, None, None)
                 del client  # If we do not abort here then good
 

@@ -5826,6 +5826,92 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 docs_url,
             })])
         }
+        CaseTypeDeclaration(c) => {
+            let kinds = p_kinds(&c.modifiers, env);
+
+            let tparams = p_tparam_l(false, &c.generic_parameter, env)?;
+            for tparam in tparams.iter() {
+                if tparam.reified != ast::ReifyKind::Erased {
+                    raise_parsing_error(node, env, &syntax_error::invalid_reified)
+                }
+            }
+
+            let user_attributes = itertools::concat(
+                c.attribute_spec
+                    .syntax_node_to_list_skip_separator()
+                    .map(|attr| p_user_attribute(attr, env))
+                    .collect::<Result<Vec<ast::UserAttributes>, _>>()?,
+            );
+            let docs_url = p_docs_url(&user_attributes, env);
+
+            let expect_hint = |node, env: &mut _| match p_hint(node, env) {
+                Ok(hint) => Some(hint),
+                Err(e) => {
+                    emit_error(e, env);
+                    None
+                }
+            };
+
+            let as_constraints = c
+                .bounds
+                .syntax_node_to_list_skip_separator()
+                .filter_map(|bound| expect_hint(bound, env))
+                .collect::<Vec<_>>();
+
+            let variants = c
+                .variants
+                .syntax_node_to_list()
+                .filter_map(|variant| {
+                    if let CaseTypeVariant(ctv) = &variant.children {
+                        expect_hint(&ctv.type_, env)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            // If there are more than one constraints create an intersection
+            let as_constraint = if as_constraints.len() > 1 {
+                let hint_ = ast::Hint_::Hintersection(as_constraints);
+                let pos = p_pos(&c.bounds, env);
+                Some(ast::Hint::new(pos, hint_))
+            } else {
+                as_constraints.into_iter().next()
+            };
+
+            // If there are more than one variants create an union
+            let kind = if variants.len() > 1 {
+                let hint_ = ast::Hint_::Hunion(variants);
+                let pos = p_pos(&c.variants, env);
+                ast::Hint::new(pos, hint_)
+            } else {
+                match variants.into_iter().next() {
+                    Some(hint) => hint,
+                    // If there less than one variant it is an ill-defined case type
+                    None => return missing_syntax("case type variant", node, env),
+                }
+            };
+
+            Ok(vec![ast::Def::mk_typedef(ast::Typedef {
+                annotation: (),
+                name: pos_name(&c.name, env)?,
+                tparams,
+                as_constraint,
+                super_constraint: None,
+                user_attributes,
+                file_attributes: vec![],
+                namespace: mk_empty_ns_env(env),
+                mode: env.file_mode(),
+                vis: ast::TypedefVisibility::Opaque,
+                kind,
+                span: p_pos(node, env),
+                emit_id: None,
+                is_ctx: false,
+                internal: kinds.has(modifier::INTERNAL),
+                module: None,
+                docs_url,
+            })])
+        }
         ContextAliasDeclaration(c) => {
             let (super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
 

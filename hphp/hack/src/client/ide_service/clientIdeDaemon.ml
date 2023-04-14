@@ -1030,8 +1030,7 @@ let handle_request
     Lwt.return (state, Ok result)
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
-      Completion_resolve_location ({ file_path; _ }, { line; column }, kind) )
-    ->
+      Completion_resolve_location (file_path, { line; column }, kind) ) ->
     (* We're given a location but it often won't be an opened file.
        We will only serve autocomplete docblocks as of truth on disk.
        Hence, we construct temporary entry to reflect the file which

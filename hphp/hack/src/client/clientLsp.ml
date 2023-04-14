@@ -3141,14 +3141,12 @@ let do_resolve_local
           let file_path = Path.make filename in
           let line = Jget.int_exn data "line" in
           let column = Jget.int_exn data "char" in
-          let file_contents = "" in
-          (* TODO(ljw): change ide message so it doesn't even take file_contents *)
           let ranking_detail = Jget.string_opt data "ranking_detail" in
           let ranking_source = Jget.int_opt data "ranking_source" in
           if line = 0 && column = 0 then failwith "NoFileLineColumnData";
           let request =
             ClientIdeMessage.Completion_resolve_location
-              ( { ClientIdeMessage.file_path; file_contents },
+              ( file_path,
                 { ClientIdeMessage.line; column },
                 resolve_ranking_source kind ranking_source )
           in

@@ -72,9 +72,14 @@ type _ t =
       -> AutocompleteTypes.ide_result t
       (** Handles "textDocument/completion" LSP messages *)
   | Completion_resolve_location :
-      document * location * SearchUtils.si_kind
+      Path.t * location * SearchUtils.si_kind
       -> DocblockService.result t
-      (** "completionItem/resolve" LSP messages - if we have file/line/column *)
+      (** "completionItem/resolve" LSP messages - if we have file/line/column.
+      The scenario is that VSCode requests textDocument/completion in A.PHP line 5 col 6,
+      and we responded with a completion item that points to a class defined in B.PHP line 10 col 5,
+      and now VSCode requests completionItem/resolve [(B.PHP, {line=10; column=5;}, class)],
+      and this method will look up B.PHP to find the docblock for that class and return it.
+      Typically B.PHP won't even be open. That's why we only provide it as Path.t *)
   | Completion_resolve :
       string * SearchUtils.si_kind
       -> DocblockService.result t
@@ -142,7 +147,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Completion(%s)" (Path.to_string file_path)
   | Completion_resolve (symbol, _) ->
     Printf.sprintf "Completion_resolve(%s)" symbol
-  | Completion_resolve_location ({ file_path; _ }, _, _) ->
+  | Completion_resolve_location (file_path, _, _) ->
     Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
   | Document_highlight ({ file_path; _ }, _) ->
     Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)

@@ -1922,8 +1922,10 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn check_cross_package_args_are_string_literals(&mut self, node: S<'a>) {
+        let mut crossed_packages_count = 0;
         if let Some(args) = self.attr_args(node) {
             for arg in args.peekable() {
+                crossed_packages_count += 1;
                 if let LiteralExpression(x) = &arg.children {
                     if let Token(t) = &x.expression.children {
                         if t.kind() == TokenKind::SingleQuotedStringLiteral
@@ -1940,7 +1942,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     ),
                 ))
             }
+            if crossed_packages_count == 1 {
+                return;
+            }
         }
+        self.errors.push(make_error_from_node(
+            node,
+            errors::cross_package_wrong_arity(crossed_packages_count),
+        ))
     }
 
     fn check_attr_enabled(&mut self, attrs: S<'a>) {

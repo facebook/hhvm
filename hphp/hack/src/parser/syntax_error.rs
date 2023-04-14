@@ -1210,3 +1210,10 @@ pub fn invalid_cross_package_argument(message: &str) -> Error {
         message
     ))
 }
+
+pub fn cross_package_wrong_arity(count: usize) -> Error {
+    Cow::Owned(format!(
+        "The '__CrossPackage' attribute expects exactly 1 argument, {} given.",
+        count
+    ))
+}

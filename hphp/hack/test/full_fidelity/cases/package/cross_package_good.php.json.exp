@@ -461,279 +461,6 @@
                     }
                   }
                 }
-              },
-              {
-                "kind":"methodish_declaration",
-                "methodish_attribute":{
-                  "kind":"old_attribute_specification",
-                  "old_attribute_specification_left_double_angle":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"<<",
-                      "text":"<<",
-                      "offset":114,
-                      "leading_width":3,
-                      "width":2,
-                      "trailing_width":0,
-                      "leading":[
-                        {"kind":"end_of_line","text":"\n","offset":114,"width":1},
-                        {"kind":"whitespace","text":"  ","offset":115,"width":2}
-                      ],
-                      "trailing":[],
-                      "line_number":9
-                    }
-                  },
-                  "old_attribute_specification_attributes":{
-                    "kind":"list",
-                    "elements":[
-                      {
-                        "kind":"list_item",
-                        "list_item":{
-                          "kind":"constructor_call",
-                          "constructor_call_type":{
-                            "kind":"simple_type_specifier",
-                            "simple_type_specifier":{
-                              "kind":"token",
-                              "token":{
-                                "kind":"name",
-                                "text":"__CrossPackage",
-                                "offset":119,
-                                "leading_width":0,
-                                "width":14,
-                                "trailing_width":0,
-                                "leading":[],
-                                "trailing":[],
-                                "line_number":9
-                              }
-                            }
-                          },
-                          "constructor_call_left_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":"(",
-                              "text":"(",
-                              "offset":133,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":9
-                            }
-                          },
-                          "constructor_call_argument_list":{
-                            "kind":"list",
-                            "elements":[
-                              {
-                                "kind":"list_item",
-                                "list_item":{
-                                  "kind":"literal",
-                                  "literal_expression":{
-                                    "kind":"token",
-                                    "token":{
-                                      "kind":"double_quoted_string_literal",
-                                      "text":"\"foo\"",
-                                      "offset":134,
-                                      "leading_width":0,
-                                      "width":5,
-                                      "trailing_width":0,
-                                      "leading":[],
-                                      "trailing":[],
-                                      "line_number":9
-                                    }
-                                  }
-                                },
-                                "list_separator":{
-                                  "kind":"token",
-                                  "token":{
-                                    "kind":",",
-                                    "text":",",
-                                    "offset":139,
-                                    "leading_width":0,
-                                    "width":1,
-                                    "trailing_width":1,
-                                    "leading":[],
-                                    "trailing":[{"kind":"whitespace","text":" ","offset":140,"width":1}],
-                                    "line_number":9
-                                  }
-                                }
-                              },
-                              {
-                                "kind":"list_item",
-                                "list_item":{
-                                  "kind":"literal",
-                                  "literal_expression":{
-                                    "kind":"token",
-                                    "token":{
-                                      "kind":"double_quoted_string_literal",
-                                      "text":"\"bar\"",
-                                      "offset":141,
-                                      "leading_width":0,
-                                      "width":5,
-                                      "trailing_width":0,
-                                      "leading":[],
-                                      "trailing":[],
-                                      "line_number":9
-                                    }
-                                  }
-                                }
-                              }
-                            ]
-                          },
-                          "constructor_call_right_paren":{
-                            "kind":"token",
-                            "token":{
-                              "kind":")",
-                              "text":")",
-                              "offset":146,
-                              "leading_width":0,
-                              "width":1,
-                              "trailing_width":0,
-                              "leading":[],
-                              "trailing":[],
-                              "line_number":9
-                            }
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "old_attribute_specification_right_double_angle":{
-                    "kind":"token",
-                    "token":{
-                      "kind":">>",
-                      "text":">>",
-                      "offset":147,
-                      "leading_width":0,
-                      "width":2,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":149,"width":1}],
-                      "line_number":9
-                    }
-                  }
-                },
-                "methodish_function_decl_header":{
-                  "kind":"function_declaration_header",
-                  "function_keyword":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"function",
-                      "text":"function",
-                      "offset":150,
-                      "leading_width":2,
-                      "width":8,
-                      "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":150,"width":2}],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":160,"width":1}],
-                      "line_number":10
-                    }
-                  },
-                  "function_name":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"name",
-                      "text":"g",
-                      "offset":161,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":10
-                    }
-                  },
-                  "function_left_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"(",
-                      "text":"(",
-                      "offset":162,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":10
-                    }
-                  },
-                  "function_right_paren":{
-                    "kind":"token",
-                    "token":{
-                      "kind":")",
-                      "text":")",
-                      "offset":163,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":10
-                    }
-                  },
-                  "function_colon":{
-                    "kind":"token",
-                    "token":{
-                      "kind":":",
-                      "text":":",
-                      "offset":164,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":165,"width":1}],
-                      "line_number":10
-                    }
-                  },
-                  "function_type":{
-                    "kind":"simple_type_specifier",
-                    "simple_type_specifier":{
-                      "kind":"token",
-                      "token":{
-                        "kind":"void",
-                        "text":"void",
-                        "offset":166,
-                        "leading_width":0,
-                        "width":4,
-                        "trailing_width":1,
-                        "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":170,"width":1}],
-                        "line_number":10
-                      }
-                    }
-                  }
-                },
-                "methodish_function_body":{
-                  "kind":"compound_statement",
-                  "compound_left_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"{",
-                      "text":"{",
-                      "offset":171,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":0,
-                      "leading":[],
-                      "trailing":[],
-                      "line_number":10
-                    }
-                  },
-                  "compound_right_brace":{
-                    "kind":"token",
-                    "token":{
-                      "kind":"}",
-                      "text":"}",
-                      "offset":172,
-                      "leading_width":0,
-                      "width":1,
-                      "trailing_width":1,
-                      "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":173,"width":1}],
-                      "line_number":10
-                    }
-                  }
-                }
               }
             ]
           },
@@ -742,13 +469,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":174,
+              "offset":114,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":175,"width":1}],
-              "line_number":11
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":115,"width":1}],
+              "line_number":8
             }
           }
         }
@@ -762,13 +489,13 @@
             "token":{
               "kind":"<<",
               "text":"<<",
-              "offset":176,
+              "offset":116,
               "leading_width":1,
               "width":2,
               "trailing_width":0,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":176,"width":1}],
+              "leading":[{"kind":"end_of_line","text":"\n","offset":116,"width":1}],
               "trailing":[],
-              "line_number":13
+              "line_number":10
             }
           },
           "old_attribute_specification_attributes":{
@@ -785,13 +512,13 @@
                       "token":{
                         "kind":"name",
                         "text":"__CrossPackage",
-                        "offset":179,
+                        "offset":119,
                         "leading_width":0,
                         "width":14,
                         "trailing_width":0,
                         "leading":[],
                         "trailing":[],
-                        "line_number":13
+                        "line_number":10
                       }
                     }
                   },
@@ -800,13 +527,13 @@
                     "token":{
                       "kind":"(",
                       "text":"(",
-                      "offset":193,
+                      "offset":133,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":13
+                      "line_number":10
                     }
                   },
                   "constructor_call_argument_list":{
@@ -821,13 +548,13 @@
                             "token":{
                               "kind":"double_quoted_string_literal",
                               "text":"\"bar\"",
-                              "offset":194,
+                              "offset":134,
                               "leading_width":0,
                               "width":5,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":13
+                              "line_number":10
                             }
                           }
                         }
@@ -839,13 +566,13 @@
                     "token":{
                       "kind":")",
                       "text":")",
-                      "offset":199,
+                      "offset":139,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":0,
                       "leading":[],
                       "trailing":[],
-                      "line_number":13
+                      "line_number":10
                     }
                   }
                 }
@@ -857,13 +584,13 @@
             "token":{
               "kind":">>",
               "text":">>",
-              "offset":200,
+              "offset":140,
               "leading_width":0,
               "width":2,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":202,"width":1}],
-              "line_number":13
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":142,"width":1}],
+              "line_number":10
             }
           }
         },
@@ -874,13 +601,13 @@
             "token":{
               "kind":"function",
               "text":"function",
-              "offset":203,
+              "offset":143,
               "leading_width":0,
               "width":8,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":211,"width":1}],
-              "line_number":14
+              "trailing":[{"kind":"whitespace","text":" ","offset":151,"width":1}],
+              "line_number":11
             }
           },
           "function_name":{
@@ -888,13 +615,13 @@
             "token":{
               "kind":"name",
               "text":"h",
-              "offset":212,
+              "offset":152,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":14
+              "line_number":11
             }
           },
           "function_left_paren":{
@@ -902,13 +629,13 @@
             "token":{
               "kind":"(",
               "text":"(",
-              "offset":213,
+              "offset":153,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":14
+              "line_number":11
             }
           },
           "function_right_paren":{
@@ -916,13 +643,13 @@
             "token":{
               "kind":")",
               "text":")",
-              "offset":214,
+              "offset":154,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":14
+              "line_number":11
             }
           },
           "function_colon":{
@@ -930,13 +657,13 @@
             "token":{
               "kind":":",
               "text":":",
-              "offset":215,
+              "offset":155,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":216,"width":1}],
-              "line_number":14
+              "trailing":[{"kind":"whitespace","text":" ","offset":156,"width":1}],
+              "line_number":11
             }
           },
           "function_type":{
@@ -946,13 +673,13 @@
               "token":{
                 "kind":"void",
                 "text":"void",
-                "offset":217,
+                "offset":157,
                 "leading_width":0,
                 "width":4,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":221,"width":1}],
-                "line_number":14
+                "trailing":[{"kind":"whitespace","text":" ","offset":161,"width":1}],
+                "line_number":11
               }
             }
           }
@@ -964,13 +691,13 @@
             "token":{
               "kind":"{",
               "text":"{",
-              "offset":222,
+              "offset":162,
               "leading_width":0,
               "width":1,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":14
+              "line_number":11
             }
           },
           "compound_right_brace":{
@@ -978,13 +705,13 @@
             "token":{
               "kind":"}",
               "text":"}",
-              "offset":223,
+              "offset":163,
               "leading_width":0,
               "width":1,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"end_of_line","text":"\n","offset":224,"width":1}],
-              "line_number":14
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":164,"width":1}],
+              "line_number":11
             }
           }
         }
@@ -996,13 +723,13 @@
           "token":{
             "kind":"end_of_file",
             "text":"",
-            "offset":225,
+            "offset":165,
             "leading_width":0,
             "width":0,
             "trailing_width":0,
             "leading":[],
             "trailing":[],
-            "line_number":15
+            "line_number":12
           }
         }
       }

@@ -2623,17 +2623,66 @@ and simplify_subtype_i
                   env
               | None -> invalid_env env
             end
+        | (r, Toption ty_sub) ->
+          let ty_null = MakeType.null r in
+          (* Errors due to `null` should refer to full option type *)
+          if_unsat
+            invalid_env
+            (simplify_subtype
+               ~subtype_env
+               ~sub_supportdyn
+               ~this_ty
+               ty_null
+               ty_super
+               env)
+          &&& simplify_subtype
+                ~subtype_env
+                ~sub_supportdyn
+                ~this_ty
+                ty_sub
+                ty_super
+        | (r, Tprim Aast.Tarraykey) ->
+          let ty_string = MakeType.string r and ty_int = MakeType.int r in
+          (* Use `if_unsat` so we report arraykey in the error *)
+          if_unsat
+            invalid_env
+            begin
+              env
+              |> simplify_subtype
+                   ~subtype_env
+                   ~sub_supportdyn
+                   ~this_ty
+                   ty_string
+                   ty_super
+              &&& simplify_subtype
+                    ~subtype_env
+                    ~sub_supportdyn
+                    ~this_ty
+                    ty_int
+                    ty_super
+            end
         | _ ->
           (match Env.get_typedef env name_super with
-          | Some { td_super_constraint = Some lower; _ } ->
-            (* For now, this rule only applies to newctx with super
-             * by syntactic restriction - super on newtype is an
-             * unstable feature. *)
+          | Some { td_type = lower; td_vis = Aast.CaseType; td_tparams; _ }
+          | Some { td_super_constraint = Some lower; td_tparams; _ } ->
             let try_lower_bound env =
               let ((env, _ty_err_opt), lower_bound) =
-                (* Using empty_expand_env for now since newctx does not
-                 * have generics so `this` will never be in scope *)
-                Phase.localize ~ety_env:empty_expand_env env lower
+                (* The this_ty cannot does not need to be set because newtypes
+                 * & case types cannot appear within classes thus cannot us
+                 * the this type. If we ever change that this could needs to
+                 * be changed *)
+                Phase.localize
+                  ~ety_env:
+                    {
+                      empty_expand_env with
+                      substs =
+                        (if List.is_empty tyl_super then
+                          SMap.empty
+                        else
+                          Decl_subst.make_locl td_tparams tyl_super);
+                    }
+                  env
+                  lower
               in
               simplify_subtype
                 ~subtype_env

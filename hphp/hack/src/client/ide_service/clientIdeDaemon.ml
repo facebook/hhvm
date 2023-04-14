@@ -1116,7 +1116,7 @@ let handle_request
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action param) ->
     let file_path = param.Code_action.file_path in
-    let file_contents = param.Code_action.file_contents in
+    let file_contents = Some param.Code_action.file_contents in
     let document_location : ClientIdeMessage.document_location =
       { file_path; file_contents; line = 0; column = 0 }
     in

@@ -3719,16 +3719,19 @@ let do_codeAction_local
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
-  let%lwt actions =
-    ide_rpc
-      ide_service
-      ~env
-      ~tracking_id
-      ~ref_unblocked_time
-      (ClientIdeMessage.Code_action
-         { ClientIdeMessage.Code_action.file_path; file_contents; range })
-  in
-  Lwt.return actions
+  match file_contents with
+  | None -> Lwt.return []
+  | Some file_contents ->
+    let%lwt actions =
+      ide_rpc
+        ide_service
+        ~env
+        ~tracking_id
+        ~ref_unblocked_time
+        (ClientIdeMessage.Code_action
+           { ClientIdeMessage.Code_action.file_path; file_contents; range })
+    in
+    Lwt.return actions
 
 let do_codeAction
     (conn : server_conn)

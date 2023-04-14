@@ -160,7 +160,7 @@ end
 module Code_action = struct
   type request = {
     file_path: Path.t;
-    file_contents: string option;
+    file_contents: string;
     range: Ide_api_types.range;
   }
 

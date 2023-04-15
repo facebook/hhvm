@@ -976,6 +976,7 @@ let initialize_naming_table
       env
       ~get_next
       ?count
+      ~always_cache_asts:false
       t
       ~trace
       ~cache_decls
@@ -1289,6 +1290,7 @@ let post_saved_state_initialization
       ~lazy_parse:true
       ~get_next:next
       ~count:(List.length parsing_files_list)
+      ~always_cache_asts:false
       t
       ~trace
       ~cache_decls:false (* Don't overwrite old decls loaded from saved state *)

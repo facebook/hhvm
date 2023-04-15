@@ -31,7 +31,7 @@ let parsing
     (env : ServerEnv.env)
     ~(get_next : Relative_path.t list Bucket.next)
     ?(count : int option)
-    ?(always_cache_asts : bool = false)
+    ~(always_cache_asts : bool)
     (t : float)
     ~(trace : bool)
     ~(cache_decls : bool)

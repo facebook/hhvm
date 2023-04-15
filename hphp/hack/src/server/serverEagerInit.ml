@@ -86,6 +86,7 @@ let init
       t
       ~trace
       ~cache_decls:true
+      ~always_cache_asts:false
       ~telemetry_label:"eager.init.parsing"
       ~cgroup_steps
       ~worker_call:MultiWorker.wrapper

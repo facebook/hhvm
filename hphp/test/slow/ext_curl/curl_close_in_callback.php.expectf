@@ -1,1 +1,0 @@
-Warning: curl_close(): Attempt to close cURL in callback, ignored. in %s/curl_close_in_callback.php on line 7

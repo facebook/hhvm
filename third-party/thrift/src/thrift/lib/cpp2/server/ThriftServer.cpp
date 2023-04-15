@@ -886,12 +886,18 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       FLAGS_thrift_disable_resource_pools;
   if (runtimeDisableResourcePoolsSet()) {
     // No need to check if we've already set this.
+    LOG(INFO)
+        << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
   // This can be called multiple times - only run it to completion once
   // but note below that it can exit early.
   if (runtimeServerActions_.checkComplete) {
-    return !runtimeDisableResourcePoolsSet();
+    auto result = !runtimeDisableResourcePoolsSet();
+    LOG(INFO)
+        << "runtimeResourcePoolsChecks() is aleady completed and result is "
+        << result;
+    return result;
   }
   // If this is called too early we can't run our other checks.
   if (!getProcessorFactory()) {
@@ -904,6 +910,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
       // setup() and if it calls runtimeDisableResourcePoolsDeprecated() at that
       // time that will become a fatal error which is what we want (that can
       // only be triggered by a requireResourcePools() call in the server code).
+      LOG(INFO)
+          << "It's too early to call runtimeResourcePoolsChecks(), returning True for now";
       return true;
     }
     runtimeDisableResourcePoolsDeprecated();
@@ -972,6 +980,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   runtimeServerActions_.checkComplete = true;
 
   if (runtimeDisableResourcePoolsSet()) {
+    LOG(INFO)
+        << "runtimeResourcePoolsChecks() returns false because of runtimeDisableResourcePoolsSet()";
     return false;
   }
   LOG(INFO) << "Resource pools check complete - allowed";

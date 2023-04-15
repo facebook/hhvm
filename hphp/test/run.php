@@ -1924,12 +1924,17 @@ final class Status {
             break;
 
           case Status::MODE_TESTPILOT:
+            $skip_msg = $message->test." skipped (by run.php)";
+            if ($reason is nonnull) {
+              $skip_msg .= " - reason: $reason";
+            }
             Status::sayTestpilot(
               $message->test,
               'not_relevant',
               $message->stime,
               $message->etime,
               $message->time,
+              $skip_msg,
             );
             break;
 
@@ -2023,12 +2028,15 @@ final class Status {
 
   public static function sayTestpilot(
       string $test, string $status, int $stime, int $etime, float $time,
+      ?string $msg = null,
   ): void {
     $start = dict['op' => 'start', 'test' => $test];
     $end = dict['op' => 'test_done', 'test' => $test, 'status' => $status,
                  'start_time' => $stime, 'end_time' => $etime, 'time' => $time];
     if ($status === 'failed') {
       $end['details'] = self::utf8Sanitize(Status::diffForTest($test));
+    } else if ($msg is nonnull) {
+      $end['details'] = self::utf8Sanitize($msg);
     }
     self::say($start, $end);
   }

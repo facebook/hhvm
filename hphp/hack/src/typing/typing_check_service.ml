@@ -999,10 +999,8 @@ let process_with_hh_distc
   | `Error msg ->
     Hh_logger.log "Error with hh_distc: %s" msg;
     HackEventLogger.invariant_violation_bug
-      ~path:Relative_path.default
-      ~pos:""
-      ~desc:("Unexpected hh_distc error: " ^ msg)
-      (Telemetry.create () |> Telemetry.string_ ~key:"error" ~value:msg);
+      "Unexpected hh_distc error"
+      ~data:msg;
     failwith msg
 
 (**

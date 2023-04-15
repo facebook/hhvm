@@ -151,16 +151,16 @@ let should_report_duplicate
         (FileInfo.show_pos p)
     in
     HackEventLogger.invariant_violation_bug
-      ~desc
+      desc
       ~path:(FileInfo.get_pos_filename p)
-      ~pos:""
-      (Telemetry.create ()
-      |> Telemetry.string_ ~key:"name" ~value:name
-      |> Telemetry.string_ ~key:"canonical_name" ~value:canonical
-      |> Telemetry.string_
-           ~key:"canonical_path"
-           ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute)
-      |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show fi))
+      ~telemetry:
+        (Telemetry.create ()
+        |> Telemetry.string_ ~key:"name" ~value:name
+        |> Telemetry.string_ ~key:"canonical_name" ~value:canonical
+        |> Telemetry.string_
+             ~key:"canonical_path"
+             ~value:(FileInfo.get_pos_filename pc |> Relative_path.to_absolute)
+        |> Telemetry.string_ ~key:"fileinfo" ~value:(FileInfo.show fi))
   in
   (* Detect anomaly where we're given a file-only [id] *)
   begin

@@ -165,11 +165,7 @@ let read_and_log_process_information ~timeout =
       "INVARIANT VIOLATION BUG: [%s] [%s]"
       desc
       (Telemetry.to_string telemetry);
-    HackEventLogger.invariant_violation_bug
-      ~desc
-      ~path:Relative_path.default
-      ~pos:""
-      telemetry;
+    HackEventLogger.invariant_violation_bug desc ~telemetry;
     ()
 
 let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =

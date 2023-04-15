@@ -274,16 +274,13 @@ let class_prop_pos class_name prop_name ctx : Pos_or_decl.t =
              *should* find the prop in the class. This is an invariant violation.
           *)
           HackEventLogger.invariant_violation_bug
-            ~desc:
-              ("nastInitCheck can't find expected class prop. class_name = "
-              ^ class_name
-              ^ "; member_origin = "
-              ^ member_origin
-              ^ "; prop_name = "
-              ^ prop_name)
-            ~path:Relative_path.default
-            ~pos:""
-            (Telemetry.create ());
+            "nastInitCheck can't find expected class prop"
+            ~data:
+              (Printf.sprintf
+                 "class_name=%s; member_origin=%s; prop_name=%s"
+                 class_name
+                 member_origin
+                 prop_name);
           Errors.add_typing_error
             Typing_error.(
               primary

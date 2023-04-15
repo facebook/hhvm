@@ -3420,11 +3420,7 @@ let do_findReferences_local
           (ServerCommandTypes.Find_refs.show_action action)
       in
       log "%s" str;
-      HackEventLogger.invariant_violation_bug
-        ~path:Relative_path.default
-        ~pos:""
-        ~desc:str
-        (Telemetry.create ());
+      HackEventLogger.invariant_violation_bug str;
       failwith "ClientIDEDaemon failed to find-refs for a localvar"
     | Error (symbol_name, action) ->
       (* ClientIdeMessage.Find_references only supports localvar.
@@ -4063,10 +4059,7 @@ let handle_errors_file_item
     (* We must have an item, because the errors-stream always ends with a sentinel, and we stop tailing upon the sentinel. *)
     log "Errors-file: unexpected end of stream";
     HackEventLogger.invariant_violation_bug
-      ~path:Relative_path.default
-      ~pos:""
-      ~desc:"errors-file unexpected end of stream"
-      (Telemetry.create ());
+      "errors-file unexpected end of stream";
     latest_hh_server_errors :=
       SeekingErrors
         {

@@ -1117,12 +1117,7 @@ let full_init
       "INVARIANT_VIOLATION_BUG [%s] count=%d"
       desc
       existing_name_count;
-    HackEventLogger.invariant_violation_bug
-      ~desc
-      ~path:Relative_path.default
-      ~pos:""
-      (Telemetry.create ()
-      |> Telemetry.int_ ~key:"existing_name_count" ~value:existing_name_count)
+    HackEventLogger.invariant_violation_bug desc ~data_int:existing_name_count
   end;
   Hh_logger.log "full init";
   let (env, t) =

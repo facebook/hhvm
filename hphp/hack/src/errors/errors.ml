@@ -531,14 +531,13 @@ let to_string error = User_error.to_string !report_pos_from_reason error
 
 let log_unexpected error path desc =
   HackEventLogger.invariant_violation_bug
+    desc
     ~path
     ~pos:
       (error
       |> User_error.to_absolute
       |> User_error.get_pos
-      |> Pos.show_absolute)
-    ~desc
-    (Telemetry.create ());
+      |> Pos.show_absolute);
   Hh_logger.log
     "UNEXPECTED: %s\n%s"
     desc
@@ -853,10 +852,10 @@ let log_exception_occurred pos e =
 let log_invariant_violation ~desc pos telemetry =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
   HackEventLogger.invariant_violation_bug
+    desc
     ~path:(Pos.filename pos)
     ~pos:pos_str
-    ~desc
-    telemetry;
+    ~telemetry;
   Hh_logger.error
     "Invariant violation at position %s\n%s"
     pos_str

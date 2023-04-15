@@ -817,16 +817,13 @@ function find_tests(
       return (false === in_array(canonical_path($test), $exclude));
     }));
   }
-  if ($options->only_remote_executable) {
-    $tests = vec(array_filter($tests, function($test) {
-      return (false === is_file("$test.no_remote"));
+
+  if ($options->list_tests) {
+    $tests = vec(array_filter($tests, function($test) use ($options) {
+      return should_skip_test_simple($options, $test) is null;
     }));
   }
-  if ($options->only_non_remote_executable) {
-    $tests = vec(array_filter($tests, function($test) {
-      return (false !== is_file("$test.no_remote"));
-    }));
-  }
+
   if ($options->include is nonnull) {
     $include = $options->include;
     $tests = vec(array_filter($tests, function($test) use ($include) {
@@ -2525,6 +2522,10 @@ function runif_should_skip_test(
   return shape('valid' => true, 'match' => true);
 }
 
+// should_skip_test_simple handles generating skips in ways that are purely
+// based on options passed to run.php, and test names/exclusion files (eg.
+// norepo).  The benefit of should_skip_test_simple is that it can factor in to
+// test listing, while more complex skip behavior will appear in test results.
 function should_skip_test_simple(
   Options $options,
   string $test,
@@ -2575,6 +2576,27 @@ function should_skip_test_simple(
   if ($options->jit_serialize is nonnull &&
       file_exists("$test.$no_jitserialize_tag")) {
     return 'skip-jit-serialize';
+  }
+
+  if ((!$options->repo || $options->jit_serialize is null
+       || (int)$options->jit_serialize < 1)
+      && file_exists($test.'.onlyjumpstart')) {
+    return 'skip-onlyjumpstart';
+  }
+
+  if (!$options->repo && file_exists($test.'.onlyrepo')) {
+    return 'skip-onlyrepo';
+  }
+
+  if ($options->repo && file_exists($test.'.norepo')) {
+    return 'skip-norepo';
+  }
+
+  if ($options->only_remote_executable && file_exists("$test.no_remote")) {
+    return 'skip-only_running_remote_executable_tests';
+  }
+  if ($options->only_non_remote_executable && !file_exists("$test.no_remote")) {
+    return 'skip-only_running_NON_remote_executable_tests';
   }
 
   return null;
@@ -2855,13 +2877,6 @@ function can_run_server_test(string $test, Options $options): bool {
 
   // we can't run repo only tests in server modes
   if (is_file("$test.onlyrepo") || is_file("$test.onlyjumpstart")) {
-    return false;
-  }
-
-  if (
-    ($options->only_remote_executable && is_file("$test.no_remote"))
-    || ($options->only_non_remote_executable && !is_file("$test.no_remote"))
-  ) {
     return false;
   }
 
@@ -3229,19 +3244,6 @@ function run_test(Options $options, string $test): mixed {
     return run_repo_test($options, $test, $hhvm, $hhvm_env);
   }
 
-  if (file_exists($test.'.onlyrepo')) {
-    return 'skip-onlyrepo';
-  }
-  if (file_exists($test.'.onlyjumpstart')) {
-    return 'skip-onlyjumpstart';
-  }
-  if ($options->only_remote_executable && is_file("$test.no_remote")) {
-    return 'skip-only_running_remote_executable_tests';
-  }
-  if ($options->only_non_remote_executable && !is_file("$test.no_remote")) {
-    return 'skip-only_running_NON_remote_executable_tests';
-  }
-
   if ($options->hhas_round_trip) {
     invariant(
       substr($test, -5) !== ".hhas",
@@ -3275,14 +3277,6 @@ function run_repo_test(
   vec<string> $hhvm,
   dict<string, mixed> $hhvm_env,
 ): mixed {
-  if (file_exists($test.'.norepo')) {
-    return 'skip-norepo';
-  }
-  if (file_exists($test.'.onlyjumpstart') &&
-      ($options->jit_serialize is null || (int)$options->jit_serialize < 1)) {
-    return 'skip-onlyjumpstart';
-  }
-
   $test_repo = test_repo($options, $test);
   if ($options->repo_out is nonnull) {
     // we may need to clean up after a previous run

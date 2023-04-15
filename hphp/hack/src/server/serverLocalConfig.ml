@@ -512,6 +512,8 @@ type t = {
       (** clientIdeDaemon should load a naming table from hack/64_distc *)
   use_hh_distc_instead_of_hulk: bool;
       (** use hh_distc instead of hulk for remote typechecking *)
+  hh_distc_fanout_threshold: int;
+      (** POC: @bobren - fanout threshold where we trigger hh_distc *)
 }
 
 let default =
@@ -619,6 +621,8 @@ let default =
     load_hack_64_distc_saved_state = false;
     ide_should_use_hack_64_distc = false;
     use_hh_distc_instead_of_hulk = false;
+    (* Cutoff derived from https://fburl.com/scuba/hh_server_events/jvja9qns *)
+    hh_distc_fanout_threshold = 500_000;
   }
 
 let system_config_path =
@@ -1396,6 +1400,12 @@ let load_
       ~current_version
       config
   in
+  let hh_distc_fanout_threshold =
+    int_
+      "hh_distc_fanout_threshold"
+      ~default:default.hh_distc_fanout_threshold
+      config
+  in
   {
     saved_state =
       {
@@ -1519,6 +1529,7 @@ let load_
     load_hack_64_distc_saved_state;
     ide_should_use_hack_64_distc;
     use_hh_distc_instead_of_hulk;
+    hh_distc_fanout_threshold;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1569,4 +1580,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       ide_should_use_hack_64_distc = options.ide_should_use_hack_64_distc;
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
       produce_streaming_errors = options.produce_streaming_errors;
+      hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
     }

@@ -1272,6 +1272,7 @@ let go_with_interrupt
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(use_hh_distc_instead_of_hulk : bool)
+    ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
     HackEventLogger.ProfileTypeCheck.get_typecheck_info
@@ -1324,7 +1325,10 @@ let go_with_interrupt
         diagnostic_pusher ) =
     (* Good cutoff where hh_server is definitely slower than hh_distc
        https://fburl.com/scuba/hh_server_events/f1wdh9nr *)
-    if BigList.length fnl > 150_000 && use_hh_distc_instead_of_hulk then
+    if
+      use_hh_distc_instead_of_hulk
+      && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
+    then
       match process_with_hh_distc ~root ~interrupt ~check_info with
       | Ok (typing_result, env) ->
         (typing_result, delegate_state, telemetry, env, [], (None, None))
@@ -1402,6 +1406,7 @@ let go
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(use_hh_distc_instead_of_hulk : bool)
+    ~(hh_distc_fanout_threshold : int option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let (((), result), cancelled) =
@@ -1417,6 +1422,7 @@ let go
       ~memory_cap
       ~longlived_workers
       ~use_hh_distc_instead_of_hulk
+      ~hh_distc_fanout_threshold
       ~check_info
   in
   assert (List.is_empty cancelled);

@@ -719,6 +719,7 @@ let make_remote_server_api
           ~memory_cap:(Some 200000)
           ~longlived_workers:false
           ~use_hh_distc_instead_of_hulk:false
+          ~hh_distc_fanout_threshold:None
           ~check_info
       in
       HackEventLogger.remote_worker_type_check_end telemetry ~start_t:t;

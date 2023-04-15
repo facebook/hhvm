@@ -78,6 +78,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -92,6 +93,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors "";
@@ -107,6 +109,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;
@@ -121,6 +124,7 @@ let test () =
       ~memory_cap
       ~longlived_workers:false
       ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   Test.assert_errors errors expected_errors;

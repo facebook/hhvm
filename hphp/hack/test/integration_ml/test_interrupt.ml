@@ -99,6 +99,7 @@ let test () =
       ~memory_cap:None
       ~longlived_workers:false
       ~use_hh_distc_instead_of_hulk:false
+      ~hh_distc_fanout_threshold:None
       ~check_info
   in
   assert (Option.is_none diag_pusher);

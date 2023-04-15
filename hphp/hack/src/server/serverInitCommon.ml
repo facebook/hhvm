@@ -224,6 +224,9 @@ let type_check
       let use_hh_distc_instead_of_hulk =
         genv.local_config.ServerLocalConfig.use_hh_distc_instead_of_hulk
       in
+      let hh_distc_fanout_threshold =
+        Some genv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
+      in
       let root = Some (ServerArgs.root genv.ServerEnv.options) in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
@@ -237,6 +240,7 @@ let type_check
         ~memory_cap
         ~longlived_workers
         ~use_hh_distc_instead_of_hulk
+        ~hh_distc_fanout_threshold
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)

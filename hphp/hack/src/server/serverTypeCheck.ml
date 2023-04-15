@@ -710,7 +710,11 @@ functor
         genv.ServerEnv.local_config
           .ServerLocalConfig.use_hh_distc_instead_of_hulk
       in
-
+      let hh_distc_fanout_threshold =
+        Some
+          genv.ServerEnv.local_config
+            .ServerLocalConfig.hh_distc_fanout_threshold
+      in
       let cgroup_typecheck_telemetry = ref None in
       let (errorl', telemetry, env, cancelled, time_first_typing_error) =
         let ctx = Provider_utils.ctx_from_server_env env in
@@ -741,6 +745,7 @@ functor
             ~memory_cap
             ~longlived_workers
             ~use_hh_distc_instead_of_hulk
+            ~hh_distc_fanout_threshold
             ~check_info:
               (ServerCheckUtils.get_check_info
                  ~check_reason

@@ -67,6 +67,7 @@ type rollout_flags = {
   ide_should_use_hack_64_distc: bool;
   use_hh_distc_instead_of_hulk: bool;
   produce_streaming_errors: bool;
+  hh_distc_fanout_threshold: int;
 }
 
 let flush () = ()

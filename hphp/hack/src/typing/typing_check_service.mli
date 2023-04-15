@@ -42,6 +42,7 @@ val go :
   memory_cap:int option ->
   longlived_workers:bool ->
   use_hh_distc_instead_of_hulk:bool ->
+  hh_distc_fanout_threshold:int option ->
   check_info:Typing_service_types.check_info ->
   result
 
@@ -59,6 +60,7 @@ val go_with_interrupt :
   memory_cap:int option ->
   longlived_workers:bool ->
   use_hh_distc_instead_of_hulk:bool ->
+  hh_distc_fanout_threshold:int option ->
   check_info:Typing_service_types.check_info ->
   ('env * result) job_result
 

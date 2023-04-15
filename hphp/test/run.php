@@ -960,7 +960,7 @@ function hhvm_cmd_impl(
       '-vEval.EnableLogBridge=false',
       // TODO(T115081796): Once userland autoloading is entirely ripped out we
       // should also rip this out.
-      '-vAutoload.UserlandEnabled=false',
+      '-vAutoload.UserlandDisabled=2',
       $mode,
       $options->wholecfg ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 

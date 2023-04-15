@@ -85,13 +85,24 @@ bool HHVM_FUNCTION(autoload_set_paths,
     return false;
   }
 
-  if (!RuntimeOption::AutoloadUserlandEnabled) {
+  if (RuntimeOption::AutoloadUserlandDisabled > 1) {
     SystemLib::throwInvalidOperationExceptionObject(
       "Attempted to call HH\\autoload_set_paths() when "
-      "Autoload.UserlandEnabled is false. HH\\autoload_set_paths() will soon "
-      "be deleted so HHVM internals can start depending on native "
+      "Autoload.UserlandDisabled is greater than 1. HH\\autoload_set_paths() "
+      "will soon be deleted so HHVM internals can start depending on native "
       "autoloading.");
-  } else if (HHVM_FN(autoload_is_native)()) {
+  }
+
+  if (RuntimeOption::AutoloadUserlandDisabled > 0) {
+    auto const rate = RuntimeOption::AutoloadUserlandDisabledSampleRate;
+    if (StructuredLog::coinflip(rate)) {
+      StructuredLogEntry ent;
+      ent.force_init = true;
+      ent.setInt("autoload_is_native", HHVM_FN(autoload_is_native)());
+      ent.setInt("sample_rate", rate);
+      if (!root.isNull()) ent.setStr("root", root.slice());
+      StructuredLog::log("hhvm_autoload_set_paths", ent);
+    }
     raise_notice(
       "Attempted to call HH\\autoload_set_paths() while the native autoloader "
       "is enabled. HH\\autoload_set_paths() disables the native autoloader, "

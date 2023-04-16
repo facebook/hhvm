@@ -33,6 +33,10 @@ macro_rules! vec_wrapper {
                 self.0.push(stmt)
             }
             #[inline]
+            pub fn insert(&mut self, index: usize, stmt: $elem) {
+                self.0.insert(index, stmt)
+            }
+            #[inline]
             pub fn drain<R>(&mut self, range: R) -> std::vec::Drain<'_, $elem>
             where
                 R: std::ops::RangeBounds<usize>,

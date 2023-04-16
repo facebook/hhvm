@@ -167,6 +167,8 @@ let passes =
     Naming_validate_module.pass on_error;
   ]
 
+(* If we don't delegate to Rust, then all naming passes are done here in OCaml.
+   *)
 let ( elab_core_program,
       elab_core_class,
       elab_core_fun_def,

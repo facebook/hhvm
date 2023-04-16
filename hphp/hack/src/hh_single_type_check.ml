@@ -241,7 +241,7 @@ let parse_options () =
   let set_bool x () = x := Some true in
   let set_bool_ x () = x := true in
   let set_float_ x f = x := f in
-  let rust_elab = ref false in
+  let rust_elab = ref true in
   let rust_provider_backend = ref false in
   let skip_hierarchy_checks = ref false in
   let skip_tast_checks = ref false in

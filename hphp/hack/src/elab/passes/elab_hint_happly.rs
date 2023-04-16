@@ -84,24 +84,26 @@ impl Pass for ElabHintHapplyPass {
 
     fn on_ty_hint_top_down(&mut self, env: &Env, elem: &mut Hint) -> ControlFlow<()> {
         match &mut *elem.1 {
-            Hint_::Happly(id, hints) => match canonical_happly(id, hints, self.tparams()) {
-                Continue((hint_opt, err_opt)) => {
-                    if let Some(hint_) = hint_opt {
-                        *elem.1 = hint_
+            Hint_::Happly(id, hints) => {
+                match canonical_happly(&elem.0, id, hints, self.tparams()) {
+                    Continue((hint_opt, err_opt)) => {
+                        if let Some(hint_) = hint_opt {
+                            *elem.1 = hint_
+                        }
+                        if let Some(err) = err_opt {
+                            env.emit_error(err)
+                        }
+                        Continue(())
                     }
-                    if let Some(err) = err_opt {
-                        env.emit_error(err)
+                    Break((hint_opt, err)) => {
+                        if let Some(hint_) = hint_opt {
+                            *elem.1 = hint_
+                        }
+                        env.emit_error(err);
+                        Break(())
                     }
-                    Continue(())
                 }
-                Break((hint_opt, err)) => {
-                    if let Some(hint_) = hint_opt {
-                        *elem.1 = hint_
-                    }
-                    env.emit_error(err);
-                    Break(())
-                }
-            },
+            }
             _ => Continue(()),
         }
     }
@@ -124,6 +126,7 @@ enum CanonResult {
 // of the hint needs modifying, we mutate here. If the whole hint should be
 // replaced, we return a `Hint_` and replace in the calling function
 fn canonical_happly(
+    hint_pos: &Pos,
     id: &mut Id,
     hints: &mut Vec<Hint>,
     tparams: &HashSet<String>,
@@ -159,7 +162,7 @@ fn canonical_happly(
             let err_opt = if hints.is_empty() {
                 None
             } else {
-                Some(NamingError::ThisNoArgument(id.0.clone()))
+                Some(NamingError::ThisNoArgument(hint_pos.clone()))
             };
             Continue((Some(hint_), err_opt))
         }
@@ -167,7 +170,7 @@ fn canonical_happly(
             if hints.is_empty() {
                 Continue((None, None))
             } else {
-                let err = NamingError::ThisNoArgument(id.0.clone());
+                let err = NamingError::ThisNoArgument(hint_pos.clone());
                 let hint_ = Hint_::Herr;
                 Break((Some(hint_), err))
             }
@@ -201,12 +204,12 @@ fn canonical_happly(
             hints.clear();
             hints.push(Hint(id.0.clone(), Box::new(Hint_::Hany)));
             hints.push(Hint(id.0.clone(), Box::new(Hint_::Hany)));
-            let err = NamingError::TooFewTypeArguments(id.0.clone());
+            let err = NamingError::TooFewTypeArguments(hint_pos.clone());
             Continue((None, Some(err)))
         }
         CanonResult::Darray => {
             let hint_ = Hint_::Hany;
-            let err = NamingError::TooManyTypeArguments(id.0.clone());
+            let err = NamingError::TooManyTypeArguments(hint_pos.clone());
             Break((Some(hint_), err))
         }
         CanonResult::Varray if hints.len() == 1 => {
@@ -217,17 +220,17 @@ fn canonical_happly(
             id.1 = sn::collections::VEC.to_string();
             hints.clear();
             hints.push(Hint(id.0.clone(), Box::new(Hint_::Hany)));
-            let err = NamingError::TooFewTypeArguments(id.0.clone());
+            let err = NamingError::TooFewTypeArguments(hint_pos.clone());
             Continue((None, Some(err)))
         }
         CanonResult::Varray => {
             let hint_ = Hint_::Hany;
-            let err = NamingError::TooManyTypeArguments(id.0.clone());
+            let err = NamingError::TooManyTypeArguments(hint_pos.clone());
             Break((Some(hint_), err))
         }
         CanonResult::VecOrDict if hints.len() > 2 => {
             let hint_ = Hint_::Hany;
-            let err = NamingError::TooManyTypeArguments(id.0.clone());
+            let err = NamingError::TooManyTypeArguments(hint_pos.clone());
             Break((Some(hint_), err))
         }
         CanonResult::VecOrDict => match hints.pop() {

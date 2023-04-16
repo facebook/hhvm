@@ -1,2 +1,3 @@
 --nast
+--like-type-hints
 --interpret-soft-types-as-like-types

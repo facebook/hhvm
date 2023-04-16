@@ -22,7 +22,6 @@ pub(crate) mod hint {
     use oxidized::aast::Hint_;
 
     /// Construct a "null" hint.
-    #[allow(dead_code)] // Only called from #[test] functions.
     #[inline(always)]
     pub(crate) fn null() -> Hint {
         Hint(super::pos::null(), Box::new(Hint_::Hnothing))

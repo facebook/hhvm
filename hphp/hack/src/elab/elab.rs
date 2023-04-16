@@ -322,11 +322,11 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
         // Add `supportdyn` and `Like` wrappers everywhere - under `everything-sdt`
         // typechecker option
-        // passes::elab_everything_sdt::ElabEverythingSdtPass::default(),
+        passes::elab_everything_sdt::ElabEverythingSdtPass::default(),
 
         // Validate use of `Hlike` hints - depends on `enable-like-type-hints`
         // and `everything_sdt` typechecker options
-        // passes::validate_like_hint::ValidateLikeHintPass::default(),
+        passes::validate_like_hint::ValidateLikeHintPass::default(),
 
         // Validate constructors under
         // `consistent-explicit_consistent_constructors` typechecker option
@@ -334,7 +334,7 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
         // Validate  use of `SupportDyn` class - depends on `enable-supportdyn`
         // and `everything_sdt` typechecker options
-        // passes::validate_supportdyn::ValidateSupportdynPass::default(),
+        passes::validate_supportdyn::ValidateSupportDynPass::default(),
 
         // Validate use of module definitions - depends on:
         // - `allow_all_files_for_module_declarations`
@@ -357,8 +357,10 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
         // special semantics or in memoized functions
         passes::validate_fun_param_inout::ValidateFunParamInoutPass::default(),
 
-        // Validate use of `Await` in sync functions and return in generators
-        passes::validate_coroutine::ValidateCoroutinePass::default(),
+        // Validate use of `Await` in sync functions and return in generators.
+        // This pass (`naming_coroutine_check.ml`) is not in the passes run from
+        // `naming.ml`!
+        //passes::validate_coroutine::ValidateCoroutinePass::default(),
 
         // Checks for the presence of a function body in methods, use of traits
         // and instance and static member variables in an interface definition
@@ -374,7 +376,9 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
         passes::validate_user_attribute_dynamically_callable::ValidateUserAttributeDynamicallyCallable::default(),
 
-        passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
+        // This pass (`nast_generic_check.ml`) is not in the passes run from
+        // `naming.ml`!
+        //passes::validate_hint_habstr::ValidateHintHabstrPass::default(),
 
         passes::validate_class_methods::ValidateClassMethodsPass::default(),
 

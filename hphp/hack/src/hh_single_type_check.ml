@@ -111,27 +111,13 @@ let magic_builtins =
     ( "hh_single_type_check_magic.hhi",
       "<?hh\n"
       ^ "namespace {\n"
-      ^ "function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
-      ^ "function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
-      ^ "function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
-      ^ "function hh_show_env()[]:void {}\n"
-      ^ "function hh_log_level(string $key, int $level)[]:void {}\n"
-      ^ "function hh_force_solve()[]:void {}"
-      ^ "function hh_time(string $command, string $tag = '_'):void {}\n"
-      ^ "}\n" );
-  |]
-
-let pessimised_magic_builtins =
-  [|
-    ( "hh_single_type_check_magic.hhi",
-      "<?hh\n"
-      ^ "namespace {\n"
-      ^ "function hh_show<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val)[]:~T {}\n"
-      ^ "function hh_expect<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val)[]:~T {}\n"
-      ^ "function hh_expect_equivalent<T as supportdyn<mixed>>(<<__AcceptDisposable>> readonly ~T $val)[]:~T {}\n"
-      ^ "function hh_show_env()[]:void {}\n"
-      ^ "function hh_log_level(string $key, int $level)[]:void {}\n"
-      ^ "function hh_force_solve()[]:void {}"
+      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_show<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_expect<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic, __SupportDynamicType>> function hh_expect_equivalent<T>(<<__AcceptDisposable>> readonly T $val)[]:T {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_show_env()[]:void {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_log_level(string $key, int $level)[]:void {}\n"
+      ^ "<<__NoAutoDynamic>> function hh_force_solve()[]:void {}"
+      ^ "<<__NoAutoDynamic>> function hh_time(string $command, string $tag = '_'):void {}\n"
       ^ "}\n" );
   |]
 
@@ -2733,7 +2719,7 @@ let decl_and_run_mode
       custom_hhi_path;
       profile_type_check_multi;
       memtrace;
-      pessimise_builtins;
+      pessimise_builtins = _;
       rust_provider_backend;
     }
     (popt : TypecheckerOptions.t)
@@ -2756,12 +2742,6 @@ let decl_and_run_mode
         extra_builtins
         |> List.fold ~f:add_file_content ~init:[]
         |> Array.of_list
-      in
-      let magic_builtins =
-        if pessimise_builtins then
-          pessimised_magic_builtins
-        else
-          magic_builtins
       in
       let magic_builtins = Array.append magic_builtins extra_builtins in
       let hhi_builtins =

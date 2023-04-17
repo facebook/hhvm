@@ -197,7 +197,7 @@ class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  use CustomTraitName;
+  use \CustomTraitName;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
@@ -268,7 +268,7 @@ class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\hack\StructTrait' => \thrift\annotation\hack\StructTrait::fromShape(
           shape(
-            "name" => "CustomTraitName",
+            "name" => "\\CustomTraitName",
           )
         ),
       ],
@@ -382,7 +382,7 @@ class MyFourthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
   use \ThriftSerializationTrait;
 
-  use CustomTraitName;
+  use \CustomTraitName;
 
   const \ThriftStructTypes::TSpec SPEC = dict[
     1 => shape(
@@ -453,7 +453,7 @@ class MyFifthStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
       'struct' => dict[
         '\thrift\annotation\hack\StructTrait' => \thrift\annotation\hack\StructTrait::fromShape(
           shape(
-            "name" => "CustomTraitName",
+            "name" => "\\CustomTraitName",
           )
         ),
       ],

@@ -3072,7 +3072,10 @@ void t_hack_generator::generate_php_struct_struct_trait(
     if (struct_trait.second.empty()) {
       traitName = hack_name(name, tstruct->program()) + "Trait";
     } else {
-      traitName = hack_name(struct_trait.second, tstruct->program());
+      traitName = unescape(struct_trait.second);
+      if (struct_trait.second.find('\\') == std::string::npos) {
+        traitName = hack_name(traitName, tstruct->program());
+      }
     }
   }
 

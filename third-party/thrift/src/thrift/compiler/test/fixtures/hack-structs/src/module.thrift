@@ -26,7 +26,7 @@ struct MySecondStruct {
   1: string foo;
 }
 
-@hack.StructTrait{name = 'CustomTraitName'}
+@hack.StructTrait{name = '\\CustomTraitName'}
 struct MyThirdStruct {
   1: string foo;
 }
@@ -36,7 +36,7 @@ struct MyFourthStruct {
   1: string foo;
 }
 
-@hack.StructTrait{name = 'CustomTraitName'}
+@hack.StructTrait{name = '\\CustomTraitName'}
 struct MyFifthStruct {
   1: string foo;
 }

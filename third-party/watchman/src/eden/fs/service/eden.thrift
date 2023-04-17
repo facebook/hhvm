@@ -190,7 +190,7 @@ enum MountState {
    */
   INITIALIZED = 2,
   /**
-   * Starting to mount fuse.
+   * Starting to mount the filesystem.
    */
   STARTING = 3,
   /**
@@ -198,7 +198,10 @@ enum MountState {
    */
   RUNNING = 4,
   /**
-   * Encountered an error while starting fuse mount.
+   * Encountered an error while starting the user-space filesystem mount.
+   * FUSE is a misnomer: this error state also applies to NFS and Windows'
+   * Projected File System.
+   * TODO: rename to INITIALIZATION_ERROR.
    */
   FUSE_ERROR = 5,
   /**
@@ -223,7 +226,7 @@ enum MountState {
    * An error occurred during mount initialization.
    *
    * This state is used for errors that occur during the INITIALIZING phase,
-   * before we have attempted to start the FUSE mount.
+   * before we have attempted to start the user-space filesystem mount.
    */
   INIT_ERROR = 9,
 } (cpp2.enum_type = 'uint32_t')

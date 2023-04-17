@@ -1,78 +1,22 @@
-dict(4) {
-  ["bat"]=>
-  dict(3) {
-    ["uses"]=>
-    vec(1) {
-      string(3) "z.*"
-    }
-    ["includes"]=>
-    vec(0) {
-    }
-    ["soft_includes"]=>
-    vec(0) {
-    }
-  }
-  ["baz"]=>
-  dict(3) {
-    ["uses"]=>
-    vec(2) {
-      string(3) "x.*"
-      string(3) "y.*"
-    }
-    ["includes"]=>
-    vec(2) {
-      string(3) "foo"
-      string(3) "bar"
-    }
-    ["soft_includes"]=>
-    vec(0) {
-    }
-  }
-  ["bar"]=>
-  dict(3) {
-    ["uses"]=>
-    vec(1) {
-      string(3) "b.*"
-    }
-    ["includes"]=>
-    vec(1) {
-      string(3) "foo"
-    }
-    ["soft_includes"]=>
-    vec(1) {
-      string(3) "bat"
-    }
-  }
-  ["foo"]=>
-  dict(3) {
-    ["uses"]=>
-    vec(1) {
-      string(3) "a.*"
-    }
-    ["includes"]=>
-    vec(0) {
-    }
-    ["soft_includes"]=>
-    vec(0) {
-    }
-  }
-}
-dict(1) {
-  ["my-prod"]=>
-  dict(3) {
-    ["packages"]=>
-    vec(2) {
-      string(3) "foo"
-      string(3) "bar"
-    }
-    ["soft_packages"]=>
-    vec(1) {
-      string(3) "bat"
-    }
-    ["domains"]=>
-    vec(2) {
-      string(17) "www\.my-prod\.com"
-      string(17) ".*\.website\.com$"
-    }
-  }
-}
+Packages
+  bar
+    includes => [foo]
+    soft_includes => [bat]
+    uses => [b.*]
+  bat
+    includes => []
+    soft_includes => []
+    uses => [z.*]
+  baz
+    includes => [bar, foo]
+    soft_includes => []
+    uses => [x.*, y.*]
+  foo
+    includes => []
+    soft_includes => []
+    uses => [a.*]
+Deployments
+  my-prod
+    domains => [.*\.website\.com$, www\.my-prod\.com]
+    packages => [bar, foo]
+    soft_packages => [bat]

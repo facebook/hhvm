@@ -71,7 +71,6 @@ type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_num_local_workers: int option;
-  tco_parallel_type_checking_threshold: int;
   tco_max_typechecker_worker_memory_mb: int option;
   tco_defer_class_declaration_threshold: int option;
   tco_prefetch_deferred_files: bool;
@@ -207,7 +206,6 @@ let default =
     tco_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
-    tco_parallel_type_checking_threshold = 10;
     tco_max_typechecker_worker_memory_mb = None;
     tco_defer_class_declaration_threshold = None;
     tco_prefetch_deferred_files = false;
@@ -345,8 +343,6 @@ let make
     ?(tco_experimental_features = default.tco_experimental_features)
     ?(tco_migration_flags = default.tco_migration_flags)
     ?tco_num_local_workers
-    ?(tco_parallel_type_checking_threshold =
-      default.tco_parallel_type_checking_threshold)
     ?tco_max_typechecker_worker_memory_mb
     ?tco_defer_class_declaration_threshold
     ?(tco_prefetch_deferred_files = default.tco_prefetch_deferred_files)
@@ -501,7 +497,6 @@ let make
     tco_experimental_features;
     tco_migration_flags;
     tco_num_local_workers;
-    tco_parallel_type_checking_threshold;
     tco_max_typechecker_worker_memory_mb;
     tco_defer_class_declaration_threshold;
     tco_prefetch_deferred_files;

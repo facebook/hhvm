@@ -39,7 +39,6 @@ impl Default for GlobalOptions {
             tco_experimental_features: s_set::SSet::new(),
             tco_migration_flags: s_set::SSet::new(),
             tco_num_local_workers: None,
-            tco_parallel_type_checking_threshold: 10,
             tco_max_typechecker_worker_memory_mb: None,
             tco_defer_class_declaration_threshold: None,
             tco_prefetch_deferred_files: false,

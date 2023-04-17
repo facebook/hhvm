@@ -50,10 +50,6 @@ type t = {
      If the delegate fails to type check, the typing check service as a whole
      will fail. *)
   tco_num_local_workers: int option;
-  (* If the number of files to type check is fewer than this value, the files
-     will be type checked sequentially (in the master process). Otherwise,
-     the files will be type checked in parallel (in MultiWorker workers). *)
-  tco_parallel_type_checking_threshold: int;
   (* If set, typechecker workers will quit after they exceed this limit *)
   tco_max_typechecker_worker_memory_mb: int option;
   (* If set, defers class declarations after N lazy declarations; if not set,
@@ -363,7 +359,6 @@ val make :
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
   ?tco_num_local_workers:int ->
-  ?tco_parallel_type_checking_threshold:int ->
   ?tco_max_typechecker_worker_memory_mb:int ->
   ?tco_defer_class_declaration_threshold:int ->
   ?tco_prefetch_deferred_files:bool ->

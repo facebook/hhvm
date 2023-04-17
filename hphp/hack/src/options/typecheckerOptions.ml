@@ -13,9 +13,6 @@ type t = GlobalOptions.t [@@deriving eq, show]
 
 let num_local_workers t = t.GlobalOptions.tco_num_local_workers
 
-let parallel_type_checking_threshold t =
-  t.GlobalOptions.tco_parallel_type_checking_threshold
-
 let max_typechecker_worker_memory_mb t =
   t.GlobalOptions.tco_max_typechecker_worker_memory_mb
 

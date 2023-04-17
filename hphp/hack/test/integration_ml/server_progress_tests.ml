@@ -393,9 +393,10 @@ let test_errors_during () : bool Lwt.t =
   let%lwt () =
     try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
         (* This test will rely upon b.php being typechecked in a separate bucket from loop.php.
-           To accomplish this: (1) we pass a custom hhi path to an empty directory so it doesn't
-           typecheck more than the two files we gave it, (2) we set parallel_type_checking_threshold
-           to 0 to ensure that it will use multiworkers, (3) we set max_workers to 4 so the bucket-dividing
+           To accomplish this:
+           (1) we pass a custom hhi path to an empty directory so it doesn't
+           typecheck more than the two files we gave it,
+           (2) we set max_workers to 4 so the bucket-dividing
            algorithm will comfortably separate them. (it seems to have off-by-one oddities to just 2
            max workers isn't enough.) *)
         let%lwt _stdout =
@@ -409,8 +410,6 @@ let test_errors_during () : bool Lwt.t =
               "max_workers=4";
               "--config";
               "produce_streaming_errors=true";
-              "--config";
-              "parallel_type_checking_threshold=0";
               "--custom-hhi-path";
               Path.to_string hhi;
             |]
@@ -460,9 +459,10 @@ let test_errors_kill () : bool Lwt.t =
   let%lwt () =
     try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
         (* This test will rely upon b.php being typechecked in a separate bucket from loop.php.
-           To accomplish this: (1) we pass a custom hhi path to an empty directory so it doesn't
-           typecheck more than the two files we gave it, (2) we set parallel_type_checking_threshold
-           to 0 to ensure that it will use multiworkers, (3) we set max_workers to 4 so the bucket-dividing
+           To accomplish this:
+           (1) we pass a custom hhi path to an empty directory so it doesn't
+           typecheck more than the two files we gave it,
+           (2) we set max_workers to 4 so the bucket-dividing
            algorithm will comfortably separate them. (it seems to have off-by-one oddities to just 2
            max workers isn't enough.) *)
         let%lwt _stdout =
@@ -476,8 +476,6 @@ let test_errors_kill () : bool Lwt.t =
               "max_workers=4";
               "--config";
               "produce_streaming_errors=true";
-              "--config";
-              "parallel_type_checking_threshold=0";
               "--custom-hhi-path";
               Path.to_string hhi;
             |]
@@ -611,9 +609,10 @@ let test_client_during () : bool Lwt.t =
   let%lwt () =
     try_with_server [b_php; loop_php] (fun ~tmp ~root ~hhi ->
         (* This test will rely upon b.php being typechecked in a separate bucket from loop.php.
-           To accomplish this: (1) we pass a custom hhi path to an empty directory so it doesn't
-           typecheck more than the two files we gave it, (2) we set parallel_type_checking_threshold
-           to 0 to ensure that it will use multiworkers, (3) we set max_workers to 4 so the bucket-dividing
+           To accomplish this:
+           (1) we pass a custom hhi path to an empty directory so it doesn't
+           typecheck more than the two files we gave it,
+           (2) we set max_workers to 4 so the bucket-dividing
            algorithm will comfortably separate them. (it seems to have off-by-one oddities to just 2
            max workers isn't enough.) *)
         let%lwt _stdout =
@@ -627,8 +626,6 @@ let test_client_during () : bool Lwt.t =
               "max_workers=4";
               "--config";
               "produce_streaming_errors=true";
-              "--config";
-              "parallel_type_checking_threshold=0";
               "--custom-hhi-path";
               Path.to_string hhi;
             |]

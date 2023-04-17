@@ -426,10 +426,6 @@ type t = {
       (** If None, only the type check delegate's logic will be used.
       If the delegate fails to type check, the typing check service as a whole
       will fail. *)
-  parallel_type_checking_threshold: int;
-      (** If the number of files to type check is fewer than this value, the files
-      will be type checked sequentially (in the master process). Otherwise,
-      the files will be type checked in parallel (in MultiWorker workers). *)
   defer_class_declaration_threshold: int option;
       (** If set, defers class declarations after N lazy declarations; if not set,
       always lazily declares classes not already in cache. *)
@@ -576,7 +572,6 @@ let default =
     skip_hierarchy_checks = false;
     skip_tast_checks = false;
     num_local_workers = None;
-    parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
     prefetch_deferred_files = false;
     produce_streaming_errors = true;
@@ -1067,12 +1062,6 @@ let load_
       ~current_version
       config
   in
-  let parallel_type_checking_threshold =
-    int_
-      "parallel_type_checking_threshold"
-      ~default:default.parallel_type_checking_threshold
-      config
-  in
   let num_local_workers = int_opt "num_local_workers" config in
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
@@ -1476,7 +1465,6 @@ let load_
     skip_hierarchy_checks;
     skip_tast_checks;
     num_local_workers;
-    parallel_type_checking_threshold;
     defer_class_declaration_threshold;
     prefetch_deferred_files;
     produce_streaming_errors;

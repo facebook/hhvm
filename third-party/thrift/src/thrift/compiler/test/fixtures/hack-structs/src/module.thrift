@@ -16,17 +16,20 @@
 
 include "thrift/annotation/hack.thrift"
 
+@hack.StructTrait
 struct MyStruct {
   1: string foo;
 } (php.structtrait)
 
+@hack.StructTrait
 struct MySecondStruct {
   1: string foo;
-} (php.structtrait = '1')
+}
 
+@hack.StructTrait{name = 'CustomTraitName'}
 struct MyThirdStruct {
   1: string foo;
-} (php.structtrait = 'CustomTraitName')
+}
 
 @hack.StructTrait
 struct MyFourthStruct {

@@ -824,10 +824,6 @@ class t_hack_generator : public t_concat_generator {
 
   std::pair<bool, const std::string> find_hack_struct_trait(
       const t_struct* tstruct) const {
-    if (const std::string* annotation =
-            tstruct->find_annotation_or_null("php.structtrait")) {
-      return std::make_pair(true, *annotation);
-    }
     if (const auto annotation =
             tstruct->find_structured_annotation_or_null(kHackStructTraitUri)) {
       for (const auto& item : annotation->value()->get_map()) {
@@ -3073,7 +3069,7 @@ void t_hack_generator::generate_php_struct_struct_trait(
   std::string traitName;
   auto struct_trait = find_hack_struct_trait(tstruct);
   if (struct_trait.first) {
-    if (struct_trait.second.empty() || struct_trait.second == "1") {
+    if (struct_trait.second.empty()) {
       traitName = hack_name(name, tstruct->program()) + "Trait";
     } else {
       traitName = hack_name(struct_trait.second, tstruct->program());

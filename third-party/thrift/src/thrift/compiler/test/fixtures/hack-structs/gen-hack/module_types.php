@@ -81,7 +81,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\thrift\annotation\hack\StructTrait' => \thrift\annotation\hack\StructTrait::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );
@@ -168,7 +173,12 @@ class MySecondStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\thrift\annotation\hack\StructTrait' => \thrift\annotation\hack\StructTrait::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );
@@ -255,7 +265,13 @@ class MyThirdStruct implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\thrift\annotation\hack\StructTrait' => \thrift\annotation\hack\StructTrait::fromShape(
+          shape(
+            "name" => "CustomTraitName",
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );

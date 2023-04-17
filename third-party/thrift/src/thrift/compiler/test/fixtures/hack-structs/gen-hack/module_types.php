@@ -523,7 +523,12 @@ trait MySixthStructTrait implements \IThriftSyncStruct, \IThriftStructMetadata {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\thrift\annotation\hack\StructAsTrait' => \thrift\annotation\hack\StructAsTrait::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );

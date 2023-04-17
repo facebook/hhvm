@@ -38,9 +38,10 @@ struct MyFifthStruct {
   1: string foo;
 }
 
+@hack.StructAsTrait
 struct MySixthStruct {
   1: string foo;
-} (php.trait = 1)
+}
 
 @hack.StructAsTrait
 struct MySeventhStruct {

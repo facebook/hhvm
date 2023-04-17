@@ -87,7 +87,6 @@ class t_hack_generator : public t_concat_generator {
     arraysets_ = option_is_specified(options, "arraysets");
     no_nullables_ = option_is_specified(options, "nonullables");
     from_map_construct_ = option_is_specified(options, "frommap_construct");
-    struct_trait_ = option_is_specified(options, "structtrait");
     shapes_ = option_is_specified(options, "shapes");
     shape_arraykeys_ = option_is_specified(options, "shape_arraykeys");
     shapes_allow_unknown_fields_ =
@@ -842,9 +841,6 @@ class t_hack_generator : public t_concat_generator {
   }
 
   bool has_hack_struct_as_trait(const t_struct* tstruct) const {
-    if (tstruct->has_annotation("php.trait")) {
-      return true;
-    }
     const auto annotation =
         tstruct->find_structured_annotation_or_null(kHackStructAsTraitUri);
     return annotation != nullptr;
@@ -1122,11 +1118,6 @@ class t_hack_generator : public t_concat_generator {
    * of a legacy map constructor.
    */
   bool from_map_construct_;
-
-  /**
-   * True if we should add a "use StructNameTrait" to the generated class
-   */
-  bool struct_trait_;
 
   /**
    * True if we should generate Shape types for the generated structs
@@ -3087,8 +3078,6 @@ void t_hack_generator::generate_php_struct_struct_trait(
     } else {
       traitName = hack_name(struct_trait.second, tstruct->program());
     }
-  } else if (struct_trait_) {
-    traitName = hack_name(name, tstruct->program()) + "Trait";
   }
 
   if (!traitName.empty()) {

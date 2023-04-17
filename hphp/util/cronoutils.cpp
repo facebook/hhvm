@@ -534,7 +534,7 @@ start_of_this_period(time_t start_time, PERIODICITY periodicity, int period_mult
 
 	default:
 	    fprintf(stderr, "software fault in start_of_this_period()\n");
-	    exit(1);
+	    exit(HPHP_EXIT_FAILURE);
 	}
 
 	/* If the time of day is not equal to midnight then we need to

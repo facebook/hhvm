@@ -562,7 +562,7 @@ pid_t Process::ForkAndExecve(
       if (cwd != Process::GetCurrentDirectory()) {
         if (chdir(cwd.c_str()) == -1) {
           dprintf(fork_w, "%s %d", "chdir", errno);
-          _Exit(1);
+          _Exit(HPHP_EXIT_FAILURE);
         }
       }
     }
@@ -570,12 +570,12 @@ pid_t Process::ForkAndExecve(
     if (flags & Process::FORK_AND_EXECVE_FLAG_SETSID) {
       if (setsid() == -1) {
         dprintf(fork_w, "%s\n%d\n", "setsid", errno);
-        _Exit(1);
+        _Exit(HPHP_EXIT_FAILURE);
       }
     } else if (flags & Process::FORK_AND_EXECVE_FLAG_SETPGID) {
       if (setpgid(0, pgid) == -1) {
         dprintf(fork_w, "%s %d", "setpgid", errno);
-        _Exit(1);
+        _Exit(HPHP_EXIT_FAILURE);
       }
     }
 
@@ -589,7 +589,7 @@ pid_t Process::ForkAndExecve(
       execve(path.c_str(), argv_arr, envp_arr);
     }
     dprintf(fork_w, "%s %d", "execve", errno);
-    _Exit(1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
 
   close(fork_w);

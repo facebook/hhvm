@@ -1585,7 +1585,7 @@ coro::Task<Package::OndemandInfo> Package::emitGroup(
         // The unit had an ICE and we're configured to treat that as a
         // fatal error. Here is where we die on it.
         fprintf(stderr, "%s", meta.m_abort.c_str());
-        _Exit(1);
+        _Exit(HPHP_EXIT_FAILURE);
       }
       if (Option::ForceEnableSymbolRefs || RO::EvalActiveDeployment.empty()) {
         auto const filename = makeStaticString(group.m_files[i].native());

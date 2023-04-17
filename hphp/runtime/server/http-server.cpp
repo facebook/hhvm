@@ -322,7 +322,7 @@ void HttpServer::runOrExitProcess() {
                   "HttpServer::runAndExitProcess");
     // Logger flushes itself---we don't need to run any atexit handlers
     // (historically we've mostly just SEGV'd while trying) ...
-    _Exit(1);
+    _Exit(HPHP_EXIT_FAILURE);
   };
 
   if (!RuntimeOption::InstanceId.empty()) {
@@ -523,7 +523,7 @@ void HttpServer::stop(const char* stopReason) {
           pthread_setschedparam(pthread_self(), SCHED_RR, &param);
           /* sleep override */
           std::this_thread::sleep_for(std::chrono::seconds{totalWait});
-          _Exit(1);
+          _Exit(HPHP_EXIT_FAILURE);
         });
       killer.detach();
     }

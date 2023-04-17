@@ -1080,13 +1080,13 @@ static int start_server(const std::string &username, int xhprof) {
       }
     }
     if (!Capability::ChangeUnixUser(username, RuntimeOption::AllowRunAsRoot)) {
-      _exit(1);
+      _exit(HPHP_EXIT_FAILURE);
     }
     LightProcess::ChangeUser(username);
   } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
     Logger::Error("hhvm not allowed to run as root unless "
                   "-vServer.AllowRunAsRoot=1 is used.");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
   Capability::SetDumpable();
 #endif
@@ -1246,7 +1246,7 @@ static void prepare_args(int &argc,
 
 static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
-  int ret_code = -1;
+  int ret_code = HPHP_EXIT_FAILURE;
   try {
     try {
       ret_code = execute_program_impl(argc, argv);
@@ -1270,7 +1270,7 @@ int execute_program(int argc, char **argv) {
       // safe to destroy the globals, or run atexit handlers.
       // abort() so it shows up as a crash, and we can diagnose/fix the
       // exception
-      abort();
+      always_assert(false);
     }
   }
 
@@ -1565,7 +1565,7 @@ static int execute_program_impl(int argc, char** argv) {
         Logger::Error("Error in command line: invalid mode: %s",
                       po.mode.c_str());
         cout << desc << "\n";
-        return -1;
+        return HPHP_EXIT_FAILURE;
       }
       if (po.config.empty() && !vm.count("no-config")
           && ::getenv("HHVM_NO_DEFAULT_CONFIGS") == nullptr) {
@@ -1591,20 +1591,20 @@ static int execute_program_impl(int argc, char** argv) {
     } catch (const error &e) {
       Logger::Error("Error in command line: %s", e.what());
       cout << desc << "\n";
-      return -1;
+      return HPHP_EXIT_FAILURE;
     } catch (...) {
       Logger::Error("Error in command line.");
       cout << desc << "\n";
-      return -1;
+      return HPHP_EXIT_FAILURE;
     }
   } catch (const error &e) {
     Logger::Error("Error in command line: %s", e.what());
     cout << desc << "\n";
-    return -1;
+    return HPHP_EXIT_FAILURE;
   } catch (...) {
     Logger::Error("Error in command line parsing.");
     cout << desc << "\n";
-    return -1;
+    return HPHP_EXIT_FAILURE;
   }
 
 #ifdef ENABLE_SYSTEM_LOCALE_ARCHIVE
@@ -1656,7 +1656,7 @@ static int execute_program_impl(int argc, char** argv) {
     f->open(po.show, "r");
     if (!f->valid()) {
       Logger::Error("Unable to open file %s", po.show.c_str());
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     f->print();
     f->close();
@@ -1731,7 +1731,7 @@ static int execute_program_impl(int argc, char** argv) {
       fprintf(stderr, "Configurations Server.WhitelistExec, "
              "Server.WhitelistExecWarningOnly, Server.AllowedExecCmds "
              "are not supported.\n");
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     std::vector<std::string> badnodes;
     config.lint(badnodes);
@@ -1744,13 +1744,13 @@ static int execute_program_impl(int argc, char** argv) {
     if (po.mode == "getoption") {
       if (po.args.size() < 1) {
         fprintf(stderr, "Must specify an option to load\n");
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       Variant value;
       bool ret = IniSetting::Get(po.args[0], value);
       if (!ret) {
         fprintf(stderr, "No such option: %s\n", po.args[0].data());
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       if (!value.isString()) {
         VariableSerializer vs{VariableSerializer::Type::JSON};
@@ -1765,11 +1765,11 @@ static int execute_program_impl(int argc, char** argv) {
 
       if (scriptFilePath.empty()) {
         std::cerr << "Must specify of file with --repo-option-hash\n";
-        return -1;
+        return HPHP_EXIT_FAILURE;
       }
       if (access(scriptFilePath.data(), F_OK) != 0) {
         std::cerr << "Cannot access file " << scriptFilePath << "\n";
-        return -1;
+        return HPHP_EXIT_FAILURE;
       }
       auto const& opts = RepoOptions::forFile(scriptFilePath);
       cout << opts.path() << ": "
@@ -1789,7 +1789,7 @@ static int execute_program_impl(int argc, char** argv) {
       po.mode == "dumpcoverage") {
     if (po.file.empty() && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a hack file to compile.\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
     auto const file = [] (std::string file) -> std::string {
@@ -1802,7 +1802,7 @@ static int execute_program_impl(int argc, char** argv) {
     std::fstream fs(file, std::ios::in);
     if (!fs) {
       std::cerr << "Unable to open \"" << file << "\"\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     std::stringstream contents;
     contents << fs.rdbuf();
@@ -1846,7 +1846,7 @@ static int execute_program_impl(int argc, char** argv) {
     // This will dump the hhas for file as EvalDumpHhas was set
     if (!compiled) {
       std::cerr << "Unable to compile \"" << file << "\"\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
     if (po.mode == "dumpcoverage") {
@@ -2052,7 +2052,7 @@ static int execute_program_impl(int argc, char** argv) {
                      nullptr, nullptr);
       if (!unit) {
         std::cerr << "Unable to compile \"" << file << "\"\n";
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       if (auto const info = unit->getFatalInfo()) {
         raise_parse_error(unit->filepath(), info->m_fatalMsg.c_str(),
@@ -2062,7 +2062,7 @@ static int execute_program_impl(int argc, char** argv) {
       RuntimeOption::CallUserHandlerOnFatals = false;
       RuntimeOption::AlwaysLogUnhandledExceptions = false;
       g_context->onFatalError(e);
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
     Logger::Info("No syntax errors detected in %s", po.lint.c_str());
     return 0;
@@ -2091,12 +2091,12 @@ static int execute_program_impl(int argc, char** argv) {
     if (po.mode != "debug" && po.mode != "eval" && cliFile.empty()) {
       std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
     if (po.mode == "eval" && po.args.empty()) {
       std::cerr << "Nothing to do. Pass a command to run with mode eval\n";
-      return 1;
+      return HPHP_EXIT_FAILURE;
     }
 
     if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
@@ -2116,7 +2116,7 @@ static int execute_program_impl(int argc, char** argv) {
       );
       if (RuntimeOption::EvalUseRemoteUnixServer == "only") {
         Logger::Error("Failed to connect to unix server.");
-        exit(255);
+        exit(HPHP_EXIT_FAILURE);
       }
     }
 
@@ -2141,7 +2141,7 @@ static int execute_program_impl(int argc, char** argv) {
         Eval::Debugger::StartClient(po.debugger_options);
       if (!localProxy) {
         Logger::Error("Failed to start debugger client\n\n");
-        return 1;
+        return HPHP_EXIT_FAILURE;
       }
       Eval::Debugger::RegisterSandbox(localProxy->getDummyInfo());
       std::shared_ptr<std::vector<std::string>> client_args;
@@ -2193,7 +2193,7 @@ static int execute_program_impl(int argc, char** argv) {
 
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-        ret = 255;
+        ret = 1;
         if (po.mode == "eval") {
           String code{"<?hh " + file};
           auto const r = g_context->evalPHPDebugger(code.get(), 0);
@@ -2242,7 +2242,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   cout << desc << "\n";
-  return -1;
+  return HPHP_EXIT_FAILURE;
 }
 
 String canonicalize_path(const String& p, const char* root, int rootLen) {
@@ -2403,18 +2403,18 @@ void init_current_pthread_stack_limits() {
 #if defined(_GNU_SOURCE)
   if (pthread_getattr_np(pthread_self(), &attr) != 0 ) {
     Logger::Error("pthread_getattr_np failed before checking stack limits");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 #else
   if (pthread_attr_init(&attr) != 0 ) {
     Logger::Error("pthread_attr_init failed before checking stack limits");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 #endif
   init_stack_limits(&attr);
   if (pthread_attr_destroy(&attr) != 0 ) {
     Logger::Error("pthread_attr_destroy failed after checking stack limits");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 }
 
@@ -2615,7 +2615,7 @@ void hphp_process_init(bool skipModules) {
             mode == JitSerdesMode::DeserializeAndExit) {
           Logger::Error(errMsg);
           hphp_process_exit();
-          exit(1);
+          exit(HPHP_EXIT_FAILURE);
         }
         if (mode == JitSerdesMode::DeserializeOrGenerate) {
           Logger::Info(errMsg +

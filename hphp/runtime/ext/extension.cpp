@@ -68,7 +68,7 @@ void Extension::CompileSystemlib(const std::string &slib,
                  name.c_str(),
                  info->m_fatalMsg.c_str(),
                  info->m_fatalLoc.line1);
-    _Exit(0);
+    _Exit(HPHP_EXIT_FAILURE);
   }
 
   unit->merge();

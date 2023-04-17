@@ -1708,7 +1708,7 @@ Optional<int> run_client(const char* sock_path,
       "It likely crashed. Check the HHVM error log and look for coredumps",
       ex.what()
     );
-    exit(255);
+    exit(HPHP_EXIT_FAILURE);
   }
 }
 

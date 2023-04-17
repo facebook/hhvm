@@ -61,7 +61,7 @@ inline void ThreadLocalCheckReturn(int ret, const char *funcName) {
     // print to stderr and exit().
     fprintf(stderr, "%s returned %d: %s", funcName, ret,
             folly::errnoStr(ret).c_str());
-    exit(1);
+    exit(HPHP_EXIT_FAILURE);
   }
 }
 

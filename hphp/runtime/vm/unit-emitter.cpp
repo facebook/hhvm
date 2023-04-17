@@ -756,7 +756,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
       auto const flags = O_WRONLY | O_CREAT | (first_unit ? O_TRUNC : O_APPEND);
       if (!folly::writeFile(disassemble(u.get()), hhaspath.c_str(), flags)) {
         Logger::Error("Failed to write hhas to %s", hhaspath.c_str());
-        _Exit(1);
+        _Exit(HPHP_EXIT_FAILURE);
       }
       first_unit = false;
     } else {

@@ -890,7 +890,7 @@ HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
   }
   execle("/bin/sh", "sh", "-c", cmd.data(), nullptr, envp);
   free(envp);
-  _exit(127);
+  _exit(HPHP_EXIT_FAILURE);
 #endif
 }
 

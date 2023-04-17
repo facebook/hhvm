@@ -144,7 +144,7 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
     sigprocmask(SIG_SETMASK, &eset, nullptr);
     execl("/bin/sh", "sh", "-c", cmd, nullptr);
     Logger::Warning("Failed to exec: `%s'", cmd);
-    _Exit(1);
+    _Exit(HPHP_EXIT_FAILURE);
   }
   // parent
 
@@ -658,6 +658,8 @@ bool LightProcess::initShadow(int afdt_lid,
 void LightProcess::runShadow(int afdt_fd) {
   std::string buf;
 
+  auto error = false;
+
   pollfd pfd[1];
   pfd[0].fd = afdt_fd;
   pfd[0].events = POLLIN;
@@ -693,13 +695,15 @@ void LightProcess::runShadow(int afdt_fd) {
       }
     }
   } catch (const std::exception& e) {
+    error = true;
     Logger::Error("LightProcess exiting due to exception: %s", e.what());
   } catch (...) {
+    error = true;
     Logger::Error("LightProcess exiting due to unknown exception");
   }
 
   ::close(afdt_fd);
-  _Exit(0);
+  _Exit(error ? HPHP_EXIT_FAILURE : 0);
 }
 
 namespace {

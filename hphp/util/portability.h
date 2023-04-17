@@ -177,10 +177,9 @@
 
 //////////////////////////////////////////////////////////////////////
 
-// We reserve the exit status 127 to signal a failure in the
-// interpreter. 127 is a valid exit code on all reasonable
-// architectures: POSIX requires at least 8 unsigned bits and
-// Windows 32 signed bits.
+// We reserve the exit status 127 to signal a failure. 127 is a valid
+// exit code on all reasonable architectures: POSIX requires at least
+// 8 unsigned bits and Windows 32 signed bits.
 #define HPHP_EXIT_FAILURE 127
 
 //////////////////////////////////////////////////////////////////////

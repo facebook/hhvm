@@ -852,7 +852,7 @@ Index::Input make_index_input(WholeProgramInput input) {
           // An unit which failed the verifier. This causes us
           // to exit immediately with an error.
           fprintf(stderr, "%s", p.first.m_impl->fail.message->data());
-          _Exit(1);
+          _Exit(HPHP_EXIT_FAILURE);
           break;
         case Key::Type::Class:
           out.classes.emplace_back(
@@ -959,7 +959,7 @@ void whole_program(WholeProgramInput inputs,
         "bailing because Eval.AbortBuildOnVerifyError is set\n",
         ue->m_filepath->data()
       );
-      _Exit(1);
+      _Exit(HPHP_EXIT_FAILURE);
     }
     callback(std::move(ue));
   };

@@ -86,7 +86,7 @@ std::string get_and_check_systemlib() {
     // Die a horrible death.
     Logger::Error("Unable to find/load systemlib.php, check /proc is mounted"
                   " or export HHVM_SYSTEMLIB to your ENV");
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
   return slib;
 }
@@ -126,7 +126,7 @@ void ProcessInit() {
     Logger::Error("Check all of your changes to hphp/system/php");
     Logger::Error("HipHop Parse Error: %s %d",
                   info->m_fatalMsg.c_str(), info->m_fatalLoc.line1);
-    _exit(1);
+    _exit(HPHP_EXIT_FAILURE);
   }
 
   // Load the systemlib unit to build the Class objects

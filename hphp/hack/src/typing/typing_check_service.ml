@@ -889,13 +889,11 @@ let rec event_loop
     (done_count : int)
     (total_count : int)
     (interrupt : 'a MultiThreadedCall.interrupt_config)
+    (handlers : (Unix.file_descr * 'a MultiThreadedCall.interrupt_handler) list)
     (fd_distc : Unix.file_descr)
     (handle : Hh_distc_ffi.handle)
     (check_info : check_info) :
     [> `Success of Errors.t * _ | `Error of log_message | `Cancel of _ ] =
-  let handlers =
-    interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
-  in
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
   let (ready_fds, _, _) =
@@ -918,9 +916,16 @@ let rec event_loop
         ~total_count
         ~unit:"files"
         ~extra:None;
-      event_loop done_count total_count interrupt fd_distc handle check_info
+      event_loop
+        done_count
+        total_count
+        interrupt
+        handlers
+        fd_distc
+        handle
+        check_info
   ) else
-    let (env, decision, _handlers) =
+    let (env, decision, handlers) =
       List.fold
         handlers
         ~init:
@@ -949,7 +954,14 @@ let rec event_loop
       let () = Hh_distc_ffi.cancel handle in
       `Cancel interrupt.MultiThreadedCall.env
     | MultiThreadedCall.Continue ->
-      event_loop done_count total_count interrupt fd_distc handle check_info
+      event_loop
+        done_count
+        total_count
+        interrupt
+        handlers
+        fd_distc
+        handle
+        check_info
 
 (**
   This is the main process function that triggers a full init via hh_distc.
@@ -984,7 +996,12 @@ let process_with_hh_distc
   in
   let fd_distc = Hh_distc_ffi.get_fd hh_distc_handle in
   ServerProgress.write "hh_distc running";
-  match event_loop 0 0 interrupt fd_distc hh_distc_handle check_info with
+  let handlers =
+    interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
+  in
+  match
+    event_loop 0 0 interrupt handlers fd_distc hh_distc_handle check_info
+  with
   | `Success (errors, env) ->
     (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
     Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));

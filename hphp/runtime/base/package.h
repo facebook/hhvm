@@ -48,9 +48,20 @@ struct PackageInfo {
     std::vector<std::shared_ptr<re2::RE2>> m_domains;
 
     template <typename SerDe> void serde(SerDe& sd) {
-      // m_domains omitted on purpose, as it is not needed to be serialized
-      sd(m_packages, stdltstr{});
-      sd(m_soft_packages, stdltstr{});
+      sd(m_packages, stdltstr{})
+        (m_soft_packages, stdltstr{})
+        ;
+
+      std::vector<std::string> patterns;
+      if constexpr (SerDe::deserializing) {
+        sd(patterns);
+        for (auto& s : patterns) {
+          m_domains.push_back(std::make_shared<re2::RE2>(s));
+        }
+      } else {
+        for (auto const& p : m_domains) patterns.push_back(p->pattern());
+        sd(patterns);
+      }
     }
   };
 

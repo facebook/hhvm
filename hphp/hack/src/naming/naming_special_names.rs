@@ -575,6 +575,8 @@ pub mod pseudo_functions {
 
     pub const ENFORCED_CAST: &str = "\\HH\\FIXME\\ENFORCED_CAST";
 
+    pub const PACKAGE_EXISTS: &str = "\\HH\\package_exists";
+
     pub static ALL_PSEUDO_FUNCTIONS: &[&str] = &[
         ISSET,
         UNSET,
@@ -591,6 +593,7 @@ pub mod pseudo_functions {
         DIE,
         UNSAFE_CAST,
         UNSAFE_NONNULL_CAST,
+        PACKAGE_EXISTS,
     ];
 
     lazy_static! {

@@ -508,7 +508,9 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             Expr_::MethodCaller(_) | Expr_::Hole(_) => {
                 unimplemented!("TODO(hrust)")
             }
-            Expr_::Package(_) => todo!(),
+            Expr_::Package(_) => Err(Error::unrecoverable(
+                "package should have been converted into package_exists during rewriting",
+            )),
         }
     })
 }

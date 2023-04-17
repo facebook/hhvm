@@ -77,6 +77,7 @@ pub fn elaborate_program_for_codegen(
     elaborate_namespaces_visitor::elaborate_program(ns_env, program);
     let env = make_env(&tco, path);
     elaborate_common(&env, program);
+    elaborate_package_expr(&env, program);
     assert!(env.into_errors().is_empty());
 }
 
@@ -417,4 +418,10 @@ fn elaborate_for_typechecking<T: Transform>(env: Env, node: &mut T) -> Vec<Namin
 
     node.transform(&env, &mut passes);
     env.into_errors()
+}
+
+fn elaborate_package_expr<T: Transform>(env: &Env, node: &mut T) {
+    let mut passes = passes![passes::elab_expr_package::ElabExprPackagePass::default()];
+    node.transform(env, &mut passes);
+    env.assert_no_errors();
 }

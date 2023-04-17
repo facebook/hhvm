@@ -886,15 +886,15 @@ let rec drain_events (done_count, total_count, handle, check_info) =
   to stream errors and report progress back to the user.
 *)
 let rec event_loop
-    (done_count : int)
-    (total_count : int)
-    (interrupt : 'env MultiThreadedCall.interrupt_config)
-    (handlers :
-      (Unix.file_descr * 'env MultiThreadedCall.interrupt_handler) list)
-    (fd_distc : Unix.file_descr)
-    (handle : Hh_distc_ffi.handle)
-    (check_info : check_info)
-    (hhdg_path : string) :
+    ~(done_count : int)
+    ~(total_count : int)
+    ~(interrupt : 'env MultiThreadedCall.interrupt_config)
+    ~(handlers :
+       (Unix.file_descr * 'env MultiThreadedCall.interrupt_handler) list)
+    ~(fd_distc : Unix.file_descr)
+    ~(handle : Hh_distc_ffi.handle)
+    ~(check_info : check_info)
+    ~(hhdg_path : string) :
     [> `Success of typing_result * 'env
     | `Error of log_message
     | `Cancel of 'env
@@ -931,14 +931,14 @@ let rec event_loop
         ~unit:"files"
         ~extra:None;
       event_loop
-        done_count
-        total_count
-        interrupt
-        handlers
-        fd_distc
-        handle
-        check_info
-        hhdg_path
+        ~done_count
+        ~total_count
+        ~interrupt
+        ~handlers
+        ~fd_distc
+        ~handle
+        ~check_info
+        ~hhdg_path
   ) else
     let (env, decision, handlers) =
       List.fold
@@ -970,14 +970,14 @@ let rec event_loop
       `Cancel interrupt.MultiThreadedCall.env
     | MultiThreadedCall.Continue ->
       event_loop
-        done_count
-        total_count
-        interrupt
-        handlers
-        fd_distc
-        handle
-        check_info
-        hhdg_path
+        ~done_count
+        ~total_count
+        ~interrupt
+        ~handlers
+        ~fd_distc
+        ~handle
+        ~check_info
+        ~hhdg_path
 
 (**
   This is the main process function that triggers a full init via hh_distc.
@@ -1020,14 +1020,14 @@ let process_with_hh_distc
     interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
   in
   event_loop
-    0
-    0
-    interrupt
-    handlers
-    fd_distc
-    hh_distc_handle
-    check_info
-    hhdg_path
+    ~done_count:0
+    ~total_count:0
+    ~interrupt
+    ~handlers
+    ~fd_distc
+    ~handle:hh_distc_handle
+    ~check_info
+    ~hhdg_path
 
 (**
   `next` and `merge` both run in the master process and update mutable

@@ -19,7 +19,6 @@ namespace go apache.thrift.test.load
 namespace py apache.thrift.test.load
 namespace py3 thrift.perf
 namespace py.asyncio apache.thrift.test.asyncio.load
-namespace java com.facebook.thrift.perf
 namespace java.swift org.apache.swift.thrift.perf
 
 exception LoadError {

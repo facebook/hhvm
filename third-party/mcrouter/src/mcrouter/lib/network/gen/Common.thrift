@@ -29,6 +29,10 @@ exception CarbonResultRemoteError {
   1: string message
 }
 
+exception CarbonResultDeadlineExceeded {
+  1: string message
+}
+
 struct McVersionRequest {
   1: carbon.IOBufKey key
 }(cpp.methods = "

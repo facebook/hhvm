@@ -15,6 +15,10 @@ exception CarbonResultRemoteError {
   1: std::string message;
 };
 
+exception CarbonResultDeadlineExceeded {
+  1: std::string message;
+};
+
 request McVersionRequest {
   id: 13;
   name: "version";

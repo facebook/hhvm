@@ -88,37 +88,6 @@ let invalid_contains_key_check p trv_key_ty key_ty =
        trv_key_ty
        (Markdown_lite.md_codify key_ty)
 
-let non_equatable_due_to_opaque_types p ty1 ty2 enums =
-  Lints.add Codes.non_equatable_comparison Lint_warning p
-  @@ Printf.sprintf
-       "Invalid comparison:\nA value of type %s should not be compared to a value of type %s%s"
-       (Markdown_lite.md_codify ty1)
-       (Markdown_lite.md_codify ty2)
-       begin
-         match enums with
-         | [] -> ""
-         | enums ->
-           Printf.sprintf
-             " because the enum type%s %s %s opaque.\nUse functions like `%s::coerce` and `%s::assert` to convert values to the appropriate type before comparing."
-             (if List.length enums = 1 then
-               ""
-             else
-               "s")
-             (match enums with
-             | [a; b] ->
-               Printf.sprintf
-                 "%s and %s"
-                 (Markdown_lite.md_codify a)
-                 (Markdown_lite.md_codify b)
-             | _ -> String.concat ~sep:", " enums)
-             (if List.length enums = 1 then
-               "is"
-             else
-               "are")
-             (List.hd_exn enums)
-             (List.hd_exn enums)
-       end
-
 let is_always_true p lhs_class rhs_class =
   let lhs_class = Markdown_lite.md_codify lhs_class in
   let rhs_class = Markdown_lite.md_codify rhs_class in

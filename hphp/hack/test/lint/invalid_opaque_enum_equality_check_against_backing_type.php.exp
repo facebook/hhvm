@@ -1,16 +1,1 @@
-File "invalid_opaque_enum_equality_check_against_backing_type.php", line 11, characters 7-15:
-Invalid comparison:
-A value of type `Foo` should not be compared to a value of type `int` because the enum type Foo is opaque.
-Use functions like `Foo::coerce` and `Foo::assert` to convert values to the appropriate type before comparing. (Lint[5607])
-File "invalid_opaque_enum_equality_check_against_backing_type.php", line 18, characters 7-15:
-Invalid comparison:
-A value of type `vec<Foo>` should not be compared to a value of type `vec<int>` because the enum type Foo is opaque.
-Use functions like `Foo::coerce` and `Foo::assert` to convert values to the appropriate type before comparing. (Lint[5607])
-File "invalid_opaque_enum_equality_check_against_backing_type.php", line 25, characters 7-32:
-Invalid comparison:
-A value of type `int` should not be compared to a value of type `Foo` because the enum type Foo is opaque.
-Use functions like `Foo::coerce` and `Foo::assert` to convert values to the appropriate type before comparing. (Lint[5607])
-File "invalid_opaque_enum_equality_check_against_backing_type.php", line 32, characters 7-36:
-Invalid comparison:
-A value of type `int` should not be compared to a value of type `Foo` because the enum type Foo is opaque.
-Use functions like `Foo::coerce` and `Foo::assert` to convert values to the appropriate type before comparing. (Lint[5607])
+No lint errors

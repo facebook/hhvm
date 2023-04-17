@@ -38,6 +38,7 @@ let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 
 let global_opts =
   GlobalOptions.make
+    ~tco_num_local_workers:1
     ~tco_saved_state:GlobalOptions.default_saved_state
     ~po_disable_xhp_element_mangling:false
     ~po_deregister_php_stdlib:true

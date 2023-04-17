@@ -888,12 +888,17 @@ let rec drain_events (done_count, total_count, handle, check_info) =
 let rec event_loop
     (done_count : int)
     (total_count : int)
-    (interrupt : 'a MultiThreadedCall.interrupt_config)
-    (handlers : (Unix.file_descr * 'a MultiThreadedCall.interrupt_handler) list)
+    (interrupt : 'env MultiThreadedCall.interrupt_config)
+    (handlers :
+      (Unix.file_descr * 'env MultiThreadedCall.interrupt_handler) list)
     (fd_distc : Unix.file_descr)
     (handle : Hh_distc_ffi.handle)
-    (check_info : check_info) :
-    [> `Success of Errors.t * _ | `Error of log_message | `Cancel of _ ] =
+    (check_info : check_info)
+    (hhdg_path : string) :
+    [> `Success of typing_result * 'env
+    | `Error of log_message
+    | `Cancel of 'env
+    ] =
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
   let (ready_fds, _, _) =
@@ -904,7 +909,16 @@ let rec event_loop
     | None ->
       ServerProgress.write "hh_distc done";
       (match Hh_distc_ffi.join handle with
-      | Ok errors -> `Success (errors, interrupt.MultiThreadedCall.env)
+      | Ok errors ->
+        (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
+        Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
+        `Success
+          ( {
+              errors;
+              dep_edges = Typing_deps.dep_edges_make ();
+              telemetry = Telemetry.create ();
+            },
+            interrupt.MultiThreadedCall.env )
       | Error error -> `Error error)
     | Some _ ->
       let (done_count, total_count) =
@@ -924,6 +938,7 @@ let rec event_loop
         fd_distc
         handle
         check_info
+        hhdg_path
   ) else
     let (env, decision, handlers) =
       List.fold
@@ -962,6 +977,7 @@ let rec event_loop
         fd_distc
         handle
         check_info
+        hhdg_path
 
 (**
   This is the main process function that triggers a full init via hh_distc.
@@ -981,7 +997,11 @@ let rec event_loop
 let process_with_hh_distc
     ~(root : Path.t option)
     ~(interrupt : 'a MultiThreadedCall.interrupt_config)
-    ~(check_info : check_info) : (typing_result * _, _) result =
+    ~(check_info : check_info) :
+    [> `Success of typing_result * 'env
+    | `Error of log_message
+    | `Cancel of 'env
+    ] =
   (* TODO: Plumb extra --config name=value args through to spawn() *)
   (* We don't want to use with_tempdir because we need to keep the folder around
      for subseqent typechecks that will read the dep graph in the folder *)
@@ -999,26 +1019,15 @@ let process_with_hh_distc
   let handlers =
     interrupt.MultiThreadedCall.handlers interrupt.MultiThreadedCall.env
   in
-  match
-    event_loop 0 0 interrupt handlers fd_distc hh_distc_handle check_info
-  with
-  | `Success (errors, env) ->
-    (* TODO: Clear in memory deps. Doesn't effect correctness but can cause larger fanouts *)
-    Typing_deps.replace (Typing_deps_mode.InMemoryMode (Some hhdg_path));
-    Ok
-      ( {
-          errors;
-          dep_edges = Typing_deps.dep_edges_make ();
-          telemetry = Telemetry.create ();
-        },
-        env )
-  | `Cancel env -> Error env
-  | `Error msg ->
-    Hh_logger.log "Error with hh_distc: %s" msg;
-    HackEventLogger.invariant_violation_bug
-      "Unexpected hh_distc error"
-      ~data:msg;
-    failwith msg
+  event_loop
+    0
+    0
+    interrupt
+    handlers
+    fd_distc
+    hh_distc_handle
+    check_info
+    hhdg_path
 
 (**
   `next` and `merge` both run in the master process and update mutable
@@ -1178,35 +1187,6 @@ let process_in_parallel
     paths_of cancelled_results,
     (!diagnostic_pusher, !time_first_error) )
 
-let process_sequentially
-    ?diagnostic_pusher ctx fnl ~longlived_workers ~check_info ~typecheck_info :
-    typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
-  let progress =
-    { completed = []; remaining = BigList.as_list fnl; deferred = [] }
-  in
-  (* Since we're running sequentially here, we don't want 'process_files' to activate its own memtracing: *)
-  let check_info = { check_info with memtrace_dir = None } in
-  let (typing_result, progress) =
-    process_workitems
-      ctx
-      (neutral ())
-      progress
-      ~memory_cap:None
-      ~longlived_workers
-      ~error_count_at_start_of_batch:0
-      ~check_info
-      ~worker_id:"master"
-      ~batch_number:(-1)
-      ~typecheck_info
-  in
-  let push_result =
-    possibly_push_new_errors_to_lsp_client
-      ~progress
-      typing_result.errors
-      diagnostic_pusher
-  in
-  (typing_result, push_result)
-
 type 'a job_result = 'a * Relative_path.t list
 
 module type Mocking_sig = sig
@@ -1253,20 +1233,6 @@ module Mocking =
          (module TestMocking : Mocking_sig)
        else
          (module NoMocking : Mocking_sig))
-
-let should_process_sequentially
-    (opts : TypecheckerOptions.t) (workitems : workitem BigList.t) : bool =
-  (* If decls can be deferred, then we should process in parallel, since
-     we are likely to have more computations than there are files to type check. *)
-  let defer_threshold =
-    TypecheckerOptions.defer_class_declaration_threshold opts
-  in
-  let parallel_threshold =
-    TypecheckerOptions.parallel_type_checking_threshold opts
-  in
-  match (defer_threshold, BigList.length workitems) with
-  | (None, file_count) when file_count < parallel_threshold -> true
-  | _ -> false
 
 type result = {
   errors: Errors.t;
@@ -1331,6 +1297,16 @@ let go_with_interrupt
     BigList.map fnl ~f:(fun path ->
         Check { path; was_already_deferred = false })
   in
+  let num_workers = TypecheckerOptions.num_local_workers opts in
+  let workers =
+    match (workers, num_workers) with
+    | (Some workers, Some num_local_workers) ->
+      let (workers, _) = List.split_n workers num_local_workers in
+      Some workers
+    | (None, _)
+    | (_, None) ->
+      workers
+  in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let ( typing_result,
         delegate_state,
@@ -1338,56 +1314,41 @@ let go_with_interrupt
         env,
         cancelled_fnl,
         diagnostic_pusher ) =
-    (* Good cutoff where hh_server is definitely slower than hh_distc
-       https://fburl.com/scuba/hh_server_events/f1wdh9nr *)
-    if
+    let will_use_distc =
       use_hh_distc_instead_of_hulk
       && BigList.length fnl > Option.value_exn hh_distc_fanout_threshold
-    then
-      match process_with_hh_distc ~root ~interrupt ~check_info with
-      | Ok (typing_result, env) ->
-        (typing_result, delegate_state, telemetry, env, [], (None, None))
-      | Error env ->
-        (* Typecheck is cancelled due to interrupt *)
-        ( {
-            errors = Errors.empty;
-            dep_edges = Typing_deps.dep_edges_make ();
-            telemetry = Telemetry.create ();
-          },
-          delegate_state,
-          telemetry,
-          env,
-          original_fnl,
-          (None, None) )
-    else if should_process_sequentially opts fnl then begin
-      Hh_logger.log "Type checking service will process files sequentially";
-      let (typing_result, diagnostic_pusher) =
-        process_sequentially
-          ?diagnostic_pusher
-          ctx
-          fnl
-          ~longlived_workers
-          ~check_info
-          ~typecheck_info
-      in
-      ( typing_result,
-        delegate_state,
-        telemetry,
-        interrupt.MultiThreadedCall.env,
-        [],
-        diagnostic_pusher )
-    end else begin
-      Hh_logger.log "Type checking service will process files in parallel";
-      let num_workers = TypecheckerOptions.num_local_workers opts in
-      let workers =
-        match (workers, num_workers) with
-        | (Some workers, Some num_local_workers) ->
-          let (workers, _) = List.split_n workers num_local_workers in
-          Some workers
-        | (None, _)
-        | (_, None) ->
-          workers
-      in
+    in
+    let results_via_distc =
+      if will_use_distc then (
+        match process_with_hh_distc ~root ~interrupt ~check_info with
+        | `Success (typing_result, env) ->
+          Some (typing_result, delegate_state, telemetry, env, [], (None, None))
+        | `Cancel env ->
+          (* Typecheck is cancelled due to interrupt *)
+          Some
+            ( {
+                errors = Errors.empty;
+                dep_edges = Typing_deps.dep_edges_make ();
+                telemetry = Telemetry.create ();
+              },
+              delegate_state,
+              telemetry,
+              env,
+              original_fnl,
+              (None, None) )
+        | `Error msg ->
+          Hh_logger.log "Error with hh_distc: %s" msg;
+          HackEventLogger.invariant_violation_bug
+            "Unexpected hh_distc error"
+            ~data:msg;
+          None
+      ) else
+        None
+    in
+    (* None means either we didn't attempt distc, or we did but it failed and we'll fall back to parallel... *)
+    match results_via_distc with
+    | Some results -> results
+    | None ->
       process_in_parallel
         ?diagnostic_pusher
         ctx
@@ -1400,7 +1361,6 @@ let go_with_interrupt
         ~longlived_workers
         ~check_info
         ~typecheck_info
-    end
   in
   let { errors; dep_edges; telemetry = typing_telemetry } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;

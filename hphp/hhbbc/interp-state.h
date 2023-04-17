@@ -610,6 +610,10 @@ struct CollectedInfo {
      */
     Base base{};
 
+    /* 
+     * Used to track whether a member op sequence is effect free. We use
+     * this information to replace member op sequences with constants.
+     */
     bool effectFree{false};
     bool extraPop{false};
 

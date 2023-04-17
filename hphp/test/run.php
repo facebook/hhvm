@@ -1200,6 +1200,7 @@ function hphp_cmd(
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
     $hdf,
+    '--repo-options-dir='.\dirname($test),
     '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     // EnableArgsInBacktraces disables most of HHBBC's DCE optimizations.

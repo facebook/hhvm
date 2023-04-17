@@ -95,6 +95,7 @@ struct CompilerOptions {
   std::vector<std::string> config;
   std::vector<std::string> confStrings;
   std::vector<std::string> iniStrings;
+  std::string repoOptionsDir;
   std::string inputDir;
   std::vector<std::string> inputs;
   std::string inputList;
@@ -531,6 +532,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("format,f", value<std::vector<std::string>>(&formats)->composing(),
      "HHBC Output format: binary (default) | hhas | text")
+    ("repo-options-dir", value<std::string>(&po.repoOptionsDir),
+     "repo options directory")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
     ("inputs,i", value<std::vector<std::string>>(&po.inputs)->composing(),
      "input file names")
@@ -735,6 +738,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   if (po.inputDir.empty()) po.inputDir = '.';
   po.inputDir = FileUtil::normalizeDir(po.inputDir);
 
+  if (po.repoOptionsDir.empty()) {
+    po.repoOptionsDir = po.inputDir;
+  } else {
+    po.repoOptionsDir = FileUtil::normalizeDir(po.repoOptionsDir);
+  }
+
   for (auto const& dir : po.excludeDirs) {
     Option::PackageExcludeDirs.insert(FileUtil::normalizeDir(dir));
   }
@@ -899,7 +908,7 @@ std::unique_ptr<UnitIndex> computeIndex(
   Package indexPackage{po.inputDir, executor, client};
   Timer indexTimer(Timer::WallTime, "indexing");
 
-  auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
+  auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
   auto const queryStr = repoFlags.autoloadQuery();
   if (!queryStr.empty()) {
     // Index the files specified by Autoload.Query
@@ -1368,7 +1377,7 @@ bool process(const CompilerOptions &po) {
 
     // Parse the input files specified on the command line
     addInputsToPackage(*parsePackage, po);
-    auto const& repoFlags = RepoOptions::forFile(po.inputDir.c_str()).flags();
+    auto const& repoFlags = RepoOptions::forFile(po.repoOptionsDir).flags();
     auto const queryStr = repoFlags.autoloadQuery();
     if (!queryStr.empty()) {
       // Parse all the files specified by Autoload.Query

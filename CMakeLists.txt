@@ -70,6 +70,7 @@ SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
 include(MSVCDefaults)
+include(SetOSVars)
 include(Options)
 include(HPHPCompiler)
 include(HPHPFindLibs)

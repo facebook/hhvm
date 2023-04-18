@@ -185,7 +185,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #if FACEBOOK
-#define USE_FOLLY_SYMBOLIZER 1
 // Linking in libbfd is a gigantic PITA, but if folly symbolizer doesn't
 // work on your platform, you'll need to figure it out.
 #define HAVE_LIBBFD 1

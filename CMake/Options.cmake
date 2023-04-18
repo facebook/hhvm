@@ -44,7 +44,10 @@ option(ENABLE_PROXYGEN_SERVER "Build the Proxygen HTTP server" ON)
 option(ENABLE_SPLIT_DWARF "Reduce linker memory usage by putting debugging information into .dwo files" OFF)
 
 IF (LINUX)
-    option(MAP_TEXT_HUGE_PAGES "Remap hot static code onto huge pages" ON)
+  option(MAP_TEXT_HUGE_PAGES "Remap hot static code onto huge pages" ON)
+  IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    option(ENABLE_FOLLY_SYMBOLIZER "Use folly::Symbolizer to obtain debug symbols when mapping text section onto huge pages" ON)
+  ENDIF()
 ENDIF()
 
 IF (NOT DEFAULT_CONFIG_DIR)

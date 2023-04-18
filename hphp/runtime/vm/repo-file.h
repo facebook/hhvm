@@ -33,6 +33,7 @@ namespace HPHP {
 struct ArrayData;
 struct BlobDecoder;
 struct BlobEncoder;
+struct PackageInfo;
 struct RepoAutoloadMapBuilder;
 struct RepoFileIndex;
 struct RepoGlobalData;
@@ -117,7 +118,9 @@ struct RepoFileBuilder {
   // information into the file. Once successful, the temporary file is
   // renamed to its final name. Once finish() is called, nothing can
   // be done with the RepoFileBuilder except destroy it.
-  void finish(const RepoGlobalData&, const RepoAutoloadMapBuilder&);
+  void finish(const RepoGlobalData&,
+              const RepoAutoloadMapBuilder&,
+              const PackageInfo&);
 
   RepoFileBuilder(const RepoFileBuilder&) = delete;
   RepoFileBuilder(RepoFileBuilder&&) = delete;
@@ -180,6 +183,11 @@ struct RepoFile {
    * cannot be called concurrently.
    */
   static void loadGlobalTables(bool loadAutoloadMap = true);
+
+  /*
+   * Retrieves the package info stored in the repo file.
+   */
+  static const PackageInfo& packageInfo();
 
   /*
    * Query functions:

@@ -543,6 +543,10 @@ void compile_repo() {
   sample.setStr("extern_worker_impl", client->implName());
   sample.setStr("extern_worker_session", client->session());
 
+  // Package Info must be read prior to load_repo as loading the repo
+  // destroys the repo file
+  auto const packageInfo = RepoFile::packageInfo();
+
   auto [inputs, config] = load_repo(*executor, *client, sample);
 
   RepoAutoloadMapBuilder autoload;
@@ -589,7 +593,7 @@ void compile_repo() {
   );
 
   trace_time timer{"finalizing repo", &sample};
-  repo.finish(get_global_data(), autoload);
+  repo.finish(get_global_data(), autoload, packageInfo);
 
   // Only log big builds.
   if (numUnits >= RO::EvalHHBBCMinUnitsToLog) {

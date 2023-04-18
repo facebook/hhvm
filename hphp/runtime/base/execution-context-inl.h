@@ -208,6 +208,13 @@ inline const RepoOptions* ExecutionContext::getRepoOptionsForRequest() const {
   return m_requestOptions.get_pointer();
 }
 
+inline const PackageInfo& ExecutionContext::getPackageInfo() const {
+  if (RO::RepoAuthoritative) return RepoFile::packageInfo();
+  auto const opts = getRepoOptionsForRequest();
+  assertx(opts);
+  return opts->packageInfo();
+}
+
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
   auto state = getPrevVMState(fp, nullptr, nullptr, nullptr);
   return state ? state->func() : nullptr;

@@ -1476,7 +1476,9 @@ bool process(const CompilerOptions &po) {
   auto const finish = [&] {
     if (!Option::GenerateBinaryHHBC) return true;
     Timer _{Timer::WallTime, "finalizing repo"};
-    repo->finish(getGlobalData(), *autoload);
+    auto const& packageInfo =
+      RepoOptions::forFile(po.repoOptionsDir).packageInfo();
+    repo->finish(getGlobalData(), *autoload, packageInfo);
     return true;
   };
   if (!RO::EvalUseHHBBC) {

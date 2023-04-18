@@ -1485,18 +1485,10 @@ const StaticString
   s_packages("packages"),
   s_soft_packages("soft_packages"),
   s_domains("domains");
-
-const PackageInfo getPackageInfo() {
-  VMRegAnchor _;
-  auto const func =
-    fromCaller([] (const BTFrame& frm) { return frm.func(); });
-  assertx(func);
-  return RepoOptions::forFile(func->filename()->data()).packageInfo();
-}
-
 } // namespace
+
 Array HHVM_FUNCTION(get_all_packages) {
-  auto const packageInfo = getPackageInfo();
+  auto const& packageInfo = g_context->getPackageInfo();
   DictInit result(packageInfo.packages().size());
   for (auto const& [name, p] : packageInfo.packages()) {
     DictInit package(3);
@@ -1519,7 +1511,7 @@ Array HHVM_FUNCTION(get_all_packages) {
 }
 
 Array HHVM_FUNCTION(get_all_deployments) {
-  auto const packageInfo = getPackageInfo();
+  auto const& packageInfo = g_context->getPackageInfo();
   DictInit result(packageInfo.deployments().size());
   for (auto const& [name, d] : packageInfo.deployments()) {
     DictInit deployment(3);
@@ -1547,7 +1539,8 @@ Array HHVM_FUNCTION(get_all_deployments) {
 bool HHVM_FUNCTION(package_exists, StringArg name) {
   assertx(name.get());
   if (name.get()->empty()) return false;
-  return getPackageInfo().isPackageInActiveDeployment(name.get());
+  auto const& packageInfo = g_context->getPackageInfo();
+  return packageInfo.isPackageInActiveDeployment(name.get());
 }
 
 static struct HHExtension final : Extension {

@@ -49,6 +49,7 @@ namespace {
 enum class RepoFileChunks {
   UNIT_EMITTERS,
   GLOBAL_DATA,
+  PACKAGE_INFO,
 
   SIZE // Leave last!
 };
@@ -96,6 +97,7 @@ constexpr Blob::Version kCurrentVersion = 1;
 // ever do, we can just raise them.
 constexpr size_t kUnitEmitterSizeLimit = 1ull << 33;
 constexpr size_t kGlobalDataSizeLimit  = 1ull << 28;
+constexpr size_t kPackageInfoSizeLimit = 1ull << 28;
 constexpr size_t kIndexSizeLimit       = 1ull << 28;
 
 // If you hit this limit you also need to change Blob::HashMapIndex::Bucket.
@@ -191,7 +193,8 @@ void RepoFileBuilder::add(const EncodedUE& ue) {
 }
 
 void RepoFileBuilder::finish(const RepoGlobalData& global,
-                             const RepoAutoloadMapBuilder& autoloadMap) {
+                             const RepoAutoloadMapBuilder& autoloadMap,
+                             const PackageInfo& packageInfo) {
   assertx(m_data);
 
   // Global data
@@ -201,6 +204,15 @@ void RepoFileBuilder::finish(const RepoGlobalData& global,
     m_data->write(RepoFileChunks::GLOBAL_DATA, encoder.data(), encoder.size());
     always_assert(
       m_data->sizes.get(RepoFileChunks::GLOBAL_DATA) <= kGlobalDataSizeLimit);
+  }
+
+  // Package Info
+  {
+    BlobEncoder encoder;
+    encoder(packageInfo);
+    m_data->write(RepoFileChunks::PACKAGE_INFO, encoder.data(), encoder.size());
+    always_assert(
+      m_data->sizes.get(RepoFileChunks::PACKAGE_INFO) <= kPackageInfoSizeLimit);
   }
 
   // Unit Symbols
@@ -292,6 +304,8 @@ namespace {
 // Reader state
 struct RepoFileData : Blob::Reader<RepoFileChunks, RepoFileIndexes> {
   RepoGlobalData globalData;
+
+  PackageInfo packageInfo;
 
   Blob::CaseSensitiveHashMapIndex pathToUnitInfoBoundsIndex;
   Blob::ListIndex unitInfosIndex;
@@ -400,6 +414,7 @@ void RepoFile::init(const std::string& path) {
 
   data.check(RepoFileChunks::UNIT_EMITTERS, 0);
   data.check(RepoFileChunks::GLOBAL_DATA, kGlobalDataSizeLimit);
+  data.check(RepoFileChunks::PACKAGE_INFO, kPackageInfoSizeLimit);
 
   for (auto i = 0; i < uint32_t(RepoFileIndexes::SIZE); i++) {
     data.check(RepoFileIndexes(i), kIndexSizeLimit, kIndexDataSizeLimit);
@@ -412,6 +427,16 @@ void RepoFile::init(const std::string& path) {
       data.sizes.get(RepoFileChunks::GLOBAL_DATA)
     );
     blob.decoder(data.globalData);
+    blob.decoder.assertDone();
+  }
+
+  // We load package info eagerly
+  {
+    auto blob = data.fd.readBlob(
+      data.offsets.get(RepoFileChunks::PACKAGE_INFO),
+      data.sizes.get(RepoFileChunks::PACKAGE_INFO)
+    );
+    blob.decoder(data.packageInfo);
     blob.decoder.assertDone();
   }
 }
@@ -461,6 +486,11 @@ void RepoFile::loadGlobalTables(bool loadAutoloadMap) {
   }
 
   data.loadedGlobalTables.store(true);
+}
+
+const PackageInfo& RepoFile::packageInfo() {
+  assertx(s_repoFileData);
+  return s_repoFileData->packageInfo;
 }
 
 std::unique_ptr<UnitEmitter>

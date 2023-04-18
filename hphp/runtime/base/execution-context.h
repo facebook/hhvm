@@ -326,6 +326,8 @@ public:
 
   bool hasRequestEventHandlers() const;
 
+  const PackageInfo& getPackageInfo() const;
+
   const RepoOptions& getRepoOptionsForCurrentFrame() const;
   const RepoOptions& getRepoOptionsForFrame(int frame) const;
 

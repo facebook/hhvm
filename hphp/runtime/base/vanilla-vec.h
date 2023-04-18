@@ -63,7 +63,8 @@ struct APCHandle;
 struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   // If false, use the "8 type bytes / 8 value words" chunked layout.
   // If true, stored 9 byte unaligned typed values.
-  static constexpr bool stores_unaligned_typed_values = arch() == Arch::X64;
+  static constexpr bool stores_unaligned_typed_values =
+    (arch() == Arch::X64 || arch() == Arch::ARM);
 
   // The default capacity of PackedLayout and unaligned type values, used if capacity = 0.
   static constexpr uint32_t SmallSize = 5;

@@ -39,47 +39,55 @@ mod ffi {
 }
 
 pub fn package_info_cpp_ffi(source_text: &CxxString) -> ffi::PackageInfo {
-    let info = package::PackageInfo::from_text(&source_text.to_string()).unwrap();
-    let convert = |v: Option<&package::NameSet>| {
-        v.map(|v| v.iter().map(|v| v.get_ref().clone()).collect())
-            .unwrap_or_default()
-    };
-    let packages = info
-        .packages()
-        .iter()
-        .map(|(name, package)| {
-            let package_ffi = ffi::Package {
-                uses: convert(package.uses.as_ref()),
-                includes: convert(package.includes.as_ref()),
-                soft_includes: convert(package.soft_includes.as_ref()),
+    let s = package::PackageInfo::from_text(&source_text.to_string());
+    match s {
+        Ok(info) => {
+            let convert = |v: Option<&package::NameSet>| {
+                v.map(|v| v.iter().map(|v| v.get_ref().clone()).collect())
+                    .unwrap_or_default()
             };
-            ffi::PackageMapEntry {
-                name: name.get_ref().to_string(),
-                package: package_ffi,
-            }
-        })
-        .collect();
-    let deployments = info
-        .deployments()
-        .map(|deployments_unwrapped| {
-            deployments_unwrapped
+            let packages = info
+                .packages()
                 .iter()
-                .map(|(name, deployment)| {
-                    let deployment_ffi = ffi::Deployment {
-                        packages: convert(deployment.packages.as_ref()),
-                        soft_packages: convert(deployment.soft_packages.as_ref()),
-                        domains: convert(deployment.domains.as_ref()),
+                .map(|(name, package)| {
+                    let package_ffi = ffi::Package {
+                        uses: convert(package.uses.as_ref()),
+                        includes: convert(package.includes.as_ref()),
+                        soft_includes: convert(package.soft_includes.as_ref()),
                     };
-                    ffi::DeploymentMapEntry {
-                        name: name.get_ref().into(),
-                        deployment: deployment_ffi,
+                    ffi::PackageMapEntry {
+                        name: name.get_ref().to_string(),
+                        package: package_ffi,
                     }
                 })
-                .collect()
-        })
-        .unwrap_or_default();
-    ffi::PackageInfo {
-        packages,
-        deployments,
+                .collect();
+            let deployments = info
+                .deployments()
+                .map(|deployments_unwrapped| {
+                    deployments_unwrapped
+                        .iter()
+                        .map(|(name, deployment)| {
+                            let deployment_ffi = ffi::Deployment {
+                                packages: convert(deployment.packages.as_ref()),
+                                soft_packages: convert(deployment.soft_packages.as_ref()),
+                                domains: convert(deployment.domains.as_ref()),
+                            };
+                            ffi::DeploymentMapEntry {
+                                name: name.get_ref().into(),
+                                deployment: deployment_ffi,
+                            }
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+            ffi::PackageInfo {
+                packages,
+                deployments,
+            }
+        }
+        Err(_e) => ffi::PackageInfo {
+            packages: vec![],
+            deployments: vec![],
+        },
     }
 }

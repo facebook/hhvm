@@ -562,7 +562,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "TestService";
-                METHOD_NAME = "TestService.init";
+                METHOD_NAME = "init";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

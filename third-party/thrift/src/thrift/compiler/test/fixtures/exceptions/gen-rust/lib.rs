@@ -1499,7 +1499,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.doBland";
+                METHOD_NAME = "doBland";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1571,7 +1571,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.doRaise";
+                METHOD_NAME = "doRaise";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1643,7 +1643,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.get200";
+                METHOD_NAME = "get200";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1715,7 +1715,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Raiser";
-                METHOD_NAME = "Raiser.get500";
+                METHOD_NAME = "get500";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

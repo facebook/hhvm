@@ -274,7 +274,7 @@ impl From<Attr> for u32 {
 
 impl Attr {
     pub fn add(&mut self, attr: Attr) {
-        self.repr = *self | attr
+        *self = *self | attr
     }
     pub fn remove(&mut self, attr: Attr) {
         self.repr &= !attr.repr;
@@ -378,10 +378,12 @@ impl SubAssign for Attr {
 }
 
 impl BitOr for Attr {
-    type Output = u32;
+    type Output = Self;
 
-    fn bitor(self, other: Self) -> u32 {
-        self.repr | other.repr
+    fn bitor(self, other: Self) -> Self {
+        Self {
+            repr: self.repr | other.repr,
+        }
     }
 }
 

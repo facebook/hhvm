@@ -2421,7 +2421,7 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadEnabled, ini, config, "Autoload.Enabled", true);
     Config::Bind(AutoloadUserlandDisabled, ini, config, "Autoload.UserlandDisabled", 1);
     Config::Bind(AutoloadUserlandDisabledSampleRate, ini, config,
-                 "Autoload.UserlandDisabledSampleRate", 100);
+                 "Autoload.UserlandDisabledSampleRate", 1);
     Config::Bind(AutoloadDBPath, ini, config, "Autoload.DB.Path");
     Config::Bind(AutoloadEnableExternFactExtractor, ini, config, "Autoload.EnableExternFactExtractor", true);
 

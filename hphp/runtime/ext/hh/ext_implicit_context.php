@@ -182,39 +182,13 @@ function create_implicit_context(
   mixed $context,
 )[zoned]: object /* ImplicitContextData */;
 
-/**
- * Sets implicit context to one of the non value based special types.
- * The type value is of SpecialImplicitContextType.
- * If $memo_key is provided, it is used for keying the memoization key,
- * otherwise name of the caller is used.
- * Returns the previous implicit context.
- *
- * NOTE: This code is actually [zoned] but it is safe to call from
- * [leak_safe_shallow] since leak_safe_shallow can call it via a level of
- * indirection. However, this happens in HackC generated memoized wrapped code.
- * Mark this code as [leak_safe] to avoid this level of indirection.
- * This code should not be called from userland.
- */
-<<__Native>>
-function create_special_implicit_context(
-  int $type /* SpecialImplicitContextType */,
-  ?string $memo_key = null,
-)[leak_safe]: object /* ImplicitContextData */;
-
 /*
  * Singleton memoization wrapper over create_special_implicit_context for
  * ic inaccessible case
  */
 <<__Memoize>>
 function create_ic_inaccessible_context()[] {
-  // Note: This function needs a backdoor since it needs to call zoned code
-  // but it does not actually inspect the IC
-  // The parent function cannot be zoned since zoned requires a memoization
-  // category which will result in infinite loop since MakeICInaccessible
-  // uses this function.
-  return \HH\Coeffects\backdoor(
-    ()[zoned] ==> create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE),
-  );
+  return create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE, null);
 }
 
 /*

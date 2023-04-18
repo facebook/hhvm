@@ -2907,6 +2907,9 @@ fn get_call_builtin_func_info<'arena, 'decl>(
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
             Some((1, Instruct::Opcode(Opcode::SetImplicitContextByValue)))
         }
+        "HH\\ImplicitContext\\_Private\\create_special_implicit_context" if e.systemlib() => {
+            Some((2, Instruct::Opcode(Opcode::CreateSpecialImplicitContext)))
+        }
         // TODO: enforce that this returns readonly
         "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
         "HH\\global_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),

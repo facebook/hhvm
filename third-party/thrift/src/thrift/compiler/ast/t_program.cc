@@ -128,7 +128,8 @@ std::unique_ptr<t_program> t_program::add_include(
 
   program->set_include_prefix(include_prefix);
 
-  auto include = std::make_unique<t_include>(program.get());
+  auto include =
+      std::make_unique<t_include>(program.get(), std::move(include_site));
   include->set_src_range(range);
 
   add_include(std::move(include));

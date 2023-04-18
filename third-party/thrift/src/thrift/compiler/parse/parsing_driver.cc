@@ -570,7 +570,8 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
     program_cache[path] = included_program.get();
     program_bundle->add_program(std::move(included_program));
   } else {
-    auto include = std::make_unique<t_include>(program_cache[path]);
+    auto include =
+        std::make_unique<t_include>(program_cache[path], std::move(name));
     include->set_src_range(range);
     program->add_include(std::move(include));
   }

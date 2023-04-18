@@ -29,12 +29,16 @@ class t_program;
  */
 class t_include : public t_node {
  public:
-  explicit t_include(t_program* program) : program_(program) {}
+  t_include(t_program* program, std::string raw_path)
+      : program_(program), raw_path_(std::move(raw_path)) {}
 
   t_program* get_program() const { return program_; }
 
+  fmt::string_view raw_path() const { return raw_path_; }
+
  private:
   t_program* program_;
+  std::string raw_path_;
 };
 
 } // namespace compiler

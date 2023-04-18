@@ -67,7 +67,7 @@ class file_manager {
       throw std::runtime_error("Could not read file: " + program_->path());
     }
     for (const auto* include : program_->includes()) {
-      includes_.insert(include->get_program()->path());
+      includes_.insert(fmt::to_string(include->raw_path()));
     }
   }
 

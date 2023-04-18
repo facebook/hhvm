@@ -16,6 +16,7 @@
 
 include "thrift/lib/thrift/schema.thrift"
 include "thrift/lib/thrift/protocol.thrift"
+include "thrift/lib/thrift/id.thrift"
 
 namespace py3 apache.thrift
 

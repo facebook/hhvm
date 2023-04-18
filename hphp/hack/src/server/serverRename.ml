@@ -310,8 +310,20 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
         has_anonymous_variadic = false;
       })
 
+let classish_is_interface (ctx : Provider_context.t) (name : string) : bool =
+  match Decl_provider.get_class ctx (Utils.add_ns name) with
+  | None -> false
+  | Some cls ->
+    (match Decl_provider.Class.kind cls with
+    | Ast_defs.Cinterface -> true
+    | _ -> false)
+
 (* Produce a "deprecated" version of the old function so that calls to it can be rerouted *)
-let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
+let get_deprecated_wrapper_patch
+    ~(filename : string option)
+    ~(definition : string SymbolDefinition.t option)
+    ~(ctx : Provider_context.t)
+    (new_name : string) : patch option =
   SymbolDefinition.(
     Full_fidelity_positioned_syntax.(
       Option.Monad_infix.(
@@ -342,6 +354,7 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
             ~kind:definition.kind
             ~pos:definition.pos
         in
+
         cst_node >>= fun cst_node ->
         begin
           match syntax cst_node with
@@ -359,12 +372,19 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
               else
                 DeprecatedNonStaticMethodRef
             in
-            Some
-              ( func_decl_text,
-                call_signature.params_text_list,
-                call_signature.returns_void,
-                call_signature.is_async,
-                func_ref )
+
+            (match definition.class_name with
+            | Some name when classish_is_interface ctx name ->
+              (* We can't add a stub that calls the new name in
+                 interfaces, as methods can't have bodies there. *)
+              None
+            | _ ->
+              Some
+                ( func_decl_text,
+                  call_signature.params_text_list,
+                  call_signature.returns_void,
+                  call_signature.is_async,
+                  func_ref ))
           | FunctionDeclaration { function_declaration_header = func_decl; _ }
             ->
             let call_signature = get_call_signature_for_wrap func_decl in

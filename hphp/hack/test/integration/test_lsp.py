@@ -5744,6 +5744,54 @@ class TestLsp(TestCase[LspTestDriver]):
         variables = self.setup_php_file("rename.php")
         self.load_and_run("rename", variables)
 
+    def test_rename_in_interface(self) -> None:
+        self.prepare_server_environment()
+        variables = self.setup_php_file("rename_in_interface.php")
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("rename_in_interface"), use_serverless_ide=False
+            )
+            .wait_for_hh_server_ready()
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                method="textDocument/rename",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 19},
+                    "newName": "previouslyCalledSomeMethod",
+                },
+                result={
+                    "changes": {
+                        "${php_file_uri}": [
+                            {
+                                "range": {
+                                    "start": {"line": 3, "character": 18},
+                                    "end": {"line": 3, "character": 28},
+                                },
+                                "newText": "previouslyCalledSomeMethod",
+                            },
+                        ]
+                    }
+                },
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
     def test_references(self) -> None:
         self.prepare_server_environment()
         variables = self.setup_php_file("references.php")

@@ -7802,7 +7802,10 @@ and class_get_inner
     let (env, tyl) =
       TUtils.get_concrete_supertypes ~abstract_enum:true env cty
     in
-    if List.is_empty tyl then begin
+    let (env, has_no_bound) =
+      TUtils.no_upper_bound ~include_sd_mixed:true env tyl
+    in
+    if has_no_bound then begin
       let (env, ty) = Env.fresh_type_error env p in
       Errors.add_typing_error
         Typing_error.(

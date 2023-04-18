@@ -530,3 +530,9 @@ val strip_supportdyn :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   bool * Typing_env_types.env * Typing_defs.locl_ty
+
+val no_upper_bound :
+  include_sd_mixed:bool ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty list ->
+  Typing_env_types.env * bool

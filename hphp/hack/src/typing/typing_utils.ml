@@ -528,6 +528,26 @@ let run_on_intersection_array_key_value_res env ~f tyl =
   let (res, arr_errs, key_errs, val_errs) = List.unzip4 quads in
   (env, res, arr_errs, key_errs, val_errs)
 
+let rec strip_supportdyn env ty =
+  let (env, ty) = Typing_env.expand_type env ty in
+  match get_node ty with
+  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+    let (_, env, ty) = strip_supportdyn env tyarg in
+    (true, env, ty)
+  | _ -> (false, env, ty)
+
+(* The list of types should not be considered to be a bound if it is all mixed
+   or supportdyn<mixed> (when include_sd_mixed is set *)
+let no_upper_bound ~include_sd_mixed env tyl =
+  List.for_all_env env tyl ~f:(fun env ty ->
+      if is_mixed env ty then
+        (env, true)
+      else if include_sd_mixed then
+        let (stripped, env, ty) = strip_supportdyn env ty in
+        (env, stripped && is_mixed env ty)
+      else
+        (env, false))
+
 (* Gets the base type of an abstract type *)
 let get_base_type ?(expand_supportdyn = true) env ty =
   let rec loop seen_generics ty =
@@ -564,11 +584,14 @@ let get_base_type ?(expand_supportdyn = true) env ty =
     | Tgeneric _
     | Tnewtype _
     | Tdependent _ ->
-      let (_env, tys) =
+      let (env, tys) =
         get_concrete_supertypes ~expand_supportdyn ~abstract_enum:true env ty
       in
+      let (_env, has_no_bounds) =
+        no_upper_bound ~include_sd_mixed:expand_supportdyn env tys
+      in
       (match tys with
-      | [ty] -> loop seen_generics ty
+      | [ty] when not has_no_bounds -> loop seen_generics ty
       | _ -> ty)
     | _ -> ty
   in
@@ -851,11 +874,3 @@ let is_capability_i ty =
 let supports_dynamic env ty =
   let r = get_reason ty in
   sub_type env ty (MakeType.supportdyn_mixed r)
-
-let rec strip_supportdyn env ty =
-  let (env, ty) = Typing_env.expand_type env ty in
-  match get_node ty with
-  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
-    let (_, env, ty) = strip_supportdyn env tyarg in
-    (true, env, ty)
-  | _ -> (false, env, ty)

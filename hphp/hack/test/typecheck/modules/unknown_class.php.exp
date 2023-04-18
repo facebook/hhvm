@@ -1,5 +1,5 @@
 File "unknown_class.php--file2.php", line 8, characters 3-4:
-Was expecting a class, but got a mixed value (Typing[4026])
+Was expecting a class, but got a value of type Sens (Typing[4026])
 File "unknown_class.php--file2.php", line 7, characters 7-9:
 You are trying to access the method `foo` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
   File "unknown_class.php--file1.php", line 5, characters 16-19:

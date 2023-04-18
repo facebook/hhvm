@@ -438,6 +438,17 @@ Array HHVM_FUNCTION(debug_file_deps) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool HHVM_FUNCTION(is_module_in_deployment, StringArg module,
+                                            StringArg deployment) {
+  auto const& packageInfo = g_context->getPackageInfo();
+  auto const it =
+    packageInfo.deployments().find(deployment.get()->toCppString());
+  if (it == end(packageInfo.deployments())) return false;
+  return packageInfo.moduleInDeployment(module.get(), it->second);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 struct DummyNativeData {
@@ -516,6 +527,8 @@ void StandardExtension::initIntrinsics() {
 
   HHVM_FALIAS(__hhvm_intrinsics\\debug_get_bytecode, debug_get_bytecode);
   HHVM_FALIAS(__hhvm_intrinsics\\debug_file_deps, debug_file_deps);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\is_module_in_deployment, is_module_in_deployment);
 
   HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
                 setDummyValue,

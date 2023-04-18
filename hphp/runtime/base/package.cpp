@@ -152,4 +152,54 @@ bool PackageInfo::isPackageInActiveDeployment(const StringData* package) const {
   return activeDeployment->m_packages.contains(package->toCppString());
 }
 
+namespace {
+
+bool moduleNameMatchesPattern(const std::string& moduleName,
+                              const std::string& pattern) {
+  if (pattern.empty()) return false;
+  if (pattern == "*") return true;
+  auto size = pattern.size();
+  if (size > 2 && pattern[size-1] == '*' && pattern[size-2] == '.') {
+    // Looking for a prefix match
+    // TODO: This is very inefficient, improve this using a something along the
+    // lines of a trie before using it in production
+    if (moduleName.size() <= size - 1) return false;
+    // Check if size - 1 length prefix of moduleName matches pattern
+    return moduleName.compare(0, size - 1, pattern, 0, size - 1) == 0;
+  }
+  // Looking for an exact match
+  return moduleName == pattern;
+}
+
+} // namespace
+
+bool PackageInfo::moduleInPackage(const StringData* module,
+                                  const Package& package) const {
+  assertx(module && !module->empty());
+  auto const moduleName = module->toCppString();
+  for (auto const& pattern : package.m_uses) {
+    if (moduleNameMatchesPattern(moduleName, pattern)) return true;
+  }
+  return false;
+}
+
+bool PackageInfo::moduleInDeployment(const StringData* module,
+                                     const Deployment& deployment,
+                                     bool allow_soft /* = true */) const {
+  assertx(module && !module->empty());
+  for (auto const& package : deployment.m_packages) {
+    auto const it = packages().find(package);
+    if (it == end(packages())) continue;
+    if (moduleInPackage(module, it->second)) return true;
+  }
+  if (allow_soft) {
+    for (auto const& package : deployment.m_soft_packages) {
+      auto const it = packages().find(package);
+      if (it == end(packages())) continue;
+      if (moduleInPackage(module, it->second)) return true;
+    }
+  }
+  return false;
+}
+
 } // namespace HPHP

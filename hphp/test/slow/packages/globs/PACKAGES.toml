@@ -1,0 +1,28 @@
+[packages]
+
+[packages.everything]
+uses = ["*"]
+
+[packages.nothing]
+uses = []
+
+[packages.foo]
+uses = ["a"]
+
+[packages.bar]
+uses = ["b.*"]
+
+[packages.baz]
+uses = ["x.*", "y.*"]
+
+[deployments]
+
+[deployments.one]
+packages = ["everything"]
+
+[deployments.two]
+packages = ["nothing"]
+
+[deployments.three]
+packages = ["foo", "bar"]
+soft_packages=["baz"]

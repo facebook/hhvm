@@ -74,6 +74,13 @@ struct PackageInfo {
   const Deployment* getActiveDeployment() const;
   bool isPackageInActiveDeployment(const StringData* package) const;
 
+  bool moduleInPackage(const StringData* module,
+                       const Package& package) const;
+
+  bool moduleInDeployment(const StringData* module,
+                          const Deployment& deployment,
+                          bool allowSoft = true) const;
+
   std::string mangleForCacheKey() const;
 
   template <typename SerDe> void serde(SerDe& sd) {

@@ -98,6 +98,9 @@ function apc_fetch_no_check(mixed $key) {
   return \apc_fetch($key, inout $ignored);
 }
 
+<<__Native>>
+function is_module_in_deployment(string $module, string $deployment): bool;
+
 <<__Native, __IsFoldable>>
 function builtin_io_foldable(
   int $a,

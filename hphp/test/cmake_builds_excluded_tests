@@ -166,6 +166,7 @@ slow/packages/basic-1.php
 slow/packages/basic-2.php
 slow/packages/basic-3.php
 slow/packages/basic-4.php
+slow/packages/globs/basic-1.php
 
 # TODO(T140203569) Need to determine why Native Autoload tests fail w/ cmake
 slow/reflection/enum_get_underlying_type.php

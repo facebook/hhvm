@@ -63,6 +63,27 @@ struct VisitByFieldId<::some::ns::detail::DirectlyAdapted> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::some::ns::CppRef> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).shared_field_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).shared_const_field_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).opt_shared_field_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).opt_shared_const_field_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).boxed_field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::some::ns::CppRef");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

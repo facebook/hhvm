@@ -9,6 +9,7 @@
 #include <thrift/lib/cpp2/frozen/Frozen.h>
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_types.h"
 #include "thrift/annotation/gen-cpp2/cpp_layouts.h"
+#include "thrift/annotation/gen-cpp2/thrift_layouts.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_layouts.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_layouts.h"
 namespace apache { namespace thrift { namespace frozen {
@@ -56,5 +57,30 @@ FROZEN_TYPE(::some::ns::ModuleB,
   FROZEN_LOAD_INLINE(
     FROZEN_LOAD_FIELD(i32Field, 1)
     FROZEN_LOAD_FIELD(inclEnumB, 2)));
+
+FROZEN_TYPE(::some::ns::CppRef,
+  FROZEN_FIELD_REF(shared_field, 1, ::std::shared_ptr<::std::int32_t>)
+  FROZEN_FIELD_REF(shared_const_field, 2, ::std::shared_ptr<const ::std::int32_t>)
+  FROZEN_FIELD_REF(opt_shared_field, 3, ::std::shared_ptr<::std::int32_t>)
+  FROZEN_FIELD_REF(opt_shared_const_field, 4, ::std::shared_ptr<const ::std::int32_t>)
+  FROZEN_FIELD_REF(boxed_field, 5, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>)
+  FROZEN_VIEW(
+    FROZEN_VIEW_FIELD_REF(shared_field, ::std::shared_ptr<::std::int32_t>)
+    FROZEN_VIEW_FIELD_REF(shared_const_field, ::std::shared_ptr<const ::std::int32_t>)
+    FROZEN_VIEW_FIELD_REF(opt_shared_field, ::std::shared_ptr<::std::int32_t>)
+    FROZEN_VIEW_FIELD_REF(opt_shared_const_field, ::std::shared_ptr<const ::std::int32_t>)
+    FROZEN_VIEW_FIELD_REF(boxed_field, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>))
+  FROZEN_SAVE_INLINE(
+    FROZEN_SAVE_FIELD(shared_field)
+    FROZEN_SAVE_FIELD(shared_const_field)
+    FROZEN_SAVE_FIELD(opt_shared_field)
+    FROZEN_SAVE_FIELD(opt_shared_const_field)
+    FROZEN_SAVE_FIELD(boxed_field))
+  FROZEN_LOAD_INLINE(
+    FROZEN_LOAD_FIELD(shared_field, 1)
+    FROZEN_LOAD_FIELD(shared_const_field, 2)
+    FROZEN_LOAD_FIELD(opt_shared_field, 3)
+    FROZEN_LOAD_FIELD(opt_shared_const_field, 4)
+    FROZEN_LOAD_FIELD(boxed_field, 5)));
 
 }}} // apache::thrift::frozen

@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 include "include1.thrift"
 include "include2.thrift"
@@ -42,4 +43,17 @@ struct ModuleB {
 @cpp.Adapter{name = "::my::Adapter"}
 struct DirectlyAdapted {
   1: i32 field;
+}
+
+struct CppRef {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  1: i32 shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  2: i32 shared_const_field;
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  3: optional i32 opt_shared_field;
+  @cpp.Ref{type = cpp.RefType.Shared}
+  4: optional i32 opt_shared_const_field;
+  @thrift.Box
+  5: optional i32 boxed_field;
 }

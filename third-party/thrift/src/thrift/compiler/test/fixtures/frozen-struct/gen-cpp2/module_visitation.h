@@ -6,6 +6,7 @@
  */
 #pragma once
 #include "thrift/annotation/gen-cpp2/cpp_visitation.h"
+#include "thrift/annotation/gen-cpp2/thrift_visitation.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_visitation.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_visitation.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/module_for_each_field.h"

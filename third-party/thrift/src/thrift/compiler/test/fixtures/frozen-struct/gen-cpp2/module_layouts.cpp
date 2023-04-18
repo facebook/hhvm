@@ -80,5 +80,48 @@ FROZEN_CLEAR(::some::ns::ModuleB,
   FROZEN_CLEAR_FIELD(i32Field)
   FROZEN_CLEAR_FIELD(inclEnumB))
 
+FROZEN_CTOR(::some::ns::CppRef,
+  FROZEN_CTOR_FIELD_REF(shared_field, 1)
+  FROZEN_CTOR_FIELD_REF(shared_const_field, 2)
+  FROZEN_CTOR_FIELD_REF(opt_shared_field, 3)
+  FROZEN_CTOR_FIELD_REF(opt_shared_const_field, 4)
+  FROZEN_CTOR_FIELD_REF(boxed_field, 5))
+FROZEN_MAXIMIZE(::some::ns::CppRef,
+  FROZEN_MAXIMIZE_FIELD(shared_field)
+  FROZEN_MAXIMIZE_FIELD(shared_const_field)
+  FROZEN_MAXIMIZE_FIELD(opt_shared_field)
+  FROZEN_MAXIMIZE_FIELD(opt_shared_const_field)
+  FROZEN_MAXIMIZE_FIELD(boxed_field))
+FROZEN_LAYOUT(::some::ns::CppRef,
+  FROZEN_LAYOUT_FIELD_REF(shared_field)
+  FROZEN_LAYOUT_FIELD_REF(shared_const_field)
+  FROZEN_LAYOUT_FIELD_REF(opt_shared_field)
+  FROZEN_LAYOUT_FIELD_REF(opt_shared_const_field)
+  FROZEN_LAYOUT_FIELD_REF(boxed_field))
+FROZEN_FREEZE(::some::ns::CppRef,
+  FROZEN_FREEZE_FIELD_REF(shared_field)
+  FROZEN_FREEZE_FIELD_REF(shared_const_field)
+  FROZEN_FREEZE_FIELD_REF(opt_shared_field)
+  FROZEN_FREEZE_FIELD_REF(opt_shared_const_field)
+  FROZEN_FREEZE_FIELD_REF(boxed_field))
+FROZEN_THAW(::some::ns::CppRef,
+  FROZEN_THAW_FIELD_REF(shared_field)
+  FROZEN_THAW_FIELD_REF(shared_const_field)
+  FROZEN_THAW_FIELD_REF(opt_shared_field)
+  FROZEN_THAW_FIELD_REF(opt_shared_const_field)
+  FROZEN_THAW_FIELD_REF(boxed_field))
+FROZEN_DEBUG(::some::ns::CppRef,
+  FROZEN_DEBUG_FIELD(shared_field)
+  FROZEN_DEBUG_FIELD(shared_const_field)
+  FROZEN_DEBUG_FIELD(opt_shared_field)
+  FROZEN_DEBUG_FIELD(opt_shared_const_field)
+  FROZEN_DEBUG_FIELD(boxed_field))
+FROZEN_CLEAR(::some::ns::CppRef,
+  FROZEN_CLEAR_FIELD(shared_field)
+  FROZEN_CLEAR_FIELD(shared_const_field)
+  FROZEN_CLEAR_FIELD(opt_shared_field)
+  FROZEN_CLEAR_FIELD(opt_shared_const_field)
+  FROZEN_CLEAR_FIELD(boxed_field))
+
 
 }}} // apache::thrift::frozen

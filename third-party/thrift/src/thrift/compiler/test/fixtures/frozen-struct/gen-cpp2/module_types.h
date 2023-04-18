@@ -10,6 +10,7 @@
 
 
 #include "thrift/annotation/gen-cpp2/cpp_types.h"
+#include "thrift/annotation/gen-cpp2/thrift_types.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_types.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_types.h"
 
@@ -25,6 +26,11 @@ struct inclBField;
 struct i32Field;
 struct inclEnumB;
 struct field;
+struct shared_field;
+struct shared_const_field;
+struct opt_shared_field;
+struct opt_shared_const_field;
+struct boxed_field;
 } // namespace ident
 namespace detail {
 #ifndef APACHE_THRIFT_ACCESSOR_i32Field
@@ -62,6 +68,26 @@ APACHE_THRIFT_DEFINE_ACCESSOR(inclEnumB);
 #ifndef APACHE_THRIFT_ACCESSOR_field
 #define APACHE_THRIFT_ACCESSOR_field
 APACHE_THRIFT_DEFINE_ACCESSOR(field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_shared_field
+#define APACHE_THRIFT_ACCESSOR_shared_field
+APACHE_THRIFT_DEFINE_ACCESSOR(shared_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_shared_const_field
+#define APACHE_THRIFT_ACCESSOR_shared_const_field
+APACHE_THRIFT_DEFINE_ACCESSOR(shared_const_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_opt_shared_field
+#define APACHE_THRIFT_ACCESSOR_opt_shared_field
+APACHE_THRIFT_DEFINE_ACCESSOR(opt_shared_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_opt_shared_const_field
+#define APACHE_THRIFT_ACCESSOR_opt_shared_const_field
+APACHE_THRIFT_DEFINE_ACCESSOR(opt_shared_const_field);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_boxed_field
+#define APACHE_THRIFT_ACCESSOR_boxed_field
+APACHE_THRIFT_DEFINE_ACCESSOR(boxed_field);
 #endif
 } // namespace detail
 } // namespace thrift
@@ -133,6 +159,7 @@ class ModuleB;
 namespace detail {
 class DirectlyAdapted;
 } // namespace detail
+class CppRef;
 }} // some::ns
 // END forward_declare
 // BEGIN hash_and_equal_to
@@ -917,6 +944,315 @@ unsigned long DirectlyAdapted::read(Protocol_* iprot) {
 } // namespace detail
 
 using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::some::ns::detail::DirectlyAdapted>;
+
+
+class CppRef final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static const folly::StringPiece __fbthrift_get_class_name();
+  using __fbthrift_reflection_ident_list = folly::tag_t<
+    ::apache::thrift::ident::shared_field,
+    ::apache::thrift::ident::shared_const_field,
+    ::apache::thrift::ident::opt_shared_field,
+    ::apache::thrift::ident::opt_shared_const_field,
+    ::apache::thrift::ident::boxed_field
+  >;
+
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5};
+  using __fbthrift_reflection_type_tags = folly::tag_t<
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t,
+    ::apache::thrift::type::i32_t
+  >;
+
+  static constexpr std::size_t __fbthrift_field_size_v = 5;
+
+  template<class T>
+  using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
+
+  template<class T>
+  using __fbthrift_type_tag = ::apache::thrift::detail::at<__fbthrift_reflection_type_tags, T::value>;
+
+  template<class T>
+  using __fbthrift_ident = ::apache::thrift::detail::at<__fbthrift_reflection_ident_list, T::value>;
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::type::ordinal_tag<
+    ::apache::thrift::detail::getFieldOrdinal<T,
+                                              __fbthrift_reflection_ident_list,
+                                              __fbthrift_reflection_type_tags>(
+      __fbthrift_reflection_field_id_list
+    )
+  >;
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = CppRef;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  CppRef();
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  CppRef(apache::thrift::FragileConstructor, ::std::shared_ptr<::std::int32_t> shared_field__arg, ::std::shared_ptr<const ::std::int32_t> shared_const_field__arg, ::std::shared_ptr<::std::int32_t> opt_shared_field__arg, ::std::shared_ptr<const ::std::int32_t> opt_shared_const_field__arg, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> boxed_field__arg);
+
+  CppRef(CppRef&&) noexcept;
+
+  CppRef(const CppRef& src);
+
+
+  CppRef& operator=(CppRef&&) noexcept;
+  CppRef& operator=(const CppRef& src);
+
+  ~CppRef();
+
+ private:
+  ::std::shared_ptr<::std::int32_t> __fbthrift_field_shared_field;
+ private:
+  ::std::shared_ptr<const ::std::int32_t> __fbthrift_field_shared_const_field;
+ private:
+  ::std::shared_ptr<::std::int32_t> __fbthrift_field_opt_shared_field;
+ private:
+  ::std::shared_ptr<const ::std::int32_t> __fbthrift_field_opt_shared_const_field;
+ private:
+  ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> __fbthrift_field_boxed_field;
+
+ public:
+
+  bool operator==(const CppRef&) const;
+  bool operator<(const CppRef&) const;
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T& shared_field_ref() & {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& shared_field_ref() const& {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& shared_field_ref() && {
+    return static_cast<T&&>(__fbthrift_field_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& shared_field_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T& shared_field() & {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& shared_field() const& {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& shared_field() && {
+    return static_cast<T&&>(__fbthrift_field_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& shared_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_field);
+  }
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T& shared_const_field_ref() & {
+    return __fbthrift_field_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T& shared_const_field_ref() const& {
+    return __fbthrift_field_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T&& shared_const_field_ref() && {
+    return static_cast<T&&>(__fbthrift_field_shared_const_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T&& shared_const_field_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_const_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T& shared_const_field() & {
+    return __fbthrift_field_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T& shared_const_field() const& {
+    return __fbthrift_field_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T&& shared_const_field() && {
+    return static_cast<T&&>(__fbthrift_field_shared_const_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T&& shared_const_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_const_field);
+  }
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T& opt_shared_field_ref() & {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& opt_shared_field_ref() const& {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& opt_shared_field_ref() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& opt_shared_field_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T& opt_shared_field() & {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& opt_shared_field() const& {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& opt_shared_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& opt_shared_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_field);
+  }
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T& opt_shared_const_field_ref() & {
+    return __fbthrift_field_opt_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T& opt_shared_const_field_ref() const& {
+    return __fbthrift_field_opt_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T&& opt_shared_const_field_ref() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_const_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T&& opt_shared_const_field_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_const_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T& opt_shared_const_field() & {
+    return __fbthrift_field_opt_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T& opt_shared_const_field() const& {
+    return __fbthrift_field_opt_shared_const_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE T&& opt_shared_const_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_const_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::int32_t>>
+  FOLLY_ERASE const T&& opt_shared_const_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_const_field);
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> boxed_field_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_boxed_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> boxed_field_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_boxed_field)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> boxed_field_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_boxed_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> boxed_field_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_boxed_field)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> boxed_field() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_boxed_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> boxed_field() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_boxed_field)};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> boxed_field() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_boxed_field};
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::std::int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> boxed_field() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_boxed_field)};
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<CppRef>;
+  friend void swap(CppRef& a, CppRef& b);
+};
+
+template <class Protocol_>
+unsigned long CppRef::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
 
 
 }} // some::ns

@@ -42,6 +42,18 @@ struct ForEachField<::some::ns::detail::DirectlyAdapted> {
     f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::some::ns::CppRef> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).shared_field_ref()...);
+    f(1, static_cast<T&&>(t).shared_const_field_ref()...);
+    f(2, static_cast<T&&>(t).opt_shared_field_ref()...);
+    f(3, static_cast<T&&>(t).opt_shared_const_field_ref()...);
+    f(4, static_cast<T&&>(t).boxed_field_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

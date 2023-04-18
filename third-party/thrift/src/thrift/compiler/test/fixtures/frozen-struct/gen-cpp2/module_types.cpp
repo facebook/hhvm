@@ -431,6 +431,152 @@ template uint32_t DirectlyAdapted::serializedSizeZC<>(apache::thrift::CompactPro
 } // namespace detail
 }} // some::ns
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::some::ns::CppRef>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::some::ns::CppRef>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace some { namespace ns {
+
+const folly::StringPiece CppRef::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CppRef>::fields_names[folly::to_underlying(ord) - 1];
+}
+const folly::StringPiece CppRef::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<CppRef>::name;
+}
+
+CppRef::CppRef(const CppRef&) = default;
+CppRef& CppRef::operator=(const CppRef&) = default;
+CppRef::CppRef() :
+      __fbthrift_field_shared_field(std::make_shared<::std::int32_t>()),
+      __fbthrift_field_shared_const_field(std::make_shared<::std::int32_t>()) {
+}
+
+
+CppRef::~CppRef() {}
+
+CppRef::CppRef(FOLLY_MAYBE_UNUSED CppRef&& other) noexcept :
+    __fbthrift_field_shared_field(std::move(other.__fbthrift_field_shared_field)),
+    __fbthrift_field_shared_const_field(std::move(other.__fbthrift_field_shared_const_field)),
+    __fbthrift_field_opt_shared_field(std::move(other.__fbthrift_field_opt_shared_field)),
+    __fbthrift_field_opt_shared_const_field(std::move(other.__fbthrift_field_opt_shared_const_field)),
+    __fbthrift_field_boxed_field(std::move(other.__fbthrift_field_boxed_field)) {
+}
+
+CppRef& CppRef::operator=(FOLLY_MAYBE_UNUSED CppRef&& other) noexcept {
+    this->__fbthrift_field_shared_field = std::move(other.__fbthrift_field_shared_field);
+    this->__fbthrift_field_shared_const_field = std::move(other.__fbthrift_field_shared_const_field);
+    this->__fbthrift_field_opt_shared_field = std::move(other.__fbthrift_field_opt_shared_field);
+    this->__fbthrift_field_opt_shared_const_field = std::move(other.__fbthrift_field_opt_shared_const_field);
+    this->__fbthrift_field_boxed_field = std::move(other.__fbthrift_field_boxed_field);
+    return *this;
+}
+
+
+CppRef::CppRef(apache::thrift::FragileConstructor, ::std::shared_ptr<::std::int32_t> shared_field__arg, ::std::shared_ptr<const ::std::int32_t> shared_const_field__arg, ::std::shared_ptr<::std::int32_t> opt_shared_field__arg, ::std::shared_ptr<const ::std::int32_t> opt_shared_const_field__arg, ::apache::thrift::detail::boxed_value_ptr<::std::int32_t> boxed_field__arg) :
+    __fbthrift_field_shared_field(std::move(shared_field__arg)),
+    __fbthrift_field_shared_const_field(std::move(shared_const_field__arg)),
+    __fbthrift_field_opt_shared_field(std::move(opt_shared_field__arg)),
+    __fbthrift_field_opt_shared_const_field(std::move(opt_shared_const_field__arg)),
+    __fbthrift_field_boxed_field(std::move(boxed_field__arg)) {
+}
+
+
+void CppRef::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_shared_field = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>();
+  this->__fbthrift_field_shared_const_field = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::int32_t>>();
+  this->__fbthrift_field_opt_shared_field.reset();
+  this->__fbthrift_field_opt_shared_const_field.reset();
+  this->__fbthrift_field_boxed_field.reset();
+}
+
+void CppRef::__fbthrift_clear_terse_fields() {
+}
+
+bool CppRef::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool CppRef::operator==(FOLLY_MAYBE_UNUSED const CppRef& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_field_ref(), rhs.shared_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_const_field_ref(), rhs.shared_const_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_field_ref(), rhs.opt_shared_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_const_field_ref(), rhs.opt_shared_const_field_ref()))) {
+    return false;
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.boxed_field_ref(), rhs.boxed_field_ref()))) {
+    return false;
+  }
+  return true;
+}
+
+bool CppRef::operator<(FOLLY_MAYBE_UNUSED const CppRef& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_field_ref(), rhs.shared_field_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.shared_field_ref(), rhs.shared_field_ref());
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.shared_const_field_ref(), rhs.shared_const_field_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.shared_const_field_ref(), rhs.shared_const_field_ref());
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_field_ref(), rhs.opt_shared_field_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.opt_shared_field_ref(), rhs.opt_shared_field_ref());
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.opt_shared_const_field_ref(), rhs.opt_shared_const_field_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.opt_shared_const_field_ref(), rhs.opt_shared_const_field_ref());
+  }
+  if ((!::apache::thrift::detail::pointer_equal(lhs.boxed_field_ref(), rhs.boxed_field_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.boxed_field_ref(), rhs.boxed_field_ref());
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED CppRef& a, FOLLY_MAYBE_UNUSED CppRef& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_shared_field, b.__fbthrift_field_shared_field);
+  swap(a.__fbthrift_field_shared_const_field, b.__fbthrift_field_shared_const_field);
+  swap(a.__fbthrift_field_opt_shared_field, b.__fbthrift_field_opt_shared_field);
+  swap(a.__fbthrift_field_opt_shared_const_field, b.__fbthrift_field_opt_shared_const_field);
+  swap(a.__fbthrift_field_boxed_field, b.__fbthrift_field_boxed_field);
+}
+
+template void CppRef::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CppRef::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CppRef::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CppRef::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CppRef::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CppRef::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CppRef::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CppRef::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}} // some::ns
+
 namespace some { namespace ns { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 }

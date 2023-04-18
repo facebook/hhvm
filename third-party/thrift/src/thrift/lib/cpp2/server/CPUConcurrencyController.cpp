@@ -62,6 +62,11 @@ CPUConcurrencyController::CPUConcurrencyController(
           config = newConfig;
           this->enabled_.store(config->enabled(), std::memory_order_relaxed);
         });
+        this->eventHandler_.withRLock([&newConfig](const auto& eventHandler) {
+          if (eventHandler) {
+            eventHandler->configUpdated(newConfig);
+          }
+        });
         this->cancel();
         this->schedule(std::move(newConfig));
       });

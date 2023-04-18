@@ -122,6 +122,7 @@ class CPUConcurrencyController {
   class EventHandler {
    public:
     virtual ~EventHandler() = default;
+    virtual void configUpdated(std::shared_ptr<const Config>) {}
     virtual void onCycle(int64_t limit, int64_t limitUsage, int64_t load) = 0;
     virtual void limitIncreased() = 0;
     virtual void limitDecreased() = 0;

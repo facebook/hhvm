@@ -11,7 +11,7 @@
 
 #include "mcrouter/Proxy.h"
 #include "mcrouter/lib/config/RouteHandleBuilder.h"
-#include "mcrouter/lib/network/gen/MemcacheRouteHandleIf.h"
+#include "mcrouter/routes/BigValueRoute.h"
 #include "mcrouter/routes/LoggingRoute.h"
 #include "mcrouter/routes/McRouteHandleBuilder.h"
 #include "mcrouter/routes/RootRoute.h"
@@ -20,34 +20,20 @@ namespace facebook {
 namespace memcache {
 namespace mcrouter {
 
-McrouterRouteHandlePtr makeBigValueRoute(
-    McrouterRouteHandlePtr rh,
-    BigValueRouteOptions options);
-
 namespace detail {
 
-template <class RouteHandleIf>
-typename std::enable_if<
-    std::is_same<RouteHandleIf, MemcacheRouteHandleIf>::value,
-    std::shared_ptr<RouteHandleIf>>::type
-wrapWithBigValueRoute(
-    std::shared_ptr<RouteHandleIf> ch,
+template <class RouterInfo>
+typename RouterInfo::RouteHandlePtr wrapWithBigValueRoute(
+    typename RouterInfo::RouteHandlePtr ch,
     const McrouterOptions& routerOpts) {
+  if (routerOpts.big_value_split_threshold == 0) {
+    return std::move(ch);
+  }
   BigValueRouteOptions options(
       routerOpts.big_value_split_threshold,
       routerOpts.big_value_batch_size,
       routerOpts.big_value_hide_reply_flag);
-  return makeBigValueRoute(std::move(ch), std::move(options));
-}
-
-template <class RouteHandleIf>
-typename std::enable_if<
-    !std::is_same<RouteHandleIf, MemcacheRouteHandleIf>::value,
-    std::shared_ptr<RouteHandleIf>>::type
-wrapWithBigValueRoute(
-    std::shared_ptr<RouteHandleIf> ch,
-    const McrouterOptions& /* routerOpts */) {
-  return std::move(ch);
+  return makeBigValueRoute<RouterInfo>(std::move(ch), std::move(options));
 }
 
 } // namespace detail
@@ -61,7 +47,7 @@ ProxyRoute<RouterInfo>::ProxyRoute(
           proxy_,
           routeSelectors)) {
   if (proxy_.getRouterOptions().big_value_split_threshold != 0) {
-    root_ = detail::wrapWithBigValueRoute(
+    root_ = detail::wrapWithBigValueRoute<RouterInfo>(
         std::move(root_), proxy_.getRouterOptions());
   }
   if (proxy_.getRouterOptions().enable_logging_route) {

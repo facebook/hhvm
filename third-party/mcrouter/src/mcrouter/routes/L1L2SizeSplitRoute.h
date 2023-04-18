@@ -23,7 +23,6 @@
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/RouteHandleTraverser.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
-#include "mcrouter/lib/network/gen/MemcacheRouteHandleIf.h"
 
 namespace folly {
 struct dynamic;

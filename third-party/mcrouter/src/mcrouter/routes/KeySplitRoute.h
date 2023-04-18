@@ -18,7 +18,6 @@
 #include "mcrouter/lib/fbi/cpp/FuncGenerator.h"
 #include "mcrouter/lib/fbi/cpp/globals.h"
 #include "mcrouter/lib/network/gen/MemcacheMessages.h"
-#include "mcrouter/lib/network/gen/MemcacheRouteHandleIf.h"
 
 namespace facebook {
 namespace memcache {

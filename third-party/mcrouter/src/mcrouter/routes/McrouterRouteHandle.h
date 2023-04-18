@@ -24,6 +24,22 @@ using McrouterRouteHandlePtr = std::shared_ptr<McrouterRouteHandleIf>;
 
 using McrouterRouterInfo = MemcacheRouterInfo;
 
+template <typename Request>
+struct MemcacheUpdateLike {
+  static const bool value =
+      carbon::ListContains<typename MemcacheRouterInfo::AllRequests, Request>::
+          value &&
+      carbon::UpdateLike<Request>::value;
+};
+
+template <typename Request>
+struct OtherThanMemcacheGetUpdateLike {
+  static const bool value =
+      !carbon::ListContains<typename MemcacheRouterInfo::AllRequests, Request>::
+          value ||
+      (!carbon::GetLike<Request>::value && !carbon::UpdateLike<Request>::value);
+};
+
 } // namespace mcrouter
 } // namespace memcache
 } // namespace facebook

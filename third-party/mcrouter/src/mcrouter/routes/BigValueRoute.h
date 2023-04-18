@@ -16,8 +16,9 @@
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/RouteHandleTraverser.h"
 #include "mcrouter/lib/carbon/RoutingGroups.h"
-#include "mcrouter/lib/network/gen/MemcacheRouteHandleIf.h"
+#include "mcrouter/lib/network/gen/MemcacheRouterInfo.h"
 #include "mcrouter/routes/BigValueRouteIf.h"
+#include "mcrouter/routes/McrouterRouteHandle.h"
 
 namespace folly {
 class IOBuf;
@@ -50,7 +51,12 @@ namespace mcrouter {
  *
  * Default behavior for other type of operations
  */
+template <class RouterInfo>
 class BigValueRoute {
+ private:
+  using RouteHandleIf = typename RouterInfo::RouteHandleIf;
+  using RouteHandlePtr = typename RouterInfo::RouteHandlePtr;
+
  public:
   static std::string routeName() {
     return "big-value";
@@ -59,11 +65,9 @@ class BigValueRoute {
   template <class Request>
   bool traverse(
       const Request& req,
-      const RouteHandleTraverser<MemcacheRouteHandleIf>& t) const;
+      const RouteHandleTraverser<RouteHandleIf>& t) const;
 
-  BigValueRoute(
-      std::shared_ptr<MemcacheRouteHandleIf> ch,
-      BigValueRouteOptions options);
+  BigValueRoute(RouteHandlePtr ch, BigValueRouteOptions options);
 
   template <class Request>
   typename std::enable_if<
@@ -80,17 +84,17 @@ class BigValueRoute {
   McLeaseGetReply route(const McLeaseGetRequest& req) const;
 
   template <class Request>
-  ReplyT<Request> route(const Request& req, carbon::UpdateLikeT<Request> = 0)
-      const;
+  typename std::enable_if_t<MemcacheUpdateLike<Request>::value, ReplyT<Request>>
+  route(const Request& req) const;
 
   template <class Request>
-  ReplyT<Request> route(
-      const Request& req,
-      carbon::OtherThanT<Request, carbon::GetLike<>, carbon::UpdateLike<>> =
-          0) const;
+  typename std::enable_if_t<
+      OtherThanMemcacheGetUpdateLike<Request>::value,
+      ReplyT<Request>>
+  route(const Request& req) const;
 
  private:
-  const std::shared_ptr<MemcacheRouteHandleIf> ch_;
+  const RouteHandlePtr ch_;
   const BigValueRouteOptions options_;
 
   class ChunksInfo {
@@ -119,7 +123,10 @@ class BigValueRoute {
       typename std::iterator_traits<FuncIt>::value_type()>::type>
   collectAllByBatches(FuncIt beginF, FuncIt endF) const;
 
-  std::pair<std::vector<McSetRequest>, BigValueRoute::ChunksInfo>
+  template <class Request>
+  typename std::enable_if_t<
+      MemcacheUpdateLike<Request>::value,
+      std::pair<std::vector<McSetRequest>, ChunksInfo>>
   chunkUpdateRequests(
       folly::StringPiece baseKey,
       const folly::IOBuf& value,

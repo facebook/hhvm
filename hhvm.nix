@@ -57,6 +57,7 @@
 , re2
 , re2c
 , rustChannelOf
+, setupCompilerCache
 , stdenv
 , sqlite
 , tbb

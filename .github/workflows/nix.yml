@@ -46,9 +46,86 @@ jobs:
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+
+          # HHVM cannot be built in a sandbox for now because some CMake files
+          # are downloading files from internet, which is forbidden if
+          # sandboxing is enabled.
           sandbox = false
-    - run: nix build --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
-    - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+
+          # extra-sandbox-paths does not take effect when sandbox = false, but
+          # we will need the setting if we build HHVM in a sandbox in the future
+          extra-sandbox-paths = /nix/var/sccache
+    - name: Build sccache and create a shell script to set up it
+      run: |
+        set -ex
+        SCCACHE_INSTALL_PATH="$(nix build --print-out-paths --no-link "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086")"
+
+        sudo mkdir -m0770 -p /nix/var/sccache
+
+        printf \
+          '
+            # By default, nix will set TEMPDIR and TMPDIR to a unique directory
+            # among builds, preventing compiler cache.
+            # Set them to /tmp to allow for compiler cache.
+            export TEMPDIR=/tmp
+            export TMPDIR=/tmp
+
+            export SCCACHE_BUCKET="hhvm-sccache"
+            export SCCACHE_ENDPOINT="https://hhvm-sccache.s3-accelerate.amazonaws.com"
+            export SCCACHE_REGION="us-west-2"
+
+            # Do not shut down sccache server automatically because we will
+            # manually shut down sccache server to print statistics.
+            export SCCACHE_IDLE_TIMEOUT=0
+
+            export SCCACHE_ERROR_LOG=/nix/var/sccache/sccache_log.txt
+            export SCCACHE_LOG=debug
+
+            export RUSTC_WRAPPER=%q/bin/sccache
+            export CMAKE_C_COMPILER_LAUNCHER="$RUSTC_WRAPPER"
+            export CMAKE_CXX_COMPILER_LAUNCHER="$RUSTC_WRAPPER"
+          ' \
+          "$SCCACHE_INSTALL_PATH" |
+          sudo tee /nix/var/sccache/setup-compiler-cache.sh
+
+        # Assign the owner for the generated shell script, because it will be
+        # used by the nix builder users. See https://nixos.wiki/wiki/CCache
+        sudo chown -R --reference=/nix/store /nix/var/sccache
+    - name: Assume the AWS role
+      continue-on-error: true
+      id: configure-aws-credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+        # 6 hours
+        role-duration-seconds: 21600
+        aws-region: us-west-2
+    - name: Sign sccache binaries with a private key downloaded from AWS Secrets Manager
+      if: steps.configure-aws-credentials.outcome == 'success'
+      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086"
+    - name: Upload sccache binaries to the binary cache server on S3
+      if: steps.configure-aws-credentials.outcome == 'success'
+      run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086"
+    - name: Set up sccache for read-only caching on AWS S3
+      if: steps.configure-aws-credentials.outcome != 'success'
+      run: |
+        sudo tee -a /nix/var/sccache/setup-compiler-cache.sh <<EOF
+          export SCCACHE_S3_NO_CREDENTIALS=1
+        EOF
+    - name: Set up sccache for read/write caching on AWS S3
+      if: steps.configure-aws-credentials.outcome == 'success'
+      run: |
+        printf '
+          export AWS_ACCESS_KEY_ID=%q
+          export AWS_SECRET_ACCESS_KEY=%q
+          export AWS_SESSION_TOKEN=%q
+        ' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$AWS_SESSION_TOKEN" |
+        sudo tee -a /nix/var/sccache/setup-compiler-cache.sh
+    - name: Build and install HHVM
+      run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+    - if: always()
+      name: Print sccache logs
+      run: sudo cat /nix/var/sccache/sccache_log.txt
     - run: hhvm --version
     - name: Build the deb package
       if: runner.os == 'Linux'
@@ -80,14 +157,6 @@ jobs:
       with:
         name: ${{matrix.package}}.rpm
         path: ${{matrix.package}}.rpm
-    - name: Assume the AWS role
-      continue-on-error: true
-      id: configure-aws-credentials
-      if: github.event_name != 'pull_request'
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
-        aws-region: us-west-2
     - name: Sign Nix binaries with a private key downloaded from AWS Secrets Manager
       if: steps.configure-aws-credentials.outcome == 'success'
       run: |

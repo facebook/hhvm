@@ -648,6 +648,11 @@ folly::Optional<CipherSuite> AsyncFizzClientT<SM>::getCipher() const {
 }
 
 template <typename SM>
+folly::Optional<NamedGroup> AsyncFizzClientT<SM>::getGroup() const {
+  return getState().group();
+}
+
+template <typename SM>
 std::vector<SignatureScheme> AsyncFizzClientT<SM>::getSupportedSigSchemes()
     const {
   return getState().context()->getSupportedSigSchemes();

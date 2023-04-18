@@ -66,6 +66,7 @@ class AsyncFizzBaseTest : public testing::Test, public AsyncFizzBase {
   }
 
   MOCK_METHOD(folly::Optional<CipherSuite>, getCipher, (), (const));
+  MOCK_METHOD(folly::Optional<NamedGroup>, getGroup, (), (const));
   MOCK_METHOD(
       std::vector<SignatureScheme>,
       getSupportedSigSchemes,

@@ -137,6 +137,8 @@ class AsyncFizzClientT : public AsyncFizzBase,
 
   folly::Optional<CipherSuite> getCipher() const override;
 
+  folly::Optional<NamedGroup> getGroup() const override;
+
   std::vector<SignatureScheme> getSupportedSigSchemes() const override;
 
   Buf getExportedKeyingMaterial(

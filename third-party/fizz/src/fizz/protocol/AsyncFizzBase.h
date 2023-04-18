@@ -205,6 +205,11 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   virtual folly::Optional<CipherSuite> getCipher() const = 0;
 
   /**
+   * Get the NamedGroup negotiated in this transport.
+   */
+  virtual folly::Optional<NamedGroup> getGroup() const = 0;
+
+  /**
    * Get the supported signature schemes in this transport.
    */
   virtual std::vector<SignatureScheme> getSupportedSigSchemes() const = 0;

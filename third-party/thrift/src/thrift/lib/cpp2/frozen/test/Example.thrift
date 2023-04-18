@@ -15,6 +15,7 @@
  */
 
 include "thrift/lib/cpp2/frozen/test/Helper.thrift"
+include "thrift/annotation/cpp.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -80,9 +81,11 @@ struct EveryLayout {
   2: i32 aInt;
   3: list<i32> aList;
   4: set<i32> aSet;
-  5: set<i32> (cpp.template = "std::unordered_set") aHashSet;
+  @cpp.Type{template = "std::unordered_set"}
+  5: set<i32> aHashSet;
   6: map<i32, i32> aMap;
-  7: map<i32, i32> (cpp.template = 'std::unordered_map') aHashMap;
+  @cpp.Type{template = "std::unordered_map"}
+  7: map<i32, i32> aHashMap;
   8: optional i32 optInt; // optional layout
   9: float aFloat; // trivial layout
   10: optional map<i32, i32> optMap;
@@ -90,24 +93,27 @@ struct EveryLayout {
 
 struct VectorTest {
   1: list<i32> aList;
-  2: set<i32> (cpp.template = "apache::thrift::frozen::VectorAsSet") aSet;
-  3: map<i32, i32> (cpp.template = "apache::thrift::frozen::VectorAsMap") aMap;
-  4: set<i32> (
-    cpp.template = "apache::thrift::frozen::VectorAsHashSet",
-  ) aHashSet;
-  5: map<i32, i32> (
-    cpp.template = "apache::thrift::frozen::VectorAsHashMap",
-  ) aHashMap;
-  6: list<i32> (cpp.template = "folly::fbvector") fbVector;
+  @cpp.Type{template = "apache::thrift::frozen::VectorAsSet"}
+  2: set<i32> aSet;
+  @cpp.Type{template = "apache::thrift::frozen::VectorAsMap"}
+  3: map<i32, i32> aMap;
+  @cpp.Type{template = "apache::thrift::frozen::VectorAsHashSet"}
+  4: set<i32> aHashSet;
+  @cpp.Type{template = "apache::thrift::frozen::VectorAsHashMap"}
+  5: map<i32, i32> aHashMap;
+  @cpp.Type{template = "folly::fbvector"}
+  6: list<i32> fbVector;
 }
 
 struct EnumAsKeyTest {
-  1: set<Gender> (cpp.template = 'std::unordered_set') enumSet;
-  2: map<Gender, i32> (cpp.template = 'std::unordered_map') enumMap;
-  3: set<Helper.Animal> (cpp.template = 'std::unordered_set') outsideEnumSet;
-  4: map<Helper.Animal, i32> (
-    cpp.template = 'std::unordered_map',
-  ) outsideEnumMap;
+  @cpp.Type{template = "std::unordered_set"}
+  1: set<Gender> enumSet;
+  @cpp.Type{template = "std::unordered_map"}
+  2: map<Gender, i32> enumMap;
+  @cpp.Type{template = "std::unordered_set"}
+  3: set<Helper.Animal> outsideEnumSet;
+  @cpp.Type{template = "std::unordered_map"}
+  4: map<Helper.Animal, i32> outsideEnumMap;
 }
 
 union TestUnion {
@@ -157,18 +163,19 @@ struct TriviallyCopyableStruct {
   1: required i32 field;
 }
 
-typedef string Fixed2 (cpp.type = "apache::thrift::frozen::FixedSizeString<2>")
-typedef string Fixed8 (cpp.type = "apache::thrift::frozen::FixedSizeString<8>")
+@cpp.Type{name = "apache::thrift::frozen::FixedSizeString<2>"}
+typedef string Fixed2
+@cpp.Type{name = "apache::thrift::frozen::FixedSizeString<8>"}
+typedef string Fixed8
 
 struct TestFixedSizeString {
   1: Fixed8 bytes8;
-  2: optional string (
-    cpp.type = "apache::thrift::frozen::FixedSizeString<4>",
-  ) bytes4;
-  3: map<Fixed8, Fixed2> (
-    cpp.template = "apache::thrift::frozen::VectorAsHashMap",
-  ) aMapToFreeze;
-  4: map<Fixed8, Fixed2> (cpp.template = "std::unordered_map") aMap;
+  @cpp.Type{name = "apache::thrift::frozen::FixedSizeString<4>"}
+  2: optional string bytes4;
+  @cpp.Type{template = "apache::thrift::frozen::VectorAsHashMap"}
+  3: map<Fixed8, Fixed2> aMapToFreeze;
+  @cpp.Type{template = "std::unordered_map"}
+  4: map<Fixed8, Fixed2> aMap;
 }
 
 struct Empty {}

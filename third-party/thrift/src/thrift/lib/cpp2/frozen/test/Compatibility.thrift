@@ -16,6 +16,8 @@
 
 namespace cpp2 apache.thrift.test
 
+include "thrift/annotation/cpp.thrift"
+
 struct Person {
   3: optional double dob;
   5: string name;
@@ -23,7 +25,8 @@ struct Person {
 
 struct Root {
   1: string title;
-  2: map<i64, Person> (cpp.template = 'std::unordered_map') people;
+  @cpp.Type{template = "std::unordered_map"}
+  2: map<i64, Person> people;
 }
 
 struct Case {

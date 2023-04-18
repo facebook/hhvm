@@ -28,6 +28,9 @@
 #include <openssl/conf.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#include <openssl/provider.h>
+#endif
 #include <openssl/rand.h>
 #include <vector>
 
@@ -65,6 +68,12 @@ struct OpenSSLInitializer {
     ERR_load_ERR_strings();
     ERR_load_crypto_strings();
     ERR_load_EVP_strings();
+
+// RC4 is only available in legacy providers
+#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+    OSSL_PROVIDER_load(nullptr, "default");
+    OSSL_PROVIDER_load(nullptr, "legacy");
+#endif
 
     /* Determine default SSL configuration file */
     char *config_filename = getenv("OPENSSL_CONF");
@@ -998,25 +1007,27 @@ bool HHVM_FUNCTION(openssl_csr_export, const Variant& csr, Variant& out,
   return false;
 }
 
+static EVP_PKEY *duplicate_public_key(EVP_PKEY *priv_key) {
+	/* Extract public key portion by round-tripping through PEM. */
+	BIO *bio = BIO_new(BIO_s_mem());
+  SCOPE_EXIT { BIO_free(bio); };
+	if (!bio || !PEM_write_bio_PUBKEY(bio, priv_key)) {
+		return nullptr;
+	}
+
+	EVP_PKEY *pub_key = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, nullptr);
+	return pub_key;
+}
+
 Variant HHVM_FUNCTION(openssl_csr_get_public_key, const Variant& csr) {
   auto pcsr = CSRequest::Get(csr);
   if (!pcsr) return false;
 
   auto input_csr = pcsr->csr();
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000
-  /* Due to changes in OpenSSL 1.1 related to locking when decoding CSR,
-   * the pub key is not changed after assigning. It means if we pass
-   * a private key, it will be returned including the private part.
-   * If we duplicate it, then we get just the public part which is
-   * the same behavior as for OpenSSL 1.0 */
-  input_csr = X509_REQ_dup(input_csr);
-  /* We need to free the CSR as it was duplicated */
-  SCOPE_EXIT { X509_REQ_free(input_csr); };
-#endif
-  auto pubkey = X509_REQ_get_pubkey(input_csr);
+  auto pubkey = X509_REQ_get0_pubkey(input_csr);
   if (!pubkey) return false;
-  return Variant(req::make<Key>(pubkey));
+  return Variant(req::make<Key>(duplicate_public_key(pubkey)));
 }
 
 Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
@@ -1907,7 +1918,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_RSA2:
     {
       ktype = OPENSSL_KEYTYPE_RSA;
-      RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+      auto rsa = EVP_PKEY_get0_RSA(pkey);
       assertx(rsa);
       const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
       RSA_get0_key(rsa, &n, &e, &d);
@@ -1930,7 +1941,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_DSA4:
     {
       ktype = OPENSSL_KEYTYPE_DSA;
-      DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+      auto dsa = EVP_PKEY_get0_DSA(pkey);
       assertx(dsa);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DSA_get0_pqg(dsa, &p, &q, &g);
@@ -1946,7 +1957,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   case EVP_PKEY_DH:
     {
       ktype = OPENSSL_KEYTYPE_DH;
-      DH *dh = EVP_PKEY_get0_DH(pkey);
+      auto dh = EVP_PKEY_get0_DH(pkey);
       assertx(dh);
       const BIGNUM *p, *q, *g, *pub_key, *priv_key;
       DH_get0_pqg(dh, &p, &q, &g);
@@ -2060,11 +2071,15 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    cryptedlen = RSA_private_decrypt(data.size(),
-                                     (unsigned char *)data.data(),
-                                     cryptedbuf,
-                                     EVP_PKEY_get0_RSA(pkey),
-                                     padding);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      cryptedlen = RSA_private_decrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding);
+      RSA_free(rsa);
+    }
     if (cryptedlen != -1) {
       successful = 1;
     }
@@ -2100,11 +2115,15 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    successful = (RSA_private_encrypt(data.size(),
-                                      (unsigned char *)data.data(),
-                                      cryptedbuf,
-                                      EVP_PKEY_get0_RSA(pkey),
-                                      padding) == cryptedlen);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      successful = (RSA_private_encrypt(data.size(),
+                                        (unsigned char *)data.data(),
+                                        cryptedbuf,
+                                        rsa,
+                                        padding) == cryptedlen);
+      RSA_free(rsa);
+    }
     break;
   default:
     raise_warning("key type not supported");
@@ -2136,11 +2155,15 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    cryptedlen = RSA_public_decrypt(data.size(),
-                                    (unsigned char *)data.data(),
-                                    cryptedbuf,
-                                    EVP_PKEY_get0_RSA(pkey),
-                                    padding);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      cryptedlen = RSA_public_decrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding);
+      RSA_free(rsa);
+    }
     if (cryptedlen != -1) {
       successful = 1;
     }
@@ -2176,11 +2199,15 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    successful = (RSA_public_encrypt(data.size(),
-                                     (unsigned char *)data.data(),
-                                     cryptedbuf,
-                                     EVP_PKEY_get0_RSA(pkey),
-                                     padding) == cryptedlen);
+    {
+      auto rsa = EVP_PKEY_get1_RSA(pkey);
+      successful = (RSA_public_encrypt(data.size(),
+                                      (unsigned char *)data.data(),
+                                      cryptedbuf,
+                                      rsa,
+                                      padding) == cryptedlen);
+      RSA_free(rsa);
+    }
     break;
   default:
     raise_warning("key type not supported");
@@ -2199,6 +2226,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
                                     const Array& pub_key_ids,
                                     const String& method,
                                     Variant& iv) {
+
   int nkeys = pub_key_ids.size();
   if (nkeys == 0) {
     raise_warning("Fourth argument to openssl_seal() must be "
@@ -2264,7 +2292,8 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, Variant& sealed_data,
     ret = false;
     goto clean_exit;
   }
-  if (!EVP_EncryptInit_ex(ctx, cipher_type, nullptr, nullptr, nullptr)) {
+  if (!EVP_EncryptInit_ex2(ctx, cipher_type, nullptr, nullptr, nullptr)) {
+    raise_warning("Failed to initialize cipher \"%s\"", method.c_str());
     ret = false;
     goto clean_exit;
   }

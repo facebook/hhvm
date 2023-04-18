@@ -49,7 +49,7 @@
 , numactl
 , oniguruma
 , openldap
-, openssl_1_1
+, openssl
 , pcre
 , perl
 , pkg-config
@@ -127,7 +127,7 @@ stdenv.mkDerivation rec {
       (if isDefaultStdlib then boost else boost.override { inherit stdenv; })
       brotli
       bzip2
-      (curl.override { openssl = openssl_1_1; })
+      curl
       (
         if isDefaultStdlib then
           double-conversion
@@ -186,7 +186,7 @@ stdenv.mkDerivation rec {
       lz4
       oniguruma
       openldap
-      openssl_1_1
+      openssl
       pcre
       perl
       re2

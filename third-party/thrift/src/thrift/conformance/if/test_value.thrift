@@ -25,6 +25,7 @@ namespace java.swift org.apache.thrift.conformance
 namespace go thrift.conformance.test_value
 
 include "thrift/lib/thrift/type.thrift"
+include "thrift/annotation/cpp.thrift"
 
 // A value defined via calls to a protocol implementation.
 struct EncodeValue {
@@ -44,7 +45,8 @@ union WriteOp {
   6: float writeFloat;
   7: double writeDouble;
   8: string writeString;
-  9: binary (cpp.type = "folly::IOBuf") writeBinary;
+  @cpp.Type{name = "folly::IOBuf"}
+  9: binary writeBinary;
 
   10: WriteToken writeToken;
   11: WriteStructBegin writeStructBegin;

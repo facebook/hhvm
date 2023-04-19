@@ -367,11 +367,13 @@ public:
       bool isPairGenerator     : 1;
       bool hasParamsWithMultiUBs : 1;
       bool hasReturnWithMultiUBs : 1;
+      bool requiresFromOriginalModule : 1;
     };
   };
 
   LowStringPtr docComment;
   LowStringPtr originalFilename;
+  LowStringPtr originalModuleName;
 
   UserAttributeMap userAttributes;
 

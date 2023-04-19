@@ -354,6 +354,14 @@ struct Func : FuncBase {
   LSString originalClass{};
 
   /*
+   * The module where the method was initially defined, irrespective
+   * of trait inlining.  If the requiresFromOriginalModule flag is set
+   * then this field is exported to HHVM to implement the
+   * Module Level Trait semantics.
+   */
+  LSString originalModuleName{};
+
+  /*
    * This is the generated function for a closure body.  I.e. this
    * function contains the code that should run when the closure is
    * invoked.
@@ -402,6 +410,14 @@ struct Func : FuncBase {
    */
   bool hasParamsWithMultiUBs : 1;
   bool hasReturnWithMultiUBs : 1;
+
+  /*
+   * Method was originally declared in a trait with Module Level Trait semantics
+   * (e.g. the <<__ModuleLevelTrait>> attribute was specified on the original trait).
+   */
+  bool fromModuleLevelTrait : 1;
+  bool requiresFromOriginalModule : 1;
+
   CompactVector<TypeConstraint> returnUBs;
 
   /*
@@ -546,6 +562,11 @@ struct Class : ClassBase {
    * Which unit defined this class.
    */
   LSString unit;
+
+  /*
+   * Which module this class was defined in.
+   */
+  LSString moduleName;
 
   /*
    * Name of the parent class.

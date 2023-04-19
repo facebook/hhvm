@@ -185,6 +185,12 @@ struct RepoGlobalData {
   // be done if the memory manager is initialized).
   void load(bool loadConstantFuncs = true) const;
 
+  /* Enable the "Module level traits" semantics: methods defined in a trait
+   * that belongs to module A, are considered as belonging to module A
+   * even if the trait is used by a class that lives in module B.
+   */
+  bool ModuleLevelTraits = false;
+
   // NB: Only use C++ types in this struct because we want to be able
   // to serde it before memory manager and family are set up.
 
@@ -226,6 +232,7 @@ struct RepoGlobalData {
       (SourceRootForFileBC)
       (EmitBespokeTypeStructures)
       (ActiveDeployment)
+      (ModuleLevelTraits)
       ;
   }
 };

@@ -110,7 +110,7 @@ const StaticString s_Awaitable("HH\\Awaitable");
 static_assert(CheckSize<php::Block, 24>(), "");
 static_assert(CheckSize<php::Local, use_lowptr ? 12 : 16>(), "");
 static_assert(CheckSize<php::Param, use_lowptr ? 64 : 96>(), "");
-static_assert(CheckSize<php::Func, use_lowptr ? 184 : 224>(), "");
+static_assert(CheckSize<php::Func, use_lowptr ? 184 : 232>(), "");
 
 // Likewise, we also keep the bytecode and immediate types small.
 static_assert(CheckSize<Bytecode, use_lowptr ? 32 : 40>(), "");
@@ -5701,8 +5701,10 @@ assign_hierarchial_work(std::vector<SString> roots,
 //////////////////////////////////////////////////////////////////////
 // Class flattening:
 
-const StaticString s___Sealed("__Sealed");
-const StaticString s___EnableMethodTraitDiamond("__EnableMethodTraitDiamond");
+const StaticString
+  s___Sealed("__Sealed"),
+  s___EnableMethodTraitDiamond("__EnableMethodTraitDiamond"),
+  s___ModuleLevelTrait("__ModuleLevelTrait");
 
 /*
  * Extern-worker job to build ClassInfo2s (which involves flattening
@@ -7525,6 +7527,21 @@ private:
     cloned->originalClass = orig.originalClass
       ? orig.originalClass
       : orig.cls->name;
+    cloned->originalModuleName = orig.originalModuleName;
+
+    // If the "module level traits" semantics is enabled, whenever HHBBC
+    // inlines a method from a trait defined in module A into a trait/class
+    // defined in module B, it sets the requiresFromOriginalModule flag of the
+    // method to true. This flag causes the originalModuleName field to be
+    // copied in the HHVM extendedSharedData section of the method, so that
+    // HHVM is able to resolve correctly the original module of the method.
+    if (RO::EvalModuleLevelTraits && orig.fromModuleLevelTrait &&
+        !orig.requiresFromOriginalModule &&
+        orig.originalModuleName != dstCls.moduleName) {
+      cloned->requiresFromOriginalModule = true;
+    } else {
+      cloned->requiresFromOriginalModule = orig.requiresFromOriginalModule;
+    }
 
     // cloned method isn't in any method table yet, so trash its
     // index.

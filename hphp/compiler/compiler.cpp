@@ -480,6 +480,7 @@ RepoGlobalData getGlobalData() {
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.EmitBespokeTypeStructures = RO::EvalEmitBespokeTypeStructures;
   gd.ActiveDeployment = RO::EvalActiveDeployment;
+  gd.ModuleLevelTraits = RO::EvalModuleLevelTraits;
 
   if (Option::ConstFoldFileBC) {
     gd.SourceRootForFileBC.emplace(RO::SourceRoot);

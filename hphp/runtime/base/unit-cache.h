@@ -128,6 +128,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
    * magic decl driven bytecode functions like  \
    * `HH\embed_type_decl`  */                   \
   R(EnableIntrinsicsExtension)                  \
+  R(EvalModuleLevelTraits)                      \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

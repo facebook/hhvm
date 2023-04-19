@@ -4,6 +4,7 @@ module MLT_A;
 
 internal function foo(): void { echo "foo\n"; }
 
+<<__ModuleLevelTrait>>
 public trait T {
   public function getFoo(): void {
     // under module level trait semantics,

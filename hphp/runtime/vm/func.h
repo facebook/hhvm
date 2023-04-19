@@ -1424,8 +1424,9 @@ private:
     int64_t m_dynCallSampleRate;
     uint32_t m_softMakeICInaccessibleSampleRate;
     LowStringPtr m_docComment;
+    LowStringPtr m_originalModuleName;
   };
-  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 288 : 320>(), "");
+  static_assert(CheckSize<ExtendedSharedData, use_lowptr ? 296 : 328>(), "");
 
   /*
    * SharedData accessors for internal use.

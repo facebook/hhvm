@@ -360,6 +360,8 @@ module UserAttributes = struct
      has NO runtime/semantic implication. *)
   let uaSafeGlobalVariable = "__SafeForGlobalAccessCheck"
 
+  let uaModuleLevelTrait = "__ModuleLevelTrait"
+
   type attr_info = {
     contexts: string list;
     doc: string;

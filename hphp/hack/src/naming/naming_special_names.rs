@@ -324,6 +324,8 @@ pub mod user_attributes {
 
     pub const CROSS_PACKAGE: &str = "__CrossPackage";
 
+    pub const MODULE_LEVEL_TRAIT: &str = "__ModuleLevelTrait";
+
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -364,6 +366,7 @@ pub mod user_attributes {
             REQUIRE_DYNAMIC,
             ENABLE_METHOD_TRAIT_DIAMOND,
             CROSS_PACKAGE,
+            MODULE_LEVEL_TRAIT,
         ]
         .into_iter()
         .collect();

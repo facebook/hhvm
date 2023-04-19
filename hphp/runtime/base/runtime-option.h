@@ -1485,6 +1485,7 @@ struct RuntimeOption {
   F(string, RecordDir, std::string(""))                                 \
   F(bool, DumpStacktraceToErrorLogOnCrash, true)                        \
   F(bool, IncludeReopOptionsInFactsCacheBreaker, true)                  \
+  F(bool, ModuleLevelTraits, false)                                     \
   /* */
 
 private:

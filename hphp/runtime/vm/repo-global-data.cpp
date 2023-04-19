@@ -49,6 +49,7 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
   RO::EvalEmitBespokeTypeStructures                = EmitBespokeTypeStructures;
   RO::EvalActiveDeployment                         = ActiveDeployment;
+  RO::EvalModuleLevelTraits                        = ModuleLevelTraits;
 
   if (HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
@@ -107,6 +108,7 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
   SHOW(DiamondTraitMethods);
   SHOW(EmitBespokeTypeStructures);
+  SHOW(ModuleLevelTraits);
 #undef SHOW
   folly::format(
     &out, "  SourceRootForFileBC: {}\n",

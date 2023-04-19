@@ -98,6 +98,7 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
     (originalFilename)
     (originalUnit)
     (originalClass)
+    (originalModuleName)
     (returnUBs)
     (retTypeConstraint)
     (requiredCoeffects)
@@ -124,6 +125,8 @@ template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
   SERDE_BITFIELD(isReadonlyThis, sd);
   SERDE_BITFIELD(hasParamsWithMultiUBs, sd);
   SERDE_BITFIELD(hasReturnWithMultiUBs, sd);
+  SERDE_BITFIELD(fromModuleLevelTrait, sd);
+  SERDE_BITFIELD(requiresFromOriginalModule, sd);
 
   // Bytecode is not serialized automatically. If you want it to be
   // serialized, you must manually move it out of the Func and into a
@@ -191,6 +194,7 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
     (srcInfo)
     (attrs)
     (unit)
+    (moduleName)
     (parentName)
     (closureContextCls)
     (interfaceNames)

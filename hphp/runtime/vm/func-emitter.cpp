@@ -60,6 +60,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
+  , originalModuleName(nullptr)
   , memoizePropName(nullptr)
   , memoizeGuardPropName(nullptr)
   , memoizeSharedPropIndex(0)
@@ -84,6 +85,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , retUserType(nullptr)
   , docComment(nullptr)
   , originalFilename(nullptr)
+  , originalModuleName(nullptr)
   , memoizePropName(nullptr)
   , memoizeGuardPropName(nullptr)
   , memoizeSharedPropIndex(0)
@@ -326,7 +328,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     softMakeICInaccessibleSampleRate > 1 ||
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
-    (docComment && !docComment->empty());
+    (docComment && !docComment->empty()) ||
+    requiresFromOriginalModule;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -355,6 +358,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     if (!coeffectRules.empty()) ex->m_coeffectRules = coeffectRules;
     ex->m_coeffectEscapes = coeffectsInfo.second;
     ex->m_docComment = docComment;
+    ex->m_originalModuleName = originalModuleName;
   }
 
   std::vector<Func::ParamInfo> fParams;
@@ -737,6 +741,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (retUserType)
     (retUpperBounds)
     (originalFilename)
+    (originalModuleName)
     (coeffectRules)
     ;
 

@@ -974,6 +974,8 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.originalFilename =
     func.originalFilename ? func.originalFilename :
     func.originalUnit ? func.originalUnit : nullptr;
+  fe.originalModuleName = func.originalModuleName;
+  fe.requiresFromOriginalModule = func.requiresFromOriginalModule;
   fe.isClosureBody = func.isClosureBody;
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;

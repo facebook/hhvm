@@ -696,6 +696,8 @@ size_t HQSession::sendSettings() {
         case hq::SettingId::H3_DATAGRAM:
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
+        case hq::SettingId::ENABLE_WEBTRANSPORT:
+        case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
           break;
       }
     }
@@ -1474,6 +1476,9 @@ void HQSession::applySettings(const SettingsList& settings) {
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
           datagram = static_cast<bool>(setting.value);
+          break;
+        case hq::SettingId::ENABLE_WEBTRANSPORT:
+        case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
           break;
       }
     }

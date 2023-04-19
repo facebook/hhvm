@@ -225,6 +225,11 @@ class HQMultiCodec : public HQControlCodec {
     minUnseenPushID_ = std::max(minUnseenPushID_, pushId + 1);
   }
 
+  bool supportsWebTransport() const {
+    return ingressSettings_.getSetting(SettingsId::ENABLE_WEBTRANSPORT, 0) &&
+           egressSettings_.getSetting(SettingsId::ENABLE_WEBTRANSPORT, 0);
+  }
+
  protected:
   HTTPCodec& getCurrentCodec() {
     return getCodec(currentStream_);

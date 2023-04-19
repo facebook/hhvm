@@ -36,6 +36,7 @@ ParseResult HQControlCodec::checkFrameAllowed(FrameType type) {
     case hq::FrameType::DATA:
     case hq::FrameType::HEADERS:
     case hq::FrameType::PUSH_PROMISE:
+    case hq::FrameType::WEBTRANSPORT_BIDI:
       return HTTP3::ErrorCode::HTTP_FRAME_UNEXPECTED;
     default:
       break;
@@ -79,10 +80,12 @@ ParseResult HQControlCodec::parseCancelPush(Cursor& cursor,
 
 ParseResult HQControlCodec::parseSettings(Cursor& cursor,
                                           const FrameHeader& header) {
+  VLOG(4) << "parsing SETTINGS frame length=" << header.length;
   CHECK(isIngress());
   std::deque<SettingPair> outSettings;
   receivedSettings_ = true;
   auto res = hq::parseSettings(cursor, header, outSettings);
+  VLOG(4) << "Received n=" << outSettings.size() << " settings";
   if (res) {
     return res;
   }
@@ -95,10 +98,17 @@ ParseResult HQControlCodec::parseSettings(Cursor& cursor,
       case hq::SettingId::HEADER_TABLE_SIZE:
       case hq::SettingId::MAX_HEADER_LIST_SIZE:
       case hq::SettingId::QPACK_BLOCKED_STREAMS:
+      case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+        break;
       case hq::SettingId::ENABLE_CONNECT_PROTOCOL:
       case hq::SettingId::H3_DATAGRAM:
       case hq::SettingId::H3_DATAGRAM_DRAFT_8:
       case hq::SettingId::H3_DATAGRAM_RFC:
+      case hq::SettingId::ENABLE_WEBTRANSPORT:
+        // only 0/1 are legal
+        if (setting.second > 1) {
+          return HTTP3::ErrorCode::HTTP_SETTINGS_ERROR;
+        }
         break;
       default:
         continue; // ignore unknown settings
@@ -222,6 +232,8 @@ size_t HQControlCodec::generateSettings(folly::IOBufQueue& writeBuf) {
         case hq::SettingId::H3_DATAGRAM:
         case hq::SettingId::H3_DATAGRAM_DRAFT_8:
         case hq::SettingId::H3_DATAGRAM_RFC:
+        case hq::SettingId::ENABLE_WEBTRANSPORT:
+        case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
           break;
       }
       settings.emplace_back(*id, (SettingValue)setting.value);

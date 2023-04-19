@@ -56,6 +56,9 @@ enum class FrameType : uint64_t {
   // the RFC compliant frame types.
   FB_PRIORITY_UPDATE = 0xF700,
   FB_PUSH_PRIORITY_UPDATE = 0xF701,
+
+  // THIS IS NOT A FRAME TYPE, but we treat it like one
+  WEBTRANSPORT_BIDI = 0x41,
 };
 
 std::ostream& operator<<(std::ostream& os, FrameType type);
@@ -73,6 +76,8 @@ enum class SettingId : uint64_t {
   H3_DATAGRAM = 0x276, // DRAFT_0
   H3_DATAGRAM_DRAFT_8 = 0xffd277,
   H3_DATAGRAM_RFC = 0x33,
+  ENABLE_WEBTRANSPORT = 0x2b603742,
+  WEBTRANSPORT_MAX_SESSIONS = 0x2b603743,
 };
 
 using SettingValue = uint64_t;

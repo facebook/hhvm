@@ -55,6 +55,7 @@ enum class SettingsId : uint64_t {
   _HQ_DATAGRAM_DRAFT_8 = HQ_SETTINGS_MASK | 0xffd277,
   _HQ_DATAGRAM_RFC = HQ_SETTINGS_MASK | 0x33,
   ENABLE_WEBTRANSPORT = 0x2b603742,
+  WEBTRANSPORT_MAX_SESSIONS = 0x2b603743
 };
 
 using SettingPair = std::pair<SettingsId, uint32_t>;

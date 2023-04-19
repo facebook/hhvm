@@ -98,6 +98,8 @@ decodeSettingValue(folly::io::Cursor& cursor,
     case SettingId::H3_DATAGRAM:
     case SettingId::H3_DATAGRAM_DRAFT_8:
     case SettingId::H3_DATAGRAM_RFC:
+    case SettingId::ENABLE_WEBTRANSPORT:
+    case SettingId::WEBTRANSPORT_MAX_SESSIONS:
       return value;
   }
   return folly::none;

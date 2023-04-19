@@ -95,6 +95,10 @@ folly::Optional<hq::SettingId> httpToHqSettingsId(proxygen::SettingsId id) {
       return hq::SettingId::H3_DATAGRAM_DRAFT_8;
     case proxygen::SettingsId::_HQ_DATAGRAM_RFC:
       return hq::SettingId::H3_DATAGRAM_RFC;
+    case proxygen::SettingsId::ENABLE_WEBTRANSPORT:
+      return hq::SettingId::ENABLE_WEBTRANSPORT;
+    case proxygen::SettingsId::WEBTRANSPORT_MAX_SESSIONS:
+      return hq::SettingId::WEBTRANSPORT_MAX_SESSIONS;
     default:
       return folly::none; // this setting has no meaning in HQ
   }
@@ -117,6 +121,10 @@ folly::Optional<proxygen::SettingsId> hqToHttpSettingsId(hq::SettingId id) {
       return proxygen::SettingsId::_HQ_DATAGRAM_DRAFT_8;
     case hq::SettingId::H3_DATAGRAM_RFC:
       return proxygen::SettingsId::_HQ_DATAGRAM_RFC;
+    case hq::SettingId::ENABLE_WEBTRANSPORT:
+      return proxygen::SettingsId::ENABLE_WEBTRANSPORT;
+    case hq::SettingId::WEBTRANSPORT_MAX_SESSIONS:
+      return proxygen::SettingsId::WEBTRANSPORT_MAX_SESSIONS;
   }
   return folly::none;
 }

@@ -1186,6 +1186,10 @@ class FetchOperation : public Operation {
     return no_index_used_;
   }
 
+  bool wasSlow() const {
+    return was_slow_;
+  }
+
   int numCurrentQuery() const {
     return num_current_query_;
   }
@@ -1266,6 +1270,7 @@ class FetchOperation : public Operation {
   bool query_executed_ = false;
   bool no_index_used_ = false;
   bool use_checksum_ = false;
+  bool was_slow_ = false;
   // TODO: Rename `executed` to `succeeded`
   int num_queries_executed_ = 0;
   // During a `notify` call, the consumer might want to know the index of the

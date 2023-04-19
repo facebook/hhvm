@@ -1313,6 +1313,7 @@ void FetchOperation::socketActionable() {
         }
         ++num_queries_executed_;
         no_index_used_ |= mysql->server_status & SERVER_QUERY_NO_INDEX_USED;
+        was_slow_ |= mysql->server_status & SERVER_QUERY_WAS_SLOW;
         notifyQuerySuccess(more_results);
       }
       current_row_stream_.reset();
@@ -1483,7 +1484,8 @@ void FetchOperation::specializedCompleteOperation() {
         use_checksum_ || conn()->getConnectionOptions().getUseChecksum(),
         attributes_,
         readResponseAttributes(),
-        getMaxThreadBlockTime());
+        getMaxThreadBlockTime(),
+        was_slow_);
     client()->logQuerySuccess(logging_data, *conn().get());
   } else {
     db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
@@ -1505,7 +1507,8 @@ void FetchOperation::specializedCompleteOperation() {
             use_checksum_ || conn()->getConnectionOptions().getUseChecksum(),
             attributes_,
             readResponseAttributes(),
-            getMaxThreadBlockTime()),
+            getMaxThreadBlockTime(),
+            was_slow_),
         reason,
         mysql_errno(),
         mysql_error(),
@@ -1662,6 +1665,7 @@ void QueryOperation::notifyQuerySuccess(bool more_results) {
   query_result_->setNumRowsAffected(FetchOperation::currentAffectedRows());
   query_result_->setLastInsertId(FetchOperation::currentLastInsertId());
   query_result_->setRecvGtid(FetchOperation::currentRecvGtid());
+  query_result_->setWasSlow(FetchOperation::wasSlow());
   query_result_->setResponseAttributes(FetchOperation::currentRespAttrs());
 
   query_result_->setPartial(false);

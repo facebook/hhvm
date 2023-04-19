@@ -322,6 +322,15 @@ class QueryResult {
     recv_gtid_ = recv_gtid;
   }
 
+  // Query was slow
+  bool wasSlow() const {
+    return was_slow_;
+  }
+
+  void setWasSlow(bool was_slow) {
+    was_slow_ = was_slow;
+  }
+
   // Current response attributes
   const RespAttrs& responseAttributes() const {
     return resp_attrs_;
@@ -421,6 +430,7 @@ class QueryResult {
   std::shared_ptr<RowFields> row_fields_info_;
   int query_num_;
   bool partial_;
+  bool was_slow_ = false;
 
   uint64_t num_rows_;
   uint64_t num_rows_affected_;

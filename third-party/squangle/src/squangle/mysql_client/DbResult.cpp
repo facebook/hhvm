@@ -87,6 +87,7 @@ QueryResult::QueryResult(QueryResult&& other) noexcept
     : row_fields_info_(other.row_fields_info_),
       query_num_(other.query_num_),
       partial_(other.partial_),
+      was_slow_(other.was_slow_),
       num_rows_(other.num_rows_),
       num_rows_affected_(other.num_rows_affected_),
       last_insert_id_(other.last_insert_id_),
@@ -113,6 +114,7 @@ QueryResult& QueryResult::operator=(QueryResult&& other) {
     row_blocks_ = std::move(other.row_blocks_);
     other.row_blocks_.clear();
     other.num_rows_ = 0;
+    was_slow_ = other.was_slow_;
   }
   return *this;
 }

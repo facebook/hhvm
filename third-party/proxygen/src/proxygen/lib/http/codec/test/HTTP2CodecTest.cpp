@@ -2344,6 +2344,23 @@ TEST_F(HTTP2CodecTest, WebsocketIncorrectResponse) {
   EXPECT_EQ(callbacks_.streamErrors, 0);
 }
 
+TEST_F(HTTP2CodecTest, WebTransportProtocol) {
+  HTTPMessage req;
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setHTTPVersion(1, 1);
+  req.setURL("/wt");
+  req.setSecure(true);
+  req.setUpgradeProtocol("webtransport");
+
+  auto id = upstreamCodec_.createStream();
+  upstreamCodec_.generateHeader(output_, id, req, false);
+  parse();
+
+  EXPECT_FALSE(callbacks_.msg->isIngressWebsocketUpgrade());
+  EXPECT_NE(nullptr, callbacks_.msg->getUpgradeProtocol());
+  EXPECT_EQ("webtransport", *callbacks_.msg->getUpgradeProtocol());
+}
+
 TEST_F(HTTP2CodecTest, TestAllEgressFrameTypeCallbacks) {
   class CallbackTypeTracker {
     std::set<uint8_t> types;

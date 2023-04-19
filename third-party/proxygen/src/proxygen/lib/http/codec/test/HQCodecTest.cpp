@@ -813,6 +813,23 @@ TEST_F(HQCodecTest, HighAscii) {
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
+TEST_F(HQCodecTest, WebTransportProtocol) {
+  HTTPMessage req;
+  req.setMethod(HTTPMethod::CONNECT);
+  req.setHTTPVersion(1, 1);
+  req.setURL("/wt");
+  req.setSecure(true);
+  req.setUpgradeProtocol("webtransport");
+
+  auto id = upstreamCodec_->createStream();
+  upstreamCodec_->generateHeader(queue_, id, req, false);
+  parse();
+
+  EXPECT_FALSE(callbacks_.msg->isIngressWebsocketUpgrade());
+  EXPECT_NE(nullptr, callbacks_.msg->getUpgradeProtocol());
+  EXPECT_EQ("webtransport", *callbacks_.msg->getUpgradeProtocol());
+}
+
 struct FrameAllowedParams {
   CodecType codecType;
   FrameType frameType;

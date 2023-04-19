@@ -82,13 +82,18 @@ void HPACKCodec::encodeHTTP(
           HTTP_HEADER_COLON_METHOD, methodToString(HTTPMethod::CONNECT));
       uncompressed += encoder_.encodeHeader(HTTP_HEADER_COLON_PROTOCOL,
                                             headers::kWebsocketString);
+    } else if (msg.getUpgradeProtocol()) {
+      uncompressed += encoder_.encodeHeader(
+          HTTP_HEADER_COLON_METHOD, methodToString(HTTPMethod::CONNECT));
+      uncompressed += encoder_.encodeHeader(HTTP_HEADER_COLON_PROTOCOL,
+                                            *msg.getUpgradeProtocol());
     } else {
       uncompressed += encoder_.encodeHeader(HTTP_HEADER_COLON_METHOD,
                                             msg.getMethodString());
     }
 
     if (msg.getMethod() != HTTPMethod::CONNECT ||
-        msg.isEgressWebsocketUpgrade()) {
+        msg.isEgressWebsocketUpgrade() || msg.getUpgradeProtocol()) {
       uncompressed +=
           encoder_.encodeHeader(HTTP_HEADER_COLON_SCHEME, msg.getScheme());
       uncompressed +=

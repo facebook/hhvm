@@ -79,6 +79,17 @@ std::unique_ptr<folly::IOBuf> QPACKCodec::encodeHTTP(
                                  headers::kWebsocketString,
                                  baseIndex,
                                  requiredInsertCount);
+    } else if (msg.getUpgradeProtocol()) {
+      uncompressed +=
+          encoder_.encodeHeaderQ(HPACKHeaderName(HTTP_HEADER_COLON_METHOD),
+                                 methodToString(HTTPMethod::CONNECT),
+                                 baseIndex,
+                                 requiredInsertCount);
+      uncompressed +=
+          encoder_.encodeHeaderQ(HPACKHeaderName(HTTP_HEADER_COLON_PROTOCOL),
+                                 *msg.getUpgradeProtocol(),
+                                 baseIndex,
+                                 requiredInsertCount);
     } else {
       uncompressed +=
           encoder_.encodeHeaderQ(HPACKHeaderName(HTTP_HEADER_COLON_METHOD),
@@ -88,7 +99,7 @@ std::unique_ptr<folly::IOBuf> QPACKCodec::encodeHTTP(
     }
 
     if (msg.getMethod() != HTTPMethod::CONNECT ||
-        msg.isEgressWebsocketUpgrade()) {
+        msg.isEgressWebsocketUpgrade() || msg.getUpgradeProtocol()) {
       uncompressed +=
           encoder_.encodeHeaderQ(HPACKHeaderName(HTTP_HEADER_COLON_SCHEME),
                                  msg.getScheme(),

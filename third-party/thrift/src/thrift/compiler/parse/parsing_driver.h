@@ -117,11 +117,11 @@ class parsing_driver : public parser_actions {
   void on_standard_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
   void on_program_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   void on_package(source_range range, fmt::string_view name) override;
 
@@ -151,7 +151,7 @@ class parsing_driver : public parser_actions {
       source_range range,
       std::unique_ptr<t_named> defn,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   boost::optional<comment> on_doctext() override { return pop_doctext(); }
 
@@ -211,7 +211,7 @@ class parsing_driver : public parser_actions {
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   t_type_ref on_stream_return_type(
       source_range range, type_throws_spec spec) override;
@@ -224,18 +224,18 @@ class parsing_driver : public parser_actions {
   t_type_ref on_list_type(
       source_range range,
       t_type_ref element_type,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   t_type_ref on_set_type(
       source_range range,
       t_type_ref key_type,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   t_type_ref on_map_type(
       source_range range,
       t_type_ref key_type,
       t_type_ref value_type,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   std::unique_ptr<t_function> on_performs(
       source_range range, t_type_ref type) override;
@@ -267,17 +267,17 @@ class parsing_driver : public parser_actions {
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) override;
 
-  t_type_ref on_field_type(
+  t_type_ref on_type(
       const t_base_type& type,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
-  t_type_ref on_field_type(
+  t_type_ref on_type(
       source_range range,
       fmt::string_view name,
-      std::unique_ptr<t_annotations> annotations) override;
+      std::unique_ptr<deprecated_annotations> annotations) override;
 
   std::unique_ptr<t_enum> on_enum(
       source_range range,
@@ -289,7 +289,7 @@ class parsing_driver : public parser_actions {
       std::unique_ptr<stmt_attrs> attrs,
       const identifier& name,
       boost::optional<int64_t> value,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) override;
 
   std::unique_ptr<t_const> on_const(
@@ -386,20 +386,20 @@ class parsing_driver : public parser_actions {
   // annotations.
   t_type_ref new_type_ref(
       const t_type& type,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range = source_range());
-  t_type_ref new_type_ref(t_type&& type, std::unique_ptr<t_annotations>) =
-      delete;
+  t_type_ref new_type_ref(
+      t_type&& type, std::unique_ptr<deprecated_annotations>) = delete;
 
   // Creates a reference to a newly instantiated templated type.
   t_type_ref new_type_ref(
       source_range range,
       std::unique_ptr<t_templated_type> type,
-      std::unique_ptr<t_annotations> annotations);
+      std::unique_ptr<deprecated_annotations> annotations);
   // Creates a reference to a named type.
   t_type_ref new_type_ref(
       std::string name,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range,
       bool is_const = false);
 
@@ -447,13 +447,13 @@ class parsing_driver : public parser_actions {
 
   // Sets the annotations on the given node.
   static void set_annotations(
-      t_node* node, std::unique_ptr<t_annotations> annotations);
+      t_node* node, std::unique_ptr<deprecated_annotations> annotations);
 
   // Sets the attributes on the given node.
   void set_attributes(
       t_named& node,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annots,
+      std::unique_ptr<deprecated_annotations> annots,
       const source_range& loc) const;
 
   // Adds an unnamed typedef to the program
@@ -461,7 +461,7 @@ class parsing_driver : public parser_actions {
   // that can annotatable.
   const t_type* add_unnamed_typedef(
       std::unique_ptr<t_typedef> node,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       const source_range& range = source_range());
 
   // Automatic numbering for field ids (deprecated).

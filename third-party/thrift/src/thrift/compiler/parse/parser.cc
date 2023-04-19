@@ -296,15 +296,15 @@ class parser {
   //
   // annotation: identifier ["=" annotation_value]
   // annotation_value: bool_literal | integer | string_literal
-  std::unique_ptr<t_annotations> parse_annotations() {
+  std::unique_ptr<deprecated_annotations> parse_annotations() {
     auto loc = token_.range.begin;
     if (!try_consume_token('(')) {
       return {};
     }
-    auto annotations = std::unique_ptr<t_annotations>();
+    auto annotations = std::unique_ptr<deprecated_annotations>();
     while (token_.kind != ')') {
       if (!annotations) {
-        annotations = std::make_unique<t_annotations>();
+        annotations = std::make_unique<deprecated_annotations>();
         annotations->loc = loc;
       }
       auto range = track_range();
@@ -355,7 +355,7 @@ class parser {
 
   // function_or_performs:
   //     function comma_or_semicolon?
-  //   | "performs" field_type comma_or_semicolon
+  //   | "performs" type comma_or_semicolon
   std::unique_ptr<t_function_list> parse_braced_function_list() {
     expect_and_consume('{');
     auto functions = std::make_unique<t_function_list>();
@@ -368,7 +368,7 @@ class parser {
       // Parse performs.
       auto range = track_range();
       consume_token();
-      auto type = parse_field_type();
+      auto type = parse_type();
       if (!try_parse_comma_or_semicolon()) {
         report_expected("`,` or `;`");
       }
@@ -429,16 +429,15 @@ class parser {
 
   // return_type: (return_type_element ",")* return_type_element
   //
-  // return_type_element:
-  //     field_type | stream_return_type | sink_return_type | "void"
+  // return_type_element: type | stream_return_type | sink_return_type | "void"
   //
   // stream_return_type: "stream" "<" type_throws_spec ">"
   // sink_return_type: "sink" "<" type_throws_spec "," type_throws_spec ">"
-  // type_throws_spec: field_type throws?
+  // type_throws_spec: type throws?
   std::vector<t_type_ref> parse_return_type() {
     auto return_type = std::vector<t_type_ref>();
     auto parse_type_throws = [this]() -> type_throws_spec {
-      auto type = parse_field_type();
+      auto type = parse_type();
       auto throws = try_parse_throws();
       return {std::move(type), std::move(throws)};
     };
@@ -470,7 +469,7 @@ class parser {
           break;
         }
         default:
-          type = parse_field_type();
+          type = parse_type();
           break;
       }
       return_type.push_back(std::move(type));
@@ -489,11 +488,11 @@ class parser {
     return actions_.on_throws(std::move(exceptions));
   }
 
-  // typedef: "typedef" field_type identifier
+  // typedef: "typedef" type identifier
   std::unique_ptr<t_typedef> parse_typedef() {
     auto range = track_range();
     expect_and_consume(tok::kw_typedef);
-    auto type = parse_field_type();
+    auto type = parse_type();
     auto name = parse_identifier();
     return actions_.on_typedef(range, std::move(type), name);
   }
@@ -573,7 +572,7 @@ class parser {
   }
 
   // field:
-  //   statement_attrs field_id? field_qualifier? field_type identifier
+  //   statement_attrs field_id? field_qualifier? type identifier
   //     field_value? annotations comma_or_semicolon? inline_doc?
   //
   // field_id: integer ":"
@@ -598,7 +597,7 @@ class parser {
       qual = t_field_qualifier::required;
     }
 
-    auto type = parse_field_type();
+    auto type = parse_type();
     auto name = parse_identifier();
 
     // Parse the default value.
@@ -622,35 +621,35 @@ class parser {
         std::move(doc));
   }
 
-  // field_type: (tok::identifier | base_type | container_type) annotations
+  // type: (tok::identifier | base_type | container_type) annotations
   //
   // container_type: list_type | set_type | map_type
   //
-  // list_type: "list" "<" field_type ">"
-  // set_type: "set" "<" field_type ">"
-  // map_type: "map" "<" field_type "," field_type ">"
+  // list_type: "list" "<" type ">"
+  // set_type: "set" "<" type ">"
+  // map_type: "map" "<" type "," type ">"
   //
   // We disallow context-sensitive keywords as field type identifiers.
-  // This avoids an ambuguity in the resolution of the function_qualifier
+  // This avoids an ambiguity in the resolution of the function_qualifier
   // return_type part of the function rule, when one of the "oneway",
   // "idempotent" or "readonly" is encountered. It could either resolve
   // the token as function_qualifier or resolve "" as function_qualifier and
   // the token as return_type.
-  t_type_ref parse_field_type() {
+  t_type_ref parse_type() {
     auto range = track_range();
     if (const t_base_type* type = try_parse_base_type()) {
-      return actions_.on_field_type(*type, parse_annotations());
+      return actions_.on_type(*type, parse_annotations());
     }
     switch (token_.kind) {
       case tok::identifier: {
         auto name = consume_token().string_value();
         auto annotations = parse_annotations();
-        return actions_.on_field_type(range, name, std::move(annotations));
+        return actions_.on_type(range, name, std::move(annotations));
       }
       case tok::kw_list: {
         consume_token();
         expect_and_consume('<');
-        auto element_type = parse_field_type();
+        auto element_type = parse_type();
         expect_and_consume('>');
         return actions_.on_list_type(
             range, std::move(element_type), parse_annotations());
@@ -658,7 +657,7 @@ class parser {
       case tok::kw_set: {
         consume_token();
         expect_and_consume('<');
-        auto key_type = parse_field_type();
+        auto key_type = parse_type();
         expect_and_consume('>');
         return actions_.on_set_type(
             range, std::move(key_type), parse_annotations());
@@ -666,9 +665,9 @@ class parser {
       case tok::kw_map: {
         consume_token();
         expect_and_consume('<');
-        auto key_type = parse_field_type();
+        auto key_type = parse_type();
         expect_and_consume(',');
-        auto value_type = parse_field_type();
+        auto value_type = parse_type();
         expect_and_consume('>');
         return actions_.on_map_type(
             range,
@@ -751,11 +750,11 @@ class parser {
         std::move(doc));
   }
 
-  // const: "const" field_type identifier "=" const_value
+  // const: "const" type identifier "=" const_value
   std::unique_ptr<t_const> parse_const() {
     auto range = track_range();
     expect_and_consume(tok::kw_const);
-    auto type = parse_field_type();
+    auto type = parse_type();
     auto name = parse_identifier();
     expect_and_consume('=');
     auto value = parse_const_value();

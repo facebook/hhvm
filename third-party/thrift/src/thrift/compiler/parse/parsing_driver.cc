@@ -406,7 +406,7 @@ std::string parsing_driver::clean_up_doctext(std::string docstring) {
 }
 
 void parsing_driver::set_annotations(
-    t_node* node, std::unique_ptr<t_annotations> annotations) {
+    t_node* node, std::unique_ptr<deprecated_annotations> annotations) {
   if (annotations != nullptr) {
     node->reset_annotations(annotations->strings);
   }
@@ -415,7 +415,7 @@ void parsing_driver::set_annotations(
 void parsing_driver::set_attributes(
     t_named& node,
     std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<t_annotations> annots,
+    std::unique_ptr<deprecated_annotations> annots,
     const source_range& range) const {
   if (mode != parsing_mode::PROGRAM) {
     return;
@@ -464,7 +464,7 @@ std::unique_ptr<t_throws> parsing_driver::new_throws(
 
 t_type_ref parsing_driver::new_type_ref(
     const t_type& type,
-    std::unique_ptr<t_annotations> annotations,
+    std::unique_ptr<deprecated_annotations> annotations,
     const source_range& range) {
   if (annotations == nullptr || mode != parsing_mode::PROGRAM) {
     return type;
@@ -498,7 +498,7 @@ t_type_ref parsing_driver::new_type_ref(
 t_type_ref parsing_driver::new_type_ref(
     source_range range,
     std::unique_ptr<t_templated_type> node,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   if (mode != parsing_mode::PROGRAM) {
     return {};
   }
@@ -513,7 +513,7 @@ t_type_ref parsing_driver::new_type_ref(
 
 t_type_ref parsing_driver::new_type_ref(
     std::string name,
-    std::unique_ptr<t_annotations> annotations,
+    std::unique_ptr<deprecated_annotations> annotations,
     const source_range& range,
     bool is_const) {
   if (mode != parsing_mode::PROGRAM) {
@@ -579,7 +579,7 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
 
 const t_type* parsing_driver::add_unnamed_typedef(
     std::unique_ptr<t_typedef> node,
-    std::unique_ptr<t_annotations> annotations,
+    std::unique_ptr<deprecated_annotations> annotations,
     const source_range& range) {
   const t_type* result(node.get());
   node->set_src_range(range);
@@ -716,7 +716,7 @@ parsing_driver::parsing_driver(
 void parsing_driver::on_standard_header(
     source_range range,
     std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   validate_header_location(range.begin);
   if (attrs && attrs->struct_annotations) {
     diags_.error(
@@ -732,7 +732,7 @@ void parsing_driver::on_standard_header(
 void parsing_driver::on_program_header(
     source_range range,
     std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   validate_header_location(range.begin);
   set_attributes(*program, std::move(attrs), std::move(annotations), range);
 }
@@ -755,7 +755,7 @@ void parsing_driver::on_definition(
     source_range range,
     std::unique_ptr<t_named> defn,
     std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   if (mode == parsing_mode::PROGRAM) {
     programs_that_parsed_definition_.insert(program->path());
   }
@@ -832,7 +832,7 @@ std::unique_ptr<t_function> parsing_driver::on_function(
     const identifier& name,
     t_field_list params,
     std::unique_ptr<t_throws> throws,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   auto function = std::make_unique<t_function>(
       program, std::move(return_type), fmt::to_string(name.str));
   function->set_qualifier(qual);
@@ -867,7 +867,7 @@ t_type_ref parsing_driver::on_sink_return_type(
 t_type_ref parsing_driver::on_list_type(
     source_range range,
     t_type_ref element_type,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   return new_type_ref(
       range,
       std::make_unique<t_list>(std::move(element_type)),
@@ -877,7 +877,7 @@ t_type_ref parsing_driver::on_list_type(
 t_type_ref parsing_driver::on_set_type(
     source_range range,
     t_type_ref key_type,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   return new_type_ref(
       range,
       std::make_unique<t_set>(std::move(key_type)),
@@ -888,7 +888,7 @@ t_type_ref parsing_driver::on_map_type(
     source_range range,
     t_type_ref key_type,
     t_type_ref value_type,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   return new_type_ref(
       range,
       std::make_unique<t_map>(std::move(key_type), std::move(value_type)),
@@ -961,7 +961,7 @@ std::unique_ptr<t_field> parsing_driver::on_field(
     t_type_ref type,
     const identifier& name,
     std::unique_ptr<t_const_value> value,
-    std::unique_ptr<t_annotations> annotations,
+    std::unique_ptr<deprecated_annotations> annotations,
     boost::optional<comment> doc) {
   auto valid_id = id ? narrow_int<t_field_id>(range.begin, *id, "field ids")
                      : boost::optional<t_field_id>();
@@ -979,15 +979,16 @@ std::unique_ptr<t_field> parsing_driver::on_field(
   return field;
 }
 
-t_type_ref parsing_driver::on_field_type(
-    const t_base_type& type, std::unique_ptr<t_annotations> annotations) {
+t_type_ref parsing_driver::on_type(
+    const t_base_type& type,
+    std::unique_ptr<deprecated_annotations> annotations) {
   return new_type_ref(type, std::move(annotations));
 }
 
-t_type_ref parsing_driver::on_field_type(
+t_type_ref parsing_driver::on_type(
     source_range range,
     fmt::string_view name,
-    std::unique_ptr<t_annotations> annotations) {
+    std::unique_ptr<deprecated_annotations> annotations) {
   return new_type_ref(fmt::to_string(name), std::move(annotations), range);
 }
 
@@ -1004,7 +1005,7 @@ std::unique_ptr<t_enum_value> parsing_driver::on_enum_value(
     std::unique_ptr<stmt_attrs> attrs,
     const identifier& name,
     boost::optional<int64_t> value,
-    std::unique_ptr<t_annotations> annotations,
+    std::unique_ptr<deprecated_annotations> annotations,
     boost::optional<comment> doc) {
   auto enum_value = std::make_unique<t_enum_value>(fmt::to_string(name.str));
   enum_value->set_src_range(range);

@@ -54,7 +54,7 @@ struct stmt_attrs {
   std::unique_ptr<node_list<t_const>> struct_annotations;
 };
 
-struct t_annotations {
+struct deprecated_annotations {
   std::map<std::string, annotation_value> strings;
   source_location loc;
 };
@@ -76,11 +76,11 @@ class parser_actions {
   virtual void on_standard_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
   virtual void on_program_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual void on_package(source_range range, fmt::string_view name) = 0;
   virtual void on_include(source_range range, fmt::string_view str) = 0;
@@ -94,7 +94,7 @@ class parser_actions {
       source_range range,
       std::unique_ptr<t_named> defn,
       std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual boost::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
@@ -128,7 +128,7 @@ class parser_actions {
       const identifier& name,
       t_field_list params,
       std::unique_ptr<t_throws> throws,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual t_type_ref on_stream_return_type(
       source_range range, type_throws_spec spec) = 0;
@@ -140,16 +140,16 @@ class parser_actions {
   virtual t_type_ref on_list_type(
       source_range range,
       t_type_ref element_type,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
   virtual t_type_ref on_set_type(
       source_range range,
       t_type_ref key_type,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
   virtual t_type_ref on_map_type(
       source_range range,
       t_type_ref key_type,
       t_type_ref value_type,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual std::unique_ptr<t_function> on_performs(
       source_range range, t_type_ref type) = 0;
@@ -181,16 +181,17 @@ class parser_actions {
       t_type_ref type,
       const identifier& name,
       std::unique_ptr<t_const_value> value,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) = 0;
 
-  virtual t_type_ref on_field_type(
-      const t_base_type& type, std::unique_ptr<t_annotations> annotations) = 0;
+  virtual t_type_ref on_type(
+      const t_base_type& type,
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
 
-  virtual t_type_ref on_field_type(
+  virtual t_type_ref on_type(
       source_range range,
       fmt::string_view name,
-      std::unique_ptr<t_annotations> annotations) = 0;
+      std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual std::unique_ptr<t_enum> on_enum(
       source_range range, const identifier& name, t_enum_value_list values) = 0;
@@ -200,7 +201,7 @@ class parser_actions {
       std::unique_ptr<stmt_attrs> attrs,
       const identifier& name,
       boost::optional<int64_t> value,
-      std::unique_ptr<t_annotations> annotations,
+      std::unique_ptr<deprecated_annotations> annotations,
       boost::optional<comment> doc) = 0;
 
   virtual std::unique_ptr<t_const> on_const(

@@ -7,6 +7,7 @@ members = [
     "decl/direct_decl_smart_constructors",
     "deps/cargo/deps_rust",
     "deps/cargo/deps_rust_ffi",
+    "deps/cargo/hh_fanout_rust_ffi",
     "deps/cargo/typing_deps_hash",
     "facts/cargo/facts_rust",
     "facts/cargo/rust_facts_ffi",

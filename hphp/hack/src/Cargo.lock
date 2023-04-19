@@ -1337,7 +1337,6 @@ dependencies = [
  "dep_graph_delta",
  "depgraph_reader",
  "hash",
- "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
  "once_cell",

@@ -159,6 +159,10 @@ let get_class_req_attrs env pctx classname cid =
   Decl_provider.get_class pctx classname
   |> Option.value_map ~default:[] ~f:req_attrs
 
+let get_class_is_child_empty pctx classname =
+  Decl_provider.get_class pctx classname
+  |> Option.value_map ~default:false ~f:Cls.xhp_marked_empty
+
 let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
     =
   (match ty with
@@ -182,16 +186,29 @@ let snippet_for_params (params : 'a Typing_defs.fun_param list) : string =
   in
   String.concat ~sep:", " param_templates
 
-let insert_text_for_xhp_req_attrs tag attrs =
-  if List.length attrs > 0 then
-    let snippet =
-      List.mapi attrs ~f:(fun i name ->
-          Format.sprintf "%s={${%d}}" name (i + 1))
-      |> String.concat ~sep:" "
-    in
-    InsertAsSnippet { snippet = tag ^ " " ^ snippet; fallback = tag }
+let insert_text_for_xhp_req_attrs tag attrs has_children =
+  let content =
+    if List.length attrs > 0 then
+      let attr_content =
+        List.mapi attrs ~f:(fun i name ->
+            Format.sprintf "%s={${%d}}" name (i + 1))
+        |> String.concat ~sep:" "
+      in
+      tag ^ " " ^ attr_content
+    else
+      tag
+  in
+  let content =
+    if has_children then
+      Format.sprintf "%s>$0</%s>" content tag
+    else
+      content ^ " />"
+  in
+  let insert_type = List.length attrs > 0 && has_children in
+  if insert_type then
+    InsertAsSnippet { snippet = content; fallback = tag }
   else
-    InsertLiterally tag
+    InsertLiterally content
 
 (* If we're autocompleting a call (function or method), insert a
    template for the arguments as well as function name. *)
@@ -1513,14 +1530,12 @@ let complete_xhp_tag
         | SI_XHP
         | SI_Class
           when does_autocomplete_snippet ->
+          let classname = Utils.add_ns res_fullname in
           let attrs =
-            get_class_req_attrs
-              tast_env
-              pctx
-              (Utils.add_ns res_fullname)
-              (Some (Aast.CI id))
+            get_class_req_attrs tast_env pctx classname (Some (Aast.CI id))
           in
-          insert_text_for_xhp_req_attrs res_label attrs
+          let has_children = not (get_class_is_child_empty pctx classname) in
+          insert_text_for_xhp_req_attrs res_label attrs has_children
         | _ -> res_insert_text
       in
       (* Figure out how to display them *)

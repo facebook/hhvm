@@ -18,6 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/patch.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
+@thrift.Experimental
 @thrift.TerseWrite
 @patch.GeneratePatch
 package "test.dev/fixtures/patch"

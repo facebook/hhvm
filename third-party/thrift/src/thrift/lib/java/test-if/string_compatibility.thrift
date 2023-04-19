@@ -18,6 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/java.thrift"
 include "thrift/annotation/compat.thrift"
 
+@thrift.Experimental
 package "test.dev/thrift/lib/java/test/utf8"
 
 namespace java.swift com.facebook.thrift.test.utf8

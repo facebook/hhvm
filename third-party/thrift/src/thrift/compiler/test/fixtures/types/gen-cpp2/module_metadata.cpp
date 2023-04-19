@@ -356,6 +356,7 @@ StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen
     field.structured_annotations() = f.structured_annotations;
     module_MinPaddingWithCustomType.fields()->push_back(std::move(field));
   }
+  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {}).cv_struct_ref());
   module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {}).cv_struct_ref());
   module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {}).cv_struct_ref());
   return res.first->second;

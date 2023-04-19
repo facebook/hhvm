@@ -36,6 +36,7 @@ struct Boxed {
 }
 
 struct TerseWrite {
+  @thrift.Experimental
   @thrift.TerseWrite
   1: string msg;
 }

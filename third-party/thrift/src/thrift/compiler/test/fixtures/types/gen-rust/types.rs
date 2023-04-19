@@ -2194,6 +2194,19 @@ impl ::fbthrift::metadata::ThriftAnnotations for MinPaddingWithCustomType {
         #[allow(unused_variables)]
         let type_id = ::std::any::TypeId::of::<T>();
 
+        if type_id == ::std::any::TypeId::of::<thrift::types::Experimental>() {
+            let mut tmp = Some(thrift::types::Experimental {
+                ..::std::default::Default::default()
+            });
+            let r: &mut dyn ::std::any::Any = &mut tmp;
+            let r: &mut Option<T> = r.downcast_mut().unwrap();
+            return r.take();
+        }
+
+        if let Some(r) = <thrift::types::Experimental as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+            return Some(r);
+        }
+
         if type_id == ::std::any::TypeId::of::<cpp::types::MinimizePadding>() {
             let mut tmp = Some(cpp::types::MinimizePadding {
                 ..::std::default::Default::default()

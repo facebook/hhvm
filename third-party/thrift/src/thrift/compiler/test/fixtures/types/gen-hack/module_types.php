@@ -2147,6 +2147,10 @@ class MinPaddingWithCustomType implements \IThriftSyncStruct, \IThriftStructMeta
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\cpp\MinimizePadding' => \thrift\annotation\cpp\MinimizePadding::fromShape(
           shape(
           )

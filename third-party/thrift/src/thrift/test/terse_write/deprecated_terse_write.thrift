@@ -17,6 +17,9 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/test/terse_write/terse_write.thrift"
 
+@thrift.Experimental
+package "apache.org/thrift/test"
+
 namespace cpp2 apache.thrift.test.deprecated_terse_write
 
 @thrift.TerseWrite

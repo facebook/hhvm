@@ -28,6 +28,7 @@ struct FieldRefStruct {
   2: optional i32 optional_i32;
   @thrift.Box
   3: optional i32 boxed_i32;
+  @thrift.Experimental
   @thrift.TerseWrite
   4: i32 terse_i32;
 }

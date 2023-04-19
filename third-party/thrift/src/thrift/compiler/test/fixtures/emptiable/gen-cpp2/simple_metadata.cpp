@@ -121,6 +121,7 @@ StructMetadata<::apache::thrift::test::EmptiableTerseStruct>::gen(ThriftMetadata
     field.structured_annotations() = f.structured_annotations;
     simple_EmptiableTerseStruct.fields()->push_back(std::move(field));
   }
+  simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {}).cv_struct_ref());
   simple_EmptiableTerseStruct.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {}).cv_struct_ref());
   return res.first->second;
 }

@@ -19,6 +19,7 @@ include "thrift/annotation/java.thrift"
 include "thrift/annotation/compat.thrift"
 include "thrift/lib/java/test-common/test_common.thrift"
 
+@thrift.Experimental
 package "test.dev/thrift/lib/java/test/enums"
 
 namespace java.swift com.facebook.thrift.test.enums

@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.Experimental
 package "facebook.com/thrift/test/terse_write/deprecated"
 
 enum MyEnum {

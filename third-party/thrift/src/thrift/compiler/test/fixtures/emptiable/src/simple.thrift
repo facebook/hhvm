@@ -42,6 +42,7 @@ struct EmptiableStruct {
   14: optional MyStruct struct_field;
 }
 
+@thrift.Experimental
 @thrift.TerseWrite
 struct EmptiableTerseStruct {
   1: bool bool_field;

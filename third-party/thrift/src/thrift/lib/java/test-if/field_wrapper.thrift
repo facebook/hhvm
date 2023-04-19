@@ -132,6 +132,7 @@ struct WrappedTestStruct {
   17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 }
 
+@thrift.Experimental
 @thrift.TerseWrite
 struct TerseWrappedTestStruct {
   1001: i32 context;
@@ -202,6 +203,7 @@ struct TerseWrappedTestStruct {
   17: doubleAdaptedIntList wrappedDoubleAdaptedIntList_field;
 }
 
+@thrift.Experimental
 @thrift.TerseWrite
 struct MutableTerseWrappedTestStruct {
   1001: i32 context;

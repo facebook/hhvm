@@ -84,6 +84,7 @@ struct AdapterClearTestStruct {
   2: string meta;
 }
 
+@thrift.Experimental
 @thrift.TerseWrite
 struct TerseWriteField {
   1: i32 field_1;

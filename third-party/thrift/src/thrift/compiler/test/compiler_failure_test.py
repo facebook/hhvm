@@ -1465,6 +1465,9 @@ class CompilerFailureTest(unittest.TestCase):
                 include "thrift/annotation/cpp.thrift"
                 include "thrift/annotation/thrift.thrift"
 
+                @thrift.Experimental
+                package "apache.org/thrift/test"
+
                 struct MyStruct {
                     1: i32 field1 = 1;
                 }
@@ -1500,18 +1503,18 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             textwrap.dedent(
-                "[WARNING:foo.thrift:11] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
-                "[ERROR:foo.thrift:11] The `@thrift.Box` annotation cannot be combined with the other reference annotations."
+                "[WARNING:foo.thrift:14] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
+                "[ERROR:foo.thrift:14] The `@thrift.Box` annotation cannot be combined with the other reference annotations."
                 " Only annotate a single reference annotations from `field`.\n"
-                "[ERROR:foo.thrift:12] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
+                "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
                 " Only annotate a single reference annotations from `field2`.\n"
-                "[ERROR:foo.thrift:12] The `@thrift.InternBox` annotation can only be used with a struct field.\n"
-                "[ERROR:foo.thrift:12] The `@thrift.InternBox` annotation can only be used with unqualified or terse fields."
+                "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation can only be used with a struct field.\n"
+                "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation can only be used with unqualified or terse fields."
                 " Make sure `field2` is unqualified or annotated with `@thrift.TerseWrite`.\n"
-                "[ERROR:foo.thrift:15] The `@thrift.InternBox` annotation currently does not support a field with custom default.\n"
-                "[ERROR:foo.thrift:17] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
+                "[ERROR:foo.thrift:18] The `@thrift.InternBox` annotation currently does not support a field with custom default.\n"
+                "[ERROR:foo.thrift:20] The `@thrift.InternBox` annotation cannot be combined with the other reference annotations."
                 " Only annotate a single reference annotations from `field4`.\n"
-                "[ERROR:foo.thrift:17] The `thrift.box` annotation can only be used with optional fields. Make sure `field4` is optional.\n"
+                "[ERROR:foo.thrift:20] The `thrift.box` annotation can only be used with optional fields. Make sure `field4` is optional.\n"
             ),
         )
 
@@ -1828,6 +1831,9 @@ class CompilerFailureTest(unittest.TestCase):
                 """\
                 include "thrift/annotation/thrift.thrift"
 
+                @thrift.Experimental
+                package "apache.org/thrift/test"
+
                 struct TerseFields {
                     @thrift.TerseWrite
                     1: i64 field1;
@@ -1850,11 +1856,11 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:foo.thrift:6] `@thrift.TerseWrite` cannot be used with qualified fields. "
+            "[ERROR:foo.thrift:9] `@thrift.TerseWrite` cannot be used with qualified fields. "
             "Remove `optional` qualifier from field `field2`.\n"
-            "[ERROR:foo.thrift:8] `@thrift.TerseWrite` cannot be used with qualified fields. "
+            "[ERROR:foo.thrift:11] `@thrift.TerseWrite` cannot be used with qualified fields. "
             "Remove `required` qualifier from field `field3`.\n"
-            "[ERROR:foo.thrift:13] `@thrift.TerseWrite` cannot be applied to union fields (in `TerseUnion`).\n",
+            "[ERROR:foo.thrift:16] `@thrift.TerseWrite` cannot be applied to union fields (in `TerseUnion`).\n",
         )
 
     def test_interaction_nesting(self):

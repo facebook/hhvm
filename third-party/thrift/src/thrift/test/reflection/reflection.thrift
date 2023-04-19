@@ -161,6 +161,7 @@ struct struct1 {
 }
 
 struct struct2 {
+  @thrift.Experimental
   @thrift.TerseWrite
   1: i32 fieldA;
   2: string fieldB;

@@ -61,6 +61,7 @@ struct CustomDefault {
   1: string field = "default";
 }
 
+@thrift.Experimental
 @thrift.TerseWrite
 struct TerseWrite {
   1: i32 field;

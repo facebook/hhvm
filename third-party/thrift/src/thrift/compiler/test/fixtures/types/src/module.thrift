@@ -111,6 +111,7 @@ struct MinPadding {
   5: required byte tiny;
 }
 
+@thrift.Experimental
 @cpp.MinimizePadding
 @thrift.TerseWrite
 struct MinPaddingWithCustomType {

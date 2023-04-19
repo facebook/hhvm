@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.Experimental
 package "facebook.com/thrift/test"
 
 namespace cpp2 apache.thrift.test

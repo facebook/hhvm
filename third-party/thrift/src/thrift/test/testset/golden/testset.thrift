@@ -9,6 +9,9 @@ include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
 
+@thrift.Experimental
+package "apache.org/thrift/test/testset"
+
 namespace cpp2 apache.thrift.test.testset
 namespace py3 thrift.test
 namespace php apache_thrift

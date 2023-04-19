@@ -18,6 +18,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/conformance/if/any.thrift"
 include "thrift/annotation/java.thrift"
 
+@thrift.Experimental
 package "test.dev/thrift/lib/java/test/terse"
 
 namespace java.swift com.facebook.thrift.test.terse

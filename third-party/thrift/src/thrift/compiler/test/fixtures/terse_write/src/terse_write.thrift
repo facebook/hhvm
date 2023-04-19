@@ -18,6 +18,7 @@ include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
 
+@thrift.Experimental
 package "facebook.com/thrift/test/terse_write"
 
 enum MyEnum {

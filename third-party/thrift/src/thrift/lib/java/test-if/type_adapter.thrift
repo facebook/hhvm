@@ -17,7 +17,11 @@
 namespace java.swift com.facebook.thrift.test.adapter
 
 include "thrift/annotation/java.thrift"
+include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/any.thrift"
+
+@thrift.Experimental
+package "facebook.com/thrift/test/adapter"
 
 enum TestEnum {
   ZERO = 0,

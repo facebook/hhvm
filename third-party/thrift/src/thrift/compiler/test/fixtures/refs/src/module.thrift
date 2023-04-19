@@ -111,6 +111,7 @@ struct StructWithBox {
   3: optional StructWithRef c (thrift.box);
 }
 
+@thrift.Experimental
 struct StructWithInternBox {
   @thrift.InternBox
   1: Empty field1;
@@ -124,6 +125,7 @@ struct StructWithInternBox {
   4: MyField field4;
 }
 
+@thrift.Experimental
 struct AdaptedStructWithInternBox {
   @cpp.Adapter{name = "::my::Adapter1"}
   @thrift.InternBox

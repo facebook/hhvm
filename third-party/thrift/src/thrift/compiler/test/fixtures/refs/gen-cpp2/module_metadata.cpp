@@ -327,6 +327,7 @@ StructMetadata<::cpp2::StructWithInternBox>::gen(ThriftMetadata& metadata) {
     field.structured_annotations() = f.structured_annotations;
     module_StructWithInternBox.fields()->push_back(std::move(field));
   }
+  module_StructWithInternBox.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
@@ -354,6 +355,7 @@ StructMetadata<::cpp2::AdaptedStructWithInternBox>::gen(ThriftMetadata& metadata
     field.structured_annotations() = f.structured_annotations;
     module_AdaptedStructWithInternBox.fields()->push_back(std::move(field));
   }
+  module_AdaptedStructWithInternBox.structured_annotations()->push_back(*cvStruct("thrift.Experimental", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

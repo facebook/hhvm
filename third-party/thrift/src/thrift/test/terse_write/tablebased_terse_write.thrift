@@ -16,6 +16,9 @@
 
 include "thrift/annotation/thrift.thrift"
 
+@thrift.Experimental
+package "apache.org/thrift/test"
+
 namespace cpp2 apache.thrift.test.tablebased_terse_write
 
 typedef binary (cpp2.type = "folly::IOBuf") IOBuf

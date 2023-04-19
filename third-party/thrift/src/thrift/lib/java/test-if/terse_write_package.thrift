@@ -17,7 +17,7 @@
 include "thrift/annotation/thrift.thrift"
 
 @thrift.TerseWrite
-
+@thrift.Experimental
 package "test.dev/thrift/lib/java/test/terse"
 
 namespace java.swift com.facebook.thrift.test.terse

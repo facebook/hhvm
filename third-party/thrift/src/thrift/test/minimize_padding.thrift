@@ -124,6 +124,7 @@ struct nonoptimal_large_struct_noexcept_move {
   5: required i32 a;
 } (cpp.minimize_padding)
 
+@thrift.Experimental
 @thrift.TerseWrite
 struct enums {
   1: byte_enum byte_enum_field;
@@ -131,6 +132,7 @@ struct enums {
   3: short_enum short_enum_field;
 }
 
+@thrift.Experimental
 @cpp.MinimizePadding
 @thrift.TerseWrite
 struct minimized_enums {

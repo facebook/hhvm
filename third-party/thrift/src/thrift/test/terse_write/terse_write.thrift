@@ -19,6 +19,7 @@ include "thrift/annotation/thrift.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
 
+@thrift.Experimental
 package "facebook.com/thrift/test"
 
 namespace cpp2 apache.thrift.test.terse_write

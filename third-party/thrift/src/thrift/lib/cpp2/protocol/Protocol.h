@@ -278,7 +278,7 @@ inline bool canReadNElements(
 }
 
 /*
- * Skip n tuples - used for skpping lists, sets, maps.
+ * Skip n tuples - used for skipping lists, sets, maps.
  *
  * As with skip(), protocols can specialize.
  */

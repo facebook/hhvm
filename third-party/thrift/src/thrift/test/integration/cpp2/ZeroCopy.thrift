@@ -15,13 +15,15 @@
  */
 
 include "common/fb303/if/fb303.thrift"
+include "thrift/annotation/cpp.thrift"
 
 namespace cpp thrift.zerocopy
 namespace cpp2 thrift.zerocopy.cpp2
 
 cpp_include "folly/io/IOBuf.h"
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
 
 service ZeroCopyService extends fb303.FacebookService {
   IOBuf echo(1: IOBuf data);

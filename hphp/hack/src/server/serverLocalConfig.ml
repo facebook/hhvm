@@ -433,6 +433,8 @@ type t = {
       (** The whether to use the hook that prefetches files on an Eden checkout *)
   produce_streaming_errors: bool;
       (** whether hh_server should write errors to errors.bin file *)
+  consume_streaming_errors: bool;
+      (** whether hh_client should read errors from errors.bin file *)
   recheck_capture: RecheckCapture.t;
       (** Settings controlling how and whether we capture the recheck environment *)
   remote_nonce: Int64.t;
@@ -575,6 +577,7 @@ let default =
     defer_class_declaration_threshold = None;
     prefetch_deferred_files = false;
     produce_streaming_errors = true;
+    consume_streaming_errors = false;
     recheck_capture = RecheckCapture.default;
     remote_nonce = Int64.zero;
     remote_type_check = RemoteTypeCheck.default;
@@ -1079,6 +1082,12 @@ let load_
       ~default:default.produce_streaming_errors
       config
   in
+  let consume_streaming_errors =
+    bool_
+      "consume_streaming_errors"
+      ~default:default.consume_streaming_errors
+      config
+  in
   let recheck_capture =
     RecheckCapture.load ~current_version ~default:default.recheck_capture config
   in
@@ -1468,6 +1477,7 @@ let load_
     defer_class_declaration_threshold;
     prefetch_deferred_files;
     produce_streaming_errors;
+    consume_streaming_errors;
     recheck_capture;
     remote_nonce;
     remote_type_check;

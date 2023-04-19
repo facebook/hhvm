@@ -755,7 +755,8 @@ let main (args : client_check_env) (local_config : ServerLocalConfig.t) :
          changes up until now; it has no guarantee that the typecheck will reflects our
          preceding call to Rpc.NO_PRECHECKED_FILES. *)
       let use_streaming =
-        local_config.ServerLocalConfig.ide_standalone
+        (local_config.ServerLocalConfig.consume_streaming_errors
+        || local_config.ServerLocalConfig.ide_standalone)
         && (not args.output_json)
         && prechecked
       in

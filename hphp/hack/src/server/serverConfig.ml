@@ -37,6 +37,8 @@ type t = {
   warn_on_non_opt_build: bool;
   (* clientIdeDaemon will fall back to performing a full index of files to construct a naming table if it fails to load one. *)
   ide_fall_back_to_full_index: bool;
+  (* when clientIdeDaemon loads a saved state, it also gets a list of the files changed since the saved state. When this option is set, the daemon will process all of these changes right away: the IDE won't be "initialized" and won't be responding to requests until these changes are processed. *)
+  ide_process_changes_sync: bool;
 }
 [@@deriving show]
 
@@ -322,6 +324,9 @@ let load ~silent options : t * ServerLocalConfig.t =
   let ide_fall_back_to_full_index =
     bool_ "ide_fall_back_to_full_index" ~default:true config
   in
+  let ide_process_changes_sync =
+    bool_ "ide_process_changes_sync" ~default:false config
+  in
   let formatter_override =
     Option.map
       (Config_file.Getters.string_opt "formatter_override" config)
@@ -533,6 +538,7 @@ let load ~silent options : t * ServerLocalConfig.t =
       extra_paths;
       warn_on_non_opt_build;
       ide_fall_back_to_full_index;
+      ide_process_changes_sync;
     },
     local_config )
 
@@ -552,7 +558,8 @@ let default_config =
     ignored_paths = [];
     extra_paths = [];
     warn_on_non_opt_build = false;
-    ide_fall_back_to_full_index = true;
+    ide_fall_back_to_full_index = false;
+    ide_process_changes_sync = false;
   }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -589,3 +596,5 @@ let version config = config.version
 let warn_on_non_opt_build config = config.warn_on_non_opt_build
 
 let ide_fall_back_to_full_index config = config.ide_fall_back_to_full_index
+
+let ide_process_changes_sync config = config.ide_process_changes_sync

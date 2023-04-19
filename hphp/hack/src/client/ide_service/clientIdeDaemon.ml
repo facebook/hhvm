@@ -175,8 +175,10 @@ type dstate = {
 
 type state =
   | Pending_init  (** We haven't yet received init request *)
-  | During_init of dstate  (** We're working on the init request *)
-  | Initialized of istate  (** Finished work on init request *)
+  | During_init of dstate
+      (** We're working on the init request. We're still in
+  the process of loading the saved state. *)
+  | Initialized of istate  (** Finished work on init request. *)
   | Failed_init of Lsp.Error.t  (** Failed request, with root cause *)
 
 type t = {

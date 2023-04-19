@@ -215,7 +215,7 @@
 
             const_cstr! {
                 SERVICE_NAME = "{{service:name}}";
-                METHOD_NAME = "{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}";
+                METHOD_NAME = "{{service:name}}.{{function:name}}";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

@@ -4279,7 +4279,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "ping";
+                METHOD_NAME = "MyService.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -4351,7 +4351,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "getRandomData";
+                METHOD_NAME = "MyService.getRandomData";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -4423,7 +4423,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "hasDataById";
+                METHOD_NAME = "MyService.hasDataById";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -4496,7 +4496,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "getDataById";
+                METHOD_NAME = "MyService.getDataById";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -4569,7 +4569,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "putDataById";
+                METHOD_NAME = "MyService.putDataById";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -4643,7 +4643,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "lobDataById";
+                METHOD_NAME = "MyService.lobDataById";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -4717,7 +4717,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyService";
-                METHOD_NAME = "doNothing";
+                METHOD_NAME = "MyService.doNothing";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5126,7 +5126,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyServicePrioParent";
-                METHOD_NAME = "ping";
+                METHOD_NAME = "MyServicePrioParent.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5198,7 +5198,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyServicePrioParent";
-                METHOD_NAME = "pong";
+                METHOD_NAME = "MyServicePrioParent.pong";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5545,7 +5545,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyServicePrioChild";
-                METHOD_NAME = "pang";
+                METHOD_NAME = "MyServicePrioChild.pang";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -6229,7 +6229,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "BadService";
-                METHOD_NAME = "bar";
+                METHOD_NAME = "BadService.bar";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

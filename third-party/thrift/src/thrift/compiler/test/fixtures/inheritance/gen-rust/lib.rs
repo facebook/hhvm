@@ -1448,7 +1448,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyRoot";
-                METHOD_NAME = "do_root";
+                METHOD_NAME = "MyRoot.do_root";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1790,7 +1790,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyNode";
-                METHOD_NAME = "do_mid";
+                METHOD_NAME = "MyNode.do_mid";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -2143,7 +2143,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "MyLeaf";
-                METHOD_NAME = "do_leaf";
+                METHOD_NAME = "MyLeaf.do_leaf";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

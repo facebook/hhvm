@@ -1713,7 +1713,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "mapList";
+                METHOD_NAME = "NestedContainers.mapList";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1786,7 +1786,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "mapSet";
+                METHOD_NAME = "NestedContainers.mapSet";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1859,7 +1859,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "listMap";
+                METHOD_NAME = "NestedContainers.listMap";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1932,7 +1932,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "listSet";
+                METHOD_NAME = "NestedContainers.listSet";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -2005,7 +2005,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "NestedContainers";
-                METHOD_NAME = "turtles";
+                METHOD_NAME = "NestedContainers.turtles";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

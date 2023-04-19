@@ -5060,7 +5060,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "returnstream";
+                METHOD_NAME = "PubSubStreamingService.returnstream";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5173,7 +5173,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "streamthrows";
+                METHOD_NAME = "PubSubStreamingService.streamthrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5291,7 +5291,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "servicethrows";
+                METHOD_NAME = "PubSubStreamingService.servicethrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5407,7 +5407,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "servicethrows2";
+                METHOD_NAME = "PubSubStreamingService.servicethrows2";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5527,7 +5527,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "boththrows";
+                METHOD_NAME = "PubSubStreamingService.boththrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5649,7 +5649,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "responseandstreamstreamthrows";
+                METHOD_NAME = "PubSubStreamingService.responseandstreamstreamthrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5767,7 +5767,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "responseandstreamservicethrows";
+                METHOD_NAME = "PubSubStreamingService.responseandstreamservicethrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -5883,7 +5883,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "responseandstreamboththrows";
+                METHOD_NAME = "PubSubStreamingService.responseandstreamboththrows";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -6005,7 +6005,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "PubSubStreamingService";
-                METHOD_NAME = "returnstreamFast";
+                METHOD_NAME = "PubSubStreamingService.returnstreamFast";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

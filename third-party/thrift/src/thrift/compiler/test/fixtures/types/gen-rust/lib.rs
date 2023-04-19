@@ -861,7 +861,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "SomeService";
-                METHOD_NAME = "bounce_map";
+                METHOD_NAME = "SomeService.bounce_map";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -934,7 +934,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "SomeService";
-                METHOD_NAME = "binary_keyed_map";
+                METHOD_NAME = "SomeService.binary_keyed_map";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

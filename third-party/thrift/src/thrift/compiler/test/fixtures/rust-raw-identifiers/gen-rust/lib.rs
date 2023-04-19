@@ -846,7 +846,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Foo";
-                METHOD_NAME = "return";
+                METHOD_NAME = "Foo.return";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -919,7 +919,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Foo";
-                METHOD_NAME = "super";
+                METHOD_NAME = "Foo.super";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

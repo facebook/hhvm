@@ -1352,7 +1352,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "Service";
-                METHOD_NAME = "func";
+                METHOD_NAME = "Service.func";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1742,7 +1742,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "AdapterService";
-                METHOD_NAME = "count";
+                METHOD_NAME = "AdapterService.count";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),
@@ -1814,7 +1814,7 @@ pub mod server {
 
             const_cstr! {
                 SERVICE_NAME = "AdapterService";
-                METHOD_NAME = "adaptedTypes";
+                METHOD_NAME = "AdapterService.adaptedTypes";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
                 SERVICE_NAME.as_cstr(),

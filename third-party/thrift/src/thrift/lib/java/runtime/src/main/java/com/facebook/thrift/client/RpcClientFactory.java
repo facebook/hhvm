@@ -114,7 +114,7 @@ public interface RpcClientFactory {
 
     public RpcClientFactory build() {
       Objects.requireNonNull(thriftClientConfig, "ThriftClientConfig is required");
-      Objects.requireNonNull(thriftClientStats, "ThriftClientConfig is required");
+      Objects.requireNonNull(thriftClientStats, "thriftClientStats is required");
 
       RpcClientFactory rpcClientFactory;
       if (disableRSocket) {

@@ -130,80 +130,6 @@ function usage(): string {
   return "usage: {$argv[0]} [-m jit|interp] [-r] <test/directories>";
 }
 
-function help(): string {
-  $argv = get_argv();
-  $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
-  $help = <<<EOT
-
-
-This is the hhvm test-suite runner.  For more detailed documentation,
-see hphp/test/README.md.
-
-The test argument may be a path to a php test file, a directory name, or
-one of a few pre-defined suite names that this script knows about.
-
-If you work with hhvm a lot, you might consider a bash alias:
-
-   alias htest="path/to/hphp/test/run"
-
-Examples:
-
-  # Quick tests in JIT mode:
-  % {$argv[0]} test/quick
-
-  # Slow tests in interp mode:
-  % {$argv[0]} -m interp test/slow
-
-  # PHP specification tests in JIT mode:
-  % {$argv[0]} test/slow/spec
-
-  # Slow closure tests in JIT mode:
-  % {$argv[0]} test/slow/closure
-
-  # Slow closure tests in JIT mode with RepoAuthoritative:
-  % {$argv[0]} -r test/slow/closure
-
-  # Slow array tests, in RepoAuthoritative:
-  % {$argv[0]} -r test/slow/array
-
-  # Zend tests with a "z" in their name:
-  % {$argv[0]} $ztestexample
-
-  # Quick tests in JIT mode with some extra runtime options:
-  % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
-
-  # Quick tests in JIT mode with RepoAuthoritative and an extra compile-time option:
-  % {$argv[0]} test/quick -r --compiler-args '--log=4'
-
-  # All quick tests except debugger
-  % {$argv[0]} -e debugger test/quick
-
-  # All tests except those containing a string of 3 digits
-  % {$argv[0]} -E '/\d{3}/' all
-
-  # All tests whose name containing pdo_mysql
-  % {$argv[0]} -i pdo_mysql -m jit -r zend
-
-  # Print all the standard tests
-  % {$argv[0]} --list-tests
-
-  # Use a specific HHVM binary
-  % {$argv[0]} -b ~/code/hhvm/hphp/hhvm/hhvm
-  % {$argv[0]} --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
-
-  # Use retranslate all.  Run the test n times, then run retranslate all, then
-  # run the test n more on the new code.
-  % {$argv[0]} --retranslate-all 2 quick
-
-  # Use jit-serialize.  Run the test n times, then run retranslate all, run the
-  # test once more, serialize all profile data, and then restart hhvm, load the
-  # serialized state and run retranslate-all before starting the test.
-  % {$argv[0]} --jit-serialize  2 -r quick
-EOT;
-
-  return usage().$help;
-}
-
 function error(string $message): noreturn {
   print "$message\n";
   exit(1);
@@ -263,9 +189,9 @@ function check_for_multiple_default_binaries(): void {
     }
   }
 
-  if (count($found) <= 1) {
-    return;
-  }
+  // emacs hack mode thinks <= is some kind of anchor and messes up
+  // parsing after it...
+  if (!(count($found) > 1)) return;
 
   $msg = "Multiple binaries exist in this repo. \n";
   foreach ($found as $bin) {
@@ -2052,6 +1978,7 @@ final class Status {
     fwrite(STDERR, implode("", $data));
   }
 
+  <<__Memoize>>
   public static function hasCursorControl(): bool {
     // for runs on hudson-ci.org (aka jenkins).
     if (getenv("HUDSON_URL")) {
@@ -2065,7 +1992,8 @@ final class Status {
     if (!$stty) {
       return false;
     }
-    return strpos($stty, 'erase = <undef>') === false;
+    // emacs hack-mode really doesn't like <undef> inside a string...
+    return strpos($stty, 'erase = ' . '<' . 'undef' . '>') === false;
   }
 
   <<__Memoize>>
@@ -4154,6 +4082,80 @@ function main(vec<string> $argv): int {
 <<__EntryPoint>>
 function run_main(): void {
   exit(main(get_argv()));
+}
+
+function help(): string {
+  $argv = get_argv();
+  $ztestexample = 'test/zend/good/*/*z*.php'; // sep. for syntax highlighting.
+  $help = <<<EOT
+
+
+This is the hhvm test-suite runner.  For more detailed documentation,
+see hphp/test/README.md.
+
+The test argument may be a path to a php test file, a directory name, or
+one of a few pre-defined suite names that this script knows about.
+
+If you work with hhvm a lot, you might consider a bash alias:
+
+   alias htest="path/to/hphp/test/run"
+
+Examples:
+
+  # Quick tests in JIT mode:
+  % {$argv[0]} test/quick
+
+  # Slow tests in interp mode:
+  % {$argv[0]} -m interp test/slow
+
+  # PHP specification tests in JIT mode:
+  % {$argv[0]} test/slow/spec
+
+  # Slow closure tests in JIT mode:
+  % {$argv[0]} test/slow/closure
+
+  # Slow closure tests in JIT mode with RepoAuthoritative:
+  % {$argv[0]} -r test/slow/closure
+
+  # Slow array tests, in RepoAuthoritative:
+  % {$argv[0]} -r test/slow/array
+
+  # Zend tests with a "z" in their name:
+  % {$argv[0]} $ztestexample
+
+  # Quick tests in JIT mode with some extra runtime options:
+  % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
+
+  # Quick tests in JIT mode with RepoAuthoritative and an extra compile-time option:
+  % {$argv[0]} test/quick -r --compiler-args '--log=4'
+
+  # All quick tests except debugger
+  % {$argv[0]} -e debugger test/quick
+
+  # All tests except those containing a string of 3 digits
+  % {$argv[0]} -E '/\d{3}/' all
+
+  # All tests whose name containing pdo_mysql
+  % {$argv[0]} -i pdo_mysql -m jit -r zend
+
+  # Print all the standard tests
+  % {$argv[0]} --list-tests
+
+  # Use a specific HHVM binary
+  % {$argv[0]} -b ~/code/hhvm/hphp/hhvm/hhvm
+  % {$argv[0]} --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
+
+  # Use retranslate all.  Run the test n times, then run retranslate all, then
+  # run the test n more on the new code.
+  % {$argv[0]} --retranslate-all 2 quick
+
+  # Use jit-serialize.  Run the test n times, then run retranslate all, run the
+  # test once more, serialize all profile data, and then restart hhvm, load the
+  # serialized state and run retranslate-all before starting the test.
+  % {$argv[0]} --jit-serialize  2 -r quick
+EOT;
+
+  return usage().$help;
 }
 
 // Inline ASCII art moved to end-of-file to avoid confusing emacs.

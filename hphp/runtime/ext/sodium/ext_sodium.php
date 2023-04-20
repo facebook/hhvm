@@ -564,3 +564,20 @@ function sodium_crypto_secretstream_xchacha20poly1305_pull(inout mixed $state, s
 // Renew the symmetric key used in the secretstream.
 <<__Native>>
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(inout mixed $state): void;
+
+///// Ed25519 primitives.
+
+<<__Native>>
+function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_scalar_add(string $scalar_a, string $scalar_b): string;
+
+<<__Native>>
+function sodium_crypto_core_ed25519_scalar_mul(string $scalar_a, string $scalar_b): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ed25519_base(string $scalar): string;
+
+<<__Native>>
+function sodium_crypto_scalarmult_ed25519_base_noclamp(string $scalar): string;

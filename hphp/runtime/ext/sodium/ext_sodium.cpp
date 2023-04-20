@@ -2108,6 +2108,101 @@ void HHVM_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey,
 }
 #endif // crypto_secretstream_xchacha20poly1305_KEYBYTES
 
+#ifdef crypto_core_ed25519_SCALARBYTES
+const StaticString s_crypto_core_ed25519_scalar_size(
+  "scalars must be crypto_core_ed25519_SCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ed25519_scalar_add,
+                     const String& x,
+                     const String& y) {
+
+  if (
+    x.size() != crypto_core_ed25519_SCALARBYTES ||
+    y.size() != crypto_core_ed25519_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ed25519_scalar_size);
+  }
+
+  String r(crypto_core_ed25519_SCALARBYTES, ReserveString);
+  crypto_core_ed25519_scalar_add(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ed25519_SCALARBYTES);
+  return r;
+}
+
+String HHVM_FUNCTION(sodium_crypto_core_ed25519_scalar_mul,
+                     const String& x,
+                     const String& y) {
+
+  if (
+    x.size() != crypto_core_ed25519_SCALARBYTES ||
+    y.size() != crypto_core_ed25519_SCALARBYTES
+  ) {
+    throwSodiumException(s_crypto_core_ed25519_scalar_size);
+  }
+
+  String r(crypto_core_ed25519_SCALARBYTES, ReserveString);
+  crypto_core_ed25519_scalar_mul(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data()),
+    reinterpret_cast<const unsigned char*>(y.data())
+  );
+  r.setSize(crypto_core_ed25519_SCALARBYTES);
+  return r;
+}
+
+const StaticString s_crypto_core_ed25519_scalar_nonreduced_size(
+  "non-reduced scalars must be crypto_core_ed25519_NONREDUCEDSCALARBYTES bytes"
+);
+
+String HHVM_FUNCTION(sodium_crypto_core_ed25519_scalar_reduce,
+                     const String& x) {
+  if (x.size() != crypto_core_ed25519_NONREDUCEDSCALARBYTES) {
+    throwSodiumException(s_crypto_core_ed25519_scalar_nonreduced_size);
+  }
+  String r(crypto_core_ed25519_SCALARBYTES, ReserveString);
+  crypto_core_ed25519_scalar_reduce(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data())
+  );
+  r.setSize(crypto_core_ed25519_SCALARBYTES);
+  return r;
+}
+
+String HHVM_FUNCTION(sodium_crypto_scalarmult_ed25519_base_noclamp,
+                     const String& x) {
+  if (x.size() != crypto_core_ed25519_SCALARBYTES) {
+    throwSodiumException(s_crypto_core_ed25519_scalar_size);
+  }
+  String r(crypto_core_ed25519_BYTES, ReserveString);
+  crypto_scalarmult_ed25519_base_noclamp(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data())
+  );
+  r.setSize(crypto_core_ed25519_BYTES);
+  return r;
+}
+
+String HHVM_FUNCTION(sodium_crypto_scalarmult_ed25519_base,
+                     const String& x) {
+  if (x.size() != crypto_core_ed25519_SCALARBYTES) {
+    throwSodiumException(s_crypto_core_ed25519_scalar_size);
+  }
+  String r(crypto_core_ed25519_BYTES, ReserveString);
+  crypto_scalarmult_ed25519_base_noclamp(
+    reinterpret_cast<unsigned char*>(r.mutableData()),
+    reinterpret_cast<const unsigned char*>(x.data())
+  );
+  r.setSize(crypto_core_ed25519_BYTES);
+  return r;
+}
+
+#endif // crypto_core_ed25519_SCALARBYTES
+
 struct SodiumExtension final : Extension {
   SodiumExtension() : Extension("sodium", "7.2-hhvm1") {}
 
@@ -2393,6 +2488,26 @@ struct SodiumExtension final : Extension {
     HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_pull);
     HHVM_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey);
 #endif // crypto_secretstream_xchacha20poly1305_KEYBYTES
+
+#ifdef crypto_core_ed25519_SCALARBYTES
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_ED25519_SCALARBYTES,
+      crypto_core_ed25519_SCALARBYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_ED25519_NONREDUCEDSCALARBYTES,
+      crypto_core_ed25519_NONREDUCEDSCALARBYTES
+    );
+    HHVM_RC_INT(
+      SODIUM_CRYPTO_CORE_ED25519_BYTES,
+      crypto_core_ed25519_BYTES
+    );
+    HHVM_FE(sodium_crypto_core_ed25519_scalar_reduce);
+    HHVM_FE(sodium_crypto_core_ed25519_scalar_mul);
+    HHVM_FE(sodium_crypto_core_ed25519_scalar_add);
+    HHVM_FE(sodium_crypto_scalarmult_ed25519_base);
+    HHVM_FE(sodium_crypto_scalarmult_ed25519_base_noclamp);
+#endif // crypto_core_ed25519_SCALARBYTES
 
     loadSystemlib();
   }

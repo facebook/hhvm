@@ -997,13 +997,13 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
           $$,
           $_val0 ==> $_val0
             |> Foo::__fromShape($$),
-        ) |> vec($$),
+        ),
       $shape['map_of_string_to_struct_foo']
         |> Dict\map(
           $$,
           $_val1 ==> $_val1
             |> Foo::__fromShape($$),
-        ) |> dict($$),
+        ),
     );
   }
 
@@ -1012,18 +1012,14 @@ class TestStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
       'foo_struct' => $this->foo_struct?->__toShape(),
       'union_value' => $this->union_value?->__toShape(),
       'list_of_struct_foo' => $this->list_of_struct_foo
-        |> (
-          Vec\map(
-            $$,
-            ($_val0) ==> $_val0->__toShape(),
-          ) |> vec($$)
+        |> Vec\map(
+          $$,
+          ($_val0) ==> $_val0->__toShape(),
         ),
       'map_of_string_to_struct_foo' => $this->map_of_string_to_struct_foo
-        |> (
-          Dict\map(
-            $$,
-            ($_val0) ==> $_val0->__toShape(),
-          ) |> dict($$)
+        |> Dict\map(
+          $$,
+          ($_val0) ==> $_val0->__toShape(),
         ),
     );
   }

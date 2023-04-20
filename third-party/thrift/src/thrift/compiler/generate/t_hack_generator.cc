@@ -3230,22 +3230,10 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
 
   indent_down();
   indent(out) << ")";
-  if (no_use_hack_collections_) {
-    if (t->is_map()) {
-      out << " |> dict($$)";
-    } else {
-      out << " |> vec($$)";
-    }
-  }
 }
 
 void t_hack_generator::generate_shape_from_hack_array_lambda(
     std::ostream& out, t_name_generator& namer, const t_type* t) {
-  if (no_use_hack_collections_) {
-    out << "(\n";
-    indent_up();
-    indent(out);
-  }
   if (t->is_map()) {
     out << "Dict\\map(\n";
   } else {
@@ -3278,14 +3266,6 @@ void t_hack_generator::generate_shape_from_hack_array_lambda(
   }
 
   indent_down();
-  if (no_use_hack_collections_) {
-    if (t->is_map()) {
-      indent(out) << ") |> dict($$)\n";
-    } else {
-      indent(out) << ") |> vec($$)\n";
-    }
-    indent_down();
-  }
   indent(out) << "),\n";
 }
 

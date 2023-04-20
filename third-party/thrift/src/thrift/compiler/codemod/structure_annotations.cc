@@ -48,7 +48,8 @@ class structure_annotations {
         bool has_cpp_type = false;
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
-          if (!std::exchange(has_cpp_type, true)) {
+          if (type->get_true_type()->is_container() &&
+              !std::exchange(has_cpp_type, true)) {
             to_add.insert(
                 fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));
             fm_.add_include("thrift/annotation/cpp.thrift");
@@ -81,7 +82,8 @@ class structure_annotations {
         bool has_cpp_type = false;
         if (name == "cpp.template" || name == "cpp2.template") {
           to_remove.emplace_back(name, data);
-          if (!is_field && !std::exchange(has_cpp_type, true)) {
+          if (!is_field && type->get_true_type()->is_container() &&
+              !std::exchange(has_cpp_type, true)) {
             to_add.insert(
                 fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));
             fm_.add_include("thrift/annotation/cpp.thrift");

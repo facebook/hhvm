@@ -44,9 +44,10 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 typedef i32 (cpp.type = "bar") bar
 
                 struct S {
-                    1: i32 (cpp.template = "baz") baz;
-                    2: i32 qux (cpp.template = "oops!");
+                    1: i32 (cpp.type = "baz") baz;
+                    2: i32 qux (cpp.type = "oops!");
                     3: foo noAdd;
+                    4: i32 (cpp.template = "oops!") notContainer;
                 }
 
                 """
@@ -68,10 +69,11 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 typedef i32  bar
 
                 struct S {
-                    @cpp.Type{template = "baz"}
+                    @cpp.Type{name = "baz"}
                     1: i32  baz;
                     2: i32 qux ;
                     3: foo noAdd;
+                    4: i32  notContainer;
                 }
                 """
             ),

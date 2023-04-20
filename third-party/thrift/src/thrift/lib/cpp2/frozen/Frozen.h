@@ -1083,6 +1083,17 @@ void thawField(
 }
 
 /**
+ * Helper for thawing a ref field into a boxed field
+ */
+template <class T>
+void thawField(
+    ViewPosition self,
+    const Field<T>& f,
+    optional_boxed_field_ref<T&> out) {
+  f.layout.thaw(self(f.pos), out);
+}
+
+/**
  * Type alias for a View object which can be treated like a 'const T*', but for
  * Frozen types. Note that like raw pointers, this does not own the referenced
  * memory, it only points to it.

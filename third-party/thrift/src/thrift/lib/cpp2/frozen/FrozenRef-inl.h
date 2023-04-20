@@ -365,7 +365,7 @@ struct SharedRefLayout : public RefLayout<T> {
 };
 
 /**
- * Layout specialization for std::unique_ptr<T>.
+ * Layout specialization for std::unique_ptr<T> and boxed field.
  */
 template <class T>
 struct UniqueRefLayout : public RefLayout<T> {
@@ -373,13 +373,8 @@ struct UniqueRefLayout : public RefLayout<T> {
   // as unique_ptr to save runtime space
   std::unique_ptr<Field<T>> ownedField_;
 
-  template <typename D>
-  FieldPosition layout(
-      LayoutRoot& root,
-      const std::unique_ptr<T, D>& pointer,
-      LayoutPosition self) {
+  FieldPosition layout(LayoutRoot& root, const T* ptr, LayoutPosition self) {
     FieldPosition pos = this->startFieldPosition();
-    auto ptr = pointer.get();
     if (!ptr) {
       pos = root.layoutField(self, pos, this->offsetField, kOffsetNull);
       return pos;
@@ -398,24 +393,50 @@ struct UniqueRefLayout : public RefLayout<T> {
   }
 
   template <typename D>
-  void freeze(
-      FreezeRoot& root,
-      const std::unique_ptr<T, D>& ptr,
-      FreezePosition self) const {
+  FieldPosition layout(
+      LayoutRoot& root, const std::unique_ptr<T, D>& ptr, LayoutPosition self) {
+    return layout(root, ptr.get(), self);
+  }
+
+  FieldPosition layout(
+      LayoutRoot& root,
+      apache::thrift::optional_boxed_field_ref<
+          const apache::thrift::detail::boxed_value_ptr<T>&> ref,
+      LayoutPosition self) {
+    return layout(root, ref ? &*ref : nullptr, self);
+  }
+
+  void freeze(FreezeRoot& root, const T* ptr, FreezePosition self) const {
     if (!ptr) {
       root.freezeField(self, this->offsetField, kOffsetNull);
       return;
     }
 
-    if (auto alreadyFrozen = root.freezePositionOf(ptr.get())) {
+    if (auto alreadyFrozen = root.freezePositionOf(ptr)) {
       int64_t offset = alreadyFrozen->byteOffset(self);
       root.freezeField(self, this->offsetField, this->encodeOffset(offset));
     } else {
-      this->freezeValueField(root, self, ptr.get());
+      this->freezeValueField(root, self, ptr);
     }
   }
 
-  template <class D>
+  template <typename D>
+  void freeze(
+      FreezeRoot& root,
+      const std::unique_ptr<T, D>& ptr,
+      FreezePosition self) const {
+    freeze(root, ptr.get(), self);
+  }
+
+  void freeze(
+      FreezeRoot& root,
+      apache::thrift::optional_boxed_field_ref<
+          const apache::thrift::detail::boxed_value_ptr<T>&> ref,
+      FreezePosition self) const {
+    freeze(root, ref ? &*ref : nullptr, self);
+  }
+
+  template <typename D>
   void thaw(ViewPosition self, std::unique_ptr<T, D>& out) const {
     if (this->valueField_) {
       int64_t offset;
@@ -423,6 +444,20 @@ struct UniqueRefLayout : public RefLayout<T> {
       if (offset != kOffsetNull) {
         out = std::make_unique<T>();
         thawField(self(this->decodeOffset(offset)), *this->valueField_, *out);
+      }
+    }
+  }
+
+  void thaw(
+      ViewPosition self,
+      optional_boxed_field_ref<apache::thrift::detail::boxed_value_ptr<T>&> ref)
+      const {
+    if (this->valueField_) {
+      int64_t offset;
+      thawField(self, this->offsetField, offset);
+      if (offset != kOffsetNull) {
+        ref.emplace();
+        thawField(self(this->decodeOffset(offset)), *this->valueField_, *ref);
       }
     }
   }
@@ -466,7 +501,6 @@ struct UniqueRefLayout : public RefLayout<T> {
 
   View view(ViewPosition self) const { return View(this, self); }
 };
-
 } // namespace detail
 
 template <class T>
@@ -481,6 +515,12 @@ template <class T, class D>
 struct Layout<
     std::unique_ptr<T, D>,
     std::enable_if_t<!std::is_same<T, folly::IOBuf>::value>>
+    : public apache::thrift::frozen::detail::UniqueRefLayout<T> {};
+
+// Re-use UniqueRefLayout for boxed fields, as
+// apache::thrift::detail::boxed_value_ptr simply wraps around std::unique_ptr.
+template <class T>
+struct Layout<apache::thrift::detail::boxed_value_ptr<T>>
     : public apache::thrift::frozen::detail::UniqueRefLayout<T> {};
 
 } // namespace frozen

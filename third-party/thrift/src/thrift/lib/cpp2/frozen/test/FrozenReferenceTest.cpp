@@ -37,6 +37,13 @@ std::unique_ptr<Node> makeNode(int64_t id, const std::string& content) {
   return n;
 }
 
+BoxedNode makeBoxedNode(int64_t id, const std::string& content) {
+  BoxedNode b;
+  b.id() = id;
+  b.content() = content;
+  return b;
+}
+
 void fillTree(std::unique_ptr<Node>& node, int min, int max) {
   if (min >= max)
     return;
@@ -93,6 +100,36 @@ TEST(Frozen, simple_ref) {
   EXPECT_EQ(f2.thaw(), t);
 }
 
+TEST(Frozen, boxed) {
+  SimpleBoxed t;
+  Person p = Person();
+  p.name() = "boxed";
+  p.id() = 42;
+  t.boxed() = std::move(p);
+  {
+    auto f = freeze(t);
+    EXPECT_EQ(f.boxed()->name(), "boxed");
+  }
+  {
+    auto str = freezeToString(t);
+    auto f = mapFrozen<SimpleBoxed>(std::move(str));
+    EXPECT_EQ(f.boxed()->name(), "boxed");
+  }
+}
+
+TEST(Frozen, boxed_empty) {
+  SimpleBoxed t;
+  {
+    auto f = freeze(t);
+    EXPECT_FALSE(f.boxed());
+  }
+  {
+    auto str = freezeToString(t);
+    auto f = mapFrozen<SimpleBoxed>(std::move(str));
+    EXPECT_FALSE(f.boxed());
+  }
+}
+
 TEST(Frozen, recursive_node_ref) {
   Node root;
   *root.id() = 8;
@@ -136,6 +173,52 @@ TEST(Frozen, recursive_node_ref) {
 
   auto str = freezeToString(root);
   auto f2 = mapFrozen<Node>(std::move(str));
+  EXPECT_EQ(f2.thaw(), root);
+}
+
+TEST(Frozen, recursive_boxed_node_ref) {
+  BoxedNode root;
+  root.id() = 8;
+  root.left() = makeBoxedNode(3, s1);
+  root.right() = makeBoxedNode(5, s2);
+  root.content() = s2;
+  EXPECT_FALSE(root.left()->left());
+
+  auto f = freeze(root);
+  EXPECT_EQ(f.id(), 8);
+  EXPECT_EQ(f.content(), s2);
+
+  EXPECT_EQ(f.right()->id(), 5);
+  EXPECT_EQ(f.right()->content(), s2);
+  EXPECT_EQ(f.right()->left(), nullptr);
+  EXPECT_EQ(f.right()->right(), nullptr);
+
+  EXPECT_EQ(f.left()->id(), 3);
+  EXPECT_EQ(f.left()->content(), s1);
+  EXPECT_EQ(f.left()->left(), nullptr);
+
+  // compare nullptr with unset ref
+  EXPECT_EQ(nullptr, f.left()->right());
+
+  // compare unset ref with unset ref
+  EXPECT_EQ(f.left()->left(), f.left()->right());
+
+  // compare set ref with set ref
+  EXPECT_NE(f.left(), f.right());
+
+  // compare set ref itself
+  auto&& p = f.left();
+  EXPECT_EQ(f.left(), p);
+  EXPECT_EQ(p, f.left());
+
+  // bool
+  EXPECT_EQ(bool(f.left()), true);
+  EXPECT_EQ(bool(f.left()->left()), false);
+
+  EXPECT_EQ(f.thaw(), root);
+
+  auto str = freezeToString(root);
+  auto f2 = mapFrozen<BoxedNode>(std::move(str));
   EXPECT_EQ(f2.thaw(), root);
 }
 

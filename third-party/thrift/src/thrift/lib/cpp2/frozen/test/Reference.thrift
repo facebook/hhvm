@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -35,10 +36,24 @@ struct SimpleRef {
   8: optional Person c2r_opt (cpp2.ref = "true");
 }
 
+struct SimpleBoxed {
+  @thrift.Box
+  1: optional Person boxed;
+}
+
 struct Node {
   1: i64 id;
   2: optional Node left (cpp.ref = "true");
   3: optional Node right (cpp.ref = "true");
+  4: string content;
+}
+
+struct BoxedNode {
+  1: i64 id;
+  @thrift.Box
+  2: optional BoxedNode left;
+  @thrift.Box
+  3: optional BoxedNode right;
   4: string content;
 }
 

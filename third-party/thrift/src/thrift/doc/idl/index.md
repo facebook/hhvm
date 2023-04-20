@@ -315,7 +315,7 @@ package "meta.com/search"
 
 In both cases the Python namespaces don't include the file name component.
 
-The default namespace can be overriden for individual target languages with the [namespace directive](#namespace).
+The default namespace can be overriden for individual target languages with the [namespace directive](#namespace-directives).
 
 Annotations on a package declaration apply to the whole file. For example:
 
@@ -340,7 +340,7 @@ package "facebook.com/peoplesearch"
 struct PeopleSearchRequest { /* ... */ }
 ```
 
-### Namespace Directives {#namespace}
+### Namespace Directives
 
 ```grammar
 namespace_directive ::=  "namespace" maybe_qualified_id namespace_name
@@ -361,51 +361,44 @@ namespace java.swift com.facebook.peoplesearch
 
 ## Basic Thrift Types
 
+```grammar
+type ::=  primitive_type | container_type | maybe_qualified_id
+```
+
+Thrift supports primitive, container and named types. The name can be an identifier that denotes a type defined in the same Thrift file, or a qualified name of the form `filename.typename` where `filename` and `typename` are identifiers, and `typename` denotes a type defined in the Thrift file denoted by `filename`.
+
 ### Primitive Types
 
+```grammar
+primitive_type ::=  "bool" | "byte" | "i16" | "i32" | "i64" |
+                    "float" | "double" | "string" | "binary"
 ```
-PrimitiveType ::=
-  "bool" | "byte" | "i16" | "i32" | "i64" | "float" | "double" | "binary" | "string"
-```
 
-* `bool`: `true` and `false` values
-* `byte`: 8-bit signed integers
-* `i16`: 16-bit signed integers
-* `i32`: 32-bit signed integers
-* `i64`: 64-bit signed integers
-* `float`: 32-bit floating points
-* `double`: 64-bit floating points
-* `string`: UTF-8 strings
-* `binary`: byte arrays
+* `bool`: `true` or `false`
+* `byte`: an 8-bit signed integer
+* `i16`: a 16-bit signed integer
+* `i32`: a 32-bit signed integer
+* `i64`: a 64-bit signed integer
+* `float`: a 32-bit floating-point number
+* `double`: a 64-bit floating-point number
+* `string`: a UTF-8 string
+* `binary`: a byte array
 
-:::note
-Thrift does not support unsigned integers because they have no direct translation to native (primitive) types in many of Thrift’s target languages.
-:::
+Thrift does not support unsigned integers because they have no direct translation to native types in some of Thrift’s target languages such as Hack and Java.
 
-:::note
-Some target languages enforce that `string` values are UTF-8 encoded and others do not. For example, Java and Python require valid UTF-8, while C++ does not. This can appear as cross-language incompatibility.
-:::
+`binary` and `string` are encoded identically in the Binary and Compact protocols used for RPC and are interchangeable. However, they are encoded differently in JSON protocols: `binary` is Base64-encoded while `string` only has special characters escaped.
 
-:::note
-`binary` and `string` are encoded identically for RPC (Binary and Compact protocols) and are interchangeable. However, they are encoded differently in JSON protocols: `binary` is base64-encoded while `string` only has special characters escaped.
+:::caution
+Some target languages enforce that `string` values are UTF-8 encoded and others do not. For example, Java and Python require valid UTF-8, while C++ does not. This can manifest itself as a cross-language incompatibility.
 :::
 
 ### Container Types
 
-```
-ContainerType ::=
-  ListType
-| SetType
-| MapType
-
-ListType ::=
-  "list" "<" TypeSpecification ">"
-
-SetType ::=
-  "set" "<" TypeSpecification ">"
-
-MapType ::=
-  "map" "<" TypeSpecification "," TypeSpecification ">"
+```grammar
+container_type ::=  list_type | set_type | map_type
+list_type      ::=  "list" "<" type ">"
+set_type       ::=  "set" "<" type ">"
+map_type       ::=  "map" "<" type "," type ">"
 ```
 
 Thrift has strongly-typed containers that map to commonly used containers in target programming languages. There are three container types available:
@@ -423,19 +416,6 @@ Although not enforced, it is strongly encouraged to only use set and map when ke
 :::
 
 The element, key, and value types can be any Thrift type, including nested containers.
-
-### Type Specifications
-
-```
-TypeSpecification ::=
-  PrimitiveType
-| ContainerType
-| maybe_qualified_id
-```
-
-A type specification is used to refer to a type. It can be a primitive type, a container type, or a name that denotes a type defined elsewhere. The name can be an identifier that denotes a type defined in the same Thrift file, or a qualified name of the form `filename.typename` where `filename` and `typename` are identifiers, and `typename` denotes a type defined in the Thrift file denoted by `filename`.
-
-NOTE: All type definitions (see section below) define a type with a name - this name denotes that type.
 
 ### Enumeration Types
 
@@ -474,7 +454,7 @@ Removing and adding enum values can be dangerous - see [Schema Compatibility](/f
 
 ```
 TypeDef ::=
-  "typedef" TypeSpecification identifier
+  "typedef" type identifier
 ```
 
 Typedefs introduce a name that denotes the type specification. It can be used to provide a simpler way to access complex types.
@@ -496,7 +476,7 @@ StructType ::=
   "}"
 
 FieldSpecification ::=
-  FieldId ":" [ Qualifier ] TypeSpecification identifier [ DefaultValue ]
+  FieldId ":" [ Qualifier ] type identifier [ DefaultValue ]
 
 FieldId ::=
   integer
@@ -624,7 +604,7 @@ The name introduced by type definitions can be used anywhere in the Thrift file 
 
 ```
 constant_definition ::=
-  "const" TypeSpecification identifier "=" Constant
+  "const" type identifier "=" Constant
 ```
 
 A constant definition introduces a name for a value. This name can be used instead of the value after the completion of constant definition, and in other Thrift files that include this Thrift file.
@@ -826,9 +806,9 @@ FunctionSpecification ::=
   ")"
   [ "throws" "(" ( FieldSpecification )+ ")" ]
 
-ResultType ::= "void" | "oneway void" | [ "stream" ] TypeSpecification
+ResultType ::= "void" | "oneway void" | [ "stream" ] type
 
-ParameterSpecification ::= FieldId ":" TypeSpecification identifier [ DefaultValue ]
+ParameterSpecification ::= FieldId ":" type identifier [ DefaultValue ]
 ```
 
 An interface for RPC is defined in a Thrift file as a service.

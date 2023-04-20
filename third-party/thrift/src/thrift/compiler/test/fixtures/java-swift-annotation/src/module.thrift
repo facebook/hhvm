@@ -20,6 +20,9 @@ include "thrift/annotation/java.thrift"
 
 typedef map<i32, i64> (java.swift.type = "com.foo.FastIntLongMap") FMap
 
+@java.BinaryString
+typedef string binary_string
+
 @java.Annotation{
   java_annotation = "@com.foo.Enabled @com.bar.AnotherAnnotation(val = 1)",
 }
@@ -48,5 +51,10 @@ struct MyMapping {
     java.swift.type = "com.foo.FastIntObjectMap<com.foo.FastIntLongMap>",
   ) ioMap;
   3: map<string, string (java.swift.binary_string)> binaryMap;
+  4: map<string, binary> regularBinary;
+}
+
+struct BinaryMapping {
+  3: map<string, binary_string> binaryMap;
   4: map<string, binary> regularBinary;
 }

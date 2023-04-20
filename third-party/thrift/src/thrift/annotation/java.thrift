@@ -39,6 +39,9 @@ struct Annotation {
   1: string java_annotation;
 }
 
+@scope.Typedef
+struct BinaryString {}
+
 // When this annotation is applied, thrift compiler will generate isSet() series of methods.
 @scope.Struct
 @scope.Exception

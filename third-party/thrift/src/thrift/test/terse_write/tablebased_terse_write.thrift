@@ -15,14 +15,17 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 
 @thrift.Experimental
 package "apache.org/thrift/test"
 
 namespace cpp2 apache.thrift.test.tablebased_terse_write
 
-typedef binary (cpp2.type = "folly::IOBuf") IOBuf
-typedef binary (cpp2.type = "std::unique_ptr<folly::IOBuf>") IOBufPtr
+@cpp.Type{name = "folly::IOBuf"}
+typedef binary IOBuf
+@cpp.Type{name = "std::unique_ptr<folly::IOBuf>"}
+typedef binary IOBufPtr
 
 enum MyEnum {
   ME0 = 0,

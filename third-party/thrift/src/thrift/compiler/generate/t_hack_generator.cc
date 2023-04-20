@@ -373,8 +373,7 @@ class t_hack_generator : public t_concat_generator {
       bool uses_thrift_only_methods = false);
 
   bool type_has_nested_struct(const t_type* t);
-  bool field_is_nullable(
-      const t_struct* tstruct, const t_field* field, std::string dval);
+  bool field_is_nullable(const t_struct* tstruct, const t_field* field);
   void generate_php_struct_shape_methods(
       std::ofstream& out, const t_struct* tstruct);
   void generate_php_struct_stringifyMapKeys_method(std::ofstream& out);
@@ -3107,17 +3106,7 @@ void t_hack_generator::generate_php_struct_shape_spec(
            {TypeToTypehintVariations::IGNORE_WRAPPER, true},
            {TypeToTypehintVariations::RECURSIVE_IGNORE_WRAPPER, true}});
     }
-
-    std::string dval = "";
-    if (field.default_value() != nullptr &&
-        !(t->is_struct() || t->is_xception())) {
-      dval = render_const_value(t, field.default_value());
-    } else {
-      dval = render_default_value(t);
-    }
-
-    bool nullable =
-        nullable_everything_ || field_is_nullable(tstruct, &field, dval);
+    bool nullable = nullable_everything_ || field_is_nullable(tstruct, &field);
 
     std::string prefix = nullable || is_constructor_shape ? "?" : "";
 
@@ -3326,8 +3315,16 @@ bool t_hack_generator::type_has_nested_struct(const t_type* t) {
  * Determine whether a field should be marked nullable.
  */
 bool t_hack_generator::field_is_nullable(
-    const t_struct* tstruct, const t_field* field, std::string dval) {
+    const t_struct* tstruct, const t_field* field) {
+  std::string dval = "";
   const t_type* t = field->type()->get_true_type();
+  if (field->default_value() != nullptr &&
+      !(t->is_struct() || t->is_xception())) {
+    dval = render_const_value(t, field->default_value());
+  } else {
+    dval = render_default_value(t);
+  }
+
   return (dval == "null") || tstruct->is_union() ||
       (field->get_req() == t_field::e_req::optional &&
        field->default_value() == nullptr) ||
@@ -3383,16 +3380,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
     }
     const t_type* t = field.type()->get_true_type();
 
-    std::string dval = "";
-    if (field.default_value() != nullptr &&
-        !(t->is_struct() || t->is_xception())) {
-      dval = render_const_value(t, field.default_value());
-    } else {
-      dval = render_default_value(t);
-    }
-
-    bool nullable =
-        field_is_nullable(tstruct, &field, dval) || nullable_everything_;
+    bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
 
     std::stringstream source;
     source << "$shape['" << field.name() << "']";
@@ -3557,9 +3545,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
 
     std::stringstream val;
 
-    bool nullable =
-        field_is_nullable(tstruct, &field, render_default_value(t)) ||
-        nullable_everything_;
+    bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
     auto fieldRef = "$this->" + field.name();
     if (find_hack_field_adapter(field) || find_hack_adapter(field.get_type())) {
       val << fieldRef << ",\n";
@@ -3928,18 +3914,8 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
       continue;
     }
     const std::string& name = field.name();
-    const t_type* t = field.type()->get_true_type();
 
-    std::string dval = "";
-    if (field.default_value() != nullptr &&
-        !(t->is_struct() || t->is_xception())) {
-      dval = render_const_value(t, field.default_value());
-    } else {
-      dval = render_default_value(t);
-    }
-
-    bool nullable =
-        field_is_nullable(tstruct, &field, dval) || nullable_everything_;
+    bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
 
     std::string field_ref;
     if (tstruct->is_union() || nullable) {
@@ -3978,9 +3954,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
     auto [wrapper, name, ns] = find_hack_wrapper(field.get_type());
     if (wrapper) {
       bool nullable =
-          field_is_nullable(
-              tstruct, &field, render_default_value(field.get_type())) ||
-          nullable_everything_;
+          field_is_nullable(tstruct, &field) || nullable_everything_;
       out << indent() << "$" << field.name() << " = await " << fieldRef
           << (nullable ? "?" : "") << "->genUnwrap();\n";
     }
@@ -3999,9 +3973,7 @@ void t_hack_generator::generate_php_struct_async_shape_methods(
 
     std::stringstream val;
 
-    bool nullable =
-        field_is_nullable(tstruct, &field, render_default_value(t)) ||
-        nullable_everything_;
+    bool nullable = field_is_nullable(tstruct, &field) || nullable_everything_;
 
     auto fieldRef = "$this->" + field.name();
     if (find_hack_wrapper(field)) {
@@ -4275,20 +4247,12 @@ void t_hack_generator::generate_php_struct_fields(
           " is actually a bitmask, cannot generate a field of this enum type");
     }
 
-    std::string dval;
-    if (field.default_value() != nullptr &&
-        !(t->is_struct() || t->is_xception())) {
-      dval = render_const_value(t, field.default_value());
-    } else {
-      dval = render_default_value(t);
-    }
-
     // result structs only contain fields: success and e.
     // success is whatever type the method returns, but must be nullable
     // regardless, since if there is an exception we expect it to be null
     bool nullable =
         (type == ThriftStructType::RESULT ||
-         field_is_nullable(tstruct, &field, dval) || nullable_everything_) &&
+         field_is_nullable(tstruct, &field) || nullable_everything_) &&
         !is_base_exception_field;
 
     // Compute typehint before resolving typedefs to avoid missing any adapter
@@ -7622,8 +7586,7 @@ std::string t_hack_generator::argument_list(
           (ftype->is_enum() &&
            (field.default_value() == nullptr ||
             field.get_req() != t_field::e_req::required));
-      if (force_nullable &&
-          !field_is_nullable(tstruct, &field, render_default_value(ftype))) {
+      if (force_nullable && !field_is_nullable(tstruct, &field)) {
         result += "?";
       }
       result += type_to_param_typehint(field.get_type(), nullable) + " ";

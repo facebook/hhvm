@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <folly/Portability.h>
+
 #include "watchman/thirdparty/jansson/jansson.h"
 
 class w_string;
@@ -29,6 +31,10 @@ std::optional<json_ref> cfg_compute_root_files(bool* enforcing);
 std::string cfg_pretty_print_root_files(const json_ref& root_files);
 
 namespace watchman {
+
+// Folly signal handling will be limited to Linux for now. We eventually want
+// to move all platforms to folly signal handling.
+constexpr bool kUseFollySignalHandler = folly::kIsLinux;
 
 class Configuration {
  public:

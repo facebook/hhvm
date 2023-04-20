@@ -450,7 +450,11 @@ bool w_start_listener() {
   sigaddset(&sigset, SIGCHLD);
   sigprocmask(SIG_BLOCK, &sigset, NULL);
 #endif
-  setup_signal_handlers();
+  // TODO: We are trying out folly signal handling on Linux. Eventually we
+  // should remove this if and use folly signal handling on all platforms.
+  if (!kUseFollySignalHandler) {
+    setup_signal_handlers();
+  }
 
   std::optional<AcceptLoop> tcp_loop;
   std::optional<AcceptLoop> unix_loop;

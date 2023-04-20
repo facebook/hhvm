@@ -11,6 +11,7 @@
 #include <folly/Singleton.h>
 #include <folly/SocketAddress.h>
 #include <folly/String.h>
+#include <folly/init/Init.h>
 #include <folly/net/NetworkSocket.h>
 #include <folly/system/Shell.h>
 
@@ -987,14 +988,19 @@ static SpawnResult try_spawn_watchman(
 }
 
 static int inner_main(int argc, char** argv) {
-  // Since we don't fully integrate with folly, but may pull
-  // in dependencies that do, we need to perform a little bit
-  // of bootstrapping.  We don't want to run the full folly
-  // init today because it will interfere with our own signal
-  // handling.  In the future we will integrate this properly.
-  folly::SingletonVault::singleton()->registrationComplete();
+  // TODO: We used to avoid folly::init so it didn't interfere with our own
+  // signal handling. We want to swap to folly signal handling, so we'll do a
+  // full init on Linux to test it. We should remove this if in the future.
+  if (kUseFollySignalHandler) {
+    folly::init(&argc, &argv, folly::InitOptions().useGFlags(false));
+  } else {
+    folly::SingletonVault::singleton()->registrationComplete();
+  }
+
   SCOPE_EXIT {
-    folly::SingletonVault::singleton()->destroyInstancesFinal();
+    if (!kUseFollySignalHandler) {
+      folly::SingletonVault::singleton()->destroyInstancesFinal();
+    }
   };
 
   auto daemon_argv = parse_cmdline(&argc, &argv);

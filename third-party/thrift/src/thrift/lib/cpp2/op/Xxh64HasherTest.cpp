@@ -147,6 +147,18 @@ TEST(Xxh64HasherTest, checkCombineIOBuf) {
   EXPECT_EQ(hasherCopy.getResult(), hasher3.getResult());
 }
 
+TEST(Xxh64HasherTest, checkCombineChainedIOBuf) {
+  Xxh64Hasher hasher1, hasher2;
+  auto bufA = folly::IOBuf::wrapBuffer("abc", 3);
+  auto bufB = folly::IOBuf::wrapBuffer("def", 3);
+  bufA->prependChain(std::move(bufB));
+  hasher1.combine(*bufA);
+  hasher2.combine(*folly::IOBuf::wrapBuffer("abcdef", 6));
+  hasher1.finalize();
+  hasher2.finalize();
+  EXPECT_EQ(hasher1.getResult(), hasher2.getResult());
+}
+
 TEST(Xxh64HasherTest, checkCombineByteRange) {
   Xxh64Hasher hasher1;
   hasher1.finalize();

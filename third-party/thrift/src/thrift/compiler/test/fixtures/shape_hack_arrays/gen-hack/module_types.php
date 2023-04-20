@@ -761,10 +761,10 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       $shape['map_of_string_to_list_of_A']
         |> Dict\map(
           $$,
-          $_val1 ==> $_val1
+          $_val2 ==> $_val2
             |> Vec\map(
               $$,
-              $_val2 ==> $_val2
+              $_val1 ==> $_val1
                 |> A::__fromShape($$),
             ),
         ),
@@ -772,10 +772,10 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       $shape['map_of_string_to_map_of_string_to_A']
         |> Dict\map(
           $$,
-          $_val3 ==> $_val3
+          $_val4 ==> $_val4
             |> Dict\map(
               $$,
-              $_val4 ==> $_val4
+              $_val3 ==> $_val3
                 |> A::__fromShape($$),
             ),
         ),
@@ -783,23 +783,23 @@ class B implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       $shape['list_of_map_of_string_to_A']
         |> Vec\map(
           $$,
-          $_val5 ==> $_val5
+          $_val6 ==> $_val6
             |> Dict\map(
               $$,
-              $_val6 ==> $_val6
+              $_val5 ==> $_val5
                 |> A::__fromShape($$),
             ),
         ),
       $shape['list_of_map_of_string_to_list_of_A']
         |> Vec\map(
           $$,
-          $_val7 ==> $_val7
+          $_val9 ==> $_val9
             |> Dict\map(
               $$,
               $_val8 ==> $_val8
                 |> Vec\map(
                   $$,
-                  $_val9 ==> $_val9
+                  $_val7 ==> $_val7
                     |> A::__fromShape($$),
                 ),
             ),
@@ -1481,10 +1481,10 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       Shapes::idx($shape, 'map_of_string_to_list_of_A') === null ? null : ($shape['map_of_string_to_list_of_A']
         |> Dict\map(
           $$,
-          $_val1 ==> $_val1
+          $_val2 ==> $_val2
             |> Vec\map(
               $$,
-              $_val2 ==> $_val2
+              $_val1 ==> $_val1
                 |> A::__fromShape($$),
             ),
         )),
@@ -1492,10 +1492,10 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       Shapes::idx($shape, 'map_of_string_to_map_of_string_to_A') === null ? null : ($shape['map_of_string_to_map_of_string_to_A']
         |> Dict\map(
           $$,
-          $_val3 ==> $_val3
+          $_val4 ==> $_val4
             |> Dict\map(
               $$,
-              $_val4 ==> $_val4
+              $_val3 ==> $_val3
                 |> A::__fromShape($$),
             ),
         )),
@@ -1503,23 +1503,23 @@ class C implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapishSy
       Shapes::idx($shape, 'list_of_map_of_string_to_A') === null ? null : ($shape['list_of_map_of_string_to_A']
         |> Vec\map(
           $$,
-          $_val5 ==> $_val5
+          $_val6 ==> $_val6
             |> Dict\map(
               $$,
-              $_val6 ==> $_val6
+              $_val5 ==> $_val5
                 |> A::__fromShape($$),
             ),
         )),
       Shapes::idx($shape, 'list_of_map_of_string_to_list_of_A') === null ? null : ($shape['list_of_map_of_string_to_list_of_A']
         |> Vec\map(
           $$,
-          $_val7 ==> $_val7
+          $_val9 ==> $_val9
             |> Dict\map(
               $$,
               $_val8 ==> $_val8
                 |> Vec\map(
                   $$,
-                  $_val9 ==> $_val9
+                  $_val7 ==> $_val7
                     |> A::__fromShape($$),
                 ),
             ),

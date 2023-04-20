@@ -1,7 +1,7 @@
 (library
  (name lsp)
  (wrapped false)
- (libraries base file_content file_url hh_json jsonrpc utils_core symbol pos relative_path)
+ (libraries base file_content file_url hh_json jsonrpc logging utils_core symbol pos relative_path)
  (preprocess
   (pps
    lwt_ppx

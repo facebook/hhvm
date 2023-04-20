@@ -32,9 +32,13 @@ let lsp_uri_to_path (uri : documentUri) : string =
     uri
 
 let path_to_lsp_uri (path : string) ~(default_path : string) : Lsp.documentUri =
-  if path = "" then
+  if path = "" then begin
+    HackEventLogger.invariant_violation_bug "missing path";
+    Hh_logger.log
+      "missing path %s"
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     File_url.create default_path |> uri_of_string
-  else
+  end else
     File_url.create path |> uri_of_string
 
 let lsp_textDocumentIdentifier_to_filename

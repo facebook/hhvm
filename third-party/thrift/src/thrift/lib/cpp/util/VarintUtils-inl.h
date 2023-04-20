@@ -83,7 +83,7 @@ void readVarintMediumSlowUnrolled(
 
   // check that the available data is more than the longest possible varint or
   // that the last available byte ends a varint
-  if (FOLLY_LIKELY(len >= maxSize || (len > 0 && !(p[len - 1] & 0x80)))) {
+  if (FOLLY_LIKELY(len >= maxSize)) {
     uint64_t result;
     const uint8_t* start = p;
     do {

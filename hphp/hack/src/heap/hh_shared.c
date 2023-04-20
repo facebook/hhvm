@@ -429,6 +429,9 @@ static size_t used_heap_size(void) {
 
 static long removed_count = 0;
 
+static ZSTD_CCtx* zstd_cctx = NULL;
+static ZSTD_DCtx* zstd_dctx = NULL;
+
 /* Expose so we can display diagnostics */
 CAMLprim value hh_used_heap_size(void) {
   if (shm_use_sharded_hashtbl) {
@@ -868,6 +871,29 @@ static size_t get_shared_mem_size(void) {
           heap_size + page_size + locals_size_b);
 }
 
+// Must be called AFTER init_shared_globals / define_globals
+// once per process, during hh_shared_init / hh_connect
+static void init_zstd_compression() {
+  // if use ZSTD
+  if (*compression) {
+    /* The resources below (dictionaries, contexts) technically leak,
+     * we don't free them as there is no proper API from workers.
+     * However, they are in use till the end of the process live. */
+    zstd_cctx = ZSTD_createCCtx();
+    zstd_dctx = ZSTD_createDCtx();
+    {
+      ZSTD_CDict* zstd_cdict = ZSTD_createCDict(NULL, 0, *compression);
+      const size_t result = ZSTD_CCtx_refCDict(zstd_cctx, zstd_cdict);
+      assert(!ZSTD_isError(result));
+    }
+    {
+      ZSTD_DDict* zstd_ddict = ZSTD_createDDict(NULL, 0);
+      const size_t result = ZSTD_DCtx_refDDict(zstd_dctx, zstd_ddict);
+      assert(!ZSTD_isError(result));
+    }
+  }
+}
+
 static void init_shared_globals(
   size_t config_log_level,
   double config_sample_rate,
@@ -990,6 +1016,7 @@ CAMLprim value hh_shared_init(
     Double_val(Field(config_val, 8)),
     Long_val(Field(config_val, 9))
   );
+  init_zstd_compression();
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
 
@@ -1030,6 +1057,7 @@ value hh_connect(value connector, value worker_id_val) {
   assert(memfd_shared_mem >= 0);
   char *shared_mem_init = memfd_map(memfd_shared_mem, SHARED_MEM_INIT, shared_mem_size);
   define_globals(shared_mem_init);
+  init_zstd_compression();
 
   if (shm_use_sharded_hashtbl) {
     assert(memfd_shmffi >= 0);
@@ -1412,7 +1440,7 @@ value hh_serialize_raw(value data) {
     max_compression_size = ZSTD_compressBound(size);
     compressed_data = malloc(max_compression_size);
 
-    compressed_size = ZSTD_compress(compressed_data, max_compression_size, data_value, size, *compression);
+    compressed_size = ZSTD_compress2(zstd_cctx, compressed_data, max_compression_size, data_value, size);
   }
   else {
     max_compression_size = LZ4_compressBound(size);
@@ -1504,7 +1532,7 @@ static heap_entry_t* hh_store_ocaml(
     max_compression_size = ZSTD_compressBound(size);
     compressed_data = malloc(max_compression_size);
 
-    compressed_size = ZSTD_compress(compressed_data, max_compression_size, data_value, size, *compression);
+    compressed_size = ZSTD_compress2(zstd_cctx, compressed_data, max_compression_size, data_value, size);
   }
   else {
     max_compression_size = LZ4_compressBound(size);
@@ -1868,7 +1896,7 @@ static CAMLprim value hh_deserialize(heap_entry_t *elt) {
     data = malloc(uncompressed_size_exp);
   size_t uncompressed_size = 0;
   if (*compression) {
-    uncompressed_size = ZSTD_decompress(data, uncompressed_size_exp, src, size);
+    uncompressed_size = ZSTD_decompressDCtx(zstd_dctx, data, uncompressed_size_exp, src, size);
   }
   else {
     uncompressed_size = LZ4_decompress_safe(

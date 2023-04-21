@@ -16,8 +16,6 @@
 
 #include "hphp/test/ext/test_server.h"
 
-#include "hphp/compiler/option.h"
-
 #include "hphp/util/async-func.h"
 #include "hphp/util/process-exec.h"
 

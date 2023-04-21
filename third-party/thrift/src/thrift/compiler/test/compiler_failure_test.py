@@ -2489,6 +2489,30 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(err, "[ERROR:foo.thrift:1] Type `foo.i8` not defined.\n")
 
+    def test_terse_write_outside_experimental_mode(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                include "thrift/annotation/thrift.thrift"
+
+                package "apache.org/thrift/test"
+
+                struct MyStruct {
+                    @thrift.TerseWrite
+                    1: i32 field1 = 1;
+                }
+                """
+            ),
+        )
+
+        ret, out, err = self.run_thrift("foo.thrift")
+        self.assertEqual(ret, 1)
+        self.assertEqual(
+            err,
+            "[ERROR:foo.thrift:6] Using @thrift.TerseWrite on field `field1` is only allowed in the experimental mode.\n",
+        )
+
     def test_cycle(self):
         write_file(
             "foo.thrift",

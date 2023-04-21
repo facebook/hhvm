@@ -624,6 +624,15 @@ void validate_uri_uniqueness(diagnostic_context& ctx, const t_program& prog) {
   visit(prog);
 }
 
+void limit_terse_write_on_experimental_mode(
+    diagnostic_context& ctx, const t_named& node) {
+  ctx.check(
+      !node.find_structured_annotation_or_null(kTerseWriteUri) ||
+          node.release_state() <= t_release_state::experimental,
+      "Using @thrift.TerseWrite on field `{}` is only allowed in the experimental mode.",
+      node.name());
+}
+
 void validate_field_id(diagnostic_context& ctx, const t_field& node) {
   if (node.explicit_id() != node.id()) {
     ctx.report(
@@ -1155,6 +1164,7 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_java_wrapper_annotation);
   validator.add_definition_visitor(
       &validate_java_wrapper_and_adapter_annotation);
+  validator.add_definition_visitor(&limit_terse_write_on_experimental_mode);
   validator.add_definition_visitor(&validate_custom_cpp_type_annotations);
 
   validator.add_typedef_visitor([](auto& ctx, const auto& node) {

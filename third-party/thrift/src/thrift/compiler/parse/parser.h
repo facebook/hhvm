@@ -74,9 +74,7 @@ class parser_actions {
   virtual void on_program() = 0;
 
   virtual void on_standard_header(
-      source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
+      source_location loc, std::unique_ptr<stmt_attrs> attrs) = 0;
   virtual void on_program_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,

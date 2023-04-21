@@ -115,9 +115,7 @@ class parsing_driver : public parser_actions {
   void on_program() override { clear_doctext(); }
 
   void on_standard_header(
-      source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
-      std::unique_ptr<deprecated_annotations> annotations) override;
+      source_location loc, std::unique_ptr<stmt_attrs> attrs) override;
   void on_program_header(
       source_range range,
       std::unique_ptr<stmt_attrs> attrs,

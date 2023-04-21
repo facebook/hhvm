@@ -124,46 +124,43 @@ class parser {
     return true;
   }
 
-  // statement:
-  //   statement_attrs (header | definition) annotations comma_or_semicolon?
+  // statement: statement_attrs (header | definition)
+  //
+  // header: program_doctext? (include | package | namespace)
   void parse_statement() {
     auto range = track_range();
     auto attrs = parse_statement_attrs();
-    auto stmt = parse_header_or_definition();
-    auto annotations = parse_annotations();
-    try_parse_comma_or_semicolon();
-    switch (stmt.type) {
-      case t_statement_type::standard_header:
-        actions_.on_standard_header(
-            range, std::move(attrs), std::move(annotations));
+    switch (token_.kind) {
+      case tok::kw_include:
+      case tok::kw_cpp_include:
+      case tok::kw_hs_include:
+        actions_.on_program_doctext();
+        parse_include();
+        actions_.on_standard_header(range, std::move(attrs));
         break;
-      case t_statement_type::program_header:
+      case tok::kw_package: {
+        actions_.on_program_doctext();
+        parse_package();
+        auto annotations = parse_annotations();
+        try_consume_token(';');
         actions_.on_program_header(
             range, std::move(attrs), std::move(annotations));
         break;
-      case t_statement_type::definition:
-        actions_.on_definition(
-            range,
-            std::move(stmt.defn),
-            std::move(attrs),
-            std::move(annotations));
+      }
+      case tok::kw_namespace:
+        actions_.on_program_doctext();
+        parse_namespace();
+        actions_.on_standard_header(range, std::move(attrs));
+        break;
+      default:
+        parse_definition(range, std::move(attrs));
         break;
     }
   }
 
-  struct statement {
-    t_statement_type type = t_statement_type::definition;
-    std::unique_ptr<t_named> defn;
-
-    statement(t_statement_type t = t_statement_type::definition) : type(t) {}
-
-    template <typename Named>
-    /* implicit */ statement(std::unique_ptr<Named> n) : defn(std::move(n)) {}
-  };
-
-  // header: program_doctext? (include_or_package | namespace)
+  // definition: definition_body annotations [comma_or_semicolon]
   //
-  // definition:
+  // definition_body:
   //     service
   //   | interaction
   //   | typedef
@@ -172,26 +169,26 @@ class parser {
   //   | exception
   //   | enum
   //   | const
-  statement parse_header_or_definition() {
+  void parse_definition(
+      source_location begin, std::unique_ptr<stmt_attrs> attrs) {
+    auto range = range_tracker(begin, end_);
+    auto def = std::unique_ptr<t_named>();
     switch (token_.kind) {
-      case tok::kw_include:
-      case tok::kw_cpp_include:
-      case tok::kw_hs_include:
-      case tok::kw_package:
-        return parse_include_or_package();
-      case tok::kw_namespace:
-        parse_namespace();
-        return t_statement_type::standard_header;
       case tok::kw_typedef:
-        return parse_typedef();
+        def = parse_typedef();
+        break;
       case tok::kw_enum:
-        return parse_enum();
+        def = parse_enum();
+        break;
       case tok::kw_const:
-        return parse_const();
+        def = parse_const();
+        break;
       case tok::kw_struct:
-        return parse_struct();
+        def = parse_struct();
+        break;
       case tok::kw_union:
-        return parse_union();
+        def = parse_union();
+        break;
       case tok::kw_safe:
       case tok::kw_transient:
       case tok::kw_stateful:
@@ -199,25 +196,28 @@ class parser {
       case tok::kw_client:
       case tok::kw_server:
       case tok::kw_exception:
-        return parse_exception();
+        def = parse_exception();
+        break;
       case tok::kw_service:
-        return parse_service();
+        def = parse_service();
+        break;
       case tok::kw_interaction:
-        return parse_interaction();
+        def = parse_interaction();
+        break;
       default:
-        report_expected("header or definition");
+        report_expected("definition");
+        break;
     }
+    auto annotations = parse_annotations();
+    try_parse_comma_or_semicolon();
+    actions_.on_definition(
+        range, std::move(def), std::move(attrs), std::move(annotations));
   }
 
-  // include_or_package:
-  //     "include" string_literal
-  //   | "cpp_include" string_literal
-  //   | "hs_include" string_literal
-  //   | "package" string_literal
-  t_statement_type parse_include_or_package() {
+  // include: ("include" | "cpp_include" | "hs_include") string_literal [";"]
+  void parse_include() {
     auto range = track_range();
     auto kind = token_.kind;
-    actions_.on_program_doctext();
     consume_token();
     if (token_.kind != tok::string_literal) {
       report_expected("string literal");
@@ -225,9 +225,6 @@ class parser {
     auto str = lex_string_literal(token_);
     consume_token();
     switch (kind) {
-      case tok::kw_package:
-        actions_.on_package(range, str);
-        return t_statement_type::program_header;
       case tok::kw_include:
         actions_.on_include(range, str);
         break;
@@ -240,18 +237,31 @@ class parser {
       default:
         assert(false);
     }
-    return t_statement_type::standard_header;
+    try_consume_token(';');
   }
 
-  // namespace: "namespace" identifier (identifier | string_literal)
+  // package: "package" string_literal [";"]
+  void parse_package() {
+    assert(token_.kind == tok::kw_package);
+    auto range = track_range();
+    consume_token();
+    if (token_.kind != tok::string_literal) {
+      report_expected("string literal");
+    }
+    auto str = lex_string_literal(token_);
+    consume_token();
+    actions_.on_package(range, str);
+  }
+
+  // namespace: "namespace" identifier (identifier | string_literal) [";"]
   void parse_namespace() {
     assert(token_.kind == tok::kw_namespace);
-    actions_.on_program_doctext();
     consume_token();
     auto language = parse_identifier();
     auto ns = token_.kind == tok::string_literal
         ? lex_string_literal(consume_token())
         : fmt::to_string(parse_identifier().str);
+    try_consume_token(';');
     return actions_.on_namespace(language, ns);
   }
 

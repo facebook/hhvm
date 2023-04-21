@@ -47,19 +47,6 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
-enum class t_statement_type {
-  standard_header,
-  program_header,
-  definition,
-};
-
-enum class t_header_type {
-  standard = int(t_statement_type::standard_header),
-  // All annotations on headers of these types are
-  // attributed to the program.
-  program = int(t_statement_type::program_header),
-};
-
 /**
  * Top level class representing an entire thrift program.
  */

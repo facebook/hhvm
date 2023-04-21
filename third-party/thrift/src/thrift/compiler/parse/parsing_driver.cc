@@ -714,18 +714,12 @@ parsing_driver::parsing_driver(
 }
 
 void parsing_driver::on_standard_header(
-    source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
-    std::unique_ptr<deprecated_annotations> annotations) {
-  validate_header_location(range.begin);
+    source_location loc, std::unique_ptr<stmt_attrs> attrs) {
+  validate_header_location(loc);
   if (attrs && attrs->struct_annotations) {
     diags_.error(
         *attrs->struct_annotations->front(),
         "Structured annotations are not supported for a given entity.");
-  }
-  if (annotations) {
-    diags_.error(
-        annotations->loc, "Annotations are not supported for a given entity.");
   }
 }
 

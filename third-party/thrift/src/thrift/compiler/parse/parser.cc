@@ -124,12 +124,12 @@ class parser {
     return true;
   }
 
-  // statement: statement_attrs (header | definition)
+  // statement: attributes (header | definition)
   //
   // header: program_doctext? (include | package | namespace)
   void parse_statement() {
     auto range = track_range();
-    auto attrs = parse_statement_attrs();
+    auto attrs = parse_attributes();
     switch (token_.kind) {
       case tok::kw_include:
       case tok::kw_cpp_include:
@@ -170,7 +170,7 @@ class parser {
   //   | enum
   //   | const
   void parse_definition(
-      source_location begin, std::unique_ptr<stmt_attrs> attrs) {
+      source_location begin, std::unique_ptr<attributes> attrs) {
     auto range = range_tracker(begin, end_);
     auto def = std::unique_ptr<t_named>();
     switch (token_.kind) {
@@ -265,17 +265,17 @@ class parser {
     return actions_.on_namespace(language, ns);
   }
 
-  // statement_attrs: doctext? structured_annotation*
-  std::unique_ptr<stmt_attrs> parse_statement_attrs() {
+  // attributes: doctext? structured_annotation*
+  std::unique_ptr<attributes> parse_attributes() {
     auto doc = actions_.on_doctext();
-    auto annotations = std::unique_ptr<node_list<t_const>>();
+    auto annotations = node_list<t_const>();
     while (auto annotation = parse_structured_annotation()) {
-      if (!annotations) {
-        annotations = std::make_unique<node_list<t_const>>();
-      }
-      annotations->emplace_back(std::move(annotation));
+      annotations.emplace_back(std::move(annotation));
     }
-    return actions_.on_statement_attrs(std::move(doc), std::move(annotations));
+    return doc || !annotations.empty()
+        ? std::make_unique<attributes>(
+              attributes{std::move(doc), std::move(annotations)})
+        : nullptr;
   }
 
   boost::optional<comment> try_parse_inline_doc() {
@@ -389,13 +389,13 @@ class parser {
   }
 
   // function:
-  //   statement_attrs function_qualifier?
+  //   attributes function_qualifier?
   //     return_type identifier? "(" field* ")" throws? annotations
   //
   // function_qualifier: "oneway" | "idempotent" | "readonly"
   std::unique_ptr<t_function> parse_function() {
     auto range = track_range();
-    auto attrs = parse_statement_attrs();
+    auto attrs = parse_attributes();
 
     // Parse a function qualifier.
     auto qual = t_function_qualifier();
@@ -582,7 +582,7 @@ class parser {
   }
 
   // field:
-  //   statement_attrs field_id? field_qualifier? type identifier
+  //   attributes field_id? field_qualifier? type identifier
   //     field_value? annotations comma_or_semicolon? inline_doc?
   //
   // field_id: integer ":"
@@ -590,7 +590,7 @@ class parser {
   // field_value: "=" const_value
   std::unique_ptr<t_field> parse_field() {
     auto range = track_range();
-    auto attrs = parse_statement_attrs();
+    auto attrs = parse_attributes();
 
     // Parse the field id.
     auto field_id = boost::optional<int64_t>();
@@ -739,11 +739,11 @@ class parser {
   }
 
   // enum_value:
-  //   statement_attrs identifier ["=" integer] annotations
+  //   attributes identifier ["=" integer] annotations
   //     comma_or_semicolon? inline_doc?
   std::unique_ptr<t_enum_value> parse_enum_value() {
     auto range = track_range();
-    auto attrs = parse_statement_attrs();
+    auto attrs = parse_attributes();
     auto name = parse_identifier();
     auto value = try_consume_token('=')
         ? boost::optional<int64_t>(parse_integer())

@@ -414,7 +414,7 @@ void parsing_driver::set_annotations(
 
 void parsing_driver::set_attributes(
     t_named& node,
-    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<attributes> attrs,
     std::unique_ptr<deprecated_annotations> annots,
     const source_range& range) const {
   if (mode != parsing_mode::PROGRAM) {
@@ -425,10 +425,8 @@ void parsing_driver::set_attributes(
     if (attrs->doc) {
       node.set_doc(std::move(attrs->doc->text));
     }
-    if (attrs->struct_annotations != nullptr) {
-      for (auto& an : *attrs->struct_annotations) {
-        node.add_structured_annotation(std::move(an));
-      }
+    for (auto& annotation : attrs->annotations) {
+      node.add_structured_annotation(std::move(annotation));
     }
   }
   set_annotations(&node, std::move(annots));
@@ -714,18 +712,18 @@ parsing_driver::parsing_driver(
 }
 
 void parsing_driver::on_standard_header(
-    source_location loc, std::unique_ptr<stmt_attrs> attrs) {
+    source_location loc, std::unique_ptr<attributes> attrs) {
   validate_header_location(loc);
-  if (attrs && attrs->struct_annotations) {
+  if (attrs && !attrs->annotations.empty()) {
     diags_.error(
-        *attrs->struct_annotations->front(),
+        *attrs->annotations.front(),
         "Structured annotations are not supported for a given entity.");
   }
 }
 
 void parsing_driver::on_program_header(
     source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<attributes> attrs,
     std::unique_ptr<deprecated_annotations> annotations) {
   validate_header_location(range.begin);
   set_attributes(*program, std::move(attrs), std::move(annotations), range);
@@ -748,7 +746,7 @@ void parsing_driver::on_package(source_range range, fmt::string_view name) {
 void parsing_driver::on_definition(
     source_range range,
     std::unique_ptr<t_named> defn,
-    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<attributes> attrs,
     std::unique_ptr<deprecated_annotations> annotations) {
   if (mode == parsing_mode::PROGRAM) {
     programs_that_parsed_definition_.insert(program->path());
@@ -820,7 +818,7 @@ std::unique_ptr<t_service> parsing_driver::on_service(
 
 std::unique_ptr<t_function> parsing_driver::on_function(
     source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<attributes> attrs,
     t_function_qualifier qual,
     std::vector<t_type_ref> return_type,
     const identifier& name,
@@ -949,7 +947,7 @@ std::unique_ptr<t_exception> parsing_driver::on_exception(
 
 std::unique_ptr<t_field> parsing_driver::on_field(
     source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<attributes> attrs,
     boost::optional<int64_t> id,
     t_field_qualifier qual,
     t_type_ref type,
@@ -996,7 +994,7 @@ std::unique_ptr<t_enum> parsing_driver::on_enum(
 
 std::unique_ptr<t_enum_value> parsing_driver::on_enum_value(
     source_range range,
-    std::unique_ptr<stmt_attrs> attrs,
+    std::unique_ptr<attributes> attrs,
     const identifier& name,
     boost::optional<int64_t> value,
     std::unique_ptr<deprecated_annotations> annotations,

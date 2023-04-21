@@ -115,10 +115,10 @@ class parsing_driver : public parser_actions {
   void on_program() override { clear_doctext(); }
 
   void on_standard_header(
-      source_location loc, std::unique_ptr<stmt_attrs> attrs) override;
+      source_location loc, std::unique_ptr<attributes> attrs) override;
   void on_program_header(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       std::unique_ptr<deprecated_annotations> annotations) override;
 
   void on_package(source_range range, fmt::string_view name) override;
@@ -148,7 +148,7 @@ class parsing_driver : public parser_actions {
   void on_definition(
       source_range range,
       std::unique_ptr<t_named> defn,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       std::unique_ptr<deprecated_annotations> annotations) override;
 
   boost::optional<comment> on_doctext() override { return pop_doctext(); }
@@ -160,14 +160,6 @@ class parsing_driver : public parser_actions {
 
   comment on_inline_doc(source_location loc, fmt::string_view text) override {
     return {strip_doctext(text), loc};
-  }
-
-  std::unique_ptr<stmt_attrs> on_statement_attrs(
-      boost::optional<comment> doc,
-      std::unique_ptr<node_list<t_const>> annotations) override {
-    return doc || annotations ? std::make_unique<stmt_attrs>(stmt_attrs{
-                                    std::move(doc), std::move(annotations)})
-                              : nullptr;
   }
 
   std::unique_ptr<t_const> on_structured_annotation(
@@ -203,7 +195,7 @@ class parsing_driver : public parser_actions {
 
   std::unique_ptr<t_function> on_function(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       t_function_qualifier qual,
       std::vector<t_type_ref> return_type,
       const identifier& name,
@@ -259,7 +251,7 @@ class parsing_driver : public parser_actions {
 
   std::unique_ptr<t_field> on_field(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       boost::optional<int64_t> id,
       t_field_qualifier qual,
       t_type_ref type,
@@ -284,7 +276,7 @@ class parsing_driver : public parser_actions {
 
   std::unique_ptr<t_enum_value> on_enum_value(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       boost::optional<int64_t> value,
       std::unique_ptr<deprecated_annotations> annotations,
@@ -450,7 +442,7 @@ class parsing_driver : public parser_actions {
   // Sets the attributes on the given node.
   void set_attributes(
       t_named& node,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       std::unique_ptr<deprecated_annotations> annots,
       const source_range& loc) const;
 

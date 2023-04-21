@@ -49,9 +49,9 @@ struct comment {
   source_location loc;
 };
 
-struct stmt_attrs {
+struct attributes {
   boost::optional<comment> doc;
-  std::unique_ptr<node_list<t_const>> struct_annotations;
+  node_list<t_const> annotations;
 };
 
 struct deprecated_annotations {
@@ -74,10 +74,10 @@ class parser_actions {
   virtual void on_program() = 0;
 
   virtual void on_standard_header(
-      source_location loc, std::unique_ptr<stmt_attrs> attrs) = 0;
+      source_location loc, std::unique_ptr<attributes> attrs) = 0;
   virtual void on_program_header(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual void on_package(source_range range, fmt::string_view name) = 0;
@@ -91,16 +91,12 @@ class parser_actions {
   virtual void on_definition(
       source_range range,
       std::unique_ptr<t_named> defn,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       std::unique_ptr<deprecated_annotations> annotations) = 0;
 
   virtual boost::optional<comment> on_doctext() = 0;
   virtual void on_program_doctext() = 0;
   virtual comment on_inline_doc(source_location loc, fmt::string_view text) = 0;
-
-  virtual std::unique_ptr<stmt_attrs> on_statement_attrs(
-      boost::optional<comment> doc,
-      std::unique_ptr<node_list<t_const>> annotations) = 0;
 
   virtual std::unique_ptr<t_const> on_structured_annotation(
       source_range range, fmt::string_view name) = 0;
@@ -120,7 +116,7 @@ class parser_actions {
 
   virtual std::unique_ptr<t_function> on_function(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       t_function_qualifier qual,
       std::vector<t_type_ref> return_type,
       const identifier& name,
@@ -173,7 +169,7 @@ class parser_actions {
 
   virtual std::unique_ptr<t_field> on_field(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       boost::optional<int64_t> id,
       t_field_qualifier qual,
       t_type_ref type,
@@ -196,7 +192,7 @@ class parser_actions {
 
   virtual std::unique_ptr<t_enum_value> on_enum_value(
       source_range range,
-      std::unique_ptr<stmt_attrs> attrs,
+      std::unique_ptr<attributes> attrs,
       const identifier& name,
       boost::optional<int64_t> value,
       std::unique_ptr<deprecated_annotations> annotations,

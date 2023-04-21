@@ -27,7 +27,7 @@ namespace thrift {
 namespace op {
 
 TEST(StdHasherTest, checkCombineBool) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(true);
   EXPECT_NE(previousResult, hasher.getResult());
@@ -37,7 +37,7 @@ TEST(StdHasherTest, checkCombineBool) {
 }
 
 TEST(StdHasherTest, checkCombineInt8) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int8_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -50,7 +50,7 @@ TEST(StdHasherTest, checkCombineInt8) {
 }
 
 TEST(StdHasherTest, checkCombineInt16) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int16_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -63,7 +63,7 @@ TEST(StdHasherTest, checkCombineInt16) {
 }
 
 TEST(StdHasherTest, checkCombineInt32) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int32_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -76,7 +76,7 @@ TEST(StdHasherTest, checkCombineInt32) {
 }
 
 TEST(StdHasherTest, checkCombineInt64) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int64_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -89,7 +89,7 @@ TEST(StdHasherTest, checkCombineInt64) {
 }
 
 TEST(StdHasherTest, checkCombineFloat) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<float>(-1.0));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -102,7 +102,7 @@ TEST(StdHasherTest, checkCombineFloat) {
 }
 
 TEST(StdHasherTest, checkCombineDouble) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<double>(-1.0));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -115,7 +115,7 @@ TEST(StdHasherTest, checkCombineDouble) {
 }
 
 TEST(StdHasherTest, checkCombineIOBuf) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   auto bufA = folly::IOBuf::wrapBuffer(folly::range("abc"));
   hasher.combine(*bufA);
@@ -132,7 +132,7 @@ TEST(StdHasherTest, checkCombineIOBuf) {
 }
 
 TEST(StdHasherTest, checkCombineByteRange) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(folly::range("abc"));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -142,8 +142,8 @@ TEST(StdHasherTest, checkCombineByteRange) {
 }
 
 TEST(StdHasherTest, checkCombineStdHasher) {
-  StdHasher hasher;
-  StdHasher hasherOther;
+  StdHasherDeprecated hasher;
+  StdHasherDeprecated hasherOther;
   auto previousResult = hasher.getResult();
   hasher.combine(hasherOther);
   EXPECT_EQ(previousResult, hasher.getResult());
@@ -154,9 +154,9 @@ TEST(StdHasherTest, checkCombineStdHasher) {
 }
 
 TEST(StdHasherTest, checkLess) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   hasher.combine(folly::range("abc"));
-  StdHasher hasherOther;
+  StdHasherDeprecated hasherOther;
   EXPECT_TRUE(hasherOther < hasher);
   hasherOther.combine(folly::range("abc"));
   EXPECT_FALSE(hasherOther < hasher);
@@ -164,7 +164,7 @@ TEST(StdHasherTest, checkLess) {
 }
 
 TEST(StdHasherTest, checkFinalize) {
-  StdHasher hasher;
+  StdHasherDeprecated hasher;
   hasher.combine(folly::range("abc"));
   auto previousResult = hasher.getResult();
   hasher.finalize();

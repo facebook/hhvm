@@ -27,7 +27,7 @@ namespace apache {
 namespace thrift {
 namespace op {
 
-class StdHasher {
+class StdHasherDeprecated {
  public:
   size_t getResult() const { return result_; }
 
@@ -49,11 +49,11 @@ class StdHasher {
     result_ = folly::hash::hash_combine(
         folly::hash::hash_range(value.begin(), value.end()), result_);
   }
-  void combine(const StdHasher& other) { combine(other.result_); }
+  void combine(const StdHasherDeprecated& other) { combine(other.result_); }
 
   void finalize() {}
 
-  bool operator<(const StdHasher& other) const {
+  bool operator<(const StdHasherDeprecated other) const {
     return result_ < other.result_;
   }
 

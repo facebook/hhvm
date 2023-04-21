@@ -87,7 +87,7 @@ struct Hash {
   template <typename T = type::native_type<Tag>>
   auto operator()(const T& value) const {
     // TODO(afuller): Only use an accumulator for composite types.
-    auto accumulator = makeDeterministicAccumulator<StdHasher>();
+    auto accumulator = makeDeterministicAccumulator<StdHasherDeprecated>();
     accumulateHash(Tag{}, accumulator, value);
     return std::move(accumulator.result()).getResult();
   }

@@ -145,7 +145,11 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
             TShapeMap.empty
         in
         let upper_shape_ty =
-          mk (r, Tshape (Missing_origin, Open_shape, upper_fdm))
+          mk
+            ( r,
+              Tshape
+                (Missing_origin, Some (MakeType.mixed Reason.Rnone), upper_fdm)
+            )
         in
         ((env, None), Some upper_shape_ty))
   end
@@ -753,34 +757,11 @@ let rec array_get
               ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
           in
           (env, (ty, err_res_arr, err_res_idx))
-      | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->
+      | Tnewtype (cid, _, _bound) when String.equal cid SN.Classes.cSupportDyn
+        ->
         (* We must be under_dynamic_assumptions because
-           apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
-        let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
-        let (env, (ty, err_opt_arr, err_opt_idx)) =
-          array_get
-            ~array_pos
-            ~expr_pos
-            ~lhs_of_null_coalesce
-            is_lvalue
-            env
-            ty
-            e2
-            ty2
-        in
-        let err_res_idx =
-          Option.value_map
-            err_opt_idx
-            ~default:(Ok ty2)
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        let err_res_arr =
-          Option.value_map
-            err_opt_arr
-            ~default:dflt_arr_res
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        (env, (ty, err_res_arr, err_res_idx))
+           apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype *)
+        got_dynamic ()
       | Tnewtype (ts, [ty], bound) -> begin
         match deref bound with
         | (r, Tshape (_, shape_kind, fields))
@@ -893,7 +874,7 @@ let widen_for_assign_array_append ~expr_pos env ty =
     ((env, None), Some ty)
   | _ -> ((env, None), None)
 
-let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
+let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
   let ((env, ty_err1), ty1) =
     Typing_solver.expand_type_and_narrow
       ~description_of_expected:"an array or collection"
@@ -915,7 +896,6 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           ty
         | _ -> ty1
       in
-      let dflt_arr_res = Ok ty1 in
       let got_dynamic () =
         let tv = Typing_make_type.dynamic (get_reason ty1) in
         let (env, val_ty_err_opt) =
@@ -1019,27 +999,14 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tprim Tnull)
         when Tast.is_under_dynamic_assumptions env.Typing_env_types.checked ->
         got_dynamic ()
-      | (r, Tnewtype (cid, _, bound))
+      | (_, Tnewtype (cid, _, _bound))
         when String.equal cid SN.Classes.cSupportDyn ->
         (* We must be under_dynamic_assumptions because
-           apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
-        let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
-        let (env, (ty, err_opt_arr, err_opt_idx)) =
-          assign_array_append ~array_pos ~expr_pos ur env ty ty2
-        in
-        let err_res_idx =
-          Option.value_map
-            err_opt_idx
-            ~default:(Ok ty2)
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        let err_res_arr =
-          Option.value_map
-            err_opt_arr
-            ~default:dflt_arr_res
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        (env, (ty, err_res_arr, err_res_idx))
+           apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype.
+           In this case we just accept the assignment because it's as though
+           we applied an implicit upcast to dynamic
+        *)
+        got_dynamic ()
       | ( _,
           ( Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tvar _ | Tfun _
           | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
@@ -1077,8 +1044,8 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
  * Return the new array type
  *)
 
-let rec assign_array_get
-    ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2 =
+let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
+    =
   Typing_log.(
     log_with_level env "typing" ~level:1 (fun () ->
         log_types
@@ -1414,32 +1381,14 @@ let rec assign_array_get
           let ty = mk (r, Tshape (Missing_origin, shape_kind, fdm')) in
           (env, (ty, Ok ty, Ok tkey, Ok ty2))
       end
-      | Tnewtype (cid, _, bound) when String.equal cid SN.Classes.cSupportDyn ->
+      | Tnewtype (cid, _, _bound) when String.equal cid SN.Classes.cSupportDyn
+        ->
         (* We must be under_dynamic_assumptions because
-           apply_rules_with_index_value_ty_mismatches otherwise decends into the newtype *)
-        let ty = mk (r, Tintersection [MakeType.dynamic r; bound]) in
-        let (env, (ty, err_opt_arr, err_opt_tk, err_opt_idx)) =
-          assign_array_get ~array_pos ~expr_pos ur env ty key tkey ty2
-        in
-        let err_res_idx =
-          Option.value_map
-            err_opt_idx
-            ~default:(Ok ty2)
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        let err_res_tk =
-          Option.value_map
-            err_opt_tk
-            ~default:(Ok tkey)
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        let err_res_arr =
-          Option.value_map
-            err_opt_arr
-            ~default:(Ok ty1)
-            ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
-        in
-        (env, (ty, err_res_arr, err_res_tk, err_res_idx))
+           apply_rules_with_index_value_ty_mismatches otherwise descends into the newtype.
+           In this case we just accept the assignment because it's as though
+           we applied an implicit upcast to dynamic
+        *)
+        (env, (ety1, Ok ety1, Ok tkey, Ok ty2))
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _

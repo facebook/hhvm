@@ -61,7 +61,7 @@ class type ['a] decl_type_visitor_type =
     method on_tshape :
       'a ->
       Typing_reason.decl_t ->
-      Typing_defs.shape_kind ->
+      Typing_defs.decl_ty option ->
       Typing_defs.decl_phase Typing_defs.shape_field_type
       Typing_defs.TShapeMap.t ->
       'a
@@ -144,7 +144,7 @@ class type ['a] locl_type_visitor_type =
     method on_tshape :
       'a ->
       Typing_reason.t ->
-      Typing_defs.shape_kind ->
+      Typing_defs.locl_ty option ->
       Typing_defs.locl_phase Typing_defs.shape_field_type
       Typing_defs.TShapeMap.t ->
       'a

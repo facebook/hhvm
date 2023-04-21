@@ -2176,7 +2176,6 @@ and simplify_subtype_i
             | _ -> simplify_subtype ~subtype_env ~sub_supportdyn ty ty_super env)
           | (_, (Tdynamic | Tprim Tnull)) -> valid env
           | (_, Tnonnull)
-          | (_, Tshape (_, Open_shape, _))
           | (_, Tvar _)
           | (_, Tunapplied_alias _)
           | (_, Tnewtype _)
@@ -2224,7 +2223,7 @@ and simplify_subtype_i
                       ty_sub
                       ty_super)
               tyl
-          | (_, Tshape (_, Closed_shape, sftl)) ->
+          | (_, Tshape (_, unknown_fields_type, sftl)) ->
             List.fold_left
               ~init:(env, TL.valid)
               ~f:(fun res sft ->
@@ -2235,6 +2234,11 @@ and simplify_subtype_i
                       sft.sft_ty
                       ty_super)
               (TShapeMap.values sftl)
+            &&&
+            (match unknown_fields_type with
+            | None -> valid
+            | Some ty ->
+              simplify_subtype ~subtype_env ~sub_supportdyn ty ty_super)
           | (_, Tclass ((_, class_id), _exact, tyargs)) ->
             let class_def_sub = Typing_env.get_class env class_id in
             (match class_def_sub with
@@ -2941,14 +2945,15 @@ and simplify_subtype_shape
       | (_, false) -> `Required (make_supportdyn sft_ty))
     | None -> begin
       match shape_kind with
-      | Open_shape ->
+      | Some ty ->
         let printable_name = TUtils.get_printable_shape_field_name field_name in
-        let mixed_ty =
-          MakeType.mixed
+        let ty =
+          with_reason
+            ty
             (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
         in
-        `Optional (make_supportdyn mixed_ty)
-      | Closed_shape -> `Absent
+        `Optional (make_supportdyn ty)
+      | None -> `Absent
     end
   in
   (*
@@ -3075,7 +3080,7 @@ and simplify_subtype_shape
   in
   match (shape_kind_sub, shape_kind_super) with
   (* An open shape cannot subtype a closed shape *)
-  | (Open_shape, Closed_shape) ->
+  | (Some _, None) ->
     let fail =
       Option.map
         subtype_env.on_error

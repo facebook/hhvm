@@ -117,7 +117,10 @@ let any_shape_can_flow tast_env ty =
   let open Typing_make_type in
   let open Typing_reason in
   let shape_top =
-    shape Rnone Typing_defs.Open_shape Typing_defs.TShapeMap.empty
+    shape
+      Rnone
+      (Some (Typing_make_type.mixed Reason.Rnone))
+      Typing_defs.TShapeMap.empty
   in
   Tast_env.is_sub_type tast_env shape_top ty
 

@@ -198,7 +198,8 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 )))
             }
             Ty_::Tshape(params) => {
-                let (shape_kind, ref fdm) = **params;
+                let (ref shape_kind, ref fdm) = **params;
+                let shape_kind = shape_kind.as_ref().map(|x| self.instantiate(x));
                 let fdm = fdm
                     .iter()
                     .map(|(f, sft)| {

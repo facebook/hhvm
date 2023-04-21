@@ -46,6 +46,10 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
   end
   | _ -> ((env, None), None)
 
+(* Refine a shape with the knowledge that field_name
+ * exists. We do this by intersecting with
+ * shape(field_name => mixed, ...)
+ *)
 let refine_shape field_name pos env shape =
   let ((env, e1), shape) =
     Typing_solver.expand_type_and_narrow
@@ -55,15 +59,19 @@ let refine_shape field_name pos env shape =
       pos
       shape
   in
+  let r =
+    Reason.Rmissing_optional_field
+      (get_pos shape, TUtils.get_printable_shape_field_name field_name)
+  in
+  let sft_ty = MakeType.mixed r in
   let sft_ty =
-    let r =
-      Reason.Rmissing_optional_field
-        (get_pos shape, TUtils.get_printable_shape_field_name field_name)
-    in
-    if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
-      MakeType.supportdyn_mixed ~mixed_reason:r r
+    if
+      TUtils.is_dynamic env shape
+      && TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
+    then
+      MakeType.supportdyn r sft_ty
     else
-      MakeType.mixed r
+      sft_ty
   in
   let sft = { sft_optional = false; sft_ty } in
   Option.iter ~f:Errors.add_typing_error e1;
@@ -73,8 +81,10 @@ let refine_shape field_name pos env shape =
     shape
     (mk
        ( Reason.Rnone,
-         Tshape (Missing_origin, Open_shape, TShapeMap.singleton field_name sft)
-       ))
+         Tshape
+           ( Missing_origin,
+             Some (MakeType.mixed Reason.Rnone),
+             TShapeMap.singleton field_name sft ) ))
 
 let make_locl_like_type env ty =
   if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
@@ -109,8 +119,9 @@ let rec shrink_shape pos ~supportdyn field_name env shape =
   | Tshape (_, shape_kind, fields) ->
     let fields =
       match shape_kind with
-      | Closed_shape -> TShapeMap.remove field_name fields
-      | Open_shape ->
+      | None -> TShapeMap.remove field_name fields
+      (* TODO akenn: check this *)
+      | Some _ ->
         let printable_name = TUtils.get_printable_shape_field_name field_name in
         let nothing =
           MakeType.nothing (Reason.Runset_field (pos, printable_name))
@@ -177,18 +188,18 @@ let shapes_idx_not_null_with_ty_err env shape_ty (ty, p, field) =
         TUtils.make_supportdyn r env ty
       | (r, Tshape (_, shape_kind, ftm)) ->
         let (env, field_type) =
-          match TShapeMap.find_opt field ftm with
-          | Some { sft_ty; _ } ->
-            let (env, sft_ty) =
-              Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) sft_ty
-            in
-            (env, { sft_optional = false; sft_ty })
-          | None ->
-            ( env,
-              {
-                sft_optional = false;
-                sft_ty = MakeType.nonnull (Reason.Rwitness p);
-              } )
+          let sft_ty =
+            match TShapeMap.find_opt field ftm with
+            | Some { sft_ty; _ } -> sft_ty
+            | None ->
+              Option.value
+                ~default:(MakeType.mixed (Reason.Rwitness p))
+                shape_kind
+          in
+          let (env, sft_ty) =
+            Typing_solver.non_null env (Pos_or_decl.of_raw_pos p) sft_ty
+          in
+          (env, { sft_optional = false; sft_ty })
         in
         let ftm = TShapeMap.add field field_type ftm in
         (env, mk (r, Tshape (Missing_origin, shape_kind, ftm)))
@@ -217,7 +228,9 @@ let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   mk
     ( Reason.Rshape (shape_pos, fun_name),
       Tshape
-        (Missing_origin, Open_shape, TShapeMap.singleton field_name field_ty) )
+        ( Missing_origin,
+          Some (MakeType.mixed Reason.Rnone),
+          TShapeMap.singleton field_name field_ty ) )
 
 (* Typing rules for Shapes::idx
  *
@@ -301,7 +314,7 @@ let to_collection env pos shape_ty res return_type =
 
       method! on_tshape env r shape_kind fdm =
         match shape_kind with
-        | Closed_shape ->
+        | None ->
           let keys = TShapeMap.keys fdm in
           let (env, keys) =
             List.map_env env keys ~f:(fun env key ->
@@ -333,7 +346,7 @@ let to_collection env pos shape_ty res return_type =
           let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
           let (env, value) = Typing_union.union_list env r values in
           return_type env (get_reason res) key value
-        | Open_shape -> (env, res)
+        | Some _ -> (env, res)
 
       method! on_tunion env r tyl =
         let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in
@@ -569,7 +582,7 @@ let transform_idx_fun_ty (field_name : tshape_field_name) nargs fty =
                   ( Reason.Rwitness_from_decl param1.fp_pos,
                     Tshape
                       ( Missing_origin,
-                        Open_shape,
+                        Some (MakeType.mixed Reason.Rnone),
                         TShapeMap.singleton
                           field_name
                           { sft_optional = true; sft_ty = field_ty } ) )) ))
@@ -627,7 +640,7 @@ let transform_at_fun_ty (field_name : tshape_field_name) fty =
            ( Reason.Rwitness_from_decl param1.fp_pos,
              Tshape
                ( Missing_origin,
-                 Open_shape,
+                 Some (MakeType.mixed Reason.Rnone),
                  TShapeMap.singleton
                    field_name
                    { sft_optional = true; sft_ty = field_ty } ) ))

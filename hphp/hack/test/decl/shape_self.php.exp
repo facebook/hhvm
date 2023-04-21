@@ -20,7 +20,7 @@
           (Typing_defs.TCConcrete
              { Typing_defs.tc_type =
                (Rhint ([6:27-8:4]),
-                (Tshape (Typing_defs_core.Closed_shape,
+                (Tshape (None,
                    { (Typing_defs_core.TSFclass_const (
                         ([7:5-9], "\\TestClass"), ([7:11-14], "KEY"))) ->
                      { sft_optional = false;

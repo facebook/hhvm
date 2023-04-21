@@ -526,8 +526,12 @@ let rec is_denotable ty =
     List.for_all ~f:is_denotable ts
   | Tvec_or_dict (tk, tv) -> is_denotable tk && is_denotable tv
   | Taccess (ty, _) -> is_denotable ty
-  | Tshape (_, _, sm) ->
+  | Tshape (_, unknown_field_type, sm) ->
     TShapeMap.for_all (fun _ { sft_ty; _ } -> is_denotable sft_ty) sm
+    &&
+    (match unknown_field_type with
+    | None -> true
+    | Some ty -> is_mixed ty)
   | Tfun { ft_params; ft_ret; _ } ->
     is_denotable ft_ret.et_type
     && List.for_all ft_params ~f:(fun { fp_type; _ } ->
@@ -545,6 +549,16 @@ let rec is_denotable ty =
   | Tdependent _
   | Tunapplied_alias _ ->
     false
+
+and is_mixed ty =
+  match get_node ty with
+  | Tintersection [] -> true
+  | Toption ty -> begin
+    match get_node ty with
+    | Tnonnull -> true
+    | _ -> false
+  end
+  | _ -> false
 
 let same_type_origin orig1 orig2 =
   match orig1 with
@@ -720,12 +734,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       end
       | n -> n
     end
-    | ( Tshape (shape_origin1, shape_kind1, fields1),
-        Tshape (shape_origin2, shape_kind2, fields2) ) ->
+    | ( Tshape (shape_origin1, unknown_fields1, fields1),
+        Tshape (shape_origin2, unknown_fields2, fields2) ) ->
       if same_type_origin shape_origin1 shape_origin2 then
         0
       else begin
-        match compare_shape_kind shape_kind1 shape_kind2 with
+        match Option.compare ty_compare unknown_fields1 unknown_fields2 with
         | 0 ->
           List.compare
             (fun (k1, v1) (k2, v2) ->

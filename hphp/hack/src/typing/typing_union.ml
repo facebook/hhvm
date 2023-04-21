@@ -603,7 +603,9 @@ and union_tylists_w_variances ~approx_cancel_neg env tparams tyl1 tyl2 =
 
 and union_shapes
     ~approx_cancel_neg env (shape_kind1, fdm1, r1) (shape_kind2, fdm2, r2) =
-  let shape_kind = union_shape_kind shape_kind1 shape_kind2 in
+  let (env, shape_kind) =
+    union_shape_kind ~approx_cancel_neg env shape_kind1 shape_kind2
+  in
   let ((env, shape_kind), fdm) =
     TShapeMap.merge_env
       (env, shape_kind)
@@ -617,13 +619,13 @@ and union_shapes
         | ((shape_kind_other, None, r), (_, Some { sft_ty; _ }, _)) ->
           let sft_ty =
             match shape_kind_other with
-            | Closed_shape -> sft_ty
-            | Open_shape ->
+            | None -> sft_ty
+            | Some ty ->
               let r =
                 Reason.Rmissing_optional_field
                   (Reason.to_pos r, Utils.get_printable_shape_field_name k)
               in
-              MakeType.mixed r
+              with_reason ty r
           in
           ((env, shape_kind), Some { sft_optional = true; sft_ty })
         (* key is present on both sides *)
@@ -635,10 +637,15 @@ and union_shapes
   in
   (env, Tshape (Missing_origin, shape_kind, fdm))
 
-and union_shape_kind shape_kind1 shape_kind2 =
+and union_shape_kind ~approx_cancel_neg env shape_kind1 shape_kind2 =
   match (shape_kind1, shape_kind2) with
-  | (Closed_shape, Closed_shape) -> Closed_shape
-  | _ -> Open_shape
+  | (None, None) -> (env, None)
+  | (Some t, None)
+  | (None, Some t) ->
+    (env, Some t)
+  | (Some t1, Some t2) ->
+    let (env, t) = union ~approx_cancel_neg env t1 t2 in
+    (env, Some t)
 
 (* TODO: add a new reason with positions of merge point and possibly merged
  * envs.*)

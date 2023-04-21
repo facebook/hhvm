@@ -134,14 +134,8 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
     in
     let sh_kind =
       match kind with
-      | Type.Open_shape ->
-        let pself = get_policy ?prefix lump renv in
-        let plump = get_policy ?prefix lump renv in
-        let pnull = get_policy ?prefix lump renv in
-        let tnull = Tnull pnull in
-        let tmixed = Tunion [tnull; Tnonnull (pself, plump)] in
-        Open_shape tmixed
-      | Type.Closed_shape -> Closed_shape
+      | Some t -> Open_shape (ty t)
+      | None -> Closed_shape
     in
     Tshape { sh_kind; sh_fields = Typing_defs.TShapeMap.map lift fields }
   (* ---  types below are not yet supported *)

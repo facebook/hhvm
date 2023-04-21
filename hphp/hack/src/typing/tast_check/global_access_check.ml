@@ -530,7 +530,7 @@ let is_value_collection_ty env ty =
   let shape =
     MakeType.shape
       Reason.none
-      Typing_defs.Open_shape
+      (Some (MakeType.mixed Reason.Rnone))
       Typing_defs.TShapeMap.empty
   in
   Typing_utils.is_sub_type env ty hackarray

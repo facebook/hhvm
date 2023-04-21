@@ -60,11 +60,6 @@ type fun_tparams_kind =
       explicit type argument must be reified. *)
 [@@deriving eq]
 
-type shape_kind =
-  | Closed_shape
-  | Open_shape
-[@@deriving eq, ord, show]
-
 (** The origin of a type is a succinct key that is unique to the
     type containing it. Consequently, two types with the same
     origin are necessarily identical. Any change to a type with
@@ -267,7 +262,7 @@ and _ ty_ =
    * known arms.
    *)
   | Tshape :
-      type_origin * shape_kind * 'phase shape_field_type TShapeMap.t
+      type_origin * 'phase ty option * 'phase shape_field_type TShapeMap.t
       -> 'phase ty_
   | Tvar : Ident.t -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter

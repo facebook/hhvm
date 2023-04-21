@@ -57,8 +57,8 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
     let fields = List.map (TShapeMap.elements fdm) ~f:print_shape_field_exn in
     let fields =
       match shape_kind with
-      | Closed_shape -> fields
-      | Open_shape -> fields @ ["..."]
+      | None -> fields
+      | Some _ -> fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
   | Tunapplied_alias name

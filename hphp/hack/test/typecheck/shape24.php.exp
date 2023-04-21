@@ -1,6 +1,6 @@
 File "shape24.php", line 21, characters 10-11:
 Invalid return type (Typing[4110])
-File "shape24.php", line 14, characters 12-15:
-Expected `bool`
-File "shape24.php", line 20, characters 15-15:
-But got `nonnull` because the field `z` may be set to any type in this shape
+  File "shape24.php", line 14, characters 12-15:
+  Expected `bool`
+  File "shape24.php", line 9, characters 3-5:
+  But got `nonnull`

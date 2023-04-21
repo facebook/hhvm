@@ -157,9 +157,7 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (_, Closed_shape, fields)
-    when Int.equal 0 (TShapeMap.cardinal fields) ->
-    Always_falsy
+  | Tshape (_, None, fields) when TShapeMap.is_empty fields -> Always_falsy
   | Tshape (_, _, fields) ->
     let has_non_optional_fields =
       TShapeMap.fold

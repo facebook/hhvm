@@ -352,7 +352,7 @@ let ty_equal_shallow env ty1 ty2 =
       && equal_exact exact_sub exact_super
     | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
     | (Tshape (_, shape_kind1, fdm1), Tshape (_, shape_kind2, fdm2)) ->
-      equal_shape_kind shape_kind1 shape_kind2
+      Bool.equal (Option.is_some shape_kind1) (Option.is_some shape_kind2)
       && List.equal
            (fun (k1, v1) (k2, v2) ->
              TShapeField.equal k1 k2

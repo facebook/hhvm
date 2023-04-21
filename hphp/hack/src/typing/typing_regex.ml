@@ -91,7 +91,7 @@ let type_match p s ~flags =
   let shape_map =
     TShapeMap.add (TSFlit_int (Pos_or_decl.of_raw_pos p, "0")) sft shape_map
   in
-  mk (Reason.Rregex p, Tshape (Missing_origin, Closed_shape, shape_map))
+  mk (Reason.Rregex p, Tshape (Missing_origin, None, shape_map))
 
 let get_global_options s =
   List.fold_left (String.to_list_rev s) ~init:[] ~f:(fun acc x ->

@@ -4983,7 +4983,7 @@ and expr_
       env
       p
       (Aast.Shape (List.map ~f:(fun (k, te, _) -> (k, te)) tfdm))
-      (mk (Reason.Rshape_literal p, Tshape (Missing_origin, Closed_shape, fdm)))
+      (mk (Reason.Rshape_literal p, Tshape (Missing_origin, None, fdm)))
   | ET_Splice e ->
     Typing_env.with_outside_expr_tree env (fun env dsl_name ->
         et_splice env dsl_name p e)

@@ -194,7 +194,7 @@
            scc_name = ([36:47-53], "CSHAPE");
            scc_type =
            (Rhint ([36:9-46]),
-            (Tshape (Typing_defs_core.Open_shape,
+            (Tshape ((Some (Rhint ([36:42-45]), Tmixed)),
                { (Typing_defs_core.TSFlit_str ([36:15-18], "a")) ->
                  { sft_optional = false;
                    sft_ty = (Rhint ([36:22-25]), (Tprim Tint)) };

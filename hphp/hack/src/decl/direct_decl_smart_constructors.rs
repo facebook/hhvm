@@ -72,7 +72,6 @@ use oxidized_by_ref::typing_defs::RefinedConst;
 use oxidized_by_ref::typing_defs::RefinedConstBound;
 use oxidized_by_ref::typing_defs::RefinedConstBounds;
 use oxidized_by_ref::typing_defs::ShapeFieldType;
-use oxidized_by_ref::typing_defs::ShapeKind;
 use oxidized_by_ref::typing_defs::TaccessType;
 use oxidized_by_ref::typing_defs::Tparam;
 use oxidized_by_ref::typing_defs::TshapeFieldName;
@@ -5331,18 +5330,25 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 fields.insert(self.make_t_shape_field_name(name), type_)
             }
         }
-        let (kind, is_open) = match open.token_kind() {
-            Some(TokenKind::DotDotDot) => (ShapeKind::OpenShape, true),
-            _ => (ShapeKind::ClosedShape, false),
+        let kind = match open.token_kind() {
+            // Type of unknown fields is mixed, or supportdyn<mixed> under implicit SD
+            Some(TokenKind::DotDotDot) => {
+                let pos = self.get_pos(open);
+                let reason = self.alloc(Reason::hint(pos));
+                Some(self.alloc(Ty(
+                    reason,
+                    if self.implicit_sdt() {
+                        self.make_supportdyn(pos, Ty_::Tmixed)
+                    } else {
+                        Ty_::Tmixed
+                    },
+                )))
+            }
+            _ => None,
         };
         let pos = self.merge_positions(shape, rparen);
         let origin = TypeOrigin::MissingOrigin;
-        let ty_ = Ty_::Tshape(self.alloc((origin, kind, fields.into())));
-        if is_open && self.implicit_sdt() {
-            self.hint_ty(pos, self.make_supportdyn(pos, ty_))
-        } else {
-            self.hint_ty(pos, ty_)
-        }
+        self.hint_ty(pos, Ty_::Tshape(self.alloc((origin, kind, fields.into()))))
     }
 
     fn make_classname_type_specifier(

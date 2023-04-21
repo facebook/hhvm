@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<70788a64670dfe55e1aa854030cdba89>>
+// @generated SignedSource<<a22085373c175ff45d75a962a7b9e913>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1252,17 +1252,6 @@ impl<'a> Node<'a> for ClassConstKind {
         match self {
             ClassConstKind::CCAbstract(ref __binding_0) => __binding_0.accept(v),
             ClassConstKind::CCConcrete => {}
-        }
-    }
-}
-impl<'a> Node<'a> for ShapeKind {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_shape_kind(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            ShapeKind::ClosedShape => {}
-            ShapeKind::OpenShape => {}
         }
     }
 }

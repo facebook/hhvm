@@ -53,7 +53,7 @@ class type ['a] decl_type_visitor_type =
     method on_tshape :
       'a ->
       decl_phase Reason.t_ ->
-      shape_kind ->
+      decl_ty option ->
       decl_phase shape_field_type TShapeMap.t ->
       'a
 
@@ -127,7 +127,12 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape acc _ _ fdm =
+    method on_tshape acc _ kind fdm =
+      let acc =
+        match kind with
+        | None -> acc
+        | Some ty -> this#on_type acc ty
+      in
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
 
@@ -201,7 +206,7 @@ class type ['a] locl_type_visitor_type =
     method on_tshape :
       'a ->
       Reason.t ->
-      shape_kind ->
+      locl_ty option ->
       locl_phase shape_field_type TShapeMap.t ->
       'a
 
@@ -269,7 +274,12 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tintersection acc _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tshape acc _ _ fdm =
+    method on_tshape acc _ kind fdm =
+      let acc =
+        match kind with
+        | None -> acc
+        | Some ty -> this#on_type acc ty
+      in
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
 

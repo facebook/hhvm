@@ -24,7 +24,7 @@ let of_pos pos =
 let of_marker env pos fields kind =
   let shape_ty =
     Typing_defs.(
-      mk (Typing_reason.Rnone, Tshape (Missing_origin, Closed_shape, fields)))
+      mk (Typing_reason.Rnone, Tshape (Missing_origin, None, fields)))
   in
   JSON.JSON_Object
     [

@@ -256,9 +256,9 @@ and hint_ p env = function
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let shape_kind =
       if nsi_allows_unknown_fields then
-        Open_shape
+        Some (hint env (p, Hmixed))
       else
-        Closed_shape
+        None
     in
     let fdm =
       List.fold_left

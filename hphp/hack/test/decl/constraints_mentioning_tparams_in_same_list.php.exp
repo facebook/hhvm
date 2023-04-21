@@ -120,7 +120,7 @@
             tp_constraints =
             [(Constraint_as,
               (Rhint ([15:13-29]),
-               (Tshape (Typing_defs_core.Closed_shape,
+               (Tshape (None,
                   { (Typing_defs_core.TSFlit_str ([15:19-22], "a")) ->
                     { sft_optional = false;
                       sft_ty = (Rhint ([15:26-28]), (Tgeneric ("Ta", []))) } }

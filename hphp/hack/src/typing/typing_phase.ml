@@ -126,6 +126,17 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     end
     | _ -> lty
   in
+  let push_supportdyn_into_shape lty =
+    let (is_supportdyn, _env, stripped_lty) =
+      Typing_utils.strip_supportdyn env lty
+    in
+    match deref stripped_lty with
+    | (r, Tshape (origin, Some ty, shape_fields)) when is_supportdyn ->
+      MakeType.supportdyn
+        r
+        (mk (r, Tshape (origin, Some (MakeType.supportdyn r ty), shape_fields)))
+    | _ -> lty
+  in
   let tvar_or_localize ~ety_env env r ty ~i =
     if
       TypecheckerOptions.global_inference env.genv.tcopt
@@ -294,7 +305,12 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         | None -> localize_class_instantiation ~ety_env env r cls argl None
       end
     in
-    ((env, ty_err_opt), set_type_origin lty)
+    ( (env, ty_err_opt),
+      (* If we have supportdyn<t> then push supportdyn into open shape fields *)
+      if String.equal cid Naming_special_names.Classes.cSupportDyn then
+        push_supportdyn_into_shape lty
+      else
+        set_type_origin lty )
   | Ttuple tyl ->
     let (env, tyl) =
       List.map_env_ty_err_opt
@@ -374,14 +390,24 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt), set_type_origin ty)
   | Tshape (_, shape_kind, tym) ->
-    let (env, tym) =
+    let ((env, ty_err_opt1), tym) =
       ShapeFieldMap.map_env_ty_err_opt
         (localize ~ety_env)
         env
         tym
         ~combine_ty_errs:Typing_error.multiple_opt
     in
-    (env, mk (r, Tshape (Missing_origin, shape_kind, tym)))
+    let ((env, ty_err_opt2), shape_kind) =
+      match shape_kind with
+      | None -> ((env, None), None)
+      | Some ty ->
+        let (x, ty) = localize ~ety_env env ty in
+        (x, Some ty)
+    in
+    let ty_err_opt =
+      Option.merge ty_err_opt1 ty_err_opt2 ~f:Typing_error.both
+    in
+    ((env, ty_err_opt), mk (r, Tshape (Missing_origin, shape_kind, tym)))
   | Tnewtype (name, tyl, ty) ->
     let td =
       Utils.unsafe_opt

@@ -27,7 +27,7 @@
            (Typing_defs.TCConcrete
               { Typing_defs.tc_type =
                 (Rhint ([6:23-40]),
-                 (Tshape (Typing_defs_core.Closed_shape,
+                 (Tshape (None,
                     { (Typing_defs_core.TSFlit_str ([6:29-32], "x")) ->
                       { sft_optional = false;
                         sft_ty = (Rhint ([6:36-39]), (Tprim Tint)) } }

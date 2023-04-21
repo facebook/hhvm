@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<97bc4476d42a6b0d6aba65854deab257>>
+// @generated SignedSource<<0ca870972eab58d24e438619c590419f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -133,34 +133,6 @@ pub enum FunTparamsKind {
 }
 impl TrivialDrop for FunTparamsKind {}
 arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[rust_to_ocaml(attr = "deriving (eq, ord, show)")]
-#[repr(u8)]
-pub enum ShapeKind {
-    #[rust_to_ocaml(name = "Closed_shape")]
-    ClosedShape,
-    #[rust_to_ocaml(name = "Open_shape")]
-    OpenShape,
-}
-impl TrivialDrop for ShapeKind {}
-arena_deserializer::impl_deserialize_in_arena!(ShapeKind);
 
 #[derive(
     Clone,
@@ -583,7 +555,7 @@ pub enum Ty_ {
     /// known arms.
     Tshape(
         TypeOrigin,
-        ShapeKind,
+        Option<Ty>,
         t_shape_map::TShapeMap<ShapeFieldType>,
     ),
     Tvar(ident::Ident),

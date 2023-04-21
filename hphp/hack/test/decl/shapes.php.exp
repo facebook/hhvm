@@ -4,7 +4,7 @@
        td_tparams = []; td_as_constraint = None; td_super_constraint = None;
        td_type =
        (Rhint ([3:19-57]),
-        (Tshape (Typing_defs_core.Open_shape,
+        (Tshape ((Some (Rhint ([3:53-56]), Tmixed)),
            { (Typing_defs_core.TSFlit_str ([3:25-28], "x")) ->
              { sft_optional = false;
                sft_ty = (Rhint ([3:32-37]), (Tprim Tfloat)) };
@@ -28,7 +28,7 @@
                  { et_enforced = Typing_defs_core.Unenforced;
                    et_type =
                    (Rhint ([5:22-55]),
-                    (Tshape (Typing_defs_core.Closed_shape,
+                    (Tshape (None,
                        { (Typing_defs_core.TSFlit_str ([5:28-31], "x")) ->
                          { sft_optional = false;
                            sft_ty = (Rhint ([5:35-40]), (Tprim Tfloat)) };
@@ -84,7 +84,7 @@
               { et_enforced = Typing_defs_core.Unenforced;
                 et_type =
                 (Rhint ([11:4-42]),
-                 (Tshape (Typing_defs_core.Open_shape,
+                 (Tshape ((Some (Rhint ([11:38-41]), Tmixed)),
                     { (Typing_defs_core.TSFlit_str ([11:10-13], "x")) ->
                       { sft_optional = false;
                         sft_ty = (Rhint ([11:17-22]), (Tprim Tfloat)) };
@@ -153,12 +153,12 @@
         td_super_constraint = None;
         td_type =
         (Rhint ([20:3-72]),
-         (Tshape (Typing_defs_core.Closed_shape,
+         (Tshape (None,
             { (Typing_defs_core.TSFlit_str ([20:27-34], "coord")) ->
               { sft_optional = false;
                 sft_ty =
                 (Rhint ([20:38-71]),
-                 (Tshape (Typing_defs_core.Closed_shape,
+                 (Tshape (None,
                     { (Typing_defs_core.TSFlit_str ([20:44-47], "x")) ->
                       { sft_optional = false;
                         sft_ty = (Rhint ([20:51-56]), (Tprim Tfloat)) };

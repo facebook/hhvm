@@ -4,7 +4,7 @@
        td_tparams = []; td_as_constraint = None; td_super_constraint = None;
        td_type =
        (Rhint ([3:14-8:2]),
-        (Tshape (Typing_defs_core.Closed_shape,
+        (Tshape (None,
            { (Typing_defs_core.TSFlit_str ([4:3-4], "0")) ->
              { sft_optional = false;
                sft_ty = (Rhint ([4:8-11]), (Tprim Tint)) };

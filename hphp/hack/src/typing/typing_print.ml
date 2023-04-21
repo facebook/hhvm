@@ -407,7 +407,7 @@ module Full = struct
 
   let ttuple ~fuel k tyl = list ~fuel "(" k tyl ")"
 
-  let tshape ~fuel k to_doc (shape_kind : shape_kind) (fdm : _ TShapeMap.t) =
+  let tshape ~fuel ~open_mixed k to_doc shape_kind (fdm : _ TShapeMap.t) =
     let (fuel, fields_doc) =
       let f_field (shape_map_key, { sft_optional; sft_ty }) ~fuel =
         let key_delim =
@@ -436,10 +436,16 @@ module Full = struct
       in
       shape_map ~fuel fdm f_field
     in
-    let fields_doc =
+    let (fuel, fields_doc) =
       match shape_kind with
-      | Closed_shape -> fields_doc
-      | Open_shape -> fields_doc @ [text "..."]
+      | None -> (fuel, fields_doc)
+      | Some ty ->
+        if open_mixed then
+          (fuel, fields_doc @ [text "..."])
+        else
+          let (fuel, ty_doc) = k ~fuel ty in
+          ( fuel,
+            fields_doc @ [Concat [text "_"; Space; text "=>"; Space; ty_doc]] )
     in
     list ~fuel "shape(" id fields_doc ")"
 
@@ -642,7 +648,8 @@ module Full = struct
       let (fuel, tys_doc) = ttuple ~fuel k tyl in
       let intersection_doc = Concat [text "&"; tys_doc] in
       (fuel, intersection_doc)
-    | Tshape (_, shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+    | Tshape (_, shape_kind, fdm) ->
+      tshape ~fuel ~open_mixed:false k to_doc shape_kind fdm
 
   (* TODO (T86471586): Display capabilities that are decls for functions *)
   and fun_decl_implicit_params ~fuel _to_doc _st _penv _tparams _implicit_param
@@ -683,6 +690,22 @@ module Full = struct
             (tparam, Ast_defs.Constraint_super, ty))
         @ List.map (TySet.elements upper) ~f:(fun ty ->
               (tparam, Ast_defs.Constraint_as, ty))
+
+  let rec is_open_mixed env t =
+    match t with
+    | None -> false
+    | Some t ->
+      (match get_node t with
+      | Tnewtype (n, _, ty)
+        when String.equal n SN.Classes.cSupportDyn && not (show_supportdyn env)
+        ->
+        is_open_mixed env (Some ty)
+      | Toption t ->
+        let (_, t) = Typing_inference_env.expand_type env.inference_env t in
+        (match get_node t with
+        | Tnonnull -> true
+        | _ -> false)
+      | _ -> false)
 
   (* Prints a locl_ty. If there isn't enough fuel, the type is omitted. Each
      recursive call to print a type depletes the fuel by one. *)
@@ -975,7 +998,14 @@ module Full = struct
     | Tintersection [] -> (fuel, text "mixed")
     | Tintersection tyl ->
       delimited_list ~fuel (Space ^^ text "&" ^^ Space) "(" k tyl ")"
-    | Tshape (_, shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+    | Tshape (_, shape_kind, fdm) ->
+      tshape
+        ~fuel
+        ~open_mixed:(is_open_mixed env shape_kind)
+        k
+        to_doc
+        shape_kind
+        fdm
     | Taccess (root_ty, id) ->
       let (fuel, root_ty_doc) = k ~fuel root_ty in
       let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
@@ -1495,11 +1525,7 @@ module Json = struct
     | (p, Tclass ((_, cid), e, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys @ refs e
     | (p, Tshape (_, shape_kind, fl)) ->
-      let fields_known =
-        match shape_kind with
-        | Closed_shape -> true
-        | Open_shape -> false
-      in
+      let fields_known = Option.is_none shape_kind in
       obj
       @@ kind p "shape"
       @ is_array false
@@ -1794,9 +1820,9 @@ module Json = struct
             >>= fun (fields_known, _fields_known_keytrace) ->
             let shape_kind =
               if fields_known then
-                Closed_shape
+                None
               else
-                Open_shape
+                Some (Typing_make_type.mixed Reason.Rnone)
             in
             let fields =
               List.fold fields ~init:TShapeMap.empty ~f:(fun shape_map (k, v) ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eac533440129c881254cd9226cfc540c>>
+// @generated SignedSource<<d3ac436f5b727f7f4fa029a4cb7ac1a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -82,7 +82,6 @@ arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 pub type CrossPackageDecl<'a> = Option<&'a str>;
 
 pub use oxidized::typing_defs_core::FunTparamsKind;
-pub use oxidized::typing_defs_core::ShapeKind;
 pub use oxidized::typing_defs_core::ValKind;
 
 #[derive(
@@ -491,7 +490,7 @@ pub enum Ty_<'a> {
     Tshape(
         &'a (
             TypeOrigin<'a>,
-            oxidized::typing_defs_core::ShapeKind,
+            Option<&'a Ty<'a>>,
             t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
         ),
     ),

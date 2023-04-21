@@ -187,6 +187,11 @@ let base_visitor ~human_friendly ~under_dynamic line char =
         let ty = class_id_ty env id in
         Some (pos, env, ty)
       | _ -> acc
+
+    method! on_If env cond then_block else_block =
+      match ServerUtils.resugar_invariant_call env cond then_block with
+      | Some e -> self#on_expr env e
+      | None -> super#on_If env cond then_block else_block
   end
 
 (** Return the type of the node associated with exactly the given range.

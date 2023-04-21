@@ -58,13 +58,18 @@ namespace HH {
   //   : (function(C): <the return type of C::method>)
 
   /**
+   * Call `invariant_violation` if the condition is false.
+   *
+   * ```
+   * invariant($x >= 0, "Value cannot be negative: %d", $x);
+   * ```
+   *
    * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
    */
   function invariant(
-    \HH\FIXME\MISSING_PARAM_TYPE
-      $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
+    \HH\FIXME\MISSING_PARAM_TYPE $condition,
     FormatString<\PlainSprintf> $f,
-    \HH\FIXME\MISSING_PARAM_TYPE ...$f_args
+    mixed ...$f_args
   )[]: void; // becomes:
   // if (!(<condition>)) { // an Exception is thrown
   //   invariant_violation('sprintf format: %s', 'string', ...);

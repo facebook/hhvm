@@ -121,7 +121,7 @@ namespace HH {
   // Equivalent to invariant(false, $fmt, ...$fmt_args).
   function invariant_violation(
     FormatString<\PlainSprintf> $fmt,
-    \HH\FIXME\MISSING_PARAM_TYPE ...$fmt_args
+    mixed ...$fmt_args
   )[]: noreturn;
 
 }

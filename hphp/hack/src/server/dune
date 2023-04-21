@@ -236,12 +236,14 @@
   find
   decl
   decl_class
+  decl_provider
   hhi
   procs_bucket
   procs_procs
   relative_path
   server_files
   sys_utils
+  tast_env
   utils_core
   watchman)
  (preprocess

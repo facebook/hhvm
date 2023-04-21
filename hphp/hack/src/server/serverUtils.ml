@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+module SN = Naming_special_names
 
 type 'env handle_command_result =
   | Done of 'env
@@ -208,3 +209,73 @@ let make_next
       concat_next_files [next_files_hhi; next_files_extra; next_files_root] ()
     in
     Bucket.of_list next
+
+(* During naming, we desugar:
+ *
+ * invariant(foo(), "oh dear");
+ *
+ * To:
+ *
+ * if (!foo()) {
+ *   invariant_violation("oh dear");
+ * }
+ *
+ * If [cond] and [then_body] look like desugared syntax, return the
+ * equivalent expression that calls invariant().
+ *)
+let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
+    Tast.expr option =
+  (* If a user has actually written
+   *
+   * if (!foo()) {
+   *   invariant_violation("oh dear");
+   * }
+   *
+   * then the position of the if statement and the call will be different. If
+   * the positions are the same, we know that we desugared a call to invariant().
+   *)
+  let has_same_start pos1 pos2 =
+    let pos1_start = Pos.start_offset pos1 in
+    let pos2_start = Pos.start_offset pos2 in
+    pos1_start = pos2_start
+  in
+
+  match (cond, then_body) with
+  | ( (_, _, Aast.Unop (Ast_defs.Unot, invariant_cond)),
+      [
+        ( stmt_pos,
+          Aast.Expr
+            ( call_ty,
+              call_pos,
+              Aast.Call
+                ((recv_ty, recv_pos, Aast.Id (name_pos, name)), _, args, _) ) );
+      ] )
+    when String.equal name SN.AutoimportedFunctions.invariant_violation
+         && has_same_start stmt_pos call_pos ->
+    let recv_ty_invariant =
+      match
+        Decl_provider.get_fun
+          (Tast_env.get_ctx env)
+          SN.AutoimportedFunctions.invariant
+      with
+      | Some fun_decl ->
+        let (_, f_locl_ty) =
+          Tast_env.localize_no_subst
+            env
+            ~ignore_errors:true
+            fun_decl.Typing_defs.fe_type
+        in
+        f_locl_ty
+      | None -> recv_ty
+    in
+    Some
+      ( call_ty,
+        call_pos,
+        Aast.Call
+          ( ( recv_ty_invariant,
+              recv_pos,
+              Aast.Id (name_pos, SN.AutoimportedFunctions.invariant) ),
+            [],
+            (Ast_defs.Pnormal, invariant_cond) :: args,
+            None ) )
+  | _ -> None

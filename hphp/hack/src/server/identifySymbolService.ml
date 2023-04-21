@@ -455,6 +455,11 @@ let visitor =
         typed_class_id ~class_id_type:Other env ty p
       | Aast.CI _ -> typed_class_id env ty p
 
+    method! on_If env cond then_block else_block : Result_set.t =
+      match ServerUtils.resugar_invariant_call env cond then_block with
+      | Some e -> self#on_expr env e
+      | None -> super#on_If env cond then_block else_block
+
     method! on_Call env ((_, _, expr_) as e) tal el unpacked_element =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
        * use the result of `self#on_expr env e`, since it would record a

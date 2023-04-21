@@ -66,12 +66,12 @@ type entry = {
       (** Derived from [contents]; contains additional preprocessing. *)
   mutable parser_return: Parser_return.t option;
       (** this parser_return, if present, came from source_text via Ast_provider.parse
-    under ~full:true ~keep_errors:true *)
+      under ~full:true ~keep_errors:true *)
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
       (** NOT monotonic: depends on the decls of other files. *)
-  mutable naming_and_typing_errors: Errors.t option;
+  mutable all_errors: Errors.t option;
       (** NOT monotonic for the same reason as [tast]. *)
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }

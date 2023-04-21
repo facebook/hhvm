@@ -33,19 +33,11 @@ let compute_tast_and_errors_unquarantined_internal
     ~(entry : Provider_context.entry)
     ~(mode : a compute_tast_mode) : a =
   match
-    ( mode,
-      entry.Provider_context.tast,
-      entry.Provider_context.naming_and_typing_errors )
+    (mode, entry.Provider_context.tast, entry.Provider_context.all_errors)
   with
   | (Compute_tast_only, Some tast, _) ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_and_errors, Some tast, Some naming_and_typing_errors) ->
-    let (_parser_return, ast_errors) =
-      Ast_provider.compute_parser_return_and_ast_errors
-        ~popt:(Provider_context.get_popt ctx)
-        ~entry
-    in
-    let errors = Errors.merge ast_errors naming_and_typing_errors in
+  | (Compute_tast_and_errors, Some tast, Some errors) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   | (mode, _, _) ->
     (* prepare logging *)
@@ -134,11 +126,11 @@ let compute_tast_and_errors_unquarantined_internal
 
     (match mode with
     | Compute_tast_and_errors ->
-      let naming_and_typing_errors = Errors.merge naming_errors typing_errors in
+      let errors =
+        naming_errors |> Errors.merge typing_errors |> Errors.merge ast_errors
+      in
       entry.Provider_context.tast <- Some tast;
-      entry.Provider_context.naming_and_typing_errors <-
-        Some naming_and_typing_errors;
-      let errors = Errors.merge ast_errors naming_and_typing_errors in
+      entry.Provider_context.all_errors <- Some errors;
       { Compute_tast_and_errors.tast; errors; telemetry }
     | Compute_tast_only ->
       entry.Provider_context.tast <- Some tast;
@@ -164,17 +156,8 @@ let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
-  match
-    ( entry.Provider_context.tast,
-      entry.Provider_context.naming_and_typing_errors )
-  with
-  | (Some tast, Some naming_and_typing_errors) ->
-    let (_parser_return, ast_errors) =
-      Ast_provider.compute_parser_return_and_ast_errors
-        ~popt:(Provider_context.get_popt ctx)
-        ~entry
-    in
-    let errors = Errors.merge ast_errors naming_and_typing_errors in
+  match (entry.Provider_context.tast, entry.Provider_context.all_errors) with
+  | (Some tast, Some errors) ->
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->

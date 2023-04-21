@@ -11,7 +11,7 @@ let invalidate_tast_cache_of_entries (entries : Provider_context.entries) : unit
     =
   Relative_path.Map.iter entries ~f:(fun _path entry ->
       entry.Provider_context.tast <- None;
-      entry.Provider_context.naming_and_typing_errors <- None)
+      entry.Provider_context.all_errors <- None)
 
 let invalidate_local_decl_caches_for_file
     (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :

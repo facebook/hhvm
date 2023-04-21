@@ -115,6 +115,8 @@
 #include <time.h>
 #include <zstd.h>
 
+#include "dictionary_data.h"
+
 // Some OCaml utility functions (introduced only in 4.12.0)
 //
 // TODO(hverr): Remove these when we move to 4.12.0
@@ -882,12 +884,12 @@ static void init_zstd_compression() {
     zstd_cctx = ZSTD_createCCtx();
     zstd_dctx = ZSTD_createDCtx();
     {
-      ZSTD_CDict* zstd_cdict = ZSTD_createCDict(NULL, 0, *compression);
+      ZSTD_CDict* zstd_cdict = ZSTD_createCDict(dictionary_data, dictionary_data_len, *compression);
       const size_t result = ZSTD_CCtx_refCDict(zstd_cctx, zstd_cdict);
       assert(!ZSTD_isError(result));
     }
     {
-      ZSTD_DDict* zstd_ddict = ZSTD_createDDict(NULL, 0);
+      ZSTD_DDict* zstd_ddict = ZSTD_createDDict(dictionary_data, dictionary_data_len);
       const size_t result = ZSTD_DCtx_refDDict(zstd_dctx, zstd_ddict);
       assert(!ZSTD_isError(result));
     }

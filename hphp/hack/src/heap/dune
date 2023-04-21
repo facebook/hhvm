@@ -13,7 +13,7 @@
    (:include config/c_library_flags.sexp)))
  (preprocess
   (pps ppx_deriving.std visitors.ppx))
- (libraries shmffi utils_core))
+ (libraries shmffi utils_core dictionary_data))
 
 (library
  (name heap_ident)

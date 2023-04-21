@@ -729,7 +729,7 @@ entry in open_files, with empty AST and TAST. If the LSP client
 happened to send us two DidOpens for a file, or DidChange before DidOpen,
 well, we won't complain. *)
 let open_or_change_file_during_init
-    (dstate : dstate) (path : Relative_path.t) (contents : string) : state =
+    (dstate : dstate) (path : Relative_path.t) (contents : string) : dstate =
   let entry =
     Provider_context.make_entry
       ~path
@@ -738,7 +738,7 @@ let open_or_change_file_during_init
   let open_files =
     Relative_path.Map.add dstate.dfiles.open_files ~key:path ~data:entry
   in
-  During_init { dstate with dfiles = { dstate.dfiles with open_files } }
+  { dstate with dfiles = { dstate.dfiles with open_files } }
 
 (** Closes a file, in response to DidClose event, by removing the
 entry in open_files. If the LSP client sents us multile DidCloses,
@@ -792,11 +792,11 @@ let update_file
 use in typechecking. Also ensures that hhi files haven't been deleted
 by tmp_cleaner, so that type-checking will succeed. *)
 let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
-    state * Provider_context.t * Provider_context.entry =
+    istate * Provider_context.t * Provider_context.entry =
   let istate = restore_hhi_root_if_necessary istate in
   let (ifiles, entry) = update_file istate.ifiles document in
   let ctx = make_singleton_ctx istate entry in
-  (Initialized { istate with ifiles }, ctx, entry)
+  ({ istate with ifiles }, ctx, entry)
 
 (** Simple helper. It updates the [ifiles] or [dfiles] member of Initialized
 or During_init states, respectively. Will throw if you call it on any other
@@ -913,27 +913,27 @@ let handle_request
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let state = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (state, Ok Errors.empty)
+    let dstate = open_or_change_file_during_init dstate path file_contents in
+    Lwt.return (During_init dstate, Ok Errors.empty)
   | (Initialized istate, Ide_file_opened document) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
-    Lwt.return (state, Ok errors)
+    Lwt.return (Initialized istate, Ok errors)
   (* IDE File Changed *)
   | (During_init dstate, Ide_file_changed { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let state = open_or_change_file_during_init dstate path file_contents in
-    Lwt.return (state, Ok Errors.empty)
+    let dstate = open_or_change_file_during_init dstate path file_contents in
+    Lwt.return (During_init dstate, Ok Errors.empty)
   | (Initialized istate, Ide_file_changed document) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let { Tast_provider.Compute_tast_and_errors.errors; _ } =
       Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
     in
-    Lwt.return (state, Ok errors)
+    Lwt.return (Initialized istate, Ok errors)
   (* Document Symbol *)
   | ( ( During_init { dfiles = files; dcommon = common; _ }
       | Initialized { ifiles = files; icommon = common; _ } ),
@@ -946,7 +946,7 @@ let handle_request
   (***********************************************************)
   (************************* UNABLE TO HANDLE ****************)
   (***********************************************************)
-  | (During_init _, _) ->
+  | (During_init dstate, _) ->
     let e =
       {
         Lsp.Error.code = Lsp.Error.RequestCancelled;
@@ -954,8 +954,8 @@ let handle_request
         data = None;
       }
     in
-    Lwt.return (state, Error e)
-  | (Failed_init e, _) -> Lwt.return (state, Error e)
+    Lwt.return (During_init dstate, Error e)
+  | (Failed_init e, _) -> Lwt.return (Failed_init e, Error e)
   | (Pending_init, _) ->
     failwith
       (Printf.sprintf
@@ -966,16 +966,16 @@ let handle_request
   (************************* NORMAL HANDLING AFTER INIT ******)
   (***********************************************************)
   | (Initialized istate, Hover (document, { line; column })) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHover.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
     (* textDocument/rename - localvar only *)
   | (Initialized istate, Rename (document, { line; column }, new_name)) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
@@ -985,12 +985,12 @@ let handle_request
           | Some (_name, action) ->
             Error action (* not a localvar, must defer to hh_server *))
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
     (* textDocument/references - localvar only *)
   | (Initialized istate, Find_references (document, { line; column })) ->
     let open Result.Monad_infix in
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
@@ -1006,14 +1006,14 @@ let handle_request
             (* Not a localvar, must defer to hh_server *)
             Error (name, action))
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Autocomplete *)
   | ( Initialized istate,
       Completion
         (document, { line; column }, { ClientIdeMessage.is_manually_invoked })
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
@@ -1024,12 +1024,12 @@ let handle_request
         ~column
         ~naming_table:istate.naming_table
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
   | (Initialized istate, Completion_resolve (symbol, kind)) ->
     let ctx = make_empty_ctx istate in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
   | ( Initialized istate,
       Completion_resolve_location (file_path, { line; column }, kind) ) ->
@@ -1046,26 +1046,26 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind)
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Document highlighting *)
   | (Initialized istate, Document_highlight (document, { line; column })) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (state, Ok results)
+    Lwt.return (Initialized istate, Ok results)
   (* Signature help *)
   | (Initialized istate, Signature_help (document, { line; column })) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (state, Ok results)
+    Lwt.return (Initialized istate, Ok results)
   (* Code actions (refactorings, quickfixes) *)
   | (Initialized istate, Code_action (document, range)) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
 
     let path = Path.to_string document.file_path in
     (* TODO: should be using RelativePath.t, not string *)
@@ -1073,31 +1073,31 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           CodeActionsService.go ~ctx ~entry ~path ~range)
     in
-    Lwt.return (state, Ok results)
+    Lwt.return (Initialized istate, Ok results)
   (* Go to definition *)
   | (Initialized istate, Definition (document, { line; column })) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Type Definition *)
   | (Initialized istate, Type_definition (document, { line; column })) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column)
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Type Coverage *)
   | (Initialized istate, Type_coverage document) ->
-    let (state, ctx, entry) = update_file_ctx istate document in
+    let (istate, ctx, entry) = update_file_ctx istate document in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerColorFile.go_quarantined ~ctx ~entry)
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
   (* Workspace Symbol *)
   | (Initialized istate, Workspace_symbol query) ->
     (* Note: needs reverse-naming-table, hence only works in initialized
@@ -1109,7 +1109,7 @@ let handle_request
     let result =
       ServerSearch.go ctx query ~kind_filter:"" istate.icommon.sienv
     in
-    Lwt.return (state, Ok result)
+    Lwt.return (Initialized istate, Ok result)
 
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   match state with

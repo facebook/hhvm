@@ -15,6 +15,7 @@
 */
 
 #include <vector>
+#include <string>
 
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/emulate-zend.h"
@@ -40,26 +41,8 @@
 #include <dlfcn.h>
 #include <spawn.h>
 
-/*
- * These are here to work around a gcc-5 lto bug. Without them,
- * certain symbols don't get defined, even though they're referenced,
- * but the build succeeds, and the references get set to nullptr (so
- * calls to vector<string>::~vector() end up as a call to 0.
- *
- * See T15096405
- */
-std::vector<std::string> dummy_vec { "hello", "foo" };
-std::set<std::string> dummy_set { "hello" };
-
 int main(int argc, char** argv) {
   HPHP::StaticString::CreateAll();
-
-  // Also for t15096405
-  std::string (*ptr1)(std::string&&, const char*) = std::operator+;
-  std::string (*ptr2)(const char*, std::string&&) = std::operator+;
-  if (!argc) {
-    return intptr_t(ptr1) + intptr_t(ptr2);
-  }
 
   HPHP::Process::RecordArgv(argv);
   int len = strlen(argv[0]);

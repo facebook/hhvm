@@ -695,7 +695,9 @@ functor
         ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
         ~(check_reason : string)
-        ~(cgroup_steps : CgroupProfiler.step_group) : type_checking_result =
+        ~(cgroup_steps : CgroupProfiler.step_group)
+        ~(files_with_naming_errors : Relative_path.Set.t) : type_checking_result
+        =
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
         Hh_logger.log "WARNING: rechecking definition in a dummy file";
@@ -707,8 +709,12 @@ functor
         genv.local_config.ServerLocalConfig.longlived_workers
       in
       let use_hh_distc_instead_of_hulk =
-        genv.ServerEnv.local_config
-          .ServerLocalConfig.use_hh_distc_instead_of_hulk
+        (* hh_distc and hh_server may behave inconsistently in the face of
+           duplicate name errors. Eventually we'll want to make duplicate
+           name errors a typing error and this check can go away. *)
+        phys_equal (Relative_path.Set.cardinal files_with_naming_errors) 0
+        && genv.ServerEnv.local_config
+             .ServerLocalConfig.use_hh_distc_instead_of_hulk
       in
       let hh_distc_fanout_threshold =
         Some
@@ -1275,6 +1281,8 @@ functor
           ~lazy_check_later
           ~check_reason
           ~cgroup_steps
+          ~files_with_naming_errors:
+            (Errors.get_failed_files errors Errors.Naming)
       in
       let time_first_error =
         Option.first_some time_first_error time_first_typing_error

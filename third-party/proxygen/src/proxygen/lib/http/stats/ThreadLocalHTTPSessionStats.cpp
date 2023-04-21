@@ -13,6 +13,7 @@ namespace proxygen {
 TLHTTPSessionStats::TLHTTPSessionStats(const std::string& prefix)
     : txnsOpen(prefix + "_transactions_open"),
       pendingBufferedReadBytes(prefix + "_pending_buffered_read_bytes"),
+      pendingBufferedWriteBytes(prefix + "_pending_buffered_write_bytes"),
       txnsOpened(prefix + "_txn_opened", facebook::fb303::SUM),
       txnsFromSessionReuse(prefix + "_txn_session_reuse", facebook::fb303::SUM),
       txnsTransactionStalled(prefix + "_txn_transaction_stall",
@@ -137,6 +138,11 @@ void TLHTTPSessionStats::recordEgressContentLengthMismatches() noexcept {
 void TLHTTPSessionStats::recordPendingBufferedReadBytes(
     int64_t amount) noexcept {
   pendingBufferedReadBytes.incrementValue(amount);
+}
+
+void TLHTTPSessionStats::recordPendingBufferedWriteBytes(
+    int64_t amount) noexcept {
+  pendingBufferedWriteBytes.incrementValue(amount);
 }
 
 } // namespace proxygen

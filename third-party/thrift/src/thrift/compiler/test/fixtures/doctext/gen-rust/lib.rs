@@ -2200,14 +2200,62 @@ pub mod errors {
         }
 
         /// Errors for thing (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum ThingError {
-            #[error("C::thing failed with {0:?}")]
             bang(crate::types::Bang),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for ThingError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::bang(inner) => {
+                        if f.alternate() {
+                            write!(f, "C::thing failed with variant `bang`: {:#}", inner)?;
+                        } else {
+                            write!(f, "C::thing failed with bang(Bang)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "C::thing failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "C::thing failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for ThingError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::bang(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::Bang> for ThingError {

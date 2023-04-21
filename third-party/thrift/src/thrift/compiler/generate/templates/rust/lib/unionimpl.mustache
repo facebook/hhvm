@@ -93,14 +93,10 @@ where
                 }{{!
                 }}{{/struct:fields}}
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "{{struct:name}}",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "{{struct:name}}".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;

@@ -6567,14 +6567,62 @@ pub mod errors {
             }
         }
 
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum StreamByIdWithExceptionStreamError {
-            #[error("MyService::streamByIdWithException stream failed with {0:?}")]
             e(crate::types::MyException),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for StreamByIdWithExceptionStreamError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "MyService::streamByIdWithException failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "MyService::streamByIdWithException failed with e(MyException)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "MyService::streamByIdWithException failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "MyService::streamByIdWithException failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for StreamByIdWithExceptionStreamError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::MyException> for StreamByIdWithExceptionStreamError {

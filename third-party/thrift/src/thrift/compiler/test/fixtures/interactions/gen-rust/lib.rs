@@ -7405,14 +7405,62 @@ pub mod errors {
         }
 
         /// Errors for frobnicate (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum FrobnicateError {
-            #[error("MyInteraction::frobnicate failed with {0:?}")]
             ex(crate::types::CustomException),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for FrobnicateError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::ex(inner) => {
+                        if f.alternate() {
+                            write!(f, "MyInteraction::frobnicate failed with variant `ex`: {:#}", inner)?;
+                        } else {
+                            write!(f, "MyInteraction::frobnicate failed with ex(CustomException)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "MyInteraction::frobnicate failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "MyInteraction::frobnicate failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for FrobnicateError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::ex(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::CustomException> for FrobnicateError {

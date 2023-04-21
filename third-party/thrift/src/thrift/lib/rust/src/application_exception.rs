@@ -53,9 +53,18 @@ pub enum ApplicationExceptionErrorCode {
 
 const TAPPLICATION_EXCEPTION_ERROR_CODE: &str = "ApplicationExceptionErrorCode";
 
-/// ApplicationException is *not* actually an error type in the Rust sense, but
-/// a Thrift-specific serializable
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
+#[derive(
+    Debug,
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Default,
+    thiserror::Error
+)]
+#[error("{type_:?}: {message}")]
 pub struct ApplicationException {
     pub message: String,
     pub type_: ApplicationExceptionErrorCode,

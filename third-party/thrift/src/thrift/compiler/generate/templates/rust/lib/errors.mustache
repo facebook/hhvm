@@ -45,16 +45,68 @@
         {{^function:starts_interaction?}}
         {{#function:exceptions?}}
         /// Errors for {{function:rust_name}} (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum {{function:upcamel}}Error {
             {{#function:exceptions}}
-            #[error("{{service:name}}::{{function:rust_name}} failed with {0:?}")]
             {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),
             {{/function:exceptions}}
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for {{function:upcamel}}Error {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    {{#function:exceptions}}
+                    Self::{{field:rust_name}}(inner) => {
+                        if f.alternate() {
+                            write!(f, "{{service:name}}::{{function:rust_name}} failed with variant `{{field:rust_name}}`: {:#}", inner)?;
+                        } else {
+                            write!(f, "{{service:name}}::{{function:rust_name}} failed with {{field:rust_name}}({{#field:type}}{{type:rust_name}}{{/field:type}})")?;
+                        }
+                    }
+                    {{/function:exceptions}}
+                    Self::ApplicationException(inner) => {
+                        write!(f, "{{service:name}}::{{function:rust_name}} failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "{{service:name}}::{{function:rust_name}} failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for {{function:upcamel}}Error {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    {{#function:exceptions}}
+                    Self::{{field:rust_name}}(ref inner) => {
+                        Some(inner)
+                    }
+                    {{/function:exceptions}}
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         {{#function:uniqueExceptions}}
@@ -149,16 +201,68 @@
         }
 
         {{#function:stream_exceptions?}}
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum {{function:upcamel}}StreamError {
             {{#function:stream_exceptions}}
-            #[error("{{service:name}}::{{function:rust_name}} stream failed with {0:?}")]
             {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),
             {{/function:stream_exceptions}}
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for {{function:upcamel}}StreamError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    {{#function:stream_exceptions}}
+                    Self::{{field:rust_name}}(inner) => {
+                        if f.alternate() {
+                            write!(f, "{{service:name}}::{{function:rust_name}} failed with variant `{{field:rust_name}}`: {:#}", inner)?;
+                        } else {
+                            write!(f, "{{service:name}}::{{function:rust_name}} failed with {{field:rust_name}}({{#field:type}}{{type:rust_name}}{{/field:type}})")?;
+                        }
+                    }
+                    {{/function:stream_exceptions}}
+                    Self::ApplicationException(inner) => {
+                        write!(f, "{{service:name}}::{{function:rust_name}} failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "{{service:name}}::{{function:rust_name}} failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for {{function:upcamel}}StreamError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    {{#function:stream_exceptions}}
+                    Self::{{field:rust_name}}(ref inner) => {
+                        Some(inner)
+                    }
+                    {{/function:stream_exceptions}}
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         {{#function:uniqueStreamExceptions}}

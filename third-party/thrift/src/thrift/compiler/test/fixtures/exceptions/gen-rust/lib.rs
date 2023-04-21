@@ -2380,18 +2380,84 @@ pub mod errors {
         }
 
         /// Errors for doRaise (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum DoRaiseError {
-            #[error("Raiser::doRaise failed with {0:?}")]
             b(crate::types::Banal),
-            #[error("Raiser::doRaise failed with {0:?}")]
             f(crate::types::Fiery),
-            #[error("Raiser::doRaise failed with {0:?}")]
             s(crate::types::Serious),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for DoRaiseError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::b(inner) => {
+                        if f.alternate() {
+                            write!(f, "Raiser::doRaise failed with variant `b`: {:#}", inner)?;
+                        } else {
+                            write!(f, "Raiser::doRaise failed with b(Banal)")?;
+                        }
+                    }
+                    Self::f(inner) => {
+                        if f.alternate() {
+                            write!(f, "Raiser::doRaise failed with variant `f`: {:#}", inner)?;
+                        } else {
+                            write!(f, "Raiser::doRaise failed with f(Fiery)")?;
+                        }
+                    }
+                    Self::s(inner) => {
+                        if f.alternate() {
+                            write!(f, "Raiser::doRaise failed with variant `s`: {:#}", inner)?;
+                        } else {
+                            write!(f, "Raiser::doRaise failed with s(Serious)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "Raiser::doRaise failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "Raiser::doRaise failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for DoRaiseError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::b(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::f(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::s(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::Banal> for DoRaiseError {
@@ -2487,18 +2553,84 @@ pub mod errors {
         }
 
         /// Errors for get500 (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum Get500Error {
-            #[error("Raiser::get500 failed with {0:?}")]
             f(crate::types::Fiery),
-            #[error("Raiser::get500 failed with {0:?}")]
             b(crate::types::Banal),
-            #[error("Raiser::get500 failed with {0:?}")]
             s(crate::types::Serious),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for Get500Error {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::f(inner) => {
+                        if f.alternate() {
+                            write!(f, "Raiser::get500 failed with variant `f`: {:#}", inner)?;
+                        } else {
+                            write!(f, "Raiser::get500 failed with f(Fiery)")?;
+                        }
+                    }
+                    Self::b(inner) => {
+                        if f.alternate() {
+                            write!(f, "Raiser::get500 failed with variant `b`: {:#}", inner)?;
+                        } else {
+                            write!(f, "Raiser::get500 failed with b(Banal)")?;
+                        }
+                    }
+                    Self::s(inner) => {
+                        if f.alternate() {
+                            write!(f, "Raiser::get500 failed with variant `s`: {:#}", inner)?;
+                        } else {
+                            write!(f, "Raiser::get500 failed with s(Serious)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "Raiser::get500 failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "Raiser::get500 failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for Get500Error {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::f(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::b(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::s(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::Fiery> for Get500Error {

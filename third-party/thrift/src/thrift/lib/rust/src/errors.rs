@@ -49,33 +49,15 @@ pub enum ProtocolError {
     InvalidValue,
     #[error("Unexpected trailing data after the end of a value")]
     TrailingData,
-    #[error("Application exception: {0:?}")]
-    ApplicationException(ApplicationException),
-}
-
-impl From<ApplicationException> for Error {
-    fn from(exn: ApplicationException) -> Error {
-        ProtocolError::ApplicationException(exn).into()
-    }
+    #[error("Unwanted extra union {0} field ty {1:?} id {2}")]
+    UnwantedExtraUnionField(String, TType, i32),
 }
 
 /// Error value returned by functions that do not throw any user-defined exceptions.
 #[derive(Debug, Error)]
 pub enum NonthrowingFunctionError {
-    #[error("Application exception: {0:?}")]
-    ApplicationException(ApplicationException),
-    #[error("{0}")]
-    ThriftError(Error),
-}
-
-impl From<Error> for NonthrowingFunctionError {
-    fn from(err: Error) -> Self {
-        NonthrowingFunctionError::ThriftError(err)
-    }
-}
-
-impl From<ApplicationException> for NonthrowingFunctionError {
-    fn from(ae: ApplicationException) -> Self {
-        NonthrowingFunctionError::ApplicationException(ae)
-    }
+    #[error(transparent)]
+    ApplicationException(#[from] ApplicationException),
+    #[error(transparent)]
+    ThriftError(#[from] Error),
 }

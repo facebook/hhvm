@@ -177,14 +177,10 @@ where
                     alt = ::std::option::Option::Some(Self::stringRef(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "ComplexUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "ComplexUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;
@@ -287,14 +283,10 @@ where
                     alt = ::std::option::Option::Some(Self::stringListValue(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "ListUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "ListUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;
@@ -389,14 +381,10 @@ where
                     alt = ::std::option::Option::Some(Self::stringData(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "DataUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "DataUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;
@@ -605,14 +593,10 @@ where
                     alt = ::std::option::Option::Some(Self::v2(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "ValUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "ValUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;
@@ -707,14 +691,10 @@ where
                     alt = ::std::option::Option::Some(Self::thingTwo(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "VirtualComplexUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "VirtualComplexUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;
@@ -891,14 +871,10 @@ where
                     alt = ::std::option::Option::Some(Self::s(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "NonCopyableUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "NonCopyableUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;

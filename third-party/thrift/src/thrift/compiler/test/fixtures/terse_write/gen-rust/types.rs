@@ -185,7 +185,7 @@ impl ::std::error::Error for TerseException {}
 
 impl ::std::fmt::Display for TerseException {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "TerseException: {}: {:?}", self.msg, self)
+        write!(f, "TerseException: {} ({:?})", self.msg, self)
     }
 }
 
@@ -578,14 +578,10 @@ where
                     alt = ::std::option::Option::Some(Self::struct_field(::fbthrift::Deserialize::read(p)?));
                 }
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "MyUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "MyUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;

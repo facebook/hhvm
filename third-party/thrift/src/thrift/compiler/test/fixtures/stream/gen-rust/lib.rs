@@ -7071,14 +7071,62 @@ pub mod errors {
             }
         }
 
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum StreamthrowsStreamError {
-            #[error("PubSubStreamingService::streamthrows stream failed with {0:?}")]
             e(crate::types::FooStreamEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for StreamthrowsStreamError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::streamthrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::streamthrows failed with e(FooStreamEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::streamthrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::streamthrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for StreamthrowsStreamError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooStreamEx> for StreamthrowsStreamError {
@@ -7115,14 +7163,62 @@ pub mod errors {
         }
 
         /// Errors for servicethrows (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum ServicethrowsError {
-            #[error("PubSubStreamingService::servicethrows failed with {0:?}")]
             e(crate::types::FooEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for ServicethrowsError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::servicethrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::servicethrows failed with e(FooEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::servicethrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::servicethrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for ServicethrowsError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooEx> for ServicethrowsError {
@@ -7203,16 +7299,73 @@ pub mod errors {
         }
 
         /// Errors for servicethrows2 (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum Servicethrows2Error {
-            #[error("PubSubStreamingService::servicethrows2 failed with {0:?}")]
             e1(crate::types::FooEx),
-            #[error("PubSubStreamingService::servicethrows2 failed with {0:?}")]
             e2(crate::types::FooEx2),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for Servicethrows2Error {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e1(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::servicethrows2 failed with variant `e1`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::servicethrows2 failed with e1(FooEx)")?;
+                        }
+                    }
+                    Self::e2(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::servicethrows2 failed with variant `e2`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::servicethrows2 failed with e2(FooEx2)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::servicethrows2 failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::servicethrows2 failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for Servicethrows2Error {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e1(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::e2(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooEx> for Servicethrows2Error {
@@ -7312,14 +7465,62 @@ pub mod errors {
         }
 
         /// Errors for boththrows (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum BoththrowsError {
-            #[error("PubSubStreamingService::boththrows failed with {0:?}")]
             e(crate::types::FooEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for BoththrowsError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::boththrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::boththrows failed with e(FooEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::boththrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::boththrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for BoththrowsError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooEx> for BoththrowsError {
@@ -7384,14 +7585,62 @@ pub mod errors {
             }
         }
 
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum BoththrowsStreamError {
-            #[error("PubSubStreamingService::boththrows stream failed with {0:?}")]
             e(crate::types::FooStreamEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for BoththrowsStreamError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::boththrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::boththrows failed with e(FooStreamEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::boththrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::boththrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for BoththrowsStreamError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooStreamEx> for BoththrowsStreamError {
@@ -7461,14 +7710,62 @@ pub mod errors {
             }
         }
 
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum ResponseandstreamstreamthrowsStreamError {
-            #[error("PubSubStreamingService::responseandstreamstreamthrows stream failed with {0:?}")]
             e(crate::types::FooStreamEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for ResponseandstreamstreamthrowsStreamError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::responseandstreamstreamthrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::responseandstreamstreamthrows failed with e(FooStreamEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamstreamthrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamstreamthrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for ResponseandstreamstreamthrowsStreamError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooStreamEx> for ResponseandstreamstreamthrowsStreamError {
@@ -7505,14 +7802,62 @@ pub mod errors {
         }
 
         /// Errors for responseandstreamservicethrows (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum ResponseandstreamservicethrowsError {
-            #[error("PubSubStreamingService::responseandstreamservicethrows failed with {0:?}")]
             e(crate::types::FooEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for ResponseandstreamservicethrowsError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::responseandstreamservicethrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::responseandstreamservicethrows failed with e(FooEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamservicethrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamservicethrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for ResponseandstreamservicethrowsError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooEx> for ResponseandstreamservicethrowsError {
@@ -7593,14 +7938,62 @@ pub mod errors {
         }
 
         /// Errors for responseandstreamboththrows (client side).
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum ResponseandstreamboththrowsError {
-            #[error("PubSubStreamingService::responseandstreamboththrows failed with {0:?}")]
             e(crate::types::FooEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for ResponseandstreamboththrowsError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::responseandstreamboththrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::responseandstreamboththrows failed with e(FooEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamboththrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamboththrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for ResponseandstreamboththrowsError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooEx> for ResponseandstreamboththrowsError {
@@ -7665,14 +8058,62 @@ pub mod errors {
             }
         }
 
-        #[derive(Debug, ::thiserror::Error)]
+        #[derive(Debug)]
         pub enum ResponseandstreamboththrowsStreamError {
-            #[error("PubSubStreamingService::responseandstreamboththrows stream failed with {0:?}")]
             e(crate::types::FooStreamEx),
-            #[error("Application exception: {0:?}")]
             ApplicationException(::fbthrift::types::ApplicationException),
-            #[error("{0}")]
             ThriftError(::anyhow::Error),
+        }
+
+        /// Human-readable string representation of the Thrift client error.
+        ///
+        /// By default, this will not print the full cause chain. If you would like to print the underlying error
+        /// cause, either use `format!("{:?}", anyhow::Error::from(client_err))` or print this using the
+        /// alternate formatter `{:#}` instead of just `{}`.
+        impl ::std::fmt::Display for ResponseandstreamboththrowsStreamError {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::result::Result<(), ::std::fmt::Error> {
+                match self {
+                    Self::e(inner) => {
+                        if f.alternate() {
+                            write!(f, "PubSubStreamingService::responseandstreamboththrows failed with variant `e`: {:#}", inner)?;
+                        } else {
+                            write!(f, "PubSubStreamingService::responseandstreamboththrows failed with e(FooStreamEx)")?;
+                        }
+                    }
+                    Self::ApplicationException(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamboththrows failed with ApplicationException")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                    Self::ThriftError(inner) => {
+                        write!(f, "PubSubStreamingService::responseandstreamboththrows failed with ThriftError")?;
+
+                        if f.alternate() {
+                          write!(f, ": {:#}", inner)?;
+                        }
+                    }
+                }
+
+                Ok(())
+            }
+        }
+
+        impl ::std::error::Error for ResponseandstreamboththrowsStreamError {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::e(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ApplicationException(ref inner) => {
+                        Some(inner)
+                    }
+                    Self::ThriftError(ref inner) => {
+                        Some(inner.as_ref())
+                    }
+                }
+            }
         }
 
         impl ::std::convert::From<crate::types::FooStreamEx> for ResponseandstreamboththrowsStreamError {

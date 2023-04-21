@@ -331,14 +331,10 @@ where
             match (fty, fid as ::std::primitive::i32, once) {
                 (::fbthrift::TType::Stop, _, _) => break,
                 (fty, _, false) => p.skip(fty)?,
-                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
-                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
-                    format!(
-                        "unwanted extra union {} field ty {:?} id {}",
-                        "MyUnion",
-                        badty,
-                        badid,
-                    ),
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ProtocolError::UnwantedExtraUnionField(
+                    "MyUnion".to_string(),
+                    badty,
+                    badid,
                 ))),
             }
             p.read_field_end()?;

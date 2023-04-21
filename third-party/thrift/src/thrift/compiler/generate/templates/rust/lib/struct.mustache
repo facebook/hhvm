@@ -77,19 +77,24 @@ impl ::std::error::Error for {{struct:rust_name}} {}
 
 impl ::std::fmt::Display for {{struct:rust_name}} {{>lib/block}}
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        {{#struct:exception?}}
         write!(f, {{!
             }}{{#struct:has_exception_message?}}{{!
                 }}{{#struct:is_exception_message_optional?}}{{!
-                    }}"{{struct:rust_name}}: {:?}: {:?}", self.{{struct:exception_message}}, self{{!
+                    }}"{{struct:rust_name}}: {:?} ({:?})", self.{{struct:exception_message}}, self{{!
                 }}{{/struct:is_exception_message_optional?}}{{!
                 }}{{^struct:is_exception_message_optional?}}{{!
-                    }}"{{struct:rust_name}}: {}: {:?}", self.{{struct:exception_message}}, self{{!
+                    }}"{{struct:rust_name}}: {} ({:?})", self.{{struct:exception_message}}, self{{!
                 }}{{/struct:is_exception_message_optional?}}{{!
             }}{{/struct:has_exception_message?}}{{!
             }}{{^struct:has_exception_message?}}{{!
                 }}"{:?}", self{{!
             }}{{/struct:has_exception_message?}}{{!
         }})
+        {{/struct:exception?}}
+        {{^struct:exception?}}
+        write!(f, "{:?}", self)
+        {{/struct:exception?}}
     }
 }
 {{/struct:exception?}}

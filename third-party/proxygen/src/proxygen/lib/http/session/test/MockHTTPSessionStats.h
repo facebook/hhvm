@@ -79,10 +79,6 @@ class MockHTTPSessionStats : public DummyHTTPSessionStats {
     _recordPendingBufferedReadBytes(num);
   }
   MOCK_METHOD(void, _recordPendingBufferedReadBytes, (int64_t));
-  void recordPendingBufferedWriteBytes(int64_t num) noexcept override {
-    _recordPendingBufferedWriteBytes(num);
-  }
-  MOCK_METHOD(void, _recordPendingBufferedWriteBytes, (int64_t));
 };
 
 } // namespace proxygen

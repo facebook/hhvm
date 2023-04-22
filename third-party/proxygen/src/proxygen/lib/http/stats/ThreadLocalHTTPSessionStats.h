@@ -38,12 +38,10 @@ class TLHTTPSessionStats : public HTTPSessionStats {
   void recordTransactionStalled() noexcept override;
   void recordSessionStalled() noexcept override;
   void recordPendingBufferedReadBytes(int64_t amount) noexcept override;
-  void recordPendingBufferedWriteBytes(int64_t amount) noexcept override;
   void recordEgressContentLengthMismatches() noexcept override;
 
   BaseStats::TLCounter txnsOpen;
   BaseStats::TLCounter pendingBufferedReadBytes;
-  BaseStats::TLCounter pendingBufferedWriteBytes;
   BaseStats::TLTimeseries txnsOpened;
   BaseStats::TLTimeseries txnsFromSessionReuse;
   BaseStats::TLTimeseries txnsTransactionStalled;

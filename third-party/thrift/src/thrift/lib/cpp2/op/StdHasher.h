@@ -27,7 +27,7 @@ namespace apache {
 namespace thrift {
 namespace op {
 
-class StdHasherDeprecated {
+class StdHasherNoIOBuf {
  public:
   size_t getResult() const { return result_; }
 
@@ -40,25 +40,35 @@ class StdHasherDeprecated {
   constexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val) {
     combine(folly::to_underlying(val));
   }
-  void combine(const folly::IOBuf& value) {
-    for (const auto& buf : value) {
-      combine(buf);
-    }
-  }
   void combine(folly::ByteRange value) {
     result_ = folly::hash::hash_combine(
         folly::hash::hash_range(value.begin(), value.end()), result_);
   }
-  void combine(const StdHasherDeprecated& other) { combine(other.result_); }
+  void combine(const StdHasherNoIOBuf& other) { combine(other.result_); }
 
   void finalize() {}
 
-  bool operator<(const StdHasherDeprecated other) const {
+  bool operator<(const StdHasherNoIOBuf other) const {
     return result_ < other.result_;
   }
 
  private:
   size_t result_ = 0;
+};
+
+struct StdHasherDeprecated : StdHasherNoIOBuf {
+  using StdHasherNoIOBuf::combine;
+  void combine(const folly::IOBuf& value) {
+    for (const auto& buf : value) {
+      combine(buf);
+    }
+  }
+};
+struct StdHasher : StdHasherNoIOBuf {
+  using StdHasherNoIOBuf::combine;
+  void combine(const folly::IOBuf& value) {
+    combine(folly::IOBufHash{}(value));
+  }
 };
 
 } // namespace op

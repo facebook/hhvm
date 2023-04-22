@@ -27,7 +27,7 @@ namespace thrift {
 namespace op {
 
 TEST(StdHasherTest, checkCombineBool) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(true);
   EXPECT_NE(previousResult, hasher.getResult());
@@ -37,7 +37,7 @@ TEST(StdHasherTest, checkCombineBool) {
 }
 
 TEST(StdHasherTest, checkCombineInt8) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int8_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -50,7 +50,7 @@ TEST(StdHasherTest, checkCombineInt8) {
 }
 
 TEST(StdHasherTest, checkCombineInt16) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int16_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -63,7 +63,7 @@ TEST(StdHasherTest, checkCombineInt16) {
 }
 
 TEST(StdHasherTest, checkCombineInt32) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int32_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -76,7 +76,7 @@ TEST(StdHasherTest, checkCombineInt32) {
 }
 
 TEST(StdHasherTest, checkCombineInt64) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<std::int64_t>(-1));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -89,7 +89,7 @@ TEST(StdHasherTest, checkCombineInt64) {
 }
 
 TEST(StdHasherTest, checkCombineFloat) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<float>(-1.0));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -102,7 +102,7 @@ TEST(StdHasherTest, checkCombineFloat) {
 }
 
 TEST(StdHasherTest, checkCombineDouble) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(static_cast<double>(-1.0));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -114,7 +114,7 @@ TEST(StdHasherTest, checkCombineDouble) {
   EXPECT_NE(previousResult, hasher.getResult());
 }
 
-TEST(StdHasherTest, checkCombineIOBuf) {
+TEST(StdHasherDeprecatedTest, checkCombineIOBuf) {
   StdHasherDeprecated hasher;
   auto previousResult = hasher.getResult();
   auto bufA = folly::IOBuf::wrapBuffer(folly::range("abc"));
@@ -131,8 +131,18 @@ TEST(StdHasherTest, checkCombineIOBuf) {
   EXPECT_EQ(hasherCopy.getResult(), hasher.getResult());
 }
 
+TEST(StdHasherTest, checkCombineIOBuf) {
+  StdHasher hasher1, hasher2;
+  auto bufA = folly::IOBuf::wrapBuffer("abc", 3);
+  auto bufB = folly::IOBuf::wrapBuffer("def", 3);
+  bufA->prependChain(std::move(bufB));
+  hasher1.combine(*bufA);
+  hasher2.combine(*folly::IOBuf::wrapBuffer("abcdef", 6));
+  EXPECT_EQ(hasher1.getResult(), hasher2.getResult());
+}
+
 TEST(StdHasherTest, checkCombineByteRange) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   auto previousResult = hasher.getResult();
   hasher.combine(folly::range("abc"));
   EXPECT_NE(previousResult, hasher.getResult());
@@ -142,8 +152,8 @@ TEST(StdHasherTest, checkCombineByteRange) {
 }
 
 TEST(StdHasherTest, checkCombineStdHasher) {
-  StdHasherDeprecated hasher;
-  StdHasherDeprecated hasherOther;
+  StdHasher hasher;
+  StdHasher hasherOther;
   auto previousResult = hasher.getResult();
   hasher.combine(hasherOther);
   EXPECT_EQ(previousResult, hasher.getResult());
@@ -154,9 +164,9 @@ TEST(StdHasherTest, checkCombineStdHasher) {
 }
 
 TEST(StdHasherTest, checkLess) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   hasher.combine(folly::range("abc"));
-  StdHasherDeprecated hasherOther;
+  StdHasher hasherOther;
   EXPECT_TRUE(hasherOther < hasher);
   hasherOther.combine(folly::range("abc"));
   EXPECT_FALSE(hasherOther < hasher);
@@ -164,7 +174,7 @@ TEST(StdHasherTest, checkLess) {
 }
 
 TEST(StdHasherTest, checkFinalize) {
-  StdHasherDeprecated hasher;
+  StdHasher hasher;
   hasher.combine(folly::range("abc"));
   auto previousResult = hasher.getResult();
   hasher.finalize();

@@ -12,16 +12,16 @@ dict(6) {
     string(20) "// Float description"
   }
   ["some_string"]=>
-  vec(4) {
+  vec(3) {
     string(11) "// Multiple"
     string(2) "//"
     string(13) "// paragraphs"
+  }
+  ["some_bool"]=>
+  vec(12) {
     string(26) "/*
 
   Another paragraph.*/"
-  }
-  ["some_bool"]=>
-  vec(11) {
     string(7) "// Long"
     string(17) "/*     long    */"
     string(13) "//description"

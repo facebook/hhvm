@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
 
+#include <re2/re2.h>
 #include "hphp/util/trace.h"
 
 //TODO(T146965521) Until Rust FFI symbol redefinition problem can be resolved

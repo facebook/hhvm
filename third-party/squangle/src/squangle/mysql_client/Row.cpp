@@ -8,6 +8,7 @@
 
 #include "squangle/mysql_client/Row.h"
 
+#include <re2/re2.h>
 #include <chrono>
 
 namespace facebook {

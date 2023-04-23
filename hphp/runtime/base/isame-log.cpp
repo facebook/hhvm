@@ -33,6 +33,7 @@ bool isame_log(const StringData* input, const StringData* arg) {
     StructuredLogEntry sample;
     sample.force_init = true;
     sample.setInt("sample_rate", rate);
+    sample.setStr("event", "isame");
     sample.setStr("lhs", input->slice());
     sample.setStr("rhs", arg->slice());
     StackTrace st(StackTrace::Force{});

@@ -27,6 +27,9 @@ function server_warmup_status(): string;
 <<__Native>>
 function server_warmup_status_monotonic(): string;
 
+<<__Native>>
+function set_endpoint_name(string $name): void;
+
 /**
  * Returns a description of the context in which the request is executing.
  *

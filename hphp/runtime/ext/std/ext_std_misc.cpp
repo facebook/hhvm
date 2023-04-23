@@ -113,6 +113,10 @@ String HHVM_FUNCTION(server_warmup_status_monotonic) {
   return String(jit::tc::warmupStatusString());
 }
 
+void HHVM_FUNCTION(set_endpoint_name, const String& endpoint) {
+  ServerStats::SetEndpoint(endpoint.c_str());
+}
+
 const StaticString
   s_clisrv("clisrv"),
   s_cli("cli"),
@@ -476,6 +480,7 @@ void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
     HHVM_FALIAS(HH\\server_warmup_status_monotonic,
                 server_warmup_status_monotonic);
+    HHVM_FALIAS(HH\\set_endpoint_name, set_endpoint_name);
     HHVM_FALIAS(HH\\execution_context, execution_context);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);

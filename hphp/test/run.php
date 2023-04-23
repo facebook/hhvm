@@ -387,7 +387,6 @@ function get_options(
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     '*repo' => 'r',
-    '*split-hphpc' => '',
     '*repo-single' => '',
     '*repo-separate' => '',
     '*repo-threads:' => '',
@@ -513,15 +512,6 @@ function get_options(
     }
     if ($options->mode is nonnull && $options->mode !== 'jit') {
       error("jit-serialize only works in jit mode");
-    }
-  }
-
-  if ($options->split_hphpc) {
-    if (!$options->repo) {
-      error("split-hphpc only works in repo mode");
-    }
-    if (!$options->repo_separate) {
-      error("split-hphpc only works in repo-separate mode");
     }
   }
 
@@ -1035,7 +1025,6 @@ function hhvm_cmd(
   if ($options->repo) {
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
-    $program = "hhvm";
     $hhbbc_repo =
       "\"" . test_repo($options, $test) . "/hhvm.$repo_suffix\"";
     $cmd .= ' -vRepo.Authoritative=true';
@@ -1091,11 +1080,7 @@ function hhvm_cmd(
   return tuple($cmds, $env);
 }
 
-function hphp_cmd(
-  Options $options,
-  string $test,
-  string $program,
-): string {
+function hphp_cmd(Options $options, string $test): string {
   // Transform extra_args like "-vName=Value" into "-vRuntime.Name=Value".
   $extra_args =
     preg_replace("/(^-v|\s+-v)\s*/", "$1Runtime.", extra_args($options));
@@ -1149,22 +1134,10 @@ function hphp_cmd(
 }
 
 function hphpc_path(Options $options): string {
-  if ($options->split_hphpc) {
-    $file = "";
-    $file = bin_root().'/hphpc';
-
-    if (!is_file($file)) {
-      error("$file doesn't exist. Did you forget to build first?");
-    }
-    return rel_path($file);
-  } else {
-    return hhvm_path();
-  }
+  return hhvm_path();
 }
 
-function hhbbc_cmd(
-  Options $options, string $test, string $program,
-): string {
+function hhbbc_cmd(Options $options, string $test): string {
   $test_repo = test_repo($options, $test);
   return implode(" ", vec[
     hphpc_path($options),
@@ -1258,13 +1231,11 @@ function exec_with_stack(string $cmd): ?string {
   return "Running `$cmd' failed (".$status['exitcode']."):\n\n$s";
 }
 
-function repo_mode_compile(
-  Options $options, string $test, string $program,
-): bool {
-  $hphp = hphp_cmd($options, $test, $program);
+function repo_mode_compile(Options $options, string $test): bool {
+  $hphp = hphp_cmd($options, $test);
   $result = exec_with_stack($hphp);
   if ($result is null && repo_separate($options, $test)) {
-    $hhbbc = hhbbc_cmd($options, $test, $program);
+    $hhbbc = hhbbc_cmd($options, $test);
     $result = exec_with_stack($hhbbc);
   }
   if ($result is null) return true;
@@ -3218,24 +3189,22 @@ function run_repo_test(
     Status::createTestTmpDir($test);
   }
 
-  $program = "hhvm";
-
   if (file_exists($test . '.hphpc_assert')) {
-    $hphp = hphp_cmd($options, $test, $program);
+    $hphp = hphp_cmd($options, $test);
     return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
   } else if (file_exists($test . '.hhbbc_assert')) {
-    $hphp = hphp_cmd($options, $test, $program);
+    $hphp = hphp_cmd($options, $test);
     if (repo_separate($options, $test)) {
       $result = exec_with_stack($hphp);
       if ($result is string) return false;
-      $hhbbc = hhbbc_cmd($options, $test, $program);
+      $hhbbc = hhbbc_cmd($options, $test);
       return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
     } else {
       return run_foreach_config($options, $test, vec[$hphp], $hhvm_env);
     }
   }
 
-  if (!repo_mode_compile($options, $test, $program)) {
+  if (!repo_mode_compile($options, $test)) {
     return false;
   }
 
@@ -3252,7 +3221,7 @@ function run_repo_test(
       return false;
     }
     shell_exec("mv $test_repo/hhvm.hhbbc $test_repo/hhvm.hhbc");
-    $hhbbc = hhbbc_cmd($options, $test, $program);
+    $hhbbc = hhbbc_cmd($options, $test);
     $result = exec_with_stack($hhbbc);
     if ($result is string) {
       Status::writeDiff($test, $result);
@@ -3334,10 +3303,9 @@ function print_commands(
     }
 
     // How to run it with hhbbc:
-    $program = "hhvm";
-    $hhbbc_cmds = hphp_cmd($options, $test, $program)."\n";
+    $hhbbc_cmds = hphp_cmd($options, $test)."\n";
     if (repo_separate($options, $test)) {
-      $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
+      $hhbbc_cmd  = hhbbc_cmd($options, $test)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       if ($options->hhbbc2) {
         foreach ($commands as $c) {

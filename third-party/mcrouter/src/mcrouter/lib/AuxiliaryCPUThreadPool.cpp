@@ -6,6 +6,7 @@
  */
 
 #include "AuxiliaryCPUThreadPool.h"
+#include <folly/Singleton.h>
 
 namespace facebook {
 namespace memcache {

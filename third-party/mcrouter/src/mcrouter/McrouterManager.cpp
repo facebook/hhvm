@@ -6,6 +6,7 @@
  */
 
 #include "mcrouter/McrouterManager.h"
+#include <folly/Singleton.h>
 #include "mcrouter/lib/AuxiliaryCPUThreadPool.h"
 
 namespace facebook {

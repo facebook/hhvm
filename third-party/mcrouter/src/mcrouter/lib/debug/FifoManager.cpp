@@ -15,6 +15,7 @@
 #include <mutex>
 
 #include <folly/Format.h>
+#include <folly/Singleton.h>
 #include <folly/system/ThreadName.h>
 
 namespace facebook {

@@ -11,6 +11,7 @@
 
 #include <folly/MapUtil.h>
 #include <folly/Range.h>
+#include <folly/Singleton.h>
 
 #include "mcrouter/CarbonRouterFactory.h"
 #include "mcrouter/CarbonRouterInstance.h"

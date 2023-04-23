@@ -20,6 +20,7 @@
 #include <memory>
 #include <vector>
 
+#include <folly/Singleton.h>
 #include <folly/ssl/OpenSSLCertUtils.h>
 #include <squangle/mysql_client/AsyncHelpers.h>
 #include <squangle/mysql_client/ClientPool.h>

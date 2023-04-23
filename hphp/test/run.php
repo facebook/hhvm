@@ -163,13 +163,6 @@ function hhvm_binary_routes(): dict<string, string> {
   ];
 }
 
-function hh_codegen_binary_routes(): dict<string, string> {
-  return dict[
-    "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
-    "cmake"   => "/hphp/hack/bin"
-  ];
-}
-
 // For Facebook: We have several build systems, and we can use any of them in
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one

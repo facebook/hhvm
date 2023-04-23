@@ -1229,7 +1229,7 @@ std::string RuntimeOption::DebuggerSessionAuthScriptBin;
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
 
-int64_t RuntimeOption::PregBacktraceLimit = 1000000;
+int64_t RuntimeOption::PregBacktrackLimit = 1000000;
 int64_t RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnablePregErrorLog = true;
 
@@ -2765,7 +2765,7 @@ void RuntimeOption::Load(
   }
   {
     // Preg
-    Config::Bind(PregBacktraceLimit, ini, config, "Preg.BacktraceLimit",
+    Config::Bind(PregBacktrackLimit, ini, config, "Preg.BacktrackLimit",
                  1000000);
     Config::Bind(PregRecursionLimit, ini, config, "Preg.RecursionLimit",
                  100000);

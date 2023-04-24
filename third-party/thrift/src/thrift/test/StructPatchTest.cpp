@@ -763,6 +763,22 @@ TEST(UnionPatchTest, PatchIfSet) {
   test::expectPatch(patch, bye, hi);
 }
 
+TEST(UnionPatchTest, PatchIfSetPredicate) {
+  MyUnionPatch patch;
+  patch.patchIfSet()->option1() = "Hi";
+  patch.patchIfSet()->option2() = 5;
+
+  MyUnion option1;
+  option1.option1_ref() = "";
+  patch.apply(option1);
+  EXPECT_EQ(option1.option1_ref().value(), "Hi");
+
+  MyUnion option2;
+  option2.option2_ref() = 0;
+  patch.apply(option2);
+  EXPECT_EQ(option2.option2_ref().value(), 5);
+}
+
 TEST(UnionPatchTest, PatchInner) {
   MyUnionPatch patch;
   *patch.patchIfSet()->option3()->patchIfSet()->option1() = "World";

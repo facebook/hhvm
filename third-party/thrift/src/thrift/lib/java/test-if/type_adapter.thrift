@@ -155,7 +155,7 @@ typedef map<i32, string> adaptedIntStringMap
   adapterClassName = "com.facebook.thrift.adapter.test.IntBinaryMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
-typedef map<i32, string (java.swift.binary_string)> adaptedIntBinaryStringMap
+typedef map<i32, string_5578> adaptedIntBinaryStringMap
 
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntBinaryListMapToStringTypeAdapter",
@@ -243,7 +243,7 @@ struct TestStruct {
   25: map<i32, i32> intMap_field;
   26: map<i32, binary> intBinaryMap_field;
   27: map<i32, string> intStringMap_field;
-  28: map<i32, string (java.swift.binary_string)> intBinaryStringMap_field;
+  28: map<i32, string_5578> intBinaryStringMap_field;
   29: map<i32, list<binary>> intBinaryListMap_field;
   51: bool boolean_default = true;
   52: byte byte_default = 9;
@@ -570,7 +570,7 @@ union TestUnion {
   25: map<i32, i32> intMap_field;
   26: map<i32, binary> intBinaryMap_field;
   27: map<i32, string> intStringMap_field;
-  28: map<i32, string (java.swift.binary_string)> intBinaryStringMap_field;
+  28: map<i32, string_5578> intBinaryStringMap_field;
   29: map<i32, list<binary>> intBinaryListMap_field;
   201: bool boolean_field2;
   202: list<binary> binaryList_field2;
@@ -975,3 +975,6 @@ safe permanent client exception AdaptedTestException {
   > quadAdaptedMap_field;
   516: adaptedInt adaptedInt;
 }
+
+// The following were automatically generated and may benefit from renaming.
+typedef string (java.swift.binary_string = "1") string_5578

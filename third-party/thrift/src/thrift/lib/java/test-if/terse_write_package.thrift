@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/thrift.thrift"
+include "thrift/annotation/cpp.thrift"
 
 @thrift.TerseWrite
 @thrift.Experimental
@@ -51,7 +52,8 @@ struct PackageLevelTerseStruct {
   6: float floatVal;
   7: double doubleVal;
   8: string stringVal;
-  9: binary (cpp.type = "::folly::IOBuf") binaryVal;
+  @cpp.Type{name = "::folly::IOBuf"}
+  9: binary binaryVal;
   10: PackageLevelTerseData structVal;
 
   11: optional bool optBoolVal;
@@ -62,7 +64,8 @@ struct PackageLevelTerseStruct {
   16: optional float optFloatVal;
   17: optional double optDoubleVal;
   18: optional string optStringVal;
-  19: optional binary (cpp.type = "::folly::IOBuf") optBinaryVal;
+  @cpp.Type{name = "::folly::IOBuf"}
+  19: optional binary optBinaryVal;
   20: optional PackageLevelTerseData optStructVal;
 
   21: optional list<i16> optListVal;

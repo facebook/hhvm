@@ -30,6 +30,7 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 
+class diagnostics_engine;
 class lexer;
 
 class t_base_type;

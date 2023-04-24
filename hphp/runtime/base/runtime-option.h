@@ -1567,7 +1567,7 @@ public:
   static std::string MailForceExtraParameters;
 
   // preg stack depth and debug support options
-  static int64_t PregBacktrackLimit;
+  static int64_t PregBacktraceLimit;
   static int64_t PregRecursionLimit;
   static bool EnablePregErrorLog;
 

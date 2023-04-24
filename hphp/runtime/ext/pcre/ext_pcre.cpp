@@ -450,8 +450,8 @@ struct PcreExtension final : Extension {
   void threadInit() override {
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.backtrack_limit",
-                     std::to_string(RuntimeOption::PregBacktrackLimit).c_str(),
-                     &tl_pcre_globals->preg_backtrack_limit);
+                     std::to_string(RuntimeOption::PregBacktraceLimit).c_str(),
+                     &tl_pcre_globals->preg_backtrace_limit);
     IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                      "pcre.recursion_limit",
                      std::to_string(RuntimeOption::PregRecursionLimit).c_str(),

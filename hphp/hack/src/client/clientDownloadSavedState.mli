@@ -7,7 +7,7 @@
  *)
 
 type saved_state_type =
-  | Naming_and_dep_table of { naming_sqlite: bool }
+  | Naming_and_dep_table
   | Naming_table
 
 type env = {

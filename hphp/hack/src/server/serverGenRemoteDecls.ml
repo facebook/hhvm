@@ -64,10 +64,7 @@ let get_project_metadata ~repo ~ssopts : (string, string) result Future.t =
 
 let get_changed_files_since_last_saved_state ~ssopts :
     (Relative_path.t list, string) result Future.Promise.t =
-  let saved_state_type =
-    (* TODO: using shallow_decls_saved_state *)
-    Saved_state_loader.Naming_and_dep_table { naming_sqlite = true }
-  in
+  let saved_state_type = Saved_state_loader.Naming_and_dep_table in
   (* TODO: the following is a bug! *)
   let root = Wwwroot.interpret_command_line_root_parameter [] in
   let project_name = Saved_state_loader.get_project_name saved_state_type in

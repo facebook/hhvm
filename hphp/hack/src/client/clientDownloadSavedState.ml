@@ -9,7 +9,7 @@
 open Hh_prelude
 
 type saved_state_type =
-  | Naming_and_dep_table of { naming_sqlite: bool }
+  | Naming_and_dep_table
   | Naming_table
 
 type env = {
@@ -62,7 +62,7 @@ let additional_info_of_json
   match saved_state_type with
   | Saved_state_loader.Naming_table -> ()
   | Saved_state_loader.Shallow_decls -> ()
-  | Saved_state_loader.Naming_and_dep_table_distc { naming_sqlite = _ } ->
+  | Saved_state_loader.Naming_and_dep_table_distc ->
     let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
     let dirty_files = Jget.obj_exn json "dirty_files" in
     let master_changes =
@@ -82,7 +82,7 @@ let additional_info_of_json
         saved_state_distance = None;
         saved_state_age = None;
       }
-  | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
+  | Saved_state_loader.Naming_and_dep_table ->
     let mergebase_global_rev = Jget.int_opt json "mergebase_global_rev" in
     let dirty_files = Jget.obj_exn json "dirty_files" in
     let master_changes =
@@ -156,7 +156,7 @@ let make_replay_token_of_additional_info
   match saved_state_type with
   | Saved_state_loader.Naming_table -> Hh_json.JSON_Null
   | Saved_state_loader.Shallow_decls -> Hh_json.JSON_Null
-  | Saved_state_loader.Naming_and_dep_table_distc { naming_sqlite = _ } ->
+  | Saved_state_loader.Naming_and_dep_table_distc ->
     let Saved_state_loader.Naming_and_dep_table_info.
           {
             mergebase_global_rev;
@@ -185,7 +185,7 @@ let make_replay_token_of_additional_info
                 @@ Relative_path.Set.elements local_changes );
             ] );
       ]
-  | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
+  | Saved_state_loader.Naming_and_dep_table ->
     let Saved_state_loader.Naming_and_dep_table_info.
           {
             mergebase_global_rev;
@@ -356,10 +356,8 @@ let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
     =
   Relative_path.set_path_prefix Relative_path.Root env.root;
   match env.saved_state_type with
-  | Naming_and_dep_table { naming_sqlite } ->
-    let saved_state_type =
-      Saved_state_loader.Naming_and_dep_table { naming_sqlite }
-    in
+  | Naming_and_dep_table ->
+    let saved_state_type = Saved_state_loader.Naming_and_dep_table in
     let%lwt result = load_saved_state ~env ~local_config ~saved_state_type in
     (match result with
     | Error load_error ->

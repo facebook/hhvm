@@ -291,8 +291,7 @@ let make_remote_server_api
         State_loader_futures.download_and_unpack_saved_state_from_manifold
           ~ssopt
           ~progress_callback:(fun _ -> ())
-          ~saved_state_type:
-            (Saved_state_loader.Naming_and_dep_table { naming_sqlite = true })
+          ~saved_state_type:Saved_state_loader.Naming_and_dep_table
           ~manifold_path
           ~target_path:(Path.make target_path)
       in

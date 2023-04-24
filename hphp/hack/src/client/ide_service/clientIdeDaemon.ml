@@ -287,8 +287,7 @@ let load_naming_table
                       { root; sockname = None }
                   ~ignore_hh_version
                   ~saved_state_type:
-                    (Saved_state_loader.Naming_and_dep_table_distc
-                       { naming_sqlite = true })
+                    Saved_state_loader.Naming_and_dep_table_distc
               in
               match result with
               | Ok

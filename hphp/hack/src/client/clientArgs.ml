@@ -1249,7 +1249,7 @@ invocations of `hh` faster.|}
       Printf.printf "The '--type' option is required. %s\n" valid_types_message;
       exit 2
     | Some "naming-and-dep-table" ->
-      ClientDownloadSavedState.Naming_and_dep_table { naming_sqlite = true }
+      ClientDownloadSavedState.Naming_and_dep_table
     | Some "naming-table" -> ClientDownloadSavedState.Naming_table
     | Some saved_state_type ->
       Printf.printf

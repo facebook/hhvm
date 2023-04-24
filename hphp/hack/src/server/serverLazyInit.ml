@@ -333,10 +333,8 @@ let download_and_load_state_exn
     let saved_state_type =
       if genv.local_config.ServerLocalConfig.load_hack_64_distc_saved_state then
         Saved_state_loader.Naming_and_dep_table_distc
-          { naming_sqlite = true (* TODO(ljw): constant true *) }
       else
         Saved_state_loader.Naming_and_dep_table
-          { naming_sqlite = true (* TODO(ljw): constant true *) }
     in
     let loader_future =
       State_loader_futures.load

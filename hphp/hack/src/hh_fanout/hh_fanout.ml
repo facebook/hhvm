@@ -117,8 +117,7 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
             Saved_state_loader.Watchman_options.
               { root = env.root; sockname = env.watchman_sockname }
           ~ignore_hh_version:env.ignore_hh_version
-          ~saved_state_type:
-            (Saved_state_loader.Naming_and_dep_table { naming_sqlite = true })
+          ~saved_state_type:Saved_state_loader.Naming_and_dep_table
       in
       (match dep_table_saved_state with
       | Error load_error ->

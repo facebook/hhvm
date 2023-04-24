@@ -157,7 +157,7 @@ class RocketServerConnection final
     closeIfNeeded();
   }
 
-  void applyDscpAndMarkToSocket(const RequestSetupMetadata& setupMetadata);
+  void applyQosMarking(const RequestSetupMetadata& setupMetadata);
 
   class ReadResumableHandle {
    public:
@@ -322,7 +322,7 @@ class RocketServerConnection final
   // Note that attachEventBase()/detachEventBase() are not supported in server
   // code
   folly::EventBase& evb_;
-  folly::AsyncTransport::UniquePtr socket_;
+  folly::AsyncTransport::UniquePtr const socket_;
   folly::AsyncSocket* const rawSocket_;
   folly::SocketAddress peerAddress_;
 

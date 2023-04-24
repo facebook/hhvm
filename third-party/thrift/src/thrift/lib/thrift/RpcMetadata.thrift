@@ -427,8 +427,11 @@ struct RequestSetupMetadata {
   // the connection. MAY be set.
   5: optional i32 dscpToReflect;
   6: optional i32 markToReflect;
+  10: optional i32 qosUseCaseId;
+  11: optional i32 qosPolicyId;
+  // Other metadata
   9: optional ClientMetadata clientMetadata;
-}
+} // next-id: 12
 
 struct SetupResponse {
   // The Rocket protocol version that server picked. SHOULD be set. MUST be a

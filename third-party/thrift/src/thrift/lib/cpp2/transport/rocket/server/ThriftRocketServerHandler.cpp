@@ -227,9 +227,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
       sampleRate_ = observer->getSampleRate();
     }
 
-    if (meta.dscpToReflect_ref() || meta.markToReflect_ref()) {
-      connection.applyDscpAndMarkToSocket(meta);
-    }
+    connection.applyQosMarking(meta);
 
     ServerPushMetadata serverMeta;
     serverMeta.set_setupResponse();

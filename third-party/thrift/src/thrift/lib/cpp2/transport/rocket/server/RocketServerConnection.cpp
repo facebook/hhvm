@@ -44,6 +44,7 @@
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
+#include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnectionPlugins.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerHandler.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
@@ -934,48 +935,44 @@ void RocketServerConnection::freeStream(
   }
 }
 
-void RocketServerConnection::applyDscpAndMarkToSocket(
+void RocketServerConnection::applyQosMarking(
     const RequestSetupMetadata& setupMetadata) {
   constexpr int32_t kMaxDscpValue = (1 << 6) - 1;
 
-  if (!socket_) {
+  if (!rawSocket_) {
     return;
   }
 
   try {
     folly::SocketAddress addr;
-    socket_->getAddress(&addr);
-
+    rawSocket_->getAddress(&addr);
     if (addr.getFamily() != AF_INET6 && addr.getFamily() != AF_INET) {
       return;
     }
 
-    if (auto* sock = socket_->getUnderlyingTransport<folly::AsyncSocket>()) {
-      const auto fd = sock->getNetworkSocket();
+    const auto fd = rawSocket_->getNetworkSocket();
 
-      if (auto dscp = setupMetadata.dscpToReflect_ref()) {
-        if (auto context = frameHandler_->getCpp2ConnContext()) {
-          THRIFT_CONNECTION_EVENT(rocket.dscp).log(*context, [&] {
-            return folly::dynamic::object("rocket_dscp", *dscp);
-          });
-        }
-        if (*dscp >= 0 && *dscp <= kMaxDscpValue) {
-          const folly::SocketOptionKey kIpv4TosKey = {IPPROTO_IP, IP_TOS};
-          const folly::SocketOptionKey kIpv6TosKey = {
-              IPPROTO_IPV6, IPV6_TCLASS};
-          auto& dscpKey =
-              addr.getIPAddress().isV4() ? kIpv4TosKey : kIpv6TosKey;
-          dscpKey.apply(fd, *dscp << 2);
-        }
+    if (auto dscp = setupMetadata.dscpToReflect()) {
+      if (auto context = frameHandler_->getCpp2ConnContext()) {
+        THRIFT_CONNECTION_EVENT(rocket.dscp).log(*context, [&] {
+          return folly::dynamic::object("rocket_dscp", *dscp);
+        });
       }
-
-#if defined(SO_MARK)
-      if (auto mark = setupMetadata.markToReflect_ref()) {
-        const folly::SocketOptionKey kSoMarkKey = {SOL_SOCKET, SO_MARK};
-        kSoMarkKey.apply(fd, *mark);
+      if (*dscp >= 0 && *dscp <= kMaxDscpValue) {
+        const folly::SocketOptionKey kIpv4TosKey = {IPPROTO_IP, IP_TOS};
+        const folly::SocketOptionKey kIpv6TosKey = {IPPROTO_IPV6, IPV6_TCLASS};
+        auto& dscpKey = addr.getIPAddress().isV4() ? kIpv4TosKey : kIpv6TosKey;
+        dscpKey.apply(fd, *dscp << 2);
       }
-#endif
     }
+#if defined(SO_MARK)
+    if (auto mark = setupMetadata.markToReflect()) {
+      const folly::SocketOptionKey kSoMarkKey = {SOL_SOCKET, SO_MARK};
+      kSoMarkKey.apply(fd, *mark);
+    }
+#endif
+
+    plugin::applyCustomQosMarkingToSocket(fd, setupMetadata);
   } catch (const std::exception& ex) {
     FB_LOG_EVERY_MS(WARNING, 60 * 1000)
         << "Failed to apply DSCP to socket: " << folly::exceptionStr(ex);

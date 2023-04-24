@@ -104,6 +104,17 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
     return derived();
   }
 
+  /// @copydoc AssignPatch::merge
+  template <typename U>
+  void merge(U&& next) {
+    if (this == std::addressof(next)) {
+      auto copy = next;
+      std::forward<U>(copy).customVisit(derived());
+    } else {
+      std::forward<U>(next).customVisit(derived());
+    }
+  }
+
  protected:
   using Base::derived;
   using Base::resetAnd;
@@ -260,6 +271,18 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
       return true;
     }
     return mergeAssign(std::forward<U>(next));
+  }
+
+  template <typename Visitor>
+  bool customVisitAssignAndClear(Visitor&& v) const {
+    if (hasAssign()) {
+      std::forward<Visitor>(v).assign(*data_.assign());
+      return true;
+    }
+    if (data_.clear() == true) {
+      std::forward<Visitor>(v).clear();
+    }
+    return false;
   }
 
   template <typename Tag>

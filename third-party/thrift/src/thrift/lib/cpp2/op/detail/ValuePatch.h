@@ -82,19 +82,22 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
     val = !val;
   }
 
-  void apply(T& val) const {
-    if (!Base::template applyAssignAndClear<type::bool_t>(val) &&
-        *data_.invert()) {
-      val = !val;
+  template <typename Visitor>
+  void customVisit(Visitor&& v) const {
+    if (!Base::template customVisitAssignAndClear(v) && *data_.invert()) {
+      std::forward<Visitor>(v).invert();
     }
   }
 
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      *data_.invert() ^= *next.toThrift().invert();
-    }
+  void apply(T& val) const {
+    struct Visitor {
+      T& v;
+      void assign(T b) { v = b; }
+      void clear() { v = false; }
+      void invert() { v = !v; }
+    };
+
+    return customVisit(Visitor{val});
   }
 
  private:
@@ -150,18 +153,22 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
     assignOr(*data_.add()) -= std::forward<U>(val);
   }
 
-  void apply(T& val) const {
-    if (!Base::template applyAssignAndClear<Tag>(val)) {
-      val += *data_.add();
+  template <typename Visitor>
+  void customVisit(Visitor&& v) const {
+    if (!Base::template customVisitAssignAndClear(v)) {
+      v.add(*data_.add());
     }
   }
 
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      *data_.add() += *next.toThrift().add();
-    }
+  void apply(T& val) const {
+    struct Visitor {
+      T& v;
+      void assign(const T& t) { v = t; }
+      void clear() { v = 0; }
+      void add(const T& t) { v += t; }
+    };
+
+    return customVisit(Visitor{val});
   }
 
   /// Increases the value.

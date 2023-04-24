@@ -426,9 +426,13 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Returns the patch that for the entry.
   template <typename K = typename T::key_type>
   FOLLY_NODISCARD VP& patchByKey(K&& key) {
-    // TODO: Return dummy patch for cases when key is slotted for removal
-    return isKeyModifiedOrRemoved(key) ? data_.patch()->operator[](key)
-                                       : data_.patchPrior()->operator[](key);
+    if (data_.remove()->count(key)) {
+      // We are going to delete key, thus patchByKey is no-op and we return a
+      // dummy patch.
+      return dummy_;
+    }
+    return isKeyModified(key) ? data_.patch()->operator[](key)
+                              : data_.patchPrior()->operator[](key);
   }
 
   /// Ensures that key exists and patches the entry.
@@ -489,12 +493,6 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
         data_.put()->find(key) != data_.put()->end();
   }
 
-  template <typename K = typename T::key_type>
-  bool isKeyModifiedOrRemoved(K&& key) {
-    return isKeyModified(key) ||
-        data_.remove()->find(key) != data_.remove()->end();
-  }
-
   void applyPatch(T& val, const P& patch) const {
     for (const auto& p : patch) {
       auto it = val.find(p.first);
@@ -514,6 +512,8 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   using Base::assignOr;
   using Base::data_;
   using Base::mergeAssignAndClear;
+
+  VP dummy_;
 };
 
 } // namespace detail

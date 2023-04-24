@@ -576,9 +576,8 @@ TEST(StructPatchTest, MapPatch) {
   EXPECT_EQ(
       *patchMerging2.toThrift().remove(),
       (std::unordered_set<std::string>{"z"}));
-  EXPECT_EQ(patchMerging2.toThrift().patch()->size(), 2);
+  EXPECT_EQ(patchMerging2.toThrift().patch()->size(), 1);
   EXPECT_TRUE(patchMerging2.toThrift().patch()->contains("g"));
-  EXPECT_TRUE(patchMerging2.toThrift().patch()->contains("z"));
 
   auto expectAfterMerge = [&](const std::unordered_set<std::string>& patchPrior,
                               const std::map<std::string, std::string>& add,

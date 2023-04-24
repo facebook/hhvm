@@ -331,3 +331,9 @@ enum PatchOp {
    */
   Put = 9,
 }
+
+// The key of PatchOp::PatchPrior in ListPatch
+@cpp.Adapter{
+  name = "::apache::thrift::InlineAdapter<::apache::thrift::op::detail::ListPatchIndex>",
+}
+typedef i32 ListPatchIndex

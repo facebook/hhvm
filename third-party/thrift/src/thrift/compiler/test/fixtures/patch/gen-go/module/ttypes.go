@@ -6441,7 +6441,7 @@ func (p *MyStructField23Patch) String() string {
 type MyStructField26Patch struct {
   Assign []int16 `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
-  Patch map[int32]*patch1.I16Patch `thrift:"patch,3" db:"patch" json:"patch"`
+  Patch map[patch1.ListPatchIndex]*patch1.I16Patch `thrift:"patch,3" db:"patch" json:"patch"`
   // unused fields # 4 to 6
   Remove []int16 `thrift:"remove,7" db:"remove" json:"remove"`
   Prepend []int16 `thrift:"prepend,8" db:"prepend" json:"prepend"`
@@ -6462,7 +6462,7 @@ func (p *MyStructField26Patch) GetClear() bool {
   return p.Clear
 }
 
-func (p *MyStructField26Patch) GetPatch() map[int32]*patch1.I16Patch {
+func (p *MyStructField26Patch) GetPatch() map[patch1.ListPatchIndex]*patch1.I16Patch {
   return p.Patch
 }
 
@@ -6512,7 +6512,7 @@ func (m *MyStructField26PatchBuilder) Clear(clear bool) *MyStructField26PatchBui
   return m
 }
 
-func (m *MyStructField26PatchBuilder) Patch(patch map[int32]*patch1.I16Patch) *MyStructField26PatchBuilder {
+func (m *MyStructField26PatchBuilder) Patch(patch map[patch1.ListPatchIndex]*patch1.I16Patch) *MyStructField26PatchBuilder {
   m.obj.Patch = patch
   return m
 }
@@ -6542,7 +6542,7 @@ func (m *MyStructField26Patch) SetClear(clear bool) *MyStructField26Patch {
   return m
 }
 
-func (m *MyStructField26Patch) SetPatch(patch map[int32]*patch1.I16Patch) *MyStructField26Patch {
+func (m *MyStructField26Patch) SetPatch(patch map[patch1.ListPatchIndex]*patch1.I16Patch) *MyStructField26Patch {
   m.Patch = patch
   return m
 }
@@ -6650,14 +6650,15 @@ func (p *MyStructField26Patch)  ReadField3(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[int32]*patch1.I16Patch, size)
+  tMap := make(map[patch1.ListPatchIndex]*patch1.I16Patch, size)
   p.Patch =  tMap
   for i := 0; i < size; i ++ {
-    var _key17 int32
+    var _key17 patch1.ListPatchIndex
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key17 = v
+      temp := patch1.ListPatchIndex(v)
+      _key17 = temp
     }
     _val18 := patch1.NewI16Patch()
     if err := _val18.Read(iprot); err != nil {
@@ -7769,7 +7770,7 @@ func (p *MyStructField28Patch) String() string {
 type MyStructField29Patch struct {
   Assign []map[string]int32 `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
-  Patch map[int32]*MyStructField29Patch1 `thrift:"patch,3" db:"patch" json:"patch"`
+  Patch map[patch1.ListPatchIndex]*MyStructField29Patch1 `thrift:"patch,3" db:"patch" json:"patch"`
   // unused fields # 4 to 6
   Remove []map[string]int32 `thrift:"remove,7" db:"remove" json:"remove"`
   Prepend []map[string]int32 `thrift:"prepend,8" db:"prepend" json:"prepend"`
@@ -7790,7 +7791,7 @@ func (p *MyStructField29Patch) GetClear() bool {
   return p.Clear
 }
 
-func (p *MyStructField29Patch) GetPatch() map[int32]*MyStructField29Patch1 {
+func (p *MyStructField29Patch) GetPatch() map[patch1.ListPatchIndex]*MyStructField29Patch1 {
   return p.Patch
 }
 
@@ -7840,7 +7841,7 @@ func (m *MyStructField29PatchBuilder) Clear(clear bool) *MyStructField29PatchBui
   return m
 }
 
-func (m *MyStructField29PatchBuilder) Patch(patch map[int32]*MyStructField29Patch1) *MyStructField29PatchBuilder {
+func (m *MyStructField29PatchBuilder) Patch(patch map[patch1.ListPatchIndex]*MyStructField29Patch1) *MyStructField29PatchBuilder {
   m.obj.Patch = patch
   return m
 }
@@ -7870,7 +7871,7 @@ func (m *MyStructField29Patch) SetClear(clear bool) *MyStructField29Patch {
   return m
 }
 
-func (m *MyStructField29Patch) SetPatch(patch map[int32]*MyStructField29Patch1) *MyStructField29Patch {
+func (m *MyStructField29Patch) SetPatch(patch map[patch1.ListPatchIndex]*MyStructField29Patch1) *MyStructField29Patch {
   m.Patch = patch
   return m
 }
@@ -7996,14 +7997,15 @@ func (p *MyStructField29Patch)  ReadField3(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[int32]*MyStructField29Patch1, size)
+  tMap := make(map[patch1.ListPatchIndex]*MyStructField29Patch1, size)
   p.Patch =  tMap
   for i := 0; i < size; i ++ {
-    var _key39 int32
+    var _key39 patch1.ListPatchIndex
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key39 = v
+      temp := patch1.ListPatchIndex(v)
+      _key39 = temp
     }
     _val40 := NewMyStructField29Patch1()
     if err := _val40.Read(iprot); err != nil {

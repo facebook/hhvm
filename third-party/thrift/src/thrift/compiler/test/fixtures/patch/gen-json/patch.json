@@ -42,6 +42,23 @@
       }
     }
   },
+  "typedefs" : {
+    "ListPatchIndex" : {
+      "lineno" : 336,
+      "type_enum" : "I32",
+      "spec_args" : null,
+      "source_range" : {
+        "begin" : {
+          "line" : 336,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 339,
+          "column" : 27
+        }
+      }
+    }
+  },
   "structs" : {
     "GeneratePatch" : {
       "lineno" : 43,

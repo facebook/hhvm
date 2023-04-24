@@ -7711,7 +7711,7 @@ func (x *MyStructField23Patch) Read(p thrift.Protocol) error {
 type MyStructField26Patch struct {
     Assign []int16 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Patch map[int32]*patch.I16Patch `thrift:"patch,3" json:"patch" db:"patch"`
+    Patch map[patch.ListPatchIndex]*patch.I16Patch `thrift:"patch,3" json:"patch" db:"patch"`
     Remove []int16 `thrift:"remove,7" json:"remove" db:"remove"`
     Prepend []int16 `thrift:"prepend,8" json:"prepend" db:"prepend"`
     Append []int16 `thrift:"append,9" json:"append" db:"append"`
@@ -7744,11 +7744,11 @@ func (x *MyStructField26Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField26Patch) GetPatchNonCompat() map[int32]*patch.I16Patch {
+func (x *MyStructField26Patch) GetPatchNonCompat() map[patch.ListPatchIndex]*patch.I16Patch {
     return x.Patch
 }
 
-func (x *MyStructField26Patch) GetPatch() map[int32]*patch.I16Patch {
+func (x *MyStructField26Patch) GetPatch() map[patch.ListPatchIndex]*patch.I16Patch {
     if !x.IsSetPatch() {
       return nil
     }
@@ -7802,7 +7802,7 @@ func (x *MyStructField26Patch) SetClear(value bool) *MyStructField26Patch {
     return x
 }
 
-func (x *MyStructField26Patch) SetPatch(value map[int32]*patch.I16Patch) *MyStructField26Patch {
+func (x *MyStructField26Patch) SetPatch(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26Patch {
     x.Patch = value
     return x
 }
@@ -7906,7 +7906,8 @@ func (x *MyStructField26Patch) writeField3(p thrift.Protocol) error {  // Patch
 for k, v := range item {
     {
         item := k
-        if err := p.WriteI32(item); err != nil {
+        err := patch.WriteListPatchIndex(item, p)
+if err != nil {
     return err
 }
     }
@@ -8065,11 +8066,11 @@ if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
 
-mapResult := make(map[int32]*patch.I16Patch, size)
+mapResult := make(map[patch.ListPatchIndex]*patch.I16Patch, size)
 for i := 0; i < size; i++ {
-    var key int32
+    var key patch.ListPatchIndex
     {
-        result, err := p.ReadI32()
+        result, err := patch.ReadListPatchIndex(p)
 if err != nil {
     return err
 }
@@ -8208,7 +8209,7 @@ func (x *MyStructField26PatchBuilder) Clear(value bool) *MyStructField26PatchBui
     return x
 }
 
-func (x *MyStructField26PatchBuilder) Patch(value map[int32]*patch.I16Patch) *MyStructField26PatchBuilder {
+func (x *MyStructField26PatchBuilder) Patch(value map[patch.ListPatchIndex]*patch.I16Patch) *MyStructField26PatchBuilder {
     x.obj.Patch = value
     return x
 }
@@ -9537,7 +9538,7 @@ func (x *MyStructField28Patch) Read(p thrift.Protocol) error {
 type MyStructField29Patch struct {
     Assign []map[string]int32 `thrift:"assign,1,optional" json:"assign,omitempty" db:"assign"`
     Clear bool `thrift:"clear,2" json:"clear" db:"clear"`
-    Patch map[int32]*MyStructField29Patch1 `thrift:"patch,3" json:"patch" db:"patch"`
+    Patch map[patch.ListPatchIndex]*MyStructField29Patch1 `thrift:"patch,3" json:"patch" db:"patch"`
     Remove []map[string]int32 `thrift:"remove,7" json:"remove" db:"remove"`
     Prepend []map[string]int32 `thrift:"prepend,8" json:"prepend" db:"prepend"`
     Append []map[string]int32 `thrift:"append,9" json:"append" db:"append"`
@@ -9570,11 +9571,11 @@ func (x *MyStructField29Patch) GetClear() bool {
     return x.Clear
 }
 
-func (x *MyStructField29Patch) GetPatchNonCompat() map[int32]*MyStructField29Patch1 {
+func (x *MyStructField29Patch) GetPatchNonCompat() map[patch.ListPatchIndex]*MyStructField29Patch1 {
     return x.Patch
 }
 
-func (x *MyStructField29Patch) GetPatch() map[int32]*MyStructField29Patch1 {
+func (x *MyStructField29Patch) GetPatch() map[patch.ListPatchIndex]*MyStructField29Patch1 {
     if !x.IsSetPatch() {
       return nil
     }
@@ -9628,7 +9629,7 @@ func (x *MyStructField29Patch) SetClear(value bool) *MyStructField29Patch {
     return x
 }
 
-func (x *MyStructField29Patch) SetPatch(value map[int32]*MyStructField29Patch1) *MyStructField29Patch {
+func (x *MyStructField29Patch) SetPatch(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29Patch {
     x.Patch = value
     return x
 }
@@ -9750,7 +9751,8 @@ func (x *MyStructField29Patch) writeField3(p thrift.Protocol) error {  // Patch
 for k, v := range item {
     {
         item := k
-        if err := p.WriteI32(item); err != nil {
+        err := patch.WriteListPatchIndex(item, p)
+if err != nil {
     return err
 }
     }
@@ -9991,11 +9993,11 @@ if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
 }
 
-mapResult := make(map[int32]*MyStructField29Patch1, size)
+mapResult := make(map[patch.ListPatchIndex]*MyStructField29Patch1, size)
 for i := 0; i < size; i++ {
-    var key int32
+    var key patch.ListPatchIndex
     {
-        result, err := p.ReadI32()
+        result, err := patch.ReadListPatchIndex(p)
 if err != nil {
     return err
 }
@@ -10218,7 +10220,7 @@ func (x *MyStructField29PatchBuilder) Clear(value bool) *MyStructField29PatchBui
     return x
 }
 
-func (x *MyStructField29PatchBuilder) Patch(value map[int32]*MyStructField29Patch1) *MyStructField29PatchBuilder {
+func (x *MyStructField29PatchBuilder) Patch(value map[patch.ListPatchIndex]*MyStructField29Patch1) *MyStructField29PatchBuilder {
     x.obj.Patch = value
     return x
 }

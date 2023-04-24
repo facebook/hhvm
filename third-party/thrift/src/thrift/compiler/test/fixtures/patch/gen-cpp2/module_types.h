@@ -7677,7 +7677,7 @@ class MyStructField26PatchStruct final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::bool_t,
-    ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>>>,
+    ::apache::thrift::type::cpp_type<::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>, ::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::InlineAdapter<::apache::thrift::op::detail::ListPatchIndex>, ::apache::thrift::type::i32_t>, ::apache::thrift::type::adapted<::apache::thrift::op::detail::NumberPatchAdapter<::apache::thrift::op::I16PatchStruct>, ::apache::thrift::type::struct_t<::apache::thrift::op::I16PatchStruct>>>>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i16_t>
@@ -7717,7 +7717,7 @@ class MyStructField26PatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructField26PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch> patch__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg);
+  MyStructField26PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch> patch__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg);
 
   MyStructField26PatchStruct(MyStructField26PatchStruct&&) noexcept;
 
@@ -7734,7 +7734,7 @@ class MyStructField26PatchStruct final  {
  private:
   bool __fbthrift_field_clear;
  private:
-  ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch> __fbthrift_field_patch;
+  ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch> __fbthrift_field_patch;
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_remove;
  private:
@@ -7829,42 +7829,42 @@ class MyStructField26PatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_clear)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> patch_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> patch_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> patch_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> patch_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> patch() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> patch() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> patch() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> patch() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
@@ -8008,12 +8008,12 @@ class MyStructField26PatchStruct final  {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
   }
-  const ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>& get_patch() const&;
-  ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch> get_patch() &&;
+  const ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>& get_patch() const&;
+  ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch> get_patch() &&;
 
-  template <typename T_MyStructField26PatchStruct_patch_struct_setter = ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>
+  template <typename T_MyStructField26PatchStruct_patch_struct_setter = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>>
   [[deprecated("Use `FOO.patch_ref() = BAR;` instead of `FOO.set_patch(BAR);`")]]
-  ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>& set_patch(T_MyStructField26PatchStruct_patch_struct_setter&& patch_) {
+  ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::apache::thrift::op::I16Patch>& set_patch(T_MyStructField26PatchStruct_patch_struct_setter&& patch_) {
     patch_ref() = std::forward<T_MyStructField26PatchStruct_patch_struct_setter>(patch_);
     return __fbthrift_field_patch;
   }
@@ -9347,7 +9347,7 @@ class MyStructField29PatchStruct final  {
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::bool_t,
-    ::apache::thrift::type::cpp_type<::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>, ::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField29Patch1Struct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField29Patch1Struct>>>>,
+    ::apache::thrift::type::cpp_type<::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>, ::apache::thrift::type::map<::apache::thrift::type::adapted<::apache::thrift::InlineAdapter<::apache::thrift::op::detail::ListPatchIndex>, ::apache::thrift::type::i32_t>, ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter<::test::fixtures::patch::MyStructField29Patch1Struct>, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField29Patch1Struct>>>>,
     ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>,
     ::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>>
@@ -9387,7 +9387,7 @@ class MyStructField29PatchStruct final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructField29PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::map<::std::string, ::std::int32_t>> assign__arg, bool clear__arg, ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1> patch__arg, ::std::vector<::std::map<::std::string, ::std::int32_t>> remove__arg, ::std::vector<::std::map<::std::string, ::std::int32_t>> prepend__arg, ::std::vector<::std::map<::std::string, ::std::int32_t>> append__arg);
+  MyStructField29PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::map<::std::string, ::std::int32_t>> assign__arg, bool clear__arg, ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1> patch__arg, ::std::vector<::std::map<::std::string, ::std::int32_t>> remove__arg, ::std::vector<::std::map<::std::string, ::std::int32_t>> prepend__arg, ::std::vector<::std::map<::std::string, ::std::int32_t>> append__arg);
 
   MyStructField29PatchStruct(MyStructField29PatchStruct&&) noexcept;
 
@@ -9404,7 +9404,7 @@ class MyStructField29PatchStruct final  {
  private:
   bool __fbthrift_field_clear;
  private:
-  ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1> __fbthrift_field_patch;
+  ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1> __fbthrift_field_patch;
  private:
   ::std::vector<::std::map<::std::string, ::std::int32_t>> __fbthrift_field_remove;
  private:
@@ -9499,42 +9499,42 @@ class MyStructField29PatchStruct final  {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_clear)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> patch_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> patch_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> patch_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> patch_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> patch() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> patch() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_patch)};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> patch() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_patch};
   }
 
-  template <typename..., typename T = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename..., typename T = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> patch() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_patch)};
   }
@@ -9678,12 +9678,12 @@ class MyStructField29PatchStruct final  {
     clear_ref() = clear_;
     return __fbthrift_field_clear;
   }
-  const ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>& get_patch() const&;
-  ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1> get_patch() &&;
+  const ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>& get_patch() const&;
+  ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1> get_patch() &&;
 
-  template <typename T_MyStructField29PatchStruct_patch_struct_setter = ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>>
+  template <typename T_MyStructField29PatchStruct_patch_struct_setter = ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>>
   [[deprecated("Use `FOO.patch_ref() = BAR;` instead of `FOO.set_patch(BAR);`")]]
-  ::std::unordered_map<::std::int32_t, ::test::fixtures::patch::MyStructField29Patch1>& set_patch(T_MyStructField29PatchStruct_patch_struct_setter&& patch_) {
+  ::std::unordered_map<::apache::thrift::op::ListPatchIndex, ::test::fixtures::patch::MyStructField29Patch1>& set_patch(T_MyStructField29PatchStruct_patch_struct_setter&& patch_) {
     patch_ref() = std::forward<T_MyStructField29PatchStruct_patch_struct_setter>(patch_);
     return __fbthrift_field_patch;
   }

@@ -337,7 +337,7 @@ pub struct MyStructField26Patch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches list values by index. Applies second."]
-    pub patch: ::fbthrift::builtin_types::HashMap<::std::primitive::i32, patch::types::I16Patch>,
+    pub patch: ::fbthrift::builtin_types::HashMap<patch::types::ListPatchIndex, patch::types::I16Patch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::vec::Vec<::std::primitive::i16>,
     #[doc = "Prepends to the front of a given list."]
@@ -401,7 +401,7 @@ pub struct MyStructField29Patch {
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches list values by index. Applies second."]
-    pub patch: ::fbthrift::builtin_types::HashMap<::std::primitive::i32, crate::types::MyStructField29Patch1>,
+    pub patch: ::fbthrift::builtin_types::HashMap<patch::types::ListPatchIndex, crate::types::MyStructField29Patch1>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::vec::Vec<::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>>,
     #[doc = "Prepends to the front of a given list."]

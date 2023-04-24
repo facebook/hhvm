@@ -584,7 +584,9 @@ t_struct& patch_generator::gen_patch(
     // TODO(afuller): support 'replace' op.
     auto elem_patch_type = find_patch_type(
         annot, orig, list->elem_type(), field_id, traversal_order + 1);
-    gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
+    if (const auto* p = program_.scope()->find_type("patch.ListPatchIndex")) {
+      gen.patchList(inst_map(t_type_ref::from_ptr(p), elem_patch_type));
+    }
     // TODO(afuller): Support sets for all types in all languages, and switch
     // this to a set instead of a list.
     gen.remove(inst_list(list->elem_type()));

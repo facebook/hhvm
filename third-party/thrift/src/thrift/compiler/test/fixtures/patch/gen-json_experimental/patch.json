@@ -17,6 +17,14 @@
     "py.asyncio": "apache_thrift_asyncio.patch",
     "py3": "apache.thrift.op"
   },
+  "typedefs": {
+      "ListPatchIndex": {
+        "name": "ListPatchIndex",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 336
+      }
+  },
   "enumerations" :
   {
       "PatchOp" : {

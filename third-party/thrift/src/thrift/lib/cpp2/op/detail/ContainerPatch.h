@@ -23,12 +23,34 @@
 
 #include <folly/Utility.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
+#include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 
 namespace apache {
 namespace thrift {
 namespace op {
 namespace detail {
+
+class ListPatchIndex
+    : public type::detail::EqWrap<ListPatchIndex, std::int32_t> {
+ private:
+  using Base = type::detail::EqWrap<ListPatchIndex, std::int32_t>;
+
+ public:
+  ListPatchIndex() = default;
+  explicit ListPatchIndex(size_t pos) : Base(util::toI32ZigZagOrdinal(pos)) {}
+  size_t position() const { return util::fromI32ZigZagOrdinal(toThrift()); }
+
+ private:
+  template <class>
+  friend struct ::apache::thrift::InlineAdapter;
+  template <class>
+  friend struct ::std::hash;
+  using Base::Base;
+  using Base::empty;
+  using Base::reset;
+  using Base::toThrift;
+};
 
 template <typename C1, typename C2>
 void erase_all(C1& container, const C2& values) {
@@ -155,7 +177,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       folly::throw_exception<bad_patch_access>();
     }
 
-    return data_.patch()->operator[](util::toI32ZigZagOrdinal(pos));
+    return data_.patch()->operator[](ListPatchIndex(pos));
   }
 
   void apply(T& val) const {
@@ -164,7 +186,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     }
 
     for (const auto& ep : *data_.patch()) {
-      auto idx = util::fromI32ZigZagOrdinal(ep.first);
+      auto idx = ep.first.position();
       if (idx >= 0 && idx < val.size()) {
         ep.second.apply(val[idx]);
       }
@@ -498,3 +520,5 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 } // namespace op
 } // namespace thrift
 } // namespace apache
+
+FBTHRIFT_STD_HASH_WRAP_DATA(apache::thrift::op::detail::ListPatchIndex)

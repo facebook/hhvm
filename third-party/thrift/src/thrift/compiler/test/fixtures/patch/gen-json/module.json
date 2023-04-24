@@ -1722,7 +1722,7 @@
         },
         "patch" : {
           "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I16Patch"} } ,
+          "spec_args" : { "key_type" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.ListPatchIndex" }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I16Patch"} } ,
           "required" : true,
           "source_range" : {
             "begin" : {
@@ -2028,7 +2028,7 @@
         },
         "patch" : {
           "type_enum" : "MAP",
-          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "MyStructField29Patch1"} } ,
+          "spec_args" : { "key_type" : { "type_enum" : "TYPEDEF", "spec_args" : "patch.ListPatchIndex" }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "MyStructField29Patch1"} } ,
           "required" : true,
           "source_range" : {
             "begin" : {

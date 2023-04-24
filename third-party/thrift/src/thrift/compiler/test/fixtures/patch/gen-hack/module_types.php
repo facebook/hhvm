@@ -5734,7 +5734,7 @@ class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches list values by index. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<i32, patch.I16Patch> patch
+   * 3: map<patch.ListPatchIndex, patch.I16Patch> patch
    */
   public Map<int, \thrift\op\I16Patch> $patch;
   /**
@@ -5840,7 +5840,16 @@ class MyStructField26Patch implements \IThriftSyncStruct, \IThriftStructMetadata
                     shape(
                       "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "patch.ListPatchIndex",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(
@@ -6924,7 +6933,7 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
    * Patches list values by index. Applies second.
    * 
    * Original thrift field:-
-   * 3: map<i32, module.MyStructField29Patch1> patch
+   * 3: map<patch.ListPatchIndex, module.MyStructField29Patch1> patch
    */
   public Map<int, \fixtures\patch\MyStructField29Patch1> $patch;
   /**
@@ -7043,7 +7052,16 @@ class MyStructField29Patch implements \IThriftSyncStruct, \IThriftStructMetadata
                     shape(
                       "keyType" => \tmeta_ThriftType::fromShape(
                         shape(
-                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "patch.ListPatchIndex",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                                )
+                              ),
+                            )
+                          ),
                         )
                       ),
                       "valueType" => \tmeta_ThriftType::fromShape(

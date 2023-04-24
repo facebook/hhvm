@@ -23,6 +23,32 @@ var _ = fmt.Printf
 var _ = thrift.ZERO
 
 
+type ListPatchIndex = int32
+
+func NewListPatchIndex() ListPatchIndex {
+  return 0
+}
+
+func WriteListPatchIndex(item ListPatchIndex, p thrift.Protocol) error {
+  if err := p.WriteI32(item); err != nil {
+    return err
+}
+  return nil
+}
+
+func ReadListPatchIndex(p thrift.Protocol) (ListPatchIndex, error) {
+  var decodeResult ListPatchIndex
+  decodeErr := func() error {
+    result, err := p.ReadI32()
+if err != nil {
+    return err
+}
+    decodeResult = result
+    return nil
+  }()
+  return decodeResult, decodeErr
+}
+
 type PatchOp int32
 
 const (

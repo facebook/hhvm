@@ -1118,7 +1118,7 @@ pub(crate) fn write_todo(fb: &mut textual::FuncBuilder<'_, '_>, msg: &str) -> Re
     }
 }
 
-fn lookup_constant_string(func: &Func<'_>, mut vid: ValueId) -> Option<ir::UnitBytesId> {
+pub(crate) fn lookup_constant_string(func: &Func<'_>, mut vid: ValueId) -> Option<ir::UnitBytesId> {
     use ir::FullInstrId;
     loop {
         match vid.full() {

@@ -35,6 +35,7 @@ use ir::MemberOpBuilder;
 use ir::MethodId;
 use ir::ObjMethodOp;
 use ir::PropId;
+use ir::ReadonlyOp;
 use ir::SpecialClsRef;
 use ir::TypeStructResolveOp;
 use ir::UnitBytesId;
@@ -43,6 +44,7 @@ use itertools::Itertools;
 
 use super::func_builder::FuncBuilderEx as _;
 use crate::class::IsStatic;
+use crate::func::lookup_constant_string;
 use crate::func::FuncInfo;
 use crate::hack;
 
@@ -426,6 +428,47 @@ impl LowerInstrs<'_> {
             _ => unreachable!(),
         }
     }
+
+    fn set_s(
+        &mut self,
+        builder: &mut FuncBuilder<'_>,
+        field: ValueId,
+        class: ValueId,
+        vid: ValueId,
+        _readonly: ReadonlyOp,
+        loc: LocId,
+    ) -> Option<Instr> {
+        // Some magic - if the class points to a ClassGetC with a
+        // constant parameter and the field is a constant then replace
+        // this with a Textual::SetPropD.
+        if let Some(propname) = lookup_constant_string(&builder.func, field) {
+            if let Some(class) = class.instr() {
+                let class_instr = builder.func.instr(class);
+                // The ClassGetC will have already been converted to a
+                // textual builtin.
+                if let Instr::Special(Special::Textual(Textual::HackBuiltin {
+                    target,
+                    values: box [cid],
+                    loc: _,
+                })) = class_instr
+                {
+                    if target == hack::Hhbc::ClassGetC.as_str() {
+                        if let Some(classname) = lookup_constant_string(&builder.func, *cid) {
+                            let cid = builder.emit_constant(Constant::String(classname));
+                            let pid = builder.emit_constant(Constant::String(propname));
+                            return Some(builder.hack_builtin(
+                                hack::Builtin::SetStaticProp,
+                                &[cid, pid, vid],
+                                loc,
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
+        None
+    }
 }
 
 impl TransformInstr for LowerInstrs<'_> {
@@ -476,6 +519,13 @@ impl TransformInstr for LowerInstrs<'_> {
                 let this = builder.strings.intern_str("$this");
                 let lid = LocalId::Named(this);
                 Instr::Hhbc(Hhbc::CGetL(lid, loc))
+            }
+            Instr::Hhbc(Hhbc::SetS([field, class, vid], readonly, loc)) => {
+                if let Some(replace) = self.set_s(builder, field, class, vid, readonly, loc) {
+                    replace
+                } else {
+                    return instr;
+                }
             }
             Instr::Hhbc(Hhbc::CheckProp(pid, loc)) => self.check_prop(builder, pid, loc),
             Instr::Hhbc(Hhbc::CheckThis(loc)) => {

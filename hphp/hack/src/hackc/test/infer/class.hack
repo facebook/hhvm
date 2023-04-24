@@ -420,9 +420,7 @@ function cgets(): void {
 // CHECK:   prune $builtins.hack_is_true(n3)
 // CHECK:   n4: *HackMixed = load &$0
 // CHECK:   store &$1 <- null: *HackMixed
-// CHECK:   store &base <- n1: *HackMixed
-// CHECK:   n5 = $builtins.hack_dim_field_get(&base, "prop3")
-// CHECK:   store n5 <- n4: *HackMixed
+// CHECK:   n5 = $builtins.hack_set_static_prop($builtins.hack_string("C"), $builtins.hack_string("prop3"), n4)
 // CHECK:   ret null
 // CHECK: #b2:
 // CHECK:   prune ! $builtins.hack_is_true(n3)

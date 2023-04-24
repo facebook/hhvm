@@ -202,8 +202,6 @@ pub(crate) enum Hhbc {
     WHResult,
 }
 
-// Needed for EnumIter
-
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Debug)]
 #[derive(TextualDecl, EnumIter)]
 pub(crate) enum Builtin {
@@ -269,6 +267,8 @@ pub(crate) enum Builtin {
     /// Build a dict based on key/value pairs.
     #[decl(fn hack_new_dict(...) -> *HackMixed)]
     NewDict,
+    #[decl(fn hack_set_static_prop(classname: string, propname: string, value: *HackArray) -> void)]
+    SetStaticProp,
     /// Note that this argument is a 'splat' (unwrapped array args for a function).
     #[decl(fn __sil_splat(*HackArray) -> *HackArray)]
     SilSplat,

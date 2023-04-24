@@ -96,7 +96,7 @@ struct PCREglobals {
   ~PCREglobals();
 
   // pcre ini_settings
-  int64_t preg_backtrace_limit;
+  int64_t preg_backtrack_limit;
   int64_t preg_recursion_limit;
   pcre_jit_stack* jit_stack;
 };

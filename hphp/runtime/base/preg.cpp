@@ -71,7 +71,7 @@ PCREglobals::PCREglobals() {
   jit_stack = pcre_jit_stack_alloc(32768, 524288);
   // Set these to handle uses of pcre prior to PcreExtension::threadInit
   // In particular, for matching tier overrides during RuntimeOption::Load
-  preg_backtrace_limit = RuntimeOption::PregBacktraceLimit;
+  preg_backtrack_limit = RuntimeOption::PregBacktrackLimit;
   preg_recursion_limit = RuntimeOption::PregRecursionLimit;
 }
 
@@ -629,7 +629,7 @@ static void init_local_extra(pcre_extra* local, pcre_extra* shared) {
     memset(local, 0, sizeof(pcre_extra));
     local->flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
   }
-  local->match_limit = tl_pcre_globals->preg_backtrace_limit;
+  local->match_limit = tl_pcre_globals->preg_backtrack_limit;
   local->match_limit_recursion = tl_pcre_globals->preg_recursion_limit;
 }
 
@@ -979,7 +979,7 @@ static void pcre_log_error(const char* func, int line, int pcre_code,
     "limits=(%" PRId64 ", %" PRId64 "), extra=(%d, %d, %d, %d)",
     func, line, pcre_code, errString,
     escapedPattern, escapedSubject, escapedRepl,
-    tl_pcre_globals->preg_backtrace_limit,
+    tl_pcre_globals->preg_backtrack_limit,
     tl_pcre_globals->preg_recursion_limit,
     arg1, arg2, arg3, arg4);
   free((void *)escapedPattern);

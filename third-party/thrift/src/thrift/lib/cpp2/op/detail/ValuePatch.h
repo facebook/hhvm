@@ -248,6 +248,14 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
     return derived();
   }
 
+  template <class Visitor>
+  void customVisit(Visitor&& v) const {
+    if (!Base::template customVisitAssignAndClear(std::forward<Visitor>(v))) {
+      std::forward<Visitor>(v).prepend(*data_.prepend());
+      std::forward<Visitor>(v).append(*data_.append());
+    }
+  }
+
  protected:
   using Base::assignOr;
   using Base::data_;
@@ -299,19 +307,16 @@ class StringPatch : public BaseStringPatch<Patch, StringPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (!applyAssignOrClear(val)) {
-      val = *data_.prepend() + std::move(val) + *data_.append();
-    }
-  }
+    struct Visitor {
+      T& v;
+      void assign(const T& t) { v = t; }
+      void clear() { v = ""; }
+      // TODO: Optimize this
+      void prepend(const T& t) { v = t + v; }
+      void append(const T& t) { v += t; }
+    };
 
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      *data_.prepend() = *std::forward<U>(next).toThrift().prepend() +
-          std::move(*data_.prepend());
-      data_.append()->append(*std::forward<U>(next).toThrift().append());
-    }
+    return Base::customVisit(Visitor{val});
   }
 
  private:
@@ -360,30 +365,23 @@ class BinaryPatch : public BaseStringPatch<Patch, BinaryPatch<Patch>> {
   }
 
   void apply(T& val) const {
-    if (applyAssignOrClear(val)) {
-      return;
-    }
-    folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
-    queue.append(std::move(*data_.prepend()));
-    queue.append(val);
-    queue.append(std::move(*data_.append()));
-    val = queue.moveAsValue();
-  }
+    struct Visitor {
+      T& v;
+      std::deque<const T*> bufs = {&v};
+      void assign(const T& t) { bufs = {&t}; }
+      void clear() { v = v.wrapBufferAsValue(folly::StringPiece("")); }
+      void prepend(const T& t) { bufs.push_front(&t); }
+      void append(const T& t) { bufs.push_back(&t); }
+      ~Visitor() {
+        folly::IOBufQueue queue{folly::IOBufQueue::cacheChainLength()};
+        for (auto buf : bufs) {
+          queue.append(*buf);
+        }
+        v = queue.moveAsValue();
+      }
+    };
 
-  /// @copydoc AssignPatch::merge
-  template <typename U>
-  void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      folly::IOBufQueue prependQueue{folly::IOBufQueue::cacheChainLength()};
-      prependQueue.append(*std::forward<U>(next).toThrift().prepend());
-      prependQueue.append(std::move(*data_.prepend()));
-      data_.prepend() = prependQueue.moveAsValue();
-
-      folly::IOBufQueue appendQueue{folly::IOBufQueue::cacheChainLength()};
-      appendQueue.append(std::move(*data_.append()));
-      appendQueue.append(*std::forward<U>(next).toThrift().append());
-      data_.append() = appendQueue.moveAsValue();
-    }
+    return Base::customVisit(Visitor{val});
   }
 
  private:

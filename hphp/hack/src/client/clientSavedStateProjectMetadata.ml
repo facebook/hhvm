@@ -48,8 +48,8 @@ let main (env : ClientEnv.client_check_env) (config : ServerLocalConfig.t) :
     State_loader_lwt.get_project_metadata
       ~progress_callback:(fun _ -> ())
       ~saved_state_type:
-        (Saved_state_loader.Naming_and_dep_table
-           { naming_sqlite = config.ServerLocalConfig.use_hack_64_naming_table })
+        (Saved_state_loader.Naming_and_dep_table { naming_sqlite = true })
+        (* TODO(ljw): constant true *)
       ~repo:root
       ~ignore_hh_version
       ~opts:config.ServerLocalConfig.saved_state

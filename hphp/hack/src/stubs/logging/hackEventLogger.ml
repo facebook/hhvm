@@ -44,7 +44,6 @@ let serialize_globals () = Serialized_globals
 type rollout_flags = {
   log_saved_state_age_and_distance: bool;
   naming_sqlite_in_hack_64: bool;
-  use_hack_64_naming_table: bool;
   fetch_remote_old_decls: bool;
   ide_max_num_decls: int;
   ide_max_num_shallow_decls: int;

@@ -163,10 +163,7 @@ let merge_saved_state_futures
         ~deptable
         ~ignore_hh_version;
       let naming_table_fallback_path =
-        if
-          genv.local_config.SLC.use_hack_64_naming_table
-          && Sys.file_exists (Path.to_string naming_sqlite_table_path)
-        then (
+        if Sys.file_exists (Path.to_string naming_sqlite_table_path) then (
           Hh_logger.log "Using sqlite naming table from hack/64 saved state";
           Some (Path.to_string naming_sqlite_table_path)
         ) else (
@@ -336,16 +333,10 @@ let download_and_load_state_exn
     let saved_state_type =
       if genv.local_config.ServerLocalConfig.load_hack_64_distc_saved_state then
         Saved_state_loader.Naming_and_dep_table_distc
-          {
-            naming_sqlite =
-              genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
-          }
+          { naming_sqlite = true (* TODO(ljw): constant true *) }
       else
         Saved_state_loader.Naming_and_dep_table
-          {
-            naming_sqlite =
-              genv.local_config.ServerLocalConfig.use_hack_64_naming_table;
-          }
+          { naming_sqlite = true (* TODO(ljw): constant true *) }
     in
     let loader_future =
       State_loader_futures.load
@@ -441,10 +432,7 @@ let use_precomputed_state_exn
     ServerArgs.naming_sqlite_path_for_target_info info
   in
   let naming_table_fallback_path =
-    if
-      genv.local_config.SLC.use_hack_64_naming_table
-      && Sys.file_exists naming_sqlite_table_path
-    then (
+    if Sys.file_exists naming_sqlite_table_path then (
       Hh_logger.log "Using sqlite naming table from hack/64 saved state";
       Some naming_sqlite_table_path
     ) else

@@ -3,25 +3,45 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::sync::Arc;
+
 use hash::IndexMap;
 use hash::IndexSet;
 
 use crate::ClassId;
+use crate::Constant;
 use crate::FloatBits;
 use crate::UnitBytesId;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TypedValue {
-    Uninit,
-    Int(i64),
     Bool(bool),
+    Dict(DictValue),
     Float(FloatBits),
-    String(UnitBytesId),
+    Int(i64),
+    Keyset(KeysetValue),
     LazyClass(ClassId),
     Null,
+    String(UnitBytesId),
+    Uninit,
     Vec(Vec<TypedValue>),
-    Keyset(KeysetValue),
-    Dict(DictValue),
+}
+
+impl<'a> From<TypedValue> for Constant<'a> {
+    fn from(tv: TypedValue) -> Self {
+        match tv {
+            TypedValue::Bool(b) => Constant::Bool(b),
+            TypedValue::Float(f) => Constant::Float(f),
+            TypedValue::Int(i) => Constant::Int(i),
+            TypedValue::LazyClass(id) => Constant::String(id.id),
+            TypedValue::Null => Constant::Null,
+            TypedValue::String(id) => Constant::String(id),
+            TypedValue::Uninit => Constant::Uninit,
+            TypedValue::Dict(_) | TypedValue::Keyset(_) | TypedValue::Vec(_) => {
+                Constant::Array(Arc::new(tv))
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]

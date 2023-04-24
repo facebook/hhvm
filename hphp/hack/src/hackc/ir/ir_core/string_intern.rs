@@ -22,6 +22,18 @@ use parking_lot::RwLockReadGuard;
 // A UnitBytesId represents an entry in the Unit::strings table.
 newtype_int!(UnitBytesId, u32, UnitBytesIdMap, UnitBytesIdSet);
 
+impl UnitBytesId {
+    pub fn display<'a>(self, strings: &'a StringInterner) -> impl std::fmt::Display + 'a {
+        struct D<'a>(UnitBytesId, &'a StringInterner);
+        impl std::fmt::Display for D<'_> {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                self.1.lookup_bstr(self.0).fmt(f)
+            }
+        }
+        D(self, strings)
+    }
+}
+
 /// A string interner for associating IDs with unique string values.  If two
 /// identical strings are inserted into the StringInterner they are guaranteed
 /// to have the same UnitBytesId.

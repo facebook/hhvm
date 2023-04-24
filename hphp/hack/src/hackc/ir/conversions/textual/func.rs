@@ -1060,7 +1060,7 @@ impl<'a> FuncInfo<'a> {
         }
     }
 
-    pub(crate) fn _name_id(&self) -> ir::UnitBytesId {
+    pub(crate) fn name_id(&self) -> ir::UnitBytesId {
         match self {
             FuncInfo::Function(fi) => fi.name.id,
             FuncInfo::Method(mi) => mi.name.id,

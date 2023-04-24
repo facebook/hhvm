@@ -30,7 +30,8 @@ pub(crate) fn lower_func<'a>(
     strings: Arc<StringInterner>,
 ) -> Func<'a> {
     trace!(
-        "Before Lower: {}",
+        "{} Before Lower: {}",
+        func_info.name_id().display(&strings),
         ir::print::DisplayFunc::new(&func, true, &strings)
     );
 

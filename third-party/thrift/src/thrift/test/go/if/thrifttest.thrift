@@ -16,6 +16,8 @@
 
 namespace go thrift.test.go.if.thrifttest
 
+include "thrift/annotation/cpp.thrift"
+
 enum Numberz {
   ONE = 1,
   TWO = 2,
@@ -86,7 +88,8 @@ struct Xtruct4 {
 struct Insanity {
   1: map<Numberz, UserId> userMap;
   2: list<Xtruct> xtructs;
-  3: map<string, string> (cpp.template = 'std::unordered_map') str2str;
+  @cpp.Type{template = "std::unordered_map"}
+  3: map<string, string> str2str;
 }
 
 struct CrazyNesting {

@@ -84,6 +84,12 @@ class BoolPatch : public BaseClearPatch<Patch, BoolPatch<Patch>> {
 
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
+    if (false) {
+      // Test whether the required methods exist in Visitor
+      v.assign(T{});
+      v.clear();
+      v.invert();
+    }
     if (!Base::template customVisitAssignAndClear(v) && *data_.invert()) {
       std::forward<Visitor>(v).invert();
     }
@@ -155,6 +161,12 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
 
   template <typename Visitor>
   void customVisit(Visitor&& v) const {
+    if (false) {
+      // Test whether the required methods exist in Visitor
+      v.assign(T{});
+      v.clear();
+      v.add(T{});
+    }
     if (!Base::template customVisitAssignAndClear(v)) {
       v.add(*data_.add());
     }
@@ -220,6 +232,7 @@ class NumberPatch : public BaseClearPatch<Patch, NumberPatch<Patch>> {
 template <typename Patch, typename Derived>
 class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
   using Base = BaseContainerPatch<Patch, Derived>;
+  using T = typename Base::value_type;
 
  public:
   using Base::Base;
@@ -250,6 +263,13 @@ class BaseStringPatch : public BaseContainerPatch<Patch, Derived> {
 
   template <class Visitor>
   void customVisit(Visitor&& v) const {
+    if (false) {
+      // Test whether the required methods exist in Visitor
+      v.assign(T{});
+      v.clear();
+      v.prepend(T{});
+      v.append(T{});
+    }
     if (!Base::template customVisitAssignAndClear(std::forward<Visitor>(v))) {
       std::forward<Visitor>(v).prepend(*data_.prepend());
       std::forward<Visitor>(v).append(*data_.append());

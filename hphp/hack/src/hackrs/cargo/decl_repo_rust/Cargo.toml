@@ -21,7 +21,7 @@ hhi = { version = "0.0.0", path = "../../../hhi/rust" }
 indicatif = { version = "0.17.1", features = ["improved_unicode", "rayon", "tokio"] }
 jwalk = "0.6"
 pos = { version = "0.0.0", path = "../../pos/cargo/pos" }
-procfs = "0.9"
+procfs = "0.10.1"
 rayon = "1.2"
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

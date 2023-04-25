@@ -721,18 +721,15 @@ void parsing_driver::on_standard_header(
   }
 }
 
-void parsing_driver::on_program_header(
+void parsing_driver::on_package(
     source_range range,
     std::unique_ptr<attributes> attrs,
-    std::unique_ptr<deprecated_annotations> annotations) {
+    fmt::string_view name) {
   validate_header_location(range.begin);
-  set_attributes(*program, std::move(attrs), std::move(annotations), range);
-}
-
-void parsing_driver::on_package(source_range range, fmt::string_view name) {
   if (mode != parsing_mode::PROGRAM) {
     return;
   }
+  set_attributes(*program, std::move(attrs), {}, range);
   if (!program->package().empty()) {
     diags_.error(range.begin, "Package already specified.");
   }

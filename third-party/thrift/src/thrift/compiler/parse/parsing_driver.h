@@ -116,12 +116,11 @@ class parsing_driver : public parser_actions {
 
   void on_standard_header(
       source_location loc, std::unique_ptr<attributes> attrs) override;
-  void on_program_header(
+
+  void on_package(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      std::unique_ptr<deprecated_annotations> annotations) override;
-
-  void on_package(source_range range, fmt::string_view name) override;
+      fmt::string_view name) override;
 
   void on_include(source_range range, fmt::string_view str) override {
     add_include(fmt::to_string(str), range);

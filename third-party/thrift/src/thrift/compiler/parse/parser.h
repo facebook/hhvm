@@ -76,12 +76,11 @@ class parser_actions {
 
   virtual void on_standard_header(
       source_location loc, std::unique_ptr<attributes> attrs) = 0;
-  virtual void on_program_header(
+
+  virtual void on_package(
       source_range range,
       std::unique_ptr<attributes> attrs,
-      std::unique_ptr<deprecated_annotations> annotations) = 0;
-
-  virtual void on_package(source_range range, fmt::string_view name) = 0;
+      fmt::string_view name) = 0;
   virtual void on_include(source_range range, fmt::string_view str) = 0;
   virtual void on_cpp_include(source_range range, fmt::string_view str) = 0;
   virtual void on_hs_include(source_range range, fmt::string_view str) = 0;

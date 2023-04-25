@@ -110,52 +110,41 @@ class parser {
 
   // The parse methods are ordered top down from the most general to concrete.
 
-  // program: statement*
+  // program: [[program_doctext] (include | package | namespace)+] definition*
   bool parse_program() {
     consume_token();
     try {
       while (token_.kind != tok::eof) {
-        parse_statement();
+        auto begin = token_.range.begin;
+        auto attrs = parse_attributes();
+        switch (token_.kind) {
+          case tok::kw_include:
+          case tok::kw_cpp_include:
+          case tok::kw_hs_include:
+            actions_.on_program_doctext();
+            parse_include();
+            actions_.on_standard_header(begin, std::move(attrs));
+            break;
+          case tok::kw_package: {
+            actions_.on_program_doctext();
+            parse_package(begin, std::move(attrs));
+            break;
+          }
+          case tok::kw_namespace:
+            actions_.on_program_doctext();
+            parse_namespace();
+            actions_.on_standard_header(begin, std::move(attrs));
+            break;
+          default:
+            parse_definition(begin, std::move(attrs));
+            break;
+        }
       }
       actions_.on_program();
     } catch (const parse_error&) {
       return false; // The error has already been reported.
     }
     return true;
-  }
-
-  // statement: attributes (header | definition)
-  //
-  // header: program_doctext? (include | package | namespace)
-  void parse_statement() {
-    auto range = track_range();
-    auto attrs = parse_attributes();
-    switch (token_.kind) {
-      case tok::kw_include:
-      case tok::kw_cpp_include:
-      case tok::kw_hs_include:
-        actions_.on_program_doctext();
-        parse_include();
-        actions_.on_standard_header(range, std::move(attrs));
-        break;
-      case tok::kw_package: {
-        actions_.on_program_doctext();
-        parse_package();
-        auto annotations = parse_annotations();
-        try_consume_token(';');
-        actions_.on_program_header(
-            range, std::move(attrs), std::move(annotations));
-        break;
-      }
-      case tok::kw_namespace:
-        actions_.on_program_doctext();
-        parse_namespace();
-        actions_.on_standard_header(range, std::move(attrs));
-        break;
-      default:
-        parse_definition(range, std::move(attrs));
-        break;
-    }
   }
 
   // definition: definition_body annotations [comma_or_semicolon]
@@ -240,17 +229,18 @@ class parser {
     try_consume_token(';');
   }
 
-  // package: "package" string_literal [";"]
-  void parse_package() {
+  // package: [attributes] "package" string_literal [";"]
+  void parse_package(source_location begin, std::unique_ptr<attributes> attrs) {
     assert(token_.kind == tok::kw_package);
-    auto range = track_range();
+    auto range = range_tracker(begin, end_);
     consume_token();
     if (token_.kind != tok::string_literal) {
       report_expected("string literal");
     }
-    auto str = lex_string_literal(token_);
+    auto name = lex_string_literal(token_);
     consume_token();
-    actions_.on_package(range, str);
+    try_consume_token(';');
+    actions_.on_package(range, std::move(attrs), name);
   }
 
   // namespace: "namespace" identifier (identifier | string_literal) [";"]

@@ -319,7 +319,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semi;
           Newline;
         ]
-    (* TODO(T150253169) - #CaseTypes: Implement proper formatting before preview launch *)
     | Syntax.CaseTypeDeclaration
         {
           case_type_attribute_spec = attr;
@@ -334,6 +333,16 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           case_type_variants = variants;
           case_type_semicolon = semi;
         } ->
+      let has_leading_bar =
+        match Syntax.syntax variants with
+        | Syntax.SyntaxList (hd :: _) ->
+          (match Syntax.syntax hd with
+          | Syntax.CaseTypeVariant { case_type_variant_bar = bar; _ }
+            when not @@ Syntax.is_missing bar ->
+            true
+          | _ -> false)
+        | _ -> false
+      in
       Concat
         [
           t env attr;
@@ -354,16 +363,31 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                 [
                   Space;
                   t env eq_kw;
-                  Space;
-                  SplitWith Cost.Base;
-                  Nest [handle_possible_list env variants];
+                  (if has_leading_bar then
+                    Newline
+                  else
+                    Space);
+                  WithRule
+                    ( (if has_leading_bar then
+                        Rule.Always
+                      else
+                        Rule.Parental),
+                      Nest
+                        [
+                          handle_possible_list
+                            ~after_each:(function
+                              | false -> space_split ()
+                              | true -> Nothing)
+                            env
+                            variants;
+                        ] );
                 ]);
           t env semi;
           Newline;
         ]
     | Syntax.CaseTypeVariant
         { case_type_variant_bar = bar; case_type_variant_type = ty } ->
-      Concat [t env bar; when_present bar space; t env ty]
+      Span [t env bar; when_present bar space; t env ty]
     | Syntax.PropertyDeclaration
         {
           property_attribute_spec = attr;

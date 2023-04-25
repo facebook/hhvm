@@ -81,6 +81,11 @@ class BasePatch : public type::detail::EqWrap<Derived, Patch> {
   void apply(terse_field_ref<U> field) const {
     derived().apply(*field);
   }
+  /// Applies patches to a Thrift value.
+  template <typename U>
+  void apply(required_field_ref<U> field) const {
+    derived().apply(*field);
+  }
   /// Replaces the existing value.
   template <typename U>
   type::if_not_id<U> assign(field_ref<U> val) {

@@ -1038,5 +1038,15 @@ TEST(StructPatchTest, IncludePatch) {
   EXPECT_EQ(data.data2(), 42);
 }
 
+TEST(StructPatchTest, RequiredFieldPatch) {
+  WithRequiredFieldsPatch patch;
+  patch.ensure<ident::requrired_int>() = 10;
+
+  WithRequiredFields data;
+  patch.apply(data);
+
+  EXPECT_EQ(*data.requrired_int(), 10);
+}
+
 } // namespace
 } // namespace apache::thrift

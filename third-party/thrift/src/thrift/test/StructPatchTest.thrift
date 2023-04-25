@@ -83,6 +83,10 @@ struct Bar {
   MapStruct extraCycle;
 }
 
+struct WithRequiredFields {
+  required i64 requrired_int;
+}
+
 @cpp.Frozen2Exclude
 struct MapStruct {
   @patch.AssignOnlyPatch

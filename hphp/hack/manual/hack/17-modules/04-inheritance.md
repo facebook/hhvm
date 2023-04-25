@@ -66,5 +66,5 @@ class Foo implements IFoo {} // ok
 
 ```hack no-extract
 module bar;
-class Bar implemeents IFoo {} // error, IFoo is internal to module foo
+class Bar implements IFoo {} // error, IFoo is internal to module foo
 ```

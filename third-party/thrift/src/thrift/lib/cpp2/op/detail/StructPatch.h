@@ -373,7 +373,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   }
 
   template <typename Id>
-  decltype(auto) ensures() {
+  decltype(auto) ensures() const {
     return Base::template ensures<Id>();
   }
 

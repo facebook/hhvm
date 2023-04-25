@@ -81,10 +81,10 @@ impl ::std::fmt::Display for {{struct:rust_name}} {{>lib/block}}
         write!(f, {{!
             }}{{#struct:has_exception_message?}}{{!
                 }}{{#struct:is_exception_message_optional?}}{{!
-                    }}"{{struct:rust_name}}: {:?} ({:?})", self.{{struct:exception_message}}, self{{!
+                    }}"{{struct:rust_name}}: {:?}", self.{{struct:exception_message}}{{!
                 }}{{/struct:is_exception_message_optional?}}{{!
                 }}{{^struct:is_exception_message_optional?}}{{!
-                    }}"{{struct:rust_name}}: {} ({:?})", self.{{struct:exception_message}}, self{{!
+                    }}"{{struct:rust_name}}: {}", self.{{struct:exception_message}}{{!
                 }}{{/struct:is_exception_message_optional?}}{{!
             }}{{/struct:has_exception_message?}}{{!
             }}{{^struct:has_exception_message?}}{{!

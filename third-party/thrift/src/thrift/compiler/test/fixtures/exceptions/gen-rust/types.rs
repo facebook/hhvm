@@ -30,7 +30,7 @@ impl ::std::error::Error for Fiery {}
 
 impl ::std::fmt::Display for Fiery {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "Fiery: {} ({:?})", self.message, self)
+        write!(f, "Fiery: {}", self.message)
     }
 }
 
@@ -58,7 +58,7 @@ impl ::std::error::Error for Serious {}
 
 impl ::std::fmt::Display for Serious {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "Serious: {:?} ({:?})", self.sonnet, self)
+        write!(f, "Serious: {:?}", self.sonnet)
     }
 }
 
@@ -87,7 +87,7 @@ impl ::std::error::Error for ComplexFieldNames {}
 
 impl ::std::fmt::Display for ComplexFieldNames {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "ComplexFieldNames: {} ({:?})", self.internal_error_message, self)
+        write!(f, "ComplexFieldNames: {}", self.internal_error_message)
     }
 }
 
@@ -116,7 +116,7 @@ impl ::std::error::Error for CustomFieldNames {}
 
 impl ::std::fmt::Display for CustomFieldNames {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "CustomFieldNames: {} ({:?})", self.internal_error_message, self)
+        write!(f, "CustomFieldNames: {}", self.internal_error_message)
     }
 }
 
@@ -145,7 +145,7 @@ impl ::std::error::Error for ExceptionWithPrimitiveField {}
 
 impl ::std::fmt::Display for ExceptionWithPrimitiveField {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "ExceptionWithPrimitiveField: {} ({:?})", self.message, self)
+        write!(f, "ExceptionWithPrimitiveField: {}", self.message)
     }
 }
 

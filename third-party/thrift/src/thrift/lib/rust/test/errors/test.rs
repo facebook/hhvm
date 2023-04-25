@@ -44,7 +44,7 @@ fn test_internal_error() {
     );
     snapshot!(
         format!("{:#}", ie),
-        "TestService::do_foo failed with variant `ie`: InternalError: got some invalid value (InternalError { code: ErrorCode::INVALID_VALUE, message: \"got some invalid value\" })"
+        "TestService::do_foo failed with variant `ie`: InternalError: got some invalid value"
     );
     snapshot!(
         format!("{:?}", ie),
@@ -68,16 +68,16 @@ ie(
     );
     snapshot!(
         format!("{:#}", Into::<anyhow::Error>::into(make_ie())),
-        "TestService::do_foo failed with ie(InternalError): InternalError: got some invalid value (InternalError { code: ErrorCode::INVALID_VALUE, message: \"got some invalid value\" })"
+        "TestService::do_foo failed with ie(InternalError): InternalError: got some invalid value"
     );
     snapshot!(
         format!("{:?}", Into::<anyhow::Error>::into(make_ie())),
-        r#"
+        "
 TestService::do_foo failed with ie(InternalError)
 
 Caused by:
-    InternalError: got some invalid value (InternalError { code: ErrorCode::INVALID_VALUE, message: "got some invalid value" })
-"#
+    InternalError: got some invalid value
+"
     );
     snapshot!(
         format!("{:#?}", Into::<anyhow::Error>::into(make_ie())),
@@ -119,7 +119,7 @@ fn test_internal_error_stream() {
     );
     snapshot!(
         format!("{:#}", ie),
-        "TestService::do_foo_stream failed with variant `ie`: InternalError: got some invalid value (InternalError { code: ErrorCode::INVALID_VALUE, message: \"got some invalid value\" })"
+        "TestService::do_foo_stream failed with variant `ie`: InternalError: got some invalid value"
     );
     snapshot!(
         format!("{:?}", ie),
@@ -143,7 +143,7 @@ ie(
     );
     snapshot!(
         format!("{:#}", Into::<anyhow::Error>::into(make_ie_stream())),
-        "TestService::do_foo_stream failed with ie(InternalError): InternalError: got some invalid value (InternalError { code: ErrorCode::INVALID_VALUE, message: \"got some invalid value\" })"
+        "TestService::do_foo_stream failed with ie(InternalError): InternalError: got some invalid value"
     );
     snapshot!(
         format!("{:?}", Into::<anyhow::Error>::into(make_ie_stream())),
@@ -151,7 +151,7 @@ ie(
 TestService::do_foo_stream failed with ie(InternalError)
 
 Caused by:
-    InternalError: got some invalid value (InternalError { code: ErrorCode::INVALID_VALUE, message: \"got some invalid value\" })
+    InternalError: got some invalid value
 "
     );
     snapshot!(

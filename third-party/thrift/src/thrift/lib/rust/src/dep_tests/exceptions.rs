@@ -50,7 +50,7 @@ fn test_should_use_message_field_override() -> Result<()> {
         ..Default::default()
     };
     assert_eq!(
-        format!("TestExceptionMsgOverride: {} ({:?})", err.message, err),
+        format!("TestExceptionMsgOverride: {}", err.message),
         format!("{}", err)
     );
 
@@ -65,9 +65,8 @@ fn test_should_use_message_field_override_optional() -> Result<()> {
     };
     assert_eq!(
         format!(
-            "TestExceptionMsgOverrideOptional: Some(\"{}\") ({:?})",
+            "TestExceptionMsgOverrideOptional: Some(\"{}\")",
             err.message.as_ref().unwrap(),
-            err
         ),
         format!("{}", err)
     );
@@ -77,7 +76,7 @@ fn test_should_use_message_field_override_optional() -> Result<()> {
         ..Default::default()
     };
     assert_eq!(
-        format!("TestExceptionMsgOverrideOptional: None ({:?})", err),
+        format!("TestExceptionMsgOverrideOptional: None"),
         format!("{}", err)
     );
 

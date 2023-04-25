@@ -185,7 +185,7 @@ impl ::std::error::Error for TerseException {}
 
 impl ::std::fmt::Display for TerseException {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(f, "TerseException: {} ({:?})", self.msg, self)
+        write!(f, "TerseException: {}", self.msg)
     }
 }
 

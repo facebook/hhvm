@@ -3946,6 +3946,10 @@ let fix_empty_paths_in_error_map errors_per_file =
   match SMap.find_opt "" errors_per_file with
   | None -> errors_per_file
   | Some errors ->
+    HackEventLogger.invariant_violation_bug "missing path for diagnostics";
+    Hh_logger.log
+      "missing path for diagnostics %s"
+      (Exception.get_current_callstack_string 99 |> Exception.clean_stack);
     SMap.remove "" errors_per_file
     |> SMap.add ~combine:( @ ) default_path errors
 

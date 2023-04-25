@@ -1775,15 +1775,15 @@ bool isTypeHelper(ISS& env,
     return t;
   };
 
-  auto const pre = [&] (Type t) {
+  auto const taken = [&] (Type t) {
     return negate ? was_true(std::move(t)) : was_false(std::move(t));
   };
 
-  auto const post = [&] (Type t) {
+  auto const fallthrough = [&] (Type t) {
     return negate ? was_false(std::move(t)) : was_true(std::move(t));
   };
 
-  refineLocation(env, location, pre, jmp.target1, post);
+  refineLocation(env, location, taken, jmp.target1, fallthrough);
   return true;
 }
 
@@ -1880,9 +1880,9 @@ bool instanceOfJmpImpl(ISS& env,
   auto const result = [&] (Type t, bool pass) {
     return pass ? instTy : fail_implies_null ? TNull : t;
   };
-  auto const pre  = [&] (Type t) { return result(t, negate); };
-  auto const post = [&] (Type t) { return result(t, !negate); };
-  refineLocation(env, locId, pre, jmp.target1, post);
+  auto const taken  = [&] (Type t) { return result(t, negate); };
+  auto const fallthrough = [&] (Type t) { return result(t, !negate); };
+  refineLocation(env, locId, taken, jmp.target1, fallthrough);
   return true;
 }
 
@@ -1944,9 +1944,9 @@ bool isTypeStructCJmpImpl(ISS& env,
   auto const result = [&] (Type t, bool pass) {
     return pass ? instTy : fail_implies_null ? TNull : t;
   };
-  auto const pre  = [&] (Type t) { return result(t, negate); };
-  auto const post = [&] (Type t) { return result(t, !negate); };
-  refineLocation(env, locId, pre, jmp.target1, post);
+  auto const taken  = [&] (Type t) { return result(t, negate); };
+  auto const fallthrough = [&] (Type t) { return result(t, !negate); };
+  refineLocation(env, locId, taken, jmp.target1, fallthrough);
   return true;
 }
 

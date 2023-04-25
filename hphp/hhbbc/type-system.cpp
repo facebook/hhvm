@@ -5323,7 +5323,7 @@ Type add_nonemptiness(Type t) {
 }
 
 Type to_cell(Type t) {
-  if (!t.subtypeOf(BCell)) return TInitCell;
+  assertx(t.subtypeOf(BCell));
   if (!t.couldBe(BUninit)) return t;
   auto const bits = (t.bits() & ~BUninit) | BInitNull;
   t.m_bits = bits;

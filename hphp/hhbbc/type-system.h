@@ -1571,8 +1571,7 @@ Type loosen_to_datatype(Type t);
 Type remove_uninit(Type t);
 
 /*
- * If t is not a TCell, returns TInitCell. Otherwise, if t contains
- * TUninit, return union_of(remove_uninit(t), TInitCell).
+ * If t contains TUninit, return union_of(remove_uninit(t), TInitNull).
  */
 Type to_cell(Type t);
 

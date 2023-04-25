@@ -759,12 +759,17 @@ bool locCouldBeUninit(ISS& env, LocalId l) {
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);
-  if (!is_volatile_local(env.ctx.func, l) && v.subtypeOf(BCell)) {
+  assertx(v.subtypeOf(BCell));
+  if (!is_volatile_local(env.ctx.func, l)) {
     if (env.undo) env.undo->onLocalWrite(l, std::move(env.state.locals[l]));
     env.state.locals[l] = std::move(t);
   }
 }
 
+/*
+ * Refine all locals in an equivalence class using fun. Returns false if refined
+ * local is unreachable.
+ */
 template<typename F>
 bool refineLocation(ISS& env, LocalId l, F fun) {
   bool ok = true;
@@ -790,8 +795,10 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
     if (env.state.thisLoc != NoLocalId) {
       l = env.state.thisLoc;
     }
+    return ok;
   }
-  if (l > MaxLocalId) return ok;
+  if (l == NoLocalId) return ok;
+  assertx(l <= MaxLocalId);
   auto fixThis = false;
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
@@ -808,15 +815,18 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
   return ok;
 }
 
-template<typename PreFun, typename PostFun>
+/*
+ * Refine locals along taken and fallthrough edges.
+ */
+template<typename Taken, typename Fallthrough>
 void refineLocation(ISS& env, LocalId l,
-                    PreFun pre, BlockId target, PostFun post) {
+                    Taken taken, BlockId target, Fallthrough fallthrough) {
   auto state = env.state;
-  auto const target_reachable = refineLocation(env, l, pre);
+  auto const target_reachable = refineLocation(env, l, taken);
   if (!target_reachable) jmp_nevertaken(env);
   // swap, so we can restore this state if the branch is always taken.
   env.state.swap(state);
-  if (!refineLocation(env, l, post)) {
+  if (!refineLocation(env, l, fallthrough)) { // fallthrough unreachable.
     jmp_setdest(env, target);
     env.state.copy_from(std::move(state));
   } else if (target_reachable) {
@@ -927,17 +937,14 @@ void killThisProps(ISS& env) {
  * that could result from reading a property $this->name.
  */
 Optional<Type> thisPropAsCell(ISS& env, SString name) {
-  auto const elem = env.collect.props.readPrivateProp(name);
-  if (!elem) return std::nullopt;
-  if (elem->ty.couldBe(BUninit) && !is_specialized_obj(thisType(env))) {
-    return TInitCell;
-  }
-  return to_cell(elem->ty);
+  auto const ty = thisPropType(env, name);
+  if (!ty) return std::nullopt;
+  return to_cell(ty.value());
 }
 
 /*
  * Merge a type into the tracked property types on $this, in the sense
- * of tvSet (i.e. setting the inner type on possible refs).
+ * of tvSet.
  *
  * Note that all types we see that could go into an object property have to
  * loosen_all.  This is because the object could be serialized and then

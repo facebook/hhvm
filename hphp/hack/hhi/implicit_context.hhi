@@ -14,6 +14,25 @@ namespace HH {
       string $key,
     )[zoned, ctx $f]: Tout;
 
+    /**
+     * Captures the current IC state and returns a new closure that calls the
+     * input closure using that state.
+     *
+     * Use this when deferring or batching closures under a different IC state
+     * than when they may be executed.
+     */
+    function embed_implicit_context_state_in_closure<T>(
+      (function ()[defaults]: T) $f,
+    )[zoned]: (function ()[defaults]: T);
+
+    /**
+     * Variation of embed_implicit_context_state_in_closure
+     * specifically for async closures
+     */
+    function embed_implicit_context_state_in_async_closure<T>(
+      (function ()[defaults]: Awaitable<T>) $f,
+    )[zoned]: (function ()[defaults]: Awaitable<T>);
+
   } // namespace ImplicitContext
 
   abstract class ImplicitContext {

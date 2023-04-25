@@ -367,6 +367,10 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   using Base::get;
   using Base::mergeAssignAndClear;
 
+  // We can not use `using Base::patchPrior` since using-declaration can't be
+  // used to introduce the name of a dependent member template as a
+  // template-name.
+  // https://en.cppreference.com/w/cpp/language/using_declaration#Notes
   template <typename Id>
   decltype(auto) patchPrior() {
     return Base::template patchPrior<Id>();

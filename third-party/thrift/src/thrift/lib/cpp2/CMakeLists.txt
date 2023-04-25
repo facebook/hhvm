@@ -327,6 +327,7 @@ add_library(
   transport/rocket/framing/Util.cpp
   transport/rocket/server/RocketRoutingHandler.cpp
   transport/rocket/server/RocketServerConnection.cpp
+  transport/rocket/server/RocketServerConnectionPlugins.cpp
   transport/rocket/server/RocketServerFrameContext.cpp
   transport/rocket/server/RocketSinkClientCallback.cpp
   transport/rocket/server/RocketStreamClientCallback.cpp

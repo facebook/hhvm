@@ -21,6 +21,7 @@
 #include <optional>
 #include <type_traits>
 
+#include <folly/GLog.h>
 #include <folly/SharedMutex.h>
 #include <folly/experimental/observer/SimpleObservable.h>
 #include <folly/synchronization/DelayedInit.h>
@@ -131,6 +132,10 @@ T& mergeServerAttributeRawValues(
     std::optional<T>& override,
     std::optional<T>& baseline,
     T& defaultValue) {
+  if (!overrideInternal && override && baseline && !folly::kIsDebug) {
+    FB_LOG_EVERY_MS(ERROR, 60000)
+        << "using ThriftServer::set...() API is discouraged. Prefer using thrift server configs https://fburl.com/thrift-server-configuration";
+  }
   return overrideInternal ? *overrideInternal
       : override          ? *override
       : baseline          ? *baseline

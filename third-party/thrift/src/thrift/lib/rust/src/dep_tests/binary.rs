@@ -39,7 +39,7 @@ fn test_unknown_union() -> Result<()> {
     // extra weirdness
     // Build an explicit unknown
     let explicit_unknown = Un::UnknownField(100);
-    let s2 = serialize(&explicit_unknown);
+    let s2 = serialize(explicit_unknown);
     // only Stop
     assert_eq!(&[TType::Stop as u8], s2.as_ref());
 

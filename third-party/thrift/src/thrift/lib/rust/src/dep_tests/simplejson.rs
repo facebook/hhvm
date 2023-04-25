@@ -464,7 +464,7 @@ fn test_not_enough() -> Result<()> {
     };
     // serialize it and assert that it serializes correctly
     let s1 = String::from_utf8(serialize(&b1).to_vec()).unwrap();
-    let s2 = String::from_utf8(serialize(&b2).to_vec()).unwrap();
+    let s2 = String::from_utf8(serialize(b2).to_vec()).unwrap();
     let to_check = format!("{} {}", s1, s2);
 
     let mut deserializer = SimpleJsonProtocolDeserializer::new(Cursor::new(
@@ -496,7 +496,7 @@ fn test_unknown_union() -> Result<()> {
     // extra weirdness
     // Build an explicit unknown
     let explicit_unknown = Un::UnknownField(100);
-    let s2 = String::from_utf8(serialize(&explicit_unknown).to_vec()).unwrap();
+    let s2 = String::from_utf8(serialize(explicit_unknown).to_vec()).unwrap();
     let expected_string = "{}";
     assert_eq!(expected_string, s2);
 

@@ -37,6 +37,9 @@ struct ServerRequestData {
 
   Duration queuedDuration() const;
   Duration requestExecutionDuration() const;
+
+  intptr_t requestPileUserData = 0;
+  intptr_t concurrencyControllerUserData = 0;
 };
 
 } // namespace apache::thrift

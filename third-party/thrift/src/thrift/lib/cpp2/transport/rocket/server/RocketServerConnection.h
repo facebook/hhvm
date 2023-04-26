@@ -239,6 +239,8 @@ class RocketServerConnection final
     return peerAddress_;
   }
 
+  folly::AsyncSocket* getRawSocket() const { return rawSocket_; }
+
   using RocketServerConnectionObserverContainer = folly::ObserverContainer<
       RocketServerConnectionObserver,
       RocketServerConnection,

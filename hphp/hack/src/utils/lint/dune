@@ -3,4 +3,4 @@
  (wrapped false)
  (preprocess
   (pps ppx_deriving.std))
- (libraries typing_ast errors lints_core pos))
+ (libraries typing_ast lints_core pos))

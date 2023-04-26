@@ -4,12 +4,39 @@
   (copy# facebook/error_message_sentinel.ml error_message_sentinel.fb.ml)))
 
 (library
+  (name user_error)
+  (wrapped false)
+  (preprocess
+   (pps ppx_deriving.std))
+  (modules message quickfix user_error)
+  (libraries
+    core_kernel
+    pos_or_decl
+  )
+)
+
+(library
  (name errors)
  (wrapped false)
  (preprocess
   (pps ppx_deriving.std))
  (modules
-  (:standard error_message_sentinel))
+   contextual_error_formatter
+   error_category
+   error_codes
+   errors
+   highlighted_error_formatter
+   markdown_lite
+   name_context
+   naming_error
+   nast_check_error
+   parsing_error
+   phase_error
+   quickfix_ffp
+   raw_error_formatter
+   render
+   typing_error
+   error_message_sentinel)
  (libraries
   core_kernel
   full_fidelity
@@ -20,6 +47,7 @@
   server_load_flag
   utils_exit
   utils_multifile
+  user_error
   (select
    error_message_sentinel.ml
    from

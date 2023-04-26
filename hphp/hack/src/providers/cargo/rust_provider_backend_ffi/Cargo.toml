@@ -13,7 +13,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 bincode = "1.3.3"
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 deps_rust = { version = "0.0.0", path = "../../../deps/cargo/deps_rust" }
 file_info = { version = "0.0.0", path = "../../../deps/rust/file_info" }
 file_provider = { version = "0.0.0", path = "../../../hackrs/file_provider/cargo/file_provider" }

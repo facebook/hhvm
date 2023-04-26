@@ -9,7 +9,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 escaper = { version = "0.0.0", path = "../../utils/escaper" }
 hash = { version = "0.0.0", path = "../../utils/hash" }

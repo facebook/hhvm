@@ -9,6 +9,6 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

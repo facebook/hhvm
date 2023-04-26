@@ -10,7 +10,7 @@ path = "../../pos.rs"
 
 [dependencies]
 arena_trait = { version = "0.0.0", path = "../../../../arena_trait" }
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 eq_modulo_pos = { version = "0.0.0", path = "../../../../utils/eq_modulo_pos" }
 hh24_types = { version = "0.0.0", path = "../../../../utils/hh24_types" }

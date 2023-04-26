@@ -203,7 +203,7 @@ dependencies = [
 name = "arena_deserializer"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "serde",
 ]
@@ -214,7 +214,7 @@ version = "0.0.0"
 dependencies = [
  "arena_deserializer",
  "bincode",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "oxidized_by_ref",
  "relative_path",
@@ -260,7 +260,7 @@ name = "assemble_ir"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "ffi",
  "hash",
@@ -409,7 +409,7 @@ name = "bc_to_ir"
 version = "0.0.0"
 dependencies = [
  "b2i_macros",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "ffi",
  "hash",
  "hhbc",
@@ -496,9 +496,9 @@ dependencies = [
 
 [[package]]
 name = "bstr"
-version = "1.2.0"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7f0778972c64420fdedc63f09919c8a88bda7b25135357fd25a5d9f3257e832"
+checksum = "c3d4260bcc2e8fc9df1eac4919a720effeb63a3f0952f5bf4944adfa18897f09"
 dependencies = [
  "memchr",
  "once_cell",
@@ -526,7 +526,7 @@ name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "escaper",
  "ffi",
  "hash",
@@ -819,7 +819,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "bytecode_printer",
  "clap 4.2.4",
@@ -883,7 +883,7 @@ dependencies = [
 name = "config_file"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "lazy_static",
  "regex",
  "serde_json",
@@ -1472,7 +1472,7 @@ name = "direct_decl_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "escaper",
  "flatten_smart_constructors",
@@ -1538,7 +1538,7 @@ name = "elab"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "core_utils_rust",
  "elaborate_namespaces_visitor",
  "file_info",
@@ -1632,7 +1632,7 @@ version = "0.0.0"
 dependencies = [
  "ast_scope",
  "bitflags",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "constant_folder",
  "core_utils_rust",
@@ -1744,7 +1744,7 @@ name = "eq_modulo_pos"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "eq_modulo_pos_derive",
  "hcons",
  "indexmap",
@@ -1811,7 +1811,7 @@ dependencies = [
 name = "escaper"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "pretty_assertions",
 ]
@@ -1863,7 +1863,7 @@ dependencies = [
 name = "ffi"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "serde",
  "write_bytes",
@@ -1902,7 +1902,7 @@ name = "file_provider"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "pos",
  "tempdir",
 ]
@@ -2234,7 +2234,7 @@ name = "hackrs_provider_backend"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "datastore",
  "decl_parser",
@@ -2568,7 +2568,7 @@ name = "hhbc"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "emit_opcodes_macro",
  "ffi",
@@ -2815,7 +2815,7 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "ffi",
  "hash",
  "hhbc",
@@ -3042,7 +3042,7 @@ dependencies = [
 name = "lowerer"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "escaper",
  "hash",
@@ -3438,7 +3438,7 @@ name = "no_pos_hash"
 version = "0.0.0"
 dependencies = [
  "arena_collections",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "fnv",
  "no_pos_hash_derive",
  "ocamlrep",
@@ -3499,15 +3499,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num_threads"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97ba99ba6393e2c3734791401b66902d981cb03bf190af674ca69949b6d5fb15"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "number_prefix"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3542,7 +3533,7 @@ dependencies = [
 name = "ocamlrep"
 version = "0.1.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "indexmap",
  "ocamlrep_derive",
@@ -3634,7 +3625,7 @@ dependencies = [
 name = "options"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "oxidized",
  "serde",
 ]
@@ -3693,7 +3684,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "eq_modulo_pos",
  "file_info",
@@ -3719,7 +3710,7 @@ dependencies = [
  "arena_deserializer",
  "arena_trait",
  "bitflags",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -3983,7 +3974,7 @@ name = "pos"
 version = "0.0.0"
 dependencies = [
  "arena_trait",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "eq_modulo_pos",
  "hh24_types",
@@ -4077,7 +4068,7 @@ name = "print_expr"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "bumpalo",
  "core_utils_rust",
  "emit_type_hint",
@@ -4885,7 +4876,7 @@ dependencies = [
 name = "signed_source"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "hex",
  "md-5",
  "once_cell",
@@ -5379,13 +5370,29 @@ dependencies = [
 
 [[package]]
 name = "time"
-version = "0.3.9"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2702e08a7a860f005826c6815dcac101b19b5eb330c27fe4a5928fec1d20ddd"
+checksum = "a561bf4617eebd33bca6434b988f39ed798e527f51a1e797d0ee4f61c0a38376"
 dependencies = [
  "itoa 1.0.5",
- "libc",
- "num_threads",
+ "serde",
+ "time-core",
+ "time-macros",
+]
+
+[[package]]
+name = "time-core"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2e153e1f1acaef8acc537e68b44906d2db6436e2b35ac2c6b42640fff91f00fd"
+
+[[package]]
+name = "time-macros"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d967f99f534ca7e495c575c62638eebc2898a8c84c119b89e250477bc4ba16b2"
+dependencies = [
+ "time-core",
 ]
 
 [[package]]
@@ -5610,7 +5617,7 @@ dependencies = [
  "getset",
  "rustversion",
  "thiserror",
- "time 0.3.9",
+ "time 0.3.17",
 ]
 
 [[package]]
@@ -5930,7 +5937,7 @@ checksum = "1a515f5799fe4961cb532f983ce2b23082366b898e52ffbce459c86f67c8378a"
 name = "write_bytes"
 version = "0.0.0"
 dependencies = [
- "bstr 1.2.0",
+ "bstr 1.4.0",
  "write_bytes-macro",
 ]
 

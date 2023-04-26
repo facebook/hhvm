@@ -9,6 +9,6 @@ edition = "2021"
 path = "../../options.rs"
 
 [dependencies]
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

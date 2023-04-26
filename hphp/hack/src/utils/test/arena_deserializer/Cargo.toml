@@ -11,7 +11,7 @@ path = "lib.rs"
 [dev-dependencies]
 arena_deserializer = { version = "0.0.0", path = "../../arena_deserializer" }
 bincode = "1.3.3"
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 bumpalo = { version = "3.11.1", features = ["collections"] }
 oxidized_by_ref = { version = "0.0.0", path = "../../../oxidized_by_ref" }
 relative_path = { version = "0.0.0", path = "../../rust/relative_path" }

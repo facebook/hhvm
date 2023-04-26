@@ -9,7 +9,7 @@ edition = "2021"
 path = "../signed_source.rs"
 
 [dependencies]
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 hex = "0.4.3"
 md-5 = "0.10"
 once_cell = "1.12"

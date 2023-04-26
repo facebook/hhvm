@@ -10,6 +10,6 @@ path = "../../file_provider.rs"
 
 [dependencies]
 anyhow = "1.0.65"
-bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
+bstr = { version = "1.4.0", features = ["serde", "std", "unicode"] }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 tempdir = "0.3"

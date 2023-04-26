@@ -973,7 +973,9 @@ let handle_request
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let files = close_file files path in
-    Lwt.return (update_state_files state files, Ok ())
+    (* TODO(ljw): produce errors for file-on-disk *)
+    let errors_TODO = Errors.empty in
+    Lwt.return (update_state_files state files, Ok errors_TODO)
   (* IDE File Opened *)
   | (During_init dstate, Ide_file_opened { file_path; file_contents }) ->
     let path =
@@ -1139,7 +1141,9 @@ let handle_request
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           CodeActionsService.go ~ctx ~entry ~path ~range)
     in
-    Lwt.return (Initialized istate, Ok results)
+    let errors_TODO = None in
+    (* TODO(ljw): maybe produce errors *)
+    Lwt.return (Initialized istate, Ok (results, errors_TODO))
   (* Go to definition *)
   | (Initialized istate, Definition (document, { line; column })) ->
     let (istate, ctx, entry) = update_file_ctx istate document in

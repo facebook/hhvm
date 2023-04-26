@@ -3709,7 +3709,8 @@ let do_codeAction_local
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
-  let%lwt actions =
+  (* TODO(ljw): handle errors *)
+  let%lwt (actions, _errors_TODO) =
     ide_rpc
       ide_service
       ~env
@@ -4880,7 +4881,8 @@ let handle_editor_buffer_message
       let file_path =
         uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
       in
-      let%lwt () =
+      (* TODO(ljw): handle errors *)
+      let%lwt _errors_TODO =
         ide_rpc
           ide_service
           ~env

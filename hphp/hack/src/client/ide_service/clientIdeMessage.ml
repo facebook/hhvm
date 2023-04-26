@@ -61,7 +61,15 @@ type _ t =
   | Disk_files_changed : changed_file list -> unit t
   | Ide_file_opened : document -> Errors.t t
   | Ide_file_changed : document -> Errors.t t
-  | Ide_file_closed : Path.t -> unit t
+  | Ide_file_closed : Path.t -> Errors.t t
+      (** This returns diagnostics for the file as it is on disk.
+      This is to serve the following scenario: (1) file was open with
+      modified contents and squiggles appropriate to the modified contents,
+      (2) user closes file without saving. In this scenario we must
+      restore squiggles to what would be appropriate for the file on disk.
+
+      It'd be possible to return an [Errors.t option], and only return [Some]
+      if the file had been closed while modified, if perf here is ever a concern. *)
   | Verbose_to_file : bool -> unit t
   | Hover : document * location -> HoverService.result t
   | Definition :
@@ -116,8 +124,25 @@ type _ t =
       (** Handles "textDocument/signatureHelp" LSP messages *)
   | Code_action :
       document * Ide_api_types.range
-      -> Lsp.CodeAction.command_or_action list t
-      (** Handles "textDocument/codeActions" LSP messages *)
+      -> (Lsp.CodeAction.command_or_action list * Errors.t option) t
+      (** Handles "textDocument/codeActions" LSP messages.
+
+      Also, we take this as a handy opportunity to send updated [Errors.t]
+      to clientLsp so it can publish them. We return [None] if the TAST+errors
+      haven't changed since they were last sent to clientLsp (through didOpen,
+      didChange, didClose or an earlier codeAction), and [Some] if they have
+      been changed.
+
+      Why send errors in code-action? It's for the scenario where file A.PHP
+      is open, file B.PHP changes on disk (e.g. due to user saving it), which
+      invalidates the TAST+errors of A.PHP, and we might therefore need to send
+      updated errors. For efficiency we chose to do this lazily when the user
+      interacts with A.PHP or switches tab to it, rather than doing every single
+      open file up-front. We could have sent updated errors on every single action,
+      e.g. hover and go-to-def. But settled for now on only doing it for codeAction
+      because this is called so frequently by VSCode (when you switch tab, and every
+      time the caret moves) in the hope that this will be a good balance of simple
+      code and decent experience. *)
 
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"

@@ -291,11 +291,7 @@ class t_py_generator : public t_concat_generator {
   std::string type_to_spec_args(const t_type* ttype);
   std::string get_real_py_module(const t_program* program);
 
-  enum EscapeFlag {
-    EscapeQuote = 1 << 0,
-    EscapeBackslash = 1 << 1,
-  };
-  std::string render_string(std::string value, EscapeFlag = EscapeQuote);
+  std::string render_string(const std::string& value);
   std::string render_ttype_declarations(const char* delimiter);
 
   std::string get_priority(
@@ -1065,7 +1061,7 @@ void t_py_generator::generate_const(const t_const* tconst) {
   f_consts_ << endl << endl;
 }
 
-string t_py_generator::render_string(string value, EscapeFlag flag) {
+string t_py_generator::render_string(const string& value) {
   std::string escaped;
   escaped.reserve(value.size());
   for (unsigned char c : value) {
@@ -1073,10 +1069,8 @@ string t_py_generator::render_string(string value, EscapeFlag flag) {
       escaped.push_back(c);
     } else if (c < 0x20 || c >= 0xf8) {
       escaped.append(fmt::format("\\x{:02x}", c));
-    } else if (c == '"' && (flag & EscapeQuote) != 0) {
+    } else if (c == '"') {
       escaped.append("\\\"");
-    } else if (c == '\\' && (flag & EscapeBackslash) != 0) {
-      escaped.append("\\\\");
     } else if (c == '\\') {
       escaped.append("\\\\");
     } else {
@@ -1603,13 +1597,8 @@ void t_py_generator::generate_py_annotation_dict(
     std::ofstream& out, const std::map<std::string, annotation_value>& fields) {
   indent_up();
   for (auto a_iter = fields.begin(); a_iter != fields.end(); ++a_iter) {
-    indent(out) << render_string(
-                       a_iter->first, EscapeFlag(EscapeQuote | EscapeBackslash))
-                << ": "
-                << render_string(
-                       a_iter->second.value,
-                       EscapeFlag(EscapeQuote | EscapeBackslash))
-                << "," << endl;
+    indent(out) << render_string(a_iter->first) << ": "
+                << render_string(a_iter->second.value) << ",\n";
   }
   indent_down();
 }

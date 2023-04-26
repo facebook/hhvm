@@ -378,6 +378,29 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
     (is_visible_for_class ~is_method env (vis, lsb) cid class_)
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
+let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
+  match cross_package with
+  | Some target ->
+    let current_module = Typing_env.get_current_module env in
+    let current_pkg =
+      Option.bind ~f:(Typing_env.get_package_for_module env) current_module
+    in
+    let target_pkg = Typing_env.get_package_by_name env target in
+    (match Typing_modules.satisfies_package_deps env current_pkg target_pkg with
+    | Some _ ->
+      Some
+        (Typing_error.modules
+           (Module_cross_pkg_call
+              {
+                pos = use_pos;
+                decl_pos = def_pos;
+                current_package_opt =
+                  Option.map ~f:Package.get_package_name current_pkg;
+                target_package_opt = cross_package;
+              }))
+    | _ -> None)
+  | None -> None
+
 let check_deprecated ~use_pos ~def_pos env deprecated =
   if Tast.is_under_dynamic_assumptions env.Typing_env_types.checked then
     None

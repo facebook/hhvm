@@ -762,6 +762,13 @@ and obj_get_concrete_class_with_member_info
             env
             ft)
       in
+      let cross_pkg_error_opt =
+        TVis.check_cross_package
+          ~use_pos:id_pos
+          ~def_pos:mem_pos
+          env
+          ft.ft_cross_package
+      in
       let should_wrap =
         TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
         && get_ce_support_dynamic_type member_info
@@ -823,7 +830,9 @@ and obj_get_concrete_class_with_member_info
       in
       let ty_err_opt =
         Option.merge lclz_ty_err_opt ft_ty_err_opt ~f:Typing_error.both
+        |> Option.merge cross_pkg_error_opt ~f:Typing_error.both
       in
+
       ((env, ty_err_opt), ft_ty, explicit_targs, Unenforced, lval_mismatch)
     | _ ->
       let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_info) in

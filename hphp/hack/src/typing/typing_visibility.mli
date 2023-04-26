@@ -71,3 +71,10 @@ val is_visible :
   Nast.class_id_ option ->
   Decl_provider.class_decl ->
   bool
+
+val check_cross_package :
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  string option ->
+  Typing_error.t option

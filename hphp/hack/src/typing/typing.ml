@@ -1242,6 +1242,9 @@ let fun_type_of_id env x tal el =
         (TVis.check_deprecated ~use_pos ~def_pos env fd.fe_deprecated);
       Option.iter
         ~f:Errors.add_typing_error
+        (TVis.check_cross_package ~use_pos ~def_pos env ft.ft_cross_package);
+      Option.iter
+        ~f:Errors.add_typing_error
         (TVis.check_top_level_access
            ~in_signature:false
            ~use_pos:(fst x)
@@ -8019,6 +8022,14 @@ and class_get_inner
                 | None -> ft
                 | Some f -> f ft
               in
+              Option.iter
+                ~f:Errors.add_typing_error
+                (TVis.check_cross_package
+                   ~use_pos:p
+                   ~def_pos
+                   env
+                   ft.ft_cross_package);
+
               let ((env, ty_err_opt1), explicit_targs) =
                 Phase.localize_targs
                   ~check_well_kinded:true
@@ -8037,6 +8048,7 @@ and class_get_inner
                   env
                   ft
               in
+
               let ((env, ty_err_opt2), ft) =
                 Phase.(
                   localize_ft
@@ -8574,6 +8586,10 @@ and call_construct
             env
             ft
         in
+        Option.iter
+          ~f:Errors.add_typing_error
+          (TVis.check_cross_package ~use_pos:p ~def_pos env ft.ft_cross_package);
+
         (* This creates type variables for non-denotable type parameters on constructors.
          * These are notably different from the tparams on the class, which are handled
          * at the top of this function. User-written type parameters on constructors

@@ -1490,6 +1490,12 @@ module Primary = struct
           target_module_opt: string option;
           target_package_opt: string option;
         }
+      | Module_cross_pkg_call of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+        }
       | Module_soft_included_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
@@ -1590,6 +1596,48 @@ module Primary = struct
       in
       (Error_code.ModuleError, claim, reason, [])
 
+    let get_module_str m_opt =
+      match m_opt with
+      | Some s -> Printf.sprintf "module `%s`" s
+      | None -> "outside of a module"
+
+    let get_package_str p_opt =
+      match p_opt with
+      | Some s -> Printf.sprintf "package `%s`" s
+      | None -> "the default package"
+
+    let module_cross_pkg_call
+        (pos : Pos.t)
+        (decl_pos : Pos_or_decl.t)
+        (current_package_opt : string option)
+        (target_package_opt : string option) =
+      let current_package = get_package_str current_package_opt in
+      let target_package =
+        match target_package_opt with
+        | Some s -> s
+        | None ->
+          failwith "target package can't be default for cross_package call"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot call this CrossPackage method using package %s from %s"
+              target_package
+              current_package )
+      and reason =
+        lazy
+          [
+            ( decl_pos,
+              Printf.sprintf
+                "This function is marked cross package, so requires the package %s to be loaded. You can check if package %s is loaded by placing this call inside a block like `if(package %s)`"
+                target_package
+                target_package
+                target_package );
+          ]
+      in
+      (Error_code.InvalidCrossPackage, claim, reason, [])
+
     let module_cross_pkg_access
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
@@ -1600,16 +1648,6 @@ module Primary = struct
         (target_module_opt : string option)
         (target_package_opt : string option)
         (soft : bool) =
-      let get_module_str m_opt =
-        match m_opt with
-        | Some s -> Printf.sprintf "module `%s`" s
-        | None -> "outside of a module"
-      in
-      let get_package_str p_opt =
-        match p_opt with
-        | Some s -> Printf.sprintf "package `%s`" s
-        | None -> "the default package"
-      in
       let current_module = get_module_str current_module_opt in
       let target_module = get_module_str target_module_opt in
       let current_package = get_package_str current_package_opt in
@@ -1682,6 +1720,13 @@ module Primary = struct
           module_pos
           current_module_opt
           target_module
+      | Module_cross_pkg_call
+          { pos; decl_pos; current_package_opt; target_package_opt } ->
+        module_cross_pkg_call
+          pos
+          decl_pos
+          current_package_opt
+          target_package_opt
       | Module_cross_pkg_access
           {
             pos;

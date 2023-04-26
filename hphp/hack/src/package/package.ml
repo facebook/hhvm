@@ -38,14 +38,11 @@ external extract_packages_from_text :
 module Info = struct
   type t = {
     glob_to_package: (string, package) Hashtbl.t;
-    existing_packages: string HashSet.t;
+    existing_packages: (string, package) Hashtbl.t;
   }
 
   let empty =
-    {
-      glob_to_package = Hashtbl.create 0;
-      existing_packages = HashSet.create ();
-    }
+    { glob_to_package = Hashtbl.create 0; existing_packages = Hashtbl.create 0 }
 
   let get_package_for_module (info : t) (md : string) : package option =
     let matching_pkgs =
@@ -67,7 +64,10 @@ module Info = struct
     | (_, pkg) :: _ -> Some pkg
 
   let package_exists (info : t) (pkg : string) : bool =
-    HashSet.mem info.existing_packages pkg
+    Hashtbl.mem info.existing_packages pkg
+
+  let get_package (info : t) (pkg : string) : package option =
+    Hashtbl.find_opt info.existing_packages pkg
 
   let initialize (path : string) =
     let contents = Sys_utils.cat path in
@@ -90,7 +90,7 @@ module Info = struct
             List.iter
               (fun (_, glob) ->
                 Hashtbl.add info.glob_to_package glob pkg;
-                HashSet.add info.existing_packages (snd pkg.name))
+                Hashtbl.add info.existing_packages (snd pkg.name) pkg)
               pkg.uses)
           packages;
         Errors.empty

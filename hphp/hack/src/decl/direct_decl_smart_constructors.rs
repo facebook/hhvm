@@ -1915,6 +1915,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
         let ifc_decl = attributes.ifc_attribute;
 
+        let cross_package = attributes.cross_package;
+
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
 
@@ -1938,7 +1940,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             }),
             flags,
             ifc_decl,
-            cross_package: None,
+            cross_package,
         });
 
         let ty = self.alloc(Ty(
@@ -5579,7 +5581,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }));
 
         let string_literal_params = if match name.1 {
-            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Docs" => true,
+            "__Deprecated" | "__Cipp" | "__CippLocal" | "__Policied" | "__Docs"
+            | "__CrossPackage" => true,
             _ => false,
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut bump::Vec<'a, u8>) {

@@ -380,6 +380,12 @@ module Primary : sig
           target_module_opt: string option;
           target_package_opt: string option;
         }
+      | Module_cross_pkg_call of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          current_package_opt: string option;
+          target_package_opt: string option;
+        }
       | Module_soft_included_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;

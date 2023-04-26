@@ -99,9 +99,7 @@ let satisfies_export_rules env current target =
     else
       Some (target_module_name, target_module_symbol.mdt_pos)
 
-let satisfies_package_deps env current target =
-  let current_pkg = Env.get_package_for_module env current in
-  let target_pkg = Env.get_package_for_module env target in
+let satisfies_package_deps env current_pkg target_pkg =
   match (current_pkg, target_pkg) with
   | (_, None) -> None
   | (None, Some target_pkg_info) ->
@@ -134,9 +132,9 @@ let satisfies_pkg_rules env current target =
     | Some (_, None) ->
       None
     | Some (current_module_name, Some current_module_symbol) ->
-      (match
-         satisfies_package_deps env current_module_name target_module_name
-       with
+      let current_pkg = Env.get_package_for_module env current_module_name in
+      let target_pkg = Env.get_package_for_module env target_module_name in
+      (match satisfies_package_deps env current_pkg target_pkg with
       | None -> None
       | Some (current_package_pos, r) ->
         Some ((current_package_pos, current_module_symbol.mdt_pos), r)))

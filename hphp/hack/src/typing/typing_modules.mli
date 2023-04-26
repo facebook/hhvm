@@ -36,3 +36,9 @@ val can_access_public :
   ]
 
 val is_class_visible : Typing_env_types.env -> Decl_provider.class_decl -> bool
+
+val satisfies_package_deps :
+  Typing_env_types.env ->
+  Package.package option ->
+  Package.package option ->
+  (Pos.t * Package.package_relationship) option

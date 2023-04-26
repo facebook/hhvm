@@ -38,5 +38,7 @@ module Info : sig
 
   val get_package_for_module : t -> string -> package option
 
+  val get_package : t -> string -> package option
+
   val package_exists : t -> string -> bool
 end

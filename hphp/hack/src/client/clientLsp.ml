@@ -3697,7 +3697,7 @@ let do_codeAction_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CodeActionRequest.params) :
-    CodeAction.command_or_action list Lwt.t =
+    (CodeAction.command_or_action list * Path.t * Errors.t option) Lwt.t =
   let file_path =
     Path.make
       (lsp_uri_to_path
@@ -3709,8 +3709,7 @@ let do_codeAction_local
       params.CodeActionRequest.textDocument.TextDocumentIdentifier.uri
   in
   let range = lsp_range_to_ide params.CodeActionRequest.range in
-  (* TODO(ljw): handle errors *)
-  let%lwt (actions, _errors_TODO) =
+  let%lwt (actions, errors_opt) =
     ide_rpc
       ide_service
       ~env
@@ -3719,7 +3718,7 @@ let do_codeAction_local
       (ClientIdeMessage.Code_action
          ({ ClientIdeMessage.file_path; ClientIdeMessage.file_contents }, range))
   in
-  Lwt.return actions
+  Lwt.return (actions, file_path, errors_opt)
 
 let do_codeAction
     (conn : server_conn)
@@ -4881,8 +4880,7 @@ let handle_editor_buffer_message
       let file_path =
         uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
       in
-      (* TODO(ljw): handle errors *)
-      let%lwt _errors_TODO =
+      let%lwt errors =
         ide_rpc
           ide_service
           ~env
@@ -4890,7 +4888,10 @@ let handle_editor_buffer_message
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_closed file_path)
       in
-      Lwt.return !state
+      let new_state =
+        publish_errors_if_standalone env !state file_path errors
+      in
+      Lwt.return new_state
     | _ ->
       (* Don't handle other events for now. When we show typechecking errors for
          the open file, we'll start handling them. *)
@@ -5429,7 +5430,7 @@ let handle_client_message
     (* textDocument/codeAction request *)
     | (_, Some ide_service, RequestMessage (id, CodeActionRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
-      let%lwt result =
+      let%lwt (result, file_path, errors_opt) =
         do_codeAction_local
           ide_service
           env
@@ -5439,6 +5440,12 @@ let handle_client_message
           params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (CodeActionResult result);
+      begin
+        match errors_opt with
+        | None -> ()
+        | Some errors ->
+          state := publish_errors_if_standalone env !state file_path errors
+      end;
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* textDocument/codeAction request, when not in serverless IDE mode *)

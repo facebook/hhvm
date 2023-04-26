@@ -9,6 +9,7 @@
   lwt
   lsp
   package
+  rust_batch_index_ffi
   server
   server_autocomplete_services
   server_env
@@ -37,3 +38,20 @@
  (libraries client_ide_message)
  (preprocess
   (pps lwt_ppx)))
+
+(rule
+ (targets librust_batch_index_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/hack/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/hack/scripts/invoke_cargo.sh
+   rust_batch_index_ffi
+   rust_batch_index_ffi)))
+
+(library
+ (name rust_batch_index_ffi)
+ (wrapped false)
+ (modules)
+ (foreign_archives rust_batch_index_ffi))

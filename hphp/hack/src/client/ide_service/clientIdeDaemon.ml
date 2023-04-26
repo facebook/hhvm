@@ -50,6 +50,8 @@ type common_state = {
       (** Local_memory backend; includes decl caches *)
   fall_back_to_full_index: bool;
       (** fall back to a full index naming table build if loading the saved state fails. *)
+  process_changes_sync: bool;
+      (** See [ServerConfig.ide_process_changes_sync] for details. *)
 }
 [@@deriving show]
 
@@ -541,6 +543,47 @@ let remove_hhi (state : state) : unit =
       let exn = Exception.wrap exn in
       ClientIdeUtils.log_bug "remove_hhi" ~exn ~telemetry:true)
 
+(** Helper called to process a batch of file changes. Updates the naming table, and invalidates the decl and tast caches for the changes. *)
+let batch_update_naming_table_and_invalidate_caches
+    ~(ctx : Provider_context.t)
+    ~(naming_table : Naming_table.t)
+    ~(sienv : SearchUtils.si_env)
+    ~(local_memory : Provider_backend.local_memory)
+    ~(open_files : Provider_context.entries)
+    (changes : Relative_path.Set.t) : ClientIdeIncremental.Batch.update_result =
+  let ({ ClientIdeIncremental.Batch.changes = changes_results; _ } as
+      update_naming_table_result) =
+    ClientIdeIncremental.Batch.update_naming_tables_and_si
+      ~ctx
+      ~naming_table
+      ~sienv
+      ~changes
+  in
+  List.iter
+    changes_results
+    ~f:(fun { ClientIdeIncremental.Batch.old_file_info; _ } ->
+      Option.iter
+        old_file_info
+        ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory));
+  Provider_utils.invalidate_tast_cache_of_entries open_files;
+  update_naming_table_result
+
+(** An empty ctx with no entries *)
+let make_empty_ctx (common : common_state) : Provider_context.t =
+  Provider_context.empty_for_tool
+    ~popt:common.popt
+    ~tcopt:common.tcopt
+    ~backend:(Provider_backend.Local_memory common.local_memory)
+    ~deps_mode:(Typing_deps_mode.InMemoryMode None)
+    ~package_info:Package.Info.empty
+
+(** Constructs a temporary ctx with just one entry. *)
+let make_singleton_ctx (common : common_state) (entry : Provider_context.entry)
+    : Provider_context.t =
+  let ctx = make_empty_ctx common in
+  let ctx = Provider_context.add_or_overwrite_entry ~ctx entry in
+  ctx
+
 (** initialize1 is called by handle_request upon receipt of an "init"
 message from the client. It is synchronous. It sets up global variables and
 glean. The remainder of init work will happen after we return... our caller
@@ -608,6 +651,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   let fall_back_to_full_index =
     ServerConfig.ide_fall_back_to_full_index config
   in
+  let process_changes_sync = ServerConfig.ide_process_changes_sync config in
   let start_time = log_startup_time "symbol_index" start_time in
   (* We only ever serve requests on files that are open. That's why our caller
      passes an initial list of open files, the ones already open in the editor
@@ -630,7 +674,15 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   {
     start_time;
     dcommon =
-      { hhi_root; sienv; popt; tcopt; local_memory; fall_back_to_full_index };
+      {
+        hhi_root;
+        sienv;
+        popt;
+        tcopt;
+        local_memory;
+        fall_back_to_full_index;
+        process_changes_sync;
+      };
     dfiles =
       {
         open_files;
@@ -659,24 +711,55 @@ let initialize2
     let changed_files_denominator =
       Relative_path.Set.cardinal changed_files_to_process
     in
+    let istate =
+      if dstate.dcommon.process_changes_sync then
+        let benchmark_start = Unix.gettimeofday () in
+        let () =
+          log
+            "Running batch update on %d changes synchronously..."
+            changed_files_denominator
+        in
+        let ClientIdeIncremental.Batch.
+              { naming_table; sienv; changes = _changes } =
+          batch_update_naming_table_and_invalidate_caches
+            ~ctx:(make_empty_ctx dstate.dcommon)
+            ~naming_table
+            ~sienv:dstate.dcommon.sienv
+            ~local_memory:dstate.dcommon.local_memory
+            ~open_files:dstate.dfiles.open_files
+            changed_files_to_process
+        in
+        let benchmark_s = Unix.gettimeofday () -. benchmark_start in
+        let () = log "Completed batch update in %f seconds." benchmark_s in
+        {
+          naming_table;
+          icommon = { dstate.dcommon with sienv };
+          ifiles =
+            {
+              open_files = dstate.dfiles.open_files;
+              changed_files_to_process = Relative_path.Set.empty;
+              changed_files_denominator = 0;
+            };
+        }
+      else
+        {
+          naming_table;
+          icommon = dstate.dcommon;
+          ifiles =
+            {
+              open_files = dstate.dfiles.open_files;
+              changed_files_to_process;
+              changed_files_denominator;
+            };
+        }
+    in
+    (* TODO(toyang): Done_init always shows "Done_init(0/0)". We should remove the progress here. *)
     let p = { ClientIdeMessage.Processing_files.total = 0; processed = 0 } in
     let%lwt () =
       write_message
         ~out_fd
         ~message:
           (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok p)))
-    in
-    let istate =
-      {
-        naming_table;
-        icommon = dstate.dcommon;
-        ifiles =
-          {
-            open_files = dstate.dfiles.open_files;
-            changed_files_to_process;
-            changed_files_denominator;
-          };
-      }
     in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
@@ -691,22 +774,6 @@ let initialize2
     in
     remove_hhi (During_init dstate);
     Lwt.return (Failed_init e)
-
-(** An empty ctx with no entries *)
-let make_empty_ctx (istate : istate) : Provider_context.t =
-  Provider_context.empty_for_tool
-    ~popt:istate.icommon.popt
-    ~tcopt:istate.icommon.tcopt
-    ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
-    ~deps_mode:(Typing_deps_mode.InMemoryMode None)
-    ~package_info:Package.Info.empty
-
-(** Constructs a temporary ctx with just one entry. *)
-let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
-    Provider_context.t =
-  let ctx = make_empty_ctx istate in
-  let ctx = Provider_context.add_or_overwrite_entry ~ctx entry in
-  ctx
 
 (** This funtion is about papering over a bug. Sometimes, rarely, we're
 failing to receive DidOpen messages from clientLsp. Our model is to
@@ -794,7 +861,7 @@ let update_file_ctx (istate : istate) (document : ClientIdeMessage.document) :
     istate * Provider_context.t * Provider_context.entry =
   let istate = restore_hhi_root_if_necessary istate in
   let (ifiles, entry) = update_file istate.ifiles document in
-  let ctx = make_singleton_ctx istate entry in
+  let ctx = make_singleton_ctx istate.icommon entry in
   ({ istate with ifiles }, ctx, entry)
 
 (** Simple helper. It updates the [ifiles] or [dfiles] member of Initialized
@@ -1026,7 +1093,7 @@ let handle_request
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
   | (Initialized istate, Completion_resolve (symbol, kind)) ->
-    let ctx = make_empty_ctx istate in
+    let ctx = make_empty_ctx istate.icommon in
     let result = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
     Lwt.return (Initialized istate, Ok result)
   (* Autocomplete docblock resolve *)
@@ -1039,7 +1106,7 @@ let handle_request
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let ctx = make_empty_ctx istate in
+    let ctx = make_empty_ctx istate.icommon in
     let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -1104,7 +1171,7 @@ let handle_request
        up positions; for member queries "Foo::bar" it needs it to fetch the
        decl for Foo. *)
     (* Note: we intentionally don't give results from unsaved files *)
-    let ctx = make_empty_ctx istate in
+    let ctx = make_empty_ctx istate.icommon in
     let result =
       ServerSearch.go ctx query ~kind_filter:"" istate.icommon.sienv
     in
@@ -1162,9 +1229,9 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
   let changed_files_to_process =
     Relative_path.Set.remove istate.ifiles.changed_files_to_process next_file
   in
-  let { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
+  let ClientIdeIncremental.{ naming_table; sienv; old_file_info; _ } =
     ClientIdeIncremental.update_naming_tables_for_changed_file
-      ~ctx:(make_empty_ctx istate)
+      ~ctx:(make_empty_ctx istate.icommon)
       ~naming_table:istate.naming_table
       ~sienv:istate.icommon.sienv
       ~path:next_file
@@ -1215,6 +1282,7 @@ let handle_one_message_exn
   match state with
   | Initialized istate
     when should_process_file_change in_fd message_queue istate ->
+    (* TODO: update this to use the Rust multithreaded batch indexing instead of processing one change at a time *)
     let%lwt istate = process_one_file_change out_fd istate in
     Lwt.return_some (Initialized istate)
   | _ ->

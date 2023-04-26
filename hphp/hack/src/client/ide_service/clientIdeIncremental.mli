@@ -32,3 +32,27 @@ val update_naming_tables_for_changed_file :
   sienv:SearchUtils.si_env ->
   path:Relative_path.t ->
   changed_file_results
+
+module Batch : sig
+  type changed_file_info = {
+    path: Relative_path.t;
+    old_file_info: FileInfo.t option;
+    new_file_info: FileInfo.t option;
+  }
+
+  type update_result = {
+    naming_table: Naming_table.t;
+    sienv: SearchUtils.si_env;
+    changes: changed_file_info list;
+  }
+
+  (** Like [update_naming_tables_for_changed_file], but uses a Rust multi-threaded
+  indexer to parse files. TODO: will replace
+  [update_naming_tables_for_changed_file] when fully tested. *)
+  val update_naming_tables_and_si :
+    ctx:Provider_context.t ->
+    naming_table:Naming_table.t ->
+    sienv:SearchUtils.si_env ->
+    changes:Relative_path.Set.t ->
+    update_result
+end

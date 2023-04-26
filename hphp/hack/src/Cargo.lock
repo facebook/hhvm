@@ -64,6 +64,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ahash"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
+dependencies = [
+ "cfg-if 1.0.0",
+ "once_cell",
+ "version_check",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1231,7 +1242,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "907076dfda823b0b36d2a1bb5f90c96660a5bbcd7729e10727f07858f22c4edc"
 dependencies = [
  "cfg-if 1.0.0",
- "hashbrown",
+ "hashbrown 0.12.3",
  "lock_api",
  "once_cell",
  "parking_lot_core 0.9.7",
@@ -2219,6 +2230,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "hackrs_provider_backend"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bstr 1.2.0",
+ "bumpalo",
+ "datastore",
+ "decl_parser",
+ "deps_rust",
+ "file_info",
+ "file_provider",
+ "folded_decl_provider",
+ "hh24_test",
+ "hh24_types",
+ "libc",
+ "maplit",
+ "names",
+ "naming_provider",
+ "ocaml_runtime",
+ "ocamlrep",
+ "ocamlrep_caml_builtins",
+ "ocamlrep_ocamlpool",
+ "oxidized",
+ "oxidized_by_ref",
+ "parking_lot 0.11.2",
+ "pos",
+ "rpds",
+ "rust_provider_backend_api",
+ "serde",
+ "shallow_decl_provider",
+ "shm_store",
+ "shmffi",
+ "ty",
+]
+
+[[package]]
 name = "hackrs_test_utils"
 version = "0.0.0"
 dependencies = [
@@ -2265,8 +2312,17 @@ version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 dependencies = [
- "ahash",
+ "ahash 0.7.6",
  "serde",
+]
+
+[[package]]
+name = "hashbrown"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
+dependencies = [
+ "ahash 0.8.3",
 ]
 
 [[package]]
@@ -2275,7 +2331,7 @@ version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69fe1fcf8b4278d860ad0548329f892a3631fb63f82574df68275f34cdbe0ffa"
 dependencies = [
- "hashbrown",
+ "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -2362,6 +2418,21 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "hh24_test"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bumpalo",
+ "direct_decl_parser",
+ "hh24_types",
+ "maplit",
+ "names",
+ "oxidized_by_ref",
+ "relative_path",
+ "tempdir",
+]
 
 [[package]]
 name = "hh24_types"
@@ -2659,7 +2730,7 @@ checksum = "1885e79c1fc4b10f0e172c475f458b7f7b93061064d98c3293e98c5ba0c8b399"
 dependencies = [
  "arbitrary",
  "autocfg",
- "hashbrown",
+ "hashbrown 0.12.3",
  "rayon",
  "serde",
 ]
@@ -2705,7 +2776,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "fnv",
- "hashbrown",
+ "hashbrown 0.12.3",
  "indexmap",
  "once_cell",
  "parking_lot 0.11.2",
@@ -3051,6 +3122,15 @@ dependencies = [
  "sparsevec",
  "static_assertions",
  "vob",
+]
+
+[[package]]
+name = "lru"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "03f1160296536f10c833a82dca22267d5486734230d47bf00bf435885814ba1e"
+dependencies = [
+ "hashbrown 0.13.2",
 ]
 
 [[package]]
@@ -4430,6 +4510,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust_batch_index_ffi"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bumpalo",
+ "direct_decl_parser",
+ "hackrs_provider_backend",
+ "ocamlrep_ocamlpool",
+ "oxidized",
+ "oxidized_by_ref",
+ "rayon",
+ "relative_path",
+ "unwrap_ocaml",
+]
+
+[[package]]
 name = "rust_decl_ffi"
 version = "0.0.0"
 dependencies = [
@@ -4500,6 +4596,17 @@ dependencies = [
  "parser_core_types",
  "positioned_by_ref_parser",
  "to_ocaml_impl",
+]
+
+[[package]]
+name = "rust_provider_backend_api"
+version = "0.0.0"
+dependencies = [
+ "file_provider",
+ "folded_decl_provider",
+ "naming_provider",
+ "shallow_decl_provider",
+ "ty",
 ]
 
 [[package]]
@@ -4727,6 +4834,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "shm_store"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bincode",
+ "datastore",
+ "hh24_types",
+ "intern",
+ "lru",
+ "lz4",
+ "md-5",
+ "measure",
+ "ocaml_blob",
+ "ocamlrep",
+ "ocamlrep_marshal",
+ "parking_lot 0.11.2",
+ "pos",
+ "serde",
+ "shmffi",
+ "zstd",
+]
+
+[[package]]
 name = "shmffi"
 version = "0.0.0"
 dependencies = [
@@ -4742,7 +4872,7 @@ dependencies = [
 name = "shmrs"
 version = "0.0.0"
 dependencies = [
- "hashbrown",
+ "hashbrown 0.12.3",
  "libc",
  "nix",
  "nohash-hasher",

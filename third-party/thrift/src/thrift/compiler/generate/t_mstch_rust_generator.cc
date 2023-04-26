@@ -753,6 +753,8 @@ class rust_mstch_service : public mstch_service {
              &rust_mstch_service::rust_extended_services},
             {"service:docs?", &rust_mstch_service::rust_has_doc},
             {"service:docs", &rust_mstch_service::rust_doc},
+            {"service:parent_service_name",
+             &rust_mstch_service::parent_service_name},
         });
   }
   mstch::node rust_functions();
@@ -790,6 +792,7 @@ class rust_mstch_service : public mstch_service {
     }
     return extended_services;
   }
+  virtual mstch::node parent_service_name() { return service_->get_name(); }
 
   mstch::node rust_all_exceptions();
   mstch::node rust_has_doc() { return service_->has_doc(); }
@@ -798,6 +801,27 @@ class rust_mstch_service : public mstch_service {
  private:
   std::unordered_multiset<std::string> function_upcamel_names_;
   const rust_codegen_options& options_;
+};
+
+class rust_mstch_interaction : public rust_mstch_service {
+ public:
+  using ast_type = t_interaction;
+
+  rust_mstch_interaction(
+      const t_interaction* interaction,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      const t_service* containing_service,
+      const rust_codegen_options* options)
+      : rust_mstch_service(interaction, ctx, pos, options),
+        containing_service_(containing_service) {}
+
+  mstch::node parent_service_name() override {
+    return containing_service_->get_name();
+  }
+
+ private:
+  const t_service* containing_service_ = nullptr;
 };
 
 class rust_mstch_function : public mstch_function {
@@ -1944,6 +1968,7 @@ void t_mstch_rust_generator::generate_program() {
 void t_mstch_rust_generator::set_mstch_factories() {
   mstch_context_.add<rust_mstch_program>(&options_);
   mstch_context_.add<rust_mstch_service>(&options_);
+  mstch_context_.add<rust_mstch_interaction>(&options_);
   mstch_context_.add<rust_mstch_type>(&options_);
   mstch_context_.add<rust_mstch_typedef>(&options_);
   mstch_context_.add<rust_mstch_struct>(&options_);

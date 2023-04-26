@@ -2334,7 +2334,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.frobnicate";
             }
             let args = self::Args_MyInteraction_frobnicate {
@@ -2380,7 +2380,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.ping";
             }
             let args = self::Args_MyInteraction_ping {
@@ -2428,7 +2428,7 @@ pub mod client {
             use ::fbthrift::Deserialize as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.truthify";
             }
             let args = self::Args_MyInteraction_truthify {
@@ -2492,7 +2492,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.encode";
             }
             let args = self::Args_MyInteraction_encode {
@@ -2930,7 +2930,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.frobnicate";
             }
             let args = self::Args_MyInteractionFast_frobnicate {
@@ -2976,7 +2976,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.ping";
             }
             let args = self::Args_MyInteractionFast_ping {
@@ -3024,7 +3024,7 @@ pub mod client {
             use ::fbthrift::Deserialize as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.truthify";
             }
             let args = self::Args_MyInteractionFast_truthify {
@@ -3088,7 +3088,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.encode";
             }
             let args = self::Args_MyInteractionFast_encode {
@@ -3527,7 +3527,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "SerialInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "SerialInteraction.frobnicate";
             }
             let args = self::Args_SerialInteraction_frobnicate {
@@ -4705,7 +4705,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.frobnicate";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -4777,7 +4777,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -4849,7 +4849,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.truthify";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -4960,7 +4960,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.encode";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -5407,7 +5407,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.frobnicate";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -5479,7 +5479,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -5551,7 +5551,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.truthify";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -5662,7 +5662,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteractionFast";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteractionFast.encode";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(
@@ -5990,7 +5990,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "SerialInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "SerialInteraction.frobnicate";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(

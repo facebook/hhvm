@@ -2058,7 +2058,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.ping";
             }
             let args = self::Args_MyInteraction_ping {
@@ -3809,7 +3809,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "MyInteraction";
+                SERVICE_NAME = "MyService";
                 METHOD_NAME = "MyInteraction.ping";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(

@@ -81,7 +81,7 @@
             {{/function:returns_streams?}}
 
             const_cstr! {
-                SERVICE_NAME = "{{service:name}}";
+                SERVICE_NAME = "{{service:parent_service_name}}";
                 METHOD_NAME = "{{service:name}}.{{function:name}}";
                 {{#function:creates_interaction?}}
                 INTERACTION_NAME = "{{function:interaction_name}}";

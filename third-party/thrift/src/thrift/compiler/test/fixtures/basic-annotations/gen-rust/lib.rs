@@ -3342,7 +3342,7 @@ pub mod client {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "BadInteraction";
+                SERVICE_NAME = "BadService";
                 METHOD_NAME = "BadInteraction.foo";
             }
             let args = self::Args_BadInteraction_foo {
@@ -5900,7 +5900,7 @@ pub mod server {
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "BadInteraction";
+                SERVICE_NAME = "BadService";
                 METHOD_NAME = "BadInteraction.foo";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(

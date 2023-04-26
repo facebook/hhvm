@@ -214,7 +214,7 @@
             use ::futures::FutureExt as _;
 
             const_cstr! {
-                SERVICE_NAME = "{{service:name}}";
+                SERVICE_NAME = "{{service:parent_service_name}}";
                 METHOD_NAME = "{{service:name}}.{{function:name}}";
             }
             let mut ctx_stack = req_ctxt.get_context_stack(

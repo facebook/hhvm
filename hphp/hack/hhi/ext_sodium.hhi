@@ -268,6 +268,23 @@ function sodium_crypto_sign_ed25519_pk_to_curve25519(string $eddsakey): string;
 <<__PHPStdLib>>
 function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
 
+///// Ed25519 primitives.
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_scalar_reduce(string $scalar): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_scalar_add(string $scalar_a, string $scalar_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_core_ed25519_scalar_mul(string $scalar_a, string $scalar_b): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ed25519_base(string $scalar): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_scalarmult_ed25519_base_noclamp(string $scalar): string;
+
 ///// Asymetric (public key) signatures
 
 <<__PHPStdLib>>

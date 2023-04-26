@@ -173,7 +173,7 @@ impl From<&[u8]> for Bytes {
 
 impl From<&bstr::BStr> for Bytes {
     fn from(s: &bstr::BStr) -> Self {
-        Self::new(s.as_ref())
+        Self::new(s)
     }
 }
 

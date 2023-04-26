@@ -127,7 +127,7 @@ fn cow_str_to_bytes(s: Cow<'_, str>) -> Cow<'_, [u8]> {
 
 fn cow_bstr_to_bytes(s: Cow<'_, BStr>) -> Cow<'_, [u8]> {
     match s {
-        Cow::Borrowed(s) => s.as_ref().into(),
+        Cow::Borrowed(s) => <&[u8]>::from(s).into(),
         Cow::Owned(s) => <Vec<u8>>::from(s).into(),
     }
 }

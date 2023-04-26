@@ -1576,6 +1576,17 @@ and simplify_subtype_i
                  env
                  (LoclType ty)
                  (LoclType (MakeType.supportdyn_mixed ~mixed_reason:r r)) ->
+          (* This is Typing_logic_helpers.( ||| ) except with a bias towards p1 *)
+          let ( ||| ) (env, p1) (f : env -> env * TL.subtype_prop) =
+            if TL.is_valid p1 then
+              (env, p1)
+            else
+              let (env, p2) = f env in
+              if TL.is_unsat p2 then
+                (env, p1)
+              else
+                (env, TL.disj ~fail p1 p2)
+          in
           simplify_subtype_i
             ~subtype_env
             ~sub_supportdyn

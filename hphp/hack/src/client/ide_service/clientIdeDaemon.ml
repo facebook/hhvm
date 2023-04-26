@@ -873,6 +873,54 @@ let update_state_files (state : state) (files : open_files_state) : state =
   | Initialized istate -> Initialized { istate with ifiles = files }
   | _ -> failwith ("Update_state_files: unexpected " ^ state_to_log_string state)
 
+(** Computes the Errors.t for what's on disk at a given path.
+We provide [istate] just in case we can benefit from a cached answer. *)
+let get_errors_for_path (istate : istate) (path : Relative_path.t) : Errors.t =
+  let disk_content_opt =
+    Sys_utils.cat_or_failed (Relative_path.to_absolute path)
+  in
+  let cached_entry_opt =
+    Relative_path.Map.find_opt istate.ifiles.open_files path
+  in
+  let entry_opt =
+    match (disk_content_opt, cached_entry_opt) with
+    | (None, _) ->
+      (* if the disk file is absent (e.g. it was deleted prior to the user closing it),
+         then we naturally can't compute errors for it. *)
+      None
+    | ( Some disk_content,
+        Some
+          ({
+             Provider_context.contents =
+               Provider_context.(Contents_from_disk str | Provided_contents str);
+             _;
+           } as entry) )
+      when String.equal disk_content str ->
+      (* file on disk was the same as what we currently have in the entry, and
+         the entry very likely already has errors computed for it, so as an optimization
+         we'll re-use errors from that entry. *)
+      Some entry
+    | (Some disk_content, _) ->
+      (* file on disk is different from what we have in the entry, e.g. because the
+         user closed a modified file, so compute errors from the disk content. *)
+      Some
+        (Provider_context.make_entry
+           ~path
+           ~contents:(Provider_context.Provided_contents disk_content))
+  in
+  match entry_opt with
+  | None ->
+    (* file couldn't be read off disk (maybe absent); therefore, by definition, no errors *)
+    Errors.empty
+  | Some entry ->
+    (* Here we'll get either cached errors from the cached entry, or will recompute errors
+       from the partially cached entry, or will compute errors from the file on disk. *)
+    let ctx = make_singleton_ctx istate.icommon entry in
+    let { Tast_provider.Compute_tast_and_errors.errors; _ } =
+      Tast_provider.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
+    errors
+
 (** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
 anything other than [Initialize_from_saved_state] as its first message. Upon
@@ -967,15 +1015,19 @@ let handle_request
     in
     Lwt.return (update_state_files state files, Ok ())
     (* IDE File Closed *)
-  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
-      Ide_file_closed file_path ) ->
+  | (During_init { dfiles = files; _ }, Ide_file_closed file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let files = close_file files path in
-    (* TODO(ljw): produce errors for file-on-disk *)
-    let errors_TODO = Errors.empty in
-    Lwt.return (update_state_files state files, Ok errors_TODO)
+    Lwt.return (update_state_files state files, Ok Errors.empty)
+  | (Initialized istate, Ide_file_closed file_path) ->
+    let path =
+      file_path |> Path.to_string |> Relative_path.create_detect_prefix
+    in
+    let errors = get_errors_for_path istate path in
+    let files = close_file istate.ifiles path in
+    Lwt.return (update_state_files state files, Ok errors)
   (* IDE File Opened *)
   | (During_init dstate, Ide_file_opened { file_path; file_contents }) ->
     let path =

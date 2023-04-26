@@ -79,6 +79,7 @@ file_info::NameType
 naming_types::KindOfType
 naming_types::NameKind
 saved_state_rollouts::Flag
+search_types::SiKind
 tast::CheckStatus
 typing_defs::ClassConstKind
 typing_defs_core::ConsistentKind

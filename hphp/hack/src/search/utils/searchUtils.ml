@@ -7,6 +7,7 @@
  *
  *)
 open Reordered_argument_collections
+include SearchTypes
 
 (* Known search providers *)
 type search_provider =
@@ -59,28 +60,6 @@ type ('a, 'b) term = {
 }
 
 let to_absolute t = { t with pos = Pos.to_absolute t.pos }
-
-(* Flattened enum that contains one element for each type of symbol *)
-type si_kind =
-  | SI_Class
-  | SI_Interface
-  | SI_Enum
-  | SI_Trait
-  | SI_Unknown
-  | SI_Mixed
-  | SI_Function
-  | SI_Typedef
-  | SI_GlobalConstant
-  | SI_XHP
-  | SI_Namespace
-  | SI_ClassMethod
-  | SI_Literal
-  | SI_ClassConstant
-  | SI_Property
-  | SI_LocalVariable
-  | SI_Keyword
-  | SI_Constructor
-[@@deriving eq, show]
 
 let is_si_class = function
   | SI_Class -> true

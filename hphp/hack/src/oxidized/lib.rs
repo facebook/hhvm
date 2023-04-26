@@ -80,6 +80,7 @@ pub use gen::pos_or_decl;
 pub use gen::quickfix;
 pub use gen::saved_state_rollouts;
 pub use gen::scoured_comments;
+pub use gen::search_types;
 pub use gen::tast;
 pub use gen::type_parameter_env;
 pub use gen::typechecker_options;

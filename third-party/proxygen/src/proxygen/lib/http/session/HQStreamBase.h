@@ -437,4 +437,4 @@ class CSBidir : public virtual HQStreamMapping {
 
 } // namespace composite
 } // namespace detail
-}; // namespace proxygen
+} // namespace proxygen

@@ -413,20 +413,22 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
 
   String uniqid(prefix.size() + 64, ReserveString);
   auto ptr = uniqid.mutableData();
-  // StringData::capacity() returns the buffer size without the null
-  // terminator. snprintf expects a the buffer capacity including room
-  // for the null terminator, writes the null termintor, and returns
-  // the full length not counting the null terminator.
-  auto capacity = uniqid.capacity() + 1;
-  int64_t len;
+  // StringData::capacity() returns the buffer size without the null terminator.
+  // snprintf() expects a "size" parameter that is the buffer capacity including
+  // room for the null terminator, writes the null terminator, and returns the
+  // number of formatted chars not counting the null terminator, whether or not
+  // all the chars were actually written.
+  // The return value may be larger than "size" if the buffer was too small.
+  auto capacity = uniqid.capacity();
+  uint32_t len;
   if (more_entropy) {
-    len = snprintf(ptr, capacity, "%s%08x%05x%.8F",
+    len = snprintf(ptr, capacity + 1, "%s%08x%05x%.8F",
                    prefix.c_str(), sec, usec, math_combined_lcg() * 10);
   } else {
-    len = snprintf(ptr, capacity, "%s%08x%05x",
+    len = snprintf(ptr, capacity + 1, "%s%08x%05x",
                    prefix.c_str(), sec, usec);
   }
-  uniqid.setSize(len);
+  uniqid.setSize(std::min(len, capacity));
   return uniqid;
 }
 

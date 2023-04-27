@@ -219,6 +219,11 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   template <typename Id>
   bool maybeEnsure() {
+    if (*patchAfter<Id>().toThrift().clear()) {
+      // Since we cleared the field in PatchAfter, we should remove any existing
+      // ensured value.
+      op::clear<Id>(*data_.ensure());
+    }
     if (ensures<Id>()) {
       return false;
     }

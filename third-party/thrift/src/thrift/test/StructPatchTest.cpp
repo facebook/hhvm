@@ -295,6 +295,20 @@ TEST(StructPatchTest, AssignClearEnsure) {
   EXPECT_EQ(*actual.optI32Val(), 2);
 }
 
+TEST(StructPatchTest, ClearAndEnsure) {
+  MyData data;
+  data.data1() = "42";
+
+  MyStructPatch patch;
+  patch.patch<ident::optStructVal>().clear();
+  patch.ensure<ident::optStructVal>(data);
+
+  MyStruct actual;
+  patch.apply(actual);
+  ASSERT_TRUE(actual.optStructVal().has_value());
+  EXPECT_EQ(*actual.optStructVal(), data);
+}
+
 TEST(StructPatchTest, OptionalField_PatchPrior) {
   // unset -> true -> false.
   // set -> invert -> invert

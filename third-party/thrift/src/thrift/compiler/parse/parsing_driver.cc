@@ -54,7 +54,7 @@ class parsing_driver::lex_handler_impl : public lex_handler {
   // "pop-ing" it on the node as needed.
   void on_doc_comment(fmt::string_view text, source_location loc) override {
     driver_.clear_doctext();
-    driver_.doctext = comment{driver_.strip_doctext(text), loc};
+    driver_.doctext_ = comment{driver_.strip_doctext(text), loc};
   }
 };
 
@@ -62,7 +62,7 @@ std::unique_ptr<t_program_bundle> parsing_driver::parse() {
   std::unique_ptr<t_program_bundle> result;
   try {
     parse_file();
-    result = std::move(program_bundle);
+    result = std::move(program_bundle_);
   } catch (const parsing_terminator&) {
     // No need to do anything here. The purpose of the exception is simply to
     // end the parsing process by unwinding to here.
@@ -72,7 +72,7 @@ std::unique_ptr<t_program_bundle> parsing_driver::parse() {
 
 void parsing_driver::parse_file() {
   // Skip already parsed files.
-  const std::string& path = program->path();
+  const std::string& path = program_->path();
   if (!already_parsed_paths_.insert(path).second) {
     return;
   }
@@ -86,15 +86,15 @@ void parsing_driver::parse_file() {
   }
   auto lex_handler = lex_handler_impl(*this);
   auto lexer = compiler::lexer(src, lex_handler, diags_);
-  program->set_src_range({src.start, src.start});
+  program_->set_src_range({src.start, src.start});
 
   // Create a new scope and scan for includes.
   diags_.report(
       src.start, diagnostic_level::info, "Scanning {} for includes\n", path);
-  mode = parsing_mode::INCLUDES;
+  mode_ = parsing_mode::INCLUDES;
   try {
     if (!compiler::parse(lexer, *this, diags_)) {
-      diags_.error(*program, "Parser error during include pass.");
+      diags_.error(*program_, "Parser error during include pass.");
       end_parsing();
     }
   } catch (const std::string& x) {
@@ -104,12 +104,12 @@ void parsing_driver::parse_file() {
   }
 
   // Recursively parse all the included programs.
-  const std::vector<t_include*>& includes = program->includes();
+  const std::vector<t_include*>& includes = program_->includes();
   // Always enable allow_neg_field_keys when parsing included files.
   // This way if a thrift file has negative keys, --allow-neg-keys doesn't have
   // to be used by everyone that includes it.
   auto old_params = params_;
-  auto old_program = program;
+  auto old_program = program_;
   for (auto include : includes) {
     t_program* included_program = include->get_program();
     circular_deps_.insert(path);
@@ -126,7 +126,7 @@ void parsing_driver::parse_file() {
     // This must be after the previous circular include check, since the emitted
     // error message above is supposed to reference the parent file name.
     params_.allow_neg_field_keys = true;
-    program = included_program;
+    program_ = included_program;
     try {
       parse_file();
     } catch (...) {
@@ -140,7 +140,7 @@ void parsing_driver::parse_file() {
     assert(num_removed == 1);
   }
   params_ = old_params;
-  program = old_program;
+  program_ = old_program;
 
   // Parse the program file
   try {
@@ -151,12 +151,12 @@ void parsing_driver::parse_file() {
   }
   lexer = compiler::lexer(src, lex_handler, diags_);
 
-  mode = parsing_mode::PROGRAM;
+  mode_ = parsing_mode::PROGRAM;
   diags_.report(
       src.start, diagnostic_level::info, "Parsing {} for types\n", path);
   try {
     if (!compiler::parse(lexer, *this, diags_)) {
-      diags_.error(*program, "Parser error during types pass.");
+      diags_.error(*program_, "Parser error during types pass.");
       end_parsing();
     }
   } catch (const std::string& x) {
@@ -171,7 +171,7 @@ void parsing_driver::parse_file() {
 }
 
 void parsing_driver::validate_header_location(source_location loc) {
-  if (programs_that_parsed_definition_.find(program->path()) !=
+  if (programs_that_parsed_definition_.find(program_->path()) !=
       programs_that_parsed_definition_.end()) {
     diags_.error(loc, "Headers must be specified before definitions.");
   }
@@ -207,7 +207,7 @@ std::string parsing_driver::find_include_file(
   // relative path, start searching
   // new search path with current dir global
   std::vector<std::string> sp = params_.incl_searchpath;
-  sp.insert(sp.begin(), directory_name(program->path()));
+  sp.insert(sp.begin(), directory_name(program_->path()));
   // iterate through paths
   std::vector<std::string>::iterator it;
   for (it = sp.begin(); it != sp.end(); it++) {
@@ -239,9 +239,9 @@ std::string parsing_driver::find_include_file(
 
 void parsing_driver::validate_not_ambiguous_enum(
     source_location loc, const std::string& name) {
-  if (scope_cache->is_ambiguous_enum_value(name)) {
+  if (scope_cache_->is_ambiguous_enum_value(name)) {
     std::string possible_enums =
-        scope_cache->get_fully_qualified_enum_value_names(name).c_str();
+        scope_cache_->get_fully_qualified_enum_value_names(name).c_str();
     diags_.warning(
         loc,
         "The ambiguous enum `{}` is defined in more than one place. "
@@ -252,15 +252,15 @@ void parsing_driver::validate_not_ambiguous_enum(
 }
 
 void parsing_driver::clear_doctext() {
-  if (doctext && mode == parsing_mode::PROGRAM) {
-    diags_.warning_legacy_strict(doctext->loc, "uncaptured doctext");
+  if (doctext_ && mode_ == parsing_mode::PROGRAM) {
+    diags_.warning_legacy_strict(doctext_->loc, "uncaptured doctext");
   }
-  doctext = boost::none;
+  doctext_ = boost::none;
 }
 
 boost::optional<comment> parsing_driver::pop_doctext() {
-  return mode == parsing_mode::PROGRAM ? std::exchange(doctext, boost::none)
-                                       : boost::none;
+  return mode_ == parsing_mode::PROGRAM ? std::exchange(doctext_, boost::none)
+                                        : boost::none;
 }
 
 std::string parsing_driver::clean_up_doctext(std::string docstring) {
@@ -417,7 +417,7 @@ void parsing_driver::set_attributes(
     std::unique_ptr<attributes> attrs,
     std::unique_ptr<deprecated_annotations> annots,
     const source_range& range) const {
-  if (mode != parsing_mode::PROGRAM) {
+  if (mode_ != parsing_mode::PROGRAM) {
     return;
   }
   node.set_src_range(range);
@@ -447,7 +447,7 @@ std::unique_ptr<t_const> parsing_driver::new_struct_annotation(
     std::unique_ptr<t_const_value> const_struct, const source_range& range) {
   auto ttype = const_struct->ttype(); // Copy the t_type_ref.
   auto result = std::make_unique<t_const>(
-      program, std::move(ttype), "", std::move(const_struct));
+      program_, std::move(ttype), "", std::move(const_struct));
   result->set_src_range(range);
   return result;
 }
@@ -464,7 +464,7 @@ t_type_ref parsing_driver::new_type_ref(
     const t_type& type,
     std::unique_ptr<deprecated_annotations> annotations,
     const source_range& range) {
-  if (annotations == nullptr || mode != parsing_mode::PROGRAM) {
+  if (annotations == nullptr || mode_ != parsing_mode::PROGRAM) {
     return type;
   }
 
@@ -476,7 +476,7 @@ t_type_ref parsing_driver::new_type_ref(
     auto node = std::make_unique<t_base_type>(*tbase_type);
     set_annotations(node.get(), std::move(annotations));
     t_type_ref result(*node);
-    program->add_unnamed_type(std::move(node));
+    program_->add_unnamed_type(std::move(node));
     return result;
   }
 
@@ -497,7 +497,7 @@ t_type_ref parsing_driver::new_type_ref(
     source_range range,
     std::unique_ptr<t_templated_type> node,
     std::unique_ptr<deprecated_annotations> annotations) {
-  if (mode != parsing_mode::PROGRAM) {
+  if (mode_ != parsing_mode::PROGRAM) {
     return {};
   }
 
@@ -505,7 +505,7 @@ t_type_ref parsing_driver::new_type_ref(
   const t_type* type = node.get();
   set_annotations(node.get(), std::move(annotations));
   node->set_src_range(range);
-  program->add_type_instantiation(std::move(node));
+  program_->add_type_instantiation(std::move(node));
   return *type;
 }
 
@@ -514,11 +514,11 @@ t_type_ref parsing_driver::new_type_ref(
     std::unique_ptr<deprecated_annotations> annotations,
     const source_range& range,
     bool is_const) {
-  if (mode != parsing_mode::PROGRAM) {
+  if (mode_ != parsing_mode::PROGRAM) {
     return {};
   }
 
-  t_type_ref result = scope_cache->ref_type(*program, name, range);
+  t_type_ref result = scope_cache_->ref_type(*program_, name, range);
 
   // TODO(afuller): Remove this special case for const, which requires a
   // specific declaration order.
@@ -548,7 +548,7 @@ void parsing_driver::set_functions(
 }
 
 void parsing_driver::add_include(std::string name, const source_range& range) {
-  if (mode != parsing_mode::INCLUDES) {
+  if (mode_ != parsing_mode::INCLUDES) {
     return;
   }
 
@@ -563,15 +563,15 @@ void parsing_driver::add_include(std::string name, const source_range& range) {
   }
   assert(!path.empty()); // Should have throw an exception if not found.
 
-  if (program_cache.find(path) == program_cache.end()) {
-    auto included_program = program->add_include(path, name, range);
-    program_cache[path] = included_program.get();
-    program_bundle->add_program(std::move(included_program));
+  if (program_cache_.find(path) == program_cache_.end()) {
+    auto included_program = program_->add_include(path, name, range);
+    program_cache_[path] = included_program.get();
+    program_bundle_->add_program(std::move(included_program));
   } else {
     auto include =
-        std::make_unique<t_include>(program_cache[path], std::move(name));
+        std::make_unique<t_include>(program_cache_[path], std::move(name));
     include->set_src_range(range);
-    program->add_include(std::move(include));
+    program_->add_include(std::move(include));
   }
 }
 
@@ -582,7 +582,7 @@ const t_type* parsing_driver::add_unnamed_typedef(
   const t_type* result(node.get());
   node->set_src_range(range);
   set_annotations(node.get(), std::move(annotations));
-  program->add_unnamed_typedef(std::move(node));
+  program_->add_unnamed_typedef(std::move(node));
   return result;
 }
 
@@ -647,7 +647,7 @@ void parsing_driver::maybe_allocate_field_id(
 }
 
 void parsing_driver::set_fields(t_structured& s, t_field_list&& fields) {
-  if (mode != parsing_mode::PROGRAM) {
+  if (mode_ != parsing_mode::PROGRAM) {
     return;
   }
   assert(s.fields().empty());
@@ -668,7 +668,7 @@ template <typename T>
 T parsing_driver::narrow_int(
     source_location loc, int64_t value, const char* name) {
   using limits = std::numeric_limits<T>;
-  if (mode == parsing_mode::PROGRAM &&
+  if (mode_ == parsing_mode::PROGRAM &&
       (value < limits::min() || value > limits::max())) {
     diags_.error(
         loc,
@@ -682,7 +682,7 @@ T parsing_driver::narrow_int(
 }
 
 std::string parsing_driver::strip_doctext(fmt::string_view text) {
-  if (mode != apache::thrift::compiler::parsing_mode::PROGRAM) {
+  if (mode_ != apache::thrift::compiler::parsing_mode::PROGRAM) {
     return {};
   }
 
@@ -705,10 +705,10 @@ parsing_driver::parsing_driver(
     std::string path,
     parsing_params parse_params)
     : source_mgr_(sm), diags_(diags), params_(std::move(parse_params)) {
-  program_bundle =
+  program_bundle_ =
       std::make_unique<t_program_bundle>(std::make_unique<t_program>(path));
-  program = program_bundle->root_program();
-  scope_cache = program->scope();
+  program_ = program_bundle_->root_program();
+  scope_cache_ = program_->scope();
 }
 
 void parsing_driver::on_standard_header(
@@ -726,15 +726,15 @@ void parsing_driver::on_package(
     std::unique_ptr<attributes> attrs,
     fmt::string_view name) {
   validate_header_location(range.begin);
-  if (mode != parsing_mode::PROGRAM) {
+  if (mode_ != parsing_mode::PROGRAM) {
     return;
   }
-  set_attributes(*program, std::move(attrs), {}, range);
-  if (!program->package().empty()) {
+  set_attributes(*program_, std::move(attrs), {}, range);
+  if (!program_->package().empty()) {
     diags_.error(range.begin, "Package already specified.");
   }
   try {
-    program->set_package(t_package(fmt::to_string(name)));
+    program_->set_package(t_package(fmt::to_string(name)));
   } catch (const std::exception& e) {
     diags_.error(range.begin, "{}", e.what());
   }
@@ -745,45 +745,45 @@ void parsing_driver::on_definition(
     std::unique_ptr<t_named> defn,
     std::unique_ptr<attributes> attrs,
     std::unique_ptr<deprecated_annotations> annotations) {
-  if (mode == parsing_mode::PROGRAM) {
-    programs_that_parsed_definition_.insert(program->path());
+  if (mode_ == parsing_mode::PROGRAM) {
+    programs_that_parsed_definition_.insert(program_->path());
   }
   set_attributes(*defn, std::move(attrs), std::move(annotations), range);
 
-  if (mode != parsing_mode::PROGRAM) {
+  if (mode_ != parsing_mode::PROGRAM) {
     return;
   }
 
   // Add to scope.
   // TODO: Consider moving program-level scope management to t_program.
   if (auto* tnode = dynamic_cast<t_interaction*>(defn.get())) {
-    scope_cache->add_interaction(program->scope_name(*defn), tnode);
+    scope_cache_->add_interaction(program_->scope_name(*defn), tnode);
   } else if (auto* tnode = dynamic_cast<t_service*>(defn.get())) {
-    scope_cache->add_service(program->scope_name(*defn), tnode);
+    scope_cache_->add_service(program_->scope_name(*defn), tnode);
   } else if (auto* tnode = dynamic_cast<t_const*>(defn.get())) {
-    scope_cache->add_constant(program->scope_name(*defn), tnode);
+    scope_cache_->add_constant(program_->scope_name(*defn), tnode);
   } else if (auto* tnode = dynamic_cast<t_enum*>(defn.get())) {
-    scope_cache->add_type(program->scope_name(*defn), tnode);
+    scope_cache_->add_type(program_->scope_name(*defn), tnode);
     // Register enum value names in scope.
     for (const auto& value : tnode->consts()) {
       // TODO: Remove the ability to access unscoped enum values.
-      scope_cache->add_constant(program->scope_name(value), &value);
-      scope_cache->add_constant(program->scope_name(*defn, value), &value);
+      scope_cache_->add_constant(program_->scope_name(value), &value);
+      scope_cache_->add_constant(program_->scope_name(*defn, value), &value);
     }
   } else if (auto* tnode = dynamic_cast<t_type*>(defn.get())) {
     auto* tnode_true_type = tnode->get_true_type();
     if (tnode_true_type && tnode_true_type->is_enum()) {
       for (const auto& value :
            static_cast<const t_enum*>(tnode_true_type)->consts()) {
-        scope_cache->add_constant(program->scope_name(*defn, value), &value);
+        scope_cache_->add_constant(program_->scope_name(*defn, value), &value);
       }
     }
-    scope_cache->add_type(program->scope_name(*defn), tnode);
+    scope_cache_->add_type(program_->scope_name(*defn), tnode);
   } else {
     throw std::logic_error("Unsupported declaration.");
   }
   // Add to program.
-  program->add_definition(std::move(defn));
+  program_->add_definition(std::move(defn));
 }
 
 std::unique_ptr<t_service> parsing_driver::on_service(
@@ -792,13 +792,13 @@ std::unique_ptr<t_service> parsing_driver::on_service(
     const identifier& base,
     std::unique_ptr<t_function_list> functions) {
   auto find_base_service = [&]() -> const t_service* {
-    if (mode == parsing_mode::PROGRAM && base.str.size() != 0) {
+    if (mode_ == parsing_mode::PROGRAM && base.str.size() != 0) {
       auto base_name = fmt::to_string(base.str);
-      if (auto* result = scope_cache->find_service(base_name)) {
+      if (auto* result = scope_cache_->find_service(base_name)) {
         return result;
       }
       if (auto* result =
-              scope_cache->find_service(program->scope_name(base_name))) {
+              scope_cache_->find_service(program_->scope_name(base_name))) {
         return result;
       }
       diags_.error(
@@ -807,7 +807,7 @@ std::unique_ptr<t_service> parsing_driver::on_service(
     return nullptr;
   };
   auto service = std::make_unique<t_service>(
-      program, fmt::to_string(name.str), find_base_service());
+      program_, fmt::to_string(name.str), find_base_service());
   service->set_src_range(range);
   set_functions(*service, std::move(functions));
   return service;
@@ -823,7 +823,7 @@ std::unique_ptr<t_function> parsing_driver::on_function(
     std::unique_ptr<t_throws> throws,
     std::unique_ptr<deprecated_annotations> annotations) {
   auto function = std::make_unique<t_function>(
-      program, std::move(return_type), fmt::to_string(name.str));
+      program_, std::move(return_type), fmt::to_string(name.str));
   function->set_qualifier(qual);
   set_fields(function->params(), std::move(params));
   function->set_exceptions(std::move(throws));
@@ -889,7 +889,7 @@ std::unique_ptr<t_function> parsing_driver::on_performs(
   std::string name = type.get_type() ? "create" + type.get_type()->get_name()
                                      : "<interaction placeholder>";
   auto function =
-      std::make_unique<t_function>(program, std::move(type), std::move(name));
+      std::make_unique<t_function>(program_, std::move(type), std::move(name));
   function->set_src_range(range);
   function->set_is_interaction_constructor();
   return function;
@@ -902,7 +902,7 @@ std::unique_ptr<t_throws> parsing_driver::on_throws(t_field_list exceptions) {
 std::unique_ptr<t_typedef> parsing_driver::on_typedef(
     source_range range, t_type_ref type, const identifier& name) {
   auto typedef_node = std::make_unique<t_typedef>(
-      program, fmt::to_string(name.str), std::move(type));
+      program_, fmt::to_string(name.str), std::move(type));
   typedef_node->set_src_range(range);
   return typedef_node;
 }
@@ -910,7 +910,7 @@ std::unique_ptr<t_typedef> parsing_driver::on_typedef(
 std::unique_ptr<t_struct> parsing_driver::on_struct(
     source_range range, const identifier& name, t_field_list fields) {
   auto struct_node =
-      std::make_unique<t_struct>(program, fmt::to_string(name.str));
+      std::make_unique<t_struct>(program_, fmt::to_string(name.str));
   struct_node->set_src_range(range);
   set_fields(*struct_node, std::move(fields));
   return struct_node;
@@ -919,7 +919,7 @@ std::unique_ptr<t_struct> parsing_driver::on_struct(
 std::unique_ptr<t_union> parsing_driver::on_union(
     source_range range, const identifier& name, t_field_list fields) {
   auto union_node =
-      std::make_unique<t_union>(program, fmt::to_string(name.str));
+      std::make_unique<t_union>(program_, fmt::to_string(name.str));
   union_node->set_src_range(range);
   set_fields(*union_node, std::move(fields));
   return union_node;
@@ -933,7 +933,7 @@ std::unique_ptr<t_exception> parsing_driver::on_exception(
     const identifier& name,
     t_field_list fields) {
   auto exception =
-      std::make_unique<t_exception>(program, fmt::to_string(name.str));
+      std::make_unique<t_exception>(program_, fmt::to_string(name.str));
   exception->set_src_range(range);
   exception->set_safety(safety);
   exception->set_kind(kind);
@@ -957,7 +957,7 @@ std::unique_ptr<t_field> parsing_driver::on_field(
   auto field = std::make_unique<t_field>(
       std::move(type), fmt::to_string(name.str), valid_id);
   field->set_qualifier(qual);
-  if (mode == parsing_mode::PROGRAM) {
+  if (mode_ == parsing_mode::PROGRAM) {
     field->set_default_value(std::move(value));
   }
   field->set_src_range(range);
@@ -983,7 +983,7 @@ t_type_ref parsing_driver::on_type(
 
 std::unique_ptr<t_enum> parsing_driver::on_enum(
     source_range range, const identifier& name, t_enum_value_list values) {
-  auto enum_node = std::make_unique<t_enum>(program, fmt::to_string(name.str));
+  auto enum_node = std::make_unique<t_enum>(program_, fmt::to_string(name.str));
   enum_node->set_src_range(range);
   enum_node->set_values(std::move(values));
   return enum_node;
@@ -1015,7 +1015,7 @@ std::unique_ptr<t_const> parsing_driver::on_const(
     const identifier& name,
     std::unique_ptr<t_const_value> value) {
   auto constant = std::make_unique<t_const>(
-      program, std::move(type), fmt::to_string(name.str), std::move(value));
+      program_, std::move(type), fmt::to_string(name.str), std::move(value));
   constant->set_src_range(range);
   return constant;
 }
@@ -1025,12 +1025,12 @@ std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
   auto find_const =
       [this](source_location loc, const std::string& name) -> const t_const* {
     validate_not_ambiguous_enum(loc, name);
-    if (const t_const* constant = scope_cache->find_constant(name)) {
+    if (const t_const* constant = scope_cache_->find_constant(name)) {
       return constant;
     }
     if (const t_const* constant =
-            scope_cache->find_constant(program->scope_name(name))) {
-      validate_not_ambiguous_enum(loc, program->scope_name(name));
+            scope_cache_->find_constant(program_->scope_name(name))) {
+      validate_not_ambiguous_enum(loc, program_->scope_name(name));
       return constant;
     }
     return nullptr;
@@ -1050,7 +1050,7 @@ std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
   }
 
   // TODO(afuller): Make this an error.
-  if (mode == parsing_mode::PROGRAM) {
+  if (mode_ == parsing_mode::PROGRAM) {
     diags_.warning(
         name.loc,
         "The identifier '{}' is not defined yet. Constants and enums should "
@@ -1062,7 +1062,7 @@ std::unique_ptr<t_const_value> parsing_driver::on_const_ref(
 
 std::unique_ptr<t_const_value> parsing_driver::on_integer(
     source_location loc, int64_t value) {
-  if (mode == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
+  if (mode_ == parsing_mode::PROGRAM && !params_.allow_64bit_consts &&
       (value < INT32_MIN || value > INT32_MAX)) {
     diags_.warning(
         loc, "64-bit constant {} may not work in all languages", value);
@@ -1113,12 +1113,12 @@ std::unique_ptr<t_const_value> parsing_driver::on_struct_literal(
 int64_t parsing_driver::on_integer(source_range range, sign s, uint64_t value) {
   constexpr uint64_t max = std::numeric_limits<int64_t>::max();
   if (s == sign::minus) {
-    if (mode == parsing_mode::PROGRAM && value > max + 1) {
+    if (mode_ == parsing_mode::PROGRAM && value > max + 1) {
       diags_.error(range.begin, "integer constant -{} is too small", value);
     }
     return -value;
   }
-  if (mode == parsing_mode::PROGRAM && value > max) {
+  if (mode_ == parsing_mode::PROGRAM && value > max) {
     diags_.error(range.begin, "integer constant {} is too large", value);
   }
   return value;

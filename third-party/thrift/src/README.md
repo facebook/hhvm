@@ -118,7 +118,7 @@ If you want to invoke `cmake` again to iterate, there is an helpful `run_cmake.p
 
 CMake options:
 
-* `compiler_only`:
+* `THRIFT_COMPILER_ONLY`:
   specifies whether to build only the Thrift compiler (OFF by default)
 * `enable_tests`:
   specifies whether to enable tests

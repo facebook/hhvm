@@ -64,14 +64,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable modular builds
-option(compiler_only "Build the Thrift Compiler only" OFF)
-option(lib_only "Build the Thrift Libraries only" OFF)
-if(compiler_only OR lib_only)
+# Enable modular builds.
+option(THRIFT_COMPILER_ONLY "Build the Thrift compiler only" OFF)
+option(THRIFT_LIB_ONLY "Build the Thrift libraries only" OFF)
+if (THRIFT_COMPILER_ONLY OR THRIFT_LIB_ONLY)
   set(build_all OFF)
-else()
+else ()
   set(build_all ON)
-endif(compiler_only OR lib_only)
+endif ()
 
 set(
   thriftpy AUTO
@@ -85,7 +85,7 @@ option(thriftpy3
 )
 
 # Find required dependencies for the Thrift compiler.
-if (compiler_only OR build_all)
+if (THRIFT_COMPILER_ONLY OR build_all)
   include_directories(${OPENSSL_INCLUDE_DIR})
   set(THRIFT1 thrift1)
   set(THRIFTCPP2 thriftcpp2)
@@ -94,7 +94,7 @@ if (compiler_only OR build_all)
 endif ()
 
 # Find required dependencies for thrift/lib
-if(lib_only OR build_all)
+if (THRIFT_LIB_ONLY OR build_all)
   find_package(Gflags REQUIRED)
   find_package(Glog REQUIRED)
   find_package(folly CONFIG REQUIRED)
@@ -113,10 +113,10 @@ if(lib_only OR build_all)
     ${Boost_INCLUDE_DIRS}
   )
   add_definitions("-DTHRIFT_HAVE_LIBSNAPPY=0")
-  if(lib_only)
+  if (THRIFT_LIB_ONLY)
     find_program(THRIFT1 thrift1)
     include(${THRIFT_COMPILER_INCLUDE}/thrift/ThriftLibrary.cmake)
-  endif(lib_only)
+  endif ()
 
   find_package(python-six)
   if("${thriftpy}" STREQUAL "AUTO")
@@ -135,7 +135,7 @@ if(lib_only OR build_all)
         "Unable to find python-six, but building thrift/lib/py was requested"
     )
   endif()
-endif(lib_only OR build_all)
+endif ()
 
 if(thriftpy3)
   find_package(PythonInterp 3.6 REQUIRED)

@@ -14,11 +14,11 @@
 
 add_subdirectory(annotation)
 
-if (compiler_only OR build_all)
+if (THRIFT_COMPILER_ONLY OR build_all)
   add_subdirectory(compiler)
 endif ()
 
-if (lib_only OR build_all)
+if (THRIFT_LIB_ONLY OR build_all)
   add_subdirectory(lib)
 endif ()
 

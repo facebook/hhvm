@@ -106,6 +106,7 @@ let go_streaming_on_fd
     ~(pid : int)
     (fd : Unix.file_descr)
     (args : ClientEnv.client_check_env)
+    ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(progress_callback : string option -> unit) :
     (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ max_errors; error_format; _ } = args in
@@ -148,13 +149,35 @@ let go_streaming_on_fd
       (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
       progress_callback None;
       let found_new = ref 0 in
-      Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
-          List.iter errors_in_file ~f:(fun error ->
-              incr found_new;
-              print_error ~error_format (User_error.to_absolute error)));
-      Printf.printf "%!";
+      begin
+        try
+          Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
+              List.iter errors_in_file ~f:(fun error ->
+                  incr found_new;
+                  print_error ~error_format (User_error.to_absolute error)));
+          Printf.printf "%!"
+        with
+        | Sys_error msg when String.equal msg "Broken pipe" ->
+          (* We catch this error very locally, as small as we can around [printf],
+             since if we caught it more globally then we'd not know which pipe raised it --
+             the pipe to stdout, or stderr, or the pipe used to connect to monitor/server. *)
+          let backtrace = Stdlib.Printexc.get_raw_backtrace () in
+          Stdlib.Printexc.raise_with_backtrace
+            Exit_status.(Exit_with Client_broken_pipe)
+            backtrace
+      end;
       progress_callback !latest_progress;
       let displayed_count = displayed_count + !found_new in
+      partial_telemetry_ref :=
+        Some
+          (Telemetry.create ()
+          |> Telemetry.float_
+               ~key:"first_error_time"
+               ~value:(Option.value_exn !first_error_time)
+          |> Telemetry.float_
+               ~key:"latest_error_time"
+               ~value:(Unix.gettimeofday ())
+          |> Telemetry.int_ ~key:"displayed_count" ~value:displayed_count);
       if displayed_count >= Option.value max_errors ~default:Int.max_value then
         Lwt.return
           ( displayed_count,
@@ -546,6 +569,7 @@ let rec keep_trying_to_open
     Errors are printed soon after they are known instead of all at once at the end. *)
 let go_streaming
     (args : ClientEnv.client_check_env)
+    ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
     (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ root; show_spinner; deadline; _ } = args in
@@ -567,6 +591,6 @@ let go_streaming
       ~root
   in
   let%lwt (exit_status, telemetry) =
-    go_streaming_on_fd ~pid fd args ~progress_callback
+    go_streaming_on_fd ~pid fd args ~partial_telemetry_ref ~progress_callback
   in
   Lwt.return (exit_status, telemetry)

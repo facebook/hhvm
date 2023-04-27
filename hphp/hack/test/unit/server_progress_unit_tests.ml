@@ -533,8 +533,12 @@ let test_check_success () : bool Lwt.t =
           connect := true;
           Lwt.return_unit
         in
+        let partial_telemetry_ref = ref None in
         let check_future =
-          ClientCheckStatus.go_streaming env ~connect_then_close
+          ClientCheckStatus.go_streaming
+            env
+            ~partial_telemetry_ref
+            ~connect_then_close
         in
         let%lwt () = Lwt_unix.sleep 1.0 in
         (* It should have picked up the errors-file, and seen that it's valid, and be just waiting *)
@@ -560,8 +564,12 @@ let test_check_errors () : bool Lwt.t =
         ServerProgress.write ~include_in_logs:false "test1";
         let env = { env with ClientEnv.root } in
         let connect_then_close () = Lwt.return_unit in
+        let partial_telemetry_ref = ref None in
         let check_future =
-          ClientCheckStatus.go_streaming env ~connect_then_close
+          ClientCheckStatus.go_streaming
+            env
+            ~partial_telemetry_ref
+            ~connect_then_close
         in
         let%lwt () = Lwt_unix.sleep 0.2 in
         ServerProgress.ErrorsWrite.new_empty_file
@@ -593,9 +601,13 @@ let test_check_connect_success () : bool Lwt.t =
           let%lwt () = future2 in
           Lwt.return_unit
         in
+        let partial_telemetry_ref = ref None in
 
         let check_future =
-          ClientCheckStatus.go_streaming env ~connect_then_close
+          ClientCheckStatus.go_streaming
+            env
+            ~partial_telemetry_ref
+            ~connect_then_close
         in
         let%lwt () = Lwt_unix.sleep 1.0 in
         (* It should have found errors.bin absent, and is waiting on the callback *)
@@ -637,8 +649,12 @@ let test_check_connect_failure () : bool Lwt.t =
           let%lwt () = Lwt_unix.sleep 0.1 in
           failwith "nostart"
         in
+        let partial_telemetry_ref = ref None in
         let check_future =
-          ClientCheckStatus.go_streaming env ~connect_then_close
+          ClientCheckStatus.go_streaming
+            env
+            ~partial_telemetry_ref
+            ~connect_then_close
         in
         let%lwt r =
           try%lwt

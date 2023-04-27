@@ -6,5 +6,5 @@
  *
  *)
 
-val main :
-  ClientEnv.client_check_env -> ServerLocalConfig.t -> Exit_status.t Lwt.t
+(** This function never returns; it always calls [Exit.exit] *)
+val main : ClientEnv.client_check_env -> ServerLocalConfig.t -> 'a

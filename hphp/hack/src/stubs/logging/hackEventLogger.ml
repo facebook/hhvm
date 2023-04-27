@@ -65,7 +65,7 @@ type rollout_flags = {
   load_hack_64_distc_saved_state: bool;
   ide_should_use_hack_64_distc: bool;
   use_hh_distc_instead_of_hulk: bool;
-  produce_streaming_errors: bool;
+  consume_streaming_errors: bool;
   hh_distc_fanout_threshold: int;
 }
 
@@ -184,6 +184,10 @@ let client_restart ~data:_ = ()
 let client_check_start () = ()
 
 let client_check _ _ = ()
+
+let client_check_partial _ _ _ = ()
+
+let client_check_bad_exit _ _ _ = ()
 
 let client_lsp_shellout
     ~root:_ ~command_line:_ ~result_count:_ ~result_extra_telemetry:_ =

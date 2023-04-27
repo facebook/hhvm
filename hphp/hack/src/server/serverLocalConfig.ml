@@ -1565,6 +1565,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       load_hack_64_distc_saved_state = options.load_hack_64_distc_saved_state;
       ide_should_use_hack_64_distc = options.ide_should_use_hack_64_distc;
       use_hh_distc_instead_of_hulk = options.use_hh_distc_instead_of_hulk;
-      produce_streaming_errors = options.produce_streaming_errors;
+      consume_streaming_errors = options.consume_streaming_errors;
       hh_distc_fanout_threshold = options.hh_distc_fanout_threshold;
     }

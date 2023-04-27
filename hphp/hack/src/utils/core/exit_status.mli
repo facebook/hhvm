@@ -32,6 +32,11 @@ type t =
   | Lost_parent_monitor
   | Server_got_eof_from_monitor
   | Interrupted
+      (** hh_client installs a SIGINT handler which raises [Exit_with Interrupted].
+       Also, MonitorMain installs SIGINT, SIGQUIT, SIGTERM, SIGHUP handlers which
+       call [Exit.exit Interrupted]. *)
+  | Client_broken_pipe
+      (** hh_client code tried to write to stdout, but was thwarted by Sys_error("Broken pipe") *)
   | Worker_oomed
   | Worker_busy
   | Worker_not_found_exception

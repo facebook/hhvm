@@ -31,10 +31,8 @@ let () =
   Daemon.check_entry_point ();
   Folly.ensure_folly_init ();
 
-  (* Ignore SIGPIPE since we might get a server hangup and don't care (can
-   * detect and handle better than a signal). Ignore SIGUSR1 since we sometimes
-   * use that for the server to tell us when it's done initializing, but if we
-   * aren't explicitly listening we don't care. *)
+  (* Ignore SIGPIPE since if it arises from clientConnect then it might indicate server hangup;
+     we detect this case already and handle it better than a signal (unhandled signals cause program exit). *)
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   Sys_utils.set_signal
     Sys.sigint
@@ -118,8 +116,8 @@ let () =
     let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
-        Lwt_utils.run_main (fun () ->
-            ClientCheck.main check_env (Option.value_exn local_config))
+        ClientCheck.main check_env (Option.value_exn local_config)
+        (* never returns; does [Exit.exit] itself *)
       | ClientCommand.CStart env ->
         Lwt_utils.run_main (fun () -> ClientStart.main env)
       | ClientCommand.CStop env ->

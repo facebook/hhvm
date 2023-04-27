@@ -38,6 +38,8 @@ let state : state ref =
   ref
     { message = None; to_stderr = false; angery_reaccs_only = false; index = 0 }
 
+let get_latest_report () : string option = !state.message
+
 let start_heartbeat_telemetry () : unit =
   let rec loop n : 'a =
     let%lwt _ = Lwt_unix.sleep 1.0 in

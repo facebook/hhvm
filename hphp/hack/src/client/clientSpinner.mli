@@ -24,3 +24,6 @@ val start_heartbeat_telemetry : unit -> unit
 * Use [message_opt=None] to erase the spinner from stderr. This won't be written to the log.
   It will mean that future heartbeats report [None]. *)
 val report : to_stderr:bool -> angery_reaccs_only:bool -> string option -> unit
+
+(** For telemetry purposes, this is the most recent thing to have been reported. *)
+val get_latest_report : unit -> string option

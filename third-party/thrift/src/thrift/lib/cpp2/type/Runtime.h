@@ -421,10 +421,10 @@ class BaseDynKeyView : public BaseDynView {
   // Checks if there is an element with key equivalent to `key` in the
   // container.
   FOLLY_NODISCARD bool contains(ConstRef key) const {
-    return !ref_.get(key).type().empty();
+    return ref_.get(key).has_value();
   }
   FOLLY_NODISCARD bool contains(const std::string& key) const {
-    return !ref_.get(key).type().empty();
+    return ref_.get(key).has_value();
   }
 
  protected:

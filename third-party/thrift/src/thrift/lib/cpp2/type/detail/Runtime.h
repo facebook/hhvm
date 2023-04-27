@@ -163,8 +163,11 @@ class Dyn {
   FOLLY_NODISCARD folly::ordering compare(const Dyn& rhs) const {
     return type_->compare(ptr_, rhs);
   }
-
-  FOLLY_NODISCARD bool has_value() const { return !type().empty(); }
+  // TODO(dokwon): Only use op::isEmpty after migrating TypeStruct to terse
+  // write.
+  FOLLY_NODISCARD bool has_value() const {
+    return !type().empty() && type().toThrift() != Type::underlying_type{};
+  }
 
  protected:
   // TODO(afuller): Simplify friends model.
@@ -463,7 +466,7 @@ class BaseMapIter : public BaseDerived<Derived> {
   reference_type operator*() const { return next_; }
   BaseMapIter& operator++() {
     next_.first.reset(cur_.next());
-    if (!next_.first.type().empty()) { // TODO(afuller): Use a single call.
+    if (next_.first.has_value()) { // TODO(afuller): Use a single call.
       next_.second.reset(cur_.type_->get(cur_.ptr_, next_.first));
     }
     return *this;

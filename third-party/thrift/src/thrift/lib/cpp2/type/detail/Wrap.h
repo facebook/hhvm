@@ -78,11 +78,7 @@ class Wrap {
   }
 
   void reset() { op::clear<underlying_tag>(data_); }
-  bool empty() const {
-    return op::isEmpty<underlying_tag>(data_)
-        // TODO(afuller): Remove when terse_write is enabled:
-        || data_ == T{};
-  }
+  bool empty() const { return op::isEmpty<underlying_tag>(data_); }
 
  protected:
   T data_;

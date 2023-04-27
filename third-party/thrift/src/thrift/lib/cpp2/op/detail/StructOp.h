@@ -48,7 +48,7 @@ struct StructuredOp : BaseOp<Tag> {
   template <typename Id>
   static bool putIf(bool cond, T& self, const Dyn& val) {
     if (cond) {
-      if (val.type().empty()) {
+      if (!val.has_value()) {
         op::clear_field<FTag<Id>>(op::get<Id>(self), self);
       } else {
         op::get<Id>(self) = val.as<FTag<Id>>();

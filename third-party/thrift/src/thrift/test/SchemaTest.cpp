@@ -165,7 +165,8 @@ static void verify_void_return(
   EXPECT_EQ(rets.size(), 1);
   auto ret1 = rets.at(0);
   EXPECT_EQ(ret1.getType(), apache::thrift::type::ReturnType::Type::thriftType);
-  EXPECT_TRUE(ret1.get_thriftType().empty());
+  EXPECT_TRUE(
+      ret1.get_thriftType().toThrift() == apache::thrift::type::TypeStruct{});
 }
 
 TEST(SchemaTest, EmptyService) {

@@ -5,6 +5,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+module Error_code : sig
+  type t
+end
+
 type visibility =
   | Vprivate
   | Vpublic
@@ -280,5 +285,4 @@ type t =
       tparam_name: string;
     }
 
-include
-  Phase_error.S with type t := t and module Error_code = Error_codes.Naming
+val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t

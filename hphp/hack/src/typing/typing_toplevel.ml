@@ -339,8 +339,8 @@ let gconst_def ctx cst =
         (not (is_literal_with_trivially_inferable_type value))
         && not (Env.is_hhi env)
       then
-        Errors.add_naming_error
-        @@ Naming_error.Missing_typehint (fst cst.cst_name);
+        Errors.add_error
+          Naming_error.(to_user_error @@ Missing_typehint (fst cst.cst_name));
       let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
       (te, (env, None))
   in

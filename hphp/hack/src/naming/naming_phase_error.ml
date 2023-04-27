@@ -97,7 +97,9 @@ let emit
       experimental_features;
       parsing;
     } =
-  List.iter ~f:Errors.add_naming_error naming;
+  List.iter
+    ~f:(fun err -> Errors.add_error @@ Naming_error.to_user_error err)
+    naming;
   List.iter ~f:Errors.add_nast_check_error nast_check;
   List.iter
     ~f:(fun pos ->

@@ -6,9 +6,20 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name naming_error)
+ (wrapped false)
+ (modules naming_error name_context)
+ (libraries
+   ast
+   pos
+   pos_or_decl
+   error_codes
+   user_error))
+
+(library
  (name nast)
  (modules nast)
- (libraries annotated_ast naming_special_names errors)
+ (libraries annotated_ast naming_special_names user_error errors)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -107,14 +118,14 @@
 (library
  (name naming_global)
  (modules naming_global)
- (libraries file_info naming_provider naming_table)
+ (libraries file_info naming_error naming_provider naming_table)
  (preprocess
   (pps ppx_deriving.std)))
 
 (library
  (name naming_captures)
  (modules naming_captures)
- (libraries nast)
+ (libraries nast naming_error)
  (preprocess
   (pps ppx_deriving.std)))
 
@@ -194,6 +205,7 @@
   naming_attributes
   naming_captures
   naming_elaborate_namespaces_endo
+  naming_error
   naming_table
   naming_global
   naming_provider
@@ -201,7 +213,8 @@
   provider_backend
   substitution_mutation
   typing_deps
-  typechecker_options)
+  typechecker_options
+  user_error)
  (foreign_archives elab_ffi)
  (preprocess
   (pps ppx_deriving.std)))

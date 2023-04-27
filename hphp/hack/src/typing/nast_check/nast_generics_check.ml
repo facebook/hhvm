@@ -17,7 +17,7 @@ type tparam_info = (pos * bool * bool) SMap.t
 
 let error_if_is_this (pos, name) =
   if String.equal (String.lowercase name) "this" then
-    Errors.add_naming_error @@ Naming_error.This_reserved pos
+    Errors.add_error Naming_error.(to_user_error @@ This_reserved pos)
 
 let error_if_invalid_tparam_name ~nested ~is_hk (pos, name) =
   match
@@ -25,27 +25,30 @@ let error_if_invalid_tparam_name ~nested ~is_hk (pos, name) =
       nested && not is_hk )
   with
   | (true, false) ->
-    Errors.add_naming_error @@ Naming_error.Wildcard_tparam_disallowed pos
+    Errors.add_error
+      Naming_error.(to_user_error @@ Wildcard_tparam_disallowed pos)
   | (true, true) -> ()
   | _ ->
     if String.is_empty name || not (Char.equal name.[0] 'T') then
-      Errors.add_naming_error @@ Naming_error.Start_with_T pos
+      Errors.add_error Naming_error.(to_user_error @@ Start_with_T pos)
 
 let error_if_reified ~because_nested (pos, name) = function
   | Erased -> ()
   | SoftReified
   | Reified ->
-    Errors.add_naming_error
+    Errors.add_error
       Naming_error.(
-        HKT_unsupported_feature
-          { pos; because_nested; var_name = name; feature = Ft_reification })
+        to_user_error
+        @@ HKT_unsupported_feature
+             { pos; because_nested; var_name = name; feature = Ft_reification })
 
 let error_if_user_attributes ~because_nested (pos, name) attrs =
   if not (List.is_empty attrs) then
-    Errors.add_naming_error
+    Errors.add_error
       Naming_error.(
-        HKT_unsupported_feature
-          { pos; because_nested; var_name = name; feature = Ft_user_attrs })
+        to_user_error
+        @@ HKT_unsupported_feature
+             { pos; because_nested; var_name = name; feature = Ft_user_attrs })
 
 let error_if_not_invariant ~because_nested (pos, name) =
   let open Ast_defs in
@@ -53,17 +56,19 @@ let error_if_not_invariant ~because_nested (pos, name) =
   | Invariant -> ()
   | Covariant
   | Contravariant ->
-    Errors.add_naming_error
+    Errors.add_error
       Naming_error.(
-        HKT_unsupported_feature
-          { pos; because_nested; var_name = name; feature = Ft_variance })
+        to_user_error
+        @@ HKT_unsupported_feature
+             { pos; because_nested; var_name = name; feature = Ft_variance })
 
 let error_if_constraints_present ~because_nested (pos, name) constraints =
   if not (List.is_empty constraints) then
-    Errors.add_naming_error
+    Errors.add_error
       Naming_error.(
-        HKT_unsupported_feature
-          { pos; because_nested; var_name = name; feature = Ft_constraints })
+        to_user_error
+        @@ HKT_unsupported_feature
+             { pos; because_nested; var_name = name; feature = Ft_constraints })
 
 let rec check_tparam ~nested (seen : tparam_info) tparam =
   let name = tparam.tp_name in
@@ -103,11 +108,15 @@ and check_tparams ~nested (seen : tparam_info) tparams =
     else begin
       (match SMap.find_opt name seen with
       | Some (prev_pos, true, _) ->
-        Errors.add_naming_error
-        @@ Naming_error.Shadowed_tparam { pos; prev_pos; tparam_name = name }
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Shadowed_tparam { pos; prev_pos; tparam_name = name })
       | Some (_, false, _) ->
-        Errors.add_naming_error
-          (Naming_error.Tparam_non_shadowing_reuse { pos; tparam_name = name })
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Tparam_non_shadowing_reuse { pos; tparam_name = name })
       | None -> ());
       SMap.add name (pos, true, is_hk) seen
     end
@@ -139,15 +148,16 @@ let check_where_constraints (seen : tparam_info) cstrs =
         | Aast.Habstr (t, args) ->
           (match SMap.find_opt t seen with
           | Some (_, true, true) ->
-            Errors.add_naming_error
+            Errors.add_error
               Naming_error.(
-                HKT_unsupported_feature
-                  {
-                    pos;
-                    because_nested = false;
-                    var_name = t;
-                    feature = Ft_where_constraints;
-                  })
+                to_user_error
+                @@ HKT_unsupported_feature
+                     {
+                       pos;
+                       because_nested = false;
+                       var_name = t;
+                       feature = Ft_where_constraints;
+                     })
           | Some _
           | None ->
             ());

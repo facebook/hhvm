@@ -62,8 +62,6 @@ val add_error : error -> unit
 
 val add_parsing_error : Parsing_error.t -> unit
 
-val add_naming_error : Naming_error.t -> unit
-
 val add_nast_check_error : Nast_check_error.t -> unit
 
 val apply_error_from_reasons_callback :

@@ -35,7 +35,8 @@ let handle_unbound_name env (pos, name) kind =
   if String.equal name Naming_special_names.Classes.cUnknown then
     ()
   else begin
-    Errors.add_naming_error @@ Naming_error.Unbound_name { pos; name; kind };
+    Errors.add_error
+      Naming_error.(to_user_error @@ Unbound_name { pos; name; kind });
     (* In addition to reporting errors, we also add to the global dependency table *)
     let dep =
       let open Name_context in
@@ -59,8 +60,9 @@ let has_canon_name env get_name get_pos (pos, name) =
     match get_pos env.ctx suggest_name with
     | None -> false
     | Some suggest_pos ->
-      Errors.add_naming_error
-      @@ Naming_error.Did_you_mean { pos; name; suggest_pos; suggest_name };
+      Errors.add_error
+        Naming_error.(
+          to_user_error @@ Did_you_mean { pos; name; suggest_pos; suggest_name });
       true
   end
 
@@ -101,9 +103,10 @@ let check_package_name env (pos, name) =
   then
     ()
   else
-    Errors.add_naming_error
-    @@ Naming_error.Unbound_name
-         { pos; name; kind = Name_context.PackageNamespace }
+    Errors.add_error
+      Naming_error.(
+        to_user_error
+        @@ Unbound_name { pos; name; kind = Name_context.PackageNamespace })
 
 let check_type_name
     ?(kind = Name_context.TypeNamespace)
@@ -142,9 +145,10 @@ let check_type_name
         let (decl_pos, _) =
           Naming_global.GEnv.get_type_full_pos env.ctx (def_pos, name)
         in
-        Errors.add_naming_error
-        @@ Naming_error.Unexpected_typedef
-             { pos; decl_pos; expected_kind = kind }
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Unexpected_typedef { pos; decl_pos; expected_kind = kind })
       | Some _ -> ()
       | None ->
         if

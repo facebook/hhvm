@@ -822,8 +822,6 @@ let is_empty ?(drop_fixmed = true) err =
 
 let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
 
-let add_naming_error err = add_error @@ Naming_error.to_user_error err
-
 let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
 
 let is_suppressed User_error.{ claim; code; _ } =

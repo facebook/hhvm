@@ -40,7 +40,8 @@ let handler =
         ()
       | (_, _, Obj_get (_, (_, pos, Lvar (lvar_pos, lvar_lid)), _, _)) ->
         let lvar_name = Local_id.get_name lvar_lid in
-        Errors.add_naming_error
-        @@ Naming_error.Lvar_in_obj_get { pos; lvar_pos; lvar_name }
+        Errors.add_error
+          Naming_error.(
+            to_user_error @@ Lvar_in_obj_get { pos; lvar_pos; lvar_name })
       | _ -> ()
   end

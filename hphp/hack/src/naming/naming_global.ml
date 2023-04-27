@@ -213,7 +213,8 @@ module Env = struct
       || SN.Typehints.is_reserved_global_name x
     then (
       let (pos, name) = GEnv.get_type_full_pos ctx (p, name) in
-      Errors.add_naming_error @@ Naming_error.Name_is_reserved { pos; name };
+      Errors.add_error
+        Naming_error.(to_user_error @@ Name_is_reserved { pos; name });
       false
     ) else
       true
@@ -261,9 +262,10 @@ module Env = struct
           let (prev_pos, prev_name) =
             GEnv.get_fun_full_pos ctx (pc, canonical)
           in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { pos; name; prev_pos; prev_name }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound { pos; name; prev_pos; prev_name })
       end;
       current_file_symbols_acc
     | None ->
@@ -299,9 +301,10 @@ module Env = struct
             let (prev_pos, prev_name) =
               GEnv.get_type_full_pos ctx (pc, canonical)
             in
-            Errors.add_naming_error
-            @@ Naming_error.Error_name_already_bound
-                 { pos; prev_pos; name; prev_name }
+            Errors.add_error
+              Naming_error.(
+                to_user_error
+                @@ Error_name_already_bound { pos; prev_pos; name; prev_name })
         end;
         current_file_symbols_acc
       | None ->
@@ -328,9 +331,11 @@ module Env = struct
         then
           let (pos, name) = GEnv.get_const_full_pos ctx (p, name) in
           let (prev_pos, name) = GEnv.get_const_full_pos ctx (pc, name) in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { name; prev_name = name; pos; prev_pos }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound
+                   { name; prev_name = name; pos; prev_pos })
       end;
       current_file_symbols_acc
     | None ->
@@ -364,9 +369,11 @@ module Env = struct
         then
           let (pos, name) = GEnv.get_module_full_pos ctx (p, name) in
           let (prev_pos, name) = GEnv.get_module_full_pos ctx (pc, name) in
-          Errors.add_naming_error
-          @@ Naming_error.Error_name_already_bound
-               { name; prev_name = name; pos; prev_pos }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Error_name_already_bound
+                   { name; prev_name = name; pos; prev_pos })
       end;
       current_file_symbols_acc
     | None ->

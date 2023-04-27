@@ -247,8 +247,9 @@ let check_class_usable_as_hk_type pos class_info =
     List.exists tparams ~f:(fun tp -> not (List.is_empty tp.tp_constraints))
   in
   if has_tparam_constraints then
-    Errors.add_naming_error
-    @@ Naming_error.HKT_class_with_constraints_used { pos; class_name }
+    Errors.add_error
+      Naming_error.(
+        to_user_error @@ HKT_class_with_constraints_used { pos; class_name })
 
 let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
   let actual_kind = Simple.description_of_kind actual in
@@ -325,7 +326,7 @@ module Simple = struct
         let pos =
           get_reason tyarg |> Reason.to_pos |> Pos_or_decl.unsafe_to_raw_pos
         in
-        Errors.add_naming_error @@ Naming_error.HKT_wildcard pos;
+        Errors.add_error Naming_error.(to_user_error @@ HKT_wildcard pos);
         check_well_kinded ~in_signature env tyarg nkind
       )
     | _ -> check_well_kinded ~in_signature env tyarg nkind
@@ -501,12 +502,14 @@ module Simple = struct
       end
       | Tgeneric (_, targs)
       | Tapply (_, targs) ->
-        Errors.add_naming_error
-        @@ Naming_error.HKT_partial_application
-             {
-               pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
-               count = List.length targs;
-             }
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ HKT_partial_application
+                 {
+                   pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
+                   count = List.length targs;
+                 })
       | Tany _ -> ()
       | _ -> kind_error (Simple.fully_applied_type ())
 

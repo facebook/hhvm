@@ -905,11 +905,13 @@ let class_const_def ~in_enum_class c cls env cc =
         | CCAbstract _
           when (not (is_enum_or_enum_class c.c_kind))
                && TypecheckerOptions.require_types_class_consts tcopt > 0 ->
-          Errors.add_naming_error @@ Naming_error.Missing_typehint (fst id)
+          Errors.add_error
+            Naming_error.(to_user_error @@ Missing_typehint (fst id))
         | _
           when (not (is_enum_or_enum_class c.c_kind))
                && TypecheckerOptions.require_types_class_consts tcopt > 1 ->
-          Errors.add_naming_error @@ Naming_error.Missing_typehint (fst id)
+          Errors.add_error
+            Naming_error.(to_user_error @@ Missing_typehint (fst id))
         | CCAbstract None -> ()
         | CCAbstract (Some e (* default *))
         | CCConcrete e ->
@@ -918,7 +920,8 @@ let class_const_def ~in_enum_class c cls env cc =
             && (not (is_enum_or_enum_class c.c_kind))
             && not (Env.is_hhi env)
           then
-            Errors.add_naming_error @@ Naming_error.Missing_typehint (fst id)
+            Errors.add_error
+              Naming_error.(to_user_error @@ Missing_typehint (fst id))
       end;
       let (env, ty) = Env.fresh_type env (fst id) in
       (env, MakeType.unenforced ty, None)
@@ -1131,8 +1134,9 @@ let class_var_def ~is_static ~is_noautodynamic cls env cv =
       | Protected -> Naming_error.Vprotected
     in
     let (pos, prop_name) = cv.cv_id in
-    Errors.add_naming_error
-    @@ Naming_error.Prop_without_typehint { vis; pos; prop_name });
+    Errors.add_error
+      Naming_error.(
+        to_user_error @@ Prop_without_typehint { vis; pos; prop_name }));
 
   let (env, global_inference_env) = Env.extract_global_inference_env env in
   let ((cv_type_ty, _) as cv_type) =

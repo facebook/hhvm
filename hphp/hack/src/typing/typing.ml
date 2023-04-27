@@ -5956,13 +5956,15 @@ and expression_tree env p et =
       let dd_defined = Env.is_local_defined env dd_var in
       if not dd_defined then
         let () =
-          Errors.add_naming_error
-          @@ Naming_error.Undefined
-               {
-                 pos = dd_pos;
-                 var_name = SN.SpecialIdents.dollardollar;
-                 did_you_mean = None;
-               }
+          Errors.add_error
+            Naming_error.(
+              to_user_error
+              @@ Undefined
+                   {
+                     pos = dd_pos;
+                     var_name = SN.SpecialIdents.dollardollar;
+                     did_you_mean = None;
+                   })
         in
         let nothing_ty = MakeType.nothing Reason.Rnone in
         Env.set_local env dollardollar_var nothing_ty Pos.none

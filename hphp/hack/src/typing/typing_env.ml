@@ -1233,7 +1233,7 @@ let local_undefined_error ~env p x ctx =
         Naming_error.Undefined_in_expr_tree
           { pos = p; var_name = lid; dsl; did_you_mean = most_similar }
     in
-    Errors.add_naming_error error
+    Errors.add_error (Naming_error.to_user_error error)
   | None -> ()
 
 let get_local_in_ctx ~undefined_err_fun x ctx_opt =

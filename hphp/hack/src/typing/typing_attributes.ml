@@ -85,9 +85,11 @@ let check_implements
             (fun name -> name)
         in
 
-        Errors.add_naming_error
-        @@ Naming_error.Unbound_attribute_name
-             { pos = attr_pos; attr_name; closest_attr_name }
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Unbound_attribute_name
+                 { pos = attr_pos; attr_name; closest_attr_name })
     in
 
     env
@@ -131,9 +133,11 @@ let check_implements
       ) else
         check_new_object attr_pos env attr_cid params
     | _ ->
-      Errors.add_naming_error
-      @@ Naming_error.Unbound_attribute_name
-           { pos = attr_pos; attr_name; closest_attr_name = None };
+      Errors.add_error
+        Naming_error.(
+          to_user_error
+          @@ Unbound_attribute_name
+               { pos = attr_pos; attr_name; closest_attr_name = None });
       env
 
 let check_def env check_new_object (kind : attribute_interface_name) attributes

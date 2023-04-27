@@ -55,9 +55,11 @@ let handler =
           | Protected -> Naming_error.Vprotected
           | Internal -> Naming_error.Vinternal
         in
-        Errors.add_naming_error
-        @@ Naming_error.Illegal_use_of_dynamically_callable
-             { attr_pos = p; meth_pos = pos; vis };
+        Errors.add_error
+          Naming_error.(
+            to_user_error
+            @@ Illegal_use_of_dynamically_callable
+                 { attr_pos = p; meth_pos = pos; vis });
         check_reified_callable p
       | _ -> ()
 

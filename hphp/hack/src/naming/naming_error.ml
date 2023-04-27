@@ -1214,13 +1214,13 @@ let module_declaration_outside_allowed_files pos =
 let deprecated_use pos fn_name =
   let msg =
     "The builtin "
-    ^ Markdown_lite.md_codify (Utils.strip_ns fn_name)
+    ^ Markdown_lite.md_codify (Render.strip_ns fn_name)
     ^ " is deprecated."
   in
   User_error.make Error_codes.Typing.(to_enum DeprecatedUse) (pos, msg) []
 
 let unnecessary_attribute pos ~attr ~class_pos ~class_name ~suggestion =
-  let class_name = Utils.strip_ns class_name in
+  let class_name = Render.strip_ns class_name in
   let (reason_pos, reason_msg) =
     (class_pos, sprintf "the class `%s` is final" class_name)
   in

@@ -148,7 +148,8 @@ let visitor =
                 (Local_id.to_string lid)
                 Naming_special_names.SpecialIdents.this
             then (
-              Errors.add_naming_error @@ Naming_error.This_as_lexical_variable p;
+              Errors.add_error
+                Naming_error.(to_user_error @@ This_as_lexical_variable p);
               false
             ) else
               true)

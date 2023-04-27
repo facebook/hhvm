@@ -20,8 +20,9 @@ let error_if_no_typehint { cst_mode; cst_type; cst_name; cst_value; _ } =
       | Float _ -> "float"
       | _ -> "mixed"
     in
-    Errors.add_naming_error
-      (Naming_error.Const_without_typehint { pos; const_name; ty_name })
+    Errors.add_error
+      Naming_error.(
+        to_user_error @@ Const_without_typehint { pos; const_name; ty_name })
 
 let error_if_pseudo_constant gconst =
   if Option.is_some gconst.cst_namespace.Namespace_env.ns_name then
@@ -29,7 +30,8 @@ let error_if_pseudo_constant gconst =
     let name = Utils.strip_all_ns name in
     if Naming_special_names.PseudoConsts.is_pseudo_const (Utils.add_ns name)
     then
-      Errors.add_naming_error @@ Naming_error.Name_is_reserved { pos; name }
+      Errors.add_error
+        Naming_error.(to_user_error @@ Name_is_reserved { pos; name })
 
 let handler =
   object

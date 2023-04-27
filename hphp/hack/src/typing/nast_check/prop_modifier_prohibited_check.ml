@@ -28,7 +28,8 @@ let error_if_nonstatic_prop_with_lsb cv =
       Naming_attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
     in
     Option.iter lsb_pos ~f:(fun pos ->
-        Errors.add_naming_error @@ Naming_error.Nonstatic_property_with_lsb pos)
+        Errors.add_error
+          Naming_error.(to_user_error @@ Nonstatic_property_with_lsb pos))
 
 let unnecessary_lsb c cv =
   let attr = SN.UserAttributes.uaLSB in
@@ -37,9 +38,11 @@ let unnecessary_lsb c cv =
   | Some pos ->
     let (class_pos, class_name) = c.c_name in
     let suggestion = None in
-    Errors.add_naming_error
-      (Naming_error.Unnecessary_attribute
-         { pos; attr; class_pos; class_name; suggestion })
+    Errors.add_error
+      Naming_error.(
+        to_user_error
+        @@ Unnecessary_attribute
+             { pos; attr; class_pos; class_name; suggestion })
 
 let handler =
   object

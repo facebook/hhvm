@@ -202,7 +202,7 @@ struct AdapterWithContext {
   }
 };
 
-struct AdapterWithContextAndClear {
+struct AdapterWithContextOptimized {
   template <typename T, typename Struct, int16_t FieldId>
   static void construct(
       AdaptedWithContext<T, Struct, FieldId>& field,
@@ -228,6 +228,11 @@ struct AdapterWithContextAndClear {
   template <typename T, typename Struct, int16_t FieldId>
   static void clear(AdaptedWithContext<T, Struct, FieldId>& field) {
     field.value = {};
+  }
+
+  template <typename T, typename Struct, int16_t FieldId>
+  static bool isEmpty(const AdaptedWithContext<T, Struct, FieldId>&) {
+    return false;
   }
 };
 

@@ -277,18 +277,38 @@ struct Clear<type::adapted<Adapter, UTag>> {
   }
 };
 
-// Delegate to op::identical.
 template <typename Adapter, typename UTag>
 struct IsEmpty<type::adapted<Adapter, UTag>> {
   using Tag = type::adapted<Adapter, UTag>;
-  constexpr bool operator()(const type::native_type<Tag>& value) const {
+
+  template <typename AdapterT = Adapter>
+  constexpr adapt_detail::if_is_empty_adapter<AdapterT, type::native_type<Tag>>
+  operator()(const type::native_type<Tag>& value) const {
+    return AdapterT::isEmpty(value);
+  }
+
+  // Delegate to op::identical.
+  template <typename AdapterT = Adapter>
+  constexpr adapt_detail::
+      if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>
+      operator()(const type::native_type<Tag>& value) const {
     return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
   }
 };
 template <typename Adapter, typename UTag, typename Struct, int16_t FieldId>
 struct IsEmpty<adapted_field_tag<Adapter, UTag, Struct, FieldId>> {
   using Tag = adapted_field_tag<Adapter, UTag, Struct, FieldId>;
-  constexpr bool operator()(const type::native_type<Tag>& value) const {
+
+  template <typename AdapterT = Adapter>
+  constexpr adapt_detail::if_is_empty_adapter<AdapterT, type::native_type<Tag>>
+  operator()(const type::native_type<Tag>& value) const {
+    return AdapterT::isEmpty(value);
+  }
+
+  template <typename AdapterT = Adapter>
+  constexpr adapt_detail::
+      if_not_is_empty_adapter<AdapterT, type::native_type<Tag>>
+      operator()(const type::native_type<Tag>& value) const {
     return op::identical<Tag>(value, GetIntrinsicDefault<Tag>{}());
   }
 };

@@ -81,6 +81,10 @@ TEST(AdaptTest, ThriftClearTestStruct) {
                 adapt_detail::ClearType,
                 AdapterWithContext,
                 AdaptedWithContext<int64_t, ThriftClearTestStruct, 1>>);
+  static_assert(!folly::is_detected_v<
+                adapt_detail::IsEmptyType,
+                AdapterWithContext,
+                AdaptedWithContext<int64_t, ThriftClearTestStruct, 1>>);
 
   auto obj = ThriftClearTestStruct();
 
@@ -101,7 +105,11 @@ TEST(AdaptTest, ThriftClearTestStruct) {
 TEST(AdaptTest, AdapterClearTestStruct) {
   static_assert(folly::is_detected_v<
                 adapt_detail::ClearType,
-                AdapterWithContextAndClear,
+                AdapterWithContextOptimized,
+                AdaptedWithContext<int64_t, AdapterClearTestStruct, 1>>);
+  static_assert(folly::is_detected_v<
+                adapt_detail::IsEmptyType,
+                AdapterWithContextOptimized,
                 AdaptedWithContext<int64_t, AdapterClearTestStruct, 1>>);
 
   auto obj = AdapterClearTestStruct();
@@ -123,12 +131,10 @@ TEST(AdaptTest, AdapterClearTestStruct) {
 TEST(AdaptTest, AdapterClearTestStructOpClear) {
   static_assert(folly::is_detected_v<
                 adapt_detail::ClearType,
-                AdapterWithContextAndClear,
+                AdapterWithContextOptimized,
                 AdaptedWithContext<int64_t, AdapterClearTestStruct, 1>>);
   using namespace apache::thrift;
-  using field_type_tag = type::field<
-      type::adapted<AdapterWithContextAndClear, type::i64_t>,
-      FieldContext<AdapterClearTestStruct, 1>>;
+  using field_type_tag = op::get_field_tag<AdapterClearTestStruct, ident::data>;
 
   auto obj = AdapterClearTestStruct();
 
@@ -140,6 +146,9 @@ TEST(AdaptTest, AdapterClearTestStructOpClear) {
   EXPECT_EQ(obj.data()->value, 0);
   EXPECT_EQ(obj.data()->fieldId, 1);
   EXPECT_EQ(*obj.data()->meta, "foo");
+
+  // Always return false from AdapterWithContextOptimized::isEmpty.
+  EXPECT_FALSE(apache::thrift::op::isEmpty<field_type_tag>(obj.data().value()));
 }
 
 // TODO: move this to public header

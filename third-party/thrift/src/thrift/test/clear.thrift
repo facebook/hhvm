@@ -79,7 +79,7 @@ struct ThriftClearTestStruct {
 }
 
 struct AdapterClearTestStruct {
-  @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContextAndClear"}
+  @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContextOptimized"}
   1: i64 data;
   2: string meta;
 }

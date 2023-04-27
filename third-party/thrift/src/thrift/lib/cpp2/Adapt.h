@@ -97,6 +97,19 @@ template <typename Adapter, typename AdaptedT, typename R = void>
 using if_not_clear_adapter =
     std::enable_if_t<!is_clear_adapter_v<Adapter, AdaptedT>, R>;
 
+// Used to detect if Adapter has an isEmpty function override.
+template <typename Adapter, typename AdaptedT>
+using IsEmptyType = decltype(Adapter::isEmpty(std::declval<const AdaptedT&>()));
+template <typename Adapter, typename AdaptedT>
+constexpr bool is_empty_adapter_v =
+    folly::is_detected_v<IsEmptyType, Adapter, AdaptedT>;
+template <typename Adapter, typename AdaptedT>
+using if_is_empty_adapter =
+    std::enable_if_t<is_empty_adapter_v<Adapter, AdaptedT>, bool>;
+template <typename Adapter, typename AdaptedT>
+using if_not_is_empty_adapter =
+    std::enable_if_t<!is_empty_adapter_v<Adapter, AdaptedT>, bool>;
+
 // Converts a Thrift field value into an adapted type via Adapter.
 // This overload passes additional context containing the reference to the
 // Thrift object containing the field and the field ID as a second argument

@@ -353,11 +353,42 @@ let handle
   let command_needs_writes (type a) (msg : a command) : bool =
     match msg with
     | Debug_DO_NOT_USE -> failwith "Debug_DO_NOT_USE"
-    | Rpc (_metadata, OPEN_FILE _)
-    | Rpc (_metadata, EDIT_FILE _)
-    | Rpc (_metadata, CLOSE_FILE _)
+    | Rpc (_metadata, OPEN_FILE (path, ide_content)) ->
+      (* If the [ide_content] we're about to open is the same as what might have
+         previously been read from disk in the current typecheck (i.e. the typical case),
+         then this command won't end up altering file content and doesn't need to cancel
+         the current typecheck. (Why might they ever be different? Well, it's up to
+         VSCode what content it picks when the user opens a file. It'd be weird but
+         permissable say for VSCode to replace newlines upon open. *)
+      let disk_content = ServerFileSync.get_file_content_from_disk path in
+      let is_content_changed = not (String.equal ide_content disk_content) in
+      Hh_logger.log "OPEN_FILE is_content_changed? %b" is_content_changed;
+      is_content_changed
+    | Rpc (_metadata, EDIT_FILE _) ->
+      (* If the user is editing a file, it will necessary change file content,
+         and hence will necessarily cancel the current typecheck. Also we want
+         it to cancel the current typecheck so we can start a new Lazy_check
+         and get out squiggles for the just-edited file as soon as possible. *)
+      true
+    | Rpc (_metadata, CLOSE_FILE path) ->
+      (* If the [ide_content] we're closing is the same as what might be read
+         from disk in the current typecheck, then this command won't end up altering
+         file content and doesn't need to cancel the current typecheck.
+         The [ide_content] is necessarily what's in the File_provider for this path.
+         (Why might they ever be different? Well, if there were unsaved modifications
+         then the will be different.) *)
+      let ide_content =
+        ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
+      in
+      let disk_content = ServerFileSync.get_file_content_from_disk path in
+      let is_content_changed = not (String.equal ide_content disk_content) in
+      Hh_logger.log "CLOSE_FILE is_content_changed? %b" is_content_changed;
+      is_content_changed
     | Rpc (_metadata, DISCONNECT) ->
-      (* DISCONNECT involves CLOSE-ing all previously opened files *)
+      (* DISCONNECT involves CLOSE-ing all previously opened files.
+         We could be fancy and use the same logic as [CLOSE_FILE] above, but it's
+         not worth it; we're okay with cancelling the current typecheck in this
+         rare case. *)
       true
     | Rpc (_metadata, _) -> false
   in

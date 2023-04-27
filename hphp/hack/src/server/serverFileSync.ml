@@ -14,11 +14,15 @@ open ServerEnv
 let try_relativize_path x =
   Option.try_with (fun () -> Relative_path.(create Root x))
 
-let get_file_content_from_disk path =
+let get_file_content_from_disk_rel (path : Relative_path.t) : string option =
   let f () = Sys_utils.cat (Relative_path.to_absolute path) in
   Option.try_with f
 
-(** Get file content from File_provider or from disk. *)
+let get_file_content_from_disk (path : string) : string =
+  match try_relativize_path path with
+  | None -> ""
+  | Some path -> get_file_content_from_disk_rel path |> Option.value ~default:""
+
 let get_file_content = function
   | ServerCommandTypes.FileContent s -> s
   | ServerCommandTypes.FileName path ->
@@ -27,7 +31,7 @@ let get_file_content = function
           match File_provider.get path with
           | Some (File_provider.Ide f) -> Some f
           | Some (File_provider.Disk c) -> Some c
-          | None -> get_file_content_from_disk path)
+          | None -> get_file_content_from_disk_rel path)
     (* In case of errors, proceed with empty file contents *)
     |> Option.value ~default:""
 
@@ -174,7 +178,7 @@ let get_unsaved_changes env =
     ~f:(fun path acc ->
       match File_provider.get path with
       | Some (File_provider.Ide ide_contents) -> begin
-        match get_file_content_from_disk path with
+        match get_file_content_from_disk_rel path with
         | Some disk_contents when not (String.equal ide_contents disk_contents)
           ->
           Relative_path.Map.add acc ~key:path ~data:(ide_contents, disk_contents)
